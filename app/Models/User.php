@@ -21,7 +21,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
     ];
 
     /**
@@ -33,6 +32,11 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    /**
+     * Will load the roles eagerly
+     */
+    protected $with = ['roles'];
 
     /**
      * The attributes that should be cast.
@@ -48,23 +52,65 @@ class User extends Authenticatable
     }
 
     /**
+     * The roles that belong to the user.
+     */
+    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    /**
      * Check if the user has admin role.
      *
      * @return bool
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->hasRole('admin');
     }
 
     /**
      * Check if the user has a specific role.
      *
-     * @param  string  $role
+     * @param  string|array  $roles
      * @return bool
      */
-    public function hasRole(string $role): bool
+    public function hasRole($roles): bool
     {
-        return $this->role === $role;
+        if (is_string($roles)) {
+            return $this->roles->contains('name', $roles);
+        }
+
+        if (is_array($roles)) {
+            return $this->roles->whereIn('name', $roles)->isNotEmpty();
+        }
+
+        return false;
+    }
+
+    /**
+     * Assign a role to the user.
+     *
+     * @param  string  $role
+     * @return void
+     */
+    public function assignRole(string $role): void
+    {
+        $role = Role::firstOrCreate(['name' => $role], ['name' => ucfirst($role)]);
+        $this->roles()->syncWithoutDetaching($role);
+    }
+
+    /**
+     * Remove a role from the user.
+     *
+     * @param  string  $role
+     * @return void
+     */
+    public function removeRole(string $role): void
+    {
+        $role = Role::where('name', $role)->first();
+        if ($role) {
+            $this->roles()->detach($role->id);
+        }
     }
 }

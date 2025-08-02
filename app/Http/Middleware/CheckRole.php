@@ -26,11 +26,14 @@ class CheckRole
         /** @var \App\Models\User $user */
         $user = Auth::user();
         
+        // If no specific roles are provided, just check if user is authenticated
+        if (empty($roles)) {
+            return $next($request);
+        }
+
         // Check if user has any of the required roles
-        foreach ($roles as $role) {
-            if ($user->hasRole($role)) {
-                return $next($request);
-            }
+        if ($user->hasRole($roles)) {
+            return $next($request);
         }
 
         // If user is an admin, allow access to all routes
@@ -39,6 +42,7 @@ class CheckRole
         }
 
         // If no role matches, redirect to home with error
-        return redirect()->route('dashboard')->with('error', 'You do not have permission to access this page.');
+        return redirect()->route('dashboard')
+            ->with('error', 'You do not have permission to access this page.');
     }
 }
