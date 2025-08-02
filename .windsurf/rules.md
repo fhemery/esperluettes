@@ -4,25 +4,6 @@
 
 ### Docker/Sail Commands
 - Use `sail` instead of direct PHP/Composer commands
-- Start environment: `sail up -d`
-- Stop environment: `sail down`
-- Artisan commands: `sail artisan [command]`
-- Composer commands: `sail composer [command]`
-- Database access: `sail mysql`
-
-### Essential Laravel Commands
-- Create model: `sail artisan make:model ModelName -m`
-- Create controller: `sail artisan make:controller ControllerName`
-- Run migrations: `sail artisan migrate`
-- Create migration: `sail artisan make:migration create_table_name`
-- Create seeder: `sail artisan make:seeder TableSeeder`
-- Clear cache: `sail artisan cache:clear`
-- Generate key: `sail artisan key:generate`
-
-### Filament Commands
-- Create resource: `sail artisan make:filament-resource ModelName`
-- Create user: `sail artisan make:filament-user`
-- Create page: `sail artisan make:filament-page PageName`
 
 ## Laravel Coding Standards
 
