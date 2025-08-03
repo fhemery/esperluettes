@@ -1,6 +1,6 @@
 {
     "Name": "Nom",
-    "Email": "Email",
+    "Email": "E-mail",
     "Password": "Mot de passe",
     "Confirm Password": "Confirmer le mot de passe",
     "Remember me": "Se souvenir de moi",
@@ -30,5 +30,21 @@
     "Log Out": "Déconnexion",
     "Reset Password Notification": "Notification de réinitialisation du mot de passe",
     "You are receiving this email because we received a password reset request for your account.": "Vous recevez ce message car une demande de réinitialisation de mot de passe a été effectuée pour votre compte.",
-    "This password reset link will expire in :count minutes.": "Ce lien de réinitialisation de mot de passe expirera dans :count minutes."
+    "This password reset link will expire in :count minutes.": "Ce lien de réinitialisation de mot de passe expirera dans :count minutes.",
+    "Delete Account": "Supprimer le compte",
+    "Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.": "Une fois votre compte supprimé, toutes ses données seront définitivement effacées. Avant de supprimer votre compte, veuillez télécharger toutes les données que vous souhaitez conserver.",
+    "Are you sure you want to delete your account?": "Êtes-vous sûr de vouloir supprimer votre compte ?",
+    "Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.": "Une fois votre compte supprimé, toutes ses données seront définitivement effacées. Veuillez entrer votre mot de passe pour confirmer la suppression définitive de votre compte.",
+    "Cancel": "Annuler",
+    "Update Password": "Mettre à jour le mot de passe",
+    "Ensure your account is using a long, random password to stay secure.": "Assurez-vous que votre compte utilise un mot de passe long et aléatoire pour rester sécurisé.",
+    "Current Password": "Mot de passe actuel",
+    "New Password": "Nouveau mot de passe",
+    "Save": "Enregistrer",
+    "Saved.": "Enregistré.",
+    "Profile Information": "Informations du profil",
+    "Update your account's profile information and email address.": "Mettez à jour les informations de profil et l'adresse e-mail de votre compte.",
+    "Your email address is unverified.": "Votre adresse e-mail n'est pas vérifiée.",
+    "Click here to re-send the verification email.": "Cliquez ici pour renvoyer l'e-mail de vérification.",
+    "A new verification link has been sent to your email address.": "Un nouveau lien de vérification a été envoyé à votre adresse e-mail."
 }
