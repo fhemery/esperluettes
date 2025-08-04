@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Domains\Auth\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
+use App\Domains\Auth\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Http\Controllers\Controller;
 
 class ProfileController extends Controller
 {
