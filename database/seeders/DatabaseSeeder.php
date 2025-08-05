@@ -13,6 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Call domain-specific seeders
+        $this->call([
+            \App\Domains\Admin\Database\Seeders\AdminUserSeeder::class,
+        ]);
+        
         // User::factory(10)->create();
 
         User::factory()->create([

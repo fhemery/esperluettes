@@ -28,6 +28,12 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register domain-specific migrations
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        
+        // Register domain-specific factories
+        $this->loadFactoriesFrom(__DIR__ . '/../Database/Factories');
+        
         // Register language files
         $this->loadJsonTranslationsFrom(
             __DIR__.'/../resources/lang',

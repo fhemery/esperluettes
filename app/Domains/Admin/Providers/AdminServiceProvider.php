@@ -18,10 +18,14 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+// Specific extension to use Filament
+class AdminServiceProvider extends PanelProvider
 {
     public function boot(): void
     {
+        // Register domain-specific migrations
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        
         $this->loadJsonTranslationsFrom(
             __DIR__.'/../resources/lang',
             'fr'

@@ -14,10 +14,13 @@ class SharedServiceProvider extends ServiceProvider
         // Register any bindings or services
     }
 
-    public function boot()
+    public function boot(): void
     {
         // Note: CSS and JS assets are located in app/Domains/Shared/Resources/
         // and are managed by Vite configuration (see vite.config.js)
+        
+        // Register domain-specific migrations (infrastructure/framework tables)
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         
         // Register language files
         $this->loadJsonTranslationsFrom(
