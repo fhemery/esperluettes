@@ -56,7 +56,7 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label(__('admin.role.id_header'))
+                    ->label(__('admin.column.id'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
@@ -68,10 +68,12 @@ class RoleResource extends Resource
                     ->label(__('admin.role.users_count_header'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('admin.column.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('admin.column.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

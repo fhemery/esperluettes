@@ -75,7 +75,7 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label(__('admin.users.id_header'))
+                    ->label(__('admin.column.id'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
@@ -94,12 +94,12 @@ class UserResource extends Resource
                     ->color('primary')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('admin.users.created_at_header'))
+                    ->label(__('admin.column.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('admin.users.updated_at_header'))
+                    ->label(__('admin.column.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
