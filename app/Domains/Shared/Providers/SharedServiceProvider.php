@@ -2,8 +2,8 @@
 
 namespace App\Domains\Shared\Providers;
 
-use App\Domains\Shared\View\Components\AppLayout;
-use App\Domains\Shared\View\Components\GuestLayout;
+use App\Domains\Shared\Views\Layouts\AppLayout;
+use App\Domains\Shared\Views\Layouts\GuestLayout;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,7 +24,7 @@ class SharedServiceProvider extends ServiceProvider
         
         // Register language files
         $this->loadJsonTranslationsFrom(
-            __DIR__.'/../resources/lang',
+            __DIR__.'/../Resources/lang',
             'fr'
         );
 

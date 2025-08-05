@@ -27,7 +27,7 @@ class AdminServiceProvider extends PanelProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         
         $this->loadJsonTranslationsFrom(
-            __DIR__.'/../resources/lang',
+            __DIR__.'/../Resources/lang',
             'fr'
         );
     }

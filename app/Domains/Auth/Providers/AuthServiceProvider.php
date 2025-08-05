@@ -36,7 +36,7 @@ class AuthServiceProvider extends ServiceProvider
         
         // Register language files
         $this->loadJsonTranslationsFrom(
-            __DIR__.'/../resources/lang',
+            __DIR__.'/../Resources/lang',
             'fr'
         );
 

@@ -2,6 +2,11 @@
 
 This document outlines the architecture and folder structure for the application, following Domain-Driven Design (DDD) principles.
 
+More details can be found inside the different modules README.
+- [Admin](../app/Domains/Admin/README.md)
+- [Auth](../app/Domains/Auth/README.md)
+- [Shared](../app/Domains/Shared/README.md)
+
 ## Domain Structure
 
 Each domain in the application follows this structure:
