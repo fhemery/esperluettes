@@ -16,10 +16,16 @@ class SharedServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        // Register the view namespace
+        // Register the view namespaces
         $this->loadViewsFrom(
             app_path('Domains/Shared/Resources/views'),
             'shared'
+        );
+        
+        // Register vendor notification views
+        $this->loadViewsFrom(
+            app_path('Domains/Shared/Views'),
+            'vendor/notifications'
         );
 
         // Register the components with their original names
