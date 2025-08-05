@@ -18,10 +18,28 @@ use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
+    protected static ?string $navigationLabel = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.users.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin.users.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.users.plural_label');
+    }
+    public static function getNavigationGroup(): ?string {
+        return __('admin.user_management');
+    }
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationGroup = 'User Management';
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -29,19 +47,22 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label(__('admin.users.name_header'))
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
+                    ->label(__('admin.users.email_header'))
                     ->email()
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password')
-                    ->password()
+                    ->label(__('admin.users.password_header'))
                     ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->maxLength(255),
                 Select::make('roles')
+                    ->label(__('admin.users.roles_header'))
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload()
@@ -54,25 +75,31 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
+                    ->label(__('admin.users.id_header'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label(__('admin.users.name_header'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->label(__('admin.users.email_header'))
                     ->searchable(),
                 Tables\Columns\IconColumn::make('email_verified_at')
-                    ->label('Email Verified')
+                    ->label(__('admin.users.email_verified_at_header'))
                     ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('roles.name')
+                    ->label(__('admin.users.roles_header'))
                     ->badge()
                     ->color('primary')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('admin.users.created_at_header'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('admin.users.updated_at_header'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

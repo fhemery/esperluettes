@@ -15,13 +15,24 @@ use Filament\Tables\Filters\SelectFilter;
 
 class RoleResource extends Resource
 {
+    public static function getNavigationGroup(): ?string {
+        return __('admin.user_management');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('admin.role.label');
+    }
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.role.plural_label');
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.role.navigation_label');
+    }
     protected static ?string $model = Role::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
-    protected static ?string $navigationGroup = 'User Management';
     protected static ?int $navigationSort = 2;
-    protected static ?string $modelLabel = 'Role';
-    protected static ?string $navigationLabel = 'Roles';
     protected static ?string $slug = 'roles';
 
     public static function form(Form $form): Form
@@ -29,10 +40,12 @@ class RoleResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label(__('admin.role.name_header'))
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
                 Forms\Components\Textarea::make('description')
+                    ->label(__('admin.role.description_header'))
                     ->maxLength(65535)
                     ->columnSpanFull(),
             ]);
@@ -43,14 +56,16 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
+                    ->label(__('admin.role.id_header'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label(__('admin.role.name_header'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('users_count')
                     ->counts('users')
-                    ->label('Users')
+                    ->label(__('admin.role.users_count_header'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

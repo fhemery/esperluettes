@@ -4,7 +4,6 @@ namespace App\Domains\Admin\Providers;
 
 use Illuminate\Auth\Middleware\Authenticate;
 use App\Domains\Auth\Middleware\CheckRole;
-use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
@@ -21,6 +20,14 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    public function boot(): void
+    {
+        $this->loadJsonTranslationsFrom(
+            __DIR__.'/../resources/lang',
+            'fr'
+        );
+    }
+
     public function panel(Panel $panel): Panel
     {
         return $panel
