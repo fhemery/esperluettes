@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Providers;
 
 use Illuminate\Auth\Middleware\Authenticate;
-use App\Http\Middleware\CheckRole;
+use App\Domains\Auth\Middleware\CheckRole;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
