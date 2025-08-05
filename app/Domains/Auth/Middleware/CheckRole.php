@@ -23,7 +23,7 @@ class CheckRole
             return redirect()->route('login');
         }
 
-        /** @var \App\Models\User $user */
+        /** @var \App\Domains\Auth\Models\User $user */
         $user = Auth::user();
         
         // If no specific roles are provided, just check if user is authenticated
