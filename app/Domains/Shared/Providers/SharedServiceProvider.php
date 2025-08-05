@@ -21,6 +21,8 @@ class SharedServiceProvider extends ServiceProvider
             app_path('Domains/Shared/Resources/views'),
             'shared'
         );
+
+        Blade::anonymousComponentPath(app_path('Domains/Shared/Resources/views/components'));
         
         // Register vendor notification views
         $this->loadViewsFrom(
@@ -28,7 +30,7 @@ class SharedServiceProvider extends ServiceProvider
             'vendor/notifications'
         );
 
-        // Register the components with their original names
+        // Register the layout components
         Blade::component('app-layout', AppLayout::class);
         Blade::component('guest-layout', GuestLayout::class);
         
