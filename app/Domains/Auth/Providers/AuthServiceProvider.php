@@ -28,6 +28,12 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register language files
+        $this->loadJsonTranslationsFrom(
+            __DIR__.'/../resources/lang',
+            'fr'
+        );
+
         // Register auth views namespace
         \Illuminate\Support\Facades\View::addNamespace('auth', app_path('Domains/Auth/Views'));
     }

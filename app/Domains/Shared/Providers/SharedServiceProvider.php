@@ -16,6 +16,12 @@ class SharedServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // Register language files
+        $this->loadJsonTranslationsFrom(
+            __DIR__.'/../resources/lang',
+            'fr'
+        );
+
         // Register the view namespaces
         $this->loadViewsFrom(
             app_path('Domains/Shared/Resources/views'),
