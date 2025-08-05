@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Domains\Auth\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+// We will keep this file here to respect Laravel convention when loading seeders
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -13,16 +12,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Call domain-specific seeders
+        // Call domain-specific seeders in order
         $this->call([
+            // Admin domain seeders
             \App\Domains\Admin\Database\Seeders\AdminUserSeeder::class,
-        ]);
-        
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
         ]);
     }
 }
