@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use App\Http\Controllers\Controller;
+use App\Domains\Shared\Controllers\Controller;
 
 class ProfileController extends Controller
 {

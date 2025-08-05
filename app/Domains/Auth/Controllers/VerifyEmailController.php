@@ -2,7 +2,7 @@
 
 namespace App\Domains\Auth\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Domains\Shared\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
