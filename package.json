@@ -4,7 +4,9 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "deploy": "./deploy.sh",
+        "build-and-deploy": "npm run build && ./deploy.sh"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.10",
