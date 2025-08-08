@@ -3,17 +3,17 @@
 namespace App\Domains\Admin\Filament\Resources;
 
 use App\Domains\Admin\Filament\Resources\UserResource\Pages;
-use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\Models\User;
+use App\Domains\Auth\Services\UserActivationService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -93,6 +93,14 @@ class UserResource extends Resource
                     ->badge()
                     ->color('primary')
                     ->searchable(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label(__('admin.users.is_active_header'))
+                    ->boolean()
+                    ->sortable()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('admin.column.created_at'))
                     ->dateTime()
@@ -105,10 +113,46 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('is_active')
+                    ->label(__('admin.users.is_active_header'))
+                    ->options([
+                        1 => __('admin.users.status.active'),
+                        0 => __('admin.users.status.inactive'),
+                    ])
+                    ->placeholder('Tous les statuts'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('activate')
+                    ->label(__('admin.users.actions.activate'))
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn (User $record): bool => !$record->isActive())
+                    ->requiresConfirmation()
+                    ->modalHeading(__('admin.users.activation.confirm_title'))
+                    ->modalDescription(__('admin.users.activation.confirm_message'))
+                    ->action(function (User $record, UserActivationService $service) {
+                        $service->activateUser($record);
+                        Notification::make()
+                            ->title(__('admin.users.activation.success'))
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('deactivate')
+                    ->label(__('admin.users.actions.deactivate'))
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn (User $record): bool => $record->isActive())
+                    ->requiresConfirmation()
+                    ->modalHeading(__('admin.users.deactivation.confirm_title'))
+                    ->modalDescription(__('admin.users.deactivation.confirm_message'))
+                    ->action(function (User $record, UserActivationService $service) {
+                        $service->deactivateUser($record);
+                        Notification::make()
+                            ->title(__('admin.users.deactivation.success'))
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

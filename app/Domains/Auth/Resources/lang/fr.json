@@ -18,6 +18,8 @@
         "sent": "Nous vous avons envoyé un email de vérification !",
         "throttled": "Veuillez patienter avant de réessayer."
     },
+    "auth.account_deactivated.message": "Votre compte a été désactivé par un administrateur. Vous ne pouvez plus vous connecter à l'application.",
+    "auth.account_deactivated.contact_info": "Veuillez vérifier vos e-mails ou contacter directement les administrateurs pour plus d'informations.",
     "Name": "Nom",
     "Email": "E-mail",
     "Password": "Mot de passe",

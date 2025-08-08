@@ -22,6 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'is_active',
     ];
 
     /**
@@ -49,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -113,5 +115,35 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($role) {
             $this->roles()->detach($role->id);
         }
+    }
+
+    /**
+     * Check if the user is active.
+     *
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->is_active;
+    }
+
+    /**
+     * Activate the user.
+     *
+     * @return void
+     */
+    public function activate(): void
+    {
+        $this->update(['is_active' => true]);
+    }
+
+    /**
+     * Deactivate the user.
+     *
+     * @return void
+     */
+    public function deactivate(): void
+    {
+        $this->update(['is_active' => false]);
     }
 }
