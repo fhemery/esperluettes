@@ -39,7 +39,23 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <!-- Activation Code -->
+        @if(config('app.require_activation_code', false))
+        <div class="mt-4">
+            <x-input-label for="activation_code" :value="__('Activation Code')" />
+            <x-text-input id="activation_code" class="block mt-1 w-full" 
+                          type="text" 
+                          name="activation_code" 
+                          :value="old('activation_code')" 
+                          required 
+                          placeholder="XYZT-ABCDEFGH-IJKL"
+                          autocomplete="off" />
+            <x-input-error :messages="$errors->get('activation_code')" class="mt-2" />
+            <p class="mt-1 text-sm text-gray-600">{{ __('Enter the activation code provided to you.') }}</p>
+        </div>
+        @endif
+
+        <div class="flex items-center justify-end mt-4 gap-1">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>

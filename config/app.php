@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Activation Code Requirement
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether activation codes are required for user
+    | registration. When enabled, users must provide a valid activation code
+    | to complete the registration process.
+    |
+    */
+
+    'require_activation_code' => env('REQUIRE_ACTIVATION_CODE', false),
+
 ];
