@@ -1,11 +1,11 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
+            {{ __('Account Information') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            {{ __("Update your account's information and email address.") }}
         </p>
     </header>
 
@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('account.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('patch')
 
@@ -50,7 +50,7 @@
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
-            @if (session('status') === __('profile-updated'))
+            @if (session('status') === __('account-updated'))
                 <p
                     x-data="{ show: true }"
                     x-show="show"

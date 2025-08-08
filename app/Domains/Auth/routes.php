@@ -9,7 +9,7 @@ use App\Domains\Auth\Controllers\PasswordController;
 use App\Domains\Auth\Controllers\PasswordResetLinkController;
 use App\Domains\Auth\Controllers\RegisteredUserController;
 use App\Domains\Auth\Controllers\VerifyEmailController;
-use App\Domains\Auth\Controllers\ProfileController;
+use App\Domains\Auth\Controllers\UserAccountController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -58,8 +58,8 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 
-    // Profile routes
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // User account related routes
+    Route::get('/account', [UserAccountController::class, 'edit'])->name('account.edit');
+    Route::patch('/account', [UserAccountController::class, 'update'])->name('account.update');
+    Route::delete('/account', [UserAccountController::class, 'destroy'])->name('account.destroy');
 });
