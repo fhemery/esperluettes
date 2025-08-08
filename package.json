@@ -5,8 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "deploy": "./deploy.sh",
-        "build-and-deploy": "npm run build && ./deploy.sh"
+        "build-and-deploy:full": "npm run build && ./deploy-full.sh",
+        "build-and-deploy:app-only": "./deploy-app-only.sh"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.10",

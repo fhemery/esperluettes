@@ -10,6 +10,12 @@ The documentation will improve as the project progresses. For now, you can have 
 
 To prepare the files, just launch
 
-> npm run build-and-deploy
+> npm run build-and-deploy:full
 
 You should then get a dist/ folder than you can send to your FTP server.
+
+If you only made changes to the app folder (no new dependency), you can run:
+
+> npm run build-and-deploy:app-only
+
+Then you should take the content of the **sync** folder
