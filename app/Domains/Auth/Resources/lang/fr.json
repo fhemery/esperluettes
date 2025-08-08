@@ -41,6 +41,7 @@
     "If you're having trouble clicking the \"Verify Email Address\" button, copy and paste the URL below into your web browser:": "Si vous avez des difficultés à cliquer sur le bouton \"Vérifier l'adresse e-mail\", copiez et collez l'URL ci-dessous dans votre navigateur :",
     "If you did not create an account, no further action is required.": "Si vous n'avez pas créé de compte, aucune autre action n'est requise.",
     "Profile": "Gestion du compte",
+    "profile-updated": "Votre profil a été mis à jour avec succès.",
     "Log Out": "Déconnexion",
     "Reset Password Notification": "Notification de réinitialisation du mot de passe",
     "You are receiving this email because we received a password reset request for your account.": "Vous recevez ce message car une demande de réinitialisation de mot de passe a été effectuée pour votre compte.",

@@ -49,20 +49,20 @@ class ActivationCodeResource extends Resource
         return $form
             ->schema([
                 Select::make('sponsor_user_id')
-                    ->label('Sponsor User')
+                    ->label(__('admin.activation_codes.sponsor_user_label'))
                     ->options(User::all()->pluck('name', 'id'))
                     ->searchable()
                     ->nullable()
-                    ->helperText('Optionally select the user who will be the sponsor for this activation code'),
+                    ->helperText(__('admin.activation_codes.sponsor_user_helper')),
 
                 Textarea::make('comment')
-                    ->label('Comment')
+                    ->label(__('admin.activation_codes.comment_label'))
                     ->rows(3)
-                    ->placeholder('Optional comment about this activation code'),
+                    ->placeholder(__('admin.activation_codes.comment_helper')),
 
                 DateTimePicker::make('expires_at')
-                    ->label('Expiration Date')
-                    ->helperText('Leave empty for no expiration')
+                    ->label(__('admin.activation_codes.expires_at_label'))
+                    ->helperText(__('admin.activation_codes.expires_at_helper'))
                     ->nullable(),
             ]);
     }
