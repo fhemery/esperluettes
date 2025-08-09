@@ -42,7 +42,7 @@
                             </div>
                             @endif
                         </div>
-                        <p class="text-blue-100 mt-1">{{ __('Member since') }} {{ $user->created_at->format('F Y') }}</p>
+                        <p class="text-blue-100 mt-1">{{ __('Member since') }} {{ $user->created_at->translatedFormat('F Y') }}</p>
 
                         @if($canEdit)
                         <div class="mt-4">

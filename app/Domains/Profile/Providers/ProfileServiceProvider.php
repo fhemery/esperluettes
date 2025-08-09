@@ -4,6 +4,7 @@ namespace App\Domains\Profile\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Carbon\Carbon;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -30,5 +31,8 @@ $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         
         // Register view namespace for Profile domain
         View::addNamespace('profile', app_path('Domains/Profile/Views'));
+
+        // Ensure Carbon uses the current app locale (for translated month/day names)
+        Carbon::setLocale(app()->getLocale());
     }
 }
