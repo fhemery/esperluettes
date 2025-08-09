@@ -33,7 +33,7 @@ You need to have Docker installed on your machine, as well as a recent version o
 
 > npm run build
 
-You are up and running!
+You are up and running on : http://localhost
 
 ## Working with the app
 
