@@ -2,7 +2,7 @@
 
 namespace App\Domains\Profile\Controllers;
 
-use App\Domains\Auth\Models\User;
+use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\Services\ProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -20,9 +20,9 @@ class ProfileController extends Controller
     /**
      * Display the specified user's profile.
      */
-    public function show(User $user): View
+    public function show(Profile $profile): View
     {
-        $profile = $this->profileService->getOrCreateProfileByUserId($user->id);
+        $user = $profile->user;
         $canEdit = Auth::check() && $this->profileService->canEditProfile(Auth::user(), $profile);
 
         return view('profile::show', compact('profile', 'user', 'canEdit'));
@@ -33,6 +33,8 @@ class ProfileController extends Controller
      */
     public function showOwn(): View
     {
-        return $this->show(Auth::user());
+        $user = Auth::user();
+        $profile = $this->profileService->getOrCreateProfileByUserId($user->id);
+        return $this->show($profile);
     }
 }

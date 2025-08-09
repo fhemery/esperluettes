@@ -19,7 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Profile viewing routes
     Route::get('/profile', [ProfileController::class, 'showOwn'])->name('profile.show.own');
     Route::get('/profile/edit', [ProfileManagementController::class, 'edit'])->name('profile.edit');
-    Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileManagementController::class, 'update'])->name('profile.update');
     
     // Profile picture management

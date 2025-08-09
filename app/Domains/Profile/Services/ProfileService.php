@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Str;
 
 class ProfileService
 {
@@ -19,7 +20,12 @@ class ProfileService
         $profile = Profile::where('user_id', $user->id)->first();
         
         if (!$profile) {
-            $profile = Profile::create(['user_id' => $user->id]);
+            $profile = Profile::create([
+                'user_id' => $user->id,
+                'slug' => $this->makeUniqueSlugForUser($user),
+            ]);
+        } elseif (empty($profile->slug)) {
+            $this->ensureProfileSlug($profile);
         }
         
         return $profile;
@@ -150,8 +156,16 @@ class ProfileService
         $profile = Profile::where('user_id', $userId)->with('user')->first();
         
         if (!$profile) {
-            $profile = Profile::create(['user_id' => $userId]);
+            // Fetch the user to derive slug
+            $user = User::findOrFail($userId);
+            $profile = Profile::create([
+                'user_id' => $userId,
+                'slug' => $this->makeUniqueSlugForUser($user),
+            ]);
             $profile->load('user'); // Load the user relationship
+        } elseif (empty($profile->slug)) {
+            $this->ensureProfileSlug($profile);
+            $profile->load('user');
         }
         
         return $profile;
@@ -163,5 +177,37 @@ class ProfileService
     public function canEditProfile(User $currentUser, Profile $profile): bool
     {
         return $currentUser->id === $profile->user_id;
+    }
+
+    /**
+     * Ensure a profile has a unique slug. If missing, generate and save it.
+     */
+    public function ensureProfileSlug(Profile $profile): void
+    {
+        if (!empty($profile->slug)) {
+            return;
+        }
+        $user = $profile->user ?: User::find($profile->user_id);
+        $profile->slug = $this->makeUniqueSlugForUser($user);
+        $profile->saveQuietly();
+    }
+
+    /**
+     * Make a unique slug from the user's name with fallback to user-<id>.
+     */
+    private function makeUniqueSlugForUser(User $user): string
+    {
+        $base = Str::slug($user->name ?? '') ?: 'user-' . $user->id;
+        $slug = $base;
+        $i = 0;
+        while (
+            Profile::where('slug', $slug)
+                ->where('user_id', '!=', $user->id)
+                ->exists()
+        ) {
+            $i++;
+            $slug = $base . '-' . $i;
+        }
+        return $slug;
     }
 }

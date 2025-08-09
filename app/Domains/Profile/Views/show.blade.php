@@ -19,7 +19,29 @@
 
                     <!-- User Info -->
                     <div class="flex-1">
-                        <h1 class="text-3xl font-bold text-white">{{ $user->name }}</h1>
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-3xl font-bold text-white">{{ $user->name }}</h1>
+                            @if($canEdit)
+                            <div x-data="{ url: '{{ route('profile.show', $profile) }}', copied: false }" class="relative">
+                                <button type="button"
+                                        @click="navigator.clipboard.writeText(url).then(() => { copied = true; setTimeout(() => copied = false, 1200) })"
+                                        class="inline-flex items-center justify-center h-8 w-8 rounded-full text-white/85 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/60 transition"
+                                        :title="url"
+                                        aria-label="{{ __('Copy profile link') }}">
+                                    <!-- Material Symbols link icon -->
+                                    <span class="material-symbols-outlined text-[20px] leading-none">
+                                        link
+                                    </span>
+                                </button>
+                                <!-- Tooltip -->
+                                <div x-show="copied" x-cloak
+                                     class="absolute left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap text-xs text-white bg-black/60 rounded px-2 py-1 shadow"
+                                     x-transition.opacity.duration.150>
+                                    {{ __('Copied!') }}
+                                </div>
+                            </div>
+                            @endif
+                        </div>
                         <p class="text-blue-100 mt-1">{{ __('Member since') }} {{ $user->created_at->format('F Y') }}</p>
 
                         @if($canEdit)

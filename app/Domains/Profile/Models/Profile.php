@@ -18,6 +18,7 @@ class Profile extends Model
 
     protected $fillable = [
         'user_id',
+        'slug',
         'profile_picture_path',
         'facebook_url',
         'x_url',
@@ -29,6 +30,14 @@ class Profile extends Model
     protected $casts = [
         'user_id' => 'integer',
     ];
+
+    /**
+     * Use slug for route model binding and URL generation.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     /**
      * Get the user that owns the profile
