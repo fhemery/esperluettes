@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "filament/filament": "^3.3",
+        "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "spatie/laravel-translatable": "^6.11"
@@ -28,6 +29,7 @@
             "App\\Domains\\Shared\\": "app/Domains/Shared/",
             "App\\Domains\\Admin\\": "app/Domains/Admin/",
             "App\\Domains\\Auth\\": "app/Domains/Auth/",
+            "App\\Domains\\Profile\\": "app/Domains/Profile/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }

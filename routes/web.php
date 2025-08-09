@@ -13,3 +13,6 @@ Route::get('/dashboard', function () {
 
 // Include auth routes from Auth domain
 require app_path('Domains/Auth/routes.php');
+
+// Include profile routes from Profile domain
+require app_path('Domains/Profile/routes.php');
