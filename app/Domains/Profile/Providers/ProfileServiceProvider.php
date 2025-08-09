@@ -20,10 +20,12 @@ class ProfileServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register language files
+// Register domain-specific migrations
+$this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+        // Register JSON language files (domain-level)
         $this->loadJsonTranslationsFrom(
-            __DIR__.'/../Resources/lang',
-            'fr'
+            __DIR__.'/../Resources/lang'
         );
         
         // Register view namespace for Profile domain
