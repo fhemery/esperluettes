@@ -29,7 +29,12 @@ You need to have Docker installed on your machine, as well as a recent version o
 
 > sail artisan key:generate
 
-7. Run npm build to create the assets
+7. Fill the database and seed it
+
+> sail artisan migrate:install 
+> sail artisan db:seed
+
+8. Run npm build to create the assets
 
 > npm run build
 
