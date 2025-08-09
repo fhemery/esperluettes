@@ -82,11 +82,11 @@ echo "Copying Laravel core files..."
 cp -r app "$DIST_DIR/"
 cp -r bootstrap "$DIST_DIR/"
 cp -r config "$DIST_DIR/"
-cp -r database "$DIST_DIR/"
 cp -r public "$DIST_DIR/"
 cp -r resources "$DIST_DIR/"
 cp -r routes "$DIST_DIR/"
 cp -r storage "$DIST_DIR/"
+rm -rf "$DIST_DIR/storage/app/public/*"
 
 # Copy root files
 cp artisan "$DIST_DIR/"
@@ -132,92 +132,11 @@ chmod -R 755 "$DIST_DIR/bootstrap/cache"
 
 echo "✅ Permissions set"
 
-echo -e "${BLUE}📝 Step 7: Creating deployment instructions${NC}"
-cat > "$DIST_DIR/DEPLOYMENT_INSTRUCTIONS.md" << 'EOF'
-# Deployment Instructions for o2switch
-
-## Upload Structure
-Upload the contents of this dist folder to your o2switch account as follows:
-
-### 1. Main Laravel Files
-Upload these directories/files to your account root (NOT public_html):
-- app/
-- bootstrap/
-- config/
-- database/
-- resources/
-- routes/
-- storage/
-- vendor/
-- .env
-- artisan
-- composer.json
-- composer.lock
-
-### 2. Public Files
-Upload the contents of `public_html/` to your domain's public_html folder.
-
-## Post-Upload Steps
-
-### 1. Database Setup
-- Import your database via phpMyAdmin
-- Update .env with your o2switch database credentials
-
-### 2. Storage Link (if needed)
-Create a symbolic link from public_html/storage to ../storage/app/public
-
-### 3. Verify Permissions
-Ensure these directories have 755 permissions:
-- storage/ (and all subdirectories)
-- bootstrap/cache/
-
-## Testing
-- Visit your domain
-- Test login/registration
-- Test admin panel
-- Verify file uploads work
-
-## Troubleshooting
-- Check error logs in cPanel if you get 500 errors
-- Verify .env database credentials
-- Ensure all files uploaded correctly
-EOF
-
-echo "✅ Deployment instructions created"
-
-echo -e "${BLUE}📊 Step 8: Creating deployment summary${NC}"
-# Create a summary of what was built
-cat > "$DIST_DIR/BUILD_INFO.txt" << EOF
-Laravel Deployment Package
-==========================
-Built on: $(date)
-Environment: Production
-Laravel Version: $(./vendor/bin/sail artisan --version)
-PHP Version: $(php --version | head -n 1)
-
-Included Features:
-- User authentication with activation/deactivation
-- Admin panel (Filament)
-- Activation codes system
-- Multi-language support (French translations)
-
-Files Structure:
-- Laravel app files (ready for shared hosting)
-- Optimized for production (cached configs, routes, views)
-- Public files prepared for public_html upload
-- Proper permissions set for shared hosting
-
-Next Steps:
-1. Review DEPLOYMENT_INSTRUCTIONS.md
-2. Upload files via FTP as instructed
-3. Configure database in .env
-4. Test the deployment
-EOF
-
-echo "✅ Build summary created"
+echo -e "${BLUE}📝 Step 7: Creating zip file${NC}"
+cd $DIST_DIR && zip -qr esperluettes.zip * && cd -
 
 # Calculate package size
-PACKAGE_SIZE=$(du -sh "$DIST_DIR" | cut -f1)
+PACKAGE_SIZE=$(du -sh "$DIST_DIR/esperluettes.zip" | cut -f1)
 
 echo ""
 echo -e "${GREEN}🎉 Deployment package created successfully!${NC}"
@@ -225,18 +144,12 @@ echo "=============================================="
 echo -e "📦 Package location: ${YELLOW}$DIST_DIR/${NC}"
 echo -e "📏 Package size: ${YELLOW}$PACKAGE_SIZE${NC}"
 echo ""
-echo -e "${BLUE}📋 What's included:${NC}"
-echo "✅ Optimized Laravel application"
-echo "✅ Production environment configuration"
-echo "✅ Built frontend assets"
-echo "✅ Proper file permissions"
-echo "✅ Shared hosting structure (public_html)"
-echo "✅ Deployment instructions"
-echo ""
 echo -e "${YELLOW}📖 Next steps:${NC}"
-echo "1. Review $DIST_DIR/DEPLOYMENT_INSTRUCTIONS.md"
-echo "2. Upload files to o2switch via FTP"
-echo "3. Configure your production database"
-echo "4. Test your deployment"
+echo "1. Push the zip file to the FTP"
+echo "2. Launch migrations if needed: ./vendor/bin/sail artisan migrate --env=<environment>"
+# We are not touching public_html and storage repository because :
+# - storage is the repository of the application
+# - public_html has a link to storage that should not be messed up with
+echo "3. Launch rm -rf app bootstrap config database public resources routes vendor && unzip -o esperluettes.zip"
 echo ""
 echo -e "${GREEN}Happy deploying! 🚀${NC}"
