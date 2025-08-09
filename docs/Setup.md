@@ -3,7 +3,7 @@
 This project uses Docker and Laravel `Sail` command to work without installing anything on your machine.
 
 ## Pre-requisite
-You need to have Docker installed on your machine
+You need to have Docker installed on your machine, as well as a recent version of nodejs
 
 ## First setup
 
@@ -23,16 +23,38 @@ You need to have Docker installed on your machine
 
 > alias sail="./vendor/bin/sail"
 
+5. Copy the `.env.example` file to `.env`
+
+6. Generate a key and put it in the .env file, section "APP_KEY"
+
+> sail artisan key:generate
+
+7. Run npm build to create the assets
+
+> npm run build
+
+You are up and running!
+
 ## Working with the app
 
-Use `sail` instead of direct PHP/Composer commands:
-- Start environment: `sail up -d`
-- Stop environment: `sail down`
+### Start the environment 
+
+> sail up -d
+
+### Stop the environment 
+
+> sail down
+
+### Regenerate javascript and tailwind classes (whenever you touch javascript)
+
+> npm run build
+
+## Other Essential Laravel Commands
 - Artisan commands: `sail artisan [command]`
 - Composer commands: `sail composer [command]`
 - Database access: `sail mysql`
 
-### Essential Laravel Commands
+### Laravel Commands
 - Create model: `sail artisan make:model ModelName -m`
 - Create controller: `sail artisan make:controller ControllerName`
 - Run migrations: `sail artisan migrate`
