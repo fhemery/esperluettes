@@ -5,6 +5,7 @@ namespace App\Domains\Profile\Models;
 use App\Domains\Auth\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Domains\Profile\Support\AvatarGenerator;
 
 class Profile extends Model
 {
@@ -64,8 +65,7 @@ class Profile extends Model
      */
     public function getDefaultAvatarUrl(): string
     {
-        $initials = $this->getInitials();
-        return "https://ui-avatars.com/api/?name={$initials}&color=7F9CF5&background=EBF4FF&size=200";
+        return AvatarGenerator::forUser($this->user, 200);
     }
 
     /**
@@ -82,6 +82,8 @@ class Profile extends Model
         
         return strtoupper(substr($name, 0, 2));
     }
+
+    
 
     /**
      * Check if profile has a custom profile picture
