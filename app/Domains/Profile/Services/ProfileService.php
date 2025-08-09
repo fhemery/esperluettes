@@ -102,6 +102,12 @@ class ProfileService
             'instagram_url' => ['instagram.com'],
             'youtube_url' => ['youtube.com', 'youtu.be'],
         ];
+        $domainErrorKeys = [
+            'facebook_url' => __('Invalid domain for Facebook URL. Allowed domains: :domains'),
+            'x_url' => __('Invalid domain for X URL. Allowed domains: :domains'),
+            'instagram_url' => __('Invalid domain for Instagram URL. Allowed domains: :domains'),
+            'youtube_url' => __('Invalid domain for YouTube URL. Allowed domains: :domains'),
+        ];
 
         foreach ($socialNetworks as $field => $allowedDomains) {
             if (!empty($data[$field])) {
@@ -130,7 +136,9 @@ class ProfileService
                 }
                 
                 if (!$isValidDomain) {
-                    throw new \InvalidArgumentException("Invalid domain for {$field}. Allowed domains: " . implode(', ', $allowedDomains));
+                    $messageTemplate = $domainErrorKeys[$field] ?? __('Invalid domain. Allowed domains: :domains');
+                    $message = str_replace(':domains', implode(', ', $allowedDomains), $messageTemplate);
+                    throw new \InvalidArgumentException($message);
                 }
                 
                 $data[$field] = $url;

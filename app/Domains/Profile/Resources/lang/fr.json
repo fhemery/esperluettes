@@ -48,5 +48,9 @@
     "YouTube URL": "URL YouTube",
     "description": "description",
     "Copy profile link": "Copier le lien du profil",
-    "Copied!": "Copié !"
+    "Copied!": "Copié !",
+    "Invalid domain for Facebook URL. Allowed domains: :domains": "Domaine invalide pour l'URL Facebook. Domaines autorisés : :domains",
+    "Invalid domain for X URL. Allowed domains: :domains": "Domaine invalide pour l'URL X. Domaines autorisés : :domains",
+    "Invalid domain for Instagram URL. Allowed domains: :domains": "Domaine invalide pour l'URL Instagram. Domaines autorisés : :domains",
+    "Invalid domain for YouTube URL. Allowed domains: :domains": "Domaine invalide pour l'URL YouTube. Domaines autorisés : :domains"
 }
