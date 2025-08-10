@@ -41,6 +41,7 @@ class FeedbackResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')->label(__('admin::story.shared.name'))->required()->maxLength(255),
                 Forms\Components\TextInput::make('slug')->label(__('admin::story.shared.slug'))->helperText(__('admin::story.shared.slug_helper'))->maxLength(255),
+                Forms\Components\Textarea::make('description')->label(__('admin::story.shared.description'))->rows(3),
                 Forms\Components\Toggle::make('is_active')->label(__('admin::story.shared.active'))->default(true),
             ]);
     }
@@ -52,6 +53,7 @@ class FeedbackResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label(__('admin::story.shared.name'))->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('slug')->label(__('admin::story.shared.slug'))->toggleable(isToggledHiddenByDefault: true)->copyable(),
+                Tables\Columns\TextColumn::make('description')->label(__('admin::story.shared.description'))->wrap()->limit(80),
                 Tables\Columns\IconColumn::make('is_active')->boolean()->label(__('admin::story.shared.active'))->sortable(),
             ])
             ->actions([
