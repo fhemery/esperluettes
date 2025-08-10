@@ -26,6 +26,11 @@ deptrac:
       collectors:
         - type: directory
           value: 'app/Domains/Admin/'
+        
+    - name: Story
+      collectors:
+        - type: directory
+          value: 'app/Domains/Story/'
 
   ruleset:
     Shared: []
@@ -37,5 +42,9 @@ deptrac:
     Admin:
       - Shared
       - Auth
-      - Profile      
+      - Profile
+      - Story
+    Story:
+      - Shared
+      - Auth  
   
