@@ -6,6 +6,8 @@ use App\Domains\Shared\Views\Layouts\AppLayout;
 use App\Domains\Shared\Views\Layouts\GuestLayout;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
+use App\Domains\Shared\Listeners\AuditAllDomainEvents;
 
 class SharedServiceProvider extends ServiceProvider
 {
@@ -49,5 +51,10 @@ class SharedServiceProvider extends ServiceProvider
         // Also register them with the shared namespace for explicit usage
         Blade::component('shared::app-layout', AppLayout::class);
         Blade::component('shared::guest-layout', GuestLayout::class);
+
+        // Register wildcard event auditing if enabled
+        if (config('shared.event_auditing_enabled', true)) {
+            Event::listen('*', [AuditAllDomainEvents::class, 'handle']);
+        }
     }
 }
