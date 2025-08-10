@@ -36,6 +36,17 @@
                             </div>
                             @endif
                         </div>
+                        @if($user->roles->isNotEmpty())
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @foreach($user->roles as $role)
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/15 text-white hover:bg-white/25 transition"
+                                    title="{{ $role->description }}">
+                                    {{ $role->name }}
+                                </span>
+                            @endforeach
+                        </div>
+                        @endif
                         <p class="text-blue-100 mt-1">{{ __('Member since') }} {{ $user->created_at->translatedFormat('F Y') }}</p>
 
                         @if($canEdit)
