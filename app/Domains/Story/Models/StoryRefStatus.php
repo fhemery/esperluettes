@@ -3,10 +3,14 @@
 namespace App\Domains\Story\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Domains\Story\Models\Concerns\HasSlugAndOrder;
 
 class StoryRefStatus extends Model
 {
     protected $table = 'story_ref_statuses';
+    public const HAS_ORDER = true;
+
+    use HasSlugAndOrder;
 
     protected $fillable = [
         'name', 'slug', 'description', 'order', 'is_active',

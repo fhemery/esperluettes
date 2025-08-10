@@ -3,10 +3,14 @@
 namespace App\Domains\Story\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Domains\Story\Models\Concerns\HasSlugAndOrder;
 
 class StoryRefCopyright extends Model
 {
     protected $table = 'story_ref_copyrights';
+    public const HAS_ORDER = true;
+
+    use HasSlugAndOrder;
 
     protected $fillable = [
         'name', 'slug', 'description', 'order', 'is_active',
