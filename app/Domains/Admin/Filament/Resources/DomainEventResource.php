@@ -7,6 +7,8 @@ use App\Domains\Shared\Models\DomainEvent;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
 
 class DomainEventResource extends Resource
 {
@@ -79,6 +81,45 @@ class DomainEventResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('id')
+                    ->label(__('admin.domain_events.columns.id')),
+                TextEntry::make('occurred_at')
+                    ->label(__('admin.domain_events.columns.occurred_at'))
+                    ->dateTime('Y/m/d H:i:s'),
+                TextEntry::make('name')
+                    ->label(__('admin.domain_events.columns.event')),
+                TextEntry::make('summary')
+                    ->label(__('admin.domain_events.columns.summary')),
+                TextEntry::make('triggered_by_user_id')
+                    ->label(__('admin.domain_events.columns.user_id')),
+                TextEntry::make('context_url')
+                    ->label(__('admin.domain_events.columns.url')),
+                TextEntry::make('context_ip')
+                    ->label(__('admin.domain_events.columns.ip')),
+                TextEntry::make('context_user_agent')
+                    ->label(__('admin.domain_events.columns.user_agent'))
+                    ->columnSpanFull(),
+                TextEntry::make('payload')
+                    ->label(__('admin.domain_events.columns.payload'))
+                    ->formatStateUsing(fn ($state) => is_array($state)
+                        ? json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                        : (string) $state)
+                    ->columnSpanFull()
+                    ->copyable(),
+                TextEntry::make('meta')
+                    ->label(__('admin.domain_events.columns.meta'))
+                    ->formatStateUsing(fn ($state) => is_array($state)
+                        ? json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                        : (string) $state)
+                    ->columnSpanFull()
+                    ->copyable(),
             ]);
     }
 

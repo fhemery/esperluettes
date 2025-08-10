@@ -74,5 +74,8 @@
     "admin.domain_events.columns.user_id": "ID utilisateur",
     "admin.domain_events.columns.url": "URL",
     "admin.domain_events.columns.ip": "IP",
-    "admin.domain_events.columns.payload": "Données"
+    "admin.domain_events.columns.payload": "Données",
+    "admin.domain_events.columns.meta": "Méta",
+    "admin.domain_events.columns.id": "Id",
+    "admin.domain_events.columns.user_agent": "Agent utilisateur"
 }
