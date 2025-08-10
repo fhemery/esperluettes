@@ -77,3 +77,21 @@ Shared/
 4. Register the service provider in `config/app.php`
 5. Update `composer.json` to autoload the new domain
 6. Run `composer dump-autoload`
+
+## Deptrac architectural rules
+
+We follow a DDD layout under `app/Domains/` and enforce boundaries with Deptrac.
+Current rules (see `deptrac.yaml`):
+
+- Shared: foundational (no dependencies on other domains)
+- Auth: may depend on Shared
+- Profile: may depend on Shared and Auth
+- Admin: may depend on Shared, Auth, and Profile
+
+Run manually:
+
+```
+./vendor/bin/sail composer deptrac
+# or if Sail is not used
+composer deptrac
+```

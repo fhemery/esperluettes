@@ -6,6 +6,10 @@ The documentation will improve as the project progresses. For now, you can have 
 - How to setup [[docs/Setup.md|Setup]] the environment locally to work with it
 - The current chosen [[docs/Architecture.md|Architecture]].
 
+## Contributing
+
+Please read our [Contributing Guide](CONTRIBUTING.md) for the workflow, Conventional Commits policy, and local quality checks (Deptrac + commitlint). All work happens in a single GitHub repository via Pull Requests.
+
 ## Deploying
 
 To prepare the files, just launch
