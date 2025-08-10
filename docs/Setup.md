@@ -1,40 +1,37 @@
 # Environment setup
 
-This project uses Docker and Laravel `Sail` command to work without installing anything on your machine.
+To setup, you need:
+- [Nodejs](https://nodejs.org) - Take the LTS version
 
-## Pre-requisite
-You need to have Docker installed on your machine, as well as a recent version of nodejs
+We favor setup through Docker containers and sail, but if you are used to PHP, manual setup could work. Check [alternative setup](./Setup_alternatives.md) for more details.
 
-## First setup
+## First setup - Via Docker containers
+We are using `Docker` and `sail` to simplify setup. You need to have Docker installed (or possibly Docker Desktop and WSL if you are using Windows).
 
-1. Use `docker compose` to first start the containers :
+1. We first need to get the vendor module. For this :
+> For Linux (BASH) : docker run --rm -it -v "$PWD:/app" -w /app -e COMPOSER_MEMORY_LIMIT=-1 laravelsail/php84-composer composer install --no-interaction --prefer-dist --ignore-platform-reqs
+> For Windows (POWERSHELL) : docker run --rm -it -v "$(Get-Location):/app" -w /app -e COMPOSER_MEMORY_LIMIT=-1 laravelsail/php84-composer composer install --no-interaction --prefer-dist --ignore-platform-reqs
 
-> docker compose up -d
+2. Now sail should be available, you should be able to launch it
 
-2. Use `docker ps` to locate the sail container name (for example : `esperluettes-laravel.test`)
+> ./vendor/bin/sail up -d
 
-> docker ps | grep sail
-
-3. Launch composer to get the vendor folder :
-
-> docker compose exec [container_name] composer install
-
-4. Create an alias for the `sail` command (optional) :
+3. Create an alias for the `sail` command (optional) :
 
 > alias sail="./vendor/bin/sail"
 
-5. Copy the `.env.example` file to `.env`
+4. Copy the `.env.example` file to `.env`
 
-6. Generate a key and put it in the .env file, section "APP_KEY"
+5. Generate a key and put it in the .env file, section "APP_KEY"
 
 > sail artisan key:generate
 
-7. Fill the database and seed it
+6. Fill the database and seed it
 
 > sail artisan migrate:install 
 > sail artisan db:seed
 
-8. Run npm build to create the assets
+7. Run npm build to create the assets
 
 > npm run build
 
