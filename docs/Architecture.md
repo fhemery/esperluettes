@@ -6,6 +6,7 @@ More details can be found inside the different modules README.
 - [Admin](../app/Domains/Admin/README.md)
 - [Auth](../app/Domains/Auth/README.md)
 - [Shared](../app/Domains/Shared/README.md)
+- [Profile](../app/Domains/Profile/README.md)
 
 ## Domain Structure
 

@@ -1,0 +1,7 @@
+# Skip with SKIP_DEPTRAC=1
+if [ "${SKIP_DEPTRAC:-}" = "1" ]; then
+  echo "[husky] Skipping Deptrac (SKIP_DEPTRAC=1)"
+  exit 0
+fi
+
+./vendor/bin/deptrac

@@ -146,7 +146,7 @@ echo -e "📏 Package size: ${YELLOW}$PACKAGE_SIZE${NC}"
 echo ""
 echo -e "${YELLOW}📖 Next steps:${NC}"
 echo "1. Push the zip file to the FTP"
-echo "2. Launch migrations if needed: ./vendor/bin/sail artisan migrate --env=<environment>"
+echo "2. Launch migrations if needed: ./vendor/bin/sail artisan config:clear && ./vendor/bin/sail artisan migrate --env=<environment> && ./vendor/bin/sail artisan config:clear"
 # We are not touching public_html and storage repository because :
 # - storage is the repository of the application
 # - public_html has a link to storage that should not be messed up with
