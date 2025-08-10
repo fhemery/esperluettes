@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateAudience extends CreateRecord
 {
     protected static string $resource = AudienceResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

@@ -12,24 +12,43 @@ use Filament\Tables\Table;
 class AudienceResource extends Resource
 {
     protected static ?string $model = StoryRefAudience::class;
-
-    protected static ?string $navigationGroup = 'Story';
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationLabel = 'Audiences';
     protected static ?string $slug = 'story/audiences';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin::story.group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin::story.audience.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin::story.audience.plural_label');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin::story.audience.navigation_label');
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label(__('admin::story.shared.name'))
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('slug')
-                    ->helperText('Leave empty to auto-generate from name')
+                    ->label(__('admin::story.shared.slug'))
+                    ->helperText(__('admin::story.shared.slug_helper'))
                     ->maxLength(255),
                 Forms\Components\Toggle::make('is_active')
-                    ->label('Active')
+                    ->label(__('admin::story.shared.active'))
                     ->default(true),
             ]);
     }
@@ -39,9 +58,9 @@ class AudienceResource extends Resource
         return $table
             ->reorderable('order')
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable(),
-                Tables\Columns\TextColumn::make('slug')->toggleable(isToggledHiddenByDefault: true)->copyable(),
-                Tables\Columns\IconColumn::make('is_active')->boolean()->label('Active'),
+                Tables\Columns\TextColumn::make('name')->label(__('admin::story.shared.name'))->searchable(),
+                Tables\Columns\TextColumn::make('slug')->label(__('admin::story.shared.slug'))->toggleable(isToggledHiddenByDefault: true)->copyable(),
+                Tables\Columns\IconColumn::make('is_active')->boolean()->label(__('admin::story.shared.active')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->iconButton()->label(''),

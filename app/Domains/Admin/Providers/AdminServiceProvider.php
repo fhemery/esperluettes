@@ -25,11 +25,12 @@ class AdminServiceProvider extends PanelProvider
     {
         // Register domain-specific migrations
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
-        
-        $this->loadJsonTranslationsFrom(
-            __DIR__.'/../Resources/lang',
-            'fr'
-        );
+
+        // Load Admin domain translations
+        // JSON translations (global, non-namespaced)
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../Resources/lang');
+        // PHP translations (namespaced)
+        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'admin');
     }
 
     public function panel(Panel $panel): Panel
