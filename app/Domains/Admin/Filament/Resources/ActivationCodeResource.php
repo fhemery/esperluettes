@@ -58,7 +58,7 @@ class ActivationCodeResource extends Resource
                 Textarea::make('comment')
                     ->label(__('admin.activation_codes.comment_label'))
                     ->rows(3)
-                    ->placeholder(__('admin.activation_codes.comment_helper')),
+                    ->placeholder(__('admin.activation_codes.comment_placeholder')),
 
                 DateTimePicker::make('expires_at')
                     ->label(__('admin.activation_codes.expires_at_label'))
