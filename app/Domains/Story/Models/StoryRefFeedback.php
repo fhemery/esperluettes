@@ -13,7 +13,7 @@ class StoryRefFeedback extends Model
     use HasSlugAndOrder;
 
     protected $fillable = [
-        'name', 'slug', 'order', 'is_active',
+        'name', 'slug', 'description', 'order', 'is_active',
     ];
 
     protected $casts = [
