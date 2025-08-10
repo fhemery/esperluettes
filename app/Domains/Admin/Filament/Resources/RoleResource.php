@@ -44,6 +44,11 @@ class RoleResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
+                Forms\Components\TextInput::make('slug')
+                    ->label('Slug')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 Forms\Components\Textarea::make('description')
                     ->label(__('admin.role.description_header'))
                     ->maxLength(65535)
@@ -61,6 +66,10 @@ class RoleResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('admin.role.name_header'))
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('slug')
+                    ->label('Slug')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('users_count')
