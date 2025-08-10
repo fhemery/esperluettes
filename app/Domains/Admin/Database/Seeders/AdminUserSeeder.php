@@ -17,7 +17,7 @@ class AdminUserSeeder extends Seeder
         // Create or get the admin role
         $adminRole = Role::firstOrCreate(
             ['name' => 'admin'],
-            ['description' => 'Administrator role']
+            ['slug' => 'admin', 'description' => 'Administrator role']
         );
 
         // Create admin user
