@@ -5,6 +5,9 @@ namespace App\Domains\Profile\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Event;
+use App\Domains\Auth\Events\UserNameUpdated;
+use App\Domains\Profile\Listeners\SyncProfileNameAndSlug;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -21,8 +24,8 @@ class ProfileServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-// Register domain-specific migrations
-$this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        // Register domain-specific migrations
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         // Register JSON language files (domain-level)
         $this->loadJsonTranslationsFrom(
@@ -34,5 +37,11 @@ $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         // Ensure Carbon uses the current app locale (for translated month/day names)
         Carbon::setLocale(app()->getLocale());
+
+        // Register domain event listeners (Profile listens to Auth events)
+        Event::listen(
+            UserNameUpdated::class,
+            [SyncProfileNameAndSlug::class, 'handle']
+        );
     }
 }

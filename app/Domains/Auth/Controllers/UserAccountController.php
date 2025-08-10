@@ -3,6 +3,7 @@
 namespace App\Domains\Auth\Controllers;
 
 use App\Domains\Auth\Requests\UserAccountUpdateRequest;
+use App\Domains\Auth\Events\UserNameUpdated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,18 @@ class UserAccountController extends Controller
             $request->user()->email_verified_at = null;
         }
 
+        $originalName = $request->user()->getOriginal('name');
         $request->user()->save();
+
+        // Dispatch domain event if the user's name actually changed
+        if ($request->user()->wasChanged('name')) {
+            event(new UserNameUpdated(
+                userId: $request->user()->id,
+                oldName: (string) $originalName,
+                newName: (string) $request->user()->name,
+                changedAt: now(),
+            ));
+        }
 
         return Redirect::route('account.edit')->with('status', __('account-updated'));
     }

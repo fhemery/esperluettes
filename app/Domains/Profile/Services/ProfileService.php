@@ -32,6 +32,22 @@ class ProfileService
     }
 
     /**
+     * Sync profile slug when the user's name changes.
+     */
+    public function syncNameAndSlugForUser(int $userId, string $newName): void
+    {
+        $profile = $this->getOrCreateProfileByUserId($userId);
+
+        // Compute new unique slug from the provided name
+        $newSlug = $this->makeUniqueSlugForName($newName, $userId);
+
+        if ($profile->slug !== $newSlug) {
+            $profile->slug = $newSlug;
+            $profile->saveQuietly();
+        }
+    }
+
+    /**
      * Update profile information
      */
     public function updateProfile(User $user, array $data): Profile
@@ -211,6 +227,25 @@ class ProfileService
         while (
             Profile::where('slug', $slug)
                 ->where('user_id', '!=', $user->id)
+                ->exists()
+        ) {
+            $i++;
+            $slug = $base . '-' . $i;
+        }
+        return $slug;
+    }
+
+    /**
+     * Make a unique slug from an arbitrary name for the given user ID.
+     */
+    private function makeUniqueSlugForName(string $name, int $userId): string
+    {
+        $base = Str::slug($name) ?: 'user-' . $userId;
+        $slug = $base;
+        $i = 0;
+        while (
+            Profile::where('slug', $slug)
+                ->where('user_id', '!=', $userId)
                 ->exists()
         ) {
             $i++;
