@@ -11,6 +11,7 @@ This document explains our workflow, commit conventions, and local quality gates
 - Open a PR early (drafts welcome). Keep PRs focused and small.
 - We have no CI and automated checks for now, only commit hooks.
 - Ask for at least one review.
+- We favor integration tests, see [Testing](./docs/Testing.md) for more details
 
 ## Conventional Commits
 
