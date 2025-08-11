@@ -36,6 +36,7 @@ class AdminServiceProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->homeUrl('/')
             ->authMiddleware([
                 Authenticate::class,
             ])
