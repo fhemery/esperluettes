@@ -22,20 +22,20 @@ class UserResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.users.navigation_label');
+        return __('admin::auth.users.navigation_label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('admin.users.model_label');
+        return __('admin::auth.users.model_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.users.plural_label');
+        return __('admin::auth.users.plural_label');
     }
     public static function getNavigationGroup(): ?string {
-        return __('admin.user_management');
+        return __('admin::auth.user_management');
     }
     protected static ?string $model = User::class;
 
@@ -47,22 +47,22 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label(__('admin.users.name_header'))
+                    ->label(__('admin::auth.users.name_header'))
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
-                    ->label(__('admin.users.email_header'))
+                    ->label(__('admin::auth.users.email_header'))
                     ->email()
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password')
-                    ->label(__('admin.users.password_header'))
+                    ->label(__('admin::auth.users.password_header'))
                     ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->maxLength(255),
                 Select::make('roles')
-                    ->label(__('admin.users.roles_header'))
+                    ->label(__('admin::auth.users.roles_header'))
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload()
@@ -75,26 +75,26 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label(__('admin.column.id'))
+                    ->label(__('admin::shared.column.id'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('admin.users.name_header'))
+                    ->label(__('admin::auth.users.name_header'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->label(__('admin.users.email_header'))
+                    ->label(__('admin::auth.users.email_header'))
                     ->searchable(),
                 Tables\Columns\IconColumn::make('email_verified_at')
-                    ->label(__('admin.users.email_verified_at_header'))
+                    ->label(__('admin::auth.users.email_verified_at_header'))
                     ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('roles.name')
-                    ->label(__('admin.users.roles_header'))
+                    ->label(__('admin::auth.users.roles_header'))
                     ->badge()
                     ->color('primary')
                     ->searchable(),
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label(__('admin.users.is_active_header'))
+                    ->label(__('admin::auth.users.is_active_header'))
                     ->boolean()
                     ->sortable()
                     ->trueIcon('heroicon-o-check-circle')
@@ -102,53 +102,53 @@ class UserResource extends Resource
                     ->trueColor('success')
                     ->falseColor('danger'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('admin.column.created_at'))
+                    ->label(__('admin::shared.column.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('admin.column.updated_at'))
+                    ->label(__('admin::shared.column.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('is_active')
-                    ->label(__('admin.users.is_active_header'))
+                    ->label(__('admin::auth.users.is_active_header'))
                     ->options([
-                        1 => __('admin.users.status.active'),
-                        0 => __('admin.users.status.inactive'),
+                        1 => __('admin::auth.users.status.active'),
+                        0 => __('admin::auth.users.status.inactive'),
                     ])
                     ->placeholder('Tous les statuts'),
             ])
             ->actions([
                 Action::make('activate')
-                    ->label(__('admin.users.actions.activate'))
+                    ->label(__('admin::auth.users.actions.activate'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn (User $record): bool => !$record->isActive())
                     ->requiresConfirmation()
-                    ->modalHeading(__('admin.users.activation.confirm_title'))
-                    ->modalDescription(__('admin.users.activation.confirm_message'))
+                    ->modalHeading(__('admin::auth.users.activation.confirm_title'))
+                    ->modalDescription(__('admin::auth.users.activation.confirm_message'))
                     ->action(function (User $record, UserActivationService $service) {
                         $service->activateUser($record);
                         Notification::make()
-                            ->title(__('admin.users.activation.success'))
+                            ->title(__('admin::auth.users.activation.success'))
                             ->success()
                             ->send();
                     }),
                 Action::make('deactivate')
-                    ->label(__('admin.users.actions.deactivate'))
+                    ->label(__('admin::auth.users.actions.deactivate'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->visible(fn (User $record): bool => $record->isActive())
                     ->requiresConfirmation()
-                    ->modalHeading(__('admin.users.deactivation.confirm_title'))
-                    ->modalDescription(__('admin.users.deactivation.confirm_message'))
+                    ->modalHeading(__('admin::auth.users.deactivation.confirm_title'))
+                    ->modalDescription(__('admin::auth.users.deactivation.confirm_message'))
                     ->action(function (User $record, UserActivationService $service) {
                         $service->deactivateUser($record);
                         Notification::make()
-                            ->title(__('admin.users.deactivation.success'))
+                            ->title(__('admin::auth.users.deactivation.success'))
                             ->success()
                             ->send();
                     }),

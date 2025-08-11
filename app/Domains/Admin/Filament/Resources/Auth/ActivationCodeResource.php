@@ -21,20 +21,20 @@ class ActivationCodeResource extends Resource
     protected static ?string $model = ActivationCode::class;
 
     public static function getNavigationGroup(): ?string {
-        return __('admin.user_management');
+        return __('admin::auth.user_management');
     }
 
     public static function getModelLabel(): string
     {
-        return __('admin.activation_codes.model_label');
+        return __('admin::auth.activation_codes.model_label');
     }
     public static function getPluralModelLabel(): string
     {
-        return __('admin.activation_codes.plural_label');
+        return __('admin::auth.activation_codes.plural_label');
     }
     public static function getNavigationLabel(): string
     {
-        return __('admin.activation_codes.navigation_label');
+        return __('admin::auth.activation_codes.navigation_label');
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
@@ -46,20 +46,20 @@ class ActivationCodeResource extends Resource
         return $form
             ->schema([
                 Select::make('sponsor_user_id')
-                    ->label(__('admin.activation_codes.sponsor_user_label'))
+                    ->label(__('admin::auth.activation_codes.sponsor_user_label'))
                     ->options(User::all()->pluck('name', 'id'))
                     ->searchable()
                     ->nullable()
-                    ->helperText(__('admin.activation_codes.sponsor_user_helper')),
+                    ->helperText(__('admin::auth.activation_codes.sponsor_user_helper')),
 
                 Textarea::make('comment')
-                    ->label(__('admin.activation_codes.comment_label'))
+                    ->label(__('admin::auth.activation_codes.comment_label'))
                     ->rows(3)
-                    ->placeholder(__('admin.activation_codes.comment_placeholder')),
+                    ->placeholder(__('admin::auth.activation_codes.comment_placeholder')),
 
                 DateTimePicker::make('expires_at')
-                    ->label(__('admin.activation_codes.expires_at_label'))
-                    ->helperText(__('admin.activation_codes.expires_at_helper'))
+                    ->label(__('admin::auth.activation_codes.expires_at_label'))
+                    ->helperText(__('admin::auth.activation_codes.expires_at_helper'))
                     ->nullable(),
             ]);
     }
@@ -69,24 +69,24 @@ class ActivationCodeResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('code')
-                    ->label(__('admin.activation_codes.code_header'))
+                    ->label(__('admin::auth.activation_codes.code_header'))
                     ->copyable()
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('sponsorUser.name')
-                    ->label(__('admin.activation_codes.sponsor_header'))
-                    ->placeholder(__('admin.activation_codes.placeholder.no_sponsor'))
+                    ->label(__('admin::auth.activation_codes.sponsor_header'))
+                    ->placeholder(__('admin::auth.activation_codes.placeholder.no_sponsor'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('status')
-                    ->label(__('admin.activation_codes.status_header'))
+                    ->label(__('admin::auth.activation_codes.status_header'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'active' => __('admin.activation_codes.status.active'),
-                        'used' => __('admin.activation_codes.status.used'),
-                        'expired' => __('admin.activation_codes.status.expired'),
+                        'active' => __('admin::auth.activation_codes.status.active'),
+                        'used' => __('admin::auth.activation_codes.status.used'),
+                        'expired' => __('admin::auth.activation_codes.status.expired'),
                         default => $state,
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -98,30 +98,30 @@ class ActivationCodeResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('usedByUser.name')
-                    ->label(__('admin.activation_codes.used_by_header'))
-                    ->placeholder(__('admin.activation_codes.placeholder.not_used'))
+                    ->label(__('admin::auth.activation_codes.used_by_header'))
+                    ->placeholder(__('admin::auth.activation_codes.placeholder.not_used'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('used_at')
-                    ->label(__('admin.activation_codes.used_at_header'))
+                    ->label(__('admin::auth.activation_codes.used_at_header'))
                     ->dateTime()
-                    ->placeholder(__('admin.activation_codes.placeholder.not_used'))
+                    ->placeholder(__('admin::auth.activation_codes.placeholder.not_used'))
                     ->sortable(),
 
                 TextColumn::make('expires_at')
-                    ->label(__('admin.activation_codes.expires_at_header'))
+                    ->label(__('admin::auth.activation_codes.expires_at_header'))
                     ->dateTime()
-                    ->placeholder(__('admin.activation_codes.placeholder.no_expiration'))
+                    ->placeholder(__('admin::auth.activation_codes.placeholder.no_expiration'))
                     ->sortable(),
 
                 TextColumn::make('comment')
-                    ->label(__('admin.activation_codes.comment_header'))
+                    ->label(__('admin::auth.activation_codes.comment_header'))
                     ->limit(50)
-                    ->placeholder(__('admin.activation_codes.placeholder.no_comment')),
+                    ->placeholder(__('admin::auth.activation_codes.placeholder.no_comment')),
 
                 TextColumn::make('created_at')
-                    ->label(__('admin.column.created_at'))
+                    ->label(__('admin::shared.column.created_at'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -148,7 +148,7 @@ class ActivationCodeResource extends Resource
                     }),
 
                 SelectFilter::make('sponsor_user_id')
-                    ->label(__('admin.activation_codes.sponsor_user_label'))
+                    ->label(__('admin::auth.activation_codes.sponsor_user_label'))
                     ->options(User::all()->pluck('name', 'id'))
                     ->searchable(),
             ])

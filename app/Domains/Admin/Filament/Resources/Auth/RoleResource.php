@@ -13,19 +13,19 @@ use Filament\Tables\Table;
 class RoleResource extends Resource
 {
     public static function getNavigationGroup(): ?string {
-        return __('admin.user_management');
+        return __('admin::auth.user_management');
     }
     public static function getModelLabel(): string
     {
-        return __('admin.role.label');
+        return __('admin::auth.role.label');
     }
     public static function getPluralModelLabel(): string
     {
-        return __('admin.role.plural_label');
+        return __('admin::auth.role.plural_label');
     }
     public static function getNavigationLabel(): string
     {
-        return __('admin.role.navigation_label');
+        return __('admin::auth.role.navigation_label');
     }
     protected static ?string $model = Role::class;
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
@@ -37,7 +37,7 @@ class RoleResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label(__('admin.role.name_header'))
+                    ->label(__('admin::auth.role.name_header'))
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
@@ -47,7 +47,7 @@ class RoleResource extends Resource
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
                 Forms\Components\Textarea::make('description')
-                    ->label(__('admin.role.description_header'))
+                    ->label(__('admin::auth.role.description_header'))
                     ->maxLength(65535)
                     ->columnSpanFull(),
             ]);
@@ -58,11 +58,11 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label(__('admin.column.id'))
+                    ->label(__('admin::shared.column.id'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('admin.role.name_header'))
+                    ->label(__('admin::auth.role.name_header'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('slug')
@@ -71,15 +71,15 @@ class RoleResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('users_count')
                     ->counts('users')
-                    ->label(__('admin.role.users_count_header'))
+                    ->label(__('admin::auth.role.users_count_header'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('admin.column.created_at'))
+                    ->label(__('admin::shared.column.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('admin.column.updated_at'))
+                    ->label(__('admin::shared.column.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
