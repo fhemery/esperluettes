@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'group' => 'Histoires',
+    'group' => 'Histoires - Référentiels',
     'shared' => [
         'active' => 'Actif',
         'name' => 'Nom',
