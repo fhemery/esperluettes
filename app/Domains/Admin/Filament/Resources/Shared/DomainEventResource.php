@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources;
+namespace App\Domains\Admin\Filament\Resources\Shared;
 
-use App\Domains\Admin\Filament\Resources\DomainEventResource\Pages;
+use App\Domains\Admin\Filament\Resources\Shared\DomainEventResource\Pages;
 use App\Domains\Shared\Models\DomainEvent;
 use Filament\Resources\Resource;
 use Filament\Tables;

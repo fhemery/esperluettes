@@ -1,17 +1,14 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources;
+namespace App\Domains\Admin\Filament\Resources\Auth;
 
-use App\Domains\Admin\Filament\Resources\RoleResource\Pages;
+use App\Domains\Admin\Filament\Resources\Auth\RoleResource\Pages;
 use App\Domains\Auth\Models\Role;
-use App\Domains\Auth\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 
 class RoleResource extends Resource
 {
@@ -91,8 +88,8 @@ class RoleResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\EditAction::make()->iconButton()->label(''),
+                Tables\Actions\DeleteAction::make()->iconButton()->label('')
                     ->before(function (Role $record) {
                         // Prevent deleting roles that are in use
                         if ($record->users()->count() > 0) {

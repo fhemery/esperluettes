@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources\ActivationCodeResource\Pages;
+namespace App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource\Pages;
 
-use App\Domains\Admin\Filament\Resources\ActivationCodeResource;
+use App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources;
+namespace App\Domains\Admin\Filament\Resources\Auth;
 
-use App\Domains\Admin\Filament\Resources\UserResource\Pages;
+use App\Domains\Admin\Filament\Resources\Auth\UserResource\Pages;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Services\UserActivationService;
 use Filament\Forms;
@@ -122,7 +122,6 @@ class UserResource extends Resource
                     ->placeholder('Tous les statuts'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
                 Action::make('activate')
                     ->label(__('admin.users.actions.activate'))
                     ->icon('heroicon-o-check-circle')
@@ -153,6 +152,8 @@ class UserResource extends Resource
                             ->success()
                             ->send();
                     }),
+                    Tables\Actions\EditAction::make()->iconButton()->label(''),
+                    Tables\Actions\DeleteAction::make()->iconButton()->label('')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -1,15 +1,12 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources;
+namespace App\Domains\Admin\Filament\Resources\Auth;
 
-use App\Domains\Admin\Filament\Resources\ActivationCodeResource\Pages;
+use App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource\Pages;
 use App\Domains\Auth\Models\ActivationCode;
 use App\Domains\Auth\Models\User;
-use App\Domains\Auth\Services\ActivationCodeService;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextColumn;
@@ -156,7 +153,7 @@ class ActivationCodeResource extends Resource
                     ->searchable(),
             ])
             ->actions([
-                DeleteAction::make()
+                DeleteAction::make()->iconButton()->label('')
                     ->visible(fn (ActivationCode $record) => !$record->isUsed()),
             ])
             ->defaultSort('created_at', 'desc');
