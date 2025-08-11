@@ -1,7 +1,38 @@
 # Skip with SKIP_DEPTRAC=1
 if [ "${SKIP_DEPTRAC:-}" = "1" ]; then
   echo "[husky] Skipping Deptrac (SKIP_DEPTRAC=1)"
+else
+  if [ -x ./vendor/bin/deptrac ]; then
+    ./vendor/bin/deptrac || exit 1
+  else
+    echo "[husky] deptrac not found; skipping"
+  fi
+fi
+
+# Optionally skip tests with SKIP_TESTS=1
+if [ "${SKIP_TESTS:-}" = "1" ]; then
+  echo "[husky] Skipping tests (SKIP_TESTS=1)"
   exit 0
 fi
 
-./vendor/bin/deptrac
+echo "[husky] Running test suite"
+
+# Choose runner based on HUSKY_TEST_RUNNER (php|sail), with fallbacks
+RUNNER="${HUSKY_TEST_RUNNER:-}"
+
+if [ -z "$RUNNER" ]; then
+  echo "[husky] HUSKY_TEST_RUNNER is not set; defaulting to 'sail'"
+  RUNNER="sail"
+fi
+
+if [ "$RUNNER" = "php" ]; then
+  php artisan test || exit 1
+elif [ "$RUNNER" = "sail" ]; then
+  ./vendor/bin/sail artisan test || exit 1
+else
+  echo "[husky] Invalid HUSKY_TEST_RUNNER value: $RUNNER"
+  exit 1
+fi
+echo "[husky] Tests passed"
+
+exit 0

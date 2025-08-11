@@ -36,6 +36,7 @@ We are using `Docker` and `sail` to simplify setup. You need to have Docker inst
 > npm run build
 
 You are up and running on : http://localhost
+The first user you can log with is admin@example.com / password.
 
 ## Working with the app
 
