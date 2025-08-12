@@ -34,32 +34,26 @@ The Announcements feature enables administrators to create, manage, and publish 
 - **Responsive**: Mobile-friendly design
 - **Order**: Controlled by admin-defined display order
 
-#### Blog Listing Page (`/blog/`)
-- **URL**: `/blog/`
+#### Announcements Listing Page (`/announcements/`)
+- **URL**: `/announcements/`
 - **Content**: All published announcements
 - **Sorting**: Descending order by creation date
 - **Pagination**: Paginated list view
 - **SEO**: Proper meta tags and structured data
 
-#### Individual Article Pages (`/blog/<slug>`)
-- **URL**: `/blog/<article-slug>`
+#### Individual Article Pages (`/announcements/<slug>`)
+- **URL**: `/announcements/<article-slug>`
 - **Content**: Full article display with rich formatting
 - **SEO**: Complete meta tags, Open Graph, and structured data
 - **Social Sharing**: Share buttons for social platforms
 - **Public Access**: No authentication required
 
-### Comment System
-- **Access Control**: Only registered and verified users (email verification) can comment
-- **Threading**: Nested/threaded replies supported
-- **Pagination**: 20-30 comments per page (configurable parameter), viewable only by verified users
-- **Moderation**: 
-  - Users can flag inappropriate comments
-  - Auto-hide comments after 3 flags (configurable via env variable: `ANNOUNCEMENT_COMMENT_FLAG_THRESHOLD=3`)
-  - Admin review queue for flagged content
-- **Rich Text**: Basic formatting in comments
-- **User Mentions**: Ability to mention other users
-- **Reactions**: Like/dislike functionality
-- **Draft Visibility**: Only admins can see draft announcements
+### Comment System (Deferred)
+- Implementation deferred until admin and display are complete.
+- When implemented later:
+  - Reading and posting should be restricted to logged-in, email-verified users.
+  - Consider an in-house, reusable comments domain for cross-feature reuse; evaluate packages first and fallback to custom if they fall short.
+  - Features such as threading, flagging with thresholds, moderation queue, mentions, and reactions can be prioritized based on needs.
 
 ## Technical Specifications
 
@@ -67,10 +61,9 @@ The Announcements feature enables administrators to create, manage, and publish 
 - **Rich Text Editor**: Quill.js
 - **Image Processing**: Intervention Image (existing setup, 800px width limit)
 - **Slug Generation**: `spatie/laravel-sluggable` (globally unique)
-- **Comments**: `lakm/laravel-comments` package
 - **Admin Panel**: Filament integration
-- **SEO**: `spatie/laravel-meta` (optional)
-- **Storage**: Separate folder structure (`storage/announcements/`)
+- **SEO**: See SEO Strategy below
+- **Storage**: `storage/app/public/announcements/` (public disk, symlinked to `public/storage`)
 - **Content Storage**: HTML format (no versioning initially)
 
 ### Database Schema
@@ -96,29 +89,30 @@ announcements:
 ```
 app/Domains/Announcement/
 ├── Controllers/
-│   ├── AnnouncementController.php (public views)
-│   └── Admin/AnnouncementResource.php (Filament)
+│   └── AnnouncementController.php (public views)
 ├── Models/
-│   ├── Announcement.php
-│   └── AnnouncementComment.php
+│   └── Announcement.php
 ├── Services/
-│   ├── AnnouncementService.php
-│   └── AnnouncementCommentService.php
+│   └── AnnouncementService.php
 ├── Requests/
 │   └── AnnouncementRequest.php
 ├── Views/
-│   ├── index.blade.php (/blog/)
-│   ├── show.blade.php (/blog/<slug>)
+│   ├── index.blade.php (/announcements/)
+│   ├── show.blade.php (/announcements/<slug>)
 │   └── components/carousel.blade.php
 ├── Resources/
 │   └── lang/
 └── Database/
     └── migrations/
+
+app/Domains/Admin/
+└── Resources/
+    └── AnnouncementResource.php (Filament resource pointing to `Announcement` model)
 ```
 
 ### URL Structure
-- `/blog/` - Blog listing page
-- `/blog/<slug>` - Individual announcement page
+- `/announcements/` - Announcements listing page
+- `/announcements/<slug>` - Individual announcement page
 - `/admin/announcements` - Filament admin interface
 
 ## User Stories
@@ -129,32 +123,27 @@ app/Domains/Announcement/
 - As an admin, I can pin important announcements to the homepage carousel
 - As an admin, I can control the order of pinned announcements
 - As an admin, I can upload and manage header images for announcements
-- As an admin, I can moderate comments and manage flagged content
 - As an admin, I can bulk manage multiple announcements
 
 ### Public User Stories
 - As a visitor, I can view the latest announcements on the homepage carousel
-- As a visitor, I can browse all announcements on the blog page
+- As a visitor, I can browse all announcements on the announcements page
 - As a visitor, I can read full announcements without authentication
-- As a registered user, I can comment on announcements
-- As a registered user, I can reply to other comments
-- As a registered user, I can flag inappropriate comments
+  
+Comment-related user stories are deferred until the comment system is implemented.
 
 ## Security Considerations
 - Only admin users can create/edit announcements
-- Comment moderation to prevent spam and abuse
 - Image upload validation and processing (800px width limit)
 - XSS protection in rich text content
-- Rate limiting on comment submissions
-- Email verification required for commenting
-- Configurable flag thresholds via environment variables
+  
+Comment-related security items will be added when comments are implemented. Reading comments will require authentication with verified email.
 
 ## Performance Considerations
 - Caching of homepage carousel data
 - Image optimization and CDN delivery (800px width limit)
-- Pagination for blog listing
+- Pagination for announcements listing
 - Database indexing on slug and status fields
-- Lazy loading of comments (20-30 per page)
 - Separate storage directory for announcements
 
 ## Future Enhancements
@@ -164,3 +153,55 @@ app/Domains/Announcement/
 - Advanced analytics and engagement tracking
 - Scheduled publishing
 - Multi-language support
+- Full comment system (threading, flags with thresholds, moderation queue, mentions, reactions)
+
+## Preview Behavior
+- Draft articles are viewable by admins only within Filament and public views guarded by authorization.
+- Public routes never display drafts. Draft pages show a clear "Draft" badge/caption for admins.
+- No signed preview URLs in MVP; can be considered later if needed.
+
+## HTML Sanitization Strategy
+- Store content as HTML but sanitize on save and/or render.
+- Recommended: use `mews/purifier` (HTMLPurifier) with a strict allowed list (headings, paragraphs, lists, links, basic formatting, images if needed). Configure a dedicated profile for announcements.
+- Disable dangerous elements/attributes (scripts, events like `onload`, iframes unless explicitly allowed).
+- If we later standardize on ProseMirror, its schema can enforce valid nodes/marks and reduce sanitizer surface.
+
+## SEO Strategy
+- We will use manual tags in Blade for MVP: meta title/description and Open Graph/Twitter tags per view (listing and show).
+- Provide small helpers/partials to avoid duplication. If needs grow, we may later adopt a package (e.g., `spatie/laravel-seo`), but it's out of scope for now.
+
+## Image Handling
+- Store originals to `storage/app/public/announcements/` and generate responsive variants.
+- Variants (MVP):
+  - 400w (mobile-first)
+  - 800w (default)
+  - WebP generation alongside original format when possible
+- Provide `srcset` on public pages to improve loading on mobile. Larger desktop variants can be added later if needed.
+- Consider focal cropping for carousel visuals in a future iteration.
+
+## Carousel Accessibility
+- Provide visible controls: Previous, Next, and Pause/Play.
+- Respect user reduced-motion preference (prefers-reduced-motion): disable auto-advance when enabled.
+- Ensure keyboard navigation: focusable controls with logical tab order, arrow-key support if applicable.
+- Add appropriate ARIA roles/labels for slides and controls; announce slide changes for screen readers.
+
+## Database Indexes and Constraints
+- Indexes:
+  - `slug` unique index (already unique)
+  - Composite index on `(status, published_at DESC)` to speed listing queries
+  - Index on `is_pinned` and `display_order` for carousel queries
+  - Index on `published_at` for date-range queries and sorting
+- Constraints and rules:
+  - `display_order` must be unique among records where `is_pinned = true`; allow `NULL` for unpinned items
+  - When unpinning an item, `display_order` should be set to `NULL`
+  - Validate that `published_at` is set when status transitions to `published`
+
+## Translations (i18n)
+- Continue hybrid strategy:
+  - JSON `fr.json` for generic strings
+  - PHP namespaced files under `app/Domains/Announcement/Resources/lang` for domain-specific strings
+- Namespace: `announcements` for public strings and `admin::announcements` within Filament.
+
+## Editor Strategy
+- Use Quill.js initially for announcement content editing.
+- If Quill proves simpler and reliable, we can standardize on Quill across domains and decommission ProseMirror. Otherwise, we can reassess.
