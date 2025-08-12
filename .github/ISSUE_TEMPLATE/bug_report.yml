@@ -1,0 +1,63 @@
+name: "Rapport de bug"
+description: "Signaler un dysfonctionnement que vous avez rencontré"
+title: "[BUG] Titre bref et descriptif"
+labels:
+  - bug
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci d'avoir pris le temps de signaler un bug. Remplissez les sections ci-dessous pour nous aider à le reproduire et à le corriger rapidement.
+  - type: input
+    id: environnement
+    attributes:
+      label: Environnement
+      description: Où le bug survient-il ?
+      placeholder: ex. Production, Préprod, Local
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du bug
+      description: Décrivez clairement le problème
+      placeholder: Que s'est-il passé ? Qu'attendiez-vous ?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      description: Listez les étapes pour reproduire le bug
+      placeholder: |
+        1. Aller à '...'
+        2. Cliquer sur '...'
+        3. Faire '...'
+        4. Voir l'erreur
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+      placeholder: Décrivez ce qui aurait dû se produire
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Captures d'écran / Vidéo
+      description: Ajoutez des images ou une vidéo si possible
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Sévérité
+      options:
+        - Bloquant (service inutilisable)
+        - Élevée (impact notable)
+        - Moyenne (contournement possible)
+        - Faible (mineur / esthétique)
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte supplémentaire
+      description: Informations additionnelles, liens, pistes, etc.
