@@ -4,6 +4,13 @@ Thanks for your interest in contributing to Esperluettes!
 
 This document explains our workflow, commit conventions, and local quality gates.
 
+## Language used
+
+The project is managed mostly by a French community, therefore :
+
+- The whole code and documentation of the repository is in English, for better consistency.
+- The issues are mostly written in French, so that anyone can contribute if need be.
+
 ## Repository and workflow
 
 - We use a single GitHub repository with Pull Requests.
