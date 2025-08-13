@@ -13,5 +13,5 @@ return [
             'next' => 'Annonce suivante',
             'goto' => 'Annonce :number',
         ],
-    ],
+    ]
 ];

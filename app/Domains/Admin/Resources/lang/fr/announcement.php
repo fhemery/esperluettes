@@ -34,6 +34,7 @@ return [
     'actions' => [
         'publish' => 'Publier',
         'unpublish' => 'Dépublier',
+        'remove_header_image' => 'Supprimer l\'image',
     ],
 
     'help' => [

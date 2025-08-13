@@ -107,6 +107,36 @@ class AnnouncementService
         return $announcement;
     }
 
+    /**
+     * Delete an existing header image and its generated variants.
+     */
+    public function deleteHeaderImage(?string $headerImagePath): void
+    {
+        if (!$headerImagePath) {
+            return;
+        }
+        $disk = 'public';
+        // Original
+        if (Storage::disk($disk)->exists($headerImagePath)) {
+            Storage::disk($disk)->delete($headerImagePath);
+        }
+
+        // Variants based on conventional names
+        $dir = pathinfo($headerImagePath, PATHINFO_DIRNAME);
+        $name = pathinfo($headerImagePath, PATHINFO_FILENAME);
+        $variants = [
+            "$dir/{$name}-400w.jpg",
+            "$dir/{$name}-800w.jpg",
+            "$dir/{$name}-400w.webp",
+            "$dir/{$name}-800w.webp",
+        ];
+        foreach ($variants as $v) {
+            if (Storage::disk($disk)->exists($v)) {
+                Storage::disk($disk)->delete($v);
+            }
+        }
+    }
+
     public function bustCarouselCache(): void
     {
         Cache::forget('announcements.carousel');

@@ -64,6 +64,19 @@ class AnnouncementResource extends Resource
                     ])->columns(2),
                 Forms\Components\Section::make('Media')
                     ->schema([
+                        Forms\Components\Placeholder::make('header_image_preview')
+                            ->label('')
+                            ->content(function (callable $get) {
+                                $path = $get('header_image_path');
+                                if (!$path) return '';
+                                $url = asset('storage/' . $path);
+                                return new \Illuminate\Support\HtmlString(
+                                    '<div class="mb-2 text-center"><img src="' . e($url) . '" alt="Header image" style="max-width:200px; height: auto; border-radius: .5rem; display:block; margin:0 auto;"/></div>'
+                                );
+                            })
+                            ->reactive()
+                            ->visible(fn (callable $get) => filled($get('header_image_path')) && empty($get('header_image')) && !$get('remove_header_image'))
+                            ->columnSpanFull(),
                         Forms\Components\FileUpload::make('header_image')
                             ->label(__('admin::announcement.fields.header_image'))
                             ->image()
@@ -72,6 +85,10 @@ class AnnouncementResource extends Resource
                             ->openable()
                             ->downloadable(false)
                             ->helperText(__('admin::announcement.help.header_image')),
+                        Forms\Components\Toggle::make('remove_header_image')
+                            ->label(__('admin::announcement.actions.remove_header_image'))
+                            ->reactive()
+                            ->visible(fn (callable $get) => filled($get('header_image_path')) && empty($get('header_image'))),
                     ]),
                 Forms\Components\Section::make(__('admin::announcement.fields.status'))
                     ->schema([
