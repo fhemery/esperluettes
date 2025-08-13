@@ -58,7 +58,7 @@ class AnnouncementResource extends Resource
                             ->label(__('admin::announcement.fields.content'))
                             ->columnSpanFull()
                             ->toolbarButtons([
-                                'bold','italic','strike','underline','bulletList','orderedList','blockquote','link','undo','redo'
+                                'bold','italic','strike','underline','bulletList','orderedList','h2','h3','blockquote','link','undo','redo'
                             ])
                             ->required(),
                     ])->columns(2),
