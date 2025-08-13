@@ -107,7 +107,7 @@ class AnnouncementService
         return $announcement;
     }
 
-    protected function bustCarouselCache(): void
+    public function bustCarouselCache(): void
     {
         Cache::forget('announcements.carousel');
     }
@@ -118,7 +118,8 @@ class AnnouncementService
             return Announcement::query()
                 ->pinned()
                 ->published()
-                ->orderBy('display_order')
+                ->orderBy('display_order', 'asc')
+                ->orderByDesc('published_at')
                 ->get();
         });
     }

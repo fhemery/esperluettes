@@ -3,32 +3,53 @@
         index: 0,
         count: {{ count($items) }},
         timer: null,
-        init() {
+        start() {
+            if (this.count < 2) return;
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            this.timer = setInterval(() => this.next(), 6000);
+            this.stop();
+            this.timer = setInterval(() => {
+                // Debug: comment out in production if noisy
+                // console.debug('carousel next()', this.index, '->', (this.index + 1) % this.count);
+                this.next();
+            }, 6000);
+        },
+        stop() {
+            if (this.timer) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+        },
+        init() {
+            this.start();
+            // Pause on tab visibility hidden, resume on visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) this.stop(); else this.start();
+            });
         },
         next() { this.index = (this.index + 1) % this.count },
         prev() { this.index = (this.index - 1 + this.count) % this.count },
-        go(i) { this.index = i },
+        go(i) { this.index = i; },
     }"
     x-init="init()"
     class="relative mb-8"
+    @mouseenter="stop()"
+    @mouseleave="start()"
     role="region"
     aria-roledescription="carousel"
     aria-label="{{ __('announcement::public.carousel.region_label') }}"
 >
     <div class="overflow-hidden rounded-lg">
         <ul
-            class="whitespace-nowrap transition-transform duration-500 ease-out"
-            :style="`transform: translateX(-${index * 100}%);`"
+            class="flex transition-transform duration-500 ease-out"
+            :style="`width: ${count * 100}%; transform: translateX(-${(index * 100) / count}%);`"
             @keydown.left.prevent="prev()"
             @keydown.right.prevent="next()"
             tabindex="0"
             aria-live="polite"
         >
             @foreach($items as $i => $item)
-                <li class="inline-block align-top w-full">
-                    <a href="{{ route('announcements.show', $item->slug) }}" class="block">
+                <li class="relative" :style="`width: ${100 / count}%`" :aria-hidden="index !== {{ $i }}">
+                    <a href="{{ route('announcements.show', $item->slug) }}" class="block relative">
                         @php
                             $base = asset('storage/'.$item->header_image_path);
                             $path = pathinfo($item->header_image_path ?? '', PATHINFO_DIRNAME);
