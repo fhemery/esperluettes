@@ -9,6 +9,36 @@ use Illuminate\Support\Facades\Log;
 
 class AnnouncementObserver
 {
+    public function creating(Announcement $announcement): void
+    {
+        // Auto-assign display_order if pinned and order not provided
+        if ($announcement->is_pinned && empty($announcement->display_order)) {
+            $announcement->display_order = $this->nextDisplayOrder();
+        }
+    }
+
+    public function updating(Announcement $announcement): void
+    {
+        // If toggling pin state
+        if ($announcement->isDirty('is_pinned')) {
+            $newPinned = (bool) $announcement->is_pinned;
+            $oldPinned = (bool) $announcement->getOriginal('is_pinned');
+
+            if ($newPinned && !$oldPinned) {
+                // Became pinned: ensure it has an order
+                if (empty($announcement->display_order)) {
+                    $announcement->display_order = $this->nextDisplayOrder();
+                }
+            } elseif (!$newPinned && $oldPinned) {
+                // Became unpinned: clear order
+                $announcement->display_order = null;
+            }
+        } elseif ($announcement->is_pinned && empty($announcement->display_order)) {
+            // Still pinned but no order set yet: assign one
+            $announcement->display_order = $this->nextDisplayOrder();
+        }
+    }
+
     /**
      * Bust carousel cache when relevant fields change or records change lifecycle.
      */
@@ -49,6 +79,12 @@ class AnnouncementObserver
     {
         Log::info('AnnouncementObserver@restored', ['id' => $announcement->id]);
         Cache::forget('announcements.carousel');
+    }
+
+    protected function nextDisplayOrder(): int
+    {
+        $max = Announcement::query()->where('is_pinned', true)->max('display_order');
+        return is_null($max) ? 1 : ((int) $max + 1);
     }
 
     protected function bustIfRelevant(Announcement $announcement, bool $onCreate = false): void

@@ -1,0 +1,75 @@
+<?php
+
+use App\Domains\Admin\Filament\Resources\Announcement\PinnedAnnouncementResource;
+use App\Domains\Announcement\Models\Announcement;
+use App\Domains\Auth\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+uses(TestCase::class, RefreshDatabase::class);
+
+function makeAdminUser(): User {
+    $admin = User::factory()->create(['is_active' => true]);
+    $admin->assignRole('admin');
+    return $admin;
+}
+
+it('excludes non-pinned published announcements from PinnedAnnouncementResource', function () {
+    $admin = makeAdminUser();
+    $this->actingAs($admin);
+
+    $title = 'Published not pinned';
+    Announcement::factory()->published()->create([
+        'title' => $title,
+        'created_by' => $admin->id,
+        'is_pinned' => false,
+        'display_order' => null,
+    ]);
+
+    $response = $this->get(PinnedAnnouncementResource::getUrl());
+    if ($response->isRedirect()) { $response = $this->followRedirects($response); }
+    $response->assertOk();
+
+    // Not pinned should not appear in pinned list; assert via DB and HTML (best-effort)
+    expect(Announcement::query()->where('is_pinned', true)->count())->toBe(0);
+    $response->assertDontSee($title);
+});
+
+it('includes pinned published announcements in PinnedAnnouncementResource', function () {
+    $admin = makeAdminUser();
+    $this->actingAs($admin);
+
+    $title = 'Pinned + Published';
+    $a = Announcement::factory()->published()->pinned()->create([
+        'title' => $title,
+        'created_by' => $admin->id,
+    ]);
+
+    $response = $this->get(PinnedAnnouncementResource::getUrl());
+    if ($response->isRedirect()) { $response = $this->followRedirects($response); }
+    $response->assertOk();
+
+    // Assert present in pinned query and try to see title in HTML
+    expect(Announcement::query()->where('is_pinned', true)->pluck('id'))->toContain($a->id);
+    $response->assertSee($title);
+});
+
+it('assigns a display order for pinned published announcements (auto-order)', function () {
+    $admin = makeAdminUser();
+    $this->actingAs($admin);
+
+    $title = 'Pinned without order';
+    $a = Announcement::factory()->published()->pinned(null)->create([
+        'title' => $title,
+        'created_by' => $admin->id,
+        'display_order' => null,
+    ]);
+
+    $response = $this->get(PinnedAnnouncementResource::getUrl());
+    if ($response->isRedirect()) { $response = $this->followRedirects($response); }
+    $response->assertOk();
+
+    // Reload and check order assigned
+    $a->refresh();
+    expect($a->display_order)->not->toBeNull();
+});

@@ -3,6 +3,8 @@
 namespace App\Domains\Announcement\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Domains\Announcement\Database\Factories\AnnouncementFactory;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,7 +12,8 @@ use Illuminate\Support\Carbon;
 
 class Announcement extends Model
 {
-    use HasSlug;
+    /** @use HasFactory<\App\Domains\Announcement\Database\Factories\AnnouncementFactory> */
+    use HasSlug, HasFactory;
 
     protected $table = 'announcements';
 
@@ -56,5 +59,10 @@ class Announcement extends Model
     public function scopeOrderForListing(Builder $query): Builder
     {
         return $query->orderByDesc('published_at')->orderByDesc('id');
+    }
+
+    protected static function newFactory(): AnnouncementFactory
+    {
+        return AnnouncementFactory::new();
     }
 }

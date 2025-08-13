@@ -45,7 +45,7 @@ The Announcements feature enables administrators to create, manage, and publish 
 - **URL**: `/announcements/<article-slug>`
 - **Content**: Full article display with rich formatting
 - **SEO**: Complete meta tags, Open Graph, and structured data
-- **Social Sharing**: Share buttons for social platforms
+- **Social Sharing**: Deferred (out of scope for MVP)
 - **Public Access**: No authentication required
 
 ### Comment System (Deferred)
@@ -200,8 +200,8 @@ Comment-related security items will be added when comments are implemented. Read
 - Continue hybrid strategy:
   - JSON `fr.json` for generic strings
   - PHP namespaced files under `app/Domains/Announcement/Resources/lang` for domain-specific strings
-- Namespace: `announcements` for public strings and `admin::announcements` within Filament.
+- Namespace: `announcement` for public strings; Filament admin continues to use the `admin` namespace.
 
 ## Editor Strategy
-- Use Quill.js initially for announcement content editing.
-- If Quill proves simpler and reliable, we can standardize on Quill across domains and decommission ProseMirror. Otherwise, we can reassess.
+- Use Filament RichEditor for announcement content editing (Quill-like toolbar) for MVP.
+- We may integrate Quill.js later if needed; current sanitization/profile is compatible with RichEditor output.
