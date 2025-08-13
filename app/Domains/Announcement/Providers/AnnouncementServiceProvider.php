@@ -13,6 +13,9 @@ class AnnouncementServiceProvider extends ServiceProvider
         // Load PHP namespaced translations for the Announcement public domain
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'announcement');
 
+        // Load namespaced views for the Announcement public domain
+        $this->loadViewsFrom(__DIR__ . '/../Views', 'announcement');
+
         // Model observers
         Announcement::observe(AnnouncementObserver::class);
     }

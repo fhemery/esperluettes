@@ -57,7 +57,7 @@
 
         @if($carouselItems->count() > 0)
             <section class="w-full lg:max-w-4xl max-w-[335px] mb-6">
-                @include('announcements.components.carousel', ['items' => $carouselItems])
+                @include('announcement::components.carousel', ['items' => $carouselItems])
             </section>
         @endif
 

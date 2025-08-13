@@ -18,7 +18,7 @@ class AnnouncementController extends BaseController
 
         $pinned = $service->getPinnedForCarousel();
 
-        return view('announcements.index', [
+        return view('announcement::index', [
             'announcements' => $announcements,
             'pinned' => $pinned,
         ]);
@@ -31,7 +31,7 @@ class AnnouncementController extends BaseController
             ->published()
             ->firstOrFail();
 
-        return view('announcements.show', [
+        return view('announcement::show', [
             'announcement' => $announcement,
         ]);
     }
