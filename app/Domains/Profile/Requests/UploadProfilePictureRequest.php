@@ -39,11 +39,11 @@ class UploadProfilePictureRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'profile_picture.required' => 'Please select a profile picture to upload.',
-            'profile_picture.image' => 'The file must be an image.',
-            'profile_picture.mimes' => 'The profile picture must be a file of type: jpeg, jpg, png, gif, webp.',
-            'profile_picture.max' => 'The profile picture may not be greater than 2MB.',
-            'profile_picture.dimensions' => 'The profile picture must be at least 100x100 pixels and no larger than 2000x2000 pixels.',
+            'profile_picture.required' => __('Please select a profile picture to upload.'),
+            'profile_picture.image' => __('The file must be an image.'),
+            'profile_picture.mimes' => __('The profile picture must be a file of type: jpeg, jpg, png, gif, webp.'),
+            'profile_picture.max' => __('The profile picture may not be greater than 2MB.'),
+            'profile_picture.dimensions' => __('The profile picture must be at least 100x100 pixels and no larger than 2000x2000 pixels.'),
         ];
     }
 }

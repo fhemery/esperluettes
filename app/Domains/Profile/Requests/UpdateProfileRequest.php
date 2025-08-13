@@ -37,11 +37,11 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'description.max' => 'The description may not be greater than 1000 characters.',
-            'facebook_url.max' => 'The Facebook URL may not be greater than 255 characters.',
-            'x_url.max' => 'The X URL may not be greater than 255 characters.',
-            'instagram_url.max' => 'The Instagram URL may not be greater than 255 characters.',
-            'youtube_url.max' => 'The YouTube URL may not be greater than 255 characters.',
+            'description.max' => __('The description may not be greater than 1000 characters.'),
+            'facebook_url.max' => __('The Facebook URL may not be greater than 255 characters.'),
+            'x_url.max' => __('The X URL may not be greater than 255 characters.'),
+            'instagram_url.max' => __('The Instagram URL may not be greater than 255 characters.'),
+            'youtube_url.max' => __('The YouTube URL may not be greater than 255 characters.'),
         ];
     }
 
@@ -51,11 +51,11 @@ class UpdateProfileRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'facebook_url' => 'Facebook URL',
-            'x_url' => 'X URL',
-            'instagram_url' => 'Instagram URL',
-            'youtube_url' => 'YouTube URL',
-            'description' => 'description',
+            'facebook_url' => __('Facebook URL'),
+            'x_url' => __('X URL'),
+            'instagram_url' => __('Instagram URL'),
+            'youtube_url' => __('YouTube URL'),
+            'description' => __('description'),
         ];
     }
 }

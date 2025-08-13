@@ -1,0 +1,45 @@
+name: "Amélioration de la documentation"
+description: "Signaler un manque, une erreur ou proposer une amélioration de la documentation"
+title: "[DOC] Titre bref et descriptif"
+labels:
+  - documentation
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci d'aider à améliorer la documentation. Fournissez des détails précis pour accélérer la mise à jour.
+  - type: input
+    id: page
+    attributes:
+      label: Page / Lien concerné
+      description: URL ou chemin du fichier de documentation
+      placeholder: ex. docs/installation.md
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type de changement
+      options:
+        - Correction (fautes, liens, incohérences)
+        - Ajout de contenu manquant
+        - Mise à jour obsolète
+        - Amélioration de clarté / exemples
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Décrivez précisément ce qui doit être corrigé / ajouté
+    validations:
+      required: true
+  - type: textarea
+    id: proposition
+    attributes:
+      label: Proposition de modification (optionnel)
+      description: Texte proposé, exemple, ou PR associée
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte supplémentaire
+      description: Informations additionnelles, impact, captures d'écran

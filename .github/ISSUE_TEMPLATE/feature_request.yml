@@ -1,0 +1,53 @@
+name: "Demande de fonctionnalité"
+description: "Proposer une idée d'amélioration ou une nouvelle fonctionnalité"
+title: "[FEATURE] Titre bref et descriptif"
+labels:
+  - enhancement
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de proposer une amélioration. Donnez le plus de contexte possible pour faciliter l'évaluation.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème ou besoin
+      description: Quel problème cette fonctionnalité résout-elle ? Quelle valeur apporte-t-elle ?
+      placeholder: Décrivez le besoin utilisateur ou le problème actuel
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      description: Décrivez la solution souhaitée, le comportement attendu, les écrans, etc.
+      placeholder: Décrivez la fonctionnalité idéale
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+      description: Décrivez d'autres solutions ou contournements
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact / Priorité
+      description: Qui est impacté ? Quelle est la priorité ?
+      placeholder: ex. Tous les utilisateurs / Priorité élevée
+  - type: textarea
+    id: scope
+    attributes:
+      label: Portée et hors périmètre (optionnel)
+      description: Ce qui est inclus / exclus, contraintes connues
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Maquettes / Captures d'écran (optionnel)
+      description: Joignez des images si utile
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte supplémentaire
+      description: Informations additionnelles, liens, références

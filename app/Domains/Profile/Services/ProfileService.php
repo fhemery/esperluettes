@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Str;
 
 class ProfileService
 {
@@ -19,10 +20,31 @@ class ProfileService
         $profile = Profile::where('user_id', $user->id)->first();
         
         if (!$profile) {
-            $profile = Profile::create(['user_id' => $user->id]);
+            $profile = Profile::create([
+                'user_id' => $user->id,
+                'slug' => $this->makeUniqueSlugForUser($user),
+            ]);
+        } elseif (empty($profile->slug)) {
+            $this->ensureProfileSlug($profile);
         }
         
         return $profile;
+    }
+
+    /**
+     * Sync profile slug when the user's name changes.
+     */
+    public function syncNameAndSlugForUser(int $userId, string $newName): void
+    {
+        $profile = $this->getOrCreateProfileByUserId($userId);
+
+        // Compute new unique slug from the provided name
+        $newSlug = $this->makeUniqueSlugForName($newName, $userId);
+
+        if ($profile->slug !== $newSlug) {
+            $profile->slug = $newSlug;
+            $profile->saveQuietly();
+        }
     }
 
     /**
@@ -96,6 +118,12 @@ class ProfileService
             'instagram_url' => ['instagram.com'],
             'youtube_url' => ['youtube.com', 'youtu.be'],
         ];
+        $domainErrorKeys = [
+            'facebook_url' => __('Invalid domain for Facebook URL. Allowed domains: :domains'),
+            'x_url' => __('Invalid domain for X URL. Allowed domains: :domains'),
+            'instagram_url' => __('Invalid domain for Instagram URL. Allowed domains: :domains'),
+            'youtube_url' => __('Invalid domain for YouTube URL. Allowed domains: :domains'),
+        ];
 
         foreach ($socialNetworks as $field => $allowedDomains) {
             if (!empty($data[$field])) {
@@ -124,7 +152,9 @@ class ProfileService
                 }
                 
                 if (!$isValidDomain) {
-                    throw new \InvalidArgumentException("Invalid domain for {$field}. Allowed domains: " . implode(', ', $allowedDomains));
+                    $messageTemplate = $domainErrorKeys[$field] ?? __('Invalid domain. Allowed domains: :domains');
+                    $message = str_replace(':domains', implode(', ', $allowedDomains), $messageTemplate);
+                    throw new \InvalidArgumentException($message);
                 }
                 
                 $data[$field] = $url;
@@ -150,8 +180,16 @@ class ProfileService
         $profile = Profile::where('user_id', $userId)->with('user')->first();
         
         if (!$profile) {
-            $profile = Profile::create(['user_id' => $userId]);
+            // Fetch the user to derive slug
+            $user = User::findOrFail($userId);
+            $profile = Profile::create([
+                'user_id' => $userId,
+                'slug' => $this->makeUniqueSlugForUser($user),
+            ]);
             $profile->load('user'); // Load the user relationship
+        } elseif (empty($profile->slug)) {
+            $this->ensureProfileSlug($profile);
+            $profile->load('user');
         }
         
         return $profile;
@@ -163,5 +201,56 @@ class ProfileService
     public function canEditProfile(User $currentUser, Profile $profile): bool
     {
         return $currentUser->id === $profile->user_id;
+    }
+
+    /**
+     * Ensure a profile has a unique slug. If missing, generate and save it.
+     */
+    public function ensureProfileSlug(Profile $profile): void
+    {
+        if (!empty($profile->slug)) {
+            return;
+        }
+        $user = $profile->user ?: User::find($profile->user_id);
+        $profile->slug = $this->makeUniqueSlugForUser($user);
+        $profile->saveQuietly();
+    }
+
+    /**
+     * Make a unique slug from the user's name with fallback to user-<id>.
+     */
+    private function makeUniqueSlugForUser(User $user): string
+    {
+        $base = Str::slug($user->name ?? '') ?: 'user-' . $user->id;
+        $slug = $base;
+        $i = 0;
+        while (
+            Profile::where('slug', $slug)
+                ->where('user_id', '!=', $user->id)
+                ->exists()
+        ) {
+            $i++;
+            $slug = $base . '-' . $i;
+        }
+        return $slug;
+    }
+
+    /**
+     * Make a unique slug from an arbitrary name for the given user ID.
+     */
+    private function makeUniqueSlugForName(string $name, int $userId): string
+    {
+        $base = Str::slug($name) ?: 'user-' . $userId;
+        $slug = $base;
+        $i = 0;
+        while (
+            Profile::where('slug', $slug)
+                ->where('user_id', '!=', $userId)
+                ->exists()
+        ) {
+            $i++;
+            $slug = $base . '-' . $i;
+        }
+        return $slug;
     }
 }

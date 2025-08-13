@@ -5,13 +5,14 @@ namespace App\Domains\Auth\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Domains\Auth\Models\Role;
+use App\Domains\Auth\Database\Factories\UserFactory as DomainUserFactory;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<\App\Domains\Auth\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -82,11 +83,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasRole($roles): bool
     {
         if (is_string($roles)) {
-            return $this->roles->contains('name', $roles);
+            return $this->roles->contains('slug', $roles);
         }
 
         if (is_array($roles)) {
-            return $this->roles->whereIn('name', $roles)->isNotEmpty();
+            return $this->roles->whereIn('slug', $roles)->isNotEmpty();
         }
 
         return false;
@@ -100,8 +101,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function assignRole(string $role): void
     {
-        $role = Role::firstOrCreate(['name' => $role], ['name' => ucfirst($role)]);
-        $this->roles()->syncWithoutDetaching($role);
+        $roleModel = Role::where('slug', $role)->first();
+        if (!$roleModel) {
+            $roleModel = Role::create([
+                'name' => $role,
+                'slug' => $role,
+            ]);
+        }
+        $this->roles()->syncWithoutDetaching($roleModel);
     }
 
     /**
@@ -112,9 +119,9 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function removeRole(string $role): void
     {
-        $role = Role::where('name', $role)->first();
-        if ($role) {
-            $this->roles()->detach($role->id);
+        $roleModel = Role::where('slug', $role)->first();
+        if ($roleModel) {
+            $this->roles()->detach($roleModel->id);
         }
     }
 
@@ -146,5 +153,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function deactivate(): void
     {
         $this->update(['is_active' => false]);
+    }
+
+    /**
+     * Specify the factory for this model.
+     */
+    protected static function newFactory(): DomainUserFactory
+    {
+        return DomainUserFactory::new();
     }
 }

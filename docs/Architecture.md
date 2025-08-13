@@ -6,73 +6,71 @@ More details can be found inside the different modules README.
 - [Admin](../app/Domains/Admin/README.md)
 - [Auth](../app/Domains/Auth/README.md)
 - [Shared](../app/Domains/Shared/README.md)
+- [Profile](../app/Domains/Profile/README.md)
 
-## Domain Structure
+To understand code organization, check [Domain Structure](./Domain_Structure.md)
 
-Each domain in the application follows this structure:
+**Important:**:  The Domains must have one-way dependency (we cannot have Auth -> Profile -> Auth)
 
-```
-app/
-  Domains/
-    {DomainName}/           # e.g., Auth, Admin, Shared
-      Controllers/          # HTTP controllers
-      Requests/             # Form requests and validation
-      Models/               # Eloquent models
-      Services/             # Business logic services
-      Repositories/         # Data access layer
-      Events/               # Domain events
-      Listeners/            # Event listeners
-      Notifications/        # Email/notification classes
-      Policies/             # Authorization policies
-      Resources/            # API resources
-      View/                 # Blade views and components
-        Components/         # Blade components
-        Layouts/            # Layout files
-      Providers/            # Service providers
-      Tests/                # Domain-specific tests
-        Unit/
-        Feature/
-      Support/              # Helper classes and utilities
-      routes.php            # use web.routes.php and api.routes.php if there are both
-```
+This has two consequences :
+- To avoid messing up accidentally dependency, we have setup a tool called [Deptrac](https://github.com/deptrac/deptrac).
 
-## Shared Domain
+- When we need to send a command in the wrong direction, we use **Event-Driven Architecture**. Check below for more details. 
 
-The Shared domain contains cross-cutting concerns used by other domains:
+## Event-Driven Architecture
 
-```
-Shared/
-  Controllers/     # Base controllers
-  Traits/          # Reusable traits
-  Interfaces/      # Common interfaces
-  Helpers/         # Global helper functions/classes
-  Exceptions/      # Custom exceptions
-  Support/         # Other supporting classes
+Event-Driven Architecture is a way to send events so that other domains can react in consequence.
+
+Let's take an example with the Profile URL
+
+### The problem
+- The profile URL is generated from the username. 
+- The username is defined in Auth module
+- But the profile URL is computed in Profile module.
+
+Thus when user updates his/her name, we need to update the Profile URL.
+
+Problem : the `UserAccountController` (in **Auth** module) cannot warn the **Profile** module, because **Profile relies heavily on Auth**, so we cannot have Auth import Profile.
+
+### The solution: event driven architecture
+Because the `UserAccountController` cannot warn the **Profile** module, it is going to send an event "in the wild".
+
+```php
+if ($request->user()->wasChanged('name')) {
+  event(new UserNameUpdated(
+      userId: $request->user()->id,
+      oldName: (string) $originalName,
+      newName: (string) $request->user()->name,
+      changedAt: now(),
+  ));
+}
 ```
 
-## Naming Conventions
+Anyone can catch it. With is why the [SyncProfileNameAndSlug](../app/Domains/Profile/Listeners/SyncProfileNameAndSlug.php) listener catches it and updates.
+All we need, is to register the listener, which is done by the [ProfileServiceProvider](../app/Domains/Profile/Providers/ProfileServiceProvider.php):
 
-- **Controllers**: Use singular form (e.g., `UserController`)
-- **Models**: Use singular, PascalCase (e.g., `User`)
-- **Services**: Suffix with "Service" (e.g., `UserService`)
-- **Repositories**: Suffix with "Repository" (e.g., `UserRepository`)
-- **Events**: Use past tense (e.g., `UserCreated`)
-- **Listeners**: Describe the action (e.g., `SendWelcomeEmail`)
+```php
+Event::listen(
+    UserNameUpdated::class,
+    [SyncProfileNameAndSlug::class, 'handle']
+);
+```
+And we're done !
 
-## Best Practices
+## Deptrac architectural rules
 
-1. Keep domain logic in the appropriate domain directory
-2. Use dependency injection for services and repositories
-3. Keep controllers thin, delegating business logic to services
-4. Use form requests for validation
-5. Place domain-specific views in their respective domain directory
-6. Use the `Shared` domain for cross-cutting concerns only
+We follow a DDD layout under `app/Domains/` and enforce boundaries with Deptrac.
+Current rules (see `deptrac.yaml`):
 
-## Adding a New Domain
+- Shared: foundational (no dependencies on other domains)
+- Auth: may depend on Shared
+- Profile: may depend on Shared and Auth
+- Admin: may depend on Shared, Auth, and Profile
 
-1. Create a new directory under `app/Domains/`
-2. Follow the directory structure outlined above
-3. Create a service provider in the domain's `Providers/` directory
-4. Register the service provider in `config/app.php`
-5. Update `composer.json` to autoload the new domain
-6. Run `composer dump-autoload`
+Run manually:
+
+```
+./vendor/bin/sail composer deptrac
+# or if Sail is not used
+composer deptrac
+```

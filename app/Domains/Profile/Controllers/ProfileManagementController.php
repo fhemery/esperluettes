@@ -41,7 +41,7 @@ class ProfileManagementController extends Controller
 
             return redirect()
                 ->route('profile.edit')
-                ->with('success', 'Profile updated successfully!');
+                ->with('success', __('Profile updated successfully!'));
         } catch (\InvalidArgumentException $e) {
             return redirect()
                 ->back()
@@ -61,11 +61,11 @@ class ProfileManagementController extends Controller
 
             return redirect()
                 ->route('profile.edit')
-                ->with('success', 'Profile picture uploaded successfully!');
+                ->with('success', __('Profile picture uploaded successfully!'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->withErrors(['profile_picture' => 'Failed to upload profile picture. Please try again.']);
+                ->withErrors(['profile_picture' => __('Failed to upload profile picture. Please try again.')]);
         }
     }
 
@@ -80,11 +80,11 @@ class ProfileManagementController extends Controller
         if ($deleted) {
             return redirect()
                 ->route('profile.edit')
-                ->with('success', 'Profile picture deleted successfully!');
+                ->with('success', __('Profile picture deleted successfully!'));
         }
 
         return redirect()
             ->route('profile.edit')
-            ->with('info', 'No profile picture to delete.');
+            ->with('info', __('No profile picture to delete.'));
     }
 }

@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // Admin domain seeders
             \App\Domains\Admin\Database\Seeders\AdminUserSeeder::class,
+            // Story domain seeders
+            \App\Domains\Story\Database\Seeders\StoryRefSeeder::class,
         ]);
     }
 }

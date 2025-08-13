@@ -5,6 +5,7 @@ namespace App\Domains\Profile\Models;
 use App\Domains\Auth\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Domains\Profile\Support\AvatarGenerator;
 
 class Profile extends Model
 {
@@ -18,6 +19,7 @@ class Profile extends Model
 
     protected $fillable = [
         'user_id',
+        'slug',
         'profile_picture_path',
         'facebook_url',
         'x_url',
@@ -29,6 +31,14 @@ class Profile extends Model
     protected $casts = [
         'user_id' => 'integer',
     ];
+
+    /**
+     * Use slug for route model binding and URL generation.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     /**
      * Get the user that owns the profile
@@ -55,8 +65,7 @@ class Profile extends Model
      */
     public function getDefaultAvatarUrl(): string
     {
-        $initials = $this->getInitials();
-        return "https://ui-avatars.com/api/?name={$initials}&color=7F9CF5&background=EBF4FF&size=200";
+        return AvatarGenerator::forUser($this->user, 200);
     }
 
     /**
@@ -73,6 +82,8 @@ class Profile extends Model
         
         return strtoupper(substr($name, 0, 2));
     }
+
+    
 
     /**
      * Check if profile has a custom profile picture

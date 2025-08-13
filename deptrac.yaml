@@ -1,0 +1,50 @@
+deptrac:
+  paths:
+    - ./app/Domains
+  exclude_files:
+    - '#.*test.*#'
+    - 'vendor/.*'
+
+
+  layers:
+    - name: Shared
+      collectors:
+        - type: directory
+          value: 'app/Domains/Shared/'
+
+    - name: Auth
+      collectors:
+        - type: directory
+          value: 'app/Domains/Auth/'
+
+    - name: Profile
+      collectors:
+        - type: directory
+          value: 'app/Domains/Profile/'
+
+    - name: Admin
+      collectors:
+        - type: directory
+          value: 'app/Domains/Admin/'
+        
+    - name: Story
+      collectors:
+        - type: directory
+          value: 'app/Domains/Story/'
+
+  ruleset:
+    Shared: []
+    Auth:
+      - Shared
+    Profile:
+      - Shared
+      - Auth
+    Admin:
+      - Shared
+      - Auth
+      - Profile
+      - Story
+    Story:
+      - Shared
+      - Auth  
+  

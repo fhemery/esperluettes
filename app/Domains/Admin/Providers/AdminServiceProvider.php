@@ -25,11 +25,9 @@ class AdminServiceProvider extends PanelProvider
     {
         // Register domain-specific migrations
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
-        
-        $this->loadJsonTranslationsFrom(
-            __DIR__.'/../Resources/lang',
-            'fr'
-        );
+
+        // PHP translations (namespaced)
+        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'admin');
     }
 
     public function panel(Panel $panel): Panel
@@ -38,6 +36,7 @@ class AdminServiceProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->homeUrl('/')
             ->authMiddleware([
                 Authenticate::class,
             ])

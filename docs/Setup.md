@@ -1,12 +1,12 @@
 # Environment setup
 
 This project uses Docker and Laravel `Sail` command to work without installing too many things on your machine.
+To setup, you need:
+- [Nodejs](https://nodejs.org) - Take the LTS version
 
-## Pre-requisite
-You need to have Docker installed on your machine, as well as a recent version of nodejs
+We favor setup through Docker containers and sail, but if you are used to PHP, manual setup could work. Check [alternative setup](./Setup_alternatives.md) for more details.
 
 ## First setup - Via Docker containers
-
 We are using Docker and sail to simplify setup. You need to have Docker installed (or possibly Docker Desktop and WSL if you are using Windows).
 
 0. Specific steps for Windows: install WSL then Docker Desktop. If it works you should be able to launch docker command in WSL shell. Don't forget to launch Docker Desktop before doing any other steps.
@@ -18,8 +18,6 @@ We are using Docker and sail to simplify setup. You need to have Docker installe
 
 Use `docker compose` to first start the containers :
 
-> docker compose up -d
-
 2. Now sail should be available, you should be able to launch it (if in windows, you launch it inside WSL and not powershell)
 
 > ./vendor/bin/sail up -d
@@ -28,13 +26,13 @@ Use `docker compose` to first start the containers :
 
 >    alias sail="./vendor/bin/sail"
 
-5. Copy the `.env.example` file to `.env`
+4. Copy the `.env.example` file to `.env`
 
-6. Generate a key and put it in the .env file, section "APP_KEY"
+5. Generate a key and put it in the .env file, section "APP_KEY"
 
 > sail artisan key:generate
 
-7. Fill the database and seed it
+6. Fill the database and seed it
 
 > sail artisan migrate:install 
 
@@ -42,7 +40,7 @@ Use `docker compose` to first start the containers :
 
 > sail artisan db:seed
 
-8. Run npm build to create the assets
+7. Run npm build to create the assets
 
 > npm install
 
