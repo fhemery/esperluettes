@@ -7,10 +7,15 @@ deptrac:
 
 
   layers:
-    - name: Shared
+    - name: Admin
       collectors:
         - type: directory
-          value: 'app/Domains/Shared/'
+          value: 'app/Domains/Admin/'
+
+    - name: Announcement
+      collectors:
+        - type: directory
+          value: 'app/Domains/Announcement'
 
     - name: Auth
       collectors:
@@ -21,11 +26,11 @@ deptrac:
       collectors:
         - type: directory
           value: 'app/Domains/Profile/'
-
-    - name: Admin
+    
+    - name: Shared
       collectors:
         - type: directory
-          value: 'app/Domains/Admin/'
+          value: 'app/Domains/Shared/'
         
     - name: Story
       collectors:
@@ -34,15 +39,18 @@ deptrac:
 
   ruleset:
     Shared: []
+    Announcement:
+      - Shared
     Auth:
       - Shared
     Profile:
       - Shared
       - Auth
     Admin:
-      - Shared
+      - Announcement
       - Auth
       - Profile
+      - Shared
       - Story
     Story:
       - Shared
