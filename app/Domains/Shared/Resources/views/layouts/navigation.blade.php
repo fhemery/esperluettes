@@ -60,6 +60,17 @@
                     </x-slot>
                 </x-dropdown>
             </div>
+            @else
+            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-3">
+                <a href="{{ route('login') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+                    {{ __('Log in') }}
+                </a>
+                @if (Route::has('register'))
+                <a href="{{ route('register') }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    {{ __('Register') }}
+                </a>
+                @endif
+            </div>
             @endif
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
@@ -110,6 +121,19 @@
                     </x-responsive-nav-link>
                 </form>
             </div>
+        </div>
+    </div>
+    @else
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">
+                {{ __('Log in') }}
+            </x-responsive-nav-link>
+            @if (Route::has('register'))
+            <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">
+                {{ __('Register') }}
+            </x-responsive-nav-link>
+            @endif
         </div>
     </div>
     @endif
