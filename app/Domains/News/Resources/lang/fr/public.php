@@ -2,15 +2,15 @@
 
 return [
     'index' => [
-        'title' => 'Annonces',
+        'title' => 'Actualités',
         'read_more' => 'Lire la suite',
-        'empty' => 'Aucune annonce pour le moment.',
+        'empty' => 'Aucune actualité pour le moment.',
     ],
 
     'carousel' => [
-        'region_label' => 'Annonces épinglées',
-        'prev' => 'Annonce précédente',
-        'next' => 'Annonce suivante',
-        'goto' => 'Annonce :number',
+        'region_label' => 'Actualités épinglées',
+        'prev' => 'Actualité précédente',
+        'next' => 'Actualité suivante',
+        'goto' => 'Actualité :number',
     ],
 ];
