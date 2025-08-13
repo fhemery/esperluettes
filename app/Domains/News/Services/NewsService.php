@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Domains\News\Services;
+
+use App\Domains\News\Models\News;
+use App\Domains\Shared\Services\ImageService;
+use Illuminate\Http\UploadedFile;
+use Mews\Purifier\Facades\Purifier;
+use Illuminate\Support\Facades\Cache;
+
+class NewsService
+{
+    public function sanitizeContent(string $html): string
+    {
+        return Purifier::clean($html, 'news');
+    }
+
+    public function processHeaderImage(UploadedFile|string|null $file): ?string
+    {
+        if (!$file) {
+            return null;
+        }
+
+        $disk = 'public';
+        $folder = 'news/' . date('Y/m');
+
+        // Normalize Filament temp array handled at caller; we accept UploadedFile|string here
+        $imageService = app(ImageService::class);
+        return $imageService->process($disk, $folder, $file, widths: [400, 800]);
+    }
+
+    public function publish(News $news): News
+    {
+        $news->status = 'published';
+        if (!$news->published_at) {
+            $news->published_at = now();
+        }
+        $news->save();
+        $this->bustCarouselCache();
+        return $news;
+    }
+
+    public function unpublish(News $news): News
+    {
+        $news->status = 'draft';
+        $news->save();
+        $this->bustCarouselCache();
+        return $news;
+    }
+
+    public function pin(News $news, int $order): News
+    {
+        $news->is_pinned = true;
+        $news->display_order = $order;
+        $news->save();
+        $this->bustCarouselCache();
+        return $news;
+    }
+
+    public function unpin(News $news): News
+    {
+        $news->is_pinned = false;
+        $news->display_order = null;
+        $news->save();
+        $this->bustCarouselCache();
+        return $news;
+    }
+
+    /**
+     * Delete an existing header image and its generated variants.
+     */
+    public function deleteHeaderImage(?string $headerImagePath): void
+    {
+        if (!$headerImagePath) {
+            return;
+        }
+        $disk = 'public';
+        app(ImageService::class)->deleteWithVariants($disk, $headerImagePath);
+    }
+
+    public function bustCarouselCache(): void
+    {
+        Cache::forget('news.carousel');
+    }
+
+    public function getPinnedForCarousel()
+    {
+        return Cache::remember('news.carousel', 300, function () {
+            return News::query()
+                ->pinned()
+                ->published()
+                ->orderBy('display_order', 'asc')
+                ->orderByDesc('published_at')
+                ->get();
+        });
+    }
+}

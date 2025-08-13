@@ -12,10 +12,10 @@ deptrac:
         - type: directory
           value: 'app/Domains/Admin/'
 
-    - name: Announcement
+    - name: News
       collectors:
         - type: directory
-          value: 'app/Domains/Announcement'
+          value: 'app/Domains/News'
 
     - name: Auth
       collectors:
@@ -39,7 +39,7 @@ deptrac:
 
   ruleset:
     Shared: []
-    Announcement:
+    News:
       - Auth
       - Shared
     Auth:
@@ -48,7 +48,7 @@ deptrac:
       - Shared
       - Auth
     Admin:
-      - Announcement
+      - News
       - Auth
       - Profile
       - Shared

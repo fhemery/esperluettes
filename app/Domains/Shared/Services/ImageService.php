@@ -12,7 +12,7 @@ class ImageService
      * Process an uploaded image or a path on a disk and generate responsive variants.
      *
      * @param string $disk      Storage disk, e.g. 'public'
-     * @param string $folder    Base folder, e.g. 'announcements/2025/08'
+     * @param string $folder    Base folder, e.g. 'news/2025/08'
      * @param UploadedFile|string $file UploadedFile or a path relative to the given disk
      * @param int[] $widths     List of widths to generate (jpg + webp for each width)
      * @param string|null $finalExtension  If set, force original extension (e.g. 'jpg'); otherwise keep source ext

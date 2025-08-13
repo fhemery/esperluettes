@@ -17,5 +17,5 @@ require app_path('Domains/Auth/routes.php');
 // Include profile routes from Profile domain
 require app_path('Domains/Profile/routes.php');
 
-// Include announcement routes from Announcement domain
-require app_path('Domains/Announcement/routes.php');
+// Include news routes from News domain
+require app_path('Domains/News/routes.php');
