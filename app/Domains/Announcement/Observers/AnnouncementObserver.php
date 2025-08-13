@@ -3,6 +3,7 @@
 namespace App\Domains\Announcement\Observers;
 
 use App\Domains\Announcement\Models\Announcement;
+use App\Domains\Shared\Services\ImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +34,14 @@ class AnnouncementObserver
 
     public function deleted(Announcement $announcement): void
     {
-        Log::info('AnnouncementObserver@deleted', ['id' => $announcement->id]);
+        Log::info('AnnouncementObserver@deleted', [
+            'id' => $announcement->id,
+            'header_image_path' => $announcement->header_image_path,
+        ]);
+        // Delete header image and its variants if present
+        if (!empty($announcement->header_image_path)) {
+            app(ImageService::class)->deleteWithVariants('public', $announcement->header_image_path);
+        }
         Cache::forget('announcements.carousel');
     }
 
