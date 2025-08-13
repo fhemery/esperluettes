@@ -6,6 +6,7 @@ return [
     
     // Domain-specific providers
     App\Domains\Admin\Providers\AdminServiceProvider::class,
+    App\Domains\Announcement\Providers\AnnouncementServiceProvider::class,
     App\Domains\Auth\Providers\AuthServiceProvider::class,
     App\Domains\Profile\Providers\ProfileServiceProvider::class,
     App\Domains\Story\Providers\StoryServiceProvider::class,

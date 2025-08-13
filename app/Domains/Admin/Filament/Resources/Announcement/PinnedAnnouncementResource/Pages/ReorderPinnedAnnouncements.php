@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources\PinnedAnnouncementResource\Pages;
+namespace App\Domains\Admin\Filament\Resources\Announcement\PinnedAnnouncementResource\Pages;
 
-use App\Domains\Admin\Filament\Resources\PinnedAnnouncementResource;
+use App\Domains\Admin\Filament\Resources\Announcement\PinnedAnnouncementResource;
 use Filament\Resources\Pages\ListRecords;
 
 class ReorderPinnedAnnouncements extends ListRecords

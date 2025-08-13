@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-semibold mb-6">Announcements</h1>
+        <h1 class="text-3xl font-semibold mb-6">{{ __('announcement::public.index.title') }}</h1>
 
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             @forelse($announcements as $announcement)
@@ -32,12 +32,12 @@
                         </h2>
                         <p class="text-gray-600 mb-4">{{ $announcement->summary }}</p>
                         <a class="text-primary-600 hover:underline" href="{{ route('announcements.show', $announcement->slug) }}">
-                            Read more
+                            {{ __('announcement::public.index.read_more') }}
                         </a>
                     </div>
                 </article>
             @empty
-                <p class="text-gray-600">No announcements yet.</p>
+                <p class="text-gray-600">{{ __('announcement::public.index.empty') }}</p>
             @endforelse
         </div>
 

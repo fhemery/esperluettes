@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources\AnnouncementResource\Pages;
+namespace App\Domains\Admin\Filament\Resources\Announcement\AnnouncementResource\Pages;
 
-use App\Domains\Admin\Filament\Resources\AnnouncementResource;
+use App\Domains\Admin\Filament\Resources\Announcement\AnnouncementResource;
 use App\Domains\Announcement\Services\AnnouncementService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -37,5 +37,10 @@ class CreateAnnouncement extends CreateRecord
         $data['created_by'] = Auth::id();
 
         return $data;
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources;
+namespace App\Domains\Admin\Filament\Resources\Announcement;
 
 use App\Domains\Announcement\Models\Announcement;
 use App\Domains\Announcement\Services\AnnouncementService;
@@ -18,32 +18,44 @@ class AnnouncementResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
 
-    protected static ?string $navigationGroup = 'Content';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin::announcement.navigation.group');
+    }
 
-    protected static ?string $modelLabel = 'Announcement';
+    public static function getModelLabel(): string
+    {
+        return __('admin::announcement.resource.label');
+    }
 
-    protected static ?string $navigationLabel = 'Announcements';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin::announcement.navigation.announcements');
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Main')
+                Forms\Components\Section::make(__('admin::announcement.resource.label'))
                     ->schema([
                         Forms\Components\TextInput::make('title')
+                            ->label(__('admin::announcement.fields.title'))
                             ->required()
                             ->maxLength(200)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
                         Forms\Components\TextInput::make('slug')
+                            ->label(__('admin::announcement.fields.slug'))
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
                         Forms\Components\Textarea::make('summary')
+                            ->label(__('admin::announcement.fields.summary'))
                             ->required()
                             ->rows(3),
                         Forms\Components\RichEditor::make('content')
-                            ->label('Content')
+                            ->label(__('admin::announcement.fields.content'))
                             ->columnSpanFull()
                             ->toolbarButtons([
                                 'bold','italic','strike','underline','bulletList','orderedList','blockquote','link','undo','redo'
@@ -53,34 +65,37 @@ class AnnouncementResource extends Resource
                 Forms\Components\Section::make('Media')
                     ->schema([
                         Forms\Components\FileUpload::make('header_image')
-                            ->label('Header image')
+                            ->label(__('admin::announcement.fields.header_image'))
                             ->image()
                             ->disk('public')
                             ->directory('tmp/announcements')
                             ->openable()
                             ->downloadable(false)
-                            ->helperText('Upload an image; responsive variants are generated on save.'),
+                            ->helperText(__('admin::announcement.help.header_image')),
                     ]),
-                Forms\Components\Section::make('Publishing')
+                Forms\Components\Section::make(__('admin::announcement.fields.status'))
                     ->schema([
                         Forms\Components\Select::make('status')
+                            ->label(__('admin::announcement.fields.status'))
                             ->required()
                             ->options([
-                                'draft' => 'Draft',
-                                'published' => 'Published',
+                                'draft' => __('admin::announcement.status.draft'),
+                                'published' => __('admin::announcement.status.published'),
                             ])->native(false)
                             ->default('draft'),
                         Forms\Components\DateTimePicker::make('published_at')
+                            ->label(__('admin::announcement.fields.published_at'))
                             ->seconds(false)
                             ->native(false),
                         Forms\Components\TextInput::make('meta_description')
-                            ->label('Meta description')
+                            ->label(__('admin::announcement.fields.meta_description'))
                             ->maxLength(160),
-                        Forms\Components\Toggle::make('is_pinned')->label('Pinned'),
+                        Forms\Components\Toggle::make('is_pinned')->label(__('admin::announcement.fields.is_pinned')),
                         Forms\Components\TextInput::make('display_order')
+                            ->label(__('admin::announcement.fields.display_order'))
                             ->numeric()
                             ->minValue(1)
-                            ->helperText('Only used when pinned.'),
+                            ->helperText(__('admin::announcement.help.display_order')),
                     ])->columns(2),
             ]);
     }
@@ -89,24 +104,32 @@ class AnnouncementResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
-                Tables\Columns\BadgeColumn::make('status')->colors([
+                Tables\Columns\TextColumn::make('title')->label(__('admin::announcement.fields.title'))
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('status')->label(__('admin::announcement.fields.status'))->badge()->colors([
                     'warning' => 'draft',
                     'success' => 'published',
                 ])->sortable(),
-                Tables\Columns\IconColumn::make('is_pinned')->boolean()->label('Pinned')->sortable(),
-                Tables\Columns\TextColumn::make('display_order')->sortable(),
-                Tables\Columns\TextColumn::make('published_at')->dateTime()->sortable(),
+                Tables\Columns\IconColumn::make('is_pinned')->boolean()->label(__('admin::announcement.fields.is_pinned'))->sortable(),
+                Tables\Columns\TextColumn::make('published_at')->label(__('admin::announcement.fields.published_at'))->dateTime()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options([
-                    'draft' => 'Draft',
-                    'published' => 'Published',
+                    'draft' => __('admin::announcement.status.draft'),
+                    'published' => __('admin::announcement.status.published'),
                 ]),
-                Tables\Filters\TernaryFilter::make('is_pinned')->placeholder('All')->trueLabel('Pinned')->falseLabel('Not pinned')
+                Tables\Filters\TernaryFilter::make('is_pinned')
+                    ->placeholder(__('admin::announcement.filters.all'))
+                    ->trueLabel(__('admin::announcement.fields.is_pinned'))
+                    ->falseLabel(__('admin::announcement.filters.not_pinned'))
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->iconButton()->label('')->tooltip(__('Edit')),
+                Tables\Actions\DeleteAction::make()
+                    ->requiresConfirmation()
+                    ->iconButton()
+                    ->label('')
+                    ->tooltip(__('Delete')),
                 Tables\Actions\Action::make('publish')
                     ->visible(fn(Announcement $record) => $record->status !== 'published')
                     ->requiresConfirmation()

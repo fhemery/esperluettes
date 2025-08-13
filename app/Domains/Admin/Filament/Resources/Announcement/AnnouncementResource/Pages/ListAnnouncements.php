@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources\AnnouncementResource\Pages;
+namespace App\Domains\Admin\Filament\Resources\Announcement\AnnouncementResource\Pages;
 
-use App\Domains\Admin\Filament\Resources\AnnouncementResource;
+use App\Domains\Admin\Filament\Resources\Announcement\AnnouncementResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 

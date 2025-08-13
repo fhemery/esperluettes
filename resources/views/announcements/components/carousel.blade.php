@@ -15,7 +15,7 @@
     class="relative mb-8"
     role="region"
     aria-roledescription="carousel"
-    aria-label="Pinned announcements"
+    aria-label="{{ __('announcement::public.carousel.region_label') }}"
 >
     <div class="overflow-hidden rounded-lg">
         <ul
@@ -55,10 +55,10 @@
         </ul>
     </div>
 
-    <button type="button" @click="prev()" class="absolute inset-y-0 left-2 my-auto h-10 w-10 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center" aria-label="Previous slide">
+    <button type="button" @click="prev()" class="absolute inset-y-0 left-2 my-auto h-10 w-10 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center" aria-label="{{ __('announcement::public.carousel.prev') }}">
         <span aria-hidden="true">‹</span>
     </button>
-    <button type="button" @click="next()" class="absolute inset-y-0 right-2 my-auto h-10 w-10 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center" aria-label="Next slide">
+    <button type="button" @click="next()" class="absolute inset-y-0 right-2 my-auto h-10 w-10 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center" aria-label="{{ __('announcement::public.carousel.next') }}">
         <span aria-hidden="true">›</span>
     </button>
 
@@ -68,7 +68,7 @@
                 :class="index === {{ $i }} ? 'bg-white' : 'bg-white/50'"
                 @click="go({{ $i }})"
                 :aria-current="index === {{ $i }} ? 'true' : 'false'"
-                aria-label="Go to slide {{ $i + 1 }}"></button>
+                aria-label="{{ __('announcement::public.carousel.goto', ['number' => $i + 1]) }}"></button>
         @endforeach
     </div>
 </div>
