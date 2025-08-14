@@ -131,6 +131,13 @@ class StaticPageResource extends Resource
                 ]),
             ])
             ->actions([
+                Tables\Actions\Action::make('open')
+                    ->label('')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->extraAttributes(['style' => '--c-300:#93c5fd;--c-400:#60a5fa;--c-500:#3b82f6;--c-600:#2563eb'])
+                    ->iconButton()
+                    ->tooltip(__('Open'))
+                    ->url(fn(StaticPage $record) => url('/' . $record->slug), shouldOpenInNewTab: true),
                 Tables\Actions\EditAction::make()->iconButton()->label('')->tooltip(__('Edit')),
                 Tables\Actions\DeleteAction::make()
                     ->requiresConfirmation()
