@@ -13,4 +13,6 @@ return [
         'next' => 'Actualité suivante',
         'goto' => 'Actualité :number',
     ],
+
+    'draft_preview' => 'Aperçu de la page (brouillon) — visible uniquement par les administrateurs.',
 ];

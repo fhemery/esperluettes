@@ -141,6 +141,12 @@ class NewsResource extends Resource
                     ->falseLabel(__('admin::news.filters.not_pinned'))
             ])
             ->actions([
+                Tables\Actions\Action::make('open')
+                    ->label('')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->iconButton()
+                    ->tooltip(__('Open'))
+                    ->url(fn(News $record) => route('news.show', ['slug' => $record->slug]), shouldOpenInNewTab: true),
                 Tables\Actions\EditAction::make()->iconButton()->label('')->tooltip(__('Edit')),
                 Tables\Actions\DeleteAction::make()
                     ->requiresConfirmation()

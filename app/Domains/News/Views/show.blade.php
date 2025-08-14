@@ -8,6 +8,12 @@
                 @endif
             </header>
 
+            @if($news->status === 'draft')
+                <div class="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-4 py-2 rounded max-w-[800px] mx-auto">
+                    {{ __('news::public.draft_preview') }}
+                </div>
+            @endif
+
             @if($news->header_image_path)
                 <figure class="mb-6" style="max-width:800px; margin-left:auto; margin-right:auto;">
                     @php
