@@ -19,3 +19,6 @@ require app_path('Domains/Profile/routes.php');
 
 // Include news routes from News domain
 require app_path('Domains/News/routes.php');
+
+// Include static page routes from StaticPage domain (must be last due to catch-all)
+require app_path('Domains/StaticPage/routes.php');

@@ -10,6 +10,7 @@ return [
     App\Domains\Auth\Providers\AuthServiceProvider::class,
     App\Domains\Profile\Providers\ProfileServiceProvider::class,
     App\Domains\Story\Providers\StoryServiceProvider::class,
+    App\Domains\StaticPage\Providers\StaticPageServiceProvider::class,
     
     // Add other domain providers here as they are created
 ];

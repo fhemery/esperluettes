@@ -30,8 +30,8 @@ return [
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty'   => true,
         ],
-        // Strict profile for news content
-        'news' => [
+        // Shared strict profile for admin-managed rich content (News, Static Pages)
+        'admin-content' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             // Allow only safe, basic content elements
             'HTML.AllowedElements' => 'h1,h2,h3,h4,h5,h6,p,ul,ol,li,strong,em,b,i,a,blockquote,hr,br,span,img',

@@ -31,7 +31,12 @@ deptrac:
       collectors:
         - type: directory
           value: 'app/Domains/Shared/'
-        
+
+    - name: StaticPage
+      collectors:
+        - type: directory
+          value: 'app/Domains/StaticPage/'
+
     - name: Story
       collectors:
         - type: directory
@@ -47,11 +52,15 @@ deptrac:
     Profile:
       - Shared
       - Auth
+    StaticPage:
+      - Shared
+      - Auth
     Admin:
       - News
       - Auth
       - Profile
       - Shared
+      - StaticPage
       - Story
     Story:
       - Shared

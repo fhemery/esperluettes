@@ -12,7 +12,7 @@ class NewsService
 {
     public function sanitizeContent(string $html): string
     {
-        return Purifier::clean($html, 'news');
+        return Purifier::clean($html, 'admin-content');
     }
 
     public function processHeaderImage(UploadedFile|string|null $file): ?string
