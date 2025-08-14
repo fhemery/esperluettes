@@ -7,7 +7,7 @@ The Static Page feature enables administrators to create, manage, and publish st
 
 ### Page Management
 - **Title**: Text field for the page title
-- **Slug**: Auto-generated from title using `spatie/laravel-sluggable` (globally unique)
+- **Slug**: Auto-generated from title using `spatie/laravel-sluggable` (unique among Static Pages)
 - **Summary**: Short description/excerpt for SEO meta description
 - **Header Image**: Optional featured image with automatic processing via shared ImageService
 - **Content**: Rich text editor using the same component as News domain
@@ -21,8 +21,8 @@ The Static Page feature enables administrators to create, manage, and publish st
 - **Image Upload**: Direct upload with automatic resizing via shared ImageService
 - **Preview Functionality**: Preview pages before publishing
 - **Bulk Operations**: Bulk publish/unpublish/delete operations
-- **Draft Auto-save**: Automatic saving of drafts while editing
-- **Alphabetical Sorting**: Pages sorted alphabetically in admin interface
+- **Manual Save**: No autosave; authors save drafts manually
+- **Alphabetical Sorting**: Pages sorted alphabetically (title ASC) in admin interface; searchable title and status filter
 
 ### Public Display
 
@@ -32,6 +32,7 @@ The Static Page feature enables administrators to create, manage, and publish st
 - **SEO**: Complete meta tags, Open Graph, and structured data
 - **Public Access**: No authentication required
 - **Last Updated**: Display last modification date
+ - **Draft Visibility**: Draft pages are only visible to authenticated admins. When viewing a draft, show a small banner indicating preview mode and draft status.
 
 #### Navigation Integration
 - **Manual Links**: Links to static pages will be manually added to footer, menus, etc.
@@ -42,19 +43,19 @@ The Static Page feature enables administrators to create, manage, and publish st
 ### Technology Stack
 - **Rich Text Editor**: Same component as News domain (reusable admin component)
 - **Image Processing**: Shared ImageService (existing setup, 800px width limit)
-- **Slug Generation**: `spatie/laravel-sluggable` (globally unique)
+- **Slug Generation**: `spatie/laravel-sluggable` (unique among Static Pages)
 - **Admin Panel**: Filament integration
 - **SEO**: Meta tags, Open Graph, structured data
 - **Storage**: `storage/app/public/static-pages/` (public disk, symlinked to `public/storage`)
 - **Content Storage**: HTML format (no versioning initially)
-- **Caching**: Route caching to avoid dynamic route generation on each request
+ - **Caching**: Use the default app cache to store a slug→page map used by a catch-all route, avoiding DB lookups on each request
 
 ### Database Schema
 ```sql
 static_pages:
 - id (primary key)
 - title (string)
-- slug (string, unique globally)
+- slug (string, unique among Static Pages)
 - summary (text, nullable)
 - content (longtext)
 - header_image_path (string, nullable)
@@ -95,23 +96,22 @@ app/Domains/StaticPage/
 ```
 
 ### Routing Strategy
-- **Dynamic Routes**: Routes registered dynamically based on published static pages
-- **Caching**: Route cache to avoid database queries on each request
-- **Cache Invalidation**: Clear route cache when pages are created/updated/deleted
-- **Conflict Prevention**: Ensure static page slugs don't conflict with existing application routes
+- **Approach**: Single catch-all route `/{slug}` defined after all specific routes. The controller consults a cached slug→page-id map to resolve published pages.
+- **Caching**: Slug map stored in the default app cache (e.g., key `static_pages:slug_map`). Invalidate and rebuild on page create, update, delete, publish, and unpublish.
+- **Uniqueness Scope**: Slugs are unique among Static Pages only (no reserved slugs list; other domains like News are namespaced differently).
 
 ### Reusable Components
 - **Rich Text Editor**: Reuse admin component from News domain
 - **Image Processing**: Use shared ImageService for header images
 - **SEO Components**: Extract SEO meta tag generation to shared service if needed
-- **Slug Generation**: Use existing sluggable configuration
+- **Slug Generation**: Use existing sluggable configuration; allow manual override in admin
+- **Content Sanitization**: Use a shared HTML Purifier profile (e.g., `admin-content`) for both News and Static Pages
 
 ## SEO Strategy
 
 ### Meta Tags
 - **Title**: Page title with site name
 - **Description**: Use summary field or auto-generated from content
-- **Keywords**: Optional field for meta keywords
 - **Canonical URL**: Proper canonical URLs for each page
 
 ### Open Graph
@@ -136,7 +136,7 @@ app/Domains/StaticPage/
 - As an admin, I can manage SEO settings for each page
 - As an admin, I can see when pages were last updated
 - As an admin, I can delete pages I no longer need
-- As an admin, I can see all pages sorted alphabetically
+- As an admin, I can see all pages sorted alphabetically (title ASC), search by title, and filter by status
 
 ### Public User Stories
 - As a visitor, I can access static pages directly via their URLs (e.g., `/faq`)
@@ -158,9 +158,9 @@ app/Domains/StaticPage/
 - Content formatting and display
 
 ### Phase 3: Dynamic Routing & Caching
-- Dynamic route registration
-- Route caching mechanism
-- Cache invalidation on page changes
+- Implement catch-all `/{slug}` route
+- Implement slug map cache in default app cache
+- Cache invalidation on page changes (create/update/delete/publish/unpublish)
 
 ### Phase 4: SEO & Polish
 - Complete SEO meta tags
@@ -172,19 +172,18 @@ app/Domains/StaticPage/
 ## Technical Considerations
 
 ### Route Conflicts
-- Implement route conflict detection
-- Reserve system routes (admin, api, etc.)
-- Validate slugs against existing routes
+- No reserved slugs list. Ensure uniqueness among Static Pages only.
 
 ### Performance
-- Route caching for production
 - Database indexing on slug field
 - Efficient cache invalidation
+- Cached slug map for O(1) lookups via catch-all route
 
 ### Security
 - Input sanitization for rich content
 - XSS prevention in content display
 - Admin-only access to management features
+ - Use shared Purifier profile `admin-content` (same as News)
 
 ## Future Enhancements (Out of Scope)
 - Page hierarchy and nested URLs
