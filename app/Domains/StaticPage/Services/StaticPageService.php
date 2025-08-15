@@ -14,7 +14,6 @@ class StaticPageService
 
     public function sanitizeContent(string $html): string
     {
-        // Reuse shared admin-content profile (same as News)
         return Purifier::clean($html, 'admin-content');
     }
 

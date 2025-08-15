@@ -16,7 +16,7 @@ return [
         'model_label' => 'Utilisateur',
         'plural_label' => 'Utilisateurs',
         'navigation_label' => 'Utilisateurs',
-        'name_header' => 'Nom',
+        'name_header' => 'Pseudo',
         'email_header' => 'Email',
         'roles_header' => 'Rôles',
         'email_verified_at_header' => 'Email vérifié ?',

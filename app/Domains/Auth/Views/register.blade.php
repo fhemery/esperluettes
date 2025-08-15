@@ -6,21 +6,21 @@
 
         <!-- Name -->
         <div>
-            <x-input-label for="name" :value="__('Name')" />
+            <x-input-label for="name" :value="__('auth::register.name')" />
             <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
         <!-- Email Address -->
         <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
+            <x-input-label for="email" :value="__('auth::register.email')" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Password -->
         <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <x-input-label for="password" :value="__('auth::register.password')" />
 
             <x-text-input id="password" class="block mt-1 w-full"
                             type="password"
@@ -32,7 +32,7 @@
 
         <!-- Confirm Password -->
         <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <x-input-label for="password_confirmation" :value="__('auth::register.confirm_password')" />
 
             <x-text-input id="password_confirmation" class="block mt-1 w-full"
                             type="password"
@@ -44,7 +44,7 @@
         <!-- Activation Code -->
         @if(config('app.require_activation_code', false))
         <div class="mt-4">
-            <x-input-label for="activation_code" :value="__('Activation Code')" />
+            <x-input-label for="activation_code" :value="__('auth::register.activation.label')" />
             <x-text-input id="activation_code" class="block mt-1 w-full" 
                           type="text" 
                           name="activation_code" 
@@ -53,20 +53,21 @@
                           placeholder="XYZT-ABCDEFGH-IJKL"
                           autocomplete="off" />
             <x-input-error :messages="$errors->get('activation_code')" class="mt-2" />
-            <p class="mt-1 text-sm text-gray-600">{{ __('Enter the activation code provided to you.') }}</p>
+            <p class="mt-1 text-sm text-gray-600">{{ __('auth::register.activation.help') }}</p>
         </div>
         @endif
 
         <div class="flex items-center justify-end mt-4 gap-1">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
+                {{ __('auth::register.links.already_registered') }}
             </a>
 
             <x-primary-button class="ms-4">
-                {{ __('Register') }}
+                {{ __('auth::register.submit') }}
             </x-primary-button>
         </div>
             </form>
         </div>
     </div>
 </x-app-layout>
+
