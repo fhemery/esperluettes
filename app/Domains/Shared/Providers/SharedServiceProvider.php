@@ -3,7 +3,6 @@
 namespace App\Domains\Shared\Providers;
 
 use App\Domains\Shared\Views\Layouts\AppLayout;
-use App\Domains\Shared\Views\Layouts\GuestLayout;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
@@ -46,11 +45,9 @@ class SharedServiceProvider extends ServiceProvider
 
         // Register the layout components
         Blade::component('app-layout', AppLayout::class);
-        Blade::component('guest-layout', GuestLayout::class);
         
-        // Also register them with the shared namespace for explicit usage
+        // Also register with the shared namespace for explicit usage
         Blade::component('shared::app-layout', AppLayout::class);
-        Blade::component('shared::guest-layout', GuestLayout::class);
 
         // Register wildcard event auditing if enabled
         if (config('shared.event_auditing_enabled', true)) {
