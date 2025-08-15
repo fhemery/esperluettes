@@ -34,11 +34,11 @@ return [
         'admin-content' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             // Allow only safe, basic content elements
-            'HTML.AllowedElements' => 'h1,h2,h3,h4,h5,h6,p,ul,ol,li,strong,em,b,i,a,blockquote,hr,br,span,img',
+            'HTML.AllowedElements' => 'h1,h2,h3,h4,h5,h6,p,ul,ol,li,strong,em,b,i,a,u,s,del, blockquote,hr,br,span,img',
             'HTML.AllowedAttributes' => 'a.href,a.title,a.rel,span.style,img.src,img.alt,img.width,img.height',
             'Attr.AllowedFrameTargets' => ['_blank'],
             'Attr.AllowedRel' => ['noopener','noreferrer'],
-            'CSS.AllowedProperties' => 'text-align',
+            'CSS.AllowedProperties' => 'text-align,text-decoration',
             'URI.SafeIframeRegexp' => null,
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty' => true,
