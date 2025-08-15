@@ -18,7 +18,6 @@ return [
         'navigation_label' => 'Utilisateurs',
         'name_header' => 'Nom',
         'email_header' => 'Email',
-        'password_header' => 'Mot de passe',
         'roles_header' => 'Rôles',
         'email_verified_at_header' => 'Email vérifié ?',
         'is_active_header' => 'Actif',

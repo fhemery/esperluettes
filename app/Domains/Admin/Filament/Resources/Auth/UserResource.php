@@ -55,12 +55,6 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('password')
-                    ->label(__('admin::auth.users.password_header'))
-                    ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
-                    ->dehydrated(fn (?string $state): bool => filled($state))
-                    ->required(fn (string $operation): bool => $operation === 'create')
-                    ->maxLength(255),
                 Select::make('roles')
                     ->label(__('admin::auth.users.roles_header'))
                     ->relationship('roles', 'name')
