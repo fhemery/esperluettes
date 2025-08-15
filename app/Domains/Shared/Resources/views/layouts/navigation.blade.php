@@ -43,12 +43,18 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        @if (Auth::user()->hasVerifiedEmail())
                         <x-dropdown-link :href="route('profile.show.own')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('account.edit')">
                             {{ __('Account') }}
                         </x-dropdown-link>
+                        @else
+                        <x-dropdown-link :href="route('verification.notice')">
+                            {{ __('Verify email') }}
+                        </x-dropdown-link>
+                        @endif
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -91,9 +97,11 @@
     @if (Auth::user())
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
+            @if(Auth::user()->hasVerifiedEmail())
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @endif
             @if(Auth::user()->isAdmin())
             <x-responsive-nav-link :href="route('filament.admin.pages.dashboard')" :active="request()->routeIs('filament.admin.*')">
                 {{ __('Admin') }}

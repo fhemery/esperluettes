@@ -40,6 +40,9 @@ class AuthServiceProvider extends ServiceProvider
             'fr'
         );
 
+        // Register PHP translations (namespaced)
+        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'auth');
+
         // Register auth views namespace
         \Illuminate\Support\Facades\View::addNamespace('auth', app_path('Domains/Auth/Views'));
     }
