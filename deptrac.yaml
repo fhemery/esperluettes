@@ -36,11 +36,11 @@ deptrac:
       collectors:
         - type: directory
           value: 'app/Domains/StaticPage/'
-
-    - name: Story
+    
+    - name: StoryRef
       collectors:
         - type: directory
-          value: 'app/Domains/Story/'
+          value: 'app/Domains/StoryRef/'
 
   ruleset:
     Shared: []
@@ -61,8 +61,8 @@ deptrac:
       - Profile
       - Shared
       - StaticPage
-      - Story
-    Story:
+      - StoryRef
+    StoryRef:
       - Shared
       - Auth  
   

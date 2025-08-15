@@ -11,7 +11,7 @@ More details can be found inside the different modules README.
 - [Profile](../app/Domains/Profile/README.md)
 - [StaticPage](../app/Domains/StaticPage/README.md)
 - [Shared](../app/Domains/Shared/README.md)
-- [Story](../app/Domains/Story/README.md)
+- [StoryRef](../app/Domains/StoryRef/README.md)
 
 To understand code organization, check [Domain Structure](./Domain_Structure.md)
 
