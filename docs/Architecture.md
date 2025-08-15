@@ -5,8 +5,12 @@ This document outlines the architecture and folder structure for the application
 More details can be found inside the different modules README.
 - [Admin](../app/Domains/Admin/README.md)
 - [Auth](../app/Domains/Auth/README.md)
-- [Shared](../app/Domains/Shared/README.md)
+- [Home](../app/Domains/Home/README.md)
+- [News](../app/Domains/News/README.md)
 - [Profile](../app/Domains/Profile/README.md)
+- [StaticPage](../app/Domains/StaticPage/README.md)
+- [Shared](../app/Domains/Shared/README.md)
+- [Story](../app/Domains/Story/README.md)
 
 To understand code organization, check [Domain Structure](./Domain_Structure.md)
 
