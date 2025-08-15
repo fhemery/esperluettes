@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Gestion du compte',
+    'account-updated' => 'Votre compte a été mis à jour !',
 
     'info' => [
         'title' => 'Informations du compte',

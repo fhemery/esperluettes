@@ -47,7 +47,7 @@ class UserAccountController extends Controller
             ));
         }
 
-        return Redirect::route('account.edit')->with('status', __('account-updated'));
+        return Redirect::route('account.edit')->with('status', __('auth::account.account-updated'));
     }
 
     /**

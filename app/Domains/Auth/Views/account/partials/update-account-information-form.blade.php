@@ -55,7 +55,7 @@
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
-            @if (session('status') === 'account-updated')
+            @if (session('status') === __('auth::account.account-updated'))
                 <p
                     x-data="{ show: true }"
                     x-show="show"
