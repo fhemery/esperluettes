@@ -14,7 +14,6 @@ class ProfileController extends Controller
     public function __construct(
         private ProfileService $profileService
     ) {
-        $this->middleware('auth');
     }
 
     /**
