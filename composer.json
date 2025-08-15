@@ -42,7 +42,13 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "tests/ide/TestResponseMacros.php"
+        ],
+        "exclude-from-classmap": [
+            "tests/ide/TestResponseMacros.php"
+        ]
     },
     "scripts": {
         "post-autoload-dump": [
