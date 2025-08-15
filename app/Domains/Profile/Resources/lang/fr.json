@@ -52,5 +52,10 @@
     "Invalid domain for Facebook URL. Allowed domains: :domains": "Domaine invalide pour l'URL Facebook. Domaines autorisés : :domains",
     "Invalid domain for X URL. Allowed domains: :domains": "Domaine invalide pour l'URL X. Domaines autorisés : :domains",
     "Invalid domain for Instagram URL. Allowed domains: :domains": "Domaine invalide pour l'URL Instagram. Domaines autorisés : :domains",
-    "Invalid domain for YouTube URL. Allowed domains: :domains": "Domaine invalide pour l'URL YouTube. Domaines autorisés : :domains"
+    "Invalid domain for YouTube URL. Allowed domains: :domains": "Domaine invalide pour l'URL YouTube. Domaines autorisés : :domains",
+    "Use the form below to change or remove your picture, then click \"Save Changes\".": "Utilisez le formulaire ci-dessous pour changer ou supprimer votre photo, puis cliquez sur « Enregistrer les modifications ».",
+    "Remove current picture": "Supprimer la photo actuelle",
+    "If you upload a new picture, it will replace the current one even if this is checked.": "Si vous téléversez une nouvelle photo, elle remplacera l'actuelle même si cette case est cochée.",
+    "Click save to finalize upload": "Cliquez sur « Enregistrer les modifications » pour finaliser le téléversement.",
+    "Hint: You can upload a new picture or remove the current one.": "Conseil : vous pouvez téléverser une nouvelle photo ou supprimer l'actuelle."
 }

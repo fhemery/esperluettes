@@ -25,77 +25,67 @@
                 </div>
                 @endif
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Profile Picture Section -->
-                    <div class="lg:col-span-1">
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Profile Picture') }}</h2>
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
 
-                            <!-- Current Profile Picture -->
-                            <div class="text-center mb-6">
-                                <img class="h-32 w-32 rounded-full mx-auto border-4 border-white shadow-lg"
-                                    src="{{ $profile->profile_picture_url }}"
-                                    alt="{{ __('Current profile picture') }}">
-                            </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Left: Picture + upload/remove controls -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-gray-50 rounded-lg p-6" x-data="{ hasFile: false }">
+                                <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Profile Picture') }}</h2>
 
-                            <!-- Upload New Picture -->
-                            <form action="{{ route('profile.picture.upload') }}" method="POST" enctype="multipart/form-data" class="mb-4">
-                                @csrf
-                                <div class="mb-4">
+                                <div class="text-center">
+                                    <img class="h-32 w-32 rounded-full mx-auto border-4 border-white shadow-lg"
+                                         src="{{ $profile->profile_picture_url }}"
+                                         alt="{{ __('Current profile picture') }}">
+                                </div>
+
+                                @if($profile->hasCustomProfilePicture())
+                                <div class="mt-6">
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" name="remove_profile_picture" value="1" class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-red-500">
+                                        <span class="ml-2 text-sm text-gray-700">{{ __('Remove current picture') }}</span>
+                                    </label>
+                                    <p class="mt-1 text-xs text-gray-500">{{ __('If you upload a new picture, it will replace the current one even if this is checked.') }}</p>
+                                </div>
+                                @endif
+
+                                <div class="mt-6">
                                     <label for="profile_picture" class="block text-sm font-medium text-gray-700 mb-2">
                                         {{ __('Upload New Picture') }}
                                     </label>
                                     <input type="file"
-                                        name="profile_picture"
-                                        id="profile_picture"
-                                        accept="image/*"
-                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                           name="profile_picture"
+                                           id="profile_picture"
+                                           accept="image/*"
+                                           @change="hasFile = $event.target.files && $event.target.files.length > 0"
+                                           class="block w-full text-sm text-gray-700 ring-1 ring-inset ring-gray-200 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                           :class="{
+                                               'ring-green-300 file:bg-green-50 file:text-green-700 hover:file:bg-green-100': hasFile,
+                                               'ring-gray-200': !hasFile
+                                           }">
                                     <p class="mt-1 text-xs text-gray-500">{{ __('JPG, PNG, GIF up to 2MB. Min 100x100px.') }}</p>
+                                    <p x-show="hasFile" x-cloak class="mt-2 text-sm text-green-700" aria-live="polite">
+                                        {{ __('Click save to finalize upload') }}
+                                    </p>
                                 </div>
-                                <button type="submit"
-                                    class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                                    {{ __('Upload Picture') }}
-                                </button>
-                            </form>
-
-                            <!-- Delete Picture -->
-                            @if($profile->hasCustomProfilePicture())
-                            <form action="{{ route('profile.picture.delete') }}" method="POST" onsubmit="return confirmDeleteProfilePicture(event)">
-                                <script>
-                                    function confirmDeleteProfilePicture(event) {
-                                        if (!confirm("{{ __('Are you sure you want to delete your profile picture?') }}")) {
-                                            event.preventDefault();
-                                        }
-                                    }
-                                </script>
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200">
-                                    {{ __('Delete Picture') }}
-                                </button>
-                            </form>
-                            @endif
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Profile Information Section -->
-                    <div class="lg:col-span-2">
-                        <form action="{{ route('profile.update') }}" method="POST">
-                            @csrf
-                            @method('PUT')
-
+                        <!-- Right: Profile form fields -->
+                        <div class="lg:col-span-2">
                             <!-- User Name (Read-only) -->
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Name') }}</label>
                                 <input type="text"
-                                    value="{{ $user->name }}"
-                                    disabled
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed">
+                                       value="{{ $user->name }}"
+                                       disabled
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed">
                                 <p class="mt-1 text-xs text-gray-500">{{ __('Your name cannot be changed from the profile page.') }}</p>
                             </div>
 
-                            <!-- Description with Tiptap Editor -->
+                            <!-- Description with ProseMirror Editor -->
                             <div class="mb-6" x-data="proseMirrorEditor()" x-init="content = '{{ addslashes($profile->description ?? '') }}'" x-on:beforeunload.window="destroy()">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     {{ __('Description') }}
@@ -104,42 +94,42 @@
                                 <!-- Tiptap Toolbar -->
                                 <div class="border border-gray-300 border-b-0 rounded-t-lg bg-gray-50 px-3 py-2 flex items-center space-x-2">
                                     <button type="button"
-                                        @click="editor.toggleBold()"
-                                        :class="{ 'bg-blue-100 text-blue-700': editor?.isActive('strong') }"
-                                        class="p-1.5 rounded hover:bg-gray-200 transition-colors">
+                                            @click="editor.toggleBold()"
+                                            :class="{ 'bg-blue-100 text-blue-700': editor?.isActive('strong') }"
+                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
                                         </svg>
                                     </button>
                                     <button type="button"
-                                        @click="editor.toggleItalic()"
-                                        :class="{ 'bg-blue-100 text-blue-700': editor?.isActive('em') }"
-                                        class="p-1.5 rounded hover:bg-gray-200 transition-colors">
+                                            @click="editor.toggleItalic()"
+                                            :class="{ 'bg-blue-100 text-blue-700': editor?.isActive('em') }"
+                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 4l4 16m-4-8h8"></path>
                                         </svg>
                                     </button>
                                     <button type="button"
-                                        @click="console.log('Strikethrough not implemented in basic schema')"
-                                        class="p-1.5 rounded hover:bg-gray-200 transition-colors opacity-50 cursor-not-allowed">
+                                            @click="console.log('Strikethrough not implemented in basic schema')"
+                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors opacity-50 cursor-not-allowed">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h12M6 8h12m-12 8h12"></path>
                                         </svg>
                                     </button>
                                     <div class="w-px h-6 bg-gray-300"></div>
                                     <button type="button"
-                                        @click="editor.toggleBulletList()"
-                                        :class="{ 'bg-blue-100 text-blue-700': false }"
-                                        class="p-1.5 rounded hover:bg-gray-200 transition-colors">
+                                            @click="editor.toggleBulletList()"
+                                            :class="{ 'bg-blue-100 text-blue-700': false }"
+                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
                                         </svg>
                                     </button>
                                     <button type="button"
-                                        @click="editor.toggleOrderedList()"
-                                        :class="{ 'bg-blue-100 text-blue-700': false }"
-                                        class="p-1.5 rounded hover:bg-gray-200 transition-colors">
+                                            @click="editor.toggleOrderedList()"
+                                            :class="{ 'bg-blue-100 text-blue-700': false }"
+                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                         </svg>
@@ -176,11 +166,11 @@
                                             {{ __('Facebook') }}
                                         </label>
                                         <input type="url"
-                                            name="facebook_url"
-                                            id="facebook_url"
-                                            value="{{ old('facebook_url', $profile->facebook_url) }}"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="{{ __('Facebook URL placeholder') }}">
+                                               name="facebook_url"
+                                               id="facebook_url"
+                                               value="{{ old('facebook_url', $profile->facebook_url) }}"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                               placeholder="{{ __('Facebook URL placeholder') }}">
                                     </div>
 
                                     <!-- X (Twitter) -->
@@ -192,11 +182,11 @@
                                             {{ __('X (Twitter)') }}
                                         </label>
                                         <input type="url"
-                                            name="x_url"
-                                            id="x_url"
-                                            value="{{ old('x_url', $profile->x_url) }}"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="{{ __('X URL placeholder') }}">
+                                               name="x_url"
+                                               id="x_url"
+                                               value="{{ old('x_url', $profile->x_url) }}"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                               placeholder="{{ __('X URL placeholder') }}">
                                     </div>
 
                                     <!-- Instagram -->
@@ -208,11 +198,11 @@
                                             {{ __('Instagram') }}
                                         </label>
                                         <input type="url"
-                                            name="instagram_url"
-                                            id="instagram_url"
-                                            value="{{ old('instagram_url', $profile->instagram_url) }}"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="{{ __('Instagram URL placeholder') }}">
+                                               name="instagram_url"
+                                               id="instagram_url"
+                                               value="{{ old('instagram_url', $profile->instagram_url) }}"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                               placeholder="{{ __('Instagram URL placeholder') }}">
                                     </div>
 
                                     <!-- YouTube -->
@@ -224,11 +214,11 @@
                                             {{ __('YouTube') }}
                                         </label>
                                         <input type="url"
-                                            name="youtube_url"
-                                            id="youtube_url"
-                                            value="{{ old('youtube_url', $profile->youtube_url) }}"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="{{ __('YouTube URL placeholder') }}">
+                                               name="youtube_url"
+                                               id="youtube_url"
+                                               value="{{ old('youtube_url', $profile->youtube_url) }}"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                               placeholder="{{ __('YouTube URL placeholder') }}">
                                     </div>
                                 </div>
                             </div>
@@ -236,13 +226,13 @@
                             <!-- Submit Button -->
                             <div class="flex justify-end">
                                 <button type="submit"
-                                    class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                                        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
                                     {{ __('Save Changes') }}
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>

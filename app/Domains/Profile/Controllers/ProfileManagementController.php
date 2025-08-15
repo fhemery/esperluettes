@@ -37,7 +37,10 @@ class ProfileManagementController extends Controller
     {
         try {
             $user = Auth::user();
-            $this->profileService->updateProfile($user, $request->validated());
+            $data = $request->validated();
+            $file = $request->file('profile_picture');
+            $remove = (bool) $request->boolean('remove_profile_picture');
+            $this->profileService->updateProfileWithPicture($user, $data, $file, $remove);
 
             return redirect()
                 ->route('profile.edit')

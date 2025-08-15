@@ -63,6 +63,28 @@ class ProfileService
     }
 
     /**
+     * Update profile and handle profile picture upload/removal on Save.
+     */
+    public function updateProfileWithPicture(User $user, array $data, ?UploadedFile $file, bool $remove): Profile
+    {
+        $profile = $this->getOrCreateProfile($user);
+
+        // Validate social URLs first
+        $data = $this->validateSocialNetworkUrls($data);
+
+        // If a new file is provided, it takes precedence over removal
+        if ($file instanceof UploadedFile) {
+            $this->uploadProfilePicture($user, $file);
+        } elseif ($remove) {
+            $this->deleteProfilePicture($user);
+        }
+
+        $profile->update($data);
+
+        return $profile->fresh();
+    }
+
+    /**
      * Upload and process profile picture
      */
     public function uploadProfilePicture(User $user, UploadedFile $file): string
