@@ -156,6 +156,7 @@ class NewsResource extends Resource
                     ->tooltip(__('Delete')),
                 Tables\Actions\Action::make('publish')
                     ->visible(fn(News $record) => $record->status !== 'published')
+                    ->label(__('admin::news.actions.publish'))
                     ->requiresConfirmation()
                     ->action(function(News $record) {
                         app(NewsService::class)->publish($record);
@@ -163,6 +164,7 @@ class NewsResource extends Resource
                 Tables\Actions\Action::make('unpublish')
                     ->visible(fn(News $record) => $record->status === 'published')
                     ->requiresConfirmation()
+                    ->label(__('admin::news.actions.unpublish'))
                     ->action(function(News $record) {
                         app(NewsService::class)->unpublish($record);
                     }),
