@@ -4,14 +4,17 @@ namespace App\Domains\Profile\Services;
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Profile\Models\Profile;
+use App\Domains\Shared\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Str;
 
 class ProfileService
 {
+    public function __construct(private readonly ImageService $images)
+    {
+    }
+
     /**
      * Get or create a profile for the given user
      */
@@ -99,13 +102,8 @@ class ProfileService
         // Generate unique filename
         $filename = 'profile_pictures/' . $user->id . '_' . time() . '.jpg';
         
-        // Process and save image
-        $manager = new ImageManager(new Driver());
-        $image = $manager->read($file)
-            ->cover(200, 200) // Square crop to 200x200
-            ->toJpeg(85); // Convert to JPG with 85% quality
-        
-        Storage::disk('public')->put($filename, $image);
+        // Process and save image using shared ImageService
+        $this->images->saveSquareJpg('public', $filename, $file, size: 200, quality: 85);
         
         // Update profile with new picture path
         $profile->update(['profile_picture_path' => $filename]);

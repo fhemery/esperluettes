@@ -100,4 +100,24 @@ class ImageService
             Storage::disk($disk)->put($webpPath, (string) $img->encodeByExtension('webp', quality: 82));
         }
     }
+
+    /**
+     * Save a square-cropped JPEG to a disk.
+     *
+     * @param string $disk        Storage disk, e.g. 'public'
+     * @param string $targetPath  Relative path within the disk where the image will be saved
+     * @param UploadedFile|string $file  UploadedFile or absolute/local path string
+     * @param int $size           Target square size (e.g. 200)
+     * @param int $quality        JPEG quality (0-100)
+     * @return string             The saved relative path
+     */
+    public function saveSquareJpg(string $disk, string $targetPath, UploadedFile|string $file, int $size = 200, int $quality = 85): string
+    {
+        $sourcePath = $file instanceof UploadedFile ? $file->getRealPath() : (string) $file;
+
+        $img = Image::read($sourcePath)->cover($size, $size);
+        Storage::disk($disk)->put($targetPath, (string) $img->encodeByExtension('jpg', quality: $quality));
+
+        return $targetPath;
+    }
 }
