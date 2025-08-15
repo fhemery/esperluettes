@@ -2,10 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
-
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -19,6 +15,9 @@ require app_path('Domains/Profile/routes.php');
 
 // Include news routes from News domain
 require app_path('Domains/News/routes.php');
+
+// Include home routes from Home domain
+require app_path('Domains/Home/routes.php');
 
 // Include static page routes from StaticPage domain (must be last due to catch-all)
 require app_path('Domains/StaticPage/routes.php');
