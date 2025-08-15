@@ -39,7 +39,7 @@ return [
 
     'help' => [
         'header_image' => 'Téléchargez une image; des variantes responsives seront générées à l’enregistrement.',
-        'display_order' => 'Utilisé uniquement lorsque l’actualité est épinglée en page d\'accueil.',
+        'display_order' => 'Le remplissage de l\'ordre se fait depuis l\'onglet "Gestion de la page d\'accueil"',
     ],
 
     'filters' => [

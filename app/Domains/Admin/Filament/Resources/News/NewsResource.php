@@ -110,6 +110,7 @@ class NewsResource extends Resource
                         Forms\Components\Toggle::make('is_pinned')->label(__('admin::news.fields.is_pinned')),
                         Forms\Components\TextInput::make('display_order')
                             ->label(__('admin::news.fields.display_order'))
+                            ->disabled()
                             ->numeric()
                             ->minValue(1)
                             ->helperText(__('admin::news.help.display_order')),
