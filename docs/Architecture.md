@@ -5,6 +5,7 @@ This document outlines the architecture and folder structure for the application
 More details can be found inside the different modules README.
 - [Admin](../app/Domains/Admin/README.md)
 - [Auth](../app/Domains/Auth/README.md)
+- [Dashboard](../app/Domains/Dashboard/README.md)
 - [Home](../app/Domains/Home/README.md)
 - [News](../app/Domains/News/README.md)
 - [Profile](../app/Domains/Profile/README.md)
