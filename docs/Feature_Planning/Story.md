@@ -1,0 +1,384 @@
+# Story & Chapter Sharing Feature Specification
+
+## Overview
+The Story & Chapter sharing feature is the core functionality of the platform, enabling users to create, publish, and share stories with rich configuration options and chapter management. Stories can be commented on by the community, with comprehensive visibility controls and metadata management.
+
+## Core Features
+
+### Story Management
+
+#### Basic Story Fields
+- **Title**: Text field for the story title
+- **Description**: Rich text description of the story
+- **Cover Image**: Optional story cover with automatic processing via Intervention Image
+- **Co-Authors**: Support for multiple authors collaborating on a single story
+- **Visibility**: Three levels of access control (independent of chapter publication status)
+  - **Public**: Accessible to everyone, including non-members
+  - **Community**: Accessible only to registered members
+  - **Private**: Visible only to author(s) and co-authors
+
+#### Story Configuration Options
+
+##### Mandatory Fields
+- **Story Type**: Single choice from `StoryRefType` (mandatory)
+- **Genre**: Multiple choice from `StoryRefGenre` (1 minimum, 3 maximum)
+- **Target Audience**: Single choice from `StoryRefAudience` (mandatory)
+- **Copyright**: Single choice from `StoryRefCopyright` (mandatory)
+
+##### Optional Fields
+- **Writing Status**: Single choice from `StoryRefStatus` (optional)
+- **Feedback Type**: Single choice from `StoryRefFeedback` (optional)
+- **Trigger Warnings**: Multiple choice from `StoryRefTriggerWarning` (optional)
+
+### Chapter Management
+
+#### Chapter Structure
+- **Title**: Text field for chapter title
+- **Author Note**: Rich text editor with basic formatting options
+- **Chapter Content**: Rich text editor with basic formatting options
+- **Publication Status**: Three states
+  - **Not Published**: Draft state, not visible to readers
+  - **Published**: Live and accessible based on story visibility
+  - **Archived**: Hidden from readers but still visible and fully manageable by authors/co-authors in management UI
+
+#### Chapter Operations
+- **Add Chapter**: Create new chapters for a story (subject to chapter limit)
+- **Edit Chapter**: Modify existing chapter content and metadata
+- **Reorder Chapters**: Bulk reordering functionality for chapter sequence
+- **Archive Chapter**: Hide chapter from all users (soft delete)
+- **Delete Chapter**: Permanent removal (hard delete)
+
+#### Chapter Creation Limits
+- **Base Limit**: 5 chapters per user
+- **Comment Bonus**: +1 chapter limit per comment made on other users' stories
+- **Calculation**: Total limit = 5 + (comments on other stories)
+
+### Reading & Viewing Experience
+- **Story Listing**: Browse available stories with filtering and sorting options
+- **Story Detail**: View story metadata, description, and table of contents
+- **Chapter Reading**: Sequential chapter reading with next/previous navigation
+- **Reading Progress**: Manually marked as read by logged users (no anonymous persistence)
+- **Trigger Warning Display**: Prominently displayed on story description and search results
+- **Comment System**: Community commenting on stories and chapters (future phase)
+
+
+## Technical Specifications
+
+### Technology Stack
+- **Rich Text Editor**: ProseMirror (following established pattern from Profile domain)
+- **Image Processing**: Intervention Image (existing setup, 800px width limit)
+- **Admin Panel**: Filament integration for story reference data management
+- **Storage**: `storage/app/public/stories/` for covers. No chapter asset uploads initially; if added later, use `storage/app/public/stories/chapters/`.
+
+### Database Schema (Preliminary)
+
+#### Stories Table
+```sql
+stories:
+- id (primary key)
+- user_id (foreign key to users, primary author)
+- title (string)
+- slug (string, unique globally; includes the numeric id suffix, e.g., "my-story-title-123")
+- description (longtext)
+- cover_image_path (string, nullable)
+- visibility (enum: public, community, private)
+- story_ref_type_id (foreign key, mandatory)
+- story_ref_audience_id (foreign key, mandatory)
+- story_ref_copyright_id (foreign key, mandatory)
+- story_ref_status_id (foreign key, nullable)
+- story_ref_feedback_id (foreign key, nullable)
+- last_chapter_published_at (timestamp, nullable, for sorting)
+- created_at (timestamp)
+- updated_at (timestamp)
+```
+
+#### Story Co-Authors Table
+```sql
+story_co_authors:
+- story_id (foreign key)
+- user_id (foreign key)
+- invited_at (timestamp)
+- accepted_at (timestamp, nullable)
+- left_at (timestamp, nullable)
+- primary key (story_id, user_id)
+```
+
+#### Reading Progress Table
+```sql
+reading_progress:
+- id (primary key)
+- user_id (foreign key)
+- story_id (foreign key)
+- chapter_id (foreign key)
+- read_at (timestamp)
+- unique key (user_id, chapter_id)
+```
+
+#### User Domain Stats Table
+```sql
+user_domain_stats:
+- id (primary key)
+- user_id (foreign key, indexed)
+- domain (string, indexed)               -- e.g., 'story'
+- stat_key (string, indexed)             -- e.g., 'current_available_chapters'
+- stat_value (integer)                   -- integer for chapter caps
+- updated_at (timestamp)
+- unique key (user_id, domain, stat_key)
+```
+Notes:
+- `current_available_chapters` is stored as `('story', 'current_available_chapters')`.
+- Updated by services and real-time projections that consume the audit log (`App\Domains\Shared\Models\DomainEvent`).
+
+#### Story Genre Pivot Table
+```sql
+story_story_ref_genre:
+- story_id (foreign key)
+- story_ref_genre_id (foreign key)
+- primary key (story_id, story_ref_genre_id)
+```
+
+#### Story Trigger Warning Pivot Table
+```sql
+story_story_ref_trigger_warning:
+- story_id (foreign key)
+- story_ref_trigger_warning_id (foreign key)
+- primary key (story_id, story_ref_trigger_warning_id)
+```
+
+#### Chapters Table
+```sql
+chapters:
+- id (primary key)
+- story_id (foreign key to stories)
+- title (string)
+- slug (string, unique within story; includes numeric id suffix, e.g., "chapter-one-45")
+- author_note (longtext, nullable)
+- content (longtext)
+- order (integer)
+- status (enum: not_published, published, archived)
+- published_at (timestamp, nullable)
+- views_count (unsigned integer, default 0) -- counts reads (anonymous + logged), no per-user persistence for anonymous
+- created_at (timestamp)
+- updated_at (timestamp)
+```
+
+### Domain Structure
+```
+app/Domains/Story/
+├── Controllers/
+│   ├── StoryController.php (public views)
+│   └── ChapterController.php (public views)
+├── Models/
+│   ├── Story.php
+│   └── Chapter.php
+├── Services/
+│   ├── StoryService.php
+│   └── ChapterService.php
+├── Requests/
+│   ├── StoryRequest.php
+│   └── ChapterRequest.php
+├── Views/
+│   ├── stories/
+│   │   ├── index.blade.php
+│   │   ├── show.blade.php
+│   │   └── create.blade.php
+│   └── chapters/
+│       ├── show.blade.php
+│       └── edit.blade.php
+├── Providers/
+│   └── StoryServiceProvider.php  # Registers domain-scoped views and PHP translations (namespace: "story")
+├── Resources/
+│   └── lang/                     # Pure PHP translations loaded via provider, e.g., resources/lang/fr/story.php
+└── Database/
+    └── migrations/
+```
+
+### URL Structure
+- `/stories/` - Story listing page with filtering and sorting (excludes stories without any published public chapter)
+- `/stories/create` - Create new story (authenticated)
+- `/stories/<slug-with-id>` - Individual story page with table of contents (e.g., `my-story-title-123`)
+- `/stories/<story-slug-with-id>/<chapter-slug-with-id>` - Individual chapter page with navigation (e.g., `my-story-title-123/chapter-one-45`)
+- `/stories/<slug-with-id>/edit` - Edit story (author/co-author only)
+- `/stories/<slug-with-id>/co-authors` - Manage co-authors (authors and co-authors)
+- `/stories/<story-slug-with-id>/chapters/create` - Add new chapter (author/co-author, subject to limits)
+- `/stories/<story-slug-with-id>/chapters/<chapter-slug-with-id>/edit` - Edit chapter (author/co-author only)
+
+## User Stories
+
+### Author User Stories
+- As an author, I can create a new story with all configuration options
+- As an author, I can invite co-authors to collaborate on my stories
+- As an author, I can set visibility levels for my stories (independent of chapter status)
+- As an author, I can add chapters to my stories (within my chapter limit)
+- As an author, I can increase my chapter limit by commenting on other stories
+- As an author, I can reorder chapters in bulk
+- As an author, I can edit my story metadata and chapters at any time
+- As an author, I can archive or delete chapters
+- As an author, I can control publication status of individual chapters
+- As a co-author, I can edit story content, add chapters, and invite co-authors; even the initial author can leave the story
+
+### Reader User Stories
+- As a reader, I can browse public stories without authentication
+- As a member, I can access community-visible stories
+- As a reader, I can filter stories by genre, type, audience, status, and trigger warnings
+- As a reader, I can sort stories by latest update, random, or recommended
+- As a reader, I can view story details with prominent trigger warning display
+- As a reader, I can navigate through chapters with table of contents
+- As a reader, I can use next/previous buttons while reading chapters
+- As a logged user, I can manually mark chapters as read
+
+### Admin User Stories
+- As an admin, I can manage story reference data (types, genres, statuses, etc.)
+- As an admin, I can moderate stories and chapters if needed
+
+## Security Considerations
+- Authentication required for story creation and editing
+- Author-only access to story/chapter management
+- Visibility controls enforced at database query level
+- XSS protection in rich text content
+- Image upload validation and processing
+  - Chapter embedded images are not supported initially; if introduced later, they will be stored under `storage/app/public/stories/chapters/`
+
+## Performance Considerations
+- Database indexing on slug, visibility, and user_id fields
+- Pagination for story listings
+- Image optimization and CDN delivery
+- Caching of story metadata for listing pages
+- Efficient chapter ordering queries (use sparse ordering increments, e.g., steps of 100, to minimize renumbering on reorder)
+
+## Clarified Requirements Summary
+
+### ✅ Resolved Questions
+- **Multi-Author Support**: Stories can have multiple co-authors with collaboration features
+- **Chapter Titles**: Authors have complete control over chapter titles (no auto-numbering)
+- **Publication Model**: Story visibility is independent of chapter publication status
+- **Metadata Editing**: No fields are locked - authors can edit everything at any time
+- **Chapter Limits**: Dynamic limit based on community engagement (5 + comments on other stories)
+- **Reading Progress**: Tracked for logged users
+- **Trigger Warnings**: Prominently displayed, no pop-up modals
+- **Content Moderation**: Community-based reporting by verified users
+- **Rich Text Editor**: Same as Profile domain (ProseMirror with basic formatting)
+- **Search**: Title/description + metadata filtering only (no full-text search)
+- **Chapter Navigation**: Next/previous buttons + table of contents
+- **Story Discovery**: Sort by latest update, random, recommended + extensive filtering
+
+## Outstanding Questions
+
+### ✅ Final Clarifications
+
+#### Co-Author Management
+- **Invitation Process**: Purely in-app notifications (no email)
+- **Permission Levels**: All co-authors have equal rights
+- **Removal Process**: No one can remove co-authors after acceptance; co-authors can leave voluntarily (creates copyright management concerns)
+
+#### Chapter Limit System
+- **Comment Counter**: Separate counter that increases with each comment made on other stories
+- **Comment Deletion**: Users cannot delete comments made on their stories; deleted stories still count toward commenter's limit
+- **Gaming Prevention**: Community reporting system for fake comments
+- **Retroactive Limits**: Block new chapter creation if limit exceeded; cannot publish/de-archive chapters when over limit
+
+#### Reading Progress & Reporting
+- **Progress Definition**: Manual "mark as read" for logged users; no anonymous persistence (overall reads counted via `chapters.views_count`)
+- **Report Handling**: Moderation team processes all reports (no automation initially)
+- **Verified Status**: Email-verified users can report content
+- **AI Cover Reporting**: Users can report AI-generated covers on story pages
+
+#### Technical Architecture
+- **Notifications**: Activity log system with events (no real-time)
+- **Event System**: Story domain throws events, Activity and Admin domains catch them
+- **Recommendation Algorithm**: Deferred to future wishlist
+ - **Stats Projection**: A projector listens to domain events and updates `user_domain_stats` accordingly; backfill commands can replay the audit log to recompute stats.
+
+## Feature to be defined later
+- Reporting system (including reporting AI-generated covers)
+
+## Future Enhancements
+- Comment system for stories and chapters
+- Rating and review system
+- Story collections and series management
+- Advanced search and filtering
+- Reading lists and bookmarks
+- Author following system
+- Story statistics and analytics
+- Email notifications for new chapters
+- Mobile app support
+- Story export functionality
+- Collaborative editing features
+
+## Final Architecture Recommendation
+
+Given the complexity and interconnected nature of this domain (stories, chapters, co-authors, reading progress, limits, reporting, events), I recommend:
+
+### **Event-Driven Enhanced MVC with Domain Services**
+
+#### **Core Structure**
+- **Enhanced MVC**: Familiar Laravel structure with rich service layer
+- **Event-Driven**: Laravel events for cross-domain communication
+- **Domain Services**: Specialized services for complex business logic
+
+#### **Service Architecture**
+```
+app/Domains/Story/
+├── Services/
+│   ├── StoryService.php           # Core CRUD + business logic
+│   ├── ChapterService.php         # Chapter management + ordering
+│   ├── CoAuthorService.php        # Collaboration management
+│   ├── ReadingProgressService.php # Progress tracking
+│   ├── ChapterLimitService.php    # Dynamic limit calculation
+│   ├── StoryDiscoveryService.php  # Filtering + sorting
+│   └── ReportingService.php       # Content moderation
+├── Events/
+│   ├── StoryCreated.php
+│   ├── ChapterPublished.php
+│   ├── CoAuthorInvited.php
+│   ├── StoryReported.php
+│   └── CommentMadeOnStory.php     # For limit calculation
+├── Listeners/
+│   └── UpdateChapterLimitCounter.php
+```
+
+#### **Why This Architecture?**
+1. **Event-Driven Benefits**:
+   - Clean separation between Story domain and Activity/Admin domains
+   - Easy to add new listeners without modifying core logic
+   - Perfect for your activity log requirements
+
+2. **Service Layer Benefits**:
+   - Single responsibility per service
+   - Testable business logic
+   - Reusable across controllers, commands, jobs
+
+3. **Laravel Native**:
+   - Uses Laravel's event system naturally
+   - Familiar MVC structure
+   - Easy to maintain and extend
+
+#### **Event Flow Example**
+```php
+// When a comment is made on a story
+CommentMadeOnStory::dispatch($story, $comment, $user);
+
+// Listeners:
+// 1. Story domain: UpdateChapterLimitCounter
+// 2. Activity domain: LogCommentActivity  
+// 3. Admin domain: UpdateModerationStats
+```
+
+#### **Implementation Strategy**
+1. **Phase 1**: Core MVC structure with basic services
+2. **Phase 2**: Add event system for cross-domain communication
+3. **Phase 3**: Enhance services with complex business logic
+4. **Phase 4**: Add activity logging and admin integration
+
+**This approach gives you the structure needed for complexity while maintaining Laravel conventions and enabling clean cross-domain communication through events.**
+
+## Dependencies
+- Existing StoryRef models and data
+- User authentication and verification system
+- ProseMirror rich text editor setup
+- Intervention Image processing
+- Filament admin panel integration
+- Comment system (for chapter limit calculation)
+- Activity domain (for event logging)
+- Laravel event system
+- User roles and permissions system
