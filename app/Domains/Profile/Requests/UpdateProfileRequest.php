@@ -39,8 +39,8 @@ class UpdateProfileRequest extends FormRequest
                     $text = preg_replace('/\s+/u', ' ', trim(strip_tags($value)));
                     $length = mb_strlen((string) $text);
                     if ($length > 1000) {
-                        $fail(__('The :attribute may not be greater than :max characters.', [
-                            'attribute' => __('description'),
+                        $fail(__('profile::validation.description_max', [
+                            'attribute' => __('profile::fields.description'),
                             'max' => 1000,
                         ]));
                     }

@@ -32,6 +32,9 @@ class ProfileServiceProvider extends ServiceProvider
             __DIR__.'/../Resources/lang'
         );
         
+        // Register PHP translations (namespaced)
+        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'profile');
+        
         // Register view namespace for Profile domain
         View::addNamespace('profile', app_path('Domains/Profile/Views'));
 
