@@ -18,5 +18,8 @@ require app_path('Domains/Home/routes.php');
 // Include dashboard routes from Dashboard domain
 require app_path('Domains/Dashboard/routes.php');
 
+// Include story routes from Story domain
+require app_path('Domains/Story/routes.php');
+
 // Include static page routes from StaticPage domain (must be last due to catch-all)
 require app_path('Domains/StaticPage/routes.php');
