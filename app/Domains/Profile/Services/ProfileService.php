@@ -60,6 +60,11 @@ class ProfileService
         // Validate social network URLs
         $data = $this->validateSocialNetworkUrls($data);
         
+        // Sanitize description if provided
+        if (isset($data['description']) && is_string($data['description'])) {
+            $data['description'] = clean($data['description'], 'profile');
+        }
+        
         $profile->update($data);
         
         return $profile->fresh();
@@ -74,6 +79,11 @@ class ProfileService
 
         // Validate social URLs first
         $data = $this->validateSocialNetworkUrls($data);
+
+        // Sanitize description if provided
+        if (isset($data['description']) && is_string($data['description'])) {
+            $data['description'] = clean($data['description'], 'profile');
+        }
 
         // If a new file is provided, it takes precedence over removal
         if ($file instanceof UploadedFile) {

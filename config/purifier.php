@@ -34,9 +34,10 @@ return [
         'profile' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             // Keep very basic tags if older data contains them; no external media or links
-            'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span',
-            'HTML.AllowedAttributes' => 'p.style,span.style,li.class',
+            'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span,u,s',
+            'HTML.AllowedAttributes' => 'p.style,p.class,span.style,span.class,li.class,ul.class,ol.class',
             'CSS.AllowedProperties' => 'text-align',
+            'Attr.AllowedClasses' => ['ql-align-center','ql-align-left','ql-align-right','ql-align-justify'],
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty' => true,
             'Attr.EnableID' => false,
