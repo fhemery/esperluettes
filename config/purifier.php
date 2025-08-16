@@ -30,23 +30,17 @@ return [
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty'   => true,
         ],
-        // Sanitization profile for user profile description fields (very limited)
+        // Sanitization profile for user profile description fields (kept for backward compatibility)
         'profile' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
-            // Allow only basic inline formatting and lists; no links/images/scripts
+            // Keep very basic tags if older data contains them; no external media or links
             'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span',
-            // Allow style for potential future use, and class for Quill alignment
-            'HTML.AllowedAttributes' => 'p.style,p.class,span.style,span.class,li.class',
-            // Whitelist only Quill alignment classes
-            'Attr.AllowedClasses' => ['ql-align-center','ql-align-right','ql-align-justify'],
-            // Only allow text alignment to support Quill alignment output
+            'HTML.AllowedAttributes' => 'p.style,span.style,li.class',
             'CSS.AllowedProperties' => 'text-align',
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty' => true,
-            // Security hardening
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,
-            // Do not collect/emit warnings for disallowed markup in this profile
             'Core.CollectErrors' => false,
         ],
         // Shared strict profile for admin-managed rich content (News, Static Pages)

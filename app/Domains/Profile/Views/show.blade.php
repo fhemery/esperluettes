@@ -72,8 +72,8 @@
                         @if($profile->description)
                         <div class="mb-8">
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('About') }}</h2>
-                            <div class="prose prose-sm max-w-none text-gray-700">
-                                {!! $profile->description !!}
+                            <div class="max-w-none text-gray-700 whitespace-pre-line">
+                                {!! nl2br(e($profile->description)) !!}
                             </div>
                         </div>
                         @endif

@@ -85,71 +85,10 @@
                                 <p class="mt-1 text-xs text-gray-500">{{ __('Your name cannot be changed from the profile page.') }}</p>
                             </div>
 
-                            <!-- Description with ProseMirror Editor -->
-                            <div class="mb-6" x-data="proseMirrorEditor()" x-init="content = '{{ addslashes($profile->description ?? '') }}'" x-on:beforeunload.window="destroy()">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('Description') }}
-                                </label>
-
-                                <!-- Tiptap Toolbar -->
-                                <div class="border border-gray-300 border-b-0 rounded-t-lg bg-gray-50 px-3 py-2 flex items-center space-x-2">
-                                    <button type="button"
-                                            @click="editor.toggleBold()"
-                                            :class="{ 'bg-blue-100 text-blue-700': editor?.isActive('strong') }"
-                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            @click="editor.toggleItalic()"
-                                            :class="{ 'bg-blue-100 text-blue-700': editor?.isActive('em') }"
-                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 4l4 16m-4-8h8"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            @click="console.log('Strikethrough not implemented in basic schema')"
-                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors opacity-50 cursor-not-allowed">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h12M6 8h12m-12 8h12"></path>
-                                        </svg>
-                                    </button>
-                                    <div class="w-px h-6 bg-gray-300"></div>
-                                    <button type="button"
-                                            @click="editor.toggleBulletList()"
-                                            :class="{ 'bg-blue-100 text-blue-700': false }"
-                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            @click="editor.toggleOrderedList()"
-                                            :class="{ 'bg-blue-100 text-blue-700': false }"
-                                            class="p-1.5 rounded hover:bg-gray-200 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Tiptap Editor -->
-                                <div x-ref="editor" class="min-h-[120px] max-h-[300px] overflow-y-auto"></div>
-
-                                <!-- Hidden input for form submission -->
-                                <input type="hidden" name="description" x-ref="hiddenInput" :value="content">
-
-                                <!-- Character count and status -->
-                                <div class="mt-1 flex justify-between items-center">
-                                    <p class="text-xs text-gray-500">{{ __('Use the toolbar above for formatting. Maximum 1000 characters.') }}</p>
-                                    <div class="flex items-center space-x-2">
-                                        <span x-show="isOverLimit" class="text-xs text-red-600 font-medium">{{ __('Character limit exceeded!') }}</span>
-                                        <span class="text-xs" :class="characterCountClass" x-text="characterCount + '/1000'"></span>
-                                    </div>
-                                </div>
+                            <!-- Description (plain textarea) -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Description') }}</label>
+                                <textarea name="description" rows="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('description', $profile->description) }}</textarea>
                             </div>
 
                             <!-- Social Networks -->

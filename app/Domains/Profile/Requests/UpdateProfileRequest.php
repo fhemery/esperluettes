@@ -27,7 +27,8 @@ class UpdateProfileRequest extends FormRequest
             'x_url' => ['nullable', 'string', 'max:255'],
             'instagram_url' => ['nullable', 'string', 'max:255'],
             'youtube_url' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
+            // Basic plain text field, no constraints
+            'description' => ['nullable', 'string'],
             // Upload-on-save fields
             'profile_picture' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048', 'dimensions:min_width=100,min_height=100,max_width=2000,max_height=2000'],
             'remove_profile_picture' => ['nullable', 'boolean'],
@@ -40,7 +41,6 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'description.max' => __('The description may not be greater than 1000 characters.'),
             'facebook_url.max' => __('The Facebook URL may not be greater than 255 characters.'),
             'x_url.max' => __('The X URL may not be greater than 255 characters.'),
             'instagram_url.max' => __('The Instagram URL may not be greater than 255 characters.'),

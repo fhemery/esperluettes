@@ -8,7 +8,6 @@ use App\Domains\Shared\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Mews\Purifier\Facades\Purifier;
 
 class ProfileService
 {
@@ -60,10 +59,6 @@ class ProfileService
         
         // Validate social network URLs
         $data = $this->validateSocialNetworkUrls($data);
-        // Sanitize description HTML if provided
-        if (array_key_exists('description', $data)) {
-            $data['description'] = Purifier::clean((string) ($data['description'] ?? ''), 'profile');
-        }
         
         $profile->update($data);
         
@@ -79,10 +74,6 @@ class ProfileService
 
         // Validate social URLs first
         $data = $this->validateSocialNetworkUrls($data);
-        // Sanitize description HTML if provided
-        if (array_key_exists('description', $data)) {
-            $data['description'] = Purifier::clean((string) ($data['description'] ?? ''), 'profile');
-        }
 
         // If a new file is provided, it takes precedence over removal
         if ($file instanceof UploadedFile) {
