@@ -88,7 +88,7 @@
                             <!-- Description (plain textarea) -->
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Description') }}</label>
-                                <x-shared::editor name="description" id="editor" max="1000" defaultValue="{{ old('description', $profile->description) }}" />
+                                <x-shared::editor name="description" id="editor" max="1000" nbLines="10" defaultValue="{{ old('description', $profile->description) }}" />
                             </div>
 
                             <!-- Social Networks -->

@@ -1,4 +1,4 @@
-@props(['name', 'id', 'defaultValue', 'max' => null])
+@props(['name', 'id', 'defaultValue', 'max' => null, 'nbLines' => null])
 <div {{ $attributes->merge(['class' => '']) }}>
     <div class="mb-2" id="{{ $id }}"></div>
     <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $name }}" value="{!! $defaultValue !!}" />
@@ -29,8 +29,28 @@
                     placeholder: ''
                 });
 
-                // Ensure a decent editing area height
-                editor.root.style.minHeight = '180px';
+                // Height handling: enforce min and max lines, scroll when exceeding max
+                // Defaults: min 5 lines, max nbLines (or 5 if not provided)
+                const minLines = 5;
+                const maxLines = {{ $nbLines ? (int) $nbLines : 5 }};
+                const computed = window.getComputedStyle(editor.root);
+                const lineHeight = parseFloat(computed.lineHeight) || 24;
+                const minPx = (minLines * lineHeight);
+                const maxPx = (maxLines * lineHeight);
+
+                // Constrain Quill container (.ql-container)
+                const qlContainer = editor.container; // .ql-container element
+                if (qlContainer) {
+                    qlContainer.style.boxSizing = 'border-box';
+                    qlContainer.style.minHeight = minPx + 'px';
+                    qlContainer.style.height = maxPx + 'px'; // fix container height so inner editor can scroll
+                    qlContainer.style.overflow = 'hidden';
+                }
+
+                // Make the editor (.ql-editor) scroll inside the container
+                editor.root.style.boxSizing = 'border-box';
+                editor.root.style.height = '100%';
+                editor.root.style.overflowY = 'auto';
 
                 const quillEditor = document.getElementById('quill-editor-area-{{ $name }}');
                 const counterEl = document.getElementById('quill-counter-{{ $id }}');
