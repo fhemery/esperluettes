@@ -3,8 +3,9 @@
 use App\Domains\Story\Models\Story;
 use App\Domains\Auth\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-uses(RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 it('redirects guests from create page to login', function () {
     $response = $this->get('/stories/create');
@@ -42,9 +43,7 @@ it('allows an authenticated user to create a story and see it', function () {
     $show = $this->get('/stories/' . $story->slug);
     $show->assertOk();
     $show->assertSee('My First Story');
-    // The show view uses __('story::create.form.visibility.options.public')
-    // With a non-existent locale, __() returns the key itself
-    $show->assertSee('story::create.form.visibility.options.public');
+    $show->assertSee('story::shared.visibility.options.public');
     // Edit action visible for author; with non-existent locale, assert the key itself
     $show->assertSee('story::show.edit');
 });

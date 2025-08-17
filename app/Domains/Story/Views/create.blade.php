@@ -21,7 +21,7 @@
                             </div>
 
                             <div class="mb-6">
-                                <x-input-label for="description" :value="__('story::create.form.description.label')" />
+                                <x-input-label for="description" :value="__('story::shared.description.label')" />
                                 <x-shared::editor
                                     id="story-description-editor"
                                     name="description"
@@ -33,20 +33,20 @@
                             </div>
 
                             <div class="mb-6">
-                                <x-input-label for="visibility" :value="__('story::create.form.visibility.label')" />
+                                <x-input-label for="visibility" :value="__('story::shared.visibility.label')" />
                                 <div class="flex items-center gap-2">
                                     <select id="visibility" name="visibility" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="public">{{ __('story::create.form.visibility.options.public') }}</option>
-                                        <option value="community">{{ __('story::create.form.visibility.options.community') }}</option>
-                                        <option value="private">{{ __('story::create.form.visibility.options.private') }}</option>
+                                        <option value="public">{{ __('story::shared.visibility.options.public') }}</option>
+                                        <option value="community">{{ __('story::shared.visibility.options.community') }}</option>
+                                        <option value="private">{{ __('story::shared.visibility.options.private') }}</option>
                                     </select>
                                     <x-shared::help>
                                         <div>
-                                            {{ __('story::create.form.visibility.help.intro') }}
+                                            {{ __('story::shared.visibility.help.intro') }}
                                             <ul>
-                                                <li>{{ __('story::create.form.visibility.help.public') }}</li>
-                                                <li>{{ __('story::create.form.visibility.help.community') }}</li>
-                                                <li>{{ __('story::create.form.visibility.help.private') }}</li>
+                                                <li>{{ __('story::shared.visibility.help.public') }}</li>
+                                                <li>{{ __('story::shared.visibility.help.community') }}</li>
+                                                <li>{{ __('story::shared.visibility.help.private') }}</li>
                                                 
                                             </ul>
                                         </div>

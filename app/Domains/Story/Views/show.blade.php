@@ -15,9 +15,9 @@
             <div class="text-sm text-gray-600">
                 @php
                 $label = match($story->visibility) {
-                'public' => __('story::create.form.visibility.options.public'),
-                'community' => __('story::create.form.visibility.options.community'),
-                'private' => __('story::create.form.visibility.options.private'),
+                'public' => __('story::shared.visibility.options.public'),
+                'community' => __('story::shared.visibility.options.community'),
+                'private' => __('story::shared.visibility.options.private'),
                 default => $story->visibility,
                 };
                 $badgeClasses = match($story->visibility) {
@@ -41,6 +41,7 @@
                     </div>
 
                     <article class="prose max-w-none">
+                        <h2>{{ __('story::shared.description.label') }}</h2>
                         {!! $story->description !!}
                     </article>
                 </div>

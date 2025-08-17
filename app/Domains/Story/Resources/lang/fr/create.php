@@ -9,10 +9,6 @@ return [
             'label' => 'Titre',
             'placeholder' => 'Entrez le titre de votre histoire',
         ],
-        'description' => [
-            'label' => 'Description',
-            'placeholder' => 'Décrivez brièvement votre histoire (vous pourrez enrichir plus tard)',
-        ],
         'visibility' => [
             'label' => 'Visibilité',
             'help' => [
