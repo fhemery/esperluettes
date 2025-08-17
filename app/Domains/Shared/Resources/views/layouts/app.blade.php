@@ -5,7 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        @hasSection('title')
+            <title>@yield('title')</title>
+        @else
+            <title>{{ config('app.name', 'Laravel') }}</title>
+        @endif
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -16,6 +20,8 @@
         <!-- Quill, temporary solution -->
         <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
         <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+        @stack('meta')
 
         <!-- Scripts -->
         @vite(['app/Domains/Shared/Resources/css/app.css', 'app/Domains/Shared/Resources/js/app.js'])

@@ -3,8 +3,8 @@
 namespace App\Domains\Story\Http\Controllers;
 
 use App\Domains\Story\Http\Requests\StoryRequest;
-use App\Domains\Story\Models\Story;
 use App\Domains\Story\Services\StoryService;
+use App\Domains\Shared\Support\Seo;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -37,10 +37,12 @@ class StoryController
     public function show(string $slug): View
     {
         [$story, $isAuthor] = $this->service->getStoryForShow($slug, Auth::id());
+        $metaDescription = Seo::excerpt($story->description);
 
         return view('story::show', [
             'story' => $story,
             'isAuthor' => $isAuthor,
+            'metaDescription' => $metaDescription,
         ]);
     }
 }

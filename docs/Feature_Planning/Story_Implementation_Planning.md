@@ -155,7 +155,7 @@ This document breaks down the Story domain implementation into atomic user stori
 
 ---
 
-### **US-006: View Public Stories List**
+### **[DONE] US-006: View Public Stories List**
 **As any visitor, I want to see a list of public stories so that I can discover content to read.**
 
 **Acceptance Criteria:**

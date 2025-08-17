@@ -1,3 +1,16 @@
+@section('title', $story->title . ' – ' . config('app.name'))
+@push('meta')
+    <meta name="description" content="{{ $metaDescription }}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ $story->title }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
+    <meta property="og:image" content="{{ asset('images/story/default-cover.svg') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $story->title }}">
+    <meta name="twitter:description" content="{{ $metaDescription }}">
+    <meta name="twitter:image" content="{{ asset('images/story/default-cover.svg') }}">
+@endpush
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center">
