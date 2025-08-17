@@ -16,6 +16,6 @@ return [
         ],
     ],
     'description' => [
-        'label' => 'Synopsis',
+        'label' => 'Résumé',
     ],
 ];
