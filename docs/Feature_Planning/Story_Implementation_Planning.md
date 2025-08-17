@@ -10,7 +10,7 @@ This document breaks down the Story domain implementation into atomic user stori
 
 ## User Stories - Phase 1: Basic Story Management
 
-### **US-001: Access Story Creation**
+### **[DONE] US-001: Access Story Creation**
 **As a logged-in user, I want to access the story creation page so that I can start writing a new story.**
 
 **Acceptance Criteria:**
@@ -34,7 +34,7 @@ This document breaks down the Story domain implementation into atomic user stori
 
 ---
 
-### **US-002: View Basic Story Form**
+### ** US-002: View Basic Story Form**
 **As a logged-in user, I want to see a story creation form with basic fields so that I can enter my story details.**
 
 **Acceptance Criteria:**

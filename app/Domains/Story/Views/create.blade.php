@@ -31,6 +31,29 @@
                                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
                             </div>
 
+                            <div class="mb-6">
+                                <x-input-label for="visibility" :value="__('story::create.form.visibility.label')" />
+                                <div class="flex items-center gap-2">
+                                    <select id="visibility" name="visibility" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="public">{{ __('story::create.form.visibility.options.public') }}</option>
+                                        <option value="community">{{ __('story::create.form.visibility.options.community') }}</option>
+                                        <option value="private">{{ __('story::create.form.visibility.options.private') }}</option>
+                                    </select>
+                                    <x-shared::help>
+                                        <div>
+                                            {{ __('story::create.form.visibility.help.intro') }}
+                                            <ul>
+                                                <li>{{ __('story::create.form.visibility.help.public') }}</li>
+                                                <li>{{ __('story::create.form.visibility.help.community') }}</li>
+                                                <li>{{ __('story::create.form.visibility.help.private') }}</li>
+                                                
+                                            </ul>
+                                        </div>
+                                    </x-shared::help>
+                                </div>
+                                <x-input-error :messages="$errors->get('visibility')" class="mt-2" />
+                            </div>
+
                             <x-primary-button type="button">
                                 {{ __('story::create.actions.continue') }}
                             </x-primary-button>
