@@ -54,7 +54,7 @@ This document breaks down the Story domain implementation into atomic user stori
 
 ---
 
-### **US-003: Create Basic Story**
+### **[DONE] US-003: Create Basic Story**
 **As a logged-in user, I want to submit the story form so that my story is saved to the database.**
 
 **Acceptance Criteria:**
@@ -92,7 +92,7 @@ This document breaks down the Story domain implementation into atomic user stori
 - **Given** I am a logged-in user
 - **And** I am on the story creation page
 - **When** I click "Create Story" without filling any fields
-- **Then** I should see validation errors for "Title", "Description", and "Visibility"
+- **Then** I should see validation errors for "Title" and "Visibility" (Description is optional)
 - **And** I should remain on the story creation page
 
 **Scenario 2: Submit form with title too long**
@@ -104,10 +104,28 @@ This document breaks down the Story domain implementation into atomic user stori
 - **Then** I should see a validation error for "Title"
 - **And** my other field values should be preserved
 
+**Scenario 3: Submit form with description too long**
+- **Given** I am a logged-in user
+- **And** I am on the story creation page
+- **When** I fill in "Description" with content longer than 3000 characters
+- **And** I click "Create Story"
+- **Then** I should see a validation error for "Description"
+
+**Scenario 4: Submit form with invalid visibility**
+- **Given** I am a logged-in user
+- **And** I am on the story creation page
+- **When** I select an invalid value for "Visibility"
+- **And** I click "Create Story"
+- **Then** I should see a validation error for "Visibility"
+
 **Implementation:**
-- Update StoryRequest with validation rules
-- Add error display to create.blade.php
-- Add old() helpers to preserve form data
+- Update `StoryRequest` with validation rules
+  - Title: required, trimmed, min 1, max 255
+  - Description: optional, max 3000
+  - Visibility: required, in [public, community, private]
+- Add custom validation messages (keys) returned from `StoryRequest::messages()`
+- Ensure error display with `<x-input-error>` (already present)
+- Ensure old inputs preserved (already present)
 
 ---
 

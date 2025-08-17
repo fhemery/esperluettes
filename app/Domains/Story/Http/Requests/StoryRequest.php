@@ -15,9 +15,39 @@ class StoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
+            'title' => ['required', 'string', 'min:1', 'max:255'],
+            'description' => ['nullable', 'string', 'max:3000'],
             'visibility' => ['required', 'in:' . implode(',', Story::visibilityOptions())],
+        ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        // Trim title so min:1 applies to the trimmed value
+        $title = $this->input('title');
+        if (is_string($title)) {
+            $title = trim($title);
+        }
+
+        $this->merge([
+            'title' => $title,
+        ]);
+    }
+
+    public function messages(): array
+    {
+        // Return raw translation keys so tests (APP_LOCALE=zz) can assert them
+        return [
+            'title.required' => __('story::validation.title.required'),
+            'title.string' => __('story::validation.title.string'),
+            'title.min' => __('story::validation.title.min'),
+            'title.max' => __('story::validation.title.max'),
+
+            'description.string' => __('story::validation.description.string'),
+            'description.max' => __('story::validation.description.max'),
+
+            'visibility.required' => __('story::validation.visibility.required'),
+            'visibility.in' => __('story::validation.visibility.in'),
         ];
     }
 }
