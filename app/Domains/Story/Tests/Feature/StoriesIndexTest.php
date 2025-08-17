@@ -20,10 +20,9 @@ it('shows empty state when there are no public stories', function () {
     $response->assertSee('story::index.empty');
 });
 
-it('lists only public stories with cover, title and author', function () {
+it('should only list public stories to unlogged users, title and author', function () {
     // Arrange
     $author = alice();
-    $other  = bob();
 
     // Public story (should appear)
     $public = publicStory('Public Story', $author, [
@@ -31,12 +30,12 @@ it('lists only public stories with cover, title and author', function () {
     ]);
 
     // Private story (should not appear)
-    privateStory('Private Story', $other, [
+    privateStory('Private Story', $author, [
         'description' => '<p>Hidden</p>',
     ]);
 
     // Community story (should not appear)
-    communityStory('Community Story', $other, [
+    communityStory('Community Story', $author, [
         'description' => '<p>Hidden</p>',
     ]);
 
@@ -50,6 +49,37 @@ it('lists only public stories with cover, title and author', function () {
     $resp->assertDontSee('Private Story');
     $resp->assertDontSee('Community Story');
 });
+
+it('should show public and community stories to logged users', function () {
+    // Arrange
+    $author = alice();
+
+    // Public story (should appear)
+    $public = publicStory('Public Story', $author, [
+        'description' => '<p>Desc</p>',
+    ]);
+
+    // Private story (should not appear)
+    privateStory('Private Story', $author, [
+        'description' => '<p>Hidden</p>',
+    ]);
+
+    // Community story (should not appear)
+    communityStory('Community Story', $author, [
+        'description' => '<p>Hidden</p>',
+    ]);
+
+    // Act
+    $resp = $this->actingAs(bob())->get('/stories');
+
+    // Assert
+    $resp->assertOk();
+    $resp->assertSee($public->title);
+    $resp->assertSee('story::index.by_author');
+    $resp->assertDontSee('Private Story');
+    $resp->assertDontSee('Community Story');
+});
+
 
 it('paginates 24 stories ordered by creation date desc', function () {
     // Arrange
