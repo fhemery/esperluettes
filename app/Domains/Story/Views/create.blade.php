@@ -41,17 +41,16 @@
                                         <option value="community" {{ $visOld === 'community' ? 'selected' : '' }}>{{ __('story::shared.visibility.options.community') }}</option>
                                         <option value="private" {{ $visOld === 'private' ? 'selected' : '' }}>{{ __('story::shared.visibility.options.private') }}</option>
                                     </select>
-                                    <x-shared::help>
+                                    <x-shared::tooltip type="help" :title="__('story::shared.visibility.label')" placement="right">
                                         <div>
                                             {{ __('story::shared.visibility.help.intro') }}
                                             <ul>
                                                 <li>{{ __('story::shared.visibility.help.public') }}</li>
                                                 <li>{{ __('story::shared.visibility.help.community') }}</li>
                                                 <li>{{ __('story::shared.visibility.help.private') }}</li>
-                                                
                                             </ul>
                                         </div>
-                                    </x-shared::help>
+                                    </x-shared::tooltip>
                                 </div>
                                 <x-input-error :messages="$errors->get('visibility')" class="mt-2" />
                             </div>

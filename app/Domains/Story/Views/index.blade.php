@@ -27,7 +27,9 @@
                                     <div class="p-4">
                                         <div class="flex items-start justify-between gap-2">
                                             <h2 class="font-semibold text-gray-900 line-clamp-2">{{ $story->title }}</h2>
-                                            <span class="text-gray-400 cursor-help" title="{{ strip_tags($story->description ?? '') }}">ⓘ</span>
+                                            <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right">
+                                                {{ strip_tags($story->description ?? '') }}
+                                            </x-shared::tooltip>
                                         </div>
                                         <div class="mt-2 text-sm text-gray-600">
                                             {{ __('story::index.by_author', ['name' => optional($story->authors->first())->name]) }}
