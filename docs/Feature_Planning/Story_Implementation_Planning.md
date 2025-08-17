@@ -27,14 +27,14 @@ This document breaks down the Story domain implementation into atomic user stori
 - **Then** I should be redirected to the login page
 
 **Implementation:**
-- Create basic Story model and migration (id, user_id, title, created_at, updated_at)
+- Create basic Story model and migration (id, created_by_user_id, title, created_at, updated_at)
 - Create StoryController with create() method
 - Add authentication middleware
 - Create basic create.blade.php view
 
 ---
 
-### ** US-002: View Basic Story Form**
+### ** [DONE] US-002: View Basic Story Form**
 **As a logged-in user, I want to see a story creation form with basic fields so that I can enter my story details.**
 
 **Acceptance Criteria:**
@@ -68,13 +68,17 @@ This document breaks down the Story domain implementation into atomic user stori
 - **And** I click "Create Story"
 - **Then** I should be redirected to the story detail page
 - **And** I should see a success message
-- **And** the story should be saved in the database
-- **And** the story should be linked to my user account
+- **And** I should see the story title and description on that page
+- **And** I should see the selected visibility label (Public, Community, or Private)
+- **And** the URL should follow the pattern `/stories/{slug-with-id}` (e.g., `my-first-story-123`)
+- **And** I should see an "Edit" action available (since I'm an author)
 
 **Implementation:**
 - Add store() method to StoryController
 - Create StoryRequest for validation
 - Add slug generation to Story model
+- Persist story with created_by_user_id = auth()->id()
+- Insert `story_collaborators` row for creator with role = author, invited_by_user_id = created_by_user_id, invited_at = now, accepted_at = now
 - Create success redirect logic
 
 ---
@@ -224,7 +228,7 @@ This document breaks down the Story domain implementation into atomic user stori
 **Implementation:**
 - Add edit() and update() methods to StoryController
 - Create edit.blade.php view
-- Add authorization policy
+- Add authorization policy that checks membership in `story_collaborators` with role = author
 - Add update validation
 
 ---

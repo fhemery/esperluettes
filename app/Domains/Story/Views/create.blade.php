@@ -12,7 +12,8 @@
                     <p class="text-gray-600 mb-6">{{ __('story::create.intro') }}</p>
 
                     <div class="max-w-3xl">
-                        <form action="#" method="GET" novalidate>
+                        <form action="{{ route('stories.store') }}" method="POST" novalidate>
+                            @csrf
                             <div class="mb-5">
                                 <x-input-label for="title" :value="__('story::create.form.title.label')" />
                                 <x-text-input id="title" name="title" type="text" class="mt-1 block w-full" placeholder="{{ __('story::create.form.title.placeholder') }}" />
@@ -54,7 +55,7 @@
                                 <x-input-error :messages="$errors->get('visibility')" class="mt-2" />
                             </div>
 
-                            <x-primary-button type="button">
+                            <x-primary-button type="submit">
                                 {{ __('story::create.actions.continue') }}
                             </x-primary-button>
                         </form>

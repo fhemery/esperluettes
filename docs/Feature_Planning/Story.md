@@ -76,7 +76,7 @@ The Story & Chapter sharing feature is the core functionality of the platform, e
 ```sql
 stories:
 - id (primary key)
-- user_id (foreign key to users, primary author)
+- created_by_user_id (foreign key to users)        -- immutable; audit only, not used for permissions
 - title (string)
 - slug (string, unique globally; includes the numeric id suffix, e.g., "my-story-title-123")
 - description (longtext)
@@ -92,16 +92,23 @@ stories:
 - updated_at (timestamp)
 ```
 
-#### Story Co-Authors Table
+#### Story Collaborators Table (extensible: co-authors now, beta readers later)
 ```sql
-story_co_authors:
+story_collaborators:
 - story_id (foreign key)
 - user_id (foreign key)
+- role (enum: author, beta_reader)              -- beta_reader reserved for a future feature
+- invited_by_user_id (foreign key to users)        -- who initiated the invite
 - invited_at (timestamp)
 - accepted_at (timestamp, nullable)
 - left_at (timestamp, nullable)
-- primary key (story_id, user_id)
+- expires_at (timestamp, nullable)                 -- for time-bound access (e.g., beta readers)
+- unique key (story_id, user_id)                   -- a user has a single role per story
 ```
+
+Notes:
+- On story creation, also insert a row in `story_collaborators` for the creator with `role = author`, `invited_by_user_id = created_by_user_id`, `invited_at = now`, `accepted_at = now`.
+- Authorization is based solely on `story_collaborators.role` (e.g., `author`), not on `stories.created_by_user_id`.
 
 #### Reading Progress Table
 ```sql

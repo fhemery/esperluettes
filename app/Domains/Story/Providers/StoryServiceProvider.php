@@ -13,6 +13,9 @@ class StoryServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Load domain migrations
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
         // Register views under the 'story' namespace
         $this->loadViewsFrom(app_path('Domains/Story/Views'), 'story');
 
