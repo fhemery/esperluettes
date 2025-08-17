@@ -13,13 +13,47 @@ it('redirects guests from create page to login', function () {
     $response->assertRedirect('/login');
 });
 
-it('allows an authenticated user to create a story and see it', function () {
+it('produces unique slugs for duplicate titles', function () {
     // Arrange
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    // Force a non-existent locale so translation falls back to the key itself
-    app()->setLocale('xx');
+    $payload = [
+        'title' => 'Same Title',
+        'description' => '<p>content</p>',
+        'visibility' => Story::VIS_PUBLIC,
+    ];
+
+    // Act: create two stories with identical titles
+    $this->post('/stories', $payload)->assertRedirect();
+    $this->post('/stories', $payload)->assertRedirect();
+
+    // Assert: both exist and have unique slug-with-id
+    $stories = Story::query()->orderBy('id')->get();
+    expect($stories)->toHaveCount(2);
+
+    $first = $stories[0];
+    $second = $stories[1];
+
+    // Both slugs start with the same base, and end with their respective ids
+    $base = \App\Domains\Story\Models\Story::generateSlugBase('Same Title');
+    expect($first->slug)->toStartWith($base . '-')
+        ->and($first->slug)->toEndWith('-' . $first->id);
+    expect($second->slug)->toStartWith($base . '-')
+        ->and($second->slug)->toEndWith('-' . $second->id);
+
+    // Ensure they are different
+    expect($first->slug)->not->toEqual($second->slug);
+
+    // Show pages should be reachable via slug-with-id
+    $this->get('/stories/' . $first->slug)->assertOk();
+    $this->get('/stories/' . $second->slug)->assertOk();
+});
+
+it('allows an authenticated user to create a story and see it', function () {
+    // Arrange
+    $user = User::factory()->create();
+    $this->actingAs($user);
 
     // Act
     $payload = [

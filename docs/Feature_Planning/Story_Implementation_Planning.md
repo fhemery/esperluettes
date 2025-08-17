@@ -83,7 +83,7 @@ This document breaks down the Story domain implementation into atomic user stori
 
 ---
 
-### **US-004: Validate Story Form**
+### **[DONE] US-004: Validate Story Form**
 **As a user, I want form validation so that I cannot submit invalid story data.**
 
 **Acceptance Criteria:**
@@ -129,7 +129,7 @@ This document breaks down the Story domain implementation into atomic user stori
 
 ---
 
-### **US-005: Generate Story Slug (with ID suffix)**
+### **[DONE] US-005: Generate Story Slug (with ID suffix)**
 **As a user, I want my story to have a unique URL so that it can be accessed via a readable link.**
 
 **Acceptance Criteria:**
