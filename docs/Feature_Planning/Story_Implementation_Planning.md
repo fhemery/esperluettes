@@ -155,33 +155,57 @@ This document breaks down the Story domain implementation into atomic user stori
 
 ---
 
-### **US-006: View Public Stories List (exclude empty stories)**
+### **US-006: View Public Stories List**
 **As any visitor, I want to see a list of public stories so that I can discover content to read.**
 
 **Acceptance Criteria:**
 
-**Scenario 1: View public stories with at least one published public chapter**
-- **Given** there are stories with and without published public chapters
+**Scenario 1: View public stories (no chapter requirement)**
+- **Given** there are public, community, and private stories
 - **When** I visit `/stories`
-- **Then** I should see only public stories that have at least one published public chapter
+- **Then** I should see only public stories (even if they have no chapters yet)
 - **And** I should not see private stories
 - **And** I should not see community stories
-- **And** each story should display its title, author, and creation date
+- **And** each story card shows: cover (default cover if none), title, author name
+- **And** the description is visible on hover or via a help icon tooltip/popover
 
 **Scenario 2: Stories list pagination and ordering**
-- **Given** there are more than 10 public stories
+- **Given** there are more than 24 public stories
 - **When** I visit `/stories`
-- **Then** I should see the first 10 stories ordered by latest published chapter date (descending)
+- **Then** I should see the first 24 stories ordered by creation date (descending)
 - **And** I should see pagination controls
 - **And** I should be able to navigate to the next page
 
+**Scenario 3: Empty state**
+- **Given** there are no public stories
+- **When** I visit `/stories`
+- **Then** I should see an empty-state message using scoped Story translations (e.g., `story::index.empty`)
+
 **Implementation:**
-- Add index() method to StoryController
-- Create index.blade.php view
-- Query only stories with at least one published public chapter (join/exists on chapters)
-- Order by `last_chapter_published_at` descending
-- Add pagination logic
-- Add route for /stories
+- Add `index()` method to `StoryController`
+- Create `app/Domains/Story/Views/index.blade.php` grid (4 per row)
+- Use default cover asset when story has none (extract a default cover asset)
+- Query: `Story` where `visibility = public`
+- Order by `created_at` desc
+- Paginate: 24 per page
+- Cache the paginated result for a short TTL (e.g., 60s) since the page has no filters
+- Translations: use Story-scoped keys (e.g., `story::index.title`, `story::index.empty`), not Shared JSON
+- Route: `GET /stories`
+
+---
+
+### **US-006-SEO: SEO for Stories Index and Details**
+**As a visitor coming from search engines, I want meaningful titles and meta descriptions so that I can understand the page content.**
+
+**Acceptance Criteria:**
+- Index `/stories` sets `<title>` and meta description via localized, Story-scoped translations (e.g., `story::seo.index.title`, `story::seo.index.description`).
+- Show `/stories/{slug-with-id}` sets `<title>` as "{story title} – SiteName" and meta description as a short excerpt of the description (localized labels via `story::seo.show.*`).
+- Open Graph/Twitter basic tags present (title, description, image = story cover or default cover).
+
+**Implementation:**
+- Add Blade sections/components to inject `<title>` and meta tags.
+- Define Story-scoped translation keys under `app/Domains/Story/Resources/lang/*`.
+- Reuse default cover for OG image when story has none.
 
 ---
 

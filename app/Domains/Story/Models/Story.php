@@ -5,6 +5,7 @@ namespace App\Domains\Story\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
+use App\Domains\Auth\Models\User;
 
 class Story extends Model
 {
@@ -36,5 +37,12 @@ class Story extends Model
     public function getSlugWithIdAttribute(): string
     {
         return $this->slug; // stored with id suffix
+    }
+
+    public function authors()
+    {
+        return $this->belongsToMany(User::class, 'story_collaborators', 'story_id', 'user_id')
+            ->withPivot(['role', 'invited_by_user_id', 'invited_at', 'accepted_at'])
+            ->wherePivot('role', 'author');
     }
 }

@@ -4,6 +4,9 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 // Load custom TestResponse macros (runtime + IDE stubs)
 require_once __DIR__ . '/ide/TestResponseMacros.php';
+// Domain-scoped test helpers
+require_once __DIR__ . '/../app/Domains/Auth/Tests/helpers.php';
+require_once __DIR__ . '/../app/Domains/Story/Tests/helpers.php';
 
 // Root tests directory
 uses(TestCase::class)->in('Feature');

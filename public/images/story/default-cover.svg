@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="200" viewBox="0 0 150 200" role="img" aria-label="Default story cover">
+  <defs>
+    <!-- intentionally left blank -->
+  </defs>
+  <!-- White background -->
+  <rect width="150" height="200" fill="#ffffff"/>
+  <!-- Celadon rounded frame -->
+  <rect x="5" y="5" width="140" height="190" rx="12" fill="#ffffff" stroke="#ACE1AF" stroke-width="4"/>
+  <!-- Ampersand -->
+  <text x="75" y="105" text-anchor="middle" font-family="Georgia, serif" font-size="90" fill="#ACE1AF" aria-hidden="true">&amp;</text>
+</svg>
