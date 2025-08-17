@@ -30,10 +30,8 @@ return [
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty'   => true,
         ],
-        // Sanitization profile for user profile description fields (kept for backward compatibility)
-        'profile' => [
+        'strict' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
-            // Keep very basic tags if older data contains them; no external media or links
             'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span,u,s',
             'HTML.AllowedAttributes' => 'p.style,p.class,span.style,span.class,li.class,ul.class,ol.class',
             'CSS.AllowedProperties' => 'text-align',

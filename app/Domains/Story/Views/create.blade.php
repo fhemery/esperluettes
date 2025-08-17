@@ -21,7 +21,13 @@
 
                             <div class="mb-6">
                                 <x-input-label for="description" :value="__('story::create.form.description.label')" />
-                                <textarea id="description" name="description" rows="6" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="{{ __('story::create.form.description.placeholder') }}"></textarea>
+                                <x-shared::editor
+                                    id="story-description-editor"
+                                    name="description"
+                                    :max="3000"
+                                    :nbLines="15"
+                                    class="mt-1 block w-full"
+                                />
                                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
                             </div>
 

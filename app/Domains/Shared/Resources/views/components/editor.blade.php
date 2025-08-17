@@ -1,4 +1,4 @@
-@props(['name', 'id', 'defaultValue', 'max' => null, 'nbLines' => null])
+@props(['name', 'id', 'defaultValue' => '', 'max' => null, 'nbLines' => null])
 <div {{ $attributes->merge(['class' => '']) }}>
     <div class="mb-2" id="{{ $id }}"></div>
     <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $name }}" value="{!! $defaultValue !!}" />

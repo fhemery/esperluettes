@@ -62,7 +62,7 @@ class ProfileService
         
         // Sanitize description if provided
         if (isset($data['description']) && is_string($data['description'])) {
-            $data['description'] = clean($data['description'], 'profile');
+            $data['description'] = clean($data['description'], 'strict');
         }
         
         $profile->update($data);
@@ -82,7 +82,7 @@ class ProfileService
 
         // Sanitize description if provided
         if (isset($data['description']) && is_string($data['description'])) {
-            $data['description'] = clean($data['description'], 'profile');
+            $data['description'] = clean($data['description'], 'strict');
         }
 
         // If a new file is provided, it takes precedence over removal
