@@ -73,17 +73,14 @@ class StoryService
             $id = (int) $m[1];
         }
 
+        $base = Story::query()->with(['authors:id,name']);
         $story = $id
-            ? Story::query()->findOrFail($id)
-            : Story::query()->where('slug', $slug)->firstOrFail();
+            ? $base->findOrFail($id)
+            : $base->where('slug', $slug)->firstOrFail();
 
         $isAuthor = false;
         if (!is_null($viewerId)) {
-            $isAuthor = DB::table('story_collaborators')
-                ->where('story_id', $story->id)
-                ->where('user_id', $viewerId)
-                ->where('role', 'author')
-                ->exists();
+            $isAuthor = $story->authors->contains('id', $viewerId);
         }
 
         return [$story, $isAuthor];

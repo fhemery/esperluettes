@@ -16,7 +16,8 @@ function createStoryForAuthor(User $author, array $attributes = []): Story
         'created_by_user_id' => $author->id, // audit only
         'title' => $title,
         'slug' => $attributes['slug'] ?? $slugBase,
-        'description' => $attributes['description'] ?? null,
+        // Column is NOT NULL in schema; default to empty string in tests
+        'description' => $attributes['description'] ?? '',
         'visibility' => $attributes['visibility'] ?? Story::VIS_PUBLIC,
         'last_chapter_published_at' => $attributes['last_chapter_published_at'] ?? null,
     ]);

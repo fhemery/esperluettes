@@ -3,11 +3,14 @@
 namespace App\Domains\Story\Http\Controllers;
 
 use App\Domains\Story\Http\Requests\StoryRequest;
+use App\Domains\Story\Models\Story;
 use App\Domains\Story\Services\StoryService;
 use App\Domains\Shared\Support\Seo;
+use App\Domains\Auth\Support\Verification;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 class StoryController
 {
@@ -34,10 +37,24 @@ class StoryController
             ->with('status', __('Story created successfully.'));
     }
 
-    public function show(string $slug): View
+    public function show(string $slug): View|\Illuminate\Http\RedirectResponse
     {
         [$story, $isAuthor] = $this->service->getStoryForShow($slug, Auth::id());
         $metaDescription = Seo::excerpt($story->description);
+
+        // Enforce visibility rules
+        $user = Auth::user();
+        if ($story->visibility === Story::VIS_PRIVATE && ! $isAuthor) {
+            abort(404);
+        }
+        if ($story->visibility === Story::VIS_COMMUNITY) {
+            if (! $user) {
+                return redirect()->guest(route('login'));
+            }
+            if (! Verification::isVerified($user)) {
+                abort(404);
+            }
+        }
 
         return view('story::show', [
             'story' => $story,

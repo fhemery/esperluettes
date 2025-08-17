@@ -49,8 +49,14 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="flex items-center justify-between mb-6">
-
+                    <div class="flex items-center justify-between mb-6 text-sm text-gray-600">
+                        <div>
+                            <span class="font-medium">{{ $story->authors->pluck('name')->join(', ') }}</span>
+                        </div>
+                        <div>
+                            @php($date = app()->getLocale() === 'fr' ? $story->created_at->format('d-m-Y') : $story->created_at->format('Y-m-d'))
+                            <span>{{ $date }}</span>
+                        </div>
                     </div>
 
                     <div class="flex gap-6 items-start">
@@ -61,7 +67,12 @@
                         </div>
                         <article class="prose max-w-none">
                             <h2>{{ __('story::shared.description.label') }}</h2>
-                            {!! $story->description !!}
+                            @php($plain = trim(strip_tags($story->description ?? '')))
+                            @if($plain === '')
+                                <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>
+                            @else
+                                {!! $story->description !!}
+                            @endif
                         </article>
                     </div>
                 </div>

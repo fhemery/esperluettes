@@ -194,7 +194,7 @@ This document breaks down the Story domain implementation into atomic user stori
 
 ---
 
-### **US-006-SEO: SEO for Stories Index and Details**
+### **[DONE] US-006-SEO: SEO for Stories Index and Details**
 **As a visitor coming from search engines, I want meaningful titles and meta descriptions so that I can understand the page content.**
 
 **Acceptance Criteria:**
