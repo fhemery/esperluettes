@@ -40,10 +40,17 @@
 
                     </div>
 
-                    <article class="prose max-w-none">
-                        <h2>{{ __('story::shared.description.label') }}</h2>
-                        {!! $story->description !!}
-                    </article>
+                    <div class="flex gap-6 items-start">
+                        <div class="shrink-0" aria-hidden="true">
+                            <div class="w-[150px] h-[200px] rounded-lg border-4 border-[#ACE1AF] flex items-center justify-center bg-white">
+                                <span class="text-[90px] leading-none font-serif text-[#ACE1AF] select-none">&amp;</span>
+                            </div>
+                        </div>
+                        <article class="prose max-w-none">
+                            <h2>{{ __('story::shared.description.label') }}</h2>
+                            {!! $story->description !!}
+                        </article>
+                    </div>
                 </div>
             </div>
         </div>
