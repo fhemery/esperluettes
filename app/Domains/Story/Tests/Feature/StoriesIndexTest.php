@@ -22,7 +22,7 @@ it('shows empty state when there are no public stories', function () {
 
 it('should only list public stories to unlogged users, title and author', function () {
     // Arrange
-    $author = alice();
+    $author = alice($this);
 
     // Public story (should appear)
     $public = publicStory('Public Story', $author, [
@@ -52,7 +52,7 @@ it('should only list public stories to unlogged users, title and author', functi
 
 it('should show public and community stories to logged users', function () {
     // Arrange
-    $author = alice();
+    $author = alice($this);
 
     // Public story (should appear)
     $public = publicStory('Public Story', $author, [
@@ -70,7 +70,7 @@ it('should show public and community stories to logged users', function () {
     ]);
 
     // Act
-    $resp = $this->actingAs(bob())->get('/stories');
+    $resp = $this->actingAs(bob($this))->get('/stories');
 
     // Assert
     $resp->assertOk();
@@ -83,7 +83,7 @@ it('should show public and community stories to logged users', function () {
 
 it('paginates 24 stories ordered by creation date desc', function () {
     // Arrange
-    $author = alice(['name' => 'Author']);
+    $author = alice($this, ['name' => 'Author']);
 
     // Create 30 public stories and then set created_at explicitly for ordering
     for ($i = 1; $i <= 30; $i++) {
