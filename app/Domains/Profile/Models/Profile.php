@@ -20,6 +20,7 @@ class Profile extends Model
     protected $fillable = [
         'user_id',
         'slug',
+        'display_name',
         'profile_picture_path',
         'facebook_url',
         'x_url',

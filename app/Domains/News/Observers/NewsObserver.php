@@ -44,30 +44,16 @@ class NewsObserver
      */
     public function created(News $news): void
     {
-        Log::info('NewsObserver@created', [
-            'id' => $news->id,
-            'is_pinned' => $news->is_pinned,
-        ]);
         $this->bustIfRelevant($news, true);
     }
 
     public function updated(News $news): void
     {
-        Log::info('NewsObserver@updated', [
-            'id' => $news->id,
-            'changes' => $news->getChanges(),
-            'isDirty' => $news->isDirty(),
-            'wasChanged' => $news->wasChanged(),
-        ]);
         $this->bustIfRelevant($news);
     }
 
     public function deleted(News $news): void
     {
-        Log::info('NewsObserver@deleted', [
-            'id' => $news->id,
-            'header_image_path' => $news->header_image_path,
-        ]);
         // Delete header image and its variants if present
         if (!empty($news->header_image_path)) {
             app(ImageService::class)->deleteWithVariants('public', $news->header_image_path);
@@ -77,7 +63,6 @@ class NewsObserver
 
     public function restored(News $news): void
     {
-        Log::info('NewsObserver@restored', ['id' => $news->id]);
         Cache::forget('news.carousel');
     }
 
@@ -91,12 +76,6 @@ class NewsObserver
     {
         // Carousel depends on: is_pinned, display_order, status, published_at
         if ($onCreate || (bool) $news->is_pinned || $news->wasChanged(['is_pinned', 'display_order', 'status', 'published_at'])) {
-            Log::info('NewsObserver@bust', [
-                'id' => $news->id,
-                'onCreate' => $onCreate,
-                'is_pinned' => $news->is_pinned,
-                'changed' => $news->getChanges(),
-            ]);
             Cache::forget('news.carousel');
         }
     }

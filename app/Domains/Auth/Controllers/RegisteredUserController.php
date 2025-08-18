@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Controllers;
 
 use App\Domains\Shared\Controllers\Controller;
 use App\Domains\Auth\Models\User;
+use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Services\ActivationCodeService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -64,7 +65,11 @@ class RegisteredUserController extends Controller
             $activationCodeService->validateAndUseCode($request->activation_code, $user);
         }
 
+        // This event is internal to the Breeze framework, we keep it in case it is used
+        // but will rely on our own domain events.
         event(new Registered($user));
+        // Emit domain event for cross-domain consumers (e.g., Profile)
+        event(new UserRegistered(userId: $user->id, name: $user->name, registeredAt: now()));
 
         Auth::login($user);
 

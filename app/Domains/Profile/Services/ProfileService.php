@@ -14,6 +14,23 @@ class ProfileService
     public function __construct(private readonly ImageService $images)
     {
     }
+    
+    public function createOrInitProfileOnRegistration(int $userId, ?string $name): Profile
+    {
+        $display = is_string($name) ? trim($name) : '';
+        if ($display === '') {
+            $display = 'user-' . $userId;
+        }
+
+        // Create only if missing; do not alter an existing profile
+        return Profile::firstOrCreate(
+            ['user_id' => $userId],
+            [
+                'display_name' => $display,
+                'slug' => $this->makeUniqueSlugForName($display, $userId),
+            ]
+        );
+    }
 
     /**
      * Get or create a profile for the given user

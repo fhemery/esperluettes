@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
 use App\Domains\Auth\Events\UserNameUpdated;
 use App\Domains\Profile\Listeners\SyncProfileNameAndSlug;
+use App\Domains\Auth\Events\UserRegistered;
+use App\Domains\Profile\Listeners\CreateProfileOnUserRegistered;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -45,6 +47,11 @@ class ProfileServiceProvider extends ServiceProvider
         Event::listen(
             UserNameUpdated::class,
             [SyncProfileNameAndSlug::class, 'handle']
+        );
+
+        Event::listen(
+            UserRegistered::class,
+            [CreateProfileOnUserRegistered::class, 'handle']
         );
     }
 }
