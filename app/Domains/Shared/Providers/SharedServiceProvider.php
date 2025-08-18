@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use App\Domains\Shared\Listeners\AuditAllDomainEvents;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 
 class SharedServiceProvider extends ServiceProvider
 {
@@ -50,6 +53,17 @@ class SharedServiceProvider extends ServiceProvider
         
         // Also register with the shared namespace for explicit usage
         Blade::component('shared::app-layout', AppLayout::class);
+
+        // Share current profile DTO to navigation layout via contract
+        View::composer('shared::layouts.navigation', function ($view) {
+            $dto = null;
+            if (Auth::check()) {
+                /** @var ProfilePublicApi $api */
+                $api = app(ProfilePublicApi::class);
+                $dto = $api->getPublicProfile(Auth::id());
+            }
+            $view->with('currentProfile', $dto);
+        });
 
         // Register wildcard event auditing if enabled
         if (config('shared.event_auditing_enabled', true)) {

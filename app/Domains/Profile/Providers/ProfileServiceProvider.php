@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Profile\Listeners\CreateProfileOnUserRegistered;
+use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
+use App\Domains\Profile\PublicApi\ProfilePublicApi;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -16,7 +18,8 @@ class ProfileServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register any bindings or singletons here if needed
+        // Bind Shared contract to Profile implementation
+        $this->app->singleton(ProfilePublicApiContract::class, ProfilePublicApi::class);
     }
 
     /**
