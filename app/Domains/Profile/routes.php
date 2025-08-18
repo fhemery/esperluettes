@@ -21,8 +21,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile/edit', [ProfileManagementController::class, 'edit'])->name('profile.edit');
     Route::get('/profile/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileManagementController::class, 'update'])->name('profile.update');
-    
-    // Profile picture management
-    Route::post('/profile/picture', [ProfileManagementController::class, 'uploadPicture'])->name('profile.picture.upload');
-    Route::delete('/profile/picture', [ProfileManagementController::class, 'deletePicture'])->name('profile.picture.delete');
 });

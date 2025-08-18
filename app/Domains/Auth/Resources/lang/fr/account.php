@@ -6,11 +6,10 @@ return [
 
     'info' => [
         'title' => 'Informations du compte',
-        'description' => "Mettez à jour les informations du compte et l'adresse e‑mail de votre compte.",
+        'description' => "Mettez à jour l'adresse e‑mail de votre compte.",
         'unverified' => "Votre adresse e‑mail n'est pas vérifiée.",
         'resend' => "Cliquez ici pour renvoyer l'e‑mail de vérification.",
         'link_sent' => "Un nouveau lien de vérification a été envoyé à votre adresse e‑mail.",
-        'name_change_warning' => "Utilisez cette fonction avec parcimonie, car l'ancienne URL de profil ne sera plus valide.",
     ],
 
     'password' => [

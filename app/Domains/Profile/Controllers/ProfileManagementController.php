@@ -3,10 +3,8 @@
 namespace App\Domains\Profile\Controllers;
 
 use App\Domains\Profile\Requests\UpdateProfileRequest;
-use App\Domains\Profile\Requests\UploadProfilePictureRequest;
 use App\Domains\Profile\Services\ProfileService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -39,7 +37,7 @@ class ProfileManagementController extends Controller
             $data = $request->validated();
             $file = $request->file('profile_picture');
             $remove = (bool) $request->boolean('remove_profile_picture');
-            $this->profileService->updateProfileWithPicture($user, $data, $file, $remove);
+            $this->profileService->updateProfileWithPicture($user->id, $data, $file, $remove);
 
             return redirect()
                 ->route('profile.edit')
@@ -50,43 +48,5 @@ class ProfileManagementController extends Controller
                 ->withInput()
                 ->withErrors(['error' => $e->getMessage()]);
         }
-    }
-
-    /**
-     * Upload a new profile picture.
-     */
-    public function uploadPicture(UploadProfilePictureRequest $request): RedirectResponse
-    {
-        try {
-            $user = Auth::user();
-            $this->profileService->uploadProfilePicture($user, $request->file('profile_picture'));
-
-            return redirect()
-                ->route('profile.edit')
-                ->with('success', __('Profile picture uploaded successfully!'));
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->withErrors(['profile_picture' => __('Failed to upload profile picture. Please try again.')]);
-        }
-    }
-
-    /**
-     * Delete the current user's profile picture.
-     */
-    public function deletePicture(): RedirectResponse
-    {
-        $user = Auth::user();
-        $deleted = $this->profileService->deleteProfilePicture($user);
-
-        if ($deleted) {
-            return redirect()
-                ->route('profile.edit')
-                ->with('success', __('Profile picture deleted successfully!'));
-        }
-
-        return redirect()
-            ->route('profile.edit')
-            ->with('info', __('No profile picture to delete.'));
     }
 }

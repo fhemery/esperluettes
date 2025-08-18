@@ -2,6 +2,7 @@
 
 namespace App\Domains\Profile\Services;
 
+use App\Domains\Profile\Events\ProfileDisplayNameChanged;
 use App\Domains\Auth\Models\User;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Shared\Services\ImageService;
@@ -33,66 +34,19 @@ class ProfileService
     }
 
     /**
-     * Get or create a profile for the given user
+     * Get profile for the given user
      */
-    public function getOrCreateProfile(User $user): Profile
+    public function getProfile(int $userId): Profile
     {
-        $profile = Profile::where('user_id', $user->id)->first();
-        
-        if (!$profile) {
-            $profile = Profile::create([
-                'user_id' => $user->id,
-                'slug' => $this->makeUniqueSlugForUser($user),
-            ]);
-        } elseif (empty($profile->slug)) {
-            $this->ensureProfileSlug($profile);
-        }
-        
-        return $profile;
+        return Profile::where('user_id', $userId)->first();
     }
-
-    /**
-     * Sync profile slug when the user's name changes.
-     */
-    public function syncNameAndSlugForUser(int $userId, string $newName): void
-    {
-        $profile = $this->getOrCreateProfileByUserId($userId);
-
-        // Compute new unique slug from the provided name
-        $newSlug = $this->makeUniqueSlugForName($newName, $userId);
-
-        if ($profile->slug !== $newSlug) {
-            $profile->slug = $newSlug;
-            $profile->saveQuietly();
-        }
-    }
-
-    /**
-     * Update profile information
-     */
-    public function updateProfile(User $user, array $data): Profile
-    {
-        $profile = $this->getOrCreateProfile($user);
-        
-        // Validate social network URLs
-        $data = $this->validateSocialNetworkUrls($data);
-        
-        // Sanitize description if provided
-        if (isset($data['description']) && is_string($data['description'])) {
-            $data['description'] = clean($data['description'], 'strict');
-        }
-        
-        $profile->update($data);
-        
-        return $profile->fresh();
-    }
-
+   
     /**
      * Update profile and handle profile picture upload/removal on Save.
      */
-    public function updateProfileWithPicture(User $user, array $data, ?UploadedFile $file, bool $remove): Profile
+    public function updateProfileWithPicture(int $userId, array $data, ?UploadedFile $file, bool $remove): Profile
     {
-        $profile = $this->getOrCreateProfile($user);
+        $profile = $this->getProfile($userId);
 
         // Validate social URLs first
         $data = $this->validateSocialNetworkUrls($data);
@@ -104,22 +58,65 @@ class ProfileService
 
         // If a new file is provided, it takes precedence over removal
         if ($file instanceof UploadedFile) {
-            $this->uploadProfilePicture($user, $file);
+            $this->uploadProfilePicture($profile, $file);
         } elseif ($remove) {
-            $this->deleteProfilePicture($user);
+            $this->deleteProfilePicture($profile);
         }
 
-        $profile->update($data);
+        // Handle display name change (mutate only; do not save yet)
+        $displayChanged = null; // ['old' => string, 'new' => string] when changed
+        if (array_key_exists('display_name', $data)) {
+            $newDisplay = is_string($data['display_name']) ? trim($data['display_name']) : '';
+            if ($newDisplay !== '') {
+                $displayChanged = $this->applyDisplayName($profile, $newDisplay);
+            }
+            unset($data['display_name']);
+        }
+
+        // Apply remaining fields, then persist once
+        $profile->fill($data);
+        $profile->save();
+
+        // Dispatch event after successful save, if display changed
+        if (is_array($displayChanged)) {
+            event(new ProfileDisplayNameChanged(
+                $profile->user_id,
+                $displayChanged['old'],
+                $displayChanged['new'],
+                new \DateTimeImmutable('now')
+            ));
+        }
 
         return $profile->fresh();
     }
 
     /**
+     * Apply display name and new slug to the given profile without saving.
+     * Returns ['old' => string, 'new' => string] if a change occurred, otherwise null.
+     */
+    private function applyDisplayName(Profile $profile, string $newDisplayName): ?array
+    {
+        $normalized = trim($newDisplayName);
+        if ($normalized === '') {
+            throw new \InvalidArgumentException(__('Display name cannot be empty.'));
+        }
+
+        $old = (string) ($profile->display_name ?? '');
+        if ($old === $normalized) {
+            return null; // No change
+        }
+
+        $profile->display_name = $normalized;
+        $profile->slug = $this->makeUniqueSlugForName($normalized, $profile->user_id);
+
+        return ['old' => $old, 'new' => $normalized];
+    }
+
+    /**
      * Upload and process profile picture
      */
-    public function uploadProfilePicture(User $user, UploadedFile $file): string
+    private function uploadProfilePicture(Profile $profile, UploadedFile $file): string
     {
-        $profile = $this->getOrCreateProfile($user);
         
         // Delete old profile picture if exists
         if ($profile->profile_picture_path) {
@@ -127,7 +124,7 @@ class ProfileService
         }
         
         // Generate unique filename
-        $filename = 'profile_pictures/' . $user->id . '_' . time() . '.jpg';
+        $filename = 'profile_pictures/' . $profile->user_id . '_' . time() . '.jpg';
         
         // Process and save image using shared ImageService
         $this->images->saveSquareJpg('public', $filename, $file, size: 200, quality: 85);
@@ -141,10 +138,8 @@ class ProfileService
     /**
      * Delete profile picture
      */
-    public function deleteProfilePicture(User $user): bool
+    private function deleteProfilePicture(Profile $profile): bool
     {
-        $profile = $this->getOrCreateProfile($user);
-        
         if ($profile->profile_picture_path) {
             Storage::disk('public')->delete($profile->profile_picture_path);
             $profile->update(['profile_picture_path' => null]);

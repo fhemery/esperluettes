@@ -75,14 +75,16 @@
 
                         <!-- Right: Profile form fields -->
                         <div class="lg:col-span-2">
-                            <!-- User Name (Read-only) -->
+                            <!-- Display Name (editable, owned by Profile) -->
                             <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Name') }}</label>
+                                <label for="display_name" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Display Name') }}</label>
                                 <input type="text"
-                                       value="{{ $user->name }}"
-                                       disabled
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed">
-                                <p class="mt-1 text-xs text-gray-500">{{ __('Your name cannot be changed from the profile page.') }}</p>
+                                       name="display_name"
+                                       id="display_name"
+                                       value="{{ old('display_name', $profile->display_name) }}"
+                                       maxlength="100"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <p class="mt-1 text-xs text-gray-500">{{ __('This is the name shown publicly on your profile and content.') }}</p>
                             </div>
 
                             <!-- Description (plain textarea) -->

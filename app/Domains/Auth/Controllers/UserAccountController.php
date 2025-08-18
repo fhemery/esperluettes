@@ -34,18 +34,7 @@ class UserAccountController extends Controller
             $request->user()->email_verified_at = null;
         }
 
-        $originalName = $request->user()->getOriginal('name');
         $request->user()->save();
-
-        // Dispatch domain event if the user's name actually changed
-        if ($request->user()->wasChanged('name')) {
-            event(new UserNameUpdated(
-                userId: $request->user()->id,
-                oldName: (string) $originalName,
-                newName: (string) $request->user()->name,
-                changedAt: now(),
-            ));
-        }
 
         return Redirect::route('account.edit')->with('status', __('auth::account.account-updated'));
     }

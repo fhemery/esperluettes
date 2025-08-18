@@ -69,7 +69,7 @@ class RegisteredUserController extends Controller
         // but will rely on our own domain events.
         event(new Registered($user));
         // Emit domain event for cross-domain consumers (e.g., Profile)
-        event(new UserRegistered(userId: $user->id, name: $user->name, registeredAt: now()));
+        event(new UserRegistered(userId: $user->id, name: $request->name, registeredAt: now()));
 
         Auth::login($user);
 

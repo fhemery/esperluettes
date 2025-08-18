@@ -14,11 +14,6 @@ class CreateProfileOnUserRegistered implements ShouldHandleEventsAfterCommit
 
     public function handle(UserRegistered $event): void
     {
-\Illuminate\Support\Facades\Log::debug('Creating profile for newly registered user', [
-    'user_id' => $event->userId,
-    'name' => $event->name
-]);
-
         $this->profiles->createOrInitProfileOnRegistration($event->userId, $event->name);
     }
 }

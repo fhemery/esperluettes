@@ -6,8 +6,6 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
-use App\Domains\Auth\Events\UserNameUpdated;
-use App\Domains\Profile\Listeners\SyncProfileNameAndSlug;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Profile\Listeners\CreateProfileOnUserRegistered;
 
@@ -42,12 +40,6 @@ class ProfileServiceProvider extends ServiceProvider
 
         // Ensure Carbon uses the current app locale (for translated month/day names)
         Carbon::setLocale(app()->getLocale());
-
-        // Register domain event listeners (Profile listens to Auth events)
-        Event::listen(
-            UserNameUpdated::class,
-            [SyncProfileNameAndSlug::class, 'handle']
-        );
 
         Event::listen(
             UserRegistered::class,

@@ -23,6 +23,7 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'display_name' => ['nullable', 'string', 'max:100'],
             'facebook_url' => ['nullable', 'string', 'max:255'],
             'x_url' => ['nullable', 'string', 'max:255'],
             'instagram_url' => ['nullable', 'string', 'max:255'],
@@ -58,6 +59,7 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'display_name.max' => __('The display name may not be greater than :max characters.'),
             'facebook_url.max' => __('The Facebook URL may not be greater than 255 characters.'),
             'x_url.max' => __('The X URL may not be greater than 255 characters.'),
             'instagram_url.max' => __('The Instagram URL may not be greater than 255 characters.'),
@@ -76,6 +78,7 @@ class UpdateProfileRequest extends FormRequest
     public function attributes(): array
     {
         return [
+            'display_name' => __('display name'),
             'facebook_url' => __('Facebook URL'),
             'x_url' => __('X URL'),
             'instagram_url' => __('Instagram URL'),

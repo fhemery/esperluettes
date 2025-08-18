@@ -23,6 +23,7 @@ This has two consequences :
 - When we need to send a command in the wrong direction, we use **Event-Driven Architecture**. Check below for more details. 
 
 ## Event-Driven Architecture
+TODO: FIX with another example !
 
 Event-Driven Architecture is a way to send events so that other domains can react in consequence.
 
@@ -51,15 +52,6 @@ if ($request->user()->wasChanged('name')) {
 }
 ```
 
-Anyone can catch it. With is why the [SyncProfileNameAndSlug](../app/Domains/Profile/Listeners/SyncProfileNameAndSlug.php) listener catches it and updates.
-All we need, is to register the listener, which is done by the [ProfileServiceProvider](../app/Domains/Profile/Providers/ProfileServiceProvider.php):
-
-```php
-Event::listen(
-    UserNameUpdated::class,
-    [SyncProfileNameAndSlug::class, 'handle']
-);
-```
 And we're done !
 
 ## Deptrac architectural rules
