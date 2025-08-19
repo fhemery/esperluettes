@@ -5,10 +5,14 @@ namespace App\Domains\Profile\PublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
 use App\Domains\Shared\Dto\ProfileDto;
 use App\Domains\Profile\Services\ProfileService;
+use App\Domains\Profile\Services\ProfileAvatarUrlService;
 
 class ProfilePublicApi implements ProfilePublicApiContract
 {
-    public function __construct(private readonly ProfileService $profiles)
+    public function __construct(
+        private readonly ProfileService $profiles,
+        private readonly ProfileAvatarUrlService $avatars,
+    )
     {
     }
     public function getPublicProfile(int $userId): ?ProfileDto
@@ -35,7 +39,7 @@ class ProfilePublicApi implements ProfilePublicApiContract
                 user_id: $profile->user_id,
                 display_name: (string) ($profile->display_name ?? ''),
                 slug: (string) ($profile->slug ?? ''),
-                avatar_url: (string) $profile->profile_picture_url,
+                avatar_url: $this->avatars->publicUrl($profile->profile_picture_path, $profile->user_id),
             ) : null;
         }
 

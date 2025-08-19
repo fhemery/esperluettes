@@ -7,7 +7,7 @@
                     <!-- Profile Picture -->
                     <div class="flex-shrink-0">
                         <img class="h-24 w-24 rounded-full border-4 border-white shadow-lg"
-                            src="{{ $profile->profile_picture_url }}"
+                            src="{{ $profile->profile_picture_path }}"
                             alt="{{ __(":name's profile picture", ['name' => $profile->display_name]) }}">
                     </div>
 

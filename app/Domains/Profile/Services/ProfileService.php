@@ -28,7 +28,7 @@ class ProfileService
 
         $avatar = AvatarGenerator::forUser($display, 200);
         // Store the avatar in the public disk
-        $avatarPath = 'profile_pictures/' . $userId . '_' . time() . '.svg';
+        $avatarPath = 'profile_pictures/' . $userId . '.svg';
         Storage::disk('public')->put($avatarPath, $avatar);
 
         // Create only if missing; do not alter an existing profile
@@ -40,8 +40,6 @@ class ProfileService
                 'profile_picture_path' => $avatarPath,
             ]
         );
-        // Warm cache
-        $this->cache->putByUserId($userId, $profile);
         return $profile;
     }
 
@@ -149,12 +147,12 @@ class ProfileService
         $filename = 'profile_pictures/' . $profile->user_id . '_' . time() . '.jpg';
         
         // Process and save image using shared ImageService
-        $this->images->saveSquareJpg('public', $filename, $file, size: 200, quality: 85);
+        $path = $this->images->saveSquareJpg('public', $filename, $file, size: 200, quality: 85);
         
         // Update profile with new picture path
-        $profile->update(['profile_picture_path' => $filename]);
+        $profile->update(['profile_picture_path' => $path]);
         
-        return $filename;
+        return $path;
     }
 
     /**

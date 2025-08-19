@@ -5,7 +5,6 @@ namespace App\Domains\Profile\Models;
 use App\Domains\Auth\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Domains\Profile\Support\AvatarGenerator;
 
 class Profile extends Model
 {
@@ -81,4 +80,5 @@ class Profile extends Model
                !empty($this->instagram_url) || 
                !empty($this->youtube_url);
     }
+
 }

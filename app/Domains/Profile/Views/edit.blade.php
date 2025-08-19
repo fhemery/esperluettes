@@ -37,7 +37,7 @@
 
                                 <div class="text-center">
                                     <img class="h-32 w-32 rounded-full mx-auto border-4 border-white shadow-lg"
-                                         src="{{ $profile->profile_picture_url }}"
+                                         src="{{ $profile->profile_picture_path }}"
                                          alt="{{ __('Current profile picture') }}">
                                 </div>
 
