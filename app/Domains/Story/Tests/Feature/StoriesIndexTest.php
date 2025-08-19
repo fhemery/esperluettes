@@ -83,7 +83,7 @@ it('should show public and community stories to logged users', function () {
 
 it('paginates 24 stories ordered by creation date desc', function () {
     // Arrange
-    $author = alice($this, ['name' => 'Author']);
+    $author = alice($this);
 
     // Create 30 public stories and then set created_at explicitly for ordering
     for ($i = 1; $i <= 30; $i++) {

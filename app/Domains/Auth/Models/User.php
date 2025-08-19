@@ -6,7 +6,6 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\Database\Factories\UserFactory as DomainUserFactory;
-
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -21,7 +20,6 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var list<string>
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
         'is_active',
@@ -108,7 +106,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 'slug' => $role,
             ]);
         }
-        $this->roles()->syncWithoutDetaching($roleModel);
+        $this->roles()->syncWithoutDetaching([$roleModel->id]);
     }
 
     /**

@@ -13,7 +13,7 @@ it('redirects guests to login when accessing /stories/create', function () {
 });
 
 it('allows authenticated users to access the story creation page', function () {
-    $user = User::factory()->create();
+    $user = alice($this);
 
     $response = $this->actingAs($user)->get('/stories/create');
 

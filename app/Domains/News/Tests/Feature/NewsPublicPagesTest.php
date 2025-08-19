@@ -7,14 +7,8 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-function makeAdminForPublic(): User {
-    $admin = User::factory()->create(['is_active' => true]);
-    $admin->assignRole('admin');
-    return $admin;
-}
-
 it('shows published news in index with correct link', function () {
-    $admin = makeAdminForPublic();
+    $admin = admin($this);
     $a = News::factory()->published()->create([
         'title' => 'Published News',
         'slug' => 'published-news',
@@ -29,7 +23,7 @@ it('shows published news in index with correct link', function () {
 });
 
 it('does not show non-published news in index', function () {
-    $admin = makeAdminForPublic();
+    $admin = admin($this);
     News::factory()->create([
         'title' => 'Draft News',
         'slug' => 'draft-news',
@@ -45,7 +39,7 @@ it('does not show non-published news in index', function () {
 });
 
 it('allows direct access to published news', function () {
-    $admin = makeAdminForPublic();
+    $admin = admin($this);
     $a = News::factory()->published()->create([
         'title' => 'Published Detail',
         'slug' => 'published-detail',
@@ -58,7 +52,7 @@ it('allows direct access to published news', function () {
 });
 
 it('returns 404 for direct access to non-published news', function () {
-    $admin = makeAdminForPublic();
+    $admin = admin($this);
     $a = News::factory()->create([
         'title' => 'Draft Detail',
         'slug' => 'draft-detail',
@@ -67,6 +61,8 @@ it('returns 404 for direct access to non-published news', function () {
         'created_by' => $admin->id,
     ]);
 
-    $response = $this->get(route('news.show', $a->slug));
+    $alice = alice($this);
+
+    $response = $this->actingAs($alice)->get(route('news.show', $a->slug));
     $response->assertNotFound();
 });

@@ -5,6 +5,7 @@ namespace App\Domains\Profile\Services;
 use App\Domains\Profile\Events\ProfileDisplayNameChanged;
 use App\Domains\Auth\Models\User;
 use App\Domains\Profile\Models\Profile;
+use App\Domains\Profile\Support\AvatarGenerator;
 use App\Domains\Shared\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -23,12 +24,18 @@ class ProfileService
             $display = 'user-' . $userId;
         }
 
+        $avatar = AvatarGenerator::forUser($display, 200);
+        // Store the avatar in the public disk
+        $avatarPath = 'profile_pictures/' . $userId . '_' . time() . '.svg';
+        Storage::disk('public')->put($avatarPath, $avatar);
+
         // Create only if missing; do not alter an existing profile
         return Profile::firstOrCreate(
             ['user_id' => $userId],
-            [
+            [   
                 'display_name' => $display,
                 'slug' => $this->makeUniqueSlugForName($display, $userId),
+                'profile_picture_path' => $avatarPath,
             ]
         );
     }
@@ -214,28 +221,6 @@ class ProfileService
         return Profile::where('user_id', $userId)->with('user')->first();
     }
 
-    /**
-     * Get profile by user ID or create if it doesn't exist
-     */
-    public function getOrCreateProfileByUserId(int $userId): Profile
-    {
-        $profile = Profile::where('user_id', $userId)->with('user')->first();
-        
-        if (!$profile) {
-            // Fetch the user to derive slug
-            $user = User::findOrFail($userId);
-            $profile = Profile::create([
-                'user_id' => $userId,
-                'slug' => $this->makeUniqueSlugForUser($user),
-            ]);
-            $profile->load('user'); // Load the user relationship
-        } elseif (empty($profile->slug)) {
-            $this->ensureProfileSlug($profile);
-            $profile->load('user');
-        }
-        
-        return $profile;
-    }
 
     /**
      * Check if user can edit profile (is the owner)
@@ -245,37 +230,9 @@ class ProfileService
         return $currentUser->id === $profile->user_id;
     }
 
-    /**
-     * Ensure a profile has a unique slug. If missing, generate and save it.
-     */
-    public function ensureProfileSlug(Profile $profile): void
-    {
-        if (!empty($profile->slug)) {
-            return;
-        }
-        $user = $profile->user ?: User::find($profile->user_id);
-        $profile->slug = $this->makeUniqueSlugForUser($user);
-        $profile->saveQuietly();
-    }
+    
 
-    /**
-     * Make a unique slug from the user's name with fallback to user-<id>.
-     */
-    private function makeUniqueSlugForUser(User $user): string
-    {
-        $base = Str::slug($user->name ?? '') ?: 'user-' . $user->id;
-        $slug = $base;
-        $i = 0;
-        while (
-            Profile::where('slug', $slug)
-                ->where('user_id', '!=', $user->id)
-                ->exists()
-        ) {
-            $i++;
-            $slug = $base . '-' . $i;
-        }
-        return $slug;
-    }
+  
 
     /**
      * Make a unique slug from an arbitrary name for the given user ID.

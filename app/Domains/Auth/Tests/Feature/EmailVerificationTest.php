@@ -6,6 +6,7 @@ use App\Domains\Auth\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -13,7 +14,7 @@ uses(TestCase::class, RefreshDatabase::class);
 it('sends verification email to unverified user', function () {
     Notification::fake();
 
-    $user = User::factory()->unverified()->create();
+    $user = alice($this, [], false);
 
     $this->actingAs($user)
         ->post(route('verification.send'))
@@ -26,16 +27,14 @@ it('sends verification email to unverified user', function () {
 });
 
 it('does not send verification if already verified and redirects to dashboard', function () {
+    $user = alice($this, [], true);
+    
     Notification::fake();
-
-    $user = User::factory()->create([
-        'email_verified_at' => now(),
-    ]);
-
     $response = $this->actingAs($user)
         ->post(route('verification.send'));
 
     $response->assertRedirect(route('dashboard'));
 
     Notification::assertNothingSent();
+
 });

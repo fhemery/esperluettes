@@ -8,13 +8,13 @@
                     <div class="flex-shrink-0">
                         <img class="h-24 w-24 rounded-full border-4 border-white shadow-lg"
                             src="{{ $profile->profile_picture_url }}"
-                            alt="{{ __(":name's profile picture", ['name' => $user->name]) }}">
+                            alt="{{ __(":name's profile picture", ['name' => $profile->display_name]) }}">
                     </div>
 
                     <!-- User Info -->
                     <div class="flex-1">
                         <div class="flex items-center gap-3">
-                            <h1 class="text-3xl font-bold text-white">{{ $user->name }}</h1>
+                            <h1 class="text-3xl font-bold text-white">{{ $profile->display_name }}</h1>
                             @if($canEdit)
                             <div x-data="{ url: '{{ route('profile.show', $profile) }}', copied: false }" class="relative">
                                 <button type="button"

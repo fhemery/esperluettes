@@ -7,14 +7,8 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-function makeAdminForNews(): User {
-    $admin = User::factory()->create(['is_active' => true]);
-    $admin->assignRole('admin');
-    return $admin;
-}
-
 it('allows access to published news via route', function () {
-    $admin = makeAdminForNews();
+    $admin = admin($this);
     $news = News::factory()->create([
         'title' => 'Hello World',
         'slug' => 'hello-world',
@@ -29,7 +23,7 @@ it('allows access to published news via route', function () {
 });
 
 it('returns 404 for draft news to guests', function () {
-    $admin = makeAdminForNews();
+    $admin = admin($this);
     $news = News::factory()->create([
         'title' => 'Draft News',
         'slug' => 'draft-news',
@@ -38,12 +32,14 @@ it('returns 404 for draft news to guests', function () {
         'created_by' => $admin->id,
     ]);
 
+    Auth::logout();
+    
     $response = $this->get(route('news.show', ['slug' => $news->slug]));
     $response->assertNotFound();
 });
 
 it('returns 404 for draft news to non-admins', function () {
-    $admin = makeAdminForNews();
+    $admin = admin($this);
     $news = News::factory()->create([
         'title' => 'Draft News',
         'slug' => 'draft-news',
@@ -52,8 +48,7 @@ it('returns 404 for draft news to non-admins', function () {
         'created_by' => $admin->id,
     ]);
 
-    $user = User::factory()->create(['is_active' => true]);
-    $user->assignRole('user');
+    $user = alice($this);
     $this->actingAs($user);
 
     $response = $this->get(route('news.show', ['slug' => $news->slug]));
@@ -61,7 +56,7 @@ it('returns 404 for draft news to non-admins', function () {
 });
 
 it('shows draft preview with banner to admins', function () {
-    $admin = makeAdminForNews();
+    $admin = admin($this);
     $news = News::factory()->create([
         'title' => 'Banner Test',
         'slug' => 'banner-test',

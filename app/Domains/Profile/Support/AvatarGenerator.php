@@ -2,18 +2,16 @@
 
 namespace App\Domains\Profile\Support;
 
-use App\Domains\Auth\Models\User;
-
 class AvatarGenerator
 {
     /**
      * Generate a data URI SVG avatar for a user.
      */
-    public static function forUser(User $user, int $size = 200, ?int $seed = null): string
+    public static function forUser(string $username, int $size = 200, ?int $seed = null): string
     {
-        $name = trim($user->name ?? 'User');
+        $name = trim($username ?? 'User');
         $initials = self::initialsFromName($name);
-        $seed = $seed ?? ($user->id ?? 0);
+        $seed = $seed ?? 0;
         return self::fromInitials($initials, $size, $seed);
     }
 

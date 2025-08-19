@@ -1,13 +1,12 @@
 <?php
 
-use App\Domains\Auth\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
 it('shows basic story form fields to authenticated users', function () {
-    $user = User::factory()->create();
+    $user = alice($this);
 
     $response = $this->actingAs($user)->get('/stories/create');
 

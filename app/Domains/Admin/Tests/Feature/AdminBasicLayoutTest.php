@@ -5,14 +5,14 @@ declare(strict_types=1);
 use App\Domains\Auth\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
 it('should redirect the user to home page when clicking on logo', function () {
-    $admin = User::factory()->create([ 'is_active' => true ]);
-    $admin->assignRole('admin');
+    $admin = admin($this);
 
     $this->actingAs($admin);
 
@@ -25,8 +25,7 @@ it('should redirect the user to home page when clicking on logo', function () {
 });
 
 it('should have a link to / in header logo (HTML parsing way)', function () {
-    $admin = User::factory()->create(['is_active' => true]);
-    $admin->assignRole('admin');
+    $admin = admin($this);
 
     $this->actingAs($admin);
 

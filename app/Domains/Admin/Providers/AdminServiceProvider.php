@@ -2,6 +2,7 @@
 
 namespace App\Domains\Admin\Providers;
 
+use App\Domains\Admin\Http\Middleware\InjectFilamentUserName;
 use Illuminate\Auth\Middleware\Authenticate;
 use App\Domains\Auth\Middleware\CheckRole;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -17,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\DB;
 
 // Specific extension to use Filament
 class AdminServiceProvider extends PanelProvider
@@ -28,7 +30,11 @@ class AdminServiceProvider extends PanelProvider
 
         // PHP translations (namespaced)
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'admin');
+
+
     }
+
+    
 
     public function panel(Panel $panel): Panel
     {
@@ -37,9 +43,6 @@ class AdminServiceProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->homeUrl('/')
-            ->authMiddleware([
-                Authenticate::class,
-            ])
             ->authGuard('web')
             ->authPasswordBroker('users')
             ->colors([
@@ -69,6 +72,7 @@ class AdminServiceProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                InjectFilamentUserName::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

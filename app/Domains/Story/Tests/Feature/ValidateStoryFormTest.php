@@ -8,7 +8,7 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 it('shows errors for missing required fields (title, visibility); description optional', function () {
-    $user = User::factory()->create();
+    $user = alice($this);
 
     // Act: submit empty form
     $response = $this->actingAs($user)
@@ -28,7 +28,7 @@ it('shows errors for missing required fields (title, visibility); description op
 });
 
 it('validates title too long (>255)', function () {
-    $user = User::factory()->create();
+    $user = alice($this);
 
     $payload = [
         'title' => str_repeat('a', 256),
@@ -48,7 +48,7 @@ it('validates title too long (>255)', function () {
 });
 
 it('validates description max length (3000)', function () {
-    $user = User::factory()->create();
+    $user = alice($this);
 
     $payload = [
         'title' => 'Valid',
@@ -68,7 +68,7 @@ it('validates description max length (3000)', function () {
 });
 
 it('validates visibility must be in allowed set', function () {
-    $user = User::factory()->create();
+    $user = alice($this);
 
     $payload = [
         'title' => 'Valid',

@@ -2,15 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
 it('allows an admin user to access the Filament panel', function () {
-    $admin = User::factory()->create([ 'is_active' => true ]);
-    $admin->assignRole('admin');
+    $admin = admin($this);
 
     $this->actingAs($admin);
 
@@ -30,8 +28,7 @@ it('redirects guests trying to access the Filament panel', function () {
 });
 
 it('redirects non admins to dashboard', function () {
-    $user = User::factory()->create([ 'is_active' => true ]);
-    $user->assignRole('user');
+    $user = alice($this);
 
     $this->actingAs($user);
 

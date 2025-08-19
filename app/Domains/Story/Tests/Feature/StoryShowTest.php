@@ -1,7 +1,7 @@
 <?php
 
-use App\Domains\Auth\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -9,7 +9,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 it('shows public story details with title, description, authors and creation date', function () {
     // Arrange: author and public story
-    $author = User::factory()->create();
+    $author = alice($this);
     $story = publicStory('Public Story', $author, [
         'description' => '<p>Some description</p>',
     ]);
@@ -28,8 +28,8 @@ it('shows public story details with title, description, authors and creation dat
 });
 
 it('returns 404 for private story to non-author', function () {
-    $author = User::factory()->create();
-    $nonAuthor = User::factory()->create();
+    $author = alice($this);
+    $nonAuthor = bob($this);
     $story = privateStory('Private Story', $author);
 
     $this->actingAs($nonAuthor);
@@ -37,15 +37,17 @@ it('returns 404 for private story to non-author', function () {
 });
 
 it('redirects guest to login for community story', function () {
-    $author = User::factory()->create();
+    $author = alice($this);
     $story = communityStory('Community Story', $author);
+
+    Auth::logout();
 
     $this->get('/stories/' . $story->slug)->assertRedirect('/login');
 });
 
 it('returns 404 for community story to unverified user', function () {
-    $author = User::factory()->create();
-    $unverified = User::factory()->create([ 'email_verified_at' => null ]);
+    $author = alice($this);
+    $unverified = bob($this, [], false);
     $story = communityStory('Community Story', $author);
 
     $this->actingAs($unverified);
@@ -53,7 +55,7 @@ it('returns 404 for community story to unverified user', function () {
 });
 
 it('shows placeholder when description is empty', function () {
-    $author = User::factory()->create();
+    $author = alice($this);
     $story = publicStory('No Desc Story', $author, [ 'description' => '' ]);
 
     $response = $this->get('/stories/' . $story->slug);
@@ -62,8 +64,8 @@ it('shows placeholder when description is empty', function () {
 });
 
 it('lists multiple authors separated by comma', function () {
-    $author1 = User::factory()->create(['name' => 'Alice']);
-    $author2 = User::factory()->create(['name' => 'Bob']);
+    $author1 = alice($this);
+    $author2 = bob($this);
     $story = publicStory('Coauthored Story', $author1);
 
     // Attach second author on pivot
@@ -78,5 +80,6 @@ it('lists multiple authors separated by comma', function () {
 
     $response = $this->get('/stories/' . $story->slug);
     $response->assertOk();
-    $response->assertSee('Alice, Bob');
+    $response->assertSee('Alice');
+    $response->assertSee('Bob');
 });

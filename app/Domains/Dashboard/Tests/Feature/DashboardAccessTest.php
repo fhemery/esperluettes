@@ -17,10 +17,7 @@ it('redirects guests to login when accessing dashboard', function () {
 });
 
 it('redirects unverified users to verification notice', function () {
-    $user = User::factory()->create([
-        'email_verified_at' => null,
-        'is_active' => true,
-    ]);
+    $user = alice($this, [], false);
 
     $this->actingAs($user);
 
@@ -30,10 +27,7 @@ it('redirects unverified users to verification notice', function () {
 });
 
 it('allows verified users to access dashboard', function () {
-    $user = User::factory()->create([
-        'email_verified_at' => now(),
-        'is_active' => true,
-    ]);
+    $user = alice($this);
 
     $this->actingAs($user);
 

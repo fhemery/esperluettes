@@ -48,42 +48,6 @@ class Profile extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    /**
-     * Get the profile picture URL or default avatar
-     */
-    public function getProfilePictureUrlAttribute(): string
-    {
-        if ($this->profile_picture_path) {
-            return asset('storage/' . $this->profile_picture_path);
-        }
-        
-        return $this->getDefaultAvatarUrl();
-    }
-
-    /**
-     * Generate default avatar URL based on user initials
-     */
-    public function getDefaultAvatarUrl(): string
-    {
-        return AvatarGenerator::forUser($this->user, 200);
-    }
-
-    /**
-     * Get user initials for default avatar
-     */
-    private function getInitials(): string
-    {
-        $name = $this->user->name ?? 'User';
-        $words = explode(' ', trim($name));
-        
-        if (count($words) >= 2) {
-            return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
-        }
-        
-        return strtoupper(substr($name, 0, 2));
-    }
-
     
 
     /**

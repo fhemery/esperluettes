@@ -33,7 +33,7 @@ class ProfileController extends Controller
     public function showOwn(): View
     {
         $user = Auth::user();
-        $profile = $this->profileService->getOrCreateProfileByUserId($user->id);
+        $profile = $this->profileService->getProfile($user->id);
         return $this->show($profile);
     }
 }

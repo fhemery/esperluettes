@@ -9,32 +9,24 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 it('shows the authenticated validated user name on profile page', function () {
-    $user = User::factory()->create([
-        'name' => 'John Doe',
-        'email_verified_at' => now(),
-        'is_active' => true,
-    ]);
-
-    $this->actingAs($user);
-
-    $response = $this->get('/profile'); // uses ProfileController@showOwn
-
-    $response->assertOk();
-    $response->assertSee('John Doe');
-});
-
-it('should show profile edit button if user is current user', function () {
-    $user = User::factory()->create([
-        'name' => 'John Doe',
-        'email_verified_at' => now(),
-        'is_active' => true,
-    ]);
+    $user = alice($this);
 
     $this->actingAs($user);
 
     $response = $this->get('/profile');
 
     $response->assertOk();
-    $response->assertSee('John Doe');
+    $response->assertSee('Alice');
+});
+
+it('should show profile edit button if user is current user', function () {
+    $user = alice($this);
+
+    $this->actingAs($user);
+
+    $response = $this->get('/profile');
+
+    $response->assertOk();
+    $response->assertSee('Alice');
     $response->assertSee('Edit Profile');
 });

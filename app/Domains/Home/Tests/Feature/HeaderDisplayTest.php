@@ -19,11 +19,7 @@ it('should show the register and login button to unlogged users', function () {
 });
 
 it('should not show the register and login button to logged user', function () {
-    $user = User::factory()->create([
-        'name' => 'John Doe',
-        'email_verified_at' => now(),
-        'is_active' => true,
-    ]);
+    $user = alice($this);
 
     $this->actingAs($user);
 
@@ -35,11 +31,7 @@ it('should not show the register and login button to logged user', function () {
 });
 
 it('should show dashboard, account, profile access and logout, but not admin to logged user', function () {
-    $user = User::factory()->create([
-        'name' => 'John Doe',
-        'email_verified_at' => now(),
-        'is_active' => true,
-    ]);
+    $user = alice($this);
 
     $this->actingAs($user);
 
@@ -50,5 +42,5 @@ it('should show dashboard, account, profile access and logout, but not admin to 
     $response->assertSee('Account');
     $response->assertSee('Profile');
     $response->assertSee('Log Out');
-    $this->assertStringNotContainsString('Admin', $response->content());
+    $response->assertDontSee('Admin');
 });

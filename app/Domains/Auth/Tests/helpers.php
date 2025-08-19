@@ -20,6 +20,17 @@ function bob(TestCase $t, array $overrides = [], bool $isVerified = true): User
     ], $overrides), $isVerified);
 }
 
+function admin(TestCase $t, array $overrides = [], bool $isVerified = true): User
+{
+    $user = registerUserThroughForm($t, array_merge([
+        'name' => 'Admin',
+        'email' => 'admin@admin.com',
+    ], $overrides), $isVerified);
+    $user->assignRole('admin');
+    $user->refresh()->load('roles');
+    return $user;
+}
+
 /**
  * Register a user through the real registration HTTP endpoint and return it.
  * You can override fields like email/password via $overrides.
@@ -33,6 +44,7 @@ function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVer
         'email' => 'john@example.com',
         'password' => 'secret-password',
         'password_confirmation' => 'secret-password',
+        'is_active'=>true
     ], $overrides);
 
     if ($ensureGuest && Auth::check()) {
@@ -44,7 +56,7 @@ function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVer
 
     $user = User::where('email', $payload['email'])->firstOrFail();
     if ($isVerified) {
-        $user->forceFill(['email_verified_at' => now()])->save();
+        $user->markEmailAsVerified();
     }
 
     return $user;

@@ -20,8 +20,6 @@ class UserActivationService
 
         $user->activate();
         
-        $this->logActivationChange($user, 'activated');
-        
         return true;
     }
 
@@ -38,8 +36,6 @@ class UserActivationService
         
         // Terminate all sessions for this user
         $this->terminateUserSessions($user);
-        
-        $this->logActivationChange($user, 'deactivated');
         
         return true;
     }
@@ -61,25 +57,5 @@ class UserActivationService
         DB::table('sessions')
             ->where('user_id', $user->id)
             ->delete();
-    }
-
-    /**
-     * Log activation/deactivation changes for audit purposes
-     */
-    private function logActivationChange(User $user, string $action): void
-    {
-        $adminUser = Auth::user();
-        $adminName = $adminUser ? $adminUser->name : 'System';
-        $adminId = $adminUser ? $adminUser->id : null;
-
-        Log::info("User {$action}", [
-            'target_user_id' => $user->id,
-            'target_user_name' => $user->name,
-            'target_user_email' => $user->email,
-            'admin_user_id' => $adminId,
-            'admin_user_name' => $adminName,
-            'action' => $action,
-            'timestamp' => now()->toISOString(),
-        ]);
     }
 }

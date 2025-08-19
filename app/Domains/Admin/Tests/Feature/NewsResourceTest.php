@@ -10,14 +10,8 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-function makeAdminForCrud(): User {
-    $admin = User::factory()->create(['is_active' => true]);
-    $admin->assignRole('admin');
-    return $admin;
-}
-
 it('creates a pinned published news and auto-assigns display order via create page', function () {
-    $admin = makeAdminForCrud();
+    $admin = admin($this);
     $this->actingAs($admin);
 
     $title = 'Created via Resource';
@@ -46,7 +40,7 @@ it('creates a pinned published news and auto-assigns display order via create pa
 });
 
 it('unpinning via edit clears display order via edit page', function () {
-    $admin = makeAdminForCrud();
+    $admin = admin($this);
     $this->actingAs($admin);
 
     $a = News::factory()->published()->pinned()->create([

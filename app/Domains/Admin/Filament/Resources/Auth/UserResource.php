@@ -14,7 +14,8 @@ use Filament\Forms\Components\Select;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class UserResource extends Resource
 {
@@ -46,10 +47,23 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                // Read-only display of the Profile display name (joined alias), not persisted
+                Forms\Components\TextInput::make('profile_display_name')
                     ->label(__('admin::auth.users.name_header'))
-                    ->required()
-                    ->maxLength(255),
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->afterStateHydrated(function ($component, $record) {
+                        if ($record) {
+                            $name = $record->profile_display_name ?? null;
+                            if ($name === null) {
+                                $name = DB::table('users as u')
+                                    ->leftJoin('profile_profiles as pp', 'pp.user_id', '=', 'u.id')
+                                    ->where('u.id', $record->id)
+                                    ->value('pp.display_name');
+                            }
+                            $component->state($name ?? '');
+                        }
+                    }),
                 Forms\Components\TextInput::make('email')
                     ->label(__('admin::auth.users.email_header'))
                     ->email()
@@ -67,14 +81,23 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                $query
+                    ->leftJoin('profile_profiles as pp', 'pp.user_id', '=', 'users.id')
+                    ->select('users.*')
+                    ->selectRaw('pp.display_name as profile_display_name');
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label(__('admin::shared.column.id'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('profile_display_name')
                     ->label(__('admin::auth.users.name_header'))
-                    ->searchable(),
+                    ->sortable()
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->orWhere('pp.display_name', 'like', "%{$search}%");
+                    }),
                 Tables\Columns\TextColumn::make('email')
                     ->label(__('admin::auth.users.email_header'))
                     ->searchable(),
@@ -167,7 +190,6 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }

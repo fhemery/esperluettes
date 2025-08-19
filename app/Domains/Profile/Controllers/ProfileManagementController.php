@@ -22,7 +22,7 @@ class ProfileManagementController extends Controller
     public function edit(): View
     {
         $user = Auth::user();
-        $profile = $this->profileService->getOrCreateProfileByUserId($user->id);
+        $profile = $this->profileService->getProfile($user->id);
 
         return view('profile::edit', compact('profile', 'user'));
     }

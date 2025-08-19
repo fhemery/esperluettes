@@ -4,19 +4,14 @@ use App\Domains\StaticPage\Models\StaticPage;
 use App\Domains\Auth\Models\User;
 use App\Domains\StaticPage\Services\StaticPageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-function makeAdminForStatic(): User {
-    $admin = User::factory()->create(['is_active' => true]);
-    $admin->assignRole('admin');
-    return $admin;
-}
-
 it('allows access to published static page via catch-all route', function () {
-    $admin = makeAdminForStatic();
+    $admin = admin($this);
     $page = StaticPage::factory()->published()->create([
         'title' => 'FAQ',
         'slug' => 'faq',
@@ -29,7 +24,7 @@ it('allows access to published static page via catch-all route', function () {
 });
 
 it('returns 404 for draft page to guests', function () {
-    $admin = makeAdminForStatic();
+    $admin = admin($this);
     $page = StaticPage::factory()->create([
         'title' => 'Draft Only',
         'slug' => 'draft-only',
@@ -37,13 +32,15 @@ it('returns 404 for draft page to guests', function () {
         'published_at' => null,
         'created_by' => $admin->id,
     ]);
+
+    Auth::logout();
 
     $response = $this->get('/' . $page->slug);
     $response->assertNotFound();
 });
 
 it('returns 404 for draft page to non-admins', function () {
-    $admin = makeAdminForStatic();
+    $admin = admin($this);
     $page = StaticPage::factory()->create([
         'title' => 'Draft Only',
         'slug' => 'draft-only',
@@ -52,8 +49,7 @@ it('returns 404 for draft page to non-admins', function () {
         'created_by' => $admin->id,
     ]);
 
-    $user = User::factory()->create(['is_active' => true]);
-    $user->assignRole('user');
+    $user = alice($this);
     $this->actingAs($user);
 
 
@@ -62,7 +58,7 @@ it('returns 404 for draft page to non-admins', function () {
 });
 
 it('shows draft preview with banner to admins', function () {
-    $admin = makeAdminForStatic();
+    $admin = admin($this);
     $page = StaticPage::factory()->create([
         'title' => 'Legal Notice',
         'slug' => 'legal-notice',
@@ -78,7 +74,7 @@ it('shows draft preview with banner to admins', function () {
 });
 
 it('rebuilds slug map cache on CRUD and status changes', function () {
-    $admin = makeAdminForStatic();
+    $admin = admin($this);
 
     // Create published page -> should appear in cache
     $page = StaticPage::factory()->published()->create([

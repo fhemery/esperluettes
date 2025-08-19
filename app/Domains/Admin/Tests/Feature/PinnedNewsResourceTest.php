@@ -8,14 +8,8 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-function makeAdminUser(): User {
-    $admin = User::factory()->create(['is_active' => true]);
-    $admin->assignRole('admin');
-    return $admin;
-}
-
 it('excludes non-pinned published news from PinnedNewsResource', function () {
-    $admin = makeAdminUser();
+    $admin = admin($this);
     $this->actingAs($admin);
 
     $title = 'Published not pinned';
@@ -36,7 +30,7 @@ it('excludes non-pinned published news from PinnedNewsResource', function () {
 });
 
 it('includes pinned published news in PinnedNewsResource', function () {
-    $admin = makeAdminUser();
+    $admin = admin($this);
     $this->actingAs($admin);
 
     $title = 'Pinned + Published';
@@ -55,7 +49,7 @@ it('includes pinned published news in PinnedNewsResource', function () {
 });
 
 it('assigns a display order for pinned published news (auto-order)', function () {
-    $admin = makeAdminUser();
+    $admin = admin($this);
     $this->actingAs($admin);
 
     $title = 'Pinned without order';

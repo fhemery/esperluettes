@@ -1,7 +1,6 @@
 <?php
 
 use App\Domains\Story\Models\Story;
-use App\Domains\Auth\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +14,7 @@ it('redirects guests from create page to login', function () {
 
 it('produces unique slugs for duplicate titles', function () {
     // Arrange
-    $user = User::factory()->create();
+    $user = alice($this);
     $this->actingAs($user);
 
     $payload = [
@@ -52,7 +51,7 @@ it('produces unique slugs for duplicate titles', function () {
 
 it('allows an authenticated user to create a story and see it', function () {
     // Arrange
-    $user = User::factory()->create();
+    $user = alice($this);
     $this->actingAs($user);
 
     // Act
