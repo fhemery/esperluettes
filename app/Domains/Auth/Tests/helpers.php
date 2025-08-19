@@ -51,12 +51,19 @@ function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVer
         $t->post('/logout');
     }
 
+    // We create the user through /register form, because we 
+    // need the profile to be created.
     $response = $t->post('/register', $payload);
     $response->assertRedirect();
+    // When we create user, they get logged in automatically
+    // We log them out immediately to not interfere.
+    Auth::logout();
+
 
     $user = User::where('email', $payload['email'])->firstOrFail();
     if ($isVerified) {
         $user->markEmailAsVerified();
+        $user->save();
     }
 
     return $user;

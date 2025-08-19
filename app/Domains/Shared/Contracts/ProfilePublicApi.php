@@ -16,4 +16,10 @@ interface ProfilePublicApi
      * Returns [userId => ProfileDto].
      */
     public function getPublicProfiles(array $userIds): array;
+
+    /**
+     * Search profiles by display name and return an associative array of
+     * [user_id => display_name]. Implementations may apply caching and limits.
+     */
+    public function searchDisplayNames(string $query, int $limit = 50): array;
 }

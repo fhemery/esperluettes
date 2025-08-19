@@ -75,6 +75,7 @@ return [
             'generate' => 'Générer un code',
         ],
         'placeholder' => [
+            'deleted' => 'Supprimé',
             'no_sponsor' => 'Aucun sponsor',
             'not_used' => 'Non utilisé',
             'no_comment' => 'Aucun commentaire',

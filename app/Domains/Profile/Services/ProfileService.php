@@ -6,14 +6,16 @@ use App\Domains\Profile\Events\ProfileDisplayNameChanged;
 use App\Domains\Auth\Models\User;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\Support\AvatarGenerator;
+use App\Domains\Profile\Services\ProfileCacheService;
 use App\Domains\Shared\Services\ImageService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProfileService
 {
-    public function __construct(private readonly ImageService $images)
+    public function __construct(private readonly ImageService $images, private readonly ProfileCacheService $cache)
     {
     }
     
@@ -30,7 +32,7 @@ class ProfileService
         Storage::disk('public')->put($avatarPath, $avatar);
 
         // Create only if missing; do not alter an existing profile
-        return Profile::firstOrCreate(
+        $profile = Profile::firstOrCreate(
             ['user_id' => $userId],
             [   
                 'display_name' => $display,
@@ -38,6 +40,9 @@ class ProfileService
                 'profile_picture_path' => $avatarPath,
             ]
         );
+        // Warm cache
+        $this->cache->putByUserId($userId, $profile);
+        return $profile;
     }
 
     /**
@@ -45,7 +50,14 @@ class ProfileService
      */
     public function getProfile(int $userId): Profile
     {
-        return Profile::where('user_id', $userId)->first();
+        // Try cache first
+        $cached = $this->cache->getByUserId($userId);
+        if ($cached instanceof Profile) {
+            return $cached;
+        }
+        $profile = Profile::where('user_id', $userId)->with('user')->first();
+        $this->cache->putByUserId($userId, $profile);
+        return $profile;
     }
    
     /**
@@ -94,7 +106,10 @@ class ProfileService
             ));
         }
 
-        return $profile->fresh();
+        $fresh = $profile->fresh();
+        // Update cache after mutations
+        $this->cache->putByUserId($fresh->user_id, $fresh);
+        return $fresh;
     }
 
     /**
@@ -218,7 +233,85 @@ class ProfileService
      */
     public function getProfileByUserId(int $userId): ?Profile
     {
-        return Profile::where('user_id', $userId)->with('user')->first();
+        $cached = $this->cache->getByUserId($userId);
+        if ($cached instanceof Profile || $cached === null) {
+            return $cached;
+        }
+        $profile = Profile::where('user_id', $userId)->with('user')->first();
+        $this->cache->putByUserId($userId, $profile);
+        return $profile;
+    }
+
+
+    /**
+     * Get multiple profiles by their primary IDs.
+     * Returns an associative array: [profile_id => Profile]
+     */
+    public function getProfilesByIds(array $profileIds): array
+    {
+        return Profile::query()
+            ->whereIn('id', $profileIds)
+            ->get()
+            ->keyBy('id')
+            ->all();
+    }
+
+    /**
+     * Batch get profiles by user IDs with caching.
+     * Returns [user_id => Profile|null]
+     */
+    public function getProfilesByUserIds(array $userIds): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $userIds)));
+        if (empty($ids)) {
+            return [];
+        }
+
+        $results = [];
+        $missing = [];
+        foreach ($ids as $id) {
+            $cached = $this->cache->getByUserId($id);
+            if ($cached instanceof Profile || $cached === null) {
+                $results[$id] = $cached;
+            } else {
+                $missing[] = $id;
+            }
+        }
+
+        if (!empty($missing)) {
+            $profiles = Profile::query()->whereIn('user_id', $missing)->with('user')->get();
+            foreach ($missing as $id) {
+                $profile = $profiles->firstWhere('user_id', $id);
+                $this->cache->putByUserId($id, $profile);
+                $results[$id] = $profile;
+            }
+        }
+
+        return $results;
+    }
+
+
+    /**
+     * List profiles with optional search and pagination (no cache, no user eager-loading).
+     *
+     * - Search applies to display_name and slug (case-insensitive LIKE)
+     * - Results are ordered by display_name ASC
+     */
+    public function listProfiles(?string $search = null, int $page = 1, int $perPage = 50): LengthAwarePaginator
+    {
+        $q = is_string($search) ? trim($search) : '';
+
+        $builder = Profile::query()
+            ->when($q !== '', function ($query) use ($q) {
+                $like = "%{$q}%";
+                $query->where(function ($w) use ($like) {
+                    $w->where('display_name', 'like', $like)
+                      ->orWhere('slug', 'like', $like);
+                });
+            })
+            ->orderBy('display_name');
+
+        return $builder->paginate(perPage: max(1, (int) $perPage), page: max(1, (int) $page));
     }
 
 
@@ -229,10 +322,6 @@ class ProfileService
     {
         return $currentUser->id === $profile->user_id;
     }
-
-    
-
-  
 
     /**
      * Make a unique slug from an arbitrary name for the given user ID.

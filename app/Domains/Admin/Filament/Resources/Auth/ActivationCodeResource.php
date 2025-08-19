@@ -4,7 +4,7 @@ namespace App\Domains\Admin\Filament\Resources\Auth;
 
 use App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource\Pages;
 use App\Domains\Auth\Models\ActivationCode;
-use App\Domains\Auth\Models\User;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -41,14 +41,27 @@ class ActivationCodeResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    /**
+     * Resolve the shared ProfilePublicApi once for use in static callbacks.
+     */
+    protected static function profileApi(): ProfilePublicApi
+    {
+        /** @var ProfilePublicApi $api */
+        $api = app(ProfilePublicApi::class);
+        return $api;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Select::make('sponsor_user_id')
                     ->label(__('admin::auth.activation_codes.sponsor_user_label'))
-                    ->options(User::all()->pluck('name', 'id'))
                     ->searchable()
+                    ->getSearchResultsUsing(fn (string $search): array => static::profileApi()->searchDisplayNames($search, 50))
+                    ->getOptionLabelUsing(fn ($value): ?string => empty($value)
+                        ? null
+                        : static::profileApi()->getPublicProfile((int) $value)?->display_name)
                     ->nullable()
                     ->helperText(__('admin::auth.activation_codes.sponsor_user_helper')),
 
@@ -74,11 +87,13 @@ class ActivationCodeResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('sponsorUser.name')
+                TextColumn::make('sponsor_user_id')
                     ->label(__('admin::auth.activation_codes.sponsor_header'))
                     ->placeholder(__('admin::auth.activation_codes.placeholder.no_sponsor'))
-                    ->searchable()
-                    ->sortable(),
+                    ->formatStateUsing(function ($state, $record) {
+                        $dto = static::profileApi()->getPublicProfile((int) $state);
+                        return $dto?->display_name ?? __('admin::auth.activation_codes.placeholder.deleted');
+                    }),
 
                 TextColumn::make('status')
                     ->label(__('admin::auth.activation_codes.status_header'))
@@ -97,11 +112,13 @@ class ActivationCodeResource extends Resource
                     })
                     ->sortable(),
 
-                TextColumn::make('usedByUser.name')
+                TextColumn::make('used_by_user_id')
                     ->label(__('admin::auth.activation_codes.used_by_header'))
                     ->placeholder(__('admin::auth.activation_codes.placeholder.not_used'))
-                    ->searchable()
-                    ->sortable(),
+                    ->formatStateUsing(function ($state) {
+                        $dto = static::profileApi()->getPublicProfile((int)$state);
+                        return $dto?->display_name ?? __('admin::auth.activation_codes.placeholder.deleted');
+                    }),
 
                 TextColumn::make('used_at')
                     ->label(__('admin::auth.activation_codes.used_at_header'))
@@ -149,7 +166,7 @@ class ActivationCodeResource extends Resource
 
                 SelectFilter::make('sponsor_user_id')
                     ->label(__('admin::auth.activation_codes.sponsor_user_label'))
-                    ->options(User::all()->pluck('name', 'id'))
+                    ->options(fn () => [])
                     ->searchable(),
             ])
             ->actions([
