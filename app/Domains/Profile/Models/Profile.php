@@ -2,9 +2,7 @@
 
 namespace App\Domains\Profile\Models;
 
-use App\Domains\Auth\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Profile extends Model
 {
@@ -33,21 +31,19 @@ class Profile extends Model
     ];
 
     /**
+     * Transient roles attached at runtime (not persisted).
+     *
+     * @var array<int, \App\Domains\Auth\PublicApi\Dto\RoleDto>
+     */
+    public array $roles = [];
+
+    /**
      * Use slug for route model binding and URL generation.
      */
     public function getRouteKeyName(): string
     {
         return 'slug';
-    }
-
-    /**
-     * Get the user that owns the profile
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-    
+    }  
 
     /**
      * Check if profile has a custom profile picture

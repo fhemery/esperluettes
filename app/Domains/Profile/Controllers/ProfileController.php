@@ -2,6 +2,7 @@
 
 namespace App\Domains\Profile\Controllers;
 
+use App\Domains\Auth\PublicApi\UserPublicApi;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Services\ProfileService;
@@ -15,7 +16,8 @@ class ProfileController extends Controller
 {
     public function __construct(
         private ProfileService $profileService,
-        private ProfileAvatarUrlService $avatarUrlService
+        private ProfileAvatarUrlService $avatarUrlService,
+        private UserPublicApi $userPublicApi
     ) {
     }
 
@@ -24,12 +26,12 @@ class ProfileController extends Controller
      */
     public function show(Profile $profile): View
     {
-        $user = $profile->user;
-        $canEdit = Auth::check() && $this->profileService->canEditProfile(Auth::user(), $profile);
+        $canEdit = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
 
         $this->adjustProfilePicture($profile);
+        $this->adjustProfileRoles($profile);
 
-        return view('profile::show', compact('profile', 'user', 'canEdit'));
+        return view('profile::show', compact('profile', 'canEdit'));
     }
 
     /**
@@ -50,6 +52,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         $profile = $this->profileService->getProfile($user->id);
         $this->adjustProfilePicture($profile);
+        $this->adjustProfileRoles($profile);
 
         return view('profile::edit', compact('profile', 'user'));
     }
@@ -80,5 +83,10 @@ class ProfileController extends Controller
     private function adjustProfilePicture(Profile $profile): void
     {
         $profile->profile_picture_path = $this->avatarUrlService->publicUrl($profile->profile_picture_path, $profile->user_id);
+    }
+
+    private function adjustProfileRoles(Profile $profile): void
+    {
+        $profile->roles = $this->userPublicApi->getRolesByUserIds([$profile->user_id])[$profile->user_id] ?? [];
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Domains\Auth\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Domains\Auth\PublicApi\UserPublicApi;
+use App\Domains\Auth\PublicApi\UserPublicApiService;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -20,7 +22,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Bind Auth public API
+        $this->app->bind(UserPublicApi::class, UserPublicApiService::class);
     }
 
     /**

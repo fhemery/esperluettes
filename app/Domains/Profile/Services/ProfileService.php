@@ -3,7 +3,6 @@
 namespace App\Domains\Profile\Services;
 
 use App\Domains\Profile\Events\ProfileDisplayNameChanged;
-use App\Domains\Auth\Models\User;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\Support\AvatarGenerator;
 use App\Domains\Profile\Services\ProfileCacheService;
@@ -53,7 +52,7 @@ class ProfileService
         if ($cached instanceof Profile) {
             return $cached;
         }
-        $profile = Profile::where('user_id', $userId)->with('user')->first();
+        $profile = Profile::where('user_id', $userId)->first();
         $this->cache->putByUserId($userId, $profile);
         return $profile;
     }
@@ -227,34 +226,6 @@ class ProfileService
     }
 
     /**
-     * Get profile by user ID
-     */
-    public function getProfileByUserId(int $userId): ?Profile
-    {
-        $cached = $this->cache->getByUserId($userId);
-        if ($cached instanceof Profile || $cached === null) {
-            return $cached;
-        }
-        $profile = Profile::where('user_id', $userId)->with('user')->first();
-        $this->cache->putByUserId($userId, $profile);
-        return $profile;
-    }
-
-
-    /**
-     * Get multiple profiles by their primary IDs.
-     * Returns an associative array: [profile_id => Profile]
-     */
-    public function getProfilesByIds(array $profileIds): array
-    {
-        return Profile::query()
-            ->whereIn('id', $profileIds)
-            ->get()
-            ->keyBy('id')
-            ->all();
-    }
-
-    /**
      * Batch get profiles by user IDs with caching.
      * Returns [user_id => Profile|null]
      */
@@ -277,7 +248,7 @@ class ProfileService
         }
 
         if (!empty($missing)) {
-            $profiles = Profile::query()->whereIn('user_id', $missing)->with('user')->get();
+            $profiles = Profile::query()->whereIn('user_id', $missing)->get();
             foreach ($missing as $id) {
                 $profile = $profiles->firstWhere('user_id', $id);
                 $this->cache->putByUserId($id, $profile);
@@ -316,9 +287,9 @@ class ProfileService
     /**
      * Check if user can edit profile (is the owner)
      */
-    public function canEditProfile(User $currentUser, Profile $profile): bool
+    public function canEditProfile(int $currentUserId, int $profile_user_id): bool
     {
-        return $currentUser->id === $profile->user_id;
+        return $currentUserId === $profile_user_id;
     }
 
     /**
