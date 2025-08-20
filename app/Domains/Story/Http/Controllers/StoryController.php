@@ -6,15 +6,15 @@ use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Services\StoryService;
 use App\Domains\Shared\Support\Seo;
-use App\Domains\Auth\Support\Verification;
-use Illuminate\Contracts\View\View;
+use App\Domains\Auth\PublicApi\UserPublicApi;
+use Illuminate\Contracts\View\View; 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 class StoryController
 {
-    public function __construct(private readonly StoryService $service)
+    public function __construct(private readonly StoryService $service,
+    private readonly UserPublicApi $userPublicApi)
     {
     }
 
@@ -51,7 +51,7 @@ class StoryController
             if (! $user) {
                 return redirect()->guest(route('login'));
             }
-            if (! Verification::isVerified($user)) {
+            if (! $this->userPublicApi->isVerified($user)) {
                 abort(404);
             }
         }

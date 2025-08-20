@@ -4,6 +4,8 @@ namespace App\Domains\Auth\PublicApi;
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\PublicApi\Dto\RoleDto;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 class UserPublicApi
 {
@@ -38,5 +40,20 @@ class UserPublicApi
         }
 
         return $result;
+    }
+
+    /**
+     * Check whether a user has a verified email
+     * 
+     * TODO: implement a search based on role attribution (user) instead of 
+     * checking verified
+     */
+    public function isVerified(?Authenticatable $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return !($user instanceof MustVerifyEmail) || $user->hasVerifiedEmail();
     }
 }

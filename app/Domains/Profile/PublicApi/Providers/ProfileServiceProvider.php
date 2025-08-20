@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Profile\Providers;
+namespace App\Domains\Profile\PublicApi\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
@@ -28,15 +28,15 @@ class ProfileServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register domain-specific migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../../Database/Migrations');
 
         // Register JSON language files (domain-level)
         $this->loadJsonTranslationsFrom(
-            __DIR__.'/../Resources/lang'
+            __DIR__.'/../../Resources/lang'
         );
         
         // Register PHP translations (namespaced)
-        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'profile');
+        $this->loadTranslationsFrom(__DIR__ . '/../../Resources/lang', 'profile');
         
         // Register view namespace for Profile domain
         View::addNamespace('profile', app_path('Domains/Profile/Views'));

@@ -227,6 +227,7 @@ deptrac:
     ProfilePublic:
       - SharedContracts
       - ProfilePrivate
+      - AuthEvents
     
     StaticPagePublic:
       - SharedContracts
@@ -254,6 +255,7 @@ deptrac:
       - SharedContracts
       - AuthPublic
       - AuthEvents
+      
     
     StaticPagePrivate:
       - SharedContracts
