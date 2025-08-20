@@ -279,6 +279,7 @@ deptrac:
     HomePrivate:
       - SharedContracts
       - AuthPublicApi
+      - NewsPublicApi
     
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
     AuthTests:
