@@ -49,18 +49,8 @@
 
                     <div class="flex items-center justify-between mb-6 text-sm text-gray-600">
                         <div>
-                            @php($authorNames = $story->authors->pluck('name')->join(', '))
                             <span class="font-medium">{{ __('story::show.by') }}
-                                @foreach($story->authors as $i => $author)
-                                    @if($i > 0), @endif
-                                    @php($slug = $author->profile_slug)
-                                    @if($slug)
-                                        <a class="text-indigo-700 hover:text-indigo-900 underline" href="{{ route('profile.show', ['profile' => $slug]) }}">{{ $author->name }}</a>
-                                    @else
-                                        {{ $author->name }}
-                                    @endif
-                                @endforeach
-                                <span class="sr-only">{{ $authorNames }}</span>
+                            <x-profile.inline-names :profiles="$story->authors" />
                             </span>
                         </div>
                         <div>
