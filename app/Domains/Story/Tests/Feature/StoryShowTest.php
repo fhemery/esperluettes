@@ -83,3 +83,12 @@ it('lists multiple authors separated by comma', function () {
     $response->assertSee('Alice');
     $response->assertSee('Bob');
 });
+
+it('should add a link to author profile page', function () {
+    $author = alice($this);
+    $story = publicStory('Public Story', $author);
+
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    $response->assertSee('/profile/alice');
+});

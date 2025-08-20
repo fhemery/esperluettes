@@ -12,7 +12,6 @@
 @endpush
 
 <x-app-layout>
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -51,7 +50,18 @@
                     <div class="flex items-center justify-between mb-6 text-sm text-gray-600">
                         <div>
                             @php($authorNames = $story->authors->pluck('name')->join(', '))
-                            <span class="font-medium">{{ __('story::show.by') }} {{ $authorNames }}</span>
+                            <span class="font-medium">{{ __('story::show.by') }}
+                                @foreach($story->authors as $i => $author)
+                                    @if($i > 0), @endif
+                                    @php($slug = $author->profile_slug)
+                                    @if($slug)
+                                        <a class="text-indigo-700 hover:text-indigo-900 underline" href="{{ route('profile.show', ['profile' => $slug]) }}">{{ $author->name }}</a>
+                                    @else
+                                        {{ $author->name }}
+                                    @endif
+                                @endforeach
+                                <span class="sr-only">{{ $authorNames }}</span>
+                            </span>
                         </div>
                         <div>
                             @php($date = app()->getLocale() === 'fr' ? $story->created_at->format('d-m-Y') : $story->created_at->format('Y-m-d'))
