@@ -2,18 +2,19 @@
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Story\Models\Story;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Create a Story and attach the given author as 'author' collaborator.
  */
-function createStoryForAuthor(User $author, array $attributes = []): Story
+function createStoryForAuthor(int $authorId, array $attributes = []): Story
 {
     $title = $attributes['title'] ?? 'Untitled Story';
     $slugBase = Story::generateSlugBase($title);
 
     $story = new Story([
-        'created_by_user_id' => $author->id, // audit only
+        'created_by_user_id' => $authorId, // audit only
         'title' => $title,
         'slug' => $attributes['slug'] ?? $slugBase,
         // Column is NOT NULL in schema; default to empty string in tests
@@ -32,9 +33,9 @@ function createStoryForAuthor(User $author, array $attributes = []): Story
     // Attach author to pivot
     DB::table('story_collaborators')->insert([
         'story_id' => $story->id,
-        'user_id' => $author->id,
+        'user_id' => $authorId,
         'role' => 'author',
-        'invited_by_user_id' => $author->id,
+        'invited_by_user_id' => $authorId,
         'invited_at' => now(),
         'accepted_at' => now(),
     ]);
@@ -42,17 +43,17 @@ function createStoryForAuthor(User $author, array $attributes = []): Story
     return $story;
 }
 
-function publicStory(string $title, User $author, array $attributes = []): Story
+function publicStory(string $title, int $authorId, array $attributes = []): Story
 {
-    return createStoryForAuthor($author, array_merge(['title' => $title, 'visibility' => Story::VIS_PUBLIC], $attributes));
+    return createStoryForAuthor($authorId, array_merge(['title' => $title, 'visibility' => Story::VIS_PUBLIC], $attributes));
 }
 
-function privateStory(string $title, User $author, array $attributes = []): Story
+function privateStory(string $title, int $authorId, array $attributes = []): Story
 {
-    return createStoryForAuthor($author, array_merge(['title' => $title, 'visibility' => Story::VIS_PRIVATE], $attributes));
+    return createStoryForAuthor($authorId, array_merge(['title' => $title, 'visibility' => Story::VIS_PRIVATE], $attributes));
 }
 
-function communityStory(string $title, User $author, array $attributes = []): Story
+function communityStory(string $title, int $authorId, array $attributes = []): Story
 {
-    return createStoryForAuthor($author, array_merge(['title' => $title, 'visibility' => Story::VIS_COMMUNITY], $attributes));
+    return createStoryForAuthor($authorId, array_merge(['title' => $title, 'visibility' => Story::VIS_COMMUNITY], $attributes));
 }

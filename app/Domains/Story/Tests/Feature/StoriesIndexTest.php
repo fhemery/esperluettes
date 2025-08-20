@@ -25,17 +25,17 @@ it('should only list public stories to unlogged users, title and author', functi
     $author = alice($this);
 
     // Public story (should appear)
-    $public = publicStory('Public Story', $author, [
+    $public = publicStory('Public Story', $author->id, [
         'description' => '<p>Desc</p>',
     ]);
 
     // Private story (should not appear)
-    privateStory('Private Story', $author, [
+    privateStory('Private Story', $author->id, [
         'description' => '<p>Hidden</p>',
     ]);
 
     // Community story (should not appear)
-    communityStory('Community Story', $author, [
+    communityStory('Community Story', $author->id, [
         'description' => '<p>Hidden</p>',
     ]);
 
@@ -55,17 +55,17 @@ it('should show public and community stories to logged users', function () {
     $author = alice($this);
 
     // Public story (should appear)
-    $public = publicStory('Public Story', $author, [
+    $public = publicStory('Public Story', $author->id, [
         'description' => '<p>Desc</p>',
     ]);
 
     // Private story (should not appear)
-    privateStory('Private Story', $author, [
+    privateStory('Private Story', $author->id, [
         'description' => '<p>Hidden</p>',
     ]);
 
     // Community story (should not appear)
-    communityStory('Community Story', $author, [
+    communityStory('Community Story', $author->id, [
         'description' => '<p>Hidden</p>',
     ]);
 
@@ -87,7 +87,7 @@ it('paginates 24 stories ordered by creation date desc', function () {
 
     // Create 30 public stories and then set created_at explicitly for ordering
     for ($i = 1; $i <= 30; $i++) {
-        $story = publicStory(sprintf('Story %02d', $i), $author, [
+        $story = publicStory(sprintf('Story %02d', $i), $author->id, [
             'description' => '<p>Desc</p>',
         ]);
         $story->created_at = now()->subMinutes(60 - $i);

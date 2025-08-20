@@ -38,10 +38,15 @@ deptrac:
           value: 'app/Domains/Admin/Tests/'
 
     # Auth Domain
-    - name: AuthPublicApi
+    - name: AuthPublic
       collectors:
         - type: directory
           value: 'app/Domains/Auth/PublicApi/'
+
+    - name: AuthEvents
+      collectors:
+        - type: directory
+          value: 'app/Domains/Auth/Events/'
 
     - name: AuthPrivate
       collectors:
@@ -49,6 +54,8 @@ deptrac:
           must_not:
             - type: directory
               value: app/Domains/Auth/PublicApi/
+            - type: directory
+              value: app/Domains/Auth/Events/
             - type: directory
               value: app/Domains/Auth/Tests/
           must:
@@ -83,7 +90,7 @@ deptrac:
               value: app/Domains/Home/
 
     # News Domain
-    - name: NewsPublicApi
+    - name: NewsPublic
       collectors:
         - type: directory
           value: 'app/Domains/News/PublicApi/'
@@ -106,7 +113,7 @@ deptrac:
           value: 'app/Domains/News/Tests/'
 
     # Profile Domain
-    - name: ProfilePublicApi
+    - name: ProfilePublic
       collectors:
         - type: directory
           value: 'app/Domains/Profile/PublicApi/'
@@ -129,7 +136,7 @@ deptrac:
           value: 'app/Domains/Profile/Tests/'
 
     # StaticPage Domain
-    - name: StaticPagePublicApi
+    - name: StaticPagePublic
       collectors:
         - type: directory
           value: 'app/Domains/StaticPage/PublicApi/'
@@ -152,7 +159,7 @@ deptrac:
           value: 'app/Domains/StaticPage/Tests/'
 
     # Story Domain
-    - name: StoryPublicApi
+    - name: StoryPublic
       collectors:
         - type: directory
           value: 'app/Domains/Story/PublicApi/'
@@ -175,7 +182,7 @@ deptrac:
           value: 'app/Domains/Story/Tests/'
 
     # StoryRef Domain
-    - name: StoryRefPublicApi
+    - name: StoryRefPublic
       collectors:
         - type: directory
           value: 'app/Domains/StoryRef/PublicApi/'
@@ -204,89 +211,103 @@ deptrac:
     # Test helpers - accessible by all domain tests
     TestHelpers: []
     
+    # Events - can only depend on SharedContracts
+    AuthEvents:
+      - SharedContracts
+
     # Public APIs - can only depend on SharedContracts and their own domain
-    AuthPublicApi:
+    AuthPublic:
       - SharedContracts
       - AuthPrivate
     
-    NewsPublicApi:
+    NewsPublic:
       - SharedContracts
       - NewsPrivate
     
-    ProfilePublicApi:
+    ProfilePublic:
       - SharedContracts
       - ProfilePrivate
     
-    StaticPagePublicApi:
+    StaticPagePublic:
       - SharedContracts
       - StaticPagePrivate
     
-    StoryPublicApi:
+    StoryPublic:
       - SharedContracts
       - StoryPrivate
     
-    StoryRefPublicApi:
+    StoryRefPublic:
       - SharedContracts
       - StoryRefPrivate
     
-    # Private domain internals - can only access SharedContracts and their own PublicApi
+    # Private domains - can access SharedContracts + other domain Public APIs + own Events
     AuthPrivate:
       - SharedContracts
+      - AuthEvents
     
     NewsPrivate:
       - SharedContracts
-      - AuthPublicApi
+      - AuthPublic
+      - AuthEvents
     
     ProfilePrivate:
       - SharedContracts
-      - AuthPublicApi
+      - AuthPublic
+      - AuthEvents
     
     StaticPagePrivate:
       - SharedContracts
-      - AuthPublicApi
+      - AuthPublic
+      - AuthEvents
     
     StoryPrivate:
       - SharedContracts
-      - AuthPublicApi
-      - ProfilePublicApi
-      - StoryRefPublicApi
+      - AuthPublic
+      - AuthEvents
+      - ProfilePublic
+      - StoryRefPublic
     
     StoryRefPrivate:
       - SharedContracts
-      - AuthPublicApi
+      - AuthPublic
+      - AuthEvents
     
     AdminPrivate:
       - SharedContracts
-      - AuthPublicApi
+      - AuthPublic
+      - AuthEvents
       - AuthPrivate
-      - NewsPublicApi
+      - NewsPublic
       - NewsPrivate
-      - ProfilePublicApi
+      - ProfilePublic
       - ProfilePrivate
-      - StaticPagePublicApi
+      - StaticPagePublic
       - StaticPagePrivate
-      - StoryPublicApi
+      - StoryPublic
       - StoryPrivate
-      - StoryRefPublicApi
+      - StoryRefPublic
       - StoryRefPrivate
       - DashboardPrivate
       - HomePrivate
     
     DashboardPrivate:
       - SharedContracts
-      - AuthPublicApi
+      - AuthPublic
+      - AuthEvents
     
     HomePrivate:
       - SharedContracts
-      - AuthPublicApi
-      - NewsPublicApi
+      - AuthPublic
+      - AuthEvents
+      - NewsPublic
     
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
     AuthTests:
       - SharedContracts
       - TestHelpers
       - AuthPrivate
-      - AuthPublicApi
+      - AuthPublic
+      - AuthEvents
       # Can access other test modules for creating test data
       - NewsTests
       - ProfileTests
@@ -299,8 +320,8 @@ deptrac:
       - SharedContracts
       - TestHelpers
       - NewsPrivate
-      - NewsPublicApi
-      - AuthPublicApi
+      - NewsPublic
+      - AuthPublic
       # Can access other test modules for creating test data
       - AuthTests
       - ProfileTests
@@ -313,8 +334,8 @@ deptrac:
       - SharedContracts
       - TestHelpers
       - ProfilePrivate
-      - ProfilePublicApi
-      - AuthPublicApi
+      - ProfilePublic
+      - AuthPublic
       # Can access other test modules for creating test data
       - AuthTests
       - NewsTests
@@ -327,8 +348,8 @@ deptrac:
       - SharedContracts
       - TestHelpers
       - StaticPagePrivate
-      - StaticPagePublicApi
-      - AuthPublicApi
+      - StaticPagePublic
+      - AuthPublic
       # Can access other test modules for creating test data
       - AuthTests
       - NewsTests
@@ -341,10 +362,10 @@ deptrac:
       - SharedContracts
       - TestHelpers
       - StoryPrivate
-      - StoryPublicApi
-      - AuthPublicApi
-      - ProfilePublicApi
-      - StoryRefPublicApi
+      - StoryPublic
+      - AuthPublic
+      - ProfilePublic
+      - StoryRefPublic
       # Can access other test modules for creating test data
       - AuthTests
       - NewsTests
@@ -357,8 +378,8 @@ deptrac:
       - SharedContracts
       - TestHelpers
       - StoryRefPrivate
-      - StoryRefPublicApi
-      - AuthPublicApi
+      - StoryRefPublic
+      - AuthPublic
       # Can access other test modules for creating test data
       - AuthTests
       - NewsTests
@@ -371,12 +392,12 @@ deptrac:
       - SharedContracts
       - TestHelpers
       - AdminPrivate
-      - AuthPublicApi
-      - NewsPublicApi
-      - ProfilePublicApi
-      - StaticPagePublicApi
-      - StoryPublicApi
-      - StoryRefPublicApi
+      - AuthPublic
+      - NewsPublic
+      - ProfilePublic
+      - StaticPagePublic
+      - StoryPublic
+      - StoryRefPublic
       # Can access other test modules for creating test data
       - AuthTests
       - NewsTests

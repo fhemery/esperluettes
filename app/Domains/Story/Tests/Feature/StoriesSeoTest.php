@@ -35,7 +35,7 @@ it('renders SEO tags on stories index', function () {
 it('renders SEO tags on story show', function () {
     // Arrange
     $author = alice($this);
-    $story = publicStory('Epic Tale', $author, [
+    $story = publicStory('Epic Tale', $author->id, [
         'description' => '<p>This is a <strong>great</strong> story with a long description that should be trimmed for meta purposes.</p>'
     ]);
 

@@ -10,7 +10,7 @@ uses(TestCase::class, RefreshDatabase::class);
 it('shows public story details with title, description, authors and creation date', function () {
     // Arrange: author and public story
     $author = alice($this);
-    $story = publicStory('Public Story', $author, [
+    $story = publicStory('Public Story', $author->id, [
         'description' => '<p>Some description</p>',
     ]);
 
@@ -30,7 +30,7 @@ it('shows public story details with title, description, authors and creation dat
 it('returns 404 for private story to non-author', function () {
     $author = alice($this);
     $nonAuthor = bob($this);
-    $story = privateStory('Private Story', $author);
+    $story = privateStory('Private Story', $author->id);
 
     $this->actingAs($nonAuthor);
     $this->get('/stories/' . $story->slug)->assertNotFound();
@@ -38,7 +38,7 @@ it('returns 404 for private story to non-author', function () {
 
 it('redirects guest to login for community story', function () {
     $author = alice($this);
-    $story = communityStory('Community Story', $author);
+    $story = communityStory('Community Story', $author->id);
 
     Auth::logout();
 
@@ -48,7 +48,7 @@ it('redirects guest to login for community story', function () {
 it('returns 404 for community story to unverified user', function () {
     $author = alice($this);
     $unverified = bob($this, [], false);
-    $story = communityStory('Community Story', $author);
+    $story = communityStory('Community Story', $author->id);
 
     $this->actingAs($unverified);
     $this->get('/stories/' . $story->slug)->assertNotFound();
@@ -56,7 +56,7 @@ it('returns 404 for community story to unverified user', function () {
 
 it('shows placeholder when description is empty', function () {
     $author = alice($this);
-    $story = publicStory('No Desc Story', $author, [ 'description' => '' ]);
+    $story = publicStory('No Desc Story', $author->id, [ 'description' => '' ]);
 
     $response = $this->get('/stories/' . $story->slug);
     $response->assertOk();
@@ -66,7 +66,7 @@ it('shows placeholder when description is empty', function () {
 it('lists multiple authors separated by comma', function () {
     $author1 = alice($this);
     $author2 = bob($this);
-    $story = publicStory('Coauthored Story', $author1);
+    $story = publicStory('Coauthored Story', $author1->id);
 
     // Attach second author on pivot
     DB::table('story_collaborators')->insert([
@@ -86,7 +86,7 @@ it('lists multiple authors separated by comma', function () {
 
 it('should add a link to author profile page', function () {
     $author = alice($this);
-    $story = publicStory('Public Story', $author);
+    $story = publicStory('Public Story', $author->id);
 
     $response = $this->get('/stories/' . $story->slug);
     $response->assertOk();
