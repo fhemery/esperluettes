@@ -69,5 +69,10 @@ class SharedServiceProvider extends ServiceProvider
         if (config('shared.event_auditing_enabled', true)) {
             Event::listen('*', [AuditAllDomainEvents::class, 'handle']);
         }
+
+        // Safety guard: never run tests against a non-SQLite database
+        if (app()->environment('testing') && config('database.default') !== 'sqlite') {
+            throw new \RuntimeException('Tests must use sqlite. Clear config cache before running tests.');
+        }
     }
 }

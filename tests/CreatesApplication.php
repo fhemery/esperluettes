@@ -13,6 +13,11 @@ trait CreatesApplication
 
         $app->make(Kernel::class)->bootstrap();
 
+        // Hard safety: ensure tests always use SQLite even if config was cached
+        if ($app->environment('testing')) {
+            $app['config']->set('database.default', 'sqlite');
+        }
+
         // Ensure SQLite test database file exists
         $db = $app['config']['database.connections.sqlite.database'] ?? null;
         if (is_string($db) && str_contains($db, 'database/testing') && $db !== ':memory:') {

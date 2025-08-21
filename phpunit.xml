@@ -34,5 +34,11 @@
         <!-- Ensure Pest can write caches inside Sail container -->
         <env name="PEST_RESULTS_CACHE" value="/tmp/pest-results"/>
         <env name="PEST_MUTATE_CACHE_DIR" value="/tmp/pest-mutate"/>
+        <!-- Belt & suspenders: redirect Laravel cache artifacts away from bootstrap/cache -->
+        <env name="APP_CONFIG_CACHE" value="/tmp/laravel-config-testing.php"/>
+        <env name="APP_ROUTES_CACHE" value="/tmp/laravel-routes-testing.php"/>
+        <env name="APP_EVENTS_CACHE" value="/tmp/laravel-events-testing.php"/>
+        <env name="APP_PACKAGES_CACHE" value="/tmp/laravel-packages-testing.php"/>
+        <env name="VIEW_COMPILED_PATH" value="/tmp/laravel-views-testing"/>
     </php>
 </phpunit>
