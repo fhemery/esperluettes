@@ -59,8 +59,13 @@ class StoryController
             }
         }
 
-        // Create ViewModel with story and profile data
-        $viewModel = new StoryShowViewModel($story, Auth::id(), $this->profileApi);
+        // Fetch authors' public profiles and build ViewModel
+        $authorUserIds = $story->authors->pluck('user_id')->all();
+        $authors = empty($authorUserIds)
+            ? []
+            : array_values($this->profileApi->getPublicProfiles($authorUserIds));
+
+        $viewModel = new StoryShowViewModel($story, Auth::id(), $authors);
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 
         return view('story::show', [

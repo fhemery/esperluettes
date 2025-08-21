@@ -3,7 +3,6 @@
 namespace App\Domains\Story\ViewModels;
 
 use App\Domains\Story\Models\Story;
-use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\ProfileDto;
 
 class StoryShowViewModel
@@ -15,33 +14,15 @@ class StoryShowViewModel
     public function __construct(
         Story $story,
         ?int $currentUserId,
-        private readonly ProfilePublicApi $profileApi
+        array $authors
     ) {
         $this->story = $story;
-        $this->authors = $this->loadAuthors();
+        /** @var ProfileDto[] $authors */
+        $this->authors = $authors;
         $this->currentUserId = $currentUserId;
     }
 
-    /**
-     * Load author ProfileDtos for the story
-     * 
-     * @return ProfileDto[]
-     */
-    private function loadAuthors(): array
-    {
-        // Get author user IDs from collaborators
-        $authorUserIds = $this->story->authors->pluck('user_id')->toArray();
-        
-        if (empty($authorUserIds)) {
-            return [];
-        }
-
-        // Fetch profiles via ProfilePublicApi
-        $profilesById = $this->profileApi->getPublicProfiles($authorUserIds);
-        
-        // Return array of ProfileDto objects
-        return array_values($profilesById);
-    }
+    
 
     /**
      * Get story title
