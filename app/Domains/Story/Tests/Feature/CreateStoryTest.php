@@ -14,7 +14,7 @@ it('redirects guests from create page to login', function () {
 
 it('produces unique slugs for duplicate titles', function () {
     // Arrange
-    $user = alice($this);
+    $user = alice($this, roles: ['user-confirmed']);
     $this->actingAs($user);
 
     $payload = [
@@ -37,12 +37,10 @@ it('produces unique slugs for duplicate titles', function () {
     // Both slugs start with the same base, and end with their respective ids
     $base = \App\Domains\Story\Models\Story::generateSlugBase('Same Title');
     expect($first->slug)->toStartWith($base . '-')
-        ->and($first->slug)->toEndWith('-' . $first->id);
-    expect($second->slug)->toStartWith($base . '-')
-        ->and($second->slug)->toEndWith('-' . $second->id);
-
-    // Ensure they are different
-    expect($first->slug)->not->toEqual($second->slug);
+        ->and($first->slug)->toEndWith('-' . $first->id)
+        ->and($second->slug)->toStartWith($base . '-')
+        ->and($second->slug)->toEndWith('-' . $second->id)
+        ->and($first->slug)->not->toEqual($second->slug);
 
     // Show pages should be reachable via slug-with-id
     $this->get('/stories/' . $first->slug)->assertOk();
@@ -51,7 +49,7 @@ it('produces unique slugs for duplicate titles', function () {
 
 it('allows an authenticated user to create a story and see it', function () {
     // Arrange
-    $user = alice($this);
+    $user = alice($this, roles: ['user-confirmed']);
     $this->actingAs($user);
 
     // Act

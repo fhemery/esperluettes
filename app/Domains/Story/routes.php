@@ -8,7 +8,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/stories', [StoryController::class, 'index'])
         ->name('stories.index');
 
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware(['role:user-confirmed'])->group(function () {
         Route::get('/stories/create', [StoryCreateController::class, 'create'])
             ->name('stories.create');
 

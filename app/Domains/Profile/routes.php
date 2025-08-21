@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['role:user,user-confirmed'])->group(function () {
     // Profile viewing routes
     Route::get('/profile', [ProfileController::class, 'showOwn'])->name('profile.show.own');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');

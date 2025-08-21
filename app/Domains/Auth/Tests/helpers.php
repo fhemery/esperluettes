@@ -4,31 +4,28 @@ use App\Domains\Auth\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
-function alice(TestCase $t, array $overrides = [], bool $isVerified = true): User
+function alice(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = ['user-confirmed']): User
 {
     return registerUserThroughForm($t, array_merge([
         'name' => 'Alice',
         'email' => 'alice@example.com',
-    ], $overrides), $isVerified);
+    ], $overrides), $isVerified, $roles);
 }
 
-function bob(TestCase $t, array $overrides = [], bool $isVerified = true): User
+function bob(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = ['user-confirmed']): User
 {
     return registerUserThroughForm($t, array_merge([
         'name' => 'Bob',
         'email' => 'bob@example.com',
-    ], $overrides), $isVerified);
+    ], $overrides), $isVerified, $roles);
 }
 
-function admin(TestCase $t, array $overrides = [], bool $isVerified = true): User
+function admin(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = ['admin', 'user-confirmed']): User
 {
-    $user = registerUserThroughForm($t, array_merge([
+    return registerUserThroughForm($t, array_merge([
         'name' => 'Admin',
         'email' => 'admin@admin.com',
-    ], $overrides), $isVerified);
-    $user->assignRole('admin');
-    $user->refresh()->load('roles');
-    return $user;
+    ], $overrides), $isVerified, $roles);
 }
 
 /**
@@ -37,7 +34,7 @@ function admin(TestCase $t, array $overrides = [], bool $isVerified = true): Use
  * If $isVerified is true (default), the user's email will be marked as verified.
  * If $ensureGuest is true (default), we'll log out any existing session before registering.
  */
-function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVerified = true, bool $ensureGuest = true): User
+function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = ['user']): User
 {
     $payload = array_merge([
         'name' => 'John Doe',
@@ -47,11 +44,11 @@ function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVer
         'is_active'=>true
     ], $overrides);
 
-    if ($ensureGuest && Auth::check()) {
+    if (Auth::check()) {
         $t->post('/logout');
     }
 
-    // We create the user through /register form, because we 
+    // We create the user through /register form, because we
     // need the profile to be created.
     $response = $t->post('/register', $payload);
     $response->assertRedirect();
@@ -65,6 +62,11 @@ function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVer
         $user->markEmailAsVerified();
         $user->save();
     }
+    foreach ($roles as $role) {
+        $user->assignRole($role);
+    }
+    $user->refresh()->load('roles');
+
 
     return $user;
 }
