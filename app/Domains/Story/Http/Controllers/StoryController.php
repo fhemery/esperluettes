@@ -5,17 +5,21 @@ namespace App\Domains\Story\Http\Controllers;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Services\StoryService;
+use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Shared\Support\Seo;
 use App\Domains\Auth\PublicApi\UserPublicApi;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Illuminate\Contracts\View\View; 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class StoryController
 {
-    public function __construct(private readonly StoryService $service,
-    private readonly UserPublicApi $userPublicApi)
-    {
+    public function __construct(
+        private readonly StoryService $service,
+        private readonly UserPublicApi $userPublicApi,
+        private readonly ProfilePublicApi $profileApi
+    ) {
     }
 
     public function index(): View
@@ -39,12 +43,11 @@ class StoryController
 
     public function show(string $slug): View|\Illuminate\Http\RedirectResponse
     {
-        [$story, $isAuthor] = $this->service->getStoryForShow($slug, Auth::id());
-        $metaDescription = Seo::excerpt($story->description);
+        $story = $this->service->getStoryForShow($slug, Auth::id());
 
         // Enforce visibility rules
         $user = Auth::user();
-        if ($story->visibility === Story::VIS_PRIVATE && ! $isAuthor) {
+        if ($story->visibility === Story::VIS_PRIVATE && ! $story->isCollaborator($user->id)) {
             abort(404);
         }
         if ($story->visibility === Story::VIS_COMMUNITY) {
@@ -56,9 +59,12 @@ class StoryController
             }
         }
 
+        // Create ViewModel with story and profile data
+        $viewModel = new StoryShowViewModel($story, Auth::id(), $this->profileApi);
+        $metaDescription = Seo::excerpt($viewModel->getDescription());
+
         return view('story::show', [
-            'story' => $story,
-            'isAuthor' => $isAuthor,
+            'viewModel' => $viewModel,
             'metaDescription' => $metaDescription,
         ]);
     }

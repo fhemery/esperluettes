@@ -77,6 +77,5 @@ it('allows an authenticated user to create a story and see it', function () {
     $show->assertOk();
     $show->assertSee('My First Story');
     $show->assertSee('story::shared.visibility.options.public');
-    // Edit action visible for author; with non-existent locale, assert the key itself
     $show->assertSee('story::show.edit');
 });

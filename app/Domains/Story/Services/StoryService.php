@@ -21,25 +21,25 @@ class StoryService
         /** @var LengthAwarePaginator $stories */
         $stories = Cache::remember($cacheKey, $ttlSeconds, function () use ($perPage) {
             return Story::query()
-                ->with(['authors:id'])
+                ->with(['authors'])
                 ->where('visibility', Story::VIS_PUBLIC)
                 ->orderByDesc('created_at')
                 ->paginate($perPage);
         });
 
         // Decorate authors for each story with public profile data (transient attributes)
-        $allAuthorIds = $stories->getCollection()->flatMap(fn ($s) => $s->authors->pluck('id'))->unique()->values()->all();
+        $allAuthorIds = $stories->getCollection()->flatMap(fn ($s) => $s->authors->pluck('user_id'))->unique()->values()->all();
         if (!empty($allAuthorIds)) {
             $profiles = $this->profiles->getPublicProfiles($allAuthorIds); // [userId => ProfileDto]
             foreach ($stories->getCollection() as $story) {
                 foreach ($story->authors as $author) {
-                    $dto = $profiles[$author->id] ?? null;
+                    $dto = $profiles[$author->user_id] ?? null;
                     if ($dto) {
                         $author->name = $dto->display_name;
                         $author->avatar_url = $dto->avatar_url;
                         $author->profile_slug = $dto->slug;
                     } else {
-                        $author->name = 'user-' . $author->id;
+                        $author->name = 'user-' . $author->user_id;
                     }
                 }
             }
@@ -84,10 +84,7 @@ class StoryService
         });
     }
 
-    /**
-     * Returns [Story $story, bool $isAuthor]
-     */
-    public function getStoryForShow(string $slug, ?int $viewerId): array
+    public function getStoryForShow(string $slug, ?int $viewerId): Story
     {
         // Extract id from trailing -{id}
         $id = null;
@@ -95,34 +92,11 @@ class StoryService
             $id = (int) $m[1];
         }
 
-        $base = Story::query()->with(['authors:id']);
+        $base = Story::query();
         $story = $id
             ? $base->findOrFail($id)
             : $base->where('slug', $slug)->firstOrFail();
 
-        // Decorate authors with public profile data (transient attributes)
-        $authorIds = $story->authors->pluck('id')->all();
-        if (!empty($authorIds)) {
-            $profiles = $this->profiles->getPublicProfiles($authorIds); // [userId => ProfileDto]
-            foreach ($story->authors as $author) {
-                $dto = $profiles[$author->id] ?? null;
-                if ($dto) {
-                    // Transient attributes for view rendering
-                    $author->name = $dto->display_name;
-                    $author->avatar_url = $dto->avatar_url;
-                    $author->profile_slug = $dto->slug;
-                } else {
-                    // Reasonable fallback
-                    $author->name = 'user-' . $author->id;
-                }
-            }
-        }
-
-        $isAuthor = false;
-        if (!is_null($viewerId)) {
-            $isAuthor = $story->authors->contains('id', $viewerId);
-        }
-
-        return [$story, $isAuthor];
+        return $story;
     }
 }
