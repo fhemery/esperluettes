@@ -40,6 +40,12 @@ return [
             'confirm_title' => 'Confirmer la désactivation',
             'confirm_message' => "Êtes-vous sûr de vouloir désactiver cet utilisateur ? Toutes ses sessions actives seront terminées.",
         ],
+        'promote' => [
+            'action_label' => 'Promouvoir',
+            'confirm_title' => "Promouvoir l’utilisateur",
+            'confirm_message' => "Cela remplacera le rôle « :from » par « :to ».",
+            'success' => "L’utilisateur a été promu au rôle « :role ».",
+        ],
     ],
 
     'activation_codes' => [

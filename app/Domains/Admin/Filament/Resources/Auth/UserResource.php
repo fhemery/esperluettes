@@ -4,6 +4,7 @@ namespace App\Domains\Admin\Filament\Resources\Auth;
 
 use App\Domains\Admin\Filament\Resources\Auth\UserResource\Pages;
 use App\Domains\Auth\Models\User;
+use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\Services\UserActivationService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -154,6 +155,34 @@ class UserResource extends Resource
                             ->success()
                             ->send();
                     }),
+                Action::make('promote')
+                    ->label(__('admin::auth.users.promote.action_label'))
+                    ->icon('heroicon-o-arrow-up-circle')
+                    ->color('primary')
+                    ->visible(fn (User $record): bool => $record->hasRole('user'))
+                    ->requiresConfirmation()
+                    ->modalHeading(__('admin::auth.users.promote.confirm_title'))
+                    ->modalDescription(function () {
+                        $from = Role::where('slug', 'user')->value('name') ?? 'user';
+                        $to = Role::where('slug', 'user-confirmed')->value('name') ?? 'user-confirmed';
+                        return __('admin::auth.users.promote.confirm_message', ['from' => $from, 'to' => $to]);
+                    })
+                    ->action(function (User $record) {
+                        if ($record->hasRole('user')) {
+                            $record->removeRole('user');
+                        }
+                        if (!$record->hasRole('user-confirmed')) {
+                            $record->assignRole('user-confirmed');
+                        }
+                        Notification::make()
+                            ->title(function () {
+                                $role = Role::where('slug', 'user-confirmed')->value('name') ?? 'user-confirmed';
+                                return __('admin::auth.users.promote.success', ['role' => $role]);
+                            })
+                            ->success()
+                            ->send();
+                    }),
+
                 Action::make('deactivate')
                     ->label(__('admin::auth.users.actions.deactivate'))
                     ->icon('heroicon-o-x-circle')
