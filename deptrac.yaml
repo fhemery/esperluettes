@@ -2,67 +2,358 @@ deptrac:
   paths:
     - ./app/Domains
   exclude_files:
-    - '#.*test.*#'
     - 'vendor/.*'
 
-
   layers:
-    - name: Admin
+    # Shared contracts and DTOs - accessible by all domains
+    - name: SharedContracts
       collectors:
         - type: directory
-          value: 'app/Domains/Admin/'
+          value: 'app/Domains/Shared/Contracts/'
+        - type: directory
+          value: 'app/Domains/Shared/Dto/'
+        - type: directory
+          value: 'app/Domains/Shared/Events/'
 
-    - name: News
+    # Test helpers - can be shared between domain tests
+    - name: TestHelpers
       collectors:
         - type: directory
-          value: 'app/Domains/News'
+          value: 'app/Domains/Shared/Testing/'
 
-    - name: Auth
+    # Admin Domain
+    - name: AdminPrivate
       collectors:
-        - type: directory
-          value: 'app/Domains/Auth/'
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/Admin/Tests/
+          must:
+            - type: directory
+              value: app/Domains/Admin/
 
-    - name: Profile
+    - name: AdminTests
       collectors:
         - type: directory
-          value: 'app/Domains/Profile/'
-    
-    - name: Shared
-      collectors:
-        - type: directory
-          value: 'app/Domains/Shared/'
+          value: 'app/Domains/Admin/Tests/'
 
-    - name: StaticPage
+    # Auth Domain
+    - name: AuthPublic
       collectors:
         - type: directory
-          value: 'app/Domains/StaticPage/'
-    
-    - name: StoryRef
+          value: 'app/Domains/Auth/PublicApi/'
+
+    - name: AuthEvents
       collectors:
         - type: directory
-          value: 'app/Domains/StoryRef/'
+          value: 'app/Domains/Auth/Events/'
+
+    - name: AuthPrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/Auth/PublicApi/
+            - type: directory
+              value: app/Domains/Auth/Events/
+            - type: directory
+              value: app/Domains/Auth/Tests/
+          must:
+            - type: directory
+              value: app/Domains/Auth/
+
+    - name: AuthTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Auth/Tests/'
+
+    # Dashboard Domain
+    - name: DashboardPrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/Dashboard/Tests/
+          must:
+            - type: directory
+              value: app/Domains/Dashboard/
+
+    # Home Domain
+    - name: HomePrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/Home/Tests/
+          must:
+            - type: directory
+              value: app/Domains/Home/
+
+    # News Domain
+    - name: NewsPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/News/PublicApi/'
+
+    - name: NewsPrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/News/PublicApi/
+            - type: directory
+              value: app/Domains/News/Tests/
+          must:
+            - type: directory
+              value: app/Domains/News/
+
+    - name: NewsTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/News/Tests/'
+
+    # Profile Domain
+    - name: ProfilePublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Profile/PublicApi/'
+
+    - name: ProfilePrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/Profile/PublicApi/
+            - type: directory
+              value: app/Domains/Profile/Tests/
+          must:
+            - type: directory
+              value: app/Domains/Profile/
+
+    - name: ProfileTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Profile/Tests/'
+
+    # StaticPage Domain
+    - name: StaticPagePublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/StaticPage/PublicApi/'
+
+    - name: StaticPagePrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/StaticPage/PublicApi/
+            - type: directory
+              value: app/Domains/StaticPage/Tests/
+          must:
+            - type: directory
+              value: app/Domains/StaticPage/
+
+    - name: StaticPageTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/StaticPage/Tests/'
+
+    # Story Domain
+    - name: StoryPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Story/PublicApi/'
+
+    - name: StoryPrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/Story/PublicApi/
+            - type: directory
+              value: app/Domains/Story/Tests/
+          must:
+            - type: directory
+              value: app/Domains/Story/
+
+    - name: StoryTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Story/Tests/'
+
+    # StoryRef Domain
+    - name: StoryRefPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/StoryRef/PublicApi/'
+
+    - name: StoryRefPrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/StoryRef/PublicApi/
+            - type: directory
+              value: app/Domains/StoryRef/Tests/
+          must:
+            - type: directory
+              value: app/Domains/StoryRef/
+
+    - name: StoryRefTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/StoryRef/Tests/'
 
   ruleset:
-    Shared: []
-    News:
-      - Auth
-      - Shared
-    Auth:
-      - Shared
-    Profile:
-      - Shared
-      - Auth
-    StaticPage:
-      - Shared
-      - Auth
-    Admin:
-      - News
-      - Auth
-      - Profile
-      - Shared
-      - StaticPage
-      - StoryRef
-    StoryRef:
-      - Shared
-      - Auth  
+    # Shared contracts and DTOs - accessible by all domains
+    SharedContracts: []
+    
+    # Test helpers - accessible by all domain tests
+    TestHelpers: []
+    
+    # Events - can only depend on SharedContracts
+    AuthEvents:
+      - SharedContracts
+
+    # Public APIs - can only depend on SharedContracts and their own domain
+    AuthPublic:
+      - SharedContracts
+      - AuthPrivate
+    
+    NewsPublic:
+      - SharedContracts
+      - NewsPrivate
+    
+    ProfilePublic:
+      - SharedContracts
+      - ProfilePrivate
+      - AuthEvents
+    
+    StaticPagePublic:
+      - SharedContracts
+      - StaticPagePrivate
+    
+    StoryPublic:
+      - SharedContracts
+      - StoryPrivate
+    
+    StoryRefPublic:
+      - SharedContracts
+      - StoryRefPrivate
+    
+    # Private domains - can access SharedContracts + other domain Public APIs + events
+    AuthPrivate:
+      - SharedContracts
+      - AuthPrivate
+      - AuthEvents
+    
+    NewsPrivate:
+      - SharedContracts
+      - AuthPublic
+    
+    ProfilePrivate:
+      - SharedContracts
+      - AuthPublic
+      - AuthEvents
+    
+    StaticPagePrivate:
+      - SharedContracts
+      - AuthPublic
+    
+    StoryPrivate:
+      - SharedContracts
+      - AuthPublic
+      - ProfilePublic
+      - StoryRefPublic
+    
+    StoryRefPrivate:
+      - SharedContracts
+      - AuthPublic
+    
+    # Admin can use both Public and Private parts
+    # This is because the Admin dashboards are centered in this module
+    # But they actually could be spread in their own modules
+    AdminPrivate:
+      - SharedContracts
+      - AuthPublic
+      - AuthEvents
+      - AuthPrivate
+      - NewsPublic
+      - NewsPrivate
+      - ProfilePublic
+      - ProfilePrivate
+      - StaticPagePublic
+      - StaticPagePrivate
+      - StoryPublic
+      - StoryPrivate
+      - StoryRefPublic
+      - StoryRefPrivate
+      - DashboardPrivate
+      - HomePrivate
+    
+    DashboardPrivate:
+      - SharedContracts
+      - AuthPublic
+    
+    HomePrivate:
+      - SharedContracts
+      - AuthPublic
+      - NewsPublic
+    
+    # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
+    AuthTests:
+      - SharedContracts
+      - TestHelpers
+      - AuthPrivate
+      - AuthPublic
+      - AuthEvents
+    
+    NewsTests:
+      - SharedContracts
+      - TestHelpers
+      - NewsPrivate
+      - NewsPublic
+      - AuthPublic
+      
+    ProfileTests:
+      - SharedContracts
+      - TestHelpers
+      - ProfilePrivate
+      - ProfilePublic
+      - AuthPublic
+      
+    
+    StaticPageTests:
+      - SharedContracts
+      - TestHelpers
+      - StaticPagePrivate
+      - StaticPagePublic
+      - AuthPublic
+    
+    StoryTests:
+      - SharedContracts
+      - TestHelpers
+      - StoryPrivate
+      - StoryPublic
+      - AuthPublic
+      - ProfilePublic
+      - StoryRefPublic
+    
+    StoryRefTests:
+      - SharedContracts
+      - TestHelpers
+      - StoryRefPrivate
+      - StoryRefPublic
+      - AuthPublic
+    
+    AdminTests:
+      - SharedContracts
+      - TestHelpers
+      - AdminPrivate
+      - AuthPublic
+      - NewsPublic
+      - ProfilePublic
+      - StaticPagePublic
+      - StoryPublic
+      - StoryRefPublic
   
