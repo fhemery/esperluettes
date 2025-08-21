@@ -13,12 +13,21 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
 
 class ActivationCodeResource extends Resource
 {
     protected static ?string $model = ActivationCode::class;
+
+    /**
+     * Simple in-request cache for profile display names to avoid repeated lookups.
+     * @var array<int, string|null>
+     */
+    protected static array $profileLabelCache = [];
 
     public static function getNavigationGroup(): ?string {
         return __('admin::auth.user_management');
@@ -49,6 +58,20 @@ class ActivationCodeResource extends Resource
         /** @var ProfilePublicApi $api */
         $api = app(ProfilePublicApi::class);
         return $api;
+    }
+
+    protected static function profileLabel(?int $userId): ?string
+    {
+        if (empty($userId)) {
+            return null;
+        }
+
+        if (array_key_exists($userId, static::$profileLabelCache)) {
+            return static::$profileLabelCache[$userId];
+        }
+
+        $dto = static::profileApi()->getPublicProfile((int) $userId);
+        return static::$profileLabelCache[$userId] = $dto?->display_name;
     }
 
     public static function form(Form $form): Form
@@ -84,15 +107,14 @@ class ActivationCodeResource extends Resource
                 TextColumn::make('code')
                     ->label(__('admin::auth.activation_codes.code_header'))
                     ->copyable()
-                    ->searchable()
                     ->sortable(),
 
                 TextColumn::make('sponsor_user_id')
                     ->label(__('admin::auth.activation_codes.sponsor_header'))
                     ->placeholder(__('admin::auth.activation_codes.placeholder.no_sponsor'))
                     ->formatStateUsing(function ($state, $record) {
-                        $dto = static::profileApi()->getPublicProfile((int) $state);
-                        return $dto?->display_name ?? __('admin::auth.activation_codes.placeholder.deleted');
+                        $label = static::profileLabel((int) $state);
+                        return $label ?? __('admin::auth.activation_codes.placeholder.deleted');
                     }),
 
                 TextColumn::make('status')
@@ -109,15 +131,14 @@ class ActivationCodeResource extends Resource
                         'expired' => 'warning',
                         'used' => 'danger',
                         default => 'gray',
-                    })
-                    ->sortable(),
+                    }),
 
                 TextColumn::make('used_by_user_id')
                     ->label(__('admin::auth.activation_codes.used_by_header'))
                     ->placeholder(__('admin::auth.activation_codes.placeholder.not_used'))
                     ->formatStateUsing(function ($state) {
-                        $dto = static::profileApi()->getPublicProfile((int)$state);
-                        return $dto?->display_name ?? __('admin::auth.activation_codes.placeholder.deleted');
+                        $label = static::profileLabel((int) $state);
+                        return $label ?? __('admin::auth.activation_codes.placeholder.deleted');
                     }),
 
                 TextColumn::make('used_at')
@@ -142,7 +163,23 @@ class ActivationCodeResource extends Resource
                     ->dateTime()
                     ->sortable(),
             ])
+            ->filtersLayout(FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(3)
             ->filters([
+                Filter::make('code')
+                    ->label(__('admin::auth.activation_codes.code_header'))
+                    ->form([
+                        TextInput::make('value')
+                            ->label(__('admin::auth.activation_codes.code_header'))
+                            ->placeholder('...'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = trim((string)($data['value'] ?? ''));
+                        if ($value === '') {
+                            return $query;
+                        }
+                        return $query->where('code', 'like', '%' . $value . '%');
+                    }),
                 SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',
@@ -166,8 +203,15 @@ class ActivationCodeResource extends Resource
 
                 SelectFilter::make('sponsor_user_id')
                     ->label(__('admin::auth.activation_codes.sponsor_user_label'))
-                    ->options(fn () => [])
-                    ->searchable(),
+                    ->searchable()
+                    ->getSearchResultsUsing(fn (string $search): array => static::profileApi()->searchDisplayNames($search, 50))
+                    ->getOptionLabelUsing(fn ($value): ?string => static::profileLabel((int) $value)),
+
+                SelectFilter::make('used_by_user_id')
+                    ->label(__('admin::auth.activation_codes.used_by_header'))
+                    ->searchable()
+                    ->getSearchResultsUsing(fn (string $search): array => static::profileApi()->searchDisplayNames($search, 50))
+                    ->getOptionLabelUsing(fn ($value): ?string => static::profileLabel((int) $value)),
             ])
             ->actions([
                 DeleteAction::make()->iconButton()->label('')
