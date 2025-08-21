@@ -4,6 +4,7 @@ namespace App\Domains\Admin\Database\Seeders;
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Models\Role;
+use App\Domains\Profile\Models\Profile;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -29,6 +30,14 @@ class AdminUserSeeder extends Seeder
 
         // Attach the admin role to the user
         $adminUser->roles()->attach($adminRole);
+
+        // Create a profile for the admin user
+        Profile::create([
+            'user_id' => $adminUser->id,
+            'display_name' => 'Admin',
+            'description' => 'Admin profile',
+            'slug' => 'admin',
+        ]);
 
         $this->command->info('Admin user created successfully!');
         $this->command->info('Email: admin@example.com');
