@@ -5,7 +5,7 @@ namespace App\Domains\Profile\Support;
 class AvatarGenerator
 {
     /**
-     * Generate a data URI SVG avatar for a user.
+     * Generate a RAW SVG avatar (XML string) for a user.
      */
     public static function forUser(string $username, int $size = 200, ?int $seed = null): string
     {
@@ -16,13 +16,31 @@ class AvatarGenerator
     }
 
     /**
-     * Generate a data URI SVG avatar from initials.
+     * Generate a RAW SVG avatar (XML string) from initials.
      */
     public static function fromInitials(string $initials, int $size = 200, int $seed = 0): string
     {
         [$bg, $fg] = self::pickColors($seed);
         $svg = self::buildSvg($initials, $size, $bg, $fg);
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        return $svg;
+    }
+
+    /**
+     * Generate a DATA URI (base64) SVG avatar for a user.
+     */
+    public static function dataUriForUser(string $username, int $size = 200, ?int $seed = null): string
+    {
+        $raw = self::forUser($username, $size, $seed);
+        return 'data:image/svg+xml;base64,' . base64_encode($raw);
+    }
+
+    /**
+     * Generate a DATA URI (base64) SVG avatar from initials.
+     */
+    public static function dataUriFromInitials(string $initials, int $size = 200, int $seed = 0): string
+    {
+        $raw = self::fromInitials($initials, $size, $seed);
+        return 'data:image/svg+xml;base64,' . base64_encode($raw);
     }
 
     /**
