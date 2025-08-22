@@ -5,44 +5,64 @@ namespace App\Domains\Story\Services;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class StoryService
 {
-    public function listPublicStories(int $page, int $perPage = 24, int $ttlSeconds = 60): LengthAwarePaginator
-    {
-        /** @var LengthAwarePaginator $stories */
-        return Story::query()
-            ->with(['authors'])
-            ->where('visibility', Story::VIS_PUBLIC)
-            ->orderByDesc('created_at')
-            ->paginate($perPage, ['*'], 'page', $page);
-    }
-
     /**
      * Generic listing with optional filters.
      *
      * @param int $page
      * @param int $perPage
-     * @param array $visibilities Array of allowed visibilities (e.g., [Story::VIS_PUBLIC])
+     * @param array $visibilities Array of allowed visibilities (e.g., [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE])
      * @param int|null $userId If provided, only stories authored by this user
+     * @param int|null $viewerId If provided, include private stories where this user is a collaborator
      */
-    public function listStories(int $page, int $perPage = 24, array $visibilities = [Story::VIS_PUBLIC], ?int $userId = null): LengthAwarePaginator
+    public function listStories(int $page, int $perPage = 24, array $visibilities = [Story::VIS_PUBLIC], ?int $userId = null, ?int $viewerId = null): LengthAwarePaginator
     {
         $query = Story::query()
-            ->with(['authors'])
+            ->with(['authors', 'collaborators'])
             ->orderByDesc('created_at');
-
-        if (!empty($visibilities)) {
-            $query->whereIn('visibility', $visibilities);
-        }
 
         if ($userId !== null) {
             $query->whereHas('authors', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             });
         }
+
+        // Normalize visibilities; default to public if empty
+        $visibilities = array_values($visibilities);
+        if (empty($visibilities)) {
+            $visibilities = [Story::VIS_PUBLIC];
+        }
+
+        $pubCom = array_values(array_intersect($visibilities, [Story::VIS_PUBLIC, Story::VIS_COMMUNITY]));
+        $includePrivate = in_array(Story::VIS_PRIVATE, $visibilities, true);
+
+        $query->where(function ($w) use ($pubCom, $includePrivate, $viewerId) {
+            $addedAny = false;
+
+            if (!empty($pubCom)) {
+                $w->whereIn('visibility', $pubCom);
+                $addedAny = true;
+            }
+
+            if ($includePrivate && $viewerId !== null) {
+                if ($addedAny) {
+                    $w->orWhere(function ($q) use ($viewerId) {
+                        $q->where('visibility', Story::VIS_PRIVATE)
+                          ->whereHas('collaborators', function ($c) use ($viewerId) {
+                              $c->where('user_id', $viewerId);
+                          });
+                    });
+                } else {
+                    $w->where('visibility', Story::VIS_PRIVATE)
+                      ->whereHas('collaborators', function ($c) use ($viewerId) {
+                          $c->where('user_id', $viewerId);
+                      });
+                }
+            }
+        });
 
         /** @var LengthAwarePaginator $stories */
         return $query->paginate($perPage, ['*'], 'page', $page);

@@ -59,13 +59,13 @@ it('should show public and community stories to logged users', function () {
         'description' => '<p>Desc</p>',
     ]);
 
-    // Private story (should not appear)
-    privateStory('Private Story', $author->id, [
-        'description' => '<p>Hidden</p>',
+    // Community story (should appear)
+    $community = communityStory('Community Story', $author->id, [
+        'description' => '<p>Community not hidden</p>',
     ]);
 
-    // Community story (should not appear)
-    communityStory('Community Story', $author->id, [
+    // Private story (should not appear)
+    privateStory('Private Story', $author->id, [
         'description' => '<p>Hidden</p>',
     ]);
 
@@ -76,8 +76,8 @@ it('should show public and community stories to logged users', function () {
     $resp->assertOk();
     $resp->assertSee($public->title);
     $resp->assertSee('story::shared.by');
+    $resp->assertSee($community->title);
     $resp->assertDontSee('Private Story');
-    $resp->assertDontSee('Community Story');
 });
 
 

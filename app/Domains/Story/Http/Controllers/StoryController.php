@@ -27,7 +27,11 @@ class StoryController
     public function index(): View
     {
         $page = (int) request()->get('page', 1);
-        $paginator = $this->service->listPublicStories($page);
+        $vis = [Story::VIS_PUBLIC];
+        if (Auth::check()) {
+            $vis[] = Story::VIS_COMMUNITY;
+        }
+        $paginator = $this->service->listStories(page: $page, perPage: 24, visibilities: $vis);
 
         // Collect all author user IDs from the page
         $authorIds = $paginator->getCollection()
@@ -84,16 +88,24 @@ class StoryController
             abort(404);
         }
         $userId = (int) $profile->user_id;
-        $page = (int) request()->query('page', 1);
-        $showPrivate = filter_var(request()->query('showPrivate', false), FILTER_VALIDATE_BOOLEAN);
 
-        // Only allow private inclusion if the viewer is the owner
-        $vis = [Story::VIS_PUBLIC];
-        if ($showPrivate && Auth::id() === $userId) {
-            $vis[] = Story::VIS_PRIVATE;
+        // Guests see a simple message, not the list
+        if (! Auth::check()) {
+            return view('story::partials.user-stories-guest');
         }
 
-        $paginator = $this->service->listStories(page: $page, perPage: 12, visibilities: $vis, userId: $userId);
+        $page = (int) request()->query('page', 1);
+
+        // Only allow private inclusion if the viewer is the owner
+        $vis = [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE];
+
+        $paginator = $this->service->listStories(
+            page: $page,
+            perPage: 12,
+            visibilities: $vis,
+            userId: $userId,
+            viewerId: Auth::id(),
+        );
 
         // Authors profiles
         $authorIds = $paginator->getCollection()
