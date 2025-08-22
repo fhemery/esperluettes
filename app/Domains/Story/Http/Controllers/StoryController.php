@@ -8,6 +8,7 @@ use App\Domains\Shared\Support\Seo;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Services\StoryService;
+use App\Domains\Story\Support\StoryFilterAndPagination;
 use App\Domains\Story\ViewModels\StoryListViewModel;
 use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StorySummaryViewModel;
@@ -32,7 +33,8 @@ class StoryController
         if (Auth::check()) {
             $vis[] = Story::VIS_COMMUNITY;
         }
-        $paginator = $this->service->listStories(page: $page, perPage: 24, visibilities: $vis);
+        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis);
+        $paginator = $this->service->listStories($filter);
 
         // Collect all author user IDs from the page
         $authorIds = $paginator->getCollection()
@@ -101,13 +103,8 @@ class StoryController
             $vis = [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE];
         }
 
-        $paginator = $this->service->listStories(
-            page: $page,
-            perPage: 12,
-            visibilities: $vis,
-            userId: $userId,
-            viewerId: Auth::id(),
-        );
+        $filter = new StoryFilterAndPagination(page: $page, perPage: 12, visibilities: $vis, userId: $userId);
+        $paginator = $this->service->listStories($filter, Auth::id());
 
         // Authors profiles
         $authorIds = $paginator->getCollection()

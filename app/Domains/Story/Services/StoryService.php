@@ -4,6 +4,7 @@ namespace App\Domains\Story\Services;
 
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
+use App\Domains\Story\Support\StoryFilterAndPagination;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -12,29 +13,23 @@ class StoryService
     /**
      * Generic listing with optional filters.
      *
-     * @param int $page
-     * @param int $perPage
-     * @param array $visibilities Array of allowed visibilities (e.g., [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE])
-     * @param int|null $userId If provided, only stories authored by this user
+     * @param StoryFilterAndPagination $filter Filters and pagination (page, perPage, visibilities, userId)
      * @param int|null $viewerId If provided, include private stories where this user is a collaborator
      */
-    public function listStories(int $page, int $perPage = 24, array $visibilities = [Story::VIS_PUBLIC], ?int $userId = null, ?int $viewerId = null): LengthAwarePaginator
+    public function listStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
     {
         $query = Story::query()
             ->with(['authors', 'collaborators'])
             ->orderByDesc('created_at');
 
-        if ($userId !== null) {
-            $query->whereHas('authors', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
+        if ($filter->userId !== null) {
+            $query->whereHas('authors', function ($q) use ($filter) {
+                $q->where('user_id', $filter->userId);
             });
         }
 
-        // Normalize visibilities; default to public if empty
-        $visibilities = array_values($visibilities);
-        if (empty($visibilities)) {
-            $visibilities = [Story::VIS_PUBLIC];
-        }
+        // Visibilities already normalized in DTO
+        $visibilities = $filter->visibilities;
 
         $pubCom = array_values(array_intersect($visibilities, [Story::VIS_PUBLIC, Story::VIS_COMMUNITY]));
         $includePrivate = in_array(Story::VIS_PRIVATE, $visibilities, true);
@@ -65,7 +60,7 @@ class StoryService
         });
 
         /** @var LengthAwarePaginator $stories */
-        return $query->paginate($perPage, ['*'], 'page', $page);
+        return $query->paginate($filter->perPage, ['*'], 'page', $filter->page);
     }
 
     public function createStory(StoryRequest $request, int $userId): Story
