@@ -86,3 +86,10 @@ it('should show profile edit button if user is current user', function () {
     $response->assertSee('Alice');
     $response->assertSee('profile::show.edit_profile');
 });
+
+it('should show "My stories" tab instead of "Stories" if user is current user', function () {
+    $user = alice($this);
+
+    $this->actingAs($user)->get('/profile')
+        ->assertSee('profile::show.my-stories');
+});

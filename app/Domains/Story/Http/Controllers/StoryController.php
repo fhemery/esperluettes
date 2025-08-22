@@ -136,9 +136,12 @@ class StoryController
 
         $viewModel = new StoryListViewModel($paginator, $items);
 
+        $canEdit = Auth::id() !== null && Auth::id() === $userId;
+
         return view('story::partials.profile-stories', [
             'viewModel' => $viewModel,
             'displayAuthors' => false,
+            'canEdit' => $canEdit,
         ]);
     }
 
