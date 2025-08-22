@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -28,5 +27,5 @@ it('should show profile edit button if user is current user', function () {
 
     $response->assertOk();
     $response->assertSee('Alice');
-    $response->assertSee('Edit Profile');
+    $response->assertSee('profile::show.edit_profile');
 });

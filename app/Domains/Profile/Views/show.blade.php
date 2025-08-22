@@ -8,7 +8,7 @@
                     <div class="flex-shrink-0">
                         <img class="h-24 w-24 rounded-full border-4 border-white shadow-lg"
                             src="{{ $profile->profile_picture_path }}"
-                            alt="{{ __(":name's profile picture", ['name' => $profile->display_name]) }}">
+                            alt="{{ __('profile::show.alt_profile_picture', ['name' => $profile->display_name]) }}">
                     </div>
 
                     <!-- User Info -->
@@ -21,7 +21,7 @@
                                         @click="navigator.clipboard.writeText(url).then(() => { copied = true; setTimeout(() => copied = false, 1200) })"
                                         class="inline-flex items-center justify-center h-8 w-8 rounded-full text-white/85 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/60 transition"
                                         :title="url"
-                                        aria-label="{{ __('Copy profile link') }}">
+                                        aria-label="{{ __('profile::show.copy_profile_link') }}">
                                     <!-- Material Symbols link icon -->
                                     <span class="material-symbols-outlined text-[20px] leading-none">
                                         link
@@ -31,7 +31,7 @@
                                 <div x-show="copied" x-cloak
                                      class="absolute left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap text-xs text-white bg-black/60 rounded px-2 py-1 shadow"
                                      x-transition.opacity.duration.150>
-                                    {{ __('Copied!') }}
+                                    {{ __('profile::show.copied') }}
                                 </div>
                             </div>
                             @endif
@@ -47,7 +47,7 @@
                             @endforeach
                         </div>
                         @endif
-                        <p class="text-blue-100 mt-1">{{ __('Member since') }} {{ $profile->created_at->translatedFormat('F Y') }}</p>
+                        <p class="text-blue-100 mt-1">{{ __('profile::show.member_since') }} {{ $profile->created_at->translatedFormat('F Y') }}</p>
 
                         @if($canEdit)
                         <div class="mt-4">
@@ -56,7 +56,7 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
-                                {{ __('Edit Profile') }}
+                                {{ __('profile::show.edit_profile') }}
                             </a>
                         </div>
                         @endif
@@ -79,9 +79,13 @@
                                     const res = await fetch('/profiles/{{ $profile->slug }}/stories');
                                     const html = await res.text();
                                     this.$refs.stories.innerHTML = html;
+                                    // Initialize Alpine on dynamically injected content
+                                    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                                        window.Alpine.initTree(this.$refs.stories);
+                                    }
                                     this.storiesLoaded = true;
                                 } catch (e) {
-                                    this.$refs.stories.innerHTML = '<div class=\'text-sm text-red-600\'>{{ __('Failed to load stories.') }}</div>';
+                                    this.$refs.stories.innerHTML = '<div class=\'text-sm text-red-600\'>{{ __('profile::show.failed_to_load_stories') }}</div>';
                                 } finally {
                                     this.loading = false;
                                 }
@@ -94,13 +98,13 @@
                                         @click="tab='about'"
                                         :class="tab==='about' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                         class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                                    {{ __('About') }}
+                                    {{ __('profile::show.about') }}
                                 </button>
                                 <button type="button"
                                         @click="tab='stories'; loadStories()"
                                         :class="tab==='stories' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                         class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                                    {{ __('Stories') }}
+                                    {{ __('profile::show.stories') }}
                                 </button>
                                 <!-- Future: stats, comments, etc. -->
                             </nav>
@@ -113,8 +117,8 @@
 
                         <!-- Stories Panel -->
                         <div x-show="tab==='stories'" x-cloak>
-                            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Stories') }}</h2>
-                            <div x-show="loading" class="text-sm text-gray-500">{{ __('Loading...') }}</div>
+                            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('profile::show.stories') }}</h2>
+                            <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
                             <div x-ref="stories" class="mt-2"></div>
                         </div>
                     </div>
