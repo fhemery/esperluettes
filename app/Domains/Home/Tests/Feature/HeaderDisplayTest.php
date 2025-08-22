@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,8 +13,8 @@ it('should show the register and login button to unlogged users', function () {
     $response = $this->get('/');
 
     $response->assertOk();
-    $response->assertSee('Log in');
-    $response->assertSee('Register');
+    $response->assertSee('shared::navigation.login');
+    $response->assertSee('shared::navigation.register');
 });
 
 it('should not show the register and login button to logged user', function () {
@@ -26,8 +25,8 @@ it('should not show the register and login button to logged user', function () {
     $response = $this->get('/');
 
     $response->assertOk();
-    $this->assertStringNotContainsString('Log in', $response->content());
-    $this->assertStringNotContainsString('Register', $response->content());
+    $this->assertStringNotContainsString('shared::navigation.login', $response->content());
+    $this->assertStringNotContainsString('shared::navigation.register', $response->content());
 });
 
 it('should show dashboard, account, profile access and logout, but not admin to logged user', function () {
@@ -38,9 +37,20 @@ it('should show dashboard, account, profile access and logout, but not admin to 
     $response = $this->get('/');
 
     $response->assertOk();
-    $response->assertSee('Dashboard');
-    $response->assertSee('Account');
-    $response->assertSee('Profile');
-    $response->assertSee('Log Out');
-    $response->assertDontSee('Admin');
+    $response->assertSee('shared::navigation.dashboard');
+    $response->assertSee('shared::navigation.account');
+    $response->assertSee('shared::navigation.profile');
+    $response->assertSee('shared::navigation.logout');
+    $response->assertDontSee('shared::navigation.admin');
+});
+
+it('should show admin link to admins', function () {
+    $user = admin($this);
+
+    $this->actingAs($user);
+
+    $response = $this->get('/');
+
+    $response->assertOk();
+    $response->assertSee('shared::navigation.admin');
 });
