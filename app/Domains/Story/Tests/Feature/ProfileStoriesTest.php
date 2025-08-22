@@ -37,15 +37,20 @@ it('does not render the site navigation for the profile stories partial', functi
     $resp->assertDontSee('<nav');
 });
 
-it('returns a single translated message when guest: Vous devez être connecté', function () {
+it('lists only public stories for guests', function () {
     $owner = alice($this);
     $slug = profileSlugFor($owner);
 
+    $public = publicStory('Guest Public Story', $owner->id);
+    $community = communityStory('Guest Community Story', $owner->id);
+    $private = privateStory('Guest Private Story', $owner->id);
+
     $resp = $this->get("/profiles/{$slug}/stories");
 
-    // Expect a friendly translated message for guests
     $resp->assertOk();
-    $resp->assertSee('story::index.connection-required');
+    $resp->assertSee($public->title);
+    $resp->assertDontSee($community->title);
+    $resp->assertDontSee($private->title);
 });
 
 it('returns 404 when profile slug does not exist', function () {

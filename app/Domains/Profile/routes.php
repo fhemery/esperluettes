@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Protected routes for own profile and editing
 Route::middleware(['role:user,user-confirmed'])->group(function () {
-    // Profile viewing routes
     Route::get('/profile', [ProfileController::class, 'showOwn'])->name('profile.show.own');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::get('/profile/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
+
+// Public profile page (by slug) - accessible to guests
+Route::get('/profile/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');

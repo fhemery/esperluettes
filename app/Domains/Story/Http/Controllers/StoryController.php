@@ -2,15 +2,15 @@
 
 namespace App\Domains\Story\Http\Controllers;
 
+use App\Domains\Auth\PublicApi\UserPublicApi;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\Support\Seo;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Services\StoryService;
-use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StoryListViewModel;
+use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StorySummaryViewModel;
-use App\Domains\Shared\Support\Seo;
-use App\Domains\Auth\PublicApi\UserPublicApi;
-use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -18,15 +18,16 @@ use Illuminate\Support\Facades\Auth;
 class StoryController
 {
     public function __construct(
-        private readonly StoryService $service,
-        private readonly UserPublicApi $userPublicApi,
+        private readonly StoryService     $service,
+        private readonly UserPublicApi    $userPublicApi,
         private readonly ProfilePublicApi $profileApi
-    ) {
+    )
+    {
     }
 
     public function index(): View
     {
-        $page = (int) request()->get('page', 1);
+        $page = (int)request()->get('page', 1);
         $vis = [Story::VIS_PUBLIC];
         if (Auth::check()) {
             $vis[] = Story::VIS_COMMUNITY;
@@ -35,7 +36,7 @@ class StoryController
 
         // Collect all author user IDs from the page
         $authorIds = $paginator->getCollection()
-            ->flatMap(fn ($s) => $s->authors->pluck('user_id'))
+            ->flatMap(fn($s) => $s->authors->pluck('user_id'))
             ->unique()
             ->values()
             ->all();
@@ -87,17 +88,18 @@ class StoryController
         if (!$profile) {
             abort(404);
         }
-        $userId = (int) $profile->user_id;
+        $userId = (int)$profile->user_id;
 
-        // Guests see a simple message, not the list
-        if (! Auth::check()) {
-            return view('story::partials.user-stories-guest');
+        $page = (int)request()->query('page', 1);
+
+        // Determine visibilities based on viewer
+        if (!Auth::check()) {
+            // Guests: only public
+            $vis = [Story::VIS_PUBLIC];
+        } else {
+            // Authenticated: public + community; service enforces private visibility (owner/collaborator) via viewerId
+            $vis = [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE];
         }
-
-        $page = (int) request()->query('page', 1);
-
-        // Only allow private inclusion if the viewer is the owner
-        $vis = [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE];
 
         $paginator = $this->service->listStories(
             page: $page,
@@ -109,7 +111,7 @@ class StoryController
 
         // Authors profiles
         $authorIds = $paginator->getCollection()
-            ->flatMap(fn ($s) => $s->authors->pluck('user_id'))
+            ->flatMap(fn($s) => $s->authors->pluck('user_id'))
             ->unique()->values()->all();
         $profilesById = empty($authorIds) ? [] : $this->profileApi->getPublicProfiles($authorIds);
 
@@ -119,7 +121,9 @@ class StoryController
             $authorDtos = [];
             foreach ($story->authors as $author) {
                 $dto = $profilesById[$author->user_id] ?? null;
-                if ($dto) { $authorDtos[] = $dto; }
+                if ($dto) {
+                    $authorDtos[] = $dto;
+                }
             }
             $items[] = new StorySummaryViewModel(
                 id: $story->id,
@@ -132,7 +136,7 @@ class StoryController
 
         $viewModel = new StoryListViewModel($paginator, $items);
 
-        return view('story::partials.user-stories', [
+        return view('story::partials.profile-stories', [
             'viewModel' => $viewModel,
             'displayAuthors' => false,
         ]);
@@ -144,14 +148,14 @@ class StoryController
 
         // Enforce visibility rules
         $user = Auth::user();
-        if ($story->visibility === Story::VIS_PRIVATE && ! $story->isCollaborator($user->id)) {
+        if ($story->visibility === Story::VIS_PRIVATE && !$story->isCollaborator($user->id)) {
             abort(404);
         }
         if ($story->visibility === Story::VIS_COMMUNITY) {
-            if (! $user) {
+            if (!$user) {
                 return redirect()->guest(route('login'));
             }
-            if (! $this->userPublicApi->isVerified($user)) {
+            if (!$this->userPublicApi->isVerified($user)) {
                 abort(404);
             }
         }
