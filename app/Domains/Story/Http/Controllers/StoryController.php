@@ -6,10 +6,12 @@ use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Services\StoryService;
 use App\Domains\Story\ViewModels\StoryShowViewModel;
+use App\Domains\Story\ViewModels\StoryListViewModel;
+use App\Domains\Story\ViewModels\StorySummaryViewModel;
 use App\Domains\Shared\Support\Seo;
 use App\Domains\Auth\PublicApi\UserPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
-use Illuminate\Contracts\View\View; 
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,10 +27,43 @@ class StoryController
     public function index(): View
     {
         $page = (int) request()->get('page', 1);
-        $stories = $this->service->listPublicStories($page, 24);
+        $paginator = $this->service->listPublicStories($page);
+
+        // Collect all author user IDs from the page
+        $authorIds = $paginator->getCollection()
+            ->flatMap(fn ($s) => $s->authors->pluck('user_id'))
+            ->unique()
+            ->values()
+            ->all();
+
+        $profilesById = empty($authorIds)
+            ? []
+            : $this->profileApi->getPublicProfiles($authorIds); // [userId => ProfileDto]
+
+        // Build summaries
+        $items = [];
+        foreach ($paginator->getCollection() as $story) {
+            $authorDtos = [];
+            foreach ($story->authors as $author) {
+                $dto = $profilesById[$author->user_id] ?? null;
+                if ($dto) {
+                    $authorDtos[] = $dto;
+                }
+            }
+
+            $items[] = new StorySummaryViewModel(
+                id: $story->id,
+                title: $story->title,
+                slug: $story->slug,
+                description: $story->description,
+                authors: $authorDtos,
+            );
+        }
+
+        $viewModel = new StoryListViewModel($paginator, $items);
 
         return view('story::index', [
-            'stories' => $stories,
+            'viewModel' => $viewModel,
         ]);
     }
 

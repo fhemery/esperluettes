@@ -45,7 +45,7 @@ it('should only list public stories to unlogged users, title and author', functi
     // Assert
     $resp->assertOk();
     $resp->assertSee($public->title);
-    $resp->assertSee('story::index.by_author');
+    $resp->assertSee('story::shared.by');
     $resp->assertDontSee('Private Story');
     $resp->assertDontSee('Community Story');
 });
@@ -75,7 +75,7 @@ it('should show public and community stories to logged users', function () {
     // Assert
     $resp->assertOk();
     $resp->assertSee($public->title);
-    $resp->assertSee('story::index.by_author');
+    $resp->assertSee('story::shared.by');
     $resp->assertDontSee('Private Story');
     $resp->assertDontSee('Community Story');
 });

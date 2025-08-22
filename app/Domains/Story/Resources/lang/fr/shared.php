@@ -18,4 +18,5 @@ return [
     'description' => [
         'label' => 'Résumé',
     ],
+    'by' => 'Par '
 ];

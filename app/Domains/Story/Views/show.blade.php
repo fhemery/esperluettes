@@ -49,7 +49,7 @@
 
                     <div class="flex items-center justify-between mb-6 text-sm text-gray-600">
                         <div>
-                            <span class="font-medium">{{ __('story::show.by') }}
+                            <span class="font-medium">{{ __('story::shared.by') }}
                             <x-profile.inline-names :profiles="$viewModel->authors" />
                             </span>
                         </div>

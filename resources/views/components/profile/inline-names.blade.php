@@ -23,5 +23,3 @@
         {{ $name }}
     @endif
 @endforeach
-
-<span class="sr-only">{{ implode(', ', $names) }}</span>
