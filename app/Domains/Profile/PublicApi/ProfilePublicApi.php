@@ -21,6 +21,26 @@ class ProfilePublicApi implements ProfilePublicApiContract
         return $results[$userId] ?? null;
     }
 
+    public function getPublicProfileBySlug(string $slug): ?ProfileDto
+    {
+        $slug = trim($slug);
+        if ($slug === '') {
+            return null;
+        }
+
+        $profile = $this->profiles->getProfileBySlug($slug);
+        if (!$profile) {
+            return null;
+        }
+
+        return new ProfileDto(
+            user_id: $profile->user_id,
+            display_name: (string) ($profile->display_name ?? ''),
+            slug: (string) ($profile->slug ?? ''),
+            avatar_url: $this->avatars->publicUrl($profile->profile_picture_path, $profile->user_id),
+        );
+    }
+
     public function getPublicProfiles(array $userIds): array
     {
         $userIds = array_values(array_unique(array_map('intval', $userIds)));

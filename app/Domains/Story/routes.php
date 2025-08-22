@@ -20,4 +20,9 @@ Route::middleware(['web'])->group(function () {
     Route::get('/stories/{slug}', [StoryController::class, 'show'])
         ->where('slug', '.*')
         ->name('stories.show');
+
+    // Profile-owned stories partial (expects ?user_id=, optional &showPrivate=true)
+    Route::get('/profiles/{slug}/stories', [StoryController::class, 'profileStories'])
+        ->where('slug', '.*')
+        ->name('stories.for-profile');
 });

@@ -76,6 +76,56 @@ class StoryController
             ->with('status', __('Story created successfully.'));
     }
 
+    public function profileStories(string $slug): View
+    {
+        // Resolve profile by slug via public API
+        $profile = $this->profileApi->getPublicProfileBySlug($slug);
+        if (!$profile) {
+            abort(404);
+        }
+        $userId = (int) $profile->user_id;
+        $page = (int) request()->query('page', 1);
+        $showPrivate = filter_var(request()->query('showPrivate', false), FILTER_VALIDATE_BOOLEAN);
+
+        // Only allow private inclusion if the viewer is the owner
+        $vis = [Story::VIS_PUBLIC];
+        if ($showPrivate && Auth::id() === $userId) {
+            $vis[] = Story::VIS_PRIVATE;
+        }
+
+        $paginator = $this->service->listStories(page: $page, perPage: 12, visibilities: $vis, userId: $userId);
+
+        // Authors profiles
+        $authorIds = $paginator->getCollection()
+            ->flatMap(fn ($s) => $s->authors->pluck('user_id'))
+            ->unique()->values()->all();
+        $profilesById = empty($authorIds) ? [] : $this->profileApi->getPublicProfiles($authorIds);
+
+        // Build items
+        $items = [];
+        foreach ($paginator->getCollection() as $story) {
+            $authorDtos = [];
+            foreach ($story->authors as $author) {
+                $dto = $profilesById[$author->user_id] ?? null;
+                if ($dto) { $authorDtos[] = $dto; }
+            }
+            $items[] = new StorySummaryViewModel(
+                id: $story->id,
+                title: $story->title,
+                slug: $story->slug,
+                description: $story->description,
+                authors: $authorDtos,
+            );
+        }
+
+        $viewModel = new StoryListViewModel($paginator, $items);
+
+        return view('story::partials.user-stories', [
+            'viewModel' => $viewModel,
+            'displayAuthors' => false,
+        ]);
+    }
+
     public function show(string $slug): View|\Illuminate\Http\RedirectResponse
     {
         $story = $this->service->getStoryForShow($slug, Auth::id());

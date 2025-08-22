@@ -43,6 +43,18 @@ class ProfileService
     }
 
     /**
+     * Get a profile by its public slug.
+     */
+    public function getProfileBySlug(string $slug): ?Profile
+    {
+        $slug = trim($slug);
+        if ($slug === '') {
+            return null;
+        }
+        return Profile::where('slug', $slug)->first();
+    }
+
+    /**
      * Get profile for the given user
      */
     public function getProfile(int $userId): Profile

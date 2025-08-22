@@ -17,7 +17,35 @@ class StoryService
             ->with(['authors'])
             ->where('visibility', Story::VIS_PUBLIC)
             ->orderByDesc('created_at')
-            ->paginate($perPage);
+            ->paginate($perPage, ['*'], 'page', $page);
+    }
+
+    /**
+     * Generic listing with optional filters.
+     *
+     * @param int $page
+     * @param int $perPage
+     * @param array $visibilities Array of allowed visibilities (e.g., [Story::VIS_PUBLIC])
+     * @param int|null $userId If provided, only stories authored by this user
+     */
+    public function listStories(int $page, int $perPage = 24, array $visibilities = [Story::VIS_PUBLIC], ?int $userId = null): LengthAwarePaginator
+    {
+        $query = Story::query()
+            ->with(['authors'])
+            ->orderByDesc('created_at');
+
+        if (!empty($visibilities)) {
+            $query->whereIn('visibility', $visibilities);
+        }
+
+        if ($userId !== null) {
+            $query->whereHas('authors', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        }
+
+        /** @var LengthAwarePaginator $stories */
+        return $query->paginate($perPage, ['*'], 'page', $page);
     }
 
     public function createStory(StoryRequest $request, int $userId): Story

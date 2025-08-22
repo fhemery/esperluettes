@@ -12,6 +12,11 @@ interface ProfilePublicApi
     public function getPublicProfile(int $userId): ?ProfileDto;
 
     /**
+     * Get a public profile DTO for a given profile slug.
+     */
+    public function getPublicProfileBySlug(string $slug): ?ProfileDto;
+
+    /**
      * Batch get public profile DTOs keyed by user ID.
      * Returns [userId => ProfileDto].
      */
