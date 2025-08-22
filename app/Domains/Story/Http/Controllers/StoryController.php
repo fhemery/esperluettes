@@ -78,7 +78,7 @@ class StoryController
         $story = $this->service->createStory($request, $userId);
 
         return redirect()->to('/stories/' . $story->slug)
-            ->with('status', __('Story created successfully.'));
+            ->with('status', __('story::show.created'));
     }
 
     public function profileStories(string $slug): View
