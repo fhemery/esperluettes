@@ -3,13 +3,10 @@
 namespace App\Domains\Story\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
 class Story extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'created_by_user_id',
         'title',
@@ -54,7 +51,7 @@ class Story extends Model
         return $this->hasMany(StoryCollaborator::class)->authors();
     }
 
-    public function isCollaborator(?int $userId): bool 
+    public function isCollaborator(?int $userId): bool
     {
         return $this->collaborators()->pluck('user_id')->contains($userId);
     }
