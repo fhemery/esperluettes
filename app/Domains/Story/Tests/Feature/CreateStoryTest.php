@@ -12,6 +12,34 @@ it('redirects guests from create page to login', function () {
     $response->assertRedirect('/login');
 });
 
+it('denies non-confirmed users from accessing the create page', function () {
+    $user = alice($this, roles: ['user']);
+
+    $resp = $this->actingAs($user)->get('/stories/create');
+
+    // CheckRole middleware redirects unauthorized roles to dashboard
+    $resp->assertRedirect(route('dashboard'));
+});
+
+it('denies non-confirmed users from posting new stories', function () {
+    $user = alice($this, roles: ['user']);
+    $this->actingAs($user);
+
+    $payload = [
+        'title' => 'Blocked Title',
+        'description' => '<p>blocked</p>',
+        'visibility' => Story::VIS_PUBLIC,
+    ];
+
+    $resp = $this->post('/stories', $payload);
+
+    // Redirected to dashboard due to missing user-confirmed role
+    $resp->assertRedirect(route('dashboard'));
+
+    // Ensure nothing was created
+    expect(Story::query()->count())->toBe(0);
+});
+
 it('produces unique slugs for duplicate titles', function () {
     // Arrange
     $user = alice($this, roles: ['user-confirmed']);

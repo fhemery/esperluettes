@@ -3,7 +3,7 @@
         {{ $canEdit ? __('story::profile.my-stories') : __('story::profile.stories') }}
     </h2>
 
-    @if($canEdit)
+    @if($canCreateStory)
         <a href="{{ route('stories.create') }}"
            class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >

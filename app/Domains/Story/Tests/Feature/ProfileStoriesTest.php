@@ -135,6 +135,20 @@ it('should show "My stories" instead of "Stories" and a new Story button for the
     $resp->assertSee('story::profile.new-story');
 });
 
+it('should not show a new Story button for the owner without user-confirmed role', function () {
+    // Owner has only the base 'user' role (not user-confirmed)
+    $owner = alice($this, roles: ['user']);
+    $slug = profileSlugFor($owner);
+
+    $resp = $this->actingAs($owner)->get("/profiles/{$slug}/stories");
+
+    $resp->assertOk();
+    // Owner context still uses "My stories" label
+    $resp->assertSee('story::profile.my-stories');
+    // But the create button should be hidden without the user-confirmed role
+    $resp->assertDontSee('story::profile.new-story');
+});
+
 it('does not list author names in the profile stories partial', function () {
     $owner = alice($this);
     $slug = profileSlugFor($owner);
