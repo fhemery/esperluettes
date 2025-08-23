@@ -182,35 +182,19 @@ deptrac:
           value: 'app/Domains/Story/Tests/'
 
     # StoryRef Domain
-    - name: StoryRefPublic
+    # The StoryRef Domain is a very dumb one. As such, we do not create public or private APIs for it.
+    - name: StoryRef
       collectors:
         - type: directory
-          value: 'app/Domains/StoryRef/PublicApi/'
-
-    - name: StoryRefPrivate
-      collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/StoryRef/PublicApi/
-            - type: directory
-              value: app/Domains/StoryRef/Tests/
-          must:
-            - type: directory
-              value: app/Domains/StoryRef/
-
-    - name: StoryRefTests
-      collectors:
-        - type: directory
-          value: 'app/Domains/StoryRef/Tests/'
+          value: app/Domains/StoryRef/
 
   ruleset:
     # Shared contracts and DTOs - accessible by all domains
-    SharedContracts: []
-    
+    SharedContracts: [ ]
+
     # Test helpers - accessible by all domain tests
-    TestHelpers: []
-    
+    TestHelpers: [ ]
+
     # Events - can only depend on SharedContracts
     AuthEvents:
       - SharedContracts
@@ -219,57 +203,53 @@ deptrac:
     AuthPublic:
       - SharedContracts
       - AuthPrivate
-    
+
     NewsPublic:
       - SharedContracts
       - NewsPrivate
-    
+
     ProfilePublic:
       - SharedContracts
       - ProfilePrivate
       - AuthEvents
-    
+
     StaticPagePublic:
       - SharedContracts
       - StaticPagePrivate
-    
+
     StoryPublic:
       - SharedContracts
       - StoryPrivate
-    
-    StoryRefPublic:
+      - StoryRef
+
+    StoryRef:
       - SharedContracts
-      - StoryRefPrivate
-    
+
     # Private domains - can access SharedContracts + other domain Public APIs + events
     AuthPrivate:
       - SharedContracts
       - AuthPrivate
       - AuthEvents
-    
+
     NewsPrivate:
       - SharedContracts
       - AuthPublic
-    
+
     ProfilePrivate:
       - SharedContracts
       - AuthPublic
       - AuthEvents
-    
+
     StaticPagePrivate:
       - SharedContracts
       - AuthPublic
-    
+
     StoryPrivate:
       - SharedContracts
       - AuthPublic
       - ProfilePublic
-      - StoryRefPublic
-    
-    StoryRefPrivate:
-      - SharedContracts
-      - AuthPublic
-    
+      - StoryRef
+
     # Admin can use both Public and Private parts
     # This is because the Admin dashboards are centered in this module
     # But they actually could be spread in their own modules
@@ -286,20 +266,19 @@ deptrac:
       - StaticPagePrivate
       - StoryPublic
       - StoryPrivate
-      - StoryRefPublic
-      - StoryRefPrivate
+      - StoryRef
       - DashboardPrivate
       - HomePrivate
-    
+
     DashboardPrivate:
       - SharedContracts
       - AuthPublic
-    
+
     HomePrivate:
       - SharedContracts
       - AuthPublic
       - NewsPublic
-    
+
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
     AuthTests:
       - SharedContracts
@@ -307,29 +286,29 @@ deptrac:
       - AuthPrivate
       - AuthPublic
       - AuthEvents
-    
+
     NewsTests:
       - SharedContracts
       - TestHelpers
       - NewsPrivate
       - NewsPublic
       - AuthPublic
-      
+
     ProfileTests:
       - SharedContracts
       - TestHelpers
       - ProfilePrivate
       - ProfilePublic
       - AuthPublic
-      
-    
+
+
     StaticPageTests:
       - SharedContracts
       - TestHelpers
       - StaticPagePrivate
       - StaticPagePublic
       - AuthPublic
-    
+
     StoryTests:
       - SharedContracts
       - TestHelpers
@@ -337,15 +316,8 @@ deptrac:
       - StoryPublic
       - AuthPublic
       - ProfilePublic
-      - StoryRefPublic
-    
-    StoryRefTests:
-      - SharedContracts
-      - TestHelpers
-      - StoryRefPrivate
-      - StoryRefPublic
-      - AuthPublic
-    
+      - StoryRef
+
     AdminTests:
       - SharedContracts
       - TestHelpers
@@ -355,5 +327,4 @@ deptrac:
       - ProfilePublic
       - StaticPagePublic
       - StoryPublic
-      - StoryRefPublic
-  
+      - StoryRef
