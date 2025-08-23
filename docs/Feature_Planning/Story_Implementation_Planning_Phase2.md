@@ -9,6 +9,16 @@ consequences properly.
 Phase 2 requires completion of Phase 1 (US-001 through US-008).
 
 ---
+## Phase-wide Decisions
+
+- **Index rule**: Keep Phase 1 behavior for now (list public stories even if they have no chapters yet).
+- **Filter params**: Use slugs in URLs for all filters (type, audience, genres, trigger warnings, status where applicable).
+- **Multi-select UI**: Use chip-based multi-selects by default. If UX is unsatisfactory, we may switch to checkboxes.
+- **Relationships & caching**: Persist only foreign key ids on `stories`. Compose view models by resolving labels/slugs via a long-duration StoryRef cache. Eloquent relationships may exist for convenience but are not relied upon.
+- **StoryRef cache**: Implement a domain-level cache that can return one ref item or all, invalidated when admin changes occur (low-frequency updates).
+- **DB constraints**: Add foreign keys with ON DELETE RESTRICT. Make mandatory refs NOT NULL once implemented. Pivot tables use composite PKs and proper indexes.
+- **Filter semantics**: Combine different filters with AND. Within multi-select categories (genres, trigger warnings), use OR logic. Persist filters in pagination; use bookmarkable URLs; ignore invalid slugs gracefully.
+- **Tabs UI**: Collapsible tabs with multiple open; tab error indicators; which fields belong to which tab is decided per story.
 
 ## **US-009: Collapsible Tabs Form UI (Prerequisite)**
 
@@ -284,5 +294,181 @@ between different sections of story configuration.**
 - Handle multiple active filters in UI
 
 ---
+### **US-014: Add Genres Selection (1–3, Mandatory)**
 
-*[Continue with remaining user stories US-014 through US-021 following the same pattern...]*
+**As a user creating a story, I want to select 1 to 3 genres so that readers can discover my story in the right categories.**
+
+**Acceptance Criteria:**
+
+**Scenario 1: Genres field appears in creation form**
+
+- **Given** I am a logged-in user
+- **When** I am on the story creation page
+- **Then** I should see a "Genres" multi-select chip field
+- **And** it should be populated with active genres from `StoryRefGenre`
+- **And** options should be ordered by their `order` field
+- **And** helper text indicates "Select 1 to 3 genres"
+
+**Scenario 2: Genres are required with limits**
+
+- **Given** I am creating a story
+- **When** I submit with no genres
+- **Then** I should see a validation error indicating at least 1 genre is required
+
+- **When** I submit with 4 or more genres
+- **Then** I should see a validation error indicating a maximum of 3 is allowed
+
+**Scenario 3: Successfully create story with genres**
+
+- **Given** I select valid genres and fill other required fields
+- **When** I submit the form
+- **Then** the story is created and associated with those genres
+- **And** the genres appear on the story detail page and index cards
+
+**Scenario 4: Edit story genres**
+
+- **Given** I am editing my own story
+- **When** I open the edit form
+- **Then** the "Genres" field is pre-selected with current values
+- **And** I can change selections within the 1–3 limit
+
+**Implementation:**
+
+- Create `story_story_ref_genre` pivot table with composite PK `(story_id, story_ref_genre_id)` and FKs (RESTRICT on delete)
+- Add multi-select chips to create/edit forms
+- `StoryRequest` validation: array of ids, `min:1`, `max:3`, elements `exists:story_ref_genres,id`
+- Sync pivot on create/update
+- Display genres on story detail and index cards
+
+---
+
+### **US-015: Filter Stories by Genres**
+
+**As a reader, I want to filter stories by genres so that I can find content in my preferred categories.**
+
+**Acceptance Criteria:**
+
+- **Genres filter presence**: A multi-select filter on the index page lists active genres ordered by `order`
+- **OR logic**: Selecting multiple genres returns stories that include ANY selected genre
+- **URL**: Uses slug params `genres[]` (bookmarkable)
+- **Pagination**: Filter state persists across pages
+- **Clear**: Clearing all selections removes genre params and shows all public stories
+
+**Implementation:**
+
+- Handle `genres[]` slug parameters; resolve to ids via StoryRef cache
+- Modify query using `whereHas('genres', fn($q) => $q->whereIn('story_ref_genres.id', $ids))`
+- Persist filters via `appends()` and show active filter chips
+
+---
+
+### **US-016: Add Copyright Selection (Mandatory)**
+
+**As a user creating a story, I want to select a copyright so that usage rights are clear.**
+
+**Acceptance Criteria:**
+
+- **Field**: "Copyright" dropdown populated with active `StoryRefCopyright`, ordered by `order`
+- **Required**: Validation error if empty
+- **Create/Edit**: Save and allow changing; pre-select current value
+- **Display**: Show on story detail and index cards
+
+**Implementation:**
+
+- Enforce NOT NULL `story_ref_copyright_id` once shipped
+- Add FK constraint (RESTRICT on delete)
+- `StoryRequest` requires valid id; resolve label via cache for display
+
+---
+
+### **US-017: Add Writing Status Selection (Optional)**
+
+**As a user, I want to optionally set a writing status to indicate progress.**
+
+**Acceptance Criteria:**
+
+- **Field**: "Writing Status" dropdown with active `StoryRefStatus` (plus "Not specified") ordered by `order`
+- **Optional**: Can be empty; saved as null
+- **Edit**: Pre-selected current value; can clear
+- **Display**: Show on detail and index if set
+
+**Implementation:**
+
+- Nullable `story_ref_status_id` with FK (RESTRICT on delete)
+- `StoryRequest` allows nullable id
+- Resolve via cache for display
+
+---
+
+### **US-018: Filter Stories by Writing Status**
+
+**As a reader, I want to filter stories by writing status so I can find completed works or WIPs.**
+
+**Acceptance Criteria:**
+
+- **Filter**: "Writing Status" dropdown with "All" and "Not Specified"
+- **URL**: `status=<slug>`; special value for not specified
+- **Behavior**: Filters by `story_ref_status_id`; "Not Specified" uses `whereNull`
+- **Persistence**: Retained across pagination; removable
+
+**Implementation:**
+
+- Resolve slug to id via cache; apply `where('story_ref_status_id', $id)` or `whereNull`
+- Keep filter chip visible; update URL on change
+
+---
+
+### **US-019: Add Optional Trigger Warnings Selection**
+
+**As a user creating a story, I want to optionally select trigger warnings so readers can make informed choices.**
+
+**Acceptance Criteria:**
+
+- **Field**: "Trigger Warnings" multi-select chips from `StoryRefTriggerWarning` (ordered by `order`); optional
+- **Create/Edit**: Save none or multiple; pre-select on edit; can add/remove
+- **Display**: Prominently show warnings on detail and on index cards
+
+**Implementation:**
+
+- Create `story_story_ref_trigger_warning` pivot with composite PK and FKs (RESTRICT on delete)
+- `StoryRequest` allows optional array of ids (`exists:story_ref_trigger_warnings,id`)
+- Sync pivot on create/update
+- Prominent UI styling on detail and index
+
+---
+
+### **US-020: Filter Stories by Trigger Warnings**
+
+**As a reader, I want to filter or hide stories based on trigger warnings.**
+
+**Acceptance Criteria:**
+
+- **Modes**: "Show All", "Hide Stories with Warnings", "Show Only with Specific Warnings"
+- **Specific**: When specific warnings selected, show stories matching ANY of them
+- **URL**: `hide_warnings=1` or `trigger_warnings[]=<slug>`
+- **Persistence**: State persists; chips indicate active filters
+
+**Implementation:**
+
+- For hide mode: `whereDoesntHave('triggerWarnings')`
+- For specific mode: `whereHas('triggerWarnings', fn($q) => $q->whereIn('story_ref_trigger_warnings.id', $ids))`
+- Resolve slugs to ids via cache; manage pagination appends
+
+---
+
+### **US-021: Add Optional Feedback Type Selection**
+
+**As a user creating a story, I want to optionally select feedback preferences so readers know what kind of feedback I'm seeking.**
+
+**Acceptance Criteria:**
+
+- **Field**: "Feedback Type" dropdown from `StoryRefFeedback` (ordered by `order`), optional with empty option
+- **Create/Edit**: Can be null; editable and clearable; pre-selected if set
+- **Display**: Show on detail and index if set
+
+**Implementation:**
+
+- Nullable `story_ref_feedback_id` with FK (RESTRICT on delete)
+- `StoryRequest` allows nullable id
+- Resolve via cache for display
+
