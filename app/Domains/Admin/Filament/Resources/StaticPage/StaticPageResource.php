@@ -44,7 +44,7 @@ class StaticPageResource extends Resource
                             ->required()
                             ->maxLength(200)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
                         Forms\Components\TextInput::make('slug')
                             ->label(__('admin::static.fields.slug'))
                             ->required()
@@ -57,7 +57,7 @@ class StaticPageResource extends Resource
                             ->label(__('admin::static.fields.content'))
                             ->columnSpanFull()
                             ->toolbarButtons([
-                                'bold','italic','strike','underline','bulletList','orderedList','h2','h3','blockquote','link','undo','redo'
+                                'bold', 'italic', 'strike', 'underline', 'bulletList', 'orderedList', 'h2', 'h3', 'blockquote', 'link', 'undo', 'redo'
                             ])
                             ->required(),
                     ])->columns(2),
@@ -74,7 +74,7 @@ class StaticPageResource extends Resource
                                 );
                             })
                             ->reactive()
-                            ->visible(fn (callable $get) => filled($get('header_image_path')) && empty($get('header_image')) && !$get('remove_header_image'))
+                            ->visible(fn(callable $get) => filled($get('header_image_path')) && empty($get('header_image')) && !$get('remove_header_image'))
                             ->columnSpanFull(),
                         Forms\Components\FileUpload::make('header_image')
                             ->label(__('admin::static.fields.header_image'))
@@ -87,7 +87,7 @@ class StaticPageResource extends Resource
                         Forms\Components\Toggle::make('remove_header_image')
                             ->label(__('admin::static.actions.remove_header_image'))
                             ->reactive()
-                            ->visible(fn (callable $get) => filled($get('header_image_path')) && empty($get('header_image'))),
+                            ->visible(fn(callable $get) => filled($get('header_image_path')) && empty($get('header_image'))),
                     ]),
                 Forms\Components\Section::make(__('admin::static.fields.status'))
                     ->schema([
@@ -99,10 +99,6 @@ class StaticPageResource extends Resource
                                 'published' => __('admin::static.status.published'),
                             ])->native(false)
                             ->default('draft'),
-                        Forms\Components\DateTimePicker::make('published_at')
-                            ->label(__('admin::static.fields.published_at'))
-                            ->seconds(false)
-                            ->native(false),
                         Forms\Components\TextInput::make('meta_description')
                             ->label(__('admin::static.fields.meta_description'))
                             ->maxLength(160),
@@ -148,14 +144,14 @@ class StaticPageResource extends Resource
                     ->label(__('admin::static.actions.publish'))
                     ->visible(fn(StaticPage $record) => $record->status !== 'published')
                     ->requiresConfirmation()
-                    ->action(function(StaticPage $record) {
+                    ->action(function (StaticPage $record) {
                         app(StaticPageService::class)->publish($record);
                     }),
                 Tables\Actions\Action::make('unpublish')
                     ->label(__('admin::static.actions.unpublish'))
                     ->visible(fn(StaticPage $record) => $record->status === 'published')
                     ->requiresConfirmation()
-                    ->action(function(StaticPage $record) {
+                    ->action(function (StaticPage $record) {
                         app(StaticPageService::class)->unpublish($record);
                     }),
             ])
