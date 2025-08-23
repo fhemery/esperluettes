@@ -44,7 +44,7 @@ class NewsResource extends Resource
                             ->required()
                             ->maxLength(200)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
                         Forms\Components\TextInput::make('slug')
                             ->label(__('admin::news.fields.slug'))
                             ->required()
@@ -58,7 +58,7 @@ class NewsResource extends Resource
                             ->label(__('admin::news.fields.content'))
                             ->columnSpanFull()
                             ->toolbarButtons([
-                                'bold','italic','strike','underline','bulletList','orderedList','h2','h3','blockquote','link','undo','redo'
+                                'bold', 'italic', 'strike', 'underline', 'bulletList', 'orderedList', 'h2', 'h3', 'blockquote', 'link', 'undo', 'redo'
                             ])
                             ->required(),
                     ])->columns(2),
@@ -75,7 +75,7 @@ class NewsResource extends Resource
                                 );
                             })
                             ->reactive()
-                            ->visible(fn (callable $get) => filled($get('header_image_path')) && empty($get('header_image')) && !$get('remove_header_image'))
+                            ->visible(fn(callable $get) => filled($get('header_image_path')) && empty($get('header_image')) && !$get('remove_header_image'))
                             ->columnSpanFull(),
                         Forms\Components\FileUpload::make('header_image')
                             ->label(__('admin::news.fields.header_image'))
@@ -88,7 +88,7 @@ class NewsResource extends Resource
                         Forms\Components\Toggle::make('remove_header_image')
                             ->label(__('admin::news.actions.remove_header_image'))
                             ->reactive()
-                            ->visible(fn (callable $get) => filled($get('header_image_path')) && empty($get('header_image'))),
+                            ->visible(fn(callable $get) => filled($get('header_image_path')) && empty($get('header_image'))),
                     ]),
                 Forms\Components\Section::make(__('admin::news.fields.status'))
                     ->schema([
@@ -100,10 +100,6 @@ class NewsResource extends Resource
                                 'published' => __('admin::news.status.published'),
                             ])->native(false)
                             ->default('draft'),
-                        Forms\Components\DateTimePicker::make('published_at')
-                            ->label(__('admin::news.fields.published_at'))
-                            ->seconds(false)
-                            ->native(false),
                         Forms\Components\TextInput::make('meta_description')
                             ->label(__('admin::news.fields.meta_description'))
                             ->maxLength(160),
@@ -158,14 +154,14 @@ class NewsResource extends Resource
                     ->visible(fn(News $record) => $record->status !== 'published')
                     ->label(__('admin::news.actions.publish'))
                     ->requiresConfirmation()
-                    ->action(function(News $record) {
+                    ->action(function (News $record) {
                         app(NewsService::class)->publish($record);
                     }),
                 Tables\Actions\Action::make('unpublish')
                     ->visible(fn(News $record) => $record->status === 'published')
                     ->requiresConfirmation()
                     ->label(__('admin::news.actions.unpublish'))
-                    ->action(function(News $record) {
+                    ->action(function (News $record) {
                         app(NewsService::class)->unpublish($record);
                     }),
             ])
