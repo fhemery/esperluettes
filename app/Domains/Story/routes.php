@@ -14,6 +14,15 @@ Route::middleware(['web'])->group(function () {
 
         Route::post('/stories', [StoryController::class, 'store'])
             ->name('stories.store');
+
+        // Edit/update own stories (authors only)
+        Route::get('/stories/{slug}/edit', [StoryController::class, 'edit'])
+            ->where('slug', '.*')
+            ->name('stories.edit');
+
+        Route::match(['put', 'patch'], '/stories/{slug}', [StoryController::class, 'update'])
+            ->where('slug', '.*')
+            ->name('stories.update');
     });
 
     // Public show route (visibility enforcement handled in controller/policies later)

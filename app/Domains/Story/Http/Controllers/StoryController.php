@@ -83,6 +83,48 @@ class StoryController
             ->with('status', __('story::show.created'));
     }
 
+    public function edit(string $slug): View
+    {
+        $story = $this->service->getStoryForShow($slug, Auth::id());
+
+        // Author-only: must be a collaborator with role=author
+        if (!$story->isAuthor(Auth::id())) {
+            abort(404);
+        }
+
+        return view('story::edit', [
+            'story' => $story,
+        ]);
+    }
+
+    public function update(StoryRequest $request, string $slug): RedirectResponse
+    {
+        $story = $this->service->getStoryForShow($slug, Auth::id());
+
+        // Author-only: must be a collaborator with role=author
+        if (!$story->isAuthor(Auth::id())) {
+            abort(404);
+        }
+
+        $oldSlug = $story->slug;
+        $oldTitle = $story->title;
+
+        $story->title = (string)$request->input('title');
+        $story->description = (string)$request->input('description');
+        $story->visibility = (string)$request->input('visibility');
+
+        // If title changed, regenerate slug base but keep -id suffix
+        if ($story->title !== $oldTitle) {
+            $slugBase = Story::generateSlugBase($story->title);
+            $story->slug = $slugBase . '-' . $story->id;
+        }
+
+        $story->save();
+
+        return redirect()->to('/stories/' . $story->slug)
+            ->with('status', __('story::edit.updated'));
+    }
+
     public function profileStories(string $slug): View
     {
         // Resolve profile by slug via public API
@@ -146,10 +188,19 @@ class StoryController
     {
         $story = $this->service->getStoryForShow($slug, Auth::id());
 
+        // 301 redirect if slug base changed but id suffix matches
+        if ($story->slug !== $slug && preg_match('/-(\d+)$/', $slug, $m)) {
+            if ((int)$m[1] === (int)$story->id) {
+                return redirect()->to('/stories/' . $story->slug, 301);
+            }
+        }
+
         // Enforce visibility rules
         $user = Auth::user();
-        if ($story->visibility === Story::VIS_PRIVATE && !$story->isCollaborator($user->id)) {
-            abort(404);
+        if ($story->visibility === Story::VIS_PRIVATE) {
+            if (!$user || !$story->isCollaborator($user->id)) {
+                abort(404);
+            }
         }
         if ($story->visibility === Story::VIS_COMMUNITY) {
             if (!$user) {

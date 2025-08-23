@@ -59,4 +59,15 @@ class Story extends Model
         return $this->collaborators()->pluck('user_id')->contains($userId);
     }
 
+    /**
+     * Check if the given user id is an author collaborator for this story.
+     */
+    public function isAuthor(?int $userId): bool
+    {
+        if (!$userId) {
+            return false;
+        }
+        return $this->authors()->where('user_id', $userId)->exists();
+    }
+
 }

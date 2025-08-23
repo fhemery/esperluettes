@@ -210,6 +210,9 @@ app/Domains/Story/
 - `/stories/<story-slug-with-id>/chapters/create` - Add new chapter (author/co-author, subject to limits)
 - `/stories/<story-slug-with-id>/chapters/<chapter-slug-with-id>/edit` - Edit chapter (author/co-author only)
 
+Notes:
+- When a story title changes, the slug base changes but the `-id` suffix remains. Visiting an old slug that ends with the correct `-id` performs a 301 redirect to the canonical, updated slug.
+
 ## User Stories
 
 ### Author User Stories
@@ -246,11 +249,13 @@ app/Domains/Story/
 - Image upload validation and processing
   - Chapter embedded images are not supported initially; if introduced later, they will be stored under `storage/app/public/stories/chapters/`
 
+Unauthorized access handling:
+- For protected resources (e.g., private/community content without proper rights, or edit routes when not an author collaborator), the application returns 404 to avoid leaking existence.
+
 ## Performance Considerations
 - Database indexing on slug, visibility, and user_id fields
 - Pagination for story listings
 - Image optimization and CDN delivery
-- Caching of story metadata for listing pages
 - Efficient chapter ordering queries (use sparse ordering increments, e.g., steps of 100, to minimize renumbering on reorder)
 
 ## Clarified Requirements Summary
