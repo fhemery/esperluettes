@@ -108,3 +108,16 @@ it('shows the story type when available', function () {
     $response->assertSee(trans('story::shared.type.label'));
     $response->assertSee('Short Story');
 });
+
+it('shows the audience when available', function () {
+    $author = alice($this);
+    $aud = makeAudience('Teens');
+    $story = publicStory('Audience Story', $author->id, [
+        'story_ref_audience_id' => $aud->id,
+    ]);
+
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    $response->assertSee(trans('story::shared.audience.label'));
+    $response->assertSee('Teens');
+});

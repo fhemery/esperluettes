@@ -35,3 +35,17 @@ it('shows story types details to authenticated used', function () {
     $response->assertSee(trans('story::shared.required'));
     $response->assertSee(trans('story::create.actions.continue'));
 });
+
+it('shows story audience details to authenticated user', function () {
+    $user = alice($this);
+
+    $response = $this->actingAs($user)->get('/stories/create');
+
+    $response->assertOk();
+
+    // Audience field (label, placeholder/help, required note)
+    $response->assertSee(trans('story::shared.audience.label'));
+    $response->assertSee(trans('story::shared.audience.placeholder'));
+    $response->assertSee(trans('story::shared.audience.help'));
+    $response->assertSee(trans('story::shared.required'));
+});

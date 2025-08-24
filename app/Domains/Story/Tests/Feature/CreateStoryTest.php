@@ -34,6 +34,7 @@ it('denies non-confirmed users from posting new stories', function () {
         'description' => '<p>blocked</p>',
         'visibility' => Story::VIS_PUBLIC,
         'story_ref_type_id' => defaultStoryType()->id,
+        'story_ref_audience_id' => defaultAudience()->id,
     ];
 
     $resp = $this->post('/stories', $payload);
@@ -55,6 +56,7 @@ it('produces unique slugs for duplicate titles', function () {
         'description' => '<p>content</p>',
         'visibility' => Story::VIS_PUBLIC,
         'story_ref_type_id' => defaultStoryType()->id,
+        'story_ref_audience_id' => defaultAudience()->id,
     ];
 
     // Act: create two stories with identical titles
@@ -92,6 +94,7 @@ it('allows an authenticated user to create a story and see it', function () {
         'description' => '<p>This is a great story</p>',
         'visibility' => Story::VIS_PUBLIC,
         'story_ref_type_id' => defaultStoryType()->id,
+        'story_ref_audience_id' => defaultAudience()->id,
     ];
 
     $response = $this->post('/stories', $payload);

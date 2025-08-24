@@ -32,15 +32,18 @@ class StoryRefLookupService
      *
      * Currently includes:
      * - types: Collection of arrays with id, slug, name, order
+     * - audiences: Collection of arrays with id, slug, name, order
      *
      * @return array{
-     *     types: Collection<int, array{id:int,slug:string,name:string,order:int|null}>
+     *     types: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
+     *     audiences: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      * }
      */
     public function getStoryReferentials(): array
     {
         return [
             'types' => $this->getTypes(),
+            'audiences' => $this->getAudiences(),
         ];
     }
 
@@ -50,5 +53,39 @@ class StoryRefLookupService
             return null;
         }
         return $this->cache->typeIdBySlug($slug);
+    }
+
+    /**
+     * List active audiences ordered for UI.
+     * @return Collection<int, array{id:int,slug:string,name:string,order:int|null}>
+     */
+    public function getAudiences(): Collection
+    {
+        return $this->cache->audiences()->map(fn(array $t) => [
+            'id' => $t['id'],
+            'slug' => $t['slug'],
+            'name' => $t['name'],
+            'order' => $t['order'],
+        ]);
+    }
+
+    public function findAudienceIdBySlug(?string $slug): ?int
+    {
+        if ($slug === null) {
+            return null;
+        }
+        return $this->cache->audienceIdBySlug($slug);
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function findAudienceIdsBySlugs(?array $slugs): array
+    {
+        if ($slugs === null) {
+            return [];
+        }
+        return $this->cache->audienceIdsBySlugs($slugs);
     }
 }

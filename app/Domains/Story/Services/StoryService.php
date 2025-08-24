@@ -33,6 +33,11 @@ class StoryService
             $query->where('story_ref_type_id', $filter->typeId);
         }
 
+        // Filter by Audience if provided (multi-select)
+        if (!empty($filter->audienceIds)) {
+            $query->whereIn('story_ref_audience_id', $filter->audienceIds);
+        }
+
         // Visibilities already normalized in DTO
         $visibilities = $filter->visibilities;
 
@@ -86,6 +91,7 @@ class StoryService
             ]);
             // Set mandatory reference fields
             $story->story_ref_type_id = (int) $request->input('story_ref_type_id');
+            $story->story_ref_audience_id = (int) $request->input('story_ref_audience_id');
             $story->save();
 
             // 2) Update slug with id suffix

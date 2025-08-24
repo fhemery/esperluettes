@@ -35,12 +35,10 @@ it('allows the author to load edit page and update story', function () {
         ->assertSee('story::edit.title');
 
     // Update
-    $payload = [
+    $payload = validStoryPayload([
         'title' => 'Updated Title',
         'description' => '<p>new desc</p>',
-        'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-    ];
+    ]);
 
     $resp = $this->put('/stories/' . $story->slug, $payload);
     $resp->assertRedirect();
@@ -74,12 +72,10 @@ it('allows a co-author with role author to update', function () {
 
     $this->actingAs($coauthor);
 
-    $resp = $this->put('/stories/' . $story->slug, [
+    $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Coauthored Title',
         'description' => '<p>x</p>',
-        'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-    ]);
+    ]));
 
     $resp->assertRedirect();
     $story->refresh();
@@ -105,12 +101,10 @@ it('returns 404 for collaborator without author role', function () {
     $this->actingAs($other);
 
     $this->get('/stories/' . $story->slug . '/edit')->assertNotFound();
-    $this->put('/stories/' . $story->slug, [
+    $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Should Fail',
         'description' => '<p>x</p>',
-        'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-    ])->assertNotFound();
+    ]))->assertNotFound();
 });
 
 it('returns 404 for non-collaborator trying to edit', function () {
@@ -122,12 +116,10 @@ it('returns 404 for non-collaborator trying to edit', function () {
     $this->actingAs($intruder);
 
     $this->get('/stories/' . $story->slug . '/edit')->assertNotFound();
-    $this->put('/stories/' . $story->slug, [
+    $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Nope',
         'description' => '<p>x</p>',
-        'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-    ])->assertNotFound();
+    ]))->assertNotFound();
 });
 
 it('301-redirects from old slug base to canonical after title change', function () {
@@ -138,12 +130,10 @@ it('301-redirects from old slug base to canonical after title change', function 
     $oldSlug = $story->slug; // contains -id
 
     // Update title
-    $this->put('/stories/' . $oldSlug, [
+    $this->put('/stories/' . $oldSlug, validStoryPayload([
         'title' => 'New Canonical Title',
         'description' => '<p>desc</p>',
-        'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-    ])->assertRedirect();
+    ]))->assertRedirect();
 
     $story->refresh();
 

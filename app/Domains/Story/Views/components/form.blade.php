@@ -30,6 +30,29 @@
     <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.required') }}</p>
 </div>
 
+@php($selectedAudienceId = old('story_ref_audience_id', $story?->story_ref_audience_id ?? ''))
+
+<div class="mb-6">
+    <x-input-label for="story_ref_audience_id" :value="__('story::shared.audience.label')"/>
+    <div class="flex items-center gap-2">
+        <select id="story_ref_audience_id" name="story_ref_audience_id" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value=""
+                    disabled {{ $selectedAudienceId === '' ? 'selected' : '' }}>{{ __('story::shared.audience.placeholder') }}</option>
+            @foreach(($referentials['audiences'] ?? collect()) as $a)
+                <option
+                    value="{{ $a['id'] }}" {{ (string)$selectedAudienceId === (string)$a['id'] ? 'selected' : '' }}>{{ $a['name'] }}</option>
+            @endforeach
+        </select>
+        <x-shared::tooltip type="help" :title="__('story::shared.audience.label')" placement="right">
+            {{ __('story::shared.audience.help') }}
+        </x-shared::tooltip>
+    </div>
+    <x-input-error :messages="$errors->get('story_ref_audience_id')" class="mt-2"/>
+    <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.required') }}</p>
+    <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.audience.note_single_select') }}</p>
+</div>
+
 <div class="mb-6">
     <x-input-label for="description" :value="__('story::shared.description.label')"/>
     <x-shared::editor

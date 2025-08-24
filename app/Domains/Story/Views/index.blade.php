@@ -22,7 +22,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="mb-6">
-                        <form method="GET" action="{{ url('/stories') }}" class="flex items-center gap-3">
+                        <form method="GET" action="{{ url('/stories') }}" class="flex items-start gap-6 flex-wrap">
                             <div>
                                 <label for="type" class="block text-sm font-medium text-gray-700">{{ __('story::shared.type.label') }}</label>
                                 <select id="type" name="type" class="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -32,9 +32,24 @@
                                     @endforeach
                                 </select>
                             </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-700">{{ __('story::shared.audience.label') }}</span>
+                                <div class="mt-2 flex flex-wrap gap-3 max-w-2xl">
+                                    @php($currentAud = collect($currentAudiences ?? []))
+                                    @foreach(($referentials['audiences'] ?? collect()) as $a)
+                                        @php($checked = $currentAud->contains($a['slug']))
+                                        <label class="inline-flex items-center gap-2 text-sm">
+                                            <input type="checkbox" name="audiences[]" value="{{ $a['slug'] }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ $checked ? 'checked' : '' }}>
+                                            <span>{{ $a['name'] }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
                             <div class="pt-6">
                                 <x-primary-button type="submit">{{ __('story::index.filter') }}</x-primary-button>
-                                @if(!empty($currentType))
+                                @if(!empty($currentType) || !empty($currentAudiences))
                                     <a href="{{ url('/stories') }}" class="ml-3 text-sm text-gray-600 hover:text-gray-900">{{ __('story::index.reset_filters') }}</a>
                                 @endif
                             </div>

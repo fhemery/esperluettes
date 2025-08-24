@@ -23,4 +23,10 @@ return [
         'integer' => 'Le type d\'histoire doit être un entier',
         'exists' => 'Ce type d\'histoire n\'existe pas'
     ],
+
+    'audience' => [
+        'required' => 'L\'audience est requise',
+        'integer' => 'L\'audience doit être un entier',
+        'exists' => 'Cette audience n\'existe pas'
+    ],
 ];

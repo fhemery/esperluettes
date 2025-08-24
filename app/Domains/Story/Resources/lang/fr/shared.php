@@ -23,6 +23,12 @@ return [
         'placeholder' => 'Sélectionner un type',
         'help' => 'Choisissez la catégorie de votre histoire',
     ],
+    'audience' => [
+        'label' => 'Audience',
+        'placeholder' => 'Sélectionner une audience',
+        'help' => 'Choisissez le public visé par votre histoire',
+        'note_single_select' => 'Sélection unique requise',
+    ],
     'required' => 'Champ requis',
     'by' => 'Par '
 ];

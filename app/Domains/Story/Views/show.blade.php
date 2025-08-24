@@ -60,9 +60,16 @@
                     </div>
 
                     @if($viewModel->getTypeName())
-                        <div class="mb-4 text-sm text-gray-700">
+                        <div class="mb-2 text-sm text-gray-700">
                             <span class="font-medium">{{ __('story::shared.type.label') }}:</span>
                             <span>{{ $viewModel->getTypeName() }}</span>
+                        </div>
+                    @endif
+
+                    @if($viewModel->getAudienceName())
+                        <div class="mb-4 text-sm text-gray-700">
+                            <span class="font-medium">{{ __('story::shared.audience.label') }}:</span>
+                            <span>{{ $viewModel->getAudienceName() }}</span>
                         </div>
                     @endif
 

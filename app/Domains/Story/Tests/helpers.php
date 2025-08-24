@@ -1,8 +1,8 @@
 <?php
 
 use App\Domains\Story\Models\Story;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Create a Story and attach the given author as 'author' collaborator.
@@ -21,6 +21,7 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
         'visibility' => $attributes['visibility'] ?? Story::VIS_PUBLIC,
         'last_chapter_published_at' => $attributes['last_chapter_published_at'] ?? null,
         'story_ref_type_id' => $attributes['story_ref_type_id'] ?? defaultStoryType()->id,
+        'story_ref_audience_id' => $attributes['story_ref_audience_id'] ?? defaultAudience()->id,
     ]);
     $story->save();
 
@@ -74,7 +75,41 @@ function makeStoryType(string $name): \App\Domains\StoryRef\Models\StoryRefType
 function defaultStoryType(): \App\Domains\StoryRef\Models\StoryRefType
 {
     return \App\Domains\StoryRef\Models\StoryRefType::firstOrCreate([
-        'name' => 'FirstStoryType',
-        'slug' => 'first-story-type',
+        'name' => 'Default type',
+        'slug' => 'default-type',
         'is_active' => true]);
+}
+
+function defaultAudience(): \App\Domains\StoryRef\Models\StoryRefAudience
+{
+    return \App\Domains\StoryRef\Models\StoryRefAudience::firstOrCreate([
+        'name' => 'DefaultAudience',
+        'slug' => 'default-audience',
+        'is_active' => true]);
+}
+
+/**
+ * Ensure a Story Audience exists for tests and return it.
+ */
+function makeAudience(string $name): \App\Domains\StoryRef\Models\StoryRefAudience
+{
+    return app(\App\Domains\StoryRef\Services\AudienceService::class)->create([
+        'name' => $name,
+        'slug' => Str::slug($name),
+        'is_active' => true,
+    ]);
+}
+
+/**
+ * Build a valid payload for story create/update; override any field to test specific validation scenarios.
+ */
+function validStoryPayload(array $overrides = []): array
+{
+    return array_merge([
+        'title' => 'Valid',
+        'description' => null,
+        'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
+        'story_ref_audience_id' => defaultAudience()->id,
+    ], $overrides);
 }

@@ -11,18 +11,21 @@ class StoryShowViewModel
     public readonly ?int $currentUserId;
     public readonly array $authors;
     public readonly ?string $typeName;
+    public readonly ?string $audienceName;
 
     public function __construct(
         Story $story,
         ?int $currentUserId,
         array $authors,
         ?string $typeName = null,
+        ?string $audienceName = null,
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
         $this->authors = $authors;
         $this->currentUserId = $currentUserId;
         $this->typeName = $typeName;
+        $this->audienceName = $audienceName;
     }
 
     
@@ -86,5 +89,13 @@ class StoryShowViewModel
     public function getTypeName(): ?string
     {
         return $this->typeName;
+    }
+
+    /**
+     * Get story audience display name
+     */
+    public function getAudienceName(): ?string
+    {
+        return $this->audienceName;
     }
 }

@@ -33,11 +33,20 @@ class StoryController
         $page = (int)request()->get('page', 1);
         $typeSlug = request()->get('type');
         $typeId = $this->lookup->findTypeIdBySlug(is_string($typeSlug) ? $typeSlug : null);
+        // Audience multi-select: accept audiences[] or comma-separated 'audiences'
+        $audiencesParam = request()->get('audiences');
+        $audienceSlugs = [];
+        if (is_array($audiencesParam)) {
+            $audienceSlugs = array_values(array_filter(array_map('strval', $audiencesParam)));
+        } elseif (is_string($audiencesParam)) {
+            $audienceSlugs = array_values(array_filter(array_map('trim', explode(',', $audiencesParam))));
+        }
+        $audienceIds = $this->lookup->findAudienceIdsBySlugs($audienceSlugs);
         $vis = [Story::VIS_PUBLIC];
         if (Auth::check()) {
             $vis[] = Story::VIS_COMMUNITY;
         }
-        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId);
+        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds);
         $paginator = $this->service->listStories($filter);
 
         // Collect all author user IDs from the page
@@ -78,6 +87,10 @@ class StoryController
         if ($typeSlug) {
             $appends['type'] = $typeSlug;
         }
+        if (!empty($audienceSlugs)) {
+            // keep as comma-separated for pagination links
+            $appends['audiences'] = implode(',', $audienceSlugs);
+        }
 
         $viewModel = new StoryListViewModel($paginator, $items, $appends);
 
@@ -85,6 +98,7 @@ class StoryController
             'viewModel' => $viewModel,
             'referentials' => $referentials,
             'currentType' => is_string($typeSlug) ? $typeSlug : null,
+            'currentAudiences' => $audienceSlugs,
         ]);
     }
 
@@ -129,6 +143,7 @@ class StoryController
         $story->description = (string)$request->input('description');
         $story->visibility = (string)$request->input('visibility');
         $story->story_ref_type_id = (int)$request->input('story_ref_type_id');
+        $story->story_ref_audience_id = (int)$request->input('story_ref_audience_id');
 
         // If title changed, regenerate slug base but keep -id suffix
         if ($story->title !== $oldTitle) {
@@ -241,7 +256,12 @@ class StoryController
         $typeArr = $typesById->get($story->story_ref_type_id);
         $typeName = is_array($typeArr) ? ($typeArr['name'] ?? null) : null;
 
-        $viewModel = new StoryShowViewModel($story, Auth::id(), $authors, $typeName);
+        // Resolve audience name for display
+        $audiencesById = $this->lookup->getAudiences()->keyBy('id');
+        $audArr = $audiencesById->get($story->story_ref_audience_id);
+        $audienceName = is_array($audArr) ? ($audArr['name'] ?? null) : null;
+
+        $viewModel = new StoryShowViewModel($story, Auth::id(), $authors, $typeName, $audienceName);
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 
         return view('story::show', [

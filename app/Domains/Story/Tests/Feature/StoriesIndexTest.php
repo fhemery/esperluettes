@@ -139,3 +139,32 @@ it('filters stories by type slug', function () {
     $resp->assertSee(trans('story::index.filter'));
     $resp->assertSee(trans('story::index.reset_filters'));
 });
+
+it('filters stories by audience slug', function () {
+    // Arrange
+    $author = alice($this);
+
+    $teens = makeAudience('Teens');
+    $adults = makeAudience('Adults');
+
+    publicStory('Teen Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_audience_id' => $teens->id,
+    ]);
+
+    publicStory('Adult Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_audience_id' => $adults->id,
+    ]);
+
+    // Act: filter by teens audience slug
+    $resp = $this->get('/stories?audiences=' . $teens->slug);
+
+    // Assert: only teen story visible
+    $resp->assertOk();
+    $resp->assertSee('Teen Story');
+    $resp->assertDontSee('Adult Story');
+    // UI bits
+    $resp->assertSee(trans('story::index.filter'));
+    $resp->assertSee(trans('story::index.reset_filters'));
+});
