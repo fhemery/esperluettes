@@ -138,3 +138,28 @@ it('displays multiple selected genres as badges on show page', function () {
     $show->assertSee('Fantasy');
     $show->assertSee('Romance');
 });
+
+it('allows creating a story with an optional status which is shown on the page', function () {
+    // Arrange
+    $user = alice($this, roles: ['user-confirmed']);
+    $this->actingAs($user);
+    $status = makeStatus('Ongoing');
+
+    // Act
+    $payload = validStoryPayload([
+        'title' => 'Status Story',
+        'description' => '<p>desc</p>',
+        'story_ref_status_id' => $status->id,
+    ]);
+    $resp = $this->post('/stories', $payload);
+    $resp->assertRedirect();
+
+    // Assert
+    $story = Story::query()->firstOrFail();
+    expect($story->story_ref_status_id)->toBe($status->id);
+
+    $show = $this->get('/stories/' . $story->slug);
+    $show->assertOk();
+    $show->assertSee(trans('story::shared.status.label'));
+    $show->assertSee($status->name);
+});

@@ -352,7 +352,7 @@ categories.**
 
 ---
 
-### **US-015: Filter Stories by Genres**
+### **[DONE] US-015: Filter Stories by Genres**
 
 **As a reader, I want to filter stories by genres so that I can find content in my preferred categories.**
 

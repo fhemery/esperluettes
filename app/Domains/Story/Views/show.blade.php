@@ -80,6 +80,13 @@
                         </div>
                     @endif
 
+                    @if($viewModel->getStatusName())
+                        <div class="mb-4 text-sm text-gray-700">
+                            <span class="font-medium">{{ __('story::shared.status.label') }}:</span>
+                            <span>{{ $viewModel->getStatusName() }}</span>
+                        </div>
+                    @endif
+
                     @php($genres = $viewModel->getGenreNames())
                     @if(!empty($genres))
                         <div class="mb-6 text-sm text-gray-700">

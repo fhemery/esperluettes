@@ -15,6 +15,7 @@ class StoryRefCache
         private readonly AudienceService $audienceService,
         private readonly CopyrightService $copyrightService,
         private readonly GenreService $genreService,
+        private readonly StatusService $statusService,
     ) {}
 
     /**
@@ -232,5 +233,48 @@ class StoryRefCache
     public function clearGenres(): void
     {
         $this->cache->forget('storyref:genres:active-ordered');
+    }
+
+    /**
+     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     */
+    public function statuses(): Collection
+    {
+        return $this->cache->remember(
+            'storyref:statuses:active-ordered',
+            self::CACHE_TTL_SECONDS,
+            function () {
+                $all = collect($this->statusService->listAll());
+                $active = $all->filter(fn($m) => (bool) ($m->is_active ?? true));
+                return $active
+                    ->sortBy([
+                        ['order', 'asc'],
+                        ['name', 'asc'],
+                    ])
+                    ->values()
+                    ->map(fn($m) => [
+                        'id' => (int) $m->id,
+                        'slug' => (string) $m->slug,
+                        'name' => (string) $m->name,
+                        'is_active' => (bool) ($m->is_active ?? true),
+                        'order' => isset($m->order) ? (int) $m->order : null,
+                    ]);
+            }
+        );
+    }
+
+    public function statusIdBySlug(string $slug): ?int
+    {
+        $slug = trim(strtolower($slug));
+        if ($slug === '') {
+            return null;
+        }
+        $found = $this->statuses()->firstWhere('slug', $slug);
+        return $found['id'] ?? null;
+    }
+
+    public function clearStatuses(): void
+    {
+        $this->cache->forget('storyref:statuses:active-ordered');
     }
 }

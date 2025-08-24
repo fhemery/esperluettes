@@ -210,3 +210,28 @@ it('syncs genres on update (replaces previous selection)', function () {
     $show->assertSee('Sci-Fi');
     $show->assertSee('Mystery');
 });
+
+it('allows the author to set and change the optional status on update', function () {
+    // Arrange
+    $author = alice($this, roles: ['user-confirmed']);
+    $this->actingAs($author);
+    $story = publicStory('Status Updatable', $author->id, [
+        'description' => '<p>x</p>',
+    ]);
+
+    $status = makeStatus('Draft');
+
+    $resp1 = $this->put('/stories/' . $story->slug, validStoryPayload([
+        'title' => 'Status Updatable',
+        'description' => '<p>x</p>',
+        'story_ref_status_id' => $status->id,
+    ]));
+    $resp1->assertRedirect();
+
+    $story->refresh();
+    expect($story->story_ref_status_id)->toBe($status->id);
+    $this->get('/stories/' . $story->slug)
+        ->assertOk()
+        ->assertSee(trans('story::shared.status.label'))
+        ->assertSee($status->name);
+});

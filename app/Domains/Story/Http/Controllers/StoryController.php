@@ -171,6 +171,8 @@ class StoryController
         $story->story_ref_type_id = (int)$request->input('story_ref_type_id');
         $story->story_ref_audience_id = (int)$request->input('story_ref_audience_id');
         $story->story_ref_copyright_id = (int)$request->input('story_ref_copyright_id');
+        $statusId = $request->input('story_ref_status_id');
+        $story->story_ref_status_id = $statusId !== null ? (int)$statusId : null;
 
         // Sync genres (1..3)
         $genreIds = $request->input('story_ref_genre_ids', []);
@@ -300,6 +302,11 @@ class StoryController
         $crArr = $copyrightsById->get($story->story_ref_copyright_id);
         $copyrightName = is_array($crArr) ? ($crArr['name'] ?? null) : null;
 
+        // Resolve status name for display
+        $statusesById = $this->lookup->getStatuses()->keyBy('id');
+        $stArr = $statusesById->get($story->story_ref_status_id);
+        $statusName = is_array($stArr) ? ($stArr['name'] ?? null) : null;
+
         // Collect genre names using lookup service (service only loads IDs)
         $genreIds = $story->genres?->pluck('id')->filter()->values()->all() ?? [];
         $genresById = $this->lookup->getGenres()->keyBy('id');
@@ -307,7 +314,7 @@ class StoryController
         foreach ($genreIds as $gid) {
             $row = $genresById->get($gid);
             if (is_array($row) && isset($row['name'])) {
-                $genreNames[] = (string) $row['name'];
+                $genreNames[] = (string)$row['name'];
             }
         }
 
@@ -319,6 +326,7 @@ class StoryController
             $audienceName,
             $copyrightName,
             $genreNames,
+            $statusName,
         );
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 

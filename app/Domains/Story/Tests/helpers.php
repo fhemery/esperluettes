@@ -23,6 +23,7 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
         'story_ref_type_id' => $attributes['story_ref_type_id'] ?? defaultStoryType()->id,
         'story_ref_audience_id' => $attributes['story_ref_audience_id'] ?? defaultAudience()->id,
         'story_ref_copyright_id' => $attributes['story_ref_copyright_id'] ?? defaultCopyright()->id,
+        'story_ref_status_id' => $attributes['story_ref_status_id'] ?? null,
     ]);
     $story->save();
 
@@ -138,6 +139,15 @@ function defaultGenre(): \App\Domains\StoryRef\Models\StoryRefGenre
 function makeGenre(string $name): \App\Domains\StoryRef\Models\StoryRefGenre
 {
     return app(\App\Domains\StoryRef\Services\GenreService::class)->create([
+        'name' => $name,
+        'slug' => Str::slug($name),
+        'is_active' => true,
+    ]);
+}
+
+function makeStatus(string $name): \App\Domains\StoryRef\Models\StoryRefStatus
+{
+    return app(\App\Domains\StoryRef\Services\StatusService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
         'is_active' => true,

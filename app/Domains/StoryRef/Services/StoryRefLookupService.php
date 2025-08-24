@@ -35,12 +35,14 @@ class StoryRefLookupService
      * - audiences: Collection of arrays with id, slug, name, order
      * - copyrights: Collection of arrays with id, slug, name, order
      * - genres: Collection of arrays with id, slug, name, order
+     * - statuses: Collection of arrays with id, slug, name, order
      *
      * @return array{
      *     types: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      *     audiences: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      *     copyrights: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      *     genres: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
+     *     statuses: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      * }
      */
     public function getStoryReferentials(): array
@@ -50,6 +52,7 @@ class StoryRefLookupService
             'audiences' => $this->getAudiences(),
             'copyrights' => $this->getCopyrights(),
             'genres' => $this->getGenres(),
+            'statuses' => $this->getStatuses(),
         ];
     }
 
@@ -141,5 +144,27 @@ class StoryRefLookupService
             return [];
         }
         return $this->cache->genreIdsBySlugs($slugs);
+    }
+
+    /**
+     * List active statuses ordered for UI.
+     * @return Collection<int, array{id:int,slug:string,name:string,order:int|null}>
+     */
+    public function getStatuses(): Collection
+    {
+        return $this->cache->statuses()->map(fn(array $t) => [
+            'id' => $t['id'],
+            'slug' => $t['slug'],
+            'name' => $t['name'],
+            'order' => $t['order'],
+        ]);
+    }
+
+    public function findStatusIdBySlug(?string $slug): ?int
+    {
+        if ($slug === null) {
+            return null;
+        }
+        return $this->cache->statusIdBySlug($slug);
     }
 }

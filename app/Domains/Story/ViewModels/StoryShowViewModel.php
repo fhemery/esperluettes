@@ -13,6 +13,7 @@ class StoryShowViewModel
     public readonly ?string $typeName;
     public readonly ?string $audienceName;
     public readonly ?string $copyrightName;
+    public readonly ?string $statusName;
     /** @var array<int,string> */
     public readonly array $genreNames;
 
@@ -24,6 +25,7 @@ class StoryShowViewModel
         ?string $audienceName = null,
         ?string $copyrightName = null,
         array $genreNames = [],
+        ?string $statusName = null,
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
@@ -33,6 +35,7 @@ class StoryShowViewModel
         $this->audienceName = $audienceName;
         $this->copyrightName = $copyrightName;
         $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
+        $this->statusName = $statusName;
     }
 
     
@@ -112,6 +115,14 @@ class StoryShowViewModel
     public function getCopyrightName(): ?string
     {
         return $this->copyrightName;
+    }
+
+    /**
+     * Get story status display name
+     */
+    public function getStatusName(): ?string
+    {
+        return $this->statusName;
     }
 
     /**

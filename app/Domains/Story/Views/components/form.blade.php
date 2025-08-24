@@ -75,6 +75,26 @@
     <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.audience.note_single_select') }}</p>
 </div>
 
+@php($selectedStatusId = old('story_ref_status_id', $story?->story_ref_status_id ?? ''))
+
+<div class="mb-6">
+    <x-input-label for="story_ref_status_id" :value="__('story::shared.status.label')"/>
+    <div class="flex items-center gap-2">
+        <select id="story_ref_status_id" name="story_ref_status_id"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value="" {{ $selectedStatusId === '' ? 'selected' : '' }}>— {{ __('story::shared.status.placeholder') }} —</option>
+            @foreach(($referentials['statuses'] ?? collect()) as $s)
+                <option value="{{ $s['id'] }}" {{ (string)$selectedStatusId === (string)$s['id'] ? 'selected' : '' }}>{{ $s['name'] }}</option>
+            @endforeach
+        </select>
+        <x-shared::tooltip type="help" :title="__('story::shared.status.label')" placement="right">
+            {{ __('story::shared.status.help') }}
+        </x-shared::tooltip>
+    </div>
+    <x-input-error :messages="$errors->get('story_ref_status_id')" class="mt-2"/>
+    <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.optional') }}</p>
+</div>
+
 @php($selectedCopyrightId = old('story_ref_copyright_id', $story?->story_ref_copyright_id ?? ''))
 
 <div class="mb-6">

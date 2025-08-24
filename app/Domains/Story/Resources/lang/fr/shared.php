@@ -34,11 +34,17 @@ return [
         'placeholder' => 'Sélectionner un copyright',
         'help' => 'Sélectionnez le régime de droits pour cette histoire',
     ],
+    'status' => [
+        'label' => 'Statut',
+        'placeholder' => 'Sélectionner un statut (optionnel)',
+        'help' => "Choisissez le statut d'avancement de l'histoire (facultatif)",
+    ],
     'genres' => [
         'label' => 'Genres',
         'help' => 'Sélectionnez 1 à 3 genres qui décrivent votre histoire',
         'note_range' => 'Sélectionnez entre 1 et 3 genres',
     ],
     'required' => 'Champ requis',
+    'optional' => 'Champ facultatif',
     'by' => 'Par '
 ];
