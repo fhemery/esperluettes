@@ -42,11 +42,21 @@ class StoryController
             $audienceSlugs = array_values(array_filter(array_map('trim', explode(',', $audiencesParam))));
         }
         $audienceIds = $this->lookup->findAudienceIdsBySlugs($audienceSlugs);
+
+        // Genres multi-select (AND semantics): accept genres[] or comma-separated 'genres'
+        $genresParam = request()->get('genres');
+        $genreSlugs = [];
+        if (is_array($genresParam)) {
+            $genreSlugs = array_values(array_filter(array_map('strval', $genresParam)));
+        } elseif (is_string($genresParam)) {
+            $genreSlugs = array_values(array_filter(array_map('trim', explode(',', $genresParam))));
+        }
+        $genreIds = $this->lookup->findGenreIdsBySlugs($genreSlugs);
         $vis = [Story::VIS_PUBLIC];
         if (Auth::check()) {
             $vis[] = Story::VIS_COMMUNITY;
         }
-        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds);
+        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds);
         $paginator = $this->service->listStories($filter);
 
         // Collect all author user IDs from the page
@@ -63,8 +73,9 @@ class StoryController
         // Referentials lookup for display (types, ...)
         $referentials = $this->lookup->getStoryReferentials();
 
-        // Build summaries
+        // Referentials lookup for display (types, ...)
         $items = [];
+        $genresById = $this->lookup->getGenres()->keyBy('id');
         foreach ($paginator->getCollection() as $story) {
             $authorDtos = [];
             foreach ($story->authors as $author) {
@@ -74,12 +85,23 @@ class StoryController
                 }
             }
 
+            // Map genre IDs to names for badges
+            $gNames = [];
+            $ids = $story->genres?->pluck('id')->all() ?? [];
+            foreach ($ids as $gid) {
+                $row = $genresById->get($gid);
+                if (is_array($row) && isset($row['name'])) {
+                    $gNames[] = (string)$row['name'];
+                }
+            }
+
             $items[] = new StorySummaryViewModel(
                 id: $story->id,
                 title: $story->title,
                 slug: $story->slug,
                 description: $story->description,
                 authors: $authorDtos,
+                genreNames: $gNames,
             );
         }
 
@@ -91,6 +113,9 @@ class StoryController
             // keep as comma-separated for pagination links
             $appends['audiences'] = implode(',', $audienceSlugs);
         }
+        if (!empty($genreSlugs)) {
+            $appends['genres'] = implode(',', $genreSlugs);
+        }
 
         $viewModel = new StoryListViewModel($paginator, $items, $appends);
 
@@ -99,6 +124,7 @@ class StoryController
             'referentials' => $referentials,
             'currentType' => is_string($typeSlug) ? $typeSlug : null,
             'currentAudiences' => $audienceSlugs,
+            'currentGenres' => $genreSlugs,
         ]);
     }
 

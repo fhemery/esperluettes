@@ -47,9 +47,23 @@
                                 </div>
                             </div>
 
+                            <div>
+                                <span class="block text-sm font-medium text-gray-700">{{ __('story::shared.genres.label') }}</span>
+                                <div class="mt-2 flex flex-wrap gap-3 max-w-2xl">
+                                    @php($currentGen = collect($currentGenres ?? []))
+                                    @foreach(($referentials['genres'] ?? collect()) as $g)
+                                        @php($checked = $currentGen->contains($g['slug']))
+                                        <label class="inline-flex items-center gap-2 text-sm">
+                                            <input type="checkbox" name="genres[]" value="{{ $g['slug'] }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ $checked ? 'checked' : '' }}>
+                                            <span>{{ $g['name'] }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
                             <div class="pt-6">
                                 <x-primary-button type="submit">{{ __('story::index.filter') }}</x-primary-button>
-                                @if(!empty($currentType) || !empty($currentAudiences))
+                                @if(!empty($currentType) || !empty($currentAudiences) || !empty($currentGenres))
                                     <a href="{{ url('/stories') }}" class="ml-3 text-sm text-gray-600 hover:text-gray-900">{{ __('story::index.reset_filters') }}</a>
                                 @endif
                             </div>

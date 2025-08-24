@@ -122,4 +122,24 @@ class StoryRefLookupService
             'order' => $t['order'],
         ]);
     }
+
+    public function findGenreIdBySlug(?string $slug): ?int
+    {
+        if ($slug === null) {
+            return null;
+        }
+        return $this->cache->genreIdBySlug($slug);
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function findGenreIdsBySlugs(?array $slugs): array
+    {
+        if ($slugs === null) {
+            return [];
+        }
+        return $this->cache->genreIdsBySlugs($slugs);
+    }
 }

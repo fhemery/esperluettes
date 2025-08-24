@@ -19,6 +19,10 @@ class StoryFilterAndPagination
          * @var array<int,int> Audience IDs to filter by (multi-select)
          */
         public array $audienceIds = [],
+        /**
+         * @var array<int,int> Genre IDs to filter by (multi-select, AND semantics)
+         */
+        public array $genreIds = [],
     ) {
         // Normalize visibilities: ensure values and not empty
         $this->visibilities = array_values($this->visibilities);
@@ -32,5 +36,8 @@ class StoryFilterAndPagination
 
         // Normalize audience ids
         $this->audienceIds = array_values(array_unique(array_map('intval', $this->audienceIds)));
+
+        // Normalize genre ids
+        $this->genreIds = array_values(array_unique(array_map('intval', $this->genreIds)));
     }
 }

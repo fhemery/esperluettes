@@ -9,6 +9,96 @@ beforeEach(function () {
     \Illuminate\Support\Facades\Cache::flush();
 });
 
+it('displays genre badges on list cards', function () {
+    // Arrange
+    $author = alice($this);
+    $fantasy = makeGenre('Fantasy');
+    $mystery = makeGenre('Mystery');
+
+    publicStory('Genreful Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_genre_ids' => [$fantasy->id, $mystery->id],
+    ]);
+
+    // Act
+    $resp = $this->get('/stories');
+
+    // Assert: badges show both genre names
+    $resp->assertOk();
+    $resp->assertSee('Genreful Story');
+    $resp->assertSee('Fantasy');
+    $resp->assertSee('Mystery');
+});
+
+it('filters stories by a single genre slug', function () {
+    // Arrange
+    $author = alice($this);
+    $romance = makeGenre('Romance');
+    $sciFi = makeGenre('Sci Fi');
+
+    publicStory('Romance Tale', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_genre_ids' => [$romance->id],
+    ]);
+
+    publicStory('Science Fiction', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_genre_ids' => [$sciFi->id],
+    ]);
+
+    // Act
+    $resp = $this->get('/stories?genres=' . $romance->slug);
+
+    // Assert: only romance story visible
+    $resp->assertOk();
+    $resp->assertSee('Romance Tale');
+    $resp->assertDontSee('Science Fiction');
+    $resp->assertSee(trans('story::index.filter'));
+    $resp->assertSee(trans('story::index.reset_filters'));
+});
+
+it('filters stories by multiple genre slugs (AND semantics)', function () {
+    // Arrange
+    $author = alice($this);
+    $horror = makeGenre('Horror');
+    $comedy = makeGenre('Comedy');
+    $drama = makeGenre('Drama');
+
+    // Matches both Horror AND Comedy
+    publicStory('Horror Comedy', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_genre_ids' => [$horror->id, $comedy->id],
+    ]);
+
+    // Only Horror
+    publicStory('Just Horror', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_genre_ids' => [$horror->id],
+    ]);
+
+    // Only Comedy
+    publicStory('Just Comedy', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_genre_ids' => [$comedy->id],
+    ]);
+
+    // Unrelated
+    publicStory('Only Drama', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_genre_ids' => [$drama->id],
+    ]);
+
+    // Act: AND filter with comma-separated list
+    $resp = $this->get('/stories?genres=' . $horror->slug . ',' . $comedy->slug);
+
+    // Assert: only the story that has BOTH appears
+    $resp->assertOk();
+    $resp->assertSee('Horror Comedy');
+    $resp->assertDontSee('Just Horror');
+    $resp->assertDontSee('Just Comedy');
+    $resp->assertDontSee('Only Drama');
+});
+
 it('shows empty state when there are no public stories', function () {
     // Act
     $response = $this->get('/stories');

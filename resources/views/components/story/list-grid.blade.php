@@ -35,6 +35,16 @@
                         <x-profile.inline-names :profiles="$item->getAuthors()" />
                     </div>
                 @endif
+                @php($genres = $item->getGenreNames())
+                @if(!empty($genres))
+                    <div class="px-4 pb-4">
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($genres as $g)
+                                <span class="inline-block text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">{{ $g }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>

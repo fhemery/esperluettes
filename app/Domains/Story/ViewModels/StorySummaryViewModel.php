@@ -8,16 +8,20 @@ class StorySummaryViewModel
 {
     /** @var ProfileDto[] */
     public readonly array $authors;
+    /** @var array<int,string> */
+    public readonly array $genreNames;
 
     public function __construct(
         public readonly int $id,
         public readonly string $title,
         public readonly string $slug,
         public readonly ?string $description,
-        array $authors
+        array $authors,
+        array $genreNames = [],
     ) {
         /** @var ProfileDto[] $authors */
         $this->authors = $authors;
+        $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
     }
 
     public function getTitle(): string
@@ -46,5 +50,13 @@ class StorySummaryViewModel
     public function getFirstAuthorName(): ?string
     {
         return $this->authors[0]->display_name ?? null;
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    public function getGenreNames(): array
+    {
+        return $this->genreNames;
     }
 }

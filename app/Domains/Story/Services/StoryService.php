@@ -19,7 +19,7 @@ class StoryService
     public function listStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
     {
         $query = Story::query()
-            ->with(['authors', 'collaborators'])
+            ->with(['authors', 'collaborators', 'genres:id'])
             ->orderByDesc('created_at');
 
         if ($filter->userId !== null) {
@@ -36,6 +36,15 @@ class StoryService
         // Filter by Audience if provided (multi-select)
         if (!empty($filter->audienceIds)) {
             $query->whereIn('story_ref_audience_id', $filter->audienceIds);
+        }
+
+        // Filter by Genres (AND semantics: story must have all selected genre IDs)
+        if (!empty($filter->genreIds)) {
+            foreach ($filter->genreIds as $gid) {
+                $query->whereHas('genres', function ($q) use ($gid) {
+                    $q->where('story_ref_genres.id', $gid);
+                });
+            }
         }
 
         // Visibilities already normalized in DTO

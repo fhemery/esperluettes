@@ -208,6 +208,27 @@ class StoryRefCache
         return $found['id'] ?? null;
     }
 
+    /**
+     * @param array<int,string> $slugs
+     * @return array<int,int> Genre IDs
+     */
+    public function genreIdsBySlugs(array $slugs): array
+    {
+        $normalized = array_values(array_filter(array_map(fn($s) => trim(strtolower((string) $s)), $slugs)));
+        if (empty($normalized)) {
+            return [];
+        }
+        $bySlug = $this->genres()->keyBy('slug');
+        $ids = [];
+        foreach ($normalized as $slug) {
+            $row = $bySlug->get($slug);
+            if (is_array($row) && isset($row['id'])) {
+                $ids[] = (int) $row['id'];
+            }
+        }
+        return array_values(array_unique($ids));
+    }
+
     public function clearGenres(): void
     {
         $this->cache->forget('storyref:genres:active-ordered');
