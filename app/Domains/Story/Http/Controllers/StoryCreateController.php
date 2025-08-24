@@ -17,9 +17,9 @@ class StoryCreateController
      */
     public function create(Request $request): View
     {
-        $types = $this->lookup->getTypes();
+        $referentials = $this->lookup->getStoryReferentials();
         return view('story::create', [
-            'types' => $types,
+            'referentials' => $referentials,
         ]);
     }
 }

@@ -27,6 +27,23 @@ class StoryRefLookupService
         ]);
     }
 
+    /**
+     * Get all story referentials needed by the UI, cached.
+     *
+     * Currently includes:
+     * - types: Collection of arrays with id, slug, name, order
+     *
+     * @return array{
+     *     types: Collection<int, array{id:int,slug:string,name:string,order:int|null}>
+     * }
+     */
+    public function getStoryReferentials(): array
+    {
+        return [
+            'types' => $this->getTypes(),
+        ];
+    }
+
     public function findTypeIdBySlug(?string $slug): ?int
     {
         if ($slug === null) {

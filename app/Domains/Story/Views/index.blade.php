@@ -27,7 +27,7 @@
                                 <label for="type" class="block text-sm font-medium text-gray-700">{{ __('story::shared.type.label') }}</label>
                                 <select id="type" name="type" class="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">— {{ __('story::shared.type.placeholder') }} —</option>
-                                    @foreach(($types ?? collect()) as $t)
+                                    @foreach(($referentials['types'] ?? collect()) as $t)
                                         <option value="{{ $t['slug'] }}" {{ (isset($currentType) && $currentType === $t['slug']) ? 'selected' : '' }}>{{ $t['name'] }}</option>
                                     @endforeach
                                 </select>

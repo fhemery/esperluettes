@@ -51,8 +51,8 @@ class StoryController
             ? []
             : $this->profileApi->getPublicProfiles($authorIds); // [userId => ProfileDto]
 
-        // Types lookup for display
-        $types = $this->lookup->getTypes();
+        // Referentials lookup for display (types, ...)
+        $referentials = $this->lookup->getStoryReferentials();
 
         // Build summaries
         $items = [];
@@ -83,7 +83,7 @@ class StoryController
 
         return view('story::index', [
             'viewModel' => $viewModel,
-            'types' => $types,
+            'referentials' => $referentials,
             'currentType' => is_string($typeSlug) ? $typeSlug : null,
         ]);
     }
@@ -106,10 +106,10 @@ class StoryController
             abort(404);
         }
 
-        $types = $this->lookup->getTypes();
+        $referentials = $this->lookup->getStoryReferentials();
         return view('story::edit', [
             'story' => $story,
-            'types' => $types,
+            'referentials' => $referentials,
         ]);
     }
 

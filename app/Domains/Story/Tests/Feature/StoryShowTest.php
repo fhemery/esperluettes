@@ -103,8 +103,6 @@ it('shows the story type when available', function () {
     $story = publicStory('Typed Story', $author->id, [
         'story_ref_type_id' => $type->id,
     ]);
-    Log::info('Type id' . $type->id);
-    Log::info('Type id' . $story->story_ref_type_id);
     $response = $this->get('/stories/' . $story->slug);
     $response->assertOk();
     $response->assertSee(trans('story::shared.type.label'));

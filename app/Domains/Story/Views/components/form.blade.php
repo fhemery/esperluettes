@@ -1,4 +1,4 @@
-@props(['story' => null, 'types' => collect()])
+@props(['story' => null, 'referentials' => []])
 
 <div class="mb-5">
     <x-input-label for="title" :value="__('story::create.form.title.label')"/>
@@ -17,7 +17,7 @@
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
             <option value=""
                     disabled {{ $selectedTypeId === '' ? 'selected' : '' }}>{{ __('story::shared.type.placeholder') }}</option>
-            @foreach($types as $t)
+            @foreach(($referentials['types'] ?? collect()) as $t)
                 <option
                     value="{{ $t['id'] }}" {{ (string)$selectedTypeId === (string)$t['id'] ? 'selected' : '' }}>{{ $t['name'] }}</option>
             @endforeach

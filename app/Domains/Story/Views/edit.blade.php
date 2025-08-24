@@ -16,7 +16,7 @@
                             @csrf
                             @method('PUT')
 
-                            <x-story::form :story="$story" :types="$types" />
+                            <x-story::form :story="$story" :referentials="$referentials" />
 
                             <x-primary-button type="submit">
                                 {{ __('story::edit.actions.save') }}

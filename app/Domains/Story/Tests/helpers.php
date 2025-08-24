@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Story\Models\Story;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 /**
