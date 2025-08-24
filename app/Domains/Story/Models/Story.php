@@ -4,6 +4,7 @@ namespace App\Domains\Story\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Domains\StoryRef\Models\StoryRefGenre;
 
 class Story extends Model
 {
@@ -70,4 +71,12 @@ class Story extends Model
         return $this->authors()->where('user_id', $userId)->exists();
     }
 
+    /**
+     * Genres attached to the story (1..3 required by validation)
+     */
+    public function genres()
+    {
+        return $this->belongsToMany(StoryRefGenre::class, 'story_genres', 'story_id', 'story_ref_genre_id')
+            ->withTimestamps();
+    }
 }

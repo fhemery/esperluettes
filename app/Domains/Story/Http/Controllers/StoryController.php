@@ -146,6 +146,13 @@ class StoryController
         $story->story_ref_audience_id = (int)$request->input('story_ref_audience_id');
         $story->story_ref_copyright_id = (int)$request->input('story_ref_copyright_id');
 
+        // Sync genres (1..3)
+        $genreIds = $request->input('story_ref_genre_ids', []);
+        if (is_array($genreIds)) {
+            $ids = array_values(array_unique(array_map('intval', $genreIds)));
+            $story->genres()->sync($ids);
+        }
+
         // If title changed, regenerate slug base but keep -id suffix
         if ($story->title !== $oldTitle) {
             $slugBase = Story::generateSlugBase($story->title);
@@ -267,7 +274,26 @@ class StoryController
         $crArr = $copyrightsById->get($story->story_ref_copyright_id);
         $copyrightName = is_array($crArr) ? ($crArr['name'] ?? null) : null;
 
-        $viewModel = new StoryShowViewModel($story, Auth::id(), $authors, $typeName, $audienceName, $copyrightName);
+        // Collect genre names using lookup service (service only loads IDs)
+        $genreIds = $story->genres?->pluck('id')->filter()->values()->all() ?? [];
+        $genresById = $this->lookup->getGenres()->keyBy('id');
+        $genreNames = [];
+        foreach ($genreIds as $gid) {
+            $row = $genresById->get($gid);
+            if (is_array($row) && isset($row['name'])) {
+                $genreNames[] = (string) $row['name'];
+            }
+        }
+
+        $viewModel = new StoryShowViewModel(
+            $story,
+            Auth::id(),
+            $authors,
+            $typeName,
+            $audienceName,
+            $copyrightName,
+            $genreNames,
+        );
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 
         return view('story::show', [

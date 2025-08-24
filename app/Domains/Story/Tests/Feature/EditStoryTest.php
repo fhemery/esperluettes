@@ -176,3 +176,37 @@ it('denies edit access to co-authors without user-confirmed role (middleware)', 
     $story->refresh();
     expect($story->title)->toBe('Needs Confirmed Role');
 });
+
+it('syncs genres on update (replaces previous selection)', function () {
+    // Arrange: author and story with default genre
+    $author = alice($this, roles: ['user-confirmed']);
+    $this->actingAs($author);
+    $story = publicStory('Genres Updatable', $author->id, [
+        'description' => '<p>x</p>',
+        'story_ref_genre_ids' => [defaultGenre()->id],
+    ]);
+
+    // New genres to replace existing selection
+    $g1 = makeGenre('Sci-Fi');
+    $g2 = makeGenre('Mystery');
+
+    // Act: update with two genres
+    $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
+        'title' => 'Genres Updatable',
+        'description' => '<p>x</p>',
+        'story_ref_genre_ids' => [$g1->id, $g2->id],
+    ]));
+    $resp->assertRedirect();
+
+    // Assert: pivot now contains only the two new genres
+    $story->refresh();
+    $ids = $story->genres()->pluck('story_ref_genres.id')->sort()->values()->all();
+    expect($ids)->toBe([$g1->id, $g2->id]);
+
+    // Show page reflects new genres
+    $show = $this->get('/stories/' . $story->slug);
+    $show->assertOk();
+    $show->assertSee(trans('story::shared.genres.label'));
+    $show->assertSee('Sci-Fi');
+    $show->assertSee('Mystery');
+});

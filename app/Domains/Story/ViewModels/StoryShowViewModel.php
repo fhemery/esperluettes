@@ -13,6 +13,8 @@ class StoryShowViewModel
     public readonly ?string $typeName;
     public readonly ?string $audienceName;
     public readonly ?string $copyrightName;
+    /** @var array<int,string> */
+    public readonly array $genreNames;
 
     public function __construct(
         Story $story,
@@ -21,6 +23,7 @@ class StoryShowViewModel
         ?string $typeName = null,
         ?string $audienceName = null,
         ?string $copyrightName = null,
+        array $genreNames = [],
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
@@ -29,6 +32,7 @@ class StoryShowViewModel
         $this->typeName = $typeName;
         $this->audienceName = $audienceName;
         $this->copyrightName = $copyrightName;
+        $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
     }
 
     
@@ -108,5 +112,14 @@ class StoryShowViewModel
     public function getCopyrightName(): ?string
     {
         return $this->copyrightName;
+    }
+
+    /**
+     * Get genre names for display
+     * @return array<int,string>
+     */
+    public function getGenreNames(): array
+    {
+        return $this->genreNames;
     }
 }

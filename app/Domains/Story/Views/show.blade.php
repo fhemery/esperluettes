@@ -80,6 +80,18 @@
                         </div>
                     @endif
 
+                    @php($genres = $viewModel->getGenreNames())
+                    @if(!empty($genres))
+                        <div class="mb-6 text-sm text-gray-700">
+                            <span class="font-medium">{{ __('story::shared.genres.label') }}:</span>
+                            <span class="inline-flex flex-wrap gap-2 ml-2">
+                                @foreach($genres as $g)
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-300">{{ $g }}</span>
+                                @endforeach
+                            </span>
+                        </div>
+                    @endif
+
                     <div class="flex gap-6 items-start">
                         <div class="shrink-0" aria-hidden="true">
                             <div class="w-[150px] h-[200px] rounded-lg border-4 border-[#ACE1AF] flex items-center justify-center bg-white">

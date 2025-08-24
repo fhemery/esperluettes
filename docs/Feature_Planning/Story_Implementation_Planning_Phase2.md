@@ -372,7 +372,7 @@ categories.**
 
 ---
 
-### **US-016: Add Copyright Selection (Mandatory)**
+### ** [DONE] US-016: Add Copyright Selection (Mandatory)**
 
 **As a user creating a story, I want to select a copyright so that usage rights are clear.**
 

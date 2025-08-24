@@ -33,10 +33,14 @@ class StoryRefLookupService
      * Currently includes:
      * - types: Collection of arrays with id, slug, name, order
      * - audiences: Collection of arrays with id, slug, name, order
+     * - copyrights: Collection of arrays with id, slug, name, order
+     * - genres: Collection of arrays with id, slug, name, order
      *
      * @return array{
      *     types: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      *     audiences: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
+     *     copyrights: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
+     *     genres: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      * }
      */
     public function getStoryReferentials(): array
@@ -45,6 +49,7 @@ class StoryRefLookupService
             'types' => $this->getTypes(),
             'audiences' => $this->getAudiences(),
             'copyrights' => $this->getCopyrights(),
+            'genres' => $this->getGenres(),
         ];
     }
 
@@ -97,6 +102,20 @@ class StoryRefLookupService
     public function getCopyrights(): Collection
     {
         return $this->cache->copyrights()->map(fn(array $t) => [
+            'id' => $t['id'],
+            'slug' => $t['slug'],
+            'name' => $t['name'],
+            'order' => $t['order'],
+        ]);
+    }
+
+    /**
+     * List active genres ordered for UI.
+     * @return Collection<int, array{id:int,slug:string,name:string,order:int|null}>
+     */
+    public function getGenres(): Collection
+    {
+        return $this->cache->genres()->map(fn(array $t) => [
             'id' => $t['id'],
             'slug' => $t['slug'],
             'name' => $t['name'],

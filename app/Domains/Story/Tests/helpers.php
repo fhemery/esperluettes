@@ -26,6 +26,14 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
     ]);
     $story->save();
 
+    // Attach default genre(s) if provided in attributes, else attach one default to satisfy relational expectations in some tests
+    $genreIds = $attributes['story_ref_genre_ids'] ?? [$attributes['story_ref_genre_id'] ?? null];
+    $genreIds = array_values(array_filter(array_map(fn($v) => $v ? (int)$v : null, (array)$genreIds)));
+    if (empty($genreIds)) {
+        $genreIds = [defaultGenre()->id];
+    }
+    $story->genres()->sync($genreIds);
+
     // Ensure slug ends with id suffix (same behavior as service/store)
     if (!str_ends_with($story->slug, '-' . $story->id)) {
         $story->slug = $slugBase . '-' . $story->id;
@@ -118,6 +126,24 @@ function makeCopyright(string $name): \App\Domains\StoryRef\Models\StoryRefCopyr
     ]);
 }
 
+function defaultGenre(): \App\Domains\StoryRef\Models\StoryRefGenre
+{
+    return \App\Domains\StoryRef\Models\StoryRefGenre::firstOrCreate([
+        'name' => 'DefaultGenre',
+        'slug' => 'default-genre',
+        'is_active' => true,
+    ]);
+}
+
+function makeGenre(string $name): \App\Domains\StoryRef\Models\StoryRefGenre
+{
+    return app(\App\Domains\StoryRef\Services\GenreService::class)->create([
+        'name' => $name,
+        'slug' => Str::slug($name),
+        'is_active' => true,
+    ]);
+}
+
 /**
  * Build a valid payload for story create/update; override any field to test specific validation scenarios.
  */
@@ -130,5 +156,6 @@ function validStoryPayload(array $overrides = []): array
         'story_ref_type_id' => defaultStoryType()->id,
         'story_ref_audience_id' => defaultAudience()->id,
         'story_ref_copyright_id' => defaultCopyright()->id,
+        'story_ref_genre_ids' => [defaultGenre()->id],
     ], $overrides);
 }

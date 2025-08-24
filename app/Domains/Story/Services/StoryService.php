@@ -99,7 +99,14 @@ class StoryService
             $story->slug = $slugBase . '-' . $story->id;
             $story->save();
 
-            // 3) Seed collaborator row for creator
+            // 3) Attach genres (1..3)
+            $genreIds = $request->input('story_ref_genre_ids', []);
+            if (is_array($genreIds)) {
+                $ids = array_values(array_unique(array_map('intval', $genreIds)));
+                $story->genres()->sync($ids);
+            }
+
+            // 4) Seed collaborator row for creator
             DB::table('story_collaborators')->insert([
                 'story_id' => $story->id,
                 'user_id' => $userId,
@@ -121,7 +128,11 @@ class StoryService
             $id = (int) $m[1];
         }
 
-        $base = Story::query();
+        // Only eager-load genre IDs to minimize payload; names are resolved via lookup in controller
+        $base = Story::query()->with([
+            'authors',
+            'genres:id',
+        ]);
         $story = $id
             ? $base->findOrFail($id)
             : $base->where('slug', $slug)->firstOrFail();

@@ -34,4 +34,12 @@ return [
         'integer' => 'Le copyright doit être un entier',
         'exists' => 'Ce copyright n\'existe pas'
     ],
+    'genres' => [
+        'required' => 'Les genres sont requis',
+        'array' => 'Le champ genres doit être une liste',
+        'min' => 'Sélectionnez au moins 1 genre',
+        'max' => 'Vous ne pouvez sélectionner que 3 genres maximum',
+        'integer' => 'Chaque genre doit être un entier',
+        'exists' => 'Un genre sélectionné n\'existe pas',
+    ],
 ];

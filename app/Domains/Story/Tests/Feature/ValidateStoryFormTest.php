@@ -1,6 +1,5 @@
 <?php
 
-use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -190,4 +189,73 @@ it('validates story_ref_copyright_id must exist', function () {
     $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
     $page->assertOk();
     $page->assertSee('story::validation.copyright.exists');
+});
+
+it('validates genres are required and must be an array of 1 to 3', function () {
+    $user = alice($this);
+
+    // Missing genres
+    $payloadMissing = validStoryPayload([
+        'story_ref_genre_ids' => null,
+    ]);
+    $resp = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payloadMissing);
+    $resp->assertRedirect('/stories/create');
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.genres.required');
+
+    // Not an array
+    $payloadNotArray = validStoryPayload([
+        'story_ref_genre_ids' => 1,
+    ]);
+    $resp = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payloadNotArray);
+    $resp->assertRedirect('/stories/create');
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.genres.array');
+});
+
+it('validates genres max 3', function () {
+    $user = alice($this);
+    // Max 3
+    $g1 = makeGenre('G1');
+    $g2 = makeGenre('G2');
+    $g3 = makeGenre('G3');
+    $g4 = makeGenre('G4');
+    $payloadMax = validStoryPayload([
+        'story_ref_genre_ids' => [$g1->id, $g2->id, $g3->id, $g4->id],
+    ]);
+    $resp = $this->actingAs($user)->from('/stories/create')->post('/stories', $payloadMax);
+    $resp->assertRedirect('/stories/create');
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.genres.max');
+});
+
+it('validates each genre id must be integer and exist', function () {
+    $user = alice($this);
+
+    // Non-integer
+    $payloadType = validStoryPayload([
+        'story_ref_genre_ids' => ['x'],
+    ]);
+    $resp = $this->actingAs($user)->from('/stories/create')->post('/stories', $payloadType);
+    $resp->assertRedirect('/stories/create');
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.genres.integer');
+
+    // Non-existent id
+    $payloadExists = validStoryPayload([
+        'story_ref_genre_ids' => [999999],
+    ]);
+    $resp = $this->actingAs($user)->from('/stories/create')->post('/stories', $payloadExists);
+    $resp->assertRedirect('/stories/create');
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.genres.exists');
 });

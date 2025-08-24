@@ -34,6 +34,11 @@ return [
         'placeholder' => 'Sélectionner un copyright',
         'help' => 'Sélectionnez le régime de droits pour cette histoire',
     ],
+    'genres' => [
+        'label' => 'Genres',
+        'help' => 'Sélectionnez 1 à 3 genres qui décrivent votre histoire',
+        'note_range' => 'Sélectionnez entre 1 et 3 genres',
+    ],
     'required' => 'Champ requis',
     'by' => 'Par '
 ];

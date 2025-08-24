@@ -30,6 +30,28 @@
     <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.required') }}</p>
 </div>
 
+@php($selectedGenreIds = collect(old('story_ref_genre_ids', $story?->genres?->pluck('id')->all() ?? []))->map(fn($v) => (string)$v)->all())
+
+<div class="mb-6">
+    <x-input-label for="story_ref_genre_ids" :value="__('story::shared.genres.label')"/>
+    <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+        @foreach(($referentials['genres'] ?? collect()) as $g)
+            <label class="inline-flex items-center gap-2">
+                <input type="checkbox" name="story_ref_genre_ids[]" value="{{ $g['id'] }}"
+                       {{ in_array((string)$g['id'], $selectedGenreIds, true) ? 'checked' : '' }}
+                       class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" />
+                <span>{{ $g['name'] }}</span>
+            </label>
+        @endforeach
+    </div>
+    <x-input-error :messages="$errors->get('story_ref_genre_ids')" class="mt-2"/>
+    <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.genres.note_range') }}</p>
+    <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.required') }}</p>
+    <x-shared::tooltip type="help" :title="__('story::shared.genres.label')" placement="right">
+        {{ __('story::shared.genres.help') }}
+    </x-shared::tooltip>
+ </div>
+
 @php($selectedAudienceId = old('story_ref_audience_id', $story?->story_ref_audience_id ?? ''))
 
 <div class="mb-6">

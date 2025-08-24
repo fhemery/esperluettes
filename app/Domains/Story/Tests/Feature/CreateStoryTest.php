@@ -108,4 +108,33 @@ it('allows an authenticated user to create a story and see it', function () {
     // Type label and name displayed
     $show->assertSee(trans('story::shared.type.label'));
     $show->assertSee(defaultStoryType()->name);
+    // Genres label and at least default genre displayed
+    $show->assertSee(trans('story::shared.genres.label'));
+    $show->assertSee(defaultGenre()->name);
+});
+
+it('displays multiple selected genres as badges on show page', function () {
+    // Arrange
+    $user = alice($this, roles: ['user-confirmed']);
+    $this->actingAs($user);
+
+    $g1 = makeGenre('Fantasy');
+    $g2 = makeGenre('Romance');
+    $payload = validStoryPayload([
+        'title' => 'Genreful',
+        'story_ref_genre_ids' => [$g1->id, $g2->id],
+    ]);
+
+    // Act
+    $resp = $this->post('/stories', $payload);
+    $resp->assertRedirect();
+
+    $story = \App\Domains\Story\Models\Story::query()->firstOrFail();
+    $show = $this->get('/stories/' . $story->slug);
+
+    // Assert
+    $show->assertOk();
+    $show->assertSee(trans('story::shared.genres.label'));
+    $show->assertSee('Fantasy');
+    $show->assertSee('Romance');
 });

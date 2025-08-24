@@ -21,6 +21,8 @@ class StoryRequest extends FormRequest
             'story_ref_type_id' => ['required', 'integer', 'exists:story_ref_types,id'],
             'story_ref_audience_id' => ['required', 'integer', 'exists:story_ref_audiences,id'],
             'story_ref_copyright_id' => ['required', 'integer', 'exists:story_ref_copyrights,id'],
+            'story_ref_genre_ids' => ['required', 'array', 'min:1', 'max:3'],
+            'story_ref_genre_ids.*' => ['integer', 'exists:story_ref_genres,id'],
         ];
     }
 
@@ -63,6 +65,13 @@ class StoryRequest extends FormRequest
             'story_ref_copyright_id.required' => __('story::validation.copyright.required'),
             'story_ref_copyright_id.integer' => __('story::validation.copyright.integer'),
             'story_ref_copyright_id.exists' => __('story::validation.copyright.exists'),
+
+            'story_ref_genre_ids.required' => __('story::validation.genres.required'),
+            'story_ref_genre_ids.array' => __('story::validation.genres.array'),
+            'story_ref_genre_ids.min' => __('story::validation.genres.min'),
+            'story_ref_genre_ids.max' => __('story::validation.genres.max'),
+            'story_ref_genre_ids.*.integer' => __('story::validation.genres.integer'),
+            'story_ref_genre_ids.*.exists' => __('story::validation.genres.exists'),
         ];
     }
 }
