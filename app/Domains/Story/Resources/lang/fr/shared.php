@@ -29,6 +29,11 @@ return [
         'help' => 'Choisissez le public visé par votre histoire',
         'note_single_select' => 'Sélection unique requise',
     ],
+    'copyright' => [
+        'label' => 'Copyright',
+        'placeholder' => 'Sélectionner un copyright',
+        'help' => 'Sélectionnez le régime de droits pour cette histoire',
+    ],
     'required' => 'Champ requis',
     'by' => 'Par '
 ];

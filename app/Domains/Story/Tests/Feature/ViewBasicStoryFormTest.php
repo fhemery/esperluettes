@@ -49,3 +49,17 @@ it('shows story audience details to authenticated user', function () {
     $response->assertSee(trans('story::shared.audience.help'));
     $response->assertSee(trans('story::shared.required'));
 });
+
+it('shows story copyright details to authenticated user', function () {
+    $user = alice($this);
+
+    $response = $this->actingAs($user)->get('/stories/create');
+
+    $response->assertOk();
+
+    // Copyright field (label, placeholder/help, required note)
+    $response->assertSee(trans('story::shared.copyright.label'));
+    $response->assertSee(trans('story::shared.copyright.placeholder'));
+    $response->assertSee(trans('story::shared.copyright.help'));
+    $response->assertSee(trans('story::shared.required'));
+});

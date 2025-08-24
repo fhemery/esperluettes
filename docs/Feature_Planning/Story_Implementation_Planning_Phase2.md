@@ -9,16 +9,23 @@ consequences properly.
 Phase 2 requires completion of Phase 1 (US-001 through US-008).
 
 ---
+
 ## Phase-wide Decisions
 
 - **Index rule**: Keep Phase 1 behavior for now (list public stories even if they have no chapters yet).
-- **Filter params**: Use slugs in URLs for all filters (type, audience, genres, trigger warnings, status where applicable).
+- **Filter params**: Use slugs in URLs for all filters (type, audience, genres, trigger warnings, status where
+  applicable).
 - **Multi-select UI**: Use chip-based multi-selects by default. If UX is unsatisfactory, we may switch to checkboxes.
-- **Relationships & caching**: Persist only foreign key ids on `stories`. Compose view models by resolving labels/slugs via a long-duration StoryRef cache. Eloquent relationships may exist for convenience but are not relied upon.
-- **StoryRef cache**: Implement a domain-level cache that can return one ref item or all, invalidated when admin changes occur (low-frequency updates).
-- **DB constraints**: Add foreign keys with ON DELETE RESTRICT. Make mandatory refs NOT NULL once implemented. Pivot tables use composite PKs and proper indexes.
-- **Filter semantics**: Combine different filters with AND. Within multi-select categories (genres, trigger warnings), use OR logic. Persist filters in pagination; use bookmarkable URLs; ignore invalid slugs gracefully.
-- **Tabs UI**: Collapsible tabs with multiple open; tab error indicators; which fields belong to which tab is decided per story.
+- **Relationships & caching**: Persist only foreign key ids on `stories`. Compose view models by resolving labels/slugs
+  via a long-duration StoryRef cache. Eloquent relationships may exist for convenience but are not relied upon.
+- **StoryRef cache**: Implement a domain-level cache that can return one ref item or all, invalidated when admin changes
+  occur (low-frequency updates).
+- **DB constraints**: Add foreign keys with ON DELETE RESTRICT. Make mandatory refs NOT NULL once implemented. Pivot
+  tables use composite PKs and proper indexes.
+- **Filter semantics**: Combine different filters with AND. Within multi-select categories (genres, trigger warnings),
+  use OR logic. Persist filters in pagination; use bookmarkable URLs; ignore invalid slugs gracefully.
+- **Tabs UI**: Collapsible tabs with multiple open; tab error indicators; which fields belong to which tab is decided
+  per story.
 
 ## **US-009: Collapsible Tabs Form UI (Prerequisite)**
 
@@ -65,7 +72,7 @@ between different sections of story configuration.**
 
 ---
 
-## **US-010: Add Story Type Selection**
+## ** [DONE] US-010: Add Story Type Selection**
 
 **As a user creating a story, I want to select a story type so that readers know what kind of story it is.**
 
@@ -132,7 +139,7 @@ between different sections of story configuration.**
 
 ---
 
-## **US-011: Filter Stories by Story Type**
+## ** [DONE] US-011: Filter Stories by Story Type**
 
 **As a reader, I want to filter stories by story type so that I can find the specific kind of content I'm looking for.**
 
@@ -182,7 +189,7 @@ between different sections of story configuration.**
 
 ---
 
-## **US-012: Add Target Audience Selection**
+## ** [DONE]US-012: Add Target Audience Selection**
 
 **As a user creating a story, I want to select target audience so that appropriate readers can find my story.**
 
@@ -246,7 +253,7 @@ between different sections of story configuration.**
 
 ---
 
-## **US-013: Filter Stories by Target Audience**
+## ** [DONE] US-013: Filter Stories by Target Audience**
 
 **As a reader, I want to filter stories by target audience so that I can find age-appropriate content.**
 
@@ -294,9 +301,11 @@ between different sections of story configuration.**
 - Handle multiple active filters in UI
 
 ---
+
 ### **US-014: Add Genres Selection (1–3, Mandatory)**
 
-**As a user creating a story, I want to select 1 to 3 genres so that readers can discover my story in the right categories.**
+**As a user creating a story, I want to select 1 to 3 genres so that readers can discover my story in the right
+categories.**
 
 **Acceptance Criteria:**
 
@@ -334,7 +343,8 @@ between different sections of story configuration.**
 
 **Implementation:**
 
-- Create `story_story_ref_genre` pivot table with composite PK `(story_id, story_ref_genre_id)` and FKs (RESTRICT on delete)
+- Create `story_story_ref_genre` pivot table with composite PK `(story_id, story_ref_genre_id)` and FKs (RESTRICT on
+  delete)
 - Add multi-select chips to create/edit forms
 - `StoryRequest` validation: array of ids, `min:1`, `max:3`, elements `exists:story_ref_genres,id`
 - Sync pivot on create/update
@@ -458,7 +468,8 @@ between different sections of story configuration.**
 
 ### **US-021: Add Optional Feedback Type Selection**
 
-**As a user creating a story, I want to optionally select feedback preferences so readers know what kind of feedback I'm seeking.**
+**As a user creating a story, I want to optionally select feedback preferences so readers know what kind of feedback I'm
+seeking.**
 
 **Acceptance Criteria:**
 

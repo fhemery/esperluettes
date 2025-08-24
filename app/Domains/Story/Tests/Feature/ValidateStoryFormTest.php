@@ -6,7 +6,7 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-it('shows errors for missing required fields (title, visibility, type, audience); description optional', function () {
+it('shows errors for missing required fields (title, visibility, type, audience, copyright); description optional', function () {
     $user = alice($this);
 
     // Act: submit empty form
@@ -24,6 +24,7 @@ it('shows errors for missing required fields (title, visibility, type, audience)
     $page->assertSee('story::validation.visibility.required');
     $page->assertSee('story::validation.type.required');
     $page->assertSee('story::validation.audience.required');
+    $page->assertSee('story::validation.copyright.required');
     // Description is optional; should not show required error
     $page->assertDontSee('story::validation.description.required');
 });
@@ -153,4 +154,40 @@ it('validates story_ref_audience_id must exist', function () {
     $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
     $page->assertOk();
     $page->assertSee('story::validation.audience.exists');
+});
+
+it('validates story_ref_copyright_id must be integer', function () {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        'story_ref_copyright_id' => 'abc',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.copyright.integer');
+});
+
+it('validates story_ref_copyright_id must exist', function () {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        'story_ref_copyright_id' => 999999,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.copyright.exists');
 });

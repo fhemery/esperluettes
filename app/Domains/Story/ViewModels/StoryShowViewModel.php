@@ -12,6 +12,7 @@ class StoryShowViewModel
     public readonly array $authors;
     public readonly ?string $typeName;
     public readonly ?string $audienceName;
+    public readonly ?string $copyrightName;
 
     public function __construct(
         Story $story,
@@ -19,6 +20,7 @@ class StoryShowViewModel
         array $authors,
         ?string $typeName = null,
         ?string $audienceName = null,
+        ?string $copyrightName = null,
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
@@ -26,6 +28,7 @@ class StoryShowViewModel
         $this->currentUserId = $currentUserId;
         $this->typeName = $typeName;
         $this->audienceName = $audienceName;
+        $this->copyrightName = $copyrightName;
     }
 
     
@@ -97,5 +100,13 @@ class StoryShowViewModel
     public function getAudienceName(): ?string
     {
         return $this->audienceName;
+    }
+
+    /**
+     * Get story copyright display name
+     */
+    public function getCopyrightName(): ?string
+    {
+        return $this->copyrightName;
     }
 }

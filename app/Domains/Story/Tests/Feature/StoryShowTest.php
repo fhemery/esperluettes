@@ -121,3 +121,16 @@ it('shows the audience when available', function () {
     $response->assertSee(trans('story::shared.audience.label'));
     $response->assertSee('Teens');
 });
+
+it('shows the copyright when available', function () {
+    $author = alice($this);
+    $cr = makeCopyright('Public Domain');
+    $story = publicStory('Copyrighted Story', $author->id, [
+        'story_ref_copyright_id' => $cr->id,
+    ]);
+
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    $response->assertSee(trans('story::shared.copyright.label'));
+    $response->assertSee('Public Domain');
+});

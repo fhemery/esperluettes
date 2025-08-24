@@ -29,4 +29,9 @@ return [
         'integer' => 'L\'audience doit être un entier',
         'exists' => 'Cette audience n\'existe pas'
     ],
+    'copyright' => [
+        'required' => 'Le copyright est requis',
+        'integer' => 'Le copyright doit être un entier',
+        'exists' => 'Ce copyright n\'existe pas'
+    ],
 ];

@@ -44,6 +44,7 @@ class StoryRefLookupService
         return [
             'types' => $this->getTypes(),
             'audiences' => $this->getAudiences(),
+            'copyrights' => $this->getCopyrights(),
         ];
     }
 
@@ -87,5 +88,19 @@ class StoryRefLookupService
             return [];
         }
         return $this->cache->audienceIdsBySlugs($slugs);
+    }
+
+    /**
+     * List active copyrights ordered for UI.
+     * @return Collection<int, array{id:int,slug:string,name:string,order:int|null}>
+     */
+    public function getCopyrights(): Collection
+    {
+        return $this->cache->copyrights()->map(fn(array $t) => [
+            'id' => $t['id'],
+            'slug' => $t['slug'],
+            'name' => $t['name'],
+            'order' => $t['order'],
+        ]);
     }
 }

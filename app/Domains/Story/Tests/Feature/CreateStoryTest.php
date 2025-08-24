@@ -29,13 +29,10 @@ it('denies non-confirmed users from posting new stories', function () {
     $user = alice($this, roles: ['user']);
     $this->actingAs($user);
 
-    $payload = [
+    $payload = validStoryPayload([
         'title' => 'Blocked Title',
         'description' => '<p>blocked</p>',
-        'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-        'story_ref_audience_id' => defaultAudience()->id,
-    ];
+    ]);
 
     $resp = $this->post('/stories', $payload);
 
@@ -51,13 +48,10 @@ it('produces unique slugs for duplicate titles', function () {
     $user = alice($this, roles: ['user-confirmed']);
     $this->actingAs($user);
 
-    $payload = [
+    $payload = validStoryPayload([
         'title' => 'Same Title',
         'description' => '<p>content</p>',
-        'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-        'story_ref_audience_id' => defaultAudience()->id,
-    ];
+    ]);
 
     // Act: create two stories with identical titles
     $this->post('/stories', $payload)->assertRedirect();
@@ -89,13 +83,10 @@ it('allows an authenticated user to create a story and see it', function () {
     $this->actingAs($user);
 
     // Act
-    $payload = [
+    $payload = validStoryPayload([
         'title' => 'My First Story',
         'description' => '<p>This is a great story</p>',
-        'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-        'story_ref_audience_id' => defaultAudience()->id,
-    ];
+    ]);
 
     $response = $this->post('/stories', $payload);
 

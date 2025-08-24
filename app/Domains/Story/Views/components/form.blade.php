@@ -53,6 +53,28 @@
     <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.audience.note_single_select') }}</p>
 </div>
 
+@php($selectedCopyrightId = old('story_ref_copyright_id', $story?->story_ref_copyright_id ?? ''))
+
+<div class="mb-6">
+    <x-input-label for="story_ref_copyright_id" :value="__('story::shared.copyright.label')"/>
+    <div class="flex items-center gap-2">
+        <select id="story_ref_copyright_id" name="story_ref_copyright_id" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value=""
+                    disabled {{ $selectedCopyrightId === '' ? 'selected' : '' }}>{{ __('story::shared.copyright.placeholder') }}</option>
+            @foreach(($referentials['copyrights'] ?? collect()) as $c)
+                <option
+                    value="{{ $c['id'] }}" {{ (string)$selectedCopyrightId === (string)$c['id'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
+            @endforeach
+        </select>
+        <x-shared::tooltip type="help" :title="__('story::shared.copyright.label')" placement="right">
+            {{ __('story::shared.copyright.help') }}
+        </x-shared::tooltip>
+    </div>
+    <x-input-error :messages="$errors->get('story_ref_copyright_id')" class="mt-2"/>
+    <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.required') }}</p>
+</div>
+
 <div class="mb-6">
     <x-input-label for="description" :value="__('story::shared.description.label')"/>
     <x-shared::editor

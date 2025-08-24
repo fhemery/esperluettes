@@ -144,6 +144,7 @@ class StoryController
         $story->visibility = (string)$request->input('visibility');
         $story->story_ref_type_id = (int)$request->input('story_ref_type_id');
         $story->story_ref_audience_id = (int)$request->input('story_ref_audience_id');
+        $story->story_ref_copyright_id = (int)$request->input('story_ref_copyright_id');
 
         // If title changed, regenerate slug base but keep -id suffix
         if ($story->title !== $oldTitle) {
@@ -261,7 +262,12 @@ class StoryController
         $audArr = $audiencesById->get($story->story_ref_audience_id);
         $audienceName = is_array($audArr) ? ($audArr['name'] ?? null) : null;
 
-        $viewModel = new StoryShowViewModel($story, Auth::id(), $authors, $typeName, $audienceName);
+        // Resolve copyright name for display
+        $copyrightsById = $this->lookup->getCopyrights()->keyBy('id');
+        $crArr = $copyrightsById->get($story->story_ref_copyright_id);
+        $copyrightName = is_array($crArr) ? ($crArr['name'] ?? null) : null;
+
+        $viewModel = new StoryShowViewModel($story, Auth::id(), $authors, $typeName, $audienceName, $copyrightName);
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 
         return view('story::show', [

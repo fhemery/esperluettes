@@ -13,6 +13,7 @@ class StoryRefCache
         private readonly CacheRepository $cache,
         private readonly TypeService $typeService,
         private readonly AudienceService $audienceService,
+        private readonly CopyrightService $copyrightService,
     ) {}
 
     /**
@@ -123,5 +124,48 @@ class StoryRefCache
     public function clearAudiences(): void
     {
         $this->cache->forget('storyref:audiences:active-ordered');
+    }
+
+    /**
+     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     */
+    public function copyrights(): Collection
+    {
+        return $this->cache->remember(
+            'storyref:copyrights:active-ordered',
+            self::CACHE_TTL_SECONDS,
+            function () {
+                $all = collect($this->copyrightService->listAll());
+                $active = $all->filter(fn($m) => (bool) ($m->is_active ?? true));
+                return $active
+                    ->sortBy([
+                        ['order', 'asc'],
+                        ['name', 'asc'],
+                    ])
+                    ->values()
+                    ->map(fn($m) => [
+                        'id' => (int) $m->id,
+                        'slug' => (string) $m->slug,
+                        'name' => (string) $m->name,
+                        'is_active' => (bool) ($m->is_active ?? true),
+                        'order' => isset($m->order) ? (int) $m->order : null,
+                    ]);
+            }
+        );
+    }
+
+    public function copyrightIdBySlug(string $slug): ?int
+    {
+        $slug = trim(strtolower($slug));
+        if ($slug === '') {
+            return null;
+        }
+        $found = $this->copyrights()->firstWhere('slug', $slug);
+        return $found['id'] ?? null;
+    }
+
+    public function clearCopyrights(): void
+    {
+        $this->cache->forget('storyref:copyrights:active-ordered');
     }
 }

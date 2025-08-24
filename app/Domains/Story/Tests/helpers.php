@@ -22,6 +22,7 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
         'last_chapter_published_at' => $attributes['last_chapter_published_at'] ?? null,
         'story_ref_type_id' => $attributes['story_ref_type_id'] ?? defaultStoryType()->id,
         'story_ref_audience_id' => $attributes['story_ref_audience_id'] ?? defaultAudience()->id,
+        'story_ref_copyright_id' => $attributes['story_ref_copyright_id'] ?? defaultCopyright()->id,
     ]);
     $story->save();
 
@@ -100,6 +101,23 @@ function makeAudience(string $name): \App\Domains\StoryRef\Models\StoryRefAudien
     ]);
 }
 
+function defaultCopyright(): \App\Domains\StoryRef\Models\StoryRefCopyright
+{
+    return \App\Domains\StoryRef\Models\StoryRefCopyright::firstOrCreate([
+        'name' => 'DefaultCopyright',
+        'slug' => 'default-copyright',
+        'is_active' => true]);
+}
+
+function makeCopyright(string $name): \App\Domains\StoryRef\Models\StoryRefCopyright
+{
+    return app(\App\Domains\StoryRef\Services\CopyrightService::class)->create([
+        'name' => $name,
+        'slug' => Str::slug($name),
+        'is_active' => true,
+    ]);
+}
+
 /**
  * Build a valid payload for story create/update; override any field to test specific validation scenarios.
  */
@@ -111,5 +129,6 @@ function validStoryPayload(array $overrides = []): array
         'visibility' => Story::VIS_PUBLIC,
         'story_ref_type_id' => defaultStoryType()->id,
         'story_ref_audience_id' => defaultAudience()->id,
+        'story_ref_copyright_id' => defaultCopyright()->id,
     ], $overrides);
 }

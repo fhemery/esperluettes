@@ -92,6 +92,7 @@ class StoryService
             // Set mandatory reference fields
             $story->story_ref_type_id = (int) $request->input('story_ref_type_id');
             $story->story_ref_audience_id = (int) $request->input('story_ref_audience_id');
+            $story->story_ref_copyright_id = (int) $request->input('story_ref_copyright_id');
             $story->save();
 
             // 2) Update slug with id suffix
