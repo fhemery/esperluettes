@@ -18,5 +18,11 @@ return [
     'description' => [
         'label' => 'Résumé',
     ],
+    'type' => [
+        'label' => 'Type',
+        'placeholder' => 'Sélectionner un type',
+        'help' => 'Choisissez la catégorie de votre histoire',
+    ],
+    'required' => 'Champ requis',
     'by' => 'Par '
 ];

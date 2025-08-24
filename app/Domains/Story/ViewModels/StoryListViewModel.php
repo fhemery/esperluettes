@@ -8,13 +8,17 @@ class StoryListViewModel
 {
     /** @var StorySummaryViewModel[] */
     private array $items;
+    /** @var array<string, mixed> */
+    private array $appends;
 
     public function __construct(
         private readonly LengthAwarePaginator $paginator,
-        array $items
+        array $items,
+        array $appends = []
     ) {
         /** @var StorySummaryViewModel[] $items */
         $this->items = $items;
+        $this->appends = $appends;
     }
 
     /**
@@ -32,6 +36,9 @@ class StoryListViewModel
 
     public function links(): string
     {
+        if (!empty($this->appends)) {
+            return (string) $this->paginator->appends($this->appends)->links();
+        }
         return (string) $this->paginator->links();
     }
 }

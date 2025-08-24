@@ -1,8 +1,6 @@
 <?php
 
-use App\Domains\Auth\Models\User;
 use App\Domains\Story\Models\Story;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -21,6 +19,7 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
         'description' => $attributes['description'] ?? '',
         'visibility' => $attributes['visibility'] ?? Story::VIS_PUBLIC,
         'last_chapter_published_at' => $attributes['last_chapter_published_at'] ?? null,
+        'story_ref_type_id' => $attributes['story_ref_type_id'] ?? defaultStoryType()->id,
     ]);
     $story->save();
 
@@ -56,4 +55,25 @@ function privateStory(string $title, int $authorId, array $attributes = []): Sto
 function communityStory(string $title, int $authorId, array $attributes = []): Story
 {
     return createStoryForAuthor($authorId, array_merge(['title' => $title, 'visibility' => Story::VIS_COMMUNITY], $attributes));
+}
+
+/**
+ * Ensure a Story Type exists for tests and return it.
+ */
+function makeStoryType(string $name): \App\Domains\StoryRef\Models\StoryRefType
+{
+    // Use service to auto-generate slug and defaults
+    return app(\App\Domains\StoryRef\Services\TypeService::class)->create([
+        'name' => $name,
+        'slug' => Str::slug($name),
+        'is_active' => true,
+    ]);
+}
+
+function defaultStoryType(): \App\Domains\StoryRef\Models\StoryRefType
+{
+    return \App\Domains\StoryRef\Models\StoryRefType::firstOrCreate([
+        'name' => 'FirstStoryType',
+        'slug' => 'first-story-type',
+        'is_active' => true]);
 }

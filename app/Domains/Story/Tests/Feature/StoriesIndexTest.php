@@ -1,7 +1,5 @@
 <?php
 
-use App\Domains\Auth\Models\User;
-use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -111,4 +109,33 @@ it('paginates 24 stories ordered by creation date desc', function () {
     $page2->assertOk();
     $page2->assertSee('Story 06');
     $page2->assertSee('Story 01');
+});
+
+it('filters stories by type slug', function () {
+    // Arrange
+    $author = alice($this);
+
+    $theater = makeStoryType('Theater');
+    $poem = makeStoryType('Poem');
+
+    publicStory('Theater Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_type_id' => $theater->id,
+    ]);
+
+    publicStory('Poem Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_type_id' => $poem->id,
+    ]);
+
+    // Act: filter by novel slug
+    $resp = $this->get('/stories?type=' . $theater->slug);
+
+    // Assert: only novel story visible
+    $resp->assertOk();
+    $resp->assertSee('Theater Story');
+    $resp->assertDontSee('Poem Story');
+    // UI bits
+    $resp->assertSee(trans('story::index.filter'));
+    $resp->assertSee(trans('story::index.reset_filters'));
 });

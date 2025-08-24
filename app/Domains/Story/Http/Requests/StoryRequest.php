@@ -18,6 +18,7 @@ class StoryRequest extends FormRequest
             'title' => ['required', 'string', 'min:1', 'max:255'],
             'description' => ['nullable', 'string', 'max:3000'],
             'visibility' => ['required', 'in:' . implode(',', Story::visibilityOptions())],
+            'story_ref_type_id' => ['required', 'integer', 'exists:story_ref_types,id'],
         ];
     }
 
@@ -48,6 +49,10 @@ class StoryRequest extends FormRequest
 
             'visibility.required' => __('story::validation.visibility.required'),
             'visibility.in' => __('story::validation.visibility.in'),
+
+            'story_ref_type_id.required' => __('story::validation.type.required'),
+            'story_ref_type_id.integer' => __('story::validation.type.integer'),
+            'story_ref_type_id.exists' => __('story::validation.type.exists'),
         ];
     }
 }

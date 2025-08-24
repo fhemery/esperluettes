@@ -17,4 +17,10 @@ return [
         'required' => 'La visibilité est requise.',
         'in' => 'La visibilité sélectionnée est invalide.',
     ],
+
+    'type' => [
+        'required' => 'Le type d\'histoire est requis',
+        'integer' => 'Le type d\'histoire doit être un entier',
+        'exists' => 'Ce type d\'histoire n\'existe pas'
+    ],
 ];

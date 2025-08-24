@@ -14,6 +14,7 @@ class Story extends Model
         'description',
         'visibility',
         'last_chapter_published_at',
+        'story_ref_type_id'
     ];
 
     public const VIS_PUBLIC = 'public';

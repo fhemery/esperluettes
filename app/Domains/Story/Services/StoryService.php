@@ -28,6 +28,11 @@ class StoryService
             });
         }
 
+        // Filter by Type if provided
+        if ($filter->typeId !== null) {
+            $query->where('story_ref_type_id', $filter->typeId);
+        }
+
         // Visibilities already normalized in DTO
         $visibilities = $filter->visibilities;
 
@@ -79,6 +84,8 @@ class StoryService
                 'description' => $description,
                 'visibility' => $visibility,
             ]);
+            // Set mandatory reference fields
+            $story->story_ref_type_id = (int) $request->input('story_ref_type_id');
             $story->save();
 
             // 2) Update slug with id suffix

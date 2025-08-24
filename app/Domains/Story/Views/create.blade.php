@@ -15,7 +15,7 @@
                         <form action="{{ route('stories.store') }}" method="POST" novalidate>
                             @csrf
 
-                            <x-story::form />
+                            <x-story::form :types="$types" />
 
                             <x-primary-button type="submit">
                                 {{ __('story::create.actions.continue') }}

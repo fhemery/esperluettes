@@ -6,6 +6,10 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+beforeEach(function () {
+    \Illuminate\Support\Facades\Cache::flush();
+});
+
 it('redirects guests from create page to login', function () {
     $response = $this->get('/stories/create');
 
@@ -29,6 +33,7 @@ it('denies non-confirmed users from posting new stories', function () {
         'title' => 'Blocked Title',
         'description' => '<p>blocked</p>',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ];
 
     $resp = $this->post('/stories', $payload);
@@ -49,6 +54,7 @@ it('produces unique slugs for duplicate titles', function () {
         'title' => 'Same Title',
         'description' => '<p>content</p>',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ];
 
     // Act: create two stories with identical titles
@@ -85,6 +91,7 @@ it('allows an authenticated user to create a story and see it', function () {
         'title' => 'My First Story',
         'description' => '<p>This is a great story</p>',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ];
 
     $response = $this->post('/stories', $payload);
@@ -104,4 +111,7 @@ it('allows an authenticated user to create a story and see it', function () {
     $show->assertSee('My First Story');
     $show->assertSee('story::shared.visibility.options.public');
     $show->assertSee('story::show.edit');
+    // Type label and name displayed
+    $show->assertSee(trans('story::shared.type.label'));
+    $show->assertSee(defaultStoryType()->name);
 });

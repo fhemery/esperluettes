@@ -7,6 +7,10 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+beforeEach(function () {
+    \Illuminate\Support\Facades\Cache::flush();
+});
+
 it('shows public story details with title, description, authors and creation date', function () {
     // Arrange: author and public story
     $author = alice($this);
@@ -56,7 +60,7 @@ it('returns 404 for community story to unverified user', function () {
 
 it('shows placeholder when description is empty', function () {
     $author = alice($this);
-    $story = publicStory('No Desc Story', $author->id, [ 'description' => '' ]);
+    $story = publicStory('No Desc Story', $author->id, ['description' => '']);
 
     $response = $this->get('/stories/' . $story->slug);
     $response->assertOk();
@@ -91,4 +95,18 @@ it('should add a link to author profile page', function () {
     $response = $this->get('/stories/' . $story->slug);
     $response->assertOk();
     $response->assertSee('/profile/alice');
+});
+
+it('shows the story type when available', function () {
+    $author = alice($this);
+    $type = makeStoryType('Short Story');
+    $story = publicStory('Typed Story', $author->id, [
+        'story_ref_type_id' => $type->id,
+    ]);
+    Log::info('Type id' . $type->id);
+    Log::info('Type id' . $story->story_ref_type_id);
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    $response->assertSee(trans('story::shared.type.label'));
+    $response->assertSee('Short Story');
 });

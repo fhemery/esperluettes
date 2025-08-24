@@ -10,16 +10,19 @@ class StoryShowViewModel
     public readonly Story $story;
     public readonly ?int $currentUserId;
     public readonly array $authors;
+    public readonly ?string $typeName;
 
     public function __construct(
         Story $story,
         ?int $currentUserId,
-        array $authors
+        array $authors,
+        ?string $typeName = null,
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
         $this->authors = $authors;
         $this->currentUserId = $currentUserId;
+        $this->typeName = $typeName;
     }
 
     
@@ -75,5 +78,13 @@ class StoryShowViewModel
     public function isAuthor(): bool
     {
         return collect($this->authors)->pluck('user_id')->contains($this->currentUserId);
+    }
+
+    /**
+     * Get story type display name
+     */
+    public function getTypeName(): ?string
+    {
+        return $this->typeName;
     }
 }

@@ -1,13 +1,12 @@
 <?php
 
-use App\Domains\Auth\Models\User;
 use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-it('shows errors for missing required fields (title, visibility); description optional', function () {
+it('shows errors for missing required fields (title, visibility, type); description optional', function () {
     $user = alice($this);
 
     // Act: submit empty form
@@ -23,6 +22,7 @@ it('shows errors for missing required fields (title, visibility); description op
     $page->assertOk();
     $page->assertSee('story::validation.title.required');
     $page->assertSee('story::validation.visibility.required');
+    $page->assertSee('story::validation.type.required');
     // Description is optional; should not show required error
     $page->assertDontSee('story::validation.description.required');
 });
@@ -34,6 +34,7 @@ it('validates title too long (>255)', function () {
         'title' => str_repeat('a', 256),
         'description' => 'Ok',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ];
 
     $response = $this->actingAs($user)
@@ -54,6 +55,7 @@ it('validates description max length (3000)', function () {
         'title' => 'Valid',
         'description' => str_repeat('a', 3001),
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ];
 
     $response = $this->actingAs($user)
@@ -74,6 +76,7 @@ it('validates visibility must be in allowed set', function () {
         'title' => 'Valid',
         'description' => null,
         'visibility' => 'friends', // invalid
+        'story_ref_type_id' => defaultStoryType()->id,
     ];
 
     $response = $this->actingAs($user)
@@ -85,4 +88,46 @@ it('validates visibility must be in allowed set', function () {
     $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
     $page->assertOk();
     $page->assertSee('story::validation.visibility.in');
+});
+
+it('validates story_ref_type_id must be integer', function () {
+    $user = alice($this);
+
+    $payload = [
+        'title' => 'Valid',
+        'description' => null,
+        'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => 'abc',
+    ];
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.type.integer');
+});
+
+it('validates story_ref_type_id must exist', function () {
+    $user = alice($this);
+
+    $payload = [
+        'title' => 'Valid',
+        'description' => null,
+        'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => 999999, // not existing
+    ];
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.type.exists');
 });

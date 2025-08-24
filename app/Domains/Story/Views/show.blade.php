@@ -59,6 +59,13 @@
                         </div>
                     </div>
 
+                    @if($viewModel->getTypeName())
+                        <div class="mb-4 text-sm text-gray-700">
+                            <span class="font-medium">{{ __('story::shared.type.label') }}:</span>
+                            <span>{{ $viewModel->getTypeName() }}</span>
+                        </div>
+                    @endif
+
                     <div class="flex gap-6 items-start">
                         <div class="shrink-0" aria-hidden="true">
                             <div class="w-[150px] h-[200px] rounded-lg border-4 border-[#ACE1AF] flex items-center justify-center bg-white">

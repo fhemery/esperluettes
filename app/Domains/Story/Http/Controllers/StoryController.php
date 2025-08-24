@@ -12,6 +12,7 @@ use App\Domains\Story\Support\StoryFilterAndPagination;
 use App\Domains\Story\ViewModels\StoryListViewModel;
 use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StorySummaryViewModel;
+use App\Domains\StoryRef\Services\StoryRefLookupService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -19,9 +20,10 @@ use Illuminate\Support\Facades\Auth;
 class StoryController
 {
     public function __construct(
-        private readonly StoryService     $service,
-        private readonly UserPublicApi    $userPublicApi,
-        private readonly ProfilePublicApi $profileApi
+        private readonly StoryService          $service,
+        private readonly UserPublicApi         $userPublicApi,
+        private readonly ProfilePublicApi      $profileApi,
+        private readonly StoryRefLookupService $lookup
     )
     {
     }
@@ -29,11 +31,13 @@ class StoryController
     public function index(): View
     {
         $page = (int)request()->get('page', 1);
+        $typeSlug = request()->get('type');
+        $typeId = $this->lookup->findTypeIdBySlug(is_string($typeSlug) ? $typeSlug : null);
         $vis = [Story::VIS_PUBLIC];
         if (Auth::check()) {
             $vis[] = Story::VIS_COMMUNITY;
         }
-        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis);
+        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId);
         $paginator = $this->service->listStories($filter);
 
         // Collect all author user IDs from the page
@@ -46,6 +50,9 @@ class StoryController
         $profilesById = empty($authorIds)
             ? []
             : $this->profileApi->getPublicProfiles($authorIds); // [userId => ProfileDto]
+
+        // Types lookup for display
+        $types = $this->lookup->getTypes();
 
         // Build summaries
         $items = [];
@@ -67,10 +74,17 @@ class StoryController
             );
         }
 
-        $viewModel = new StoryListViewModel($paginator, $items);
+        $appends = [];
+        if ($typeSlug) {
+            $appends['type'] = $typeSlug;
+        }
+
+        $viewModel = new StoryListViewModel($paginator, $items, $appends);
 
         return view('story::index', [
             'viewModel' => $viewModel,
+            'types' => $types,
+            'currentType' => is_string($typeSlug) ? $typeSlug : null,
         ]);
     }
 
@@ -92,8 +106,10 @@ class StoryController
             abort(404);
         }
 
+        $types = $this->lookup->getTypes();
         return view('story::edit', [
             'story' => $story,
+            'types' => $types,
         ]);
     }
 
@@ -112,6 +128,7 @@ class StoryController
         $story->title = (string)$request->input('title');
         $story->description = (string)$request->input('description');
         $story->visibility = (string)$request->input('visibility');
+        $story->story_ref_type_id = (int)$request->input('story_ref_type_id');
 
         // If title changed, regenerate slug base but keep -id suffix
         if ($story->title !== $oldTitle) {
@@ -219,7 +236,12 @@ class StoryController
             ? []
             : array_values($this->profileApi->getPublicProfiles($authorUserIds));
 
-        $viewModel = new StoryShowViewModel($story, Auth::id(), $authors);
+        // Resolve type name for display
+        $typesById = $this->lookup->getTypes()->keyBy('id');
+        $typeArr = $typesById->get($story->story_ref_type_id);
+        $typeName = is_array($typeArr) ? ($typeArr['name'] ?? null) : null;
+
+        $viewModel = new StoryShowViewModel($story, Auth::id(), $authors, $typeName);
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 
         return view('story::show', [

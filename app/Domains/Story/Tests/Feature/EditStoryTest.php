@@ -7,6 +7,10 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+beforeEach(function () {
+    \Illuminate\Support\Facades\Cache::flush();
+});
+
 it('redirects guests from edit page to login', function () {
     // Arrange: existing public story
     $author = alice($this, roles: ['user-confirmed']);
@@ -35,6 +39,7 @@ it('allows the author to load edit page and update story', function () {
         'title' => 'Updated Title',
         'description' => '<p>new desc</p>',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ];
 
     $resp = $this->put('/stories/' . $story->slug, $payload);
@@ -73,6 +78,7 @@ it('allows a co-author with role author to update', function () {
         'title' => 'Coauthored Title',
         'description' => '<p>x</p>',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ]);
 
     $resp->assertRedirect();
@@ -103,6 +109,7 @@ it('returns 404 for collaborator without author role', function () {
         'title' => 'Should Fail',
         'description' => '<p>x</p>',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ])->assertNotFound();
 });
 
@@ -119,6 +126,7 @@ it('returns 404 for non-collaborator trying to edit', function () {
         'title' => 'Nope',
         'description' => '<p>x</p>',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ])->assertNotFound();
 });
 
@@ -134,6 +142,7 @@ it('301-redirects from old slug base to canonical after title change', function 
         'title' => 'New Canonical Title',
         'description' => '<p>desc</p>',
         'visibility' => Story::VIS_PUBLIC,
+        'story_ref_type_id' => defaultStoryType()->id,
     ])->assertRedirect();
 
     $story->refresh();

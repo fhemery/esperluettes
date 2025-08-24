@@ -14,6 +14,7 @@ class StoryFilterAndPagination
          */
         public array $visibilities = [Story::VIS_PUBLIC],
         public ?int $userId = null,
+        public ?int $typeId = null,
     ) {
         // Normalize visibilities: ensure values and not empty
         $this->visibilities = array_values($this->visibilities);
