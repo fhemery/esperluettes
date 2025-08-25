@@ -193,3 +193,29 @@ it('allows creating a story with multiple trigger warnings and displays them on 
     $show->assertSee('Violence');
     $show->assertSee('Langage vulgaire');
 });
+
+it('allows creating a story with an optional feedback which is shown on the page', function () {
+    // Arrange
+    $user = alice($this, roles: ['user-confirmed']);
+    $this->actingAs($user);
+    $feedback = makeFeedback('Beta Readers Wanted');
+
+    // Act
+    $payload = validStoryPayload([
+        'title' => 'Feedback Story',
+        'description' => '<p>desc</p>',
+        'story_ref_feedback_id' => $feedback->id,
+    ]);
+    $resp = $this->post('/stories', $payload);
+    $resp->assertRedirect();
+
+    // Assert persistence
+    $story = Story::query()->firstOrFail();
+    expect($story->story_ref_feedback_id)->toBe($feedback->id);
+
+    // Assert display on show page
+    $show = $this->get('/stories/' . $story->slug);
+    $show->assertOk();
+    $show->assertSee(trans('story::shared.feedback.label'));
+    $show->assertSee($feedback->name);
+});

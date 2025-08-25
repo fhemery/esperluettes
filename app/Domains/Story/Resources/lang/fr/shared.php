@@ -39,6 +39,11 @@ return [
         'placeholder' => 'Sélectionner un statut (optionnel)',
         'help' => "Choisissez le statut d'avancement de l'histoire (facultatif)",
     ],
+    'feedback' => [
+        'label' => 'Retour',
+        'placeholder' => 'Sélectionner un retour (optionnel)',
+        'help' => "Choisissez une indication de retour souhaité (facultatif)",
+    ],
     'trigger_warnings' => [
         'label' => 'Avertissements de contenu',
         'help' => 'Sélectionnez les avertissements de contenu pertinents (facultatif)',

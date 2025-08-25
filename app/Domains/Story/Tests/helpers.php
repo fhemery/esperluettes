@@ -24,6 +24,7 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
         'story_ref_audience_id' => $attributes['story_ref_audience_id'] ?? defaultAudience()->id,
         'story_ref_copyright_id' => $attributes['story_ref_copyright_id'] ?? defaultCopyright()->id,
         'story_ref_status_id' => $attributes['story_ref_status_id'] ?? null,
+        'story_ref_feedback_id' => $attributes['story_ref_feedback_id'] ?? null,
     ]);
     $story->save();
 
@@ -161,6 +162,15 @@ function makeStatus(string $name): \App\Domains\StoryRef\Models\StoryRefStatus
     ]);
 }
 
+function makeFeedback(string $name): \App\Domains\StoryRef\Models\StoryRefFeedback
+{
+    return app(\App\Domains\StoryRef\Services\FeedbackService::class)->create([
+        'name' => $name,
+        'slug' => Str::slug($name),
+        'is_active' => true,
+    ]);
+}
+
 function defaultTriggerWarning(): \App\Domains\StoryRef\Models\StoryRefTriggerWarning
 {
     return \App\Domains\StoryRef\Models\StoryRefTriggerWarning::firstOrCreate([
@@ -192,5 +202,6 @@ function validStoryPayload(array $overrides = []): array
         'story_ref_audience_id' => defaultAudience()->id,
         'story_ref_copyright_id' => defaultCopyright()->id,
         'story_ref_genre_ids' => [defaultGenre()->id],
+        'story_ref_feedback_id' => null,
     ], $overrides);
 }

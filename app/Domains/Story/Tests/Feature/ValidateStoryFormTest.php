@@ -335,3 +335,40 @@ it('validates story_ref_status_id must exist when provided', function () {
     $page->assertOk();
     $page->assertSee('story::validation.status.exists');
 });
+
+
+it('validates story_ref_feedback_id must be integer when provided', function () {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        'story_ref_feedback_id' => 'abc',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.feedback.integer');
+});
+
+it('validates story_ref_feedback_id must exist when provided', function () {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        'story_ref_feedback_id' => 999999,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.feedback.exists');
+});

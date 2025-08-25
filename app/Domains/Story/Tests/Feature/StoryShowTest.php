@@ -134,3 +134,16 @@ it('shows the copyright when available', function () {
     $response->assertSee(trans('story::shared.copyright.label'));
     $response->assertSee('Public Domain');
 });
+
+it('shows the feedback when available', function () {
+    $author = alice($this);
+    $fb = makeFeedback('Open to feedback');
+    $story = publicStory('Feedback Visible', $author->id, [
+        'story_ref_feedback_id' => $fb->id,
+    ]);
+
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    $response->assertSee(trans('story::shared.feedback.label'));
+    $response->assertSee('Open to feedback');
+});

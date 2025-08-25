@@ -37,6 +37,7 @@ class StoryRefLookupService
      * - genres: Collection of arrays with id, slug, name, order
      * - statuses: Collection of arrays with id, slug, name, order
      * - trigger_warnings: Collection of arrays with id, slug, name, order
+     * - feedbacks: Collection of arrays with id, slug, name, order
      *
      * @return array{
      *     types: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
@@ -45,6 +46,7 @@ class StoryRefLookupService
      *     genres: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      *     statuses: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      *     trigger_warnings: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
+     *     feedbacks: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      * }
      */
     public function getStoryReferentials(): array
@@ -56,6 +58,7 @@ class StoryRefLookupService
             'genres' => $this->getGenres(),
             'statuses' => $this->getStatuses(),
             'trigger_warnings' => $this->getTriggerWarnings(),
+            'feedbacks' => $this->getFeedbacks(),
         ];
     }
 
@@ -203,5 +206,27 @@ class StoryRefLookupService
             return [];
         }
         return $this->cache->triggerWarningIdsBySlugs($slugs);
+    }
+
+    /**
+     * List active feedbacks ordered for UI.
+     * @return Collection<int, array{id:int,slug:string,name:string,order:int|null}>
+     */
+    public function getFeedbacks(): Collection
+    {
+        return $this->cache->feedbacks()->map(fn(array $t) => [
+            'id' => $t['id'],
+            'slug' => $t['slug'],
+            'name' => $t['name'],
+            'order' => $t['order'],
+        ]);
+    }
+
+    public function findFeedbackIdBySlug(?string $slug): ?int
+    {
+        if ($slug === null) {
+            return null;
+        }
+        return $this->cache->feedbackIdBySlug($slug);
     }
 }

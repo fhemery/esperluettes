@@ -17,6 +17,7 @@ class StoryRefCache
         private readonly GenreService $genreService,
         private readonly StatusService $statusService,
         private readonly TriggerWarningService $triggerWarningService,
+        private readonly FeedbackService $feedbackService,
     ) {}
 
     /**
@@ -277,6 +278,49 @@ class StoryRefCache
     public function clearStatuses(): void
     {
         $this->cache->forget('storyref:statuses:active-ordered');
+    }
+
+    /**
+     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     */
+    public function feedbacks(): Collection
+    {
+        return $this->cache->remember(
+            'storyref:feedbacks:active-ordered',
+            self::CACHE_TTL_SECONDS,
+            function () {
+                $all = collect($this->feedbackService->listAll());
+                $active = $all->filter(fn($m) => (bool) ($m->is_active ?? true));
+                return $active
+                    ->sortBy([
+                        ['order', 'asc'],
+                        ['name', 'asc'],
+                    ])
+                    ->values()
+                    ->map(fn($m) => [
+                        'id' => (int) $m->id,
+                        'slug' => (string) $m->slug,
+                        'name' => (string) $m->name,
+                        'is_active' => (bool) ($m->is_active ?? true),
+                        'order' => isset($m->order) ? (int) $m->order : null,
+                    ]);
+            }
+        );
+    }
+
+    public function feedbackIdBySlug(string $slug): ?int
+    {
+        $slug = trim(strtolower($slug));
+        if ($slug === '') {
+            return null;
+        }
+        $found = $this->feedbacks()->firstWhere('slug', $slug);
+        return $found['id'] ?? null;
+    }
+
+    public function clearFeedbacks(): void
+    {
+        $this->cache->forget('storyref:feedbacks:active-ordered');
     }
 
     /**

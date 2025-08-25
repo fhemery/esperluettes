@@ -199,6 +199,8 @@ class StoryController
         $story->story_ref_copyright_id = (int)$request->input('story_ref_copyright_id');
         $statusId = $request->input('story_ref_status_id');
         $story->story_ref_status_id = $statusId !== null ? (int)$statusId : null;
+        $feedbackId = $request->input('story_ref_feedback_id');
+        $story->story_ref_feedback_id = $feedbackId !== null ? (int)$feedbackId : null;
 
         // Sync genres (1..3)
         $genreIds = $request->input('story_ref_genre_ids', []);
@@ -340,6 +342,11 @@ class StoryController
         $stArr = $statusesById->get($story->story_ref_status_id);
         $statusName = is_array($stArr) ? ($stArr['name'] ?? null) : null;
 
+        // Resolve feedback name for display
+        $feedbacksById = $this->lookup->getFeedbacks()->keyBy('id');
+        $fbArr = $feedbacksById->get($story->story_ref_feedback_id);
+        $feedbackName = is_array($fbArr) ? ($fbArr['name'] ?? null) : null;
+
         // Collect genre names using lookup service (service only loads IDs)
         $genreIds = $story->genres?->pluck('id')->filter()->values()->all() ?? [];
         $genresById = $this->lookup->getGenres()->keyBy('id');
@@ -358,7 +365,7 @@ class StoryController
         foreach ($twIds as $tid) {
             $row = $twById->get($tid);
             if (is_array($row) && isset($row['name'])) {
-                $triggerWarningNames[] = (string) $row['name'];
+                $triggerWarningNames[] = (string)$row['name'];
             }
         }
 
@@ -371,6 +378,7 @@ class StoryController
             $copyrightName,
             $genreNames,
             $statusName,
+            $feedbackName,
             $triggerWarningNames,
         );
         $metaDescription = Seo::excerpt($viewModel->getDescription());

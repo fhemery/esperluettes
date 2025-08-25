@@ -14,6 +14,7 @@ class StoryShowViewModel
     public readonly ?string $audienceName;
     public readonly ?string $copyrightName;
     public readonly ?string $statusName;
+    public readonly ?string $feedbackName;
     /** @var array<int,string> */
     public readonly array $genreNames;
     /** @var array<int,string> */
@@ -28,6 +29,7 @@ class StoryShowViewModel
         ?string $copyrightName = null,
         array $genreNames = [],
         ?string $statusName = null,
+        ?string $feedbackName = null,
         array $triggerWarningNames = [],
     ) {
         $this->story = $story;
@@ -39,6 +41,7 @@ class StoryShowViewModel
         $this->copyrightName = $copyrightName;
         $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
         $this->statusName = $statusName;
+        $this->feedbackName = $feedbackName;
         $this->triggerWarningNames = array_values(array_filter(array_map('strval', $triggerWarningNames)));
     }
 
@@ -127,6 +130,14 @@ class StoryShowViewModel
     public function getStatusName(): ?string
     {
         return $this->statusName;
+    }
+
+    /**
+     * Get story feedback display name
+     */
+    public function getFeedbackName(): ?string
+    {
+        return $this->feedbackName;
     }
 
     /**

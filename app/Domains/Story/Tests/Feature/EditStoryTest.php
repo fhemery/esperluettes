@@ -270,3 +270,41 @@ it('syncs trigger warnings on update (replaces previous selection)', function ()
     $show->assertSee('Drogues');
     $show->assertSee('Suicide');
 });
+
+
+it('allows the author to set and change the optional feedback on update', function () {
+    // Arrange
+    $author = alice($this, roles: ['user-confirmed']);
+    $this->actingAs($author);
+    $story = publicStory('Feedback Updatable', $author->id, [
+        'description' => '<p>x</p>',
+    ]);
+
+    $fb = makeFeedback('Looking for critique');
+
+    // First set feedback
+    $resp1 = $this->put('/stories/' . $story->slug, validStoryPayload([
+        'title' => 'Feedback Updatable',
+        'description' => '<p>x</p>',
+        'story_ref_feedback_id' => $fb->id,
+    ]));
+    $resp1->assertRedirect();
+
+    $story->refresh();
+    expect($story->story_ref_feedback_id)->toBe($fb->id);
+    $this->get('/stories/' . $story->slug)
+        ->assertOk()
+        ->assertSee(trans('story::shared.feedback.label'))
+        ->assertSee($fb->name);
+
+    // Then clear feedback by sending null
+    $resp2 = $this->put('/stories/' . $story->slug, validStoryPayload([
+        'title' => 'Feedback Updatable',
+        'description' => '<p>x</p>',
+        'story_ref_feedback_id' => null,
+    ]));
+    $resp2->assertRedirect();
+
+    $story->refresh();
+    expect($story->story_ref_feedback_id)->toBeNull();
+});

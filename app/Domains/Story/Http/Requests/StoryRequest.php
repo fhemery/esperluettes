@@ -22,6 +22,7 @@ class StoryRequest extends FormRequest
             'story_ref_audience_id' => ['required', 'integer', 'exists:story_ref_audiences,id'],
             'story_ref_copyright_id' => ['required', 'integer', 'exists:story_ref_copyrights,id'],
             'story_ref_status_id' => ['nullable', 'integer', 'exists:story_ref_statuses,id'],
+            'story_ref_feedback_id' => ['nullable', 'integer', 'exists:story_ref_feedbacks,id'],
             'story_ref_genre_ids' => ['required', 'array', 'min:1', 'max:3'],
             'story_ref_genre_ids.*' => ['integer', 'exists:story_ref_genres,id'],
             // Optional Trigger Warnings (0..N)
@@ -72,6 +73,9 @@ class StoryRequest extends FormRequest
 
             'story_ref_status_id.integer' => __('story::validation.status.integer'),
             'story_ref_status_id.exists' => __('story::validation.status.exists'),
+
+            'story_ref_feedback_id.integer' => __('story::validation.feedback.integer'),
+            'story_ref_feedback_id.exists' => __('story::validation.feedback.exists'),
 
             'story_ref_genre_ids.required' => __('story::validation.genres.required'),
             'story_ref_genre_ids.array' => __('story::validation.genres.array'),

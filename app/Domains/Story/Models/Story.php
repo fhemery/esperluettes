@@ -2,10 +2,10 @@
 
 namespace App\Domains\Story\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use App\Domains\StoryRef\Models\StoryRefGenre;
 use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Story extends Model
 {
@@ -19,6 +19,7 @@ class Story extends Model
         'story_ref_type_id',
         'story_ref_audience_id',
         'story_ref_copyright_id',
+        'story_ref_feedback_id'
     ];
 
     public const VIS_PUBLIC = 'public';

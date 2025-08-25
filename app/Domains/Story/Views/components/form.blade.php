@@ -116,6 +116,26 @@
     <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.optional') }}</p>
 </div>
 
+@php($selectedFeedbackId = old('story_ref_feedback_id', $story?->story_ref_feedback_id ?? ''))
+
+<div class="mb-6">
+    <x-input-label for="story_ref_feedback_id" :value="__('story::shared.feedback.label')"/>
+    <div class="flex items-center gap-2">
+        <select id="story_ref_feedback_id" name="story_ref_feedback_id"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value="" {{ $selectedFeedbackId === '' ? 'selected' : '' }}>— {{ __('story::shared.feedback.placeholder') }} —</option>
+            @foreach(($referentials['feedbacks'] ?? collect()) as $f)
+                <option value="{{ $f['id'] }}" {{ (string)$selectedFeedbackId === (string)$f['id'] ? 'selected' : '' }}>{{ $f['name'] }}</option>
+            @endforeach
+        </select>
+        <x-shared::tooltip type="help" :title="__('story::shared.feedback.label')" placement="right">
+            {{ __('story::shared.feedback.help') }}
+        </x-shared::tooltip>
+    </div>
+    <x-input-error :messages="$errors->get('story_ref_feedback_id')" class="mt-2"/>
+    <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.optional') }}</p>
+</div>
+
 @php($selectedCopyrightId = old('story_ref_copyright_id', $story?->story_ref_copyright_id ?? ''))
 
 <div class="mb-6">

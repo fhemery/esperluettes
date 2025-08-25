@@ -87,6 +87,13 @@
                         </div>
                     @endif
 
+                    @if($viewModel->getFeedbackName())
+                        <div class="mb-4 text-sm text-gray-700">
+                            <span class="font-medium">{{ __('story::shared.feedback.label') }}:</span>
+                            <span>{{ $viewModel->getFeedbackName() }}</span>
+                        </div>
+                    @endif
+
                     @php($genres = $viewModel->getGenreNames())
                     @if(!empty($genres))
                         <div class="mb-6 text-sm text-gray-700">
