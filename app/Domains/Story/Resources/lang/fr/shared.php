@@ -55,5 +55,8 @@ return [
     ],
     'required' => 'Champ requis',
     'optional' => 'Champ facultatif',
-    'by' => 'Par '
+    'by' => 'Par ',
+    'filters' => [
+        'header' => 'Filtres'
+    ]
 ];

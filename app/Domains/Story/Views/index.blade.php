@@ -17,81 +17,88 @@
             {{ __('story::index.heading') }}
         </h2>
     </x-slot>
-    <div class="py-12">
+    @php($hasFilters = !empty($currentType) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw))
+
+    <!-- Filters Section -->
+    <div class="py-4">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <x-collapsible title="{{__('story::shared.filters.header')}}" :open="$hasFilters">
+                <form method="GET" action="{{ url('/stories') }}" class="flex items-start gap-6 flex-wrap" x-data
+                      @submit="if($refs.type && $refs.type.value===''){ $refs.type.removeAttribute('name') }">
+                    <div>
+                        <label for="type"
+                               class="block text-sm font-medium text-gray-700">{{ __('story::shared.type.label') }}</label>
+                        <select id="type" name="type" x-ref="type"
+                                class="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">— {{ __('story::shared.type.placeholder') }} —</option>
+                            @foreach(($referentials['types'] ?? collect()) as $t)
+                                <option
+                                    value="{{ $t['slug'] }}" {{ (isset($currentType) && $currentType === $t['slug']) ? 'selected' : '' }}>{{ $t['name'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700">{{ __('story::shared.audience.label') }}</label>
+                        @php($currentAud = collect($currentAudiences ?? []))
+                        <div class="mt-2">
+                            <x-search-multi
+                                name="audiences[]"
+                                :options="$referentials['audiences'] ?? []"
+                                :selected="$currentAud"
+                                placeholder="Search audiences…"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700">{{ __('story::shared.genres.label') }}</label>
+                        @php($currentGen = collect($currentGenres ?? []))
+                        <div class="mt-2">
+                            <x-search-multi
+                                name="genres[]"
+                                :options="$referentials['genres'] ?? []"
+                                :selected="$currentGen"
+                                placeholder="Search genres…"
+                                badge="blue"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700">{{ __('story::shared.trigger_warnings.label') }}</label>
+                        @php($currentExTw = collect($currentExcludeTw ?? []))
+                        <div class="mt-2">
+                            <x-search-multi
+                                name="exclude_tw[]"
+                                :options="$referentials['trigger_warnings'] ?? []"
+                                :selected="$currentExTw"
+                                placeholder="Search trigger warnings…"
+                                badge="red"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <x-primary-button type="submit">{{ __('story::index.filter') }}</x-primary-button>
+                        @if($hasFilters)
+                            <a href="{{ url('/stories') }}"
+                               class="ml-3 text-sm text-gray-600 hover:text-gray-900">{{ __('story::index.reset_filters') }}</a>
+                        @endif
+                    </div>
+                </form>
+            </x-collapsible>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="py-4">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="mb-6">
-                        <form method="GET" action="{{ url('/stories') }}" class="flex items-start gap-6 flex-wrap">
-                            <div>
-                                <label for="type"
-                                       class="block text-sm font-medium text-gray-700">{{ __('story::shared.type.label') }}</label>
-                                <select id="type" name="type"
-                                        class="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">— {{ __('story::shared.type.placeholder') }} —</option>
-                                    @foreach(($referentials['types'] ?? collect()) as $t)
-                                        <option
-                                            value="{{ $t['slug'] }}" {{ (isset($currentType) && $currentType === $t['slug']) ? 'selected' : '' }}>{{ $t['name'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <span
-                                    class="block text-sm font-medium text-gray-700">{{ __('story::shared.audience.label') }}</span>
-                                <div class="mt-2 flex flex-wrap gap-3 max-w-2xl">
-                                    @php($currentAud = collect($currentAudiences ?? []))
-                                    @foreach(($referentials['audiences'] ?? collect()) as $a)
-                                        @php($checked = $currentAud->contains($a['slug']))
-                                        <label class="inline-flex items-center gap-2 text-sm">
-                                            <input type="checkbox" name="audiences[]" value="{{ $a['slug'] }}"
-                                                   class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ $checked ? 'checked' : '' }}>
-                                            <span>{{ $a['name'] }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <div>
-                                <span
-                                    class="block text-sm font-medium text-gray-700">{{ __('story::shared.genres.label') }}</span>
-                                <div class="mt-2 flex flex-wrap gap-3 max-w-2xl">
-                                    @php($currentGen = collect($currentGenres ?? []))
-                                    @foreach(($referentials['genres'] ?? collect()) as $g)
-                                        @php($checked = $currentGen->contains($g['slug']))
-                                        <label class="inline-flex items-center gap-2 text-sm">
-                                            <input type="checkbox" name="genres[]" value="{{ $g['slug'] }}"
-                                                   class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ $checked ? 'checked' : '' }}>
-                                            <span>{{ $g['name'] }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-700">{{ __('story::shared.trigger_warnings.label') }}</span>
-                                <div class="mt-2 flex flex-wrap gap-3 max-w-2xl">
-                                    @php($currentExTw = collect($currentExcludeTw ?? []))
-                                    @foreach(($referentials['trigger_warnings'] ?? collect()) as $tw)
-                                        @php($checked = $currentExTw->contains($tw['slug']))
-                                        <label class="inline-flex items-center gap-2 text-sm">
-                                            <input type="checkbox" name="exclude_tw[]" value="{{ $tw['slug'] }}"
-                                                   class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ $checked ? 'checked' : '' }}>
-                                            <span>{{ $tw['name'] }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <div class="pt-6">
-                                <x-primary-button type="submit">{{ __('story::index.filter') }}</x-primary-button>
-                                @if(!empty($currentType) || !empty($currentStatus) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw))
-                                    <a href="{{ url('/stories') }}"
-                                       class="ml-3 text-sm text-gray-600 hover:text-gray-900">{{ __('story::index.reset_filters') }}</a>
-                                @endif
-                            </div>
-                        </form>
-                    </div>
                     @if ($viewModel->isEmpty())
                         <div class="text-center text-gray-600 py-16">
                             {{ __('story::index.empty') }}

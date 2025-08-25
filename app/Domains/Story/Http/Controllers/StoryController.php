@@ -41,6 +41,8 @@ class StoryController
         } elseif (is_string($audiencesParam)) {
             $audienceSlugs = array_values(array_filter(array_map('trim', explode(',', $audiencesParam))));
         }
+        // Deduplicate to avoid repeated query params across submissions
+        $audienceSlugs = array_values(array_unique($audienceSlugs));
         $audienceIds = $this->lookup->findAudienceIdsBySlugs($audienceSlugs);
 
         // Genres multi-select (AND semantics): accept genres[] or comma-separated 'genres'
@@ -51,6 +53,7 @@ class StoryController
         } elseif (is_string($genresParam)) {
             $genreSlugs = array_values(array_filter(array_map('trim', explode(',', $genresParam))));
         }
+        $genreSlugs = array_values(array_unique($genreSlugs));
         $genreIds = $this->lookup->findGenreIdsBySlugs($genreSlugs);
 
         // Trigger Warnings exclusion (OR semantics): accept exclude_tw[] or comma-separated 'exclude_tw'
@@ -61,6 +64,7 @@ class StoryController
         } elseif (is_string($twParam)) {
             $twSlugs = array_values(array_filter(array_map('trim', explode(',', $twParam))));
         }
+        $twSlugs = array_values(array_unique($twSlugs));
         $excludeTwIds = $this->lookup->findTriggerWarningIdsBySlugs($twSlugs);
         $vis = [Story::VIS_PUBLIC];
         if (Auth::check()) {
@@ -132,14 +136,14 @@ class StoryController
             $appends['type'] = $typeSlug;
         }
         if (!empty($audienceSlugs)) {
-            // keep as comma-separated for pagination links
-            $appends['audiences'] = implode(',', $audienceSlugs);
+            // Use array params so we don't mix CSV and [] formats
+            $appends['audiences'] = $audienceSlugs;
         }
         if (!empty($genreSlugs)) {
-            $appends['genres'] = implode(',', $genreSlugs);
+            $appends['genres'] = $genreSlugs;
         }
         if (!empty($twSlugs)) {
-            $appends['exclude_tw'] = implode(',', $twSlugs);
+            $appends['exclude_tw'] = $twSlugs;
         }
 
         $viewModel = new StoryListViewModel($paginator, $items, $appends);
