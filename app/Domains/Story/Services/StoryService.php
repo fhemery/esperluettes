@@ -19,7 +19,7 @@ class StoryService
     public function listStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
     {
         $query = Story::query()
-            ->with(['authors', 'collaborators', 'genres:id'])
+            ->with(['authors', 'collaborators', 'genres:id', 'triggerWarnings:id'])
             ->orderByDesc('created_at');
 
         if ($filter->userId !== null) {
@@ -45,6 +45,14 @@ class StoryService
                     $q->where('story_ref_genres.id', $gid);
                 });
             }
+        }
+
+        // Exclude stories that have ANY of the selected trigger warnings (OR semantics)
+        if (!empty($filter->excludeTriggerWarningIds)) {
+            $ids = $filter->excludeTriggerWarningIds;
+            $query->whereDoesntHave('triggerWarnings', function ($q) use ($ids) {
+                $q->whereIn('story_ref_trigger_warnings.id', $ids);
+            });
         }
 
         // Visibilities already normalized in DTO

@@ -68,9 +68,24 @@
                                 </div>
                             </div>
 
+                            <div>
+                                <span class="block text-sm font-medium text-gray-700">{{ __('story::shared.trigger_warnings.label') }}</span>
+                                <div class="mt-2 flex flex-wrap gap-3 max-w-2xl">
+                                    @php($currentExTw = collect($currentExcludeTw ?? []))
+                                    @foreach(($referentials['trigger_warnings'] ?? collect()) as $tw)
+                                        @php($checked = $currentExTw->contains($tw['slug']))
+                                        <label class="inline-flex items-center gap-2 text-sm">
+                                            <input type="checkbox" name="exclude_tw[]" value="{{ $tw['slug'] }}"
+                                                   class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ $checked ? 'checked' : '' }}>
+                                            <span>{{ $tw['name'] }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
                             <div class="pt-6">
                                 <x-primary-button type="submit">{{ __('story::index.filter') }}</x-primary-button>
-                                @if(!empty($currentType) || !empty($currentStatus) || !empty($currentAudiences) || !empty($currentGenres))
+                                @if(!empty($currentType) || !empty($currentStatus) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw))
                                     <a href="{{ url('/stories') }}"
                                        class="ml-3 text-sm text-gray-600 hover:text-gray-900">{{ __('story::index.reset_filters') }}</a>
                                 @endif

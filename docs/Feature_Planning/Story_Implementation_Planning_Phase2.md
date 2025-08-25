@@ -429,7 +429,7 @@ categories.**
 
 ---
 
-### **US-019: Add Optional Trigger Warnings Selection**
+### **[DONE]US-019: Add Optional Trigger Warnings Selection**
 
 **As a user creating a story, I want to optionally select trigger warnings so readers can make informed choices.**
 
@@ -448,7 +448,7 @@ categories.**
 
 ---
 
-### **US-020: Filter Stories by Trigger Warnings**
+### **[DONE] US-020: Filter Stories by Trigger Warnings**
 
 **As a reader, I want to filter or hide stories based on trigger warnings.**
 

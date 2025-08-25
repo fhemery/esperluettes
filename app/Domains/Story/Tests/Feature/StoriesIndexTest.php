@@ -57,6 +57,96 @@ it('filters stories by a single genre slug', function () {
     $resp->assertSee(trans('story::index.reset_filters'));
 });
 
+it('displays trigger warning badges on list cards', function () {
+    // Arrange
+    $author = alice($this);
+    $violence = makeTriggerWarning('Violence');
+    $abuse = makeTriggerWarning('Abuse');
+
+    publicStory('TW Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_trigger_warning_ids' => [$violence->id, $abuse->id],
+    ]);
+
+    // Act
+    $resp = $this->get('/stories');
+
+    // Assert: shows both TW names as badges in the list
+    $resp->assertOk();
+    $resp->assertSee('TW Story');
+    $resp->assertSee('Violence');
+    $resp->assertSee('Abuse');
+});
+
+it('excludes stories having a selected trigger warning via exclude_tw', function () {
+    // Arrange
+    $author = alice($this);
+    $violence = makeTriggerWarning('Violence');
+    $abuse = makeTriggerWarning('Abuse');
+
+    publicStory('Clean Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_trigger_warning_ids' => [],
+    ]);
+
+    publicStory('Violent Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_trigger_warning_ids' => [$violence->id],
+    ]);
+
+    publicStory('Abusive Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_trigger_warning_ids' => [$abuse->id],
+    ]);
+
+    // Act: exclude violence
+    $resp = $this->get('/stories?exclude_tw=' . $violence->slug);
+
+    // Assert: anything tagged with Violence is excluded
+    $resp->assertOk();
+    $resp->assertSee('Clean Story');
+    $resp->assertSee('Abusive Story');
+    $resp->assertDontSee('Violent Story');
+});
+
+it('excludes stories having any of multiple selected trigger warnings (OR)', function () {
+    // Arrange
+    $author = alice($this);
+    $violence = makeTriggerWarning('Violence');
+    $abuse = makeTriggerWarning('Abuse');
+    $drugs = makeTriggerWarning('Drugs');
+
+    publicStory('Only Violence', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_trigger_warning_ids' => [$violence->id],
+    ]);
+
+    publicStory('Only Abuse', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_trigger_warning_ids' => [$abuse->id],
+    ]);
+
+    publicStory('Only Drugs', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_trigger_warning_ids' => [$drugs->id],
+    ]);
+
+    publicStory('Clean Story', $author->id, [
+        'description' => '<p>Desc</p>',
+        'story_ref_trigger_warning_ids' => [],
+    ]);
+
+    // Act: exclude violence and abuse (comma separated)
+    $resp = $this->get('/stories?exclude_tw=' . $violence->slug . ',' . $abuse->slug);
+
+    // Assert: stories having either of the excluded TWs disappear; others remain
+    $resp->assertOk();
+    $resp->assertDontSee('Only Violence');
+    $resp->assertDontSee('Only Abuse');
+    $resp->assertSee('Only Drugs');
+    $resp->assertSee('Clean Story');
+});
+
 it('filters stories by multiple genre slugs (AND semantics)', function () {
     // Arrange
     $author = alice($this);

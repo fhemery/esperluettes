@@ -45,6 +45,17 @@
                         </div>
                     </div>
                 @endif
+
+                @php($tws = $item->getTriggerWarningNames())
+                @if(!empty($tws))
+                    <div class="px-4 pb-4">
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($tws as $tw)
+                                <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 ring-1 ring-inset ring-red-600/20">{{ $tw }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>

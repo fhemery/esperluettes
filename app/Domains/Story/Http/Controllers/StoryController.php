@@ -52,11 +52,21 @@ class StoryController
             $genreSlugs = array_values(array_filter(array_map('trim', explode(',', $genresParam))));
         }
         $genreIds = $this->lookup->findGenreIdsBySlugs($genreSlugs);
+
+        // Trigger Warnings exclusion (OR semantics): accept exclude_tw[] or comma-separated 'exclude_tw'
+        $twParam = request()->get('exclude_tw');
+        $twSlugs = [];
+        if (is_array($twParam)) {
+            $twSlugs = array_values(array_filter(array_map('strval', $twParam)));
+        } elseif (is_string($twParam)) {
+            $twSlugs = array_values(array_filter(array_map('trim', explode(',', $twParam))));
+        }
+        $excludeTwIds = $this->lookup->findTriggerWarningIdsBySlugs($twSlugs);
         $vis = [Story::VIS_PUBLIC];
         if (Auth::check()) {
             $vis[] = Story::VIS_COMMUNITY;
         }
-        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds);
+        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds);
         $paginator = $this->service->listStories($filter);
 
         // Collect all author user IDs from the page
@@ -76,6 +86,7 @@ class StoryController
         // Referentials lookup for display (types, ...)
         $items = [];
         $genresById = $this->lookup->getGenres()->keyBy('id');
+        $twById = $this->lookup->getTriggerWarnings()->keyBy('id');
         foreach ($paginator->getCollection() as $story) {
             $authorDtos = [];
             foreach ($story->authors as $author) {
@@ -95,6 +106,16 @@ class StoryController
                 }
             }
 
+            // Map trigger warning IDs to names for badges
+            $twNames = [];
+            $tids = $story->triggerWarnings?->pluck('id')->all() ?? [];
+            foreach ($tids as $tid) {
+                $row = $twById->get($tid);
+                if (is_array($row) && isset($row['name'])) {
+                    $twNames[] = (string)$row['name'];
+                }
+            }
+
             $items[] = new StorySummaryViewModel(
                 id: $story->id,
                 title: $story->title,
@@ -102,6 +123,7 @@ class StoryController
                 description: $story->description,
                 authors: $authorDtos,
                 genreNames: $gNames,
+                triggerWarningNames: $twNames,
             );
         }
 
@@ -116,6 +138,9 @@ class StoryController
         if (!empty($genreSlugs)) {
             $appends['genres'] = implode(',', $genreSlugs);
         }
+        if (!empty($twSlugs)) {
+            $appends['exclude_tw'] = implode(',', $twSlugs);
+        }
 
         $viewModel = new StoryListViewModel($paginator, $items, $appends);
 
@@ -125,6 +150,7 @@ class StoryController
             'currentType' => is_string($typeSlug) ? $typeSlug : null,
             'currentAudiences' => $audienceSlugs,
             'currentGenres' => $genreSlugs,
+            'currentExcludeTw' => $twSlugs,
         ]);
     }
 

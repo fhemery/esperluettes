@@ -35,6 +35,13 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
     }
     $story->genres()->sync($genreIds);
 
+    // Attach default trigger warning(s) if provided in attributes, else attach one default to satisfy relational expectations in some tests
+    $twIds = $attributes['story_ref_trigger_warning_ids'] ?? [$attributes['story_ref_trigger_warning_ids'] ?? null];
+    $twIds = array_values(array_filter(array_map(fn($v) => $v ? (int)$v : null, (array)$twIds)));
+    if (!empty($twIds)) {
+        $story->triggerWarnings()->sync($twIds);
+    }
+
     // Ensure slug ends with id suffix (same behavior as service/store)
     if (!str_ends_with($story->slug, '-' . $story->id)) {
         $story->slug = $slugBase . '-' . $story->id;

@@ -23,6 +23,10 @@ class StoryFilterAndPagination
          * @var array<int,int> Genre IDs to filter by (multi-select, AND semantics)
          */
         public array $genreIds = [],
+        /**
+         * @var array<int,int> Trigger Warning IDs to EXCLUDE (multi-select, OR semantics)
+         */
+        public array $excludeTriggerWarningIds = [],
     ) {
         // Normalize visibilities: ensure values and not empty
         $this->visibilities = array_values($this->visibilities);
@@ -39,5 +43,8 @@ class StoryFilterAndPagination
 
         // Normalize genre ids
         $this->genreIds = array_values(array_unique(array_map('intval', $this->genreIds)));
+
+        // Normalize excluded trigger warning ids
+        $this->excludeTriggerWarningIds = array_values(array_unique(array_map('intval', $this->excludeTriggerWarningIds)));
     }
 }
