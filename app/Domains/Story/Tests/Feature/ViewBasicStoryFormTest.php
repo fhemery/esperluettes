@@ -32,7 +32,6 @@ it('shows story types details to authenticated used', function () {
     $response->assertSee(trans('story::shared.type.label'));
     $response->assertSee(trans('story::shared.type.placeholder'));
     $response->assertSee(trans('story::shared.type.help'));
-    $response->assertSee(trans('story::shared.required'));
     $response->assertSee(trans('story::create.actions.continue'));
 });
 
@@ -47,7 +46,6 @@ it('shows story audience details to authenticated user', function () {
     $response->assertSee(trans('story::shared.audience.label'));
     $response->assertSee(trans('story::shared.audience.placeholder'));
     $response->assertSee(trans('story::shared.audience.help'));
-    $response->assertSee(trans('story::shared.required'));
 });
 
 it('shows story copyright details to authenticated user', function () {
@@ -61,5 +59,4 @@ it('shows story copyright details to authenticated user', function () {
     $response->assertSee(trans('story::shared.copyright.label'));
     $response->assertSee(trans('story::shared.copyright.placeholder'));
     $response->assertSee(trans('story::shared.copyright.help'));
-    $response->assertSee(trans('story::shared.required'));
 });

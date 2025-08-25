@@ -3,7 +3,7 @@
     'open' => false,
 ])
 
-<div x-data="{ open: {{ $open ? 'true' : 'false' }} }" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+<div x-data="{ open: {{ $open ? 'true' : 'false' }} }" class="w-full mb-4 bg-white overflow-visible shadow-sm sm:rounded-lg">
     <button type="button"
             class="w-full flex items-center justify-between px-4 py-3 text-left"
             @click="open = !open">

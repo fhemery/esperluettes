@@ -1,28 +1,31 @@
 @props([
     'name', // input name, e.g., "genres[]"
     'options' => [], // array of [slug => string, name => string] or list of arrays with keys slug,name
-    'selected' => [], // array of slugs
+    'selected' => [], // array of selected values (strings)
     'placeholder' => 'Search…',
     'emptyText' => 'No results',
     'maxHeight' => '15rem', // dropdown max height
     'badge' => 'indigo', // badge color: indigo (default), blue, red
+    'valueField' => 'slug', // which field from options to submit/match against (e.g., 'id' or 'slug')
 ])
 
 @php
     // Normalize options to a simple array of [slug, name]
     $opts = collect($options)
-        ->map(function ($o) {
+        ->map(function ($o) use ($valueField) {
             if (is_array($o)) {
+                $val = $o[$valueField] ?? ($o['slug'] ?? ($o['value'] ?? ($o['id'] ?? '')));
+                $label = $o['name'] ?? ($o['label'] ?? ($o['text'] ?? ''));
                 return [
-                    'slug' => $o['slug'] ?? ($o['value'] ?? (string)($o['id'] ?? '')),
-                    'name' => $o['name'] ?? ($o['label'] ?? (string)($o['text'] ?? '')),
+                    'slug' => (string) $val,
+                    'name' => (string) $label,
                 ];
             }
             // If user passed associative array slug => name
             return ['slug' => (string) $o, 'name' => (string) $o];
         })
         ->values();
-    $sel = collect($selected)->filter()->values();
+    $sel = collect($selected)->map(fn($v) => (string) $v)->filter()->values();
     // Base name without [] (no longer used, we submit only array fields to avoid duplicates)
     $nameBase = preg_replace('/\[\]$/', '', (string) $name);
 
@@ -75,7 +78,7 @@
         </div>
 
         <!-- Dropdown -->
-        <div x-cloak x-show="open" class="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg ring-1 ring-black/5">
+        <div x-cloak x-show="open" class="absolute z-20 mt-1 w-full rounded-md bg-white shadow-lg ring-1 ring-black/5">
             <ul class="max-h-60 overflow-auto py-1" :style="{maxHeight: maxHeight}">
                 <template x-for="(opt, idx) in state.filtered" :key="opt.slug">
                     <li>

@@ -1,6 +1,12 @@
 <?php
 
 return [
+    'panels' => [
+        'general' => 'Informations générales',
+        'details' => 'Détails',
+        'audience' => 'Audience',
+        'misc' => 'Divers',
+    ],
     'visibility' => [
         'label' => 'Visibilité',
         'options' => [

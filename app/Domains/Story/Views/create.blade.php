@@ -7,19 +7,19 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-transparent">
                 <div class="p-6 text-gray-900">
-                    <p class="text-gray-600 mb-6">{{ __('story::create.intro') }}</p>
-
-                    <div class="max-w-3xl">
+                    <div class="max-w-3xl mx-auto">
                         <form action="{{ route('stories.store') }}" method="POST" novalidate>
                             @csrf
 
-                            <x-story::form :referentials="$referentials" />
+                            <x-story::form :referentials="$referentials"/>
 
-                            <x-primary-button type="submit">
-                                {{ __('story::create.actions.continue') }}
-                            </x-primary-button>
+                            <div class="mt-6 flex justify-center">
+                                <x-primary-button type="submit">
+                                    {{ __('story::create.actions.continue') }}
+                                </x-primary-button>
+                            </div>
                         </form>
                     </div>
                 </div>

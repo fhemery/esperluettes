@@ -7,20 +7,20 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-transparent">
                 <div class="p-6 text-gray-900">
-                    <p class="text-gray-600 mb-6">{{ __('story::edit.intro') }}</p>
-
-                    <div class="max-w-3xl">
+                    <div class="max-w-3xl mx-auto">
                         <form action="{{ route('stories.update', ['slug' => $story->slug]) }}" method="POST" novalidate>
                             @csrf
                             @method('PUT')
 
-                            <x-story::form :story="$story" :referentials="$referentials" />
+                            <x-story::form :story="$story" :referentials="$referentials"/>
 
-                            <x-primary-button type="submit">
-                                {{ __('story::edit.actions.save') }}
-                            </x-primary-button>
+                            <div class="mt-6 flex justify-center">
+                                <x-primary-button type="submit">
+                                    {{ __('story::edit.actions.save') }}
+                                </x-primary-button>
+                            </div>
                         </form>
                     </div>
                 </div>
