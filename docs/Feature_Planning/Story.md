@@ -16,6 +16,9 @@ The Story & Chapter sharing feature is the core functionality of the platform, e
   - **Public**: Accessible to everyone, including non-members
   - **Community**: Accessible only to registered members
   - **Private**: Visible only to author(s) and co-authors
+  
+#### Deletion
+- **Delete Story**: Author-only hard delete. When confirmed, the story is permanently removed along with its pivot links (genres, trigger warnings) via database cascading.
 
 #### Story Configuration Options
 
@@ -81,10 +84,10 @@ stories:
 - slug (string, unique globally; includes the numeric id suffix, e.g., "my-story-title-123")
 - description (longtext)
 - cover_image_path (string, nullable)
-- visibility (enum: public, community, private)
-- story_ref_type_id (foreign key, mandatory)
-- story_ref_audience_id (foreign key, mandatory)
-- story_ref_copyright_id (foreign key, mandatory)
+- **visibility** (enum: public, community, private)
+- **story_ref_type_id** (foreign key, mandatory, NOT NULL)
+- **story_ref_audience_id** (foreign key, mandatory, NOT NULL)
+- **story_ref_copyright_id** (foreign key, mandatory, NOT NULL)
 - story_ref_status_id (foreign key, nullable)
 - story_ref_feedback_id (foreign key, nullable)
 - last_chapter_published_at (timestamp, nullable, for sorting)

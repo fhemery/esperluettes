@@ -329,17 +329,17 @@ class StoryController
         // Resolve type name for display
         $typesById = $this->lookup->getTypes()->keyBy('id');
         $typeArr = $typesById->get($story->story_ref_type_id);
-        $typeName = is_array($typeArr) ? ($typeArr['name'] ?? null) : null;
+        $typeName = (string) (is_array($typeArr) ? ($typeArr['name'] ?? '') : '');
 
         // Resolve audience name for display
         $audiencesById = $this->lookup->getAudiences()->keyBy('id');
         $audArr = $audiencesById->get($story->story_ref_audience_id);
-        $audienceName = is_array($audArr) ? ($audArr['name'] ?? null) : null;
+        $audienceName = (string) (is_array($audArr) ? ($audArr['name'] ?? '') : '');
 
         // Resolve copyright name for display
         $copyrightsById = $this->lookup->getCopyrights()->keyBy('id');
         $crArr = $copyrightsById->get($story->story_ref_copyright_id);
-        $copyrightName = is_array($crArr) ? ($crArr['name'] ?? null) : null;
+        $copyrightName = (string) (is_array($crArr) ? ($crArr['name'] ?? '') : '');
 
         // Resolve status name for display
         $statusesById = $this->lookup->getStatuses()->keyBy('id');
@@ -391,5 +391,21 @@ class StoryController
             'viewModel' => $viewModel,
             'metaDescription' => $metaDescription,
         ]);
+    }
+
+    public function destroy(string $slug): RedirectResponse
+    {
+        $story = $this->service->getStoryForShow($slug, Auth::id());
+
+        // Author-only: must be a collaborator with role=author
+        if (!$story->isAuthor(Auth::id())) {
+            abort(404);
+        }
+
+        // Hard delete via service; pivot tables use ON DELETE CASCADE
+        $this->service->deleteStory($story);
+
+        return redirect()->route('stories.index')
+            ->with('status', __('story::show.deleted'));
     }
 }

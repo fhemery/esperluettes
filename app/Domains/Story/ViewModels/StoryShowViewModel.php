@@ -10,9 +10,9 @@ class StoryShowViewModel
     public readonly Story $story;
     public readonly ?int $currentUserId;
     public readonly array $authors;
-    public readonly ?string $typeName;
-    public readonly ?string $audienceName;
-    public readonly ?string $copyrightName;
+    public readonly string $typeName;
+    public readonly string $audienceName;
+    public readonly string $copyrightName;
     public readonly ?string $statusName;
     public readonly ?string $feedbackName;
     /** @var array<int,string> */
@@ -24,9 +24,9 @@ class StoryShowViewModel
         Story $story,
         ?int $currentUserId,
         array $authors,
-        ?string $typeName = null,
-        ?string $audienceName = null,
-        ?string $copyrightName = null,
+        string $typeName,
+        string $audienceName,
+        string $copyrightName,
         array $genreNames = [],
         ?string $statusName = null,
         ?string $feedbackName = null,
@@ -36,9 +36,9 @@ class StoryShowViewModel
         /** @var ProfileDto[] $authors */
         $this->authors = $authors;
         $this->currentUserId = $currentUserId;
-        $this->typeName = $typeName;
-        $this->audienceName = $audienceName;
-        $this->copyrightName = $copyrightName;
+        $this->typeName = (string)$typeName;
+        $this->audienceName = (string)$audienceName;
+        $this->copyrightName = (string)$copyrightName;
         $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
         $this->statusName = $statusName;
         $this->feedbackName = $feedbackName;
@@ -103,7 +103,7 @@ class StoryShowViewModel
     /**
      * Get story type display name
      */
-    public function getTypeName(): ?string
+    public function getTypeName(): string
     {
         return $this->typeName;
     }
@@ -111,7 +111,7 @@ class StoryShowViewModel
     /**
      * Get story audience display name
      */
-    public function getAudienceName(): ?string
+    public function getAudienceName(): string
     {
         return $this->audienceName;
     }
@@ -119,7 +119,7 @@ class StoryShowViewModel
     /**
      * Get story copyright display name
      */
-    public function getCopyrightName(): ?string
+    public function getCopyrightName(): string
     {
         return $this->copyrightName;
     }

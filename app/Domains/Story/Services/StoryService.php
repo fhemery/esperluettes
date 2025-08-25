@@ -168,4 +168,15 @@ class StoryService
 
         return $story;
     }
+
+    /**
+     * Hard delete a story and let DB cascades clean related records.
+     */
+    public function deleteStory(Story $story): void
+    {
+        DB::transaction(function () use ($story) {
+            // If additional cleanup is needed later (files, events), add here.
+            $story->delete();
+        });
+    }
 }

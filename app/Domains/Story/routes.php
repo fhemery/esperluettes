@@ -23,6 +23,11 @@ Route::middleware(['web'])->group(function () {
         Route::match(['put', 'patch'], '/stories/{slug}', [StoryController::class, 'update'])
             ->where('slug', '.*')
             ->name('stories.update');
+
+        // Hard delete own story (authors only)
+        Route::delete('/stories/{slug}', [StoryController::class, 'destroy'])
+            ->where('slug', '.*')
+            ->name('stories.destroy');
     });
 
     // Public show route (visibility enforcement handled in controller/policies later)
