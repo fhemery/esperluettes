@@ -99,6 +99,18 @@
                         </div>
                     @endif
 
+                    @php($tws = $viewModel->getTriggerWarningNames())
+                    @if(!empty($tws))
+                        <div class="mb-6 text-sm text-gray-700">
+                            <span class="font-medium">{{ __('story::shared.trigger_warnings.label') }}:</span>
+                            <span class="inline-flex flex-wrap gap-2 ml-2">
+                                @foreach($tws as $tw)
+                                    <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 ring-1 ring-inset ring-red-600/20">{{ $tw }}</span>
+                                @endforeach
+                            </span>
+                        </div>
+                    @endif
+
                     <div class="flex gap-6 items-start">
                         <div class="shrink-0" aria-hidden="true">
                             <div class="w-[150px] h-[200px] rounded-lg border-4 border-[#ACE1AF] flex items-center justify-center bg-white">

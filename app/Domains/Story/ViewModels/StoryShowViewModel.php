@@ -16,6 +16,8 @@ class StoryShowViewModel
     public readonly ?string $statusName;
     /** @var array<int,string> */
     public readonly array $genreNames;
+    /** @var array<int,string> */
+    public readonly array $triggerWarningNames;
 
     public function __construct(
         Story $story,
@@ -26,6 +28,7 @@ class StoryShowViewModel
         ?string $copyrightName = null,
         array $genreNames = [],
         ?string $statusName = null,
+        array $triggerWarningNames = [],
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
@@ -36,6 +39,7 @@ class StoryShowViewModel
         $this->copyrightName = $copyrightName;
         $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
         $this->statusName = $statusName;
+        $this->triggerWarningNames = array_values(array_filter(array_map('strval', $triggerWarningNames)));
     }
 
     
@@ -132,5 +136,14 @@ class StoryShowViewModel
     public function getGenreNames(): array
     {
         return $this->genreNames;
+    }
+
+    /**
+     * Get trigger warning names for display
+     * @return array<int,string>
+     */
+    public function getTriggerWarningNames(): array
+    {
+        return $this->triggerWarningNames;
     }
 }

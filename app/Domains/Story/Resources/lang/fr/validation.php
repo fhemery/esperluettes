@@ -42,4 +42,10 @@ return [
         'integer' => 'Chaque genre doit être un entier',
         'exists' => 'Un genre sélectionné n\'existe pas',
     ],
+
+    'trigger_warnings' => [
+        'array' => 'Le champ avertissements de contenu doit être une liste',
+        'integer' => 'Chaque avertissement de contenu doit être un entier',
+        'exists' => 'Un avertissement de contenu sélectionné n\'existe pas',
+    ],
 ];

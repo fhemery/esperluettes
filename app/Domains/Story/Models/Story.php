@@ -5,6 +5,7 @@ namespace App\Domains\Story\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use App\Domains\StoryRef\Models\StoryRefGenre;
+use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
 
 class Story extends Model
 {
@@ -77,6 +78,15 @@ class Story extends Model
     public function genres()
     {
         return $this->belongsToMany(StoryRefGenre::class, 'story_genres', 'story_id', 'story_ref_genre_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Trigger Warnings attached to the story (optional, 0..N)
+     */
+    public function triggerWarnings()
+    {
+        return $this->belongsToMany(StoryRefTriggerWarning::class, 'story_trigger_warnings', 'story_id', 'story_ref_trigger_warning_id')
             ->withTimestamps();
     }
 }

@@ -259,3 +259,79 @@ it('validates each genre id must be integer and exist', function () {
     $page->assertOk();
     $page->assertSee('story::validation.genres.exists');
 });
+
+it('validates trigger warnings, when provided, must be an array', function () {
+    $user = alice($this);
+
+    // Not an array
+    $payloadNotArray = validStoryPayload([
+        'story_ref_trigger_warning_ids' => 1,
+    ]);
+    $resp = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payloadNotArray);
+    $resp->assertRedirect('/stories/create');
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.trigger_warnings.array');
+});
+
+it('validates each trigger warning id must be integer and exist when provided', function () {
+    $user = alice($this);
+
+    // Non-integer item
+    $payloadType = validStoryPayload([
+        'story_ref_trigger_warning_ids' => ['x'],
+    ]);
+    $resp = $this->actingAs($user)->from('/stories/create')->post('/stories', $payloadType);
+    $resp->assertRedirect('/stories/create');
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.trigger_warnings.integer');
+
+    // Non-existent id
+    $payloadExists = validStoryPayload([
+        'story_ref_trigger_warning_ids' => [999999],
+    ]);
+    $resp = $this->actingAs($user)->from('/stories/create')->post('/stories', $payloadExists);
+    $resp->assertRedirect('/stories/create');
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.trigger_warnings.exists');
+});
+
+it('validates story_ref_status_id must be integer when provided', function () {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        'story_ref_status_id' => 'abc',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.status.integer');
+});
+
+it('validates story_ref_status_id must exist when provided', function () {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        'story_ref_status_id' => 999999,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.status.exists');
+});

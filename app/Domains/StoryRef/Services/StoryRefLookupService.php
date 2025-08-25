@@ -36,6 +36,7 @@ class StoryRefLookupService
      * - copyrights: Collection of arrays with id, slug, name, order
      * - genres: Collection of arrays with id, slug, name, order
      * - statuses: Collection of arrays with id, slug, name, order
+     * - trigger_warnings: Collection of arrays with id, slug, name, order
      *
      * @return array{
      *     types: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
@@ -43,6 +44,7 @@ class StoryRefLookupService
      *     copyrights: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      *     genres: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      *     statuses: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
+     *     trigger_warnings: Collection<int, array{id:int,slug:string,name:string,order:int|null}>,
      * }
      */
     public function getStoryReferentials(): array
@@ -53,6 +55,7 @@ class StoryRefLookupService
             'copyrights' => $this->getCopyrights(),
             'genres' => $this->getGenres(),
             'statuses' => $this->getStatuses(),
+            'trigger_warnings' => $this->getTriggerWarnings(),
         ];
     }
 
@@ -166,5 +169,39 @@ class StoryRefLookupService
             return null;
         }
         return $this->cache->statusIdBySlug($slug);
+    }
+
+    /**
+     * List active trigger warnings ordered for UI.
+     * @return Collection<int, array{id:int,slug:string,name:string,order:int|null}>
+     */
+    public function getTriggerWarnings(): Collection
+    {
+        return $this->cache->triggerWarnings()->map(fn(array $t) => [
+            'id' => $t['id'],
+            'slug' => $t['slug'],
+            'name' => $t['name'],
+            'order' => $t['order'],
+        ]);
+    }
+
+    public function findTriggerWarningIdBySlug(?string $slug): ?int
+    {
+        if ($slug === null) {
+            return null;
+        }
+        return $this->cache->triggerWarningIdBySlug($slug);
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function findTriggerWarningIdsBySlugs(?array $slugs): array
+    {
+        if ($slugs === null) {
+            return [];
+        }
+        return $this->cache->triggerWarningIdsBySlugs($slugs);
     }
 }

@@ -163,3 +163,33 @@ it('allows creating a story with an optional status which is shown on the page',
     $show->assertSee(trans('story::shared.status.label'));
     $show->assertSee($status->name);
 });
+
+it('allows creating a story with multiple trigger warnings and displays them on show page', function () {
+    // Arrange
+    $user = alice($this, roles: ['user-confirmed']);
+    $this->actingAs($user);
+
+    $tw1 = makeTriggerWarning('Violence');
+    $tw2 = makeTriggerWarning('Langage vulgaire');
+
+    // Act
+    $payload = validStoryPayload([
+        'title' => 'TW Story',
+        'description' => '<p>desc</p>',
+        'story_ref_trigger_warning_ids' => [$tw1->id, $tw2->id],
+    ]);
+    $resp = $this->post('/stories', $payload);
+    $resp->assertRedirect();
+
+    // Assert persistence
+    $story = \App\Domains\Story\Models\Story::query()->firstOrFail();
+    $ids = $story->triggerWarnings()->pluck('story_ref_trigger_warnings.id')->sort()->values()->all();
+    expect($ids)->toBe([$tw1->id, $tw2->id]);
+
+    // Assert display on show page
+    $show = $this->get('/stories/' . $story->slug);
+    $show->assertOk();
+    $show->assertSee(trans('story::shared.trigger_warnings.label'));
+    $show->assertSee('Violence');
+    $show->assertSee('Langage vulgaire');
+});

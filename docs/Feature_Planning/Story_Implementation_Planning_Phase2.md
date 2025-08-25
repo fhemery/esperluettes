@@ -391,7 +391,7 @@ categories.**
 
 ---
 
-### **US-017: Add Writing Status Selection (Optional)**
+### **[DONE] US-017: Add Writing Status Selection (Optional)**
 
 **As a user, I want to optionally set a writing status to indicate progress.**
 
@@ -410,8 +410,9 @@ categories.**
 
 ---
 
-### **US-018: Filter Stories by Writing Status**
+### **[ABORTED] US-018: Filter Stories by Writing Status**
 
+==> Filtering does currently not make much sense.
 **As a reader, I want to filter stories by writing status so I can find completed works or WIPs.**
 
 **Acceptance Criteria:**

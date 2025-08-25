@@ -39,6 +39,10 @@ return [
         'placeholder' => 'Sélectionner un statut (optionnel)',
         'help' => "Choisissez le statut d'avancement de l'histoire (facultatif)",
     ],
+    'trigger_warnings' => [
+        'label' => 'Avertissements de contenu',
+        'help' => 'Sélectionnez les avertissements de contenu pertinents (facultatif)',
+    ],
     'genres' => [
         'label' => 'Genres',
         'help' => 'Sélectionnez 1 à 3 genres qui décrivent votre histoire',

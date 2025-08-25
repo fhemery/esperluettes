@@ -75,6 +75,27 @@
     <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.audience.note_single_select') }}</p>
 </div>
 
+@php($selectedTriggerWarningIds = collect(old('story_ref_trigger_warning_ids', $story?->triggerWarnings?->pluck('id')->all() ?? []))->map(fn($v) => (string)$v)->all())
+
+<div class="mb-6">
+    <x-input-label for="story_ref_trigger_warning_ids" :value="__('story::shared.trigger_warnings.label')"/>
+    <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+        @foreach(($referentials['trigger_warnings'] ?? collect()) as $tw)
+            <label class="inline-flex items-center gap-2">
+                <input type="checkbox" name="story_ref_trigger_warning_ids[]" value="{{ $tw['id'] }}"
+                       {{ in_array((string)$tw['id'], $selectedTriggerWarningIds, true) ? 'checked' : '' }}
+                       class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" />
+                <span>{{ $tw['name'] }}</span>
+            </label>
+        @endforeach
+    </div>
+    <x-input-error :messages="$errors->get('story_ref_trigger_warning_ids')" class="mt-2"/>
+    <p class="mt-1 text-xs text-gray-500">{{ __('story::shared.optional') }}</p>
+    <x-shared::tooltip type="help" :title="__('story::shared.trigger_warnings.label')" placement="right">
+        {{ __('story::shared.trigger_warnings.help') }}
+    </x-shared::tooltip>
+ </div>
+
 @php($selectedStatusId = old('story_ref_status_id', $story?->story_ref_status_id ?? ''))
 
 <div class="mb-6">

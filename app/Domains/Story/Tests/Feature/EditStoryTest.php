@@ -235,3 +235,38 @@ it('allows the author to set and change the optional status on update', function
         ->assertSee(trans('story::shared.status.label'))
         ->assertSee($status->name);
 });
+
+it('syncs trigger warnings on update (replaces previous selection)', function () {
+    // Arrange
+    $author = alice($this, roles: ['user-confirmed']);
+    $this->actingAs($author);
+    $twA = makeTriggerWarning('Violence');
+    $twB = makeTriggerWarning('Drogues');
+    $twC = makeTriggerWarning('Suicide');
+
+    // Story initially with one TW (A)
+    $story = publicStory('TW Updatable', $author->id, [
+        'description' => '<p>x</p>',
+    ]);
+    $story->triggerWarnings()->sync([$twA->id]);
+
+    // Act: update with [B, C]
+    $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
+        'title' => 'TW Updatable',
+        'description' => '<p>x</p>',
+        'story_ref_trigger_warning_ids' => [$twB->id, $twC->id],
+    ]));
+    $resp->assertRedirect();
+
+    // Assert pivot replaced
+    $story->refresh();
+    $ids = $story->triggerWarnings()->pluck('story_ref_trigger_warnings.id')->sort()->values()->all();
+    expect($ids)->toBe([$twB->id, $twC->id]);
+
+    // Show page displays new TWs
+    $show = $this->get('/stories/' . $story->slug);
+    $show->assertOk();
+    $show->assertSee(trans('story::shared.trigger_warnings.label'));
+    $show->assertSee('Drogues');
+    $show->assertSee('Suicide');
+});

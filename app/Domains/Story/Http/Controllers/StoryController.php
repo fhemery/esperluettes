@@ -181,6 +181,13 @@ class StoryController
             $story->genres()->sync($ids);
         }
 
+        // Sync trigger warnings (optional)
+        $twIds = $request->input('story_ref_trigger_warning_ids', []);
+        if (is_array($twIds)) {
+            $ids = array_values(array_unique(array_map('intval', $twIds)));
+            $story->triggerWarnings()->sync($ids);
+        }
+
         // If title changed, regenerate slug base but keep -id suffix
         if ($story->title !== $oldTitle) {
             $slugBase = Story::generateSlugBase($story->title);
@@ -318,6 +325,17 @@ class StoryController
             }
         }
 
+        // Collect trigger warning names for display
+        $twIds = $story->triggerWarnings?->pluck('id')->filter()->values()->all() ?? [];
+        $twById = $this->lookup->getTriggerWarnings()->keyBy('id');
+        $triggerWarningNames = [];
+        foreach ($twIds as $tid) {
+            $row = $twById->get($tid);
+            if (is_array($row) && isset($row['name'])) {
+                $triggerWarningNames[] = (string) $row['name'];
+            }
+        }
+
         $viewModel = new StoryShowViewModel(
             $story,
             Auth::id(),
@@ -327,6 +345,7 @@ class StoryController
             $copyrightName,
             $genreNames,
             $statusName,
+            $triggerWarningNames,
         );
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 

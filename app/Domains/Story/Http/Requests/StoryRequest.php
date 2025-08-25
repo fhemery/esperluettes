@@ -24,6 +24,9 @@ class StoryRequest extends FormRequest
             'story_ref_status_id' => ['nullable', 'integer', 'exists:story_ref_statuses,id'],
             'story_ref_genre_ids' => ['required', 'array', 'min:1', 'max:3'],
             'story_ref_genre_ids.*' => ['integer', 'exists:story_ref_genres,id'],
+            // Optional Trigger Warnings (0..N)
+            'story_ref_trigger_warning_ids' => ['nullable', 'array'],
+            'story_ref_trigger_warning_ids.*' => ['integer', 'exists:story_ref_trigger_warnings,id'],
         ];
     }
 
@@ -76,6 +79,10 @@ class StoryRequest extends FormRequest
             'story_ref_genre_ids.max' => __('story::validation.genres.max'),
             'story_ref_genre_ids.*.integer' => __('story::validation.genres.integer'),
             'story_ref_genre_ids.*.exists' => __('story::validation.genres.exists'),
+
+            'story_ref_trigger_warning_ids.array' => __('story::validation.trigger_warnings.array'),
+            'story_ref_trigger_warning_ids.*.integer' => __('story::validation.trigger_warnings.integer'),
+            'story_ref_trigger_warning_ids.*.exists' => __('story::validation.trigger_warnings.exists'),
         ];
     }
 }

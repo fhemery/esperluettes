@@ -16,6 +16,7 @@ class StoryRefCache
         private readonly CopyrightService $copyrightService,
         private readonly GenreService $genreService,
         private readonly StatusService $statusService,
+        private readonly TriggerWarningService $triggerWarningService,
     ) {}
 
     /**
@@ -276,5 +277,69 @@ class StoryRefCache
     public function clearStatuses(): void
     {
         $this->cache->forget('storyref:statuses:active-ordered');
+    }
+
+    /**
+     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     */
+    public function triggerWarnings(): Collection
+    {
+        return $this->cache->remember(
+            'storyref:trigger_warnings:active-ordered',
+            self::CACHE_TTL_SECONDS,
+            function () {
+                $all = collect($this->triggerWarningService->listAll());
+                $active = $all->filter(fn($m) => (bool) ($m->is_active ?? true));
+                return $active
+                    ->sortBy([
+                        ['order', 'asc'],
+                        ['name', 'asc'],
+                    ])
+                    ->values()
+                    ->map(fn($m) => [
+                        'id' => (int) $m->id,
+                        'slug' => (string) $m->slug,
+                        'name' => (string) $m->name,
+                        'is_active' => (bool) ($m->is_active ?? true),
+                        'order' => isset($m->order) ? (int) $m->order : null,
+                    ]);
+            }
+        );
+    }
+
+    public function triggerWarningIdBySlug(string $slug): ?int
+    {
+        $slug = trim(strtolower($slug));
+        if ($slug === '') {
+            return null;
+        }
+        $found = $this->triggerWarnings()->firstWhere('slug', $slug);
+        return $found['id'] ?? null;
+    }
+
+    /**
+     * @param array<int,string> $slugs
+     * @return array<int,int> Trigger Warning IDs
+     */
+    public function triggerWarningIdsBySlugs(array $slugs): array
+    {
+        $normalized = array_values(array_filter(array_map(fn($s) => trim(strtolower((string) $s)), $slugs)));
+        if (empty($normalized)) {
+            return [];
+        }
+        $bySlug = $this->triggerWarnings()->keyBy('slug');
+        $ids = [];
+        foreach ($normalized as $slug) {
+            $row = $bySlug->get($slug);
+            if (is_array($row) && isset($row['id'])) {
+                $ids[] = (int) $row['id'];
+            }
+        }
+        return array_values(array_unique($ids));
+    }
+
+    public function clearTriggerWarnings(): void
+    {
+        $this->cache->forget('storyref:trigger_warnings:active-ordered');
     }
 }

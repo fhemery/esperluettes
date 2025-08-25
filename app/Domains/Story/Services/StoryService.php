@@ -119,6 +119,13 @@ class StoryService
                 $story->genres()->sync($ids);
             }
 
+            // 3b) Attach trigger warnings (optional)
+            $twIds = $request->input('story_ref_trigger_warning_ids', []);
+            if (is_array($twIds)) {
+                $ids = array_values(array_unique(array_map('intval', $twIds)));
+                $story->triggerWarnings()->sync($ids);
+            }
+
             // 4) Seed collaborator row for creator
             DB::table('story_collaborators')->insert([
                 'story_id' => $story->id,
@@ -145,6 +152,7 @@ class StoryService
         $base = Story::query()->with([
             'authors',
             'genres:id',
+            'triggerWarnings:id',
         ]);
         $story = $id
             ? $base->findOrFail($id)

@@ -154,6 +154,24 @@ function makeStatus(string $name): \App\Domains\StoryRef\Models\StoryRefStatus
     ]);
 }
 
+function defaultTriggerWarning(): \App\Domains\StoryRef\Models\StoryRefTriggerWarning
+{
+    return \App\Domains\StoryRef\Models\StoryRefTriggerWarning::firstOrCreate([
+        'name' => 'Violence',
+        'slug' => 'violence',
+        'is_active' => true,
+    ]);
+}
+
+function makeTriggerWarning(string $name): \App\Domains\StoryRef\Models\StoryRefTriggerWarning
+{
+    return app(\App\Domains\StoryRef\Services\TriggerWarningService::class)->create([
+        'name' => $name,
+        'slug' => Str::slug($name),
+        'is_active' => true,
+    ]);
+}
+
 /**
  * Build a valid payload for story create/update; override any field to test specific validation scenarios.
  */
