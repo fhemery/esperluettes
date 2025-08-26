@@ -3,7 +3,7 @@
 use App\Domains\Admin\Filament\Resources\News\NewsResource\Pages\CreateNews;
 use App\Domains\Admin\Filament\Resources\News\NewsResource\Pages\EditNews;
 use App\Domains\News\Models\News;
-use App\Domains\Auth\Models\User;
+use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -35,7 +35,7 @@ it('creates a pinned published news and auto-assigns display order via create pa
 
     expect($a)->not->toBeNull();
     expect($a->status)->toBe('published');
-    expect((bool) $a->is_pinned)->toBeTrue();
+    expect((bool)$a->is_pinned)->toBeTrue();
     expect($a->display_order)->not->toBeNull();
 });
 
@@ -65,6 +65,45 @@ it('unpinning via edit clears display order via edit page', function () {
         ->assertHasNoFormErrors();
 
     $a->refresh();
-    expect((bool) $a->is_pinned)->toBeFalse();
+    expect((bool)$a->is_pinned)->toBeFalse();
     expect($a->display_order)->toBeNull();
+});
+
+it('saves content via create page with target blank only on external links', function () {
+    // Configure app URL for host comparison and isolate purifier cache
+    config(['app.url' => 'https://example.com']);
+    config(['purifier.cachePath' => storage_path('framework/testing/purifier')]);
+
+    $admin = admin($this);
+    $this->actingAs($admin);
+
+    $title = 'News with links';
+    $slug = 'news-with-links';
+    $content = '<p>Internal <a href="https://example.com/about">About</a> and <a href="/contact">Contact</a>. External <a href="https://google.com">Google</a>.</p>';
+
+    Livewire::test(CreateNews::class)
+        ->fillForm([
+            'title' => $title,
+            'slug' => $slug,
+            'summary' => 'Summary',
+            'content' => $content,
+            'status' => 'draft',
+            'meta_description' => 'Meta',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $saved = News::query()->where('slug', $slug)->firstOrFail();
+
+    // External link should have target and rel
+    expect($saved->content)
+        ->toContain('<a href="https://google.com" target="_blank" rel="noopener noreferrer">Google</a>');
+
+    // Internal absolute should not gain target
+    expect($saved->content)
+        ->toContain('<a href="https://example.com/about">About</a>');
+
+    // Relative link should not gain target
+    expect($saved->content)
+        ->toContain('<a href="/contact">Contact</a>');
 });

@@ -17,25 +17,26 @@
  */
 
 return [
-    'encoding'           => 'UTF-8',
-    'finalize'           => true,
-    'ignoreNonStrings'   => false,
-    'cachePath'          => storage_path('app/purifier'),
-    'cacheFileMode'      => 0755,
-    'settings'      => [
+    'encoding' => 'UTF-8',
+    'finalize' => true,
+    'ignoreNonStrings' => false,
+    'cachePath' => storage_path('app/purifier'),
+    'cacheFileMode' => 0755,
+    'settings' => [
         'default' => [
-            'HTML.Doctype'             => 'HTML 4.01 Transitional',
-            'HTML.Allowed'             => 'div,b,strong,i,em,u,a[href|title],ul,ol,li,p[style],br,span[style],img[width|height|alt|src]',
-            'CSS.AllowedProperties'    => 'font,font-size,font-weight,font-style,font-family,text-decoration,padding-left,color,background-color,text-align',
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            // Allow target & rel on anchors so external links can open in new tab safely
+            'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title|target|rel],ul,ol,li,p[style],br,span[style],img[width|height|alt|src]',
+            'CSS.AllowedProperties' => 'font,font-size,font-weight,font-style,font-family,text-decoration,padding-left,color,background-color,text-align',
             'AutoFormat.AutoParagraph' => true,
-            'AutoFormat.RemoveEmpty'   => true,
+            'AutoFormat.RemoveEmpty' => true,
         ],
         'strict' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span,u,s',
             'HTML.AllowedAttributes' => 'p.style,p.class,span.style,span.class,li.class,ul.class,ol.class',
             'CSS.AllowedProperties' => 'text-align',
-            'Attr.AllowedClasses' => ['ql-align-center','ql-align-left','ql-align-right','ql-align-justify'],
+            'Attr.AllowedClasses' => ['ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify'],
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty' => true,
             'Attr.EnableID' => false,
@@ -46,10 +47,11 @@ return [
         'admin-content' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             // Allow only safe, basic content elements
-            'HTML.AllowedElements' => 'h1,h2,h3,h4,h5,h6,p,ul,ol,li,strong,em,b,i,a,u,s,del, blockquote,hr,br,span,img',
-            'HTML.AllowedAttributes' => 'a.href,a.title,a.rel,span.style,img.src,img.alt,img.width,img.height',
+            'HTML.AllowedElements' => 'h1,h2,h3,h4,h5,h6,p,ul,ol,li,strong,em,b,i,a,u,s,del,blockquote,hr,br,span,img',
+            // Explicitly allow target & rel on anchors
+            'HTML.AllowedAttributes' => 'a.href,a.title,a.rel,a.target,span.style,img.src,img.alt,img.width,img.height',
             'Attr.AllowedFrameTargets' => ['_blank'],
-            'Attr.AllowedRel' => ['noopener','noreferrer'],
+            'Attr.AllowedRel' => ['noopener', 'noreferrer'],
             'CSS.AllowedProperties' => 'text-align,text-decoration',
             'URI.SafeIframeRegexp' => null,
             'AutoFormat.AutoParagraph' => true,
@@ -58,58 +60,58 @@ return [
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,
         ],
-        'test'    => [
+        'test' => [
             'Attr.EnableID' => 'true',
         ],
         "youtube" => [
-            "HTML.SafeIframe"      => 'true',
+            "HTML.SafeIframe" => 'true',
             "URI.SafeIframeRegexp" => "%^(http://|https://|//)(www.youtube.com/embed/|player.vimeo.com/video/)%",
         ],
         'custom_definition' => [
-            'id'  => 'html5-definitions',
+            'id' => 'html5-definitions',
             'rev' => 1,
             'debug' => false,
             'elements' => [
                 // http://developers.whatwg.org/sections.html
                 ['section', 'Block', 'Flow', 'Common'],
-                ['nav',     'Block', 'Flow', 'Common'],
+                ['nav', 'Block', 'Flow', 'Common'],
                 ['article', 'Block', 'Flow', 'Common'],
-                ['aside',   'Block', 'Flow', 'Common'],
-                ['header',  'Block', 'Flow', 'Common'],
-                ['footer',  'Block', 'Flow', 'Common'],
-				
-				// Content model actually excludes several tags, not modelled here
+                ['aside', 'Block', 'Flow', 'Common'],
+                ['header', 'Block', 'Flow', 'Common'],
+                ['footer', 'Block', 'Flow', 'Common'],
+
+                // Content model actually excludes several tags, not modelled here
                 ['address', 'Block', 'Flow', 'Common'],
                 ['hgroup', 'Block', 'Required: h1 | h2 | h3 | h4 | h5 | h6', 'Common'],
-				
-				// http://developers.whatwg.org/grouping-content.html
+
+                // http://developers.whatwg.org/grouping-content.html
                 ['figure', 'Block', 'Optional: (figcaption, Flow) | (Flow, figcaption) | Flow', 'Common'],
                 ['figcaption', 'Inline', 'Flow', 'Common'],
-				
-				// http://developers.whatwg.org/the-video-element.html#the-video-element
+
+                // http://developers.whatwg.org/the-video-element.html#the-video-element
                 ['video', 'Block', 'Optional: (source, Flow) | (Flow, source) | Flow', 'Common', [
                     'src' => 'URI',
-					'type' => 'Text',
-					'width' => 'Length',
-					'height' => 'Length',
-					'poster' => 'URI',
-					'preload' => 'Enum#auto,metadata,none',
-					'controls' => 'Bool',
+                    'type' => 'Text',
+                    'width' => 'Length',
+                    'height' => 'Length',
+                    'poster' => 'URI',
+                    'preload' => 'Enum#auto,metadata,none',
+                    'controls' => 'Bool',
                 ]],
                 ['source', 'Block', 'Flow', 'Common', [
-					'src' => 'URI',
-					'type' => 'Text',
+                    'src' => 'URI',
+                    'type' => 'Text',
                 ]],
 
-				// http://developers.whatwg.org/text-level-semantics.html
-                ['s',    'Inline', 'Inline', 'Common'],
-                ['var',  'Inline', 'Inline', 'Common'],
-                ['sub',  'Inline', 'Inline', 'Common'],
-                ['sup',  'Inline', 'Inline', 'Common'],
+                // http://developers.whatwg.org/text-level-semantics.html
+                ['s', 'Inline', 'Inline', 'Common'],
+                ['var', 'Inline', 'Inline', 'Common'],
+                ['sub', 'Inline', 'Inline', 'Common'],
+                ['sup', 'Inline', 'Inline', 'Common'],
                 ['mark', 'Inline', 'Inline', 'Common'],
-                ['wbr',  'Inline', 'Empty', 'Core'],
-				
-				// http://developers.whatwg.org/edits.html
+                ['wbr', 'Inline', 'Empty', 'Core'],
+
+                // http://developers.whatwg.org/edits.html
                 ['ins', 'Block', 'Flow', 'Common', ['cite' => 'URI', 'datetime' => 'CDATA']],
                 ['del', 'Block', 'Flow', 'Common', ['cite' => 'URI', 'datetime' => 'CDATA']],
             ],

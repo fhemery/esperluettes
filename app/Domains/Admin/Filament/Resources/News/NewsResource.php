@@ -4,6 +4,7 @@ namespace App\Domains\Admin\Filament\Resources\News;
 
 use App\Domains\News\Models\News;
 use App\Domains\News\Services\NewsService;
+use App\Domains\Shared\Support\HtmlLinkUtils;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -60,6 +61,7 @@ class NewsResource extends Resource
                             ->toolbarButtons([
                                 'bold', 'italic', 'strike', 'underline', 'bulletList', 'orderedList', 'h2', 'h3', 'blockquote', 'link', 'undo', 'redo'
                             ])
+                            ->dehydrateStateUsing(fn(?string $state) => HtmlLinkUtils::addTargetBlankToExternalLinks($state))
                             ->required(),
                     ])->columns(2),
                 Forms\Components\Section::make('Media')

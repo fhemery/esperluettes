@@ -2,6 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\StaticPage;
 
+use App\Domains\Shared\Support\HtmlLinkUtils;
 use App\Domains\StaticPage\Models\StaticPage;
 use App\Domains\StaticPage\Services\StaticPageService;
 use Filament\Forms;
@@ -59,6 +60,7 @@ class StaticPageResource extends Resource
                             ->toolbarButtons([
                                 'bold', 'italic', 'strike', 'underline', 'bulletList', 'orderedList', 'h2', 'h3', 'blockquote', 'link', 'undo', 'redo'
                             ])
+                            ->dehydrateStateUsing(fn(?string $state) => HtmlLinkUtils::addTargetBlankToExternalLinks($state))
                             ->required(),
                     ])->columns(2),
                 Forms\Components\Section::make('Media')
