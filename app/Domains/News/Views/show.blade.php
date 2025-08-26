@@ -23,11 +23,11 @@
                     <picture>
                         <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
                         <img
-                            class="max-w-full h-auto rounded mx-auto"
+                            class="w-full h-auto rounded"
                             style="max-width:800px;"
                             src="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }}"
                             srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
-                            sizes="(max-width: 640px) 100vw, 800px"
+                            sizes="(max-width: 640px) calc(100vw - 2rem), 800px"
                             alt="{{ $news->title }}"
                             loading="lazy"
                         >
