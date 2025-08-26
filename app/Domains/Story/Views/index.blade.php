@@ -47,7 +47,8 @@
                                 name="audiences[]"
                                 :options="$referentials['audiences'] ?? []"
                                 :selected="$currentAud"
-                                placeholder="Search audiences…"
+                                :placeholder="__('story::shared.audience.placeholder')"
+                                :empty-text="__('story::shared.no_results')"
                             />
                         </div>
                     </div>
@@ -61,7 +62,8 @@
                                 name="genres[]"
                                 :options="$referentials['genres'] ?? []"
                                 :selected="$currentGen"
-                                placeholder="Search genres…"
+                                :placeholder="__('story::shared.genres.placeholder')"
+                                :empty-text="__('story::shared.no_results')"
                                 badge="blue"
                             />
                         </div>
@@ -76,7 +78,8 @@
                                 name="exclude_tw[]"
                                 :options="$referentials['trigger_warnings'] ?? []"
                                 :selected="$currentExTw"
-                                placeholder="Search trigger warnings…"
+                                :placeholder="__('story::shared.trigger_warnings.placeholder')"
+                                :empty-text="__('story::shared.no_results')"
                                 badge="red"
                             />
                         </div>

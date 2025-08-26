@@ -50,6 +50,9 @@
         name: @js($name),
         options: @js($opts),
         selected: @js($sel),
+        placeholder: @js($placeholder),
+        emptyText: @js($emptyText),
+        maxHeight: @js($maxHeight),
     })" class="w-[32rem] max-w-full" @click.outside="open = false" x-init="initiated = true">
     <div class="relative">
         <!-- Selected badges and input -->
@@ -113,13 +116,16 @@
 
 </div>
 
-<script>
-    function searchMulti({name, options, selected}) {
-        return {
-            open: false,
-            placeholder: @js($placeholder),
-            emptyText: @js($emptyText),
-            maxHeight: @js($maxHeight),
+@once
+    @push('scripts')
+        <script>
+    if (!window.searchMulti) {
+        window.searchMulti = function ({name, options, selected, placeholder, emptyText, maxHeight}) {
+            return {
+                open: false,
+                placeholder: placeholder,
+                emptyText: emptyText,
+                maxHeight: maxHeight,
             highlight: -1,
             initiated: false,
             state: {
@@ -170,6 +176,9 @@
             remove(slug) {
                 this.state.selected = this.state.selected.filter(s => s !== slug);
             },
+            }
         }
     }
-</script>
+        </script>
+    @endpush
+@endonce

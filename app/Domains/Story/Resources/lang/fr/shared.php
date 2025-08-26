@@ -52,10 +52,12 @@ return [
     ],
     'trigger_warnings' => [
         'label' => 'Avertissements de contenu',
+        'placeholder' => 'Rechercher des avertissements…',
         'help' => 'Sélectionnez les avertissements de contenu pertinents (facultatif)',
     ],
     'genres' => [
         'label' => 'Genres',
+        'placeholder' => 'Rechercher des genres…',
         'help' => 'Sélectionnez 1 à 3 genres qui décrivent votre histoire',
         'note_range' => 'Sélectionnez entre 1 et 3 genres',
     ],
@@ -65,4 +67,6 @@ return [
     'filters' => [
         'header' => 'Filtres'
     ]
+    ,
+    'no_results' => 'Aucun résultat'
 ];
