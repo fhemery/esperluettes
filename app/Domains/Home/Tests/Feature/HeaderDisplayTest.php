@@ -54,3 +54,32 @@ it('should show admin link to admins', function () {
     $response->assertOk();
     $response->assertSee('shared::navigation.admin');
 });
+
+it('should show news and stories to authenticated users', function () {
+    $user = alice($this);
+
+    $this->actingAs($user);
+
+    $response = $this->get('/');
+
+    $response->assertOk();
+    $response->assertSee('shared::navigation.news');
+    $response->assertSee('shared::navigation.stories');
+});
+
+it('should not show dashboard/admin to unverified users but show news/stories', function () {
+    // Create Alice but keep her unverified
+    $user = alice($this, [], false);
+
+    $this->actingAs($user);
+
+    $response = $this->get('/');
+
+    $response->assertOk();
+    // Visible menu entries
+    $response->assertSee('shared::navigation.news');
+    $response->assertSee('shared::navigation.stories');
+    // Not visible when email not verified
+    $response->assertDontSee('shared::navigation.dashboard');
+    $response->assertDontSee('shared::navigation.admin');
+});
