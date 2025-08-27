@@ -14,7 +14,7 @@ The Story & Chapter sharing feature is the core functionality of the platform, e
 - **Co-Authors**: Support for multiple authors collaborating on a single story
 - **Visibility**: Three levels of access control (independent of chapter publication status)
   - **Public**: Accessible to everyone, including non-members
-  - **Community**: Accessible only to registered members
+  - **Community**: Accessible only to users with role `user-confirmed`
   - **Private**: Visible only to author(s) and co-authors
   
 #### Deletion
@@ -39,36 +39,33 @@ The Story & Chapter sharing feature is the core functionality of the platform, e
 - **Title**: Text field for chapter title
 - **Author Note**: Rich text editor with basic formatting options
 - **Chapter Content**: Rich text editor with basic formatting options
-- **Publication Status**: Three states
+- **Publication Status**: Two states
   - **Not Published**: Draft state, not visible to readers
   - **Published**: Live and accessible based on story visibility
-  - **Archived**: Hidden from readers but still visible and fully manageable by authors/co-authors in management UI
 
 #### Chapter Operations
-- **Add Chapter**: Create new chapters for a story (subject to chapter limit)
+- **Add Chapter**: Create new chapters for a story (chapter caps deferred to Stage 4)
 - **Edit Chapter**: Modify existing chapter content and metadata
 - **Reorder Chapters**: Bulk reordering functionality for chapter sequence
-- **Archive Chapter**: Hide chapter from all users (soft delete)
 - **Delete Chapter**: Permanent removal (hard delete)
 
-#### Chapter Creation Limits
-- **Base Limit**: 5 chapters per user
-- **Comment Bonus**: +1 chapter limit per comment made on other users' stories
-- **Calculation**: Total limit = 5 + (comments on other stories)
+#### Chapter Creation Limits (Deferred to Stage 4)
+Chapter caps and related UX are deferred to Stage 4. No limits are enforced in Phase 3.
 
 ### Reading & Viewing Experience
 - **Story Listing**: Browse available stories with filtering and sorting options
 - **Story Detail**: View story metadata, description, and table of contents
 - **Chapter Reading**: Sequential chapter reading with next/previous navigation
-- **Reading Progress**: Manually marked as read by logged users (no anonymous persistence)
+- **Reading Progress**: Manually marked as read by logged users (no anonymous persistence). Guests can click "Mark as read" to increment guest reads (one-way; no persistence).
 - **Trigger Warning Display**: Prominently displayed on story description and search results
 - **Comment System**: Community commenting on stories and chapters (future phase)
+ - **Stats Display**: Show total reads to everyone; open a click popover (`app/Domains/Shared/Resources/views/components/popover.blade.php`) for guest vs logged breakdown.
 
 
 ## Technical Specifications
 
 ### Technology Stack
-- **Rich Text Editor**: ProseMirror (following established pattern from Profile domain)
+- **Rich Text Editor**: Quill (mirrors existing Story summary editor). Strict HTML sanitization via `config/purifier.php` (strict profile). Toolbar buttons: bold, italic, underline, strikethrough, ordered list, unordered list, blockquote. Excluded: links, headings, images, code block, alignment.
 - **Image Processing**: Intervention Image (existing setup, 800px width limit)
 - **Admin Panel**: Filament integration for story reference data management
 - **Storage**: `storage/app/public/stories/` for covers. No chapter asset uploads initially; if added later, use `storage/app/public/stories/chapters/`.
@@ -162,12 +159,13 @@ chapters:
 - story_id (foreign key to stories)
 - title (string)
 - slug (string, unique within story; includes numeric id suffix, e.g., "chapter-one-45")
-- author_note (longtext, nullable)
+- author_note (text, nullable)
 - content (longtext)
-- order (integer)
-- status (enum: not_published, published, archived)
-- published_at (timestamp, nullable)
-- views_count (unsigned integer, default 0) -- counts reads (anonymous + logged), no per-user persistence for anonymous
+- sort_order (integer)
+- status (enum: not_published, published)
+- first_published_at (timestamp, nullable)
+- reads_guest_count (unsigned integer, default 0)
+- reads_logged_count (unsigned integer, default 0)
 - created_at (timestamp)
 - updated_at (timestamp)
 ```
@@ -207,14 +205,18 @@ app/Domains/Story/
 - `/stories/` - Story listing page with filtering and sorting (excludes stories without any published public chapter)
 - `/stories/create` - Create new story (authenticated)
 - `/stories/<slug-with-id>` - Individual story page with table of contents (e.g., `my-story-title-123`)
-- `/stories/<story-slug-with-id>/<chapter-slug-with-id>` - Individual chapter page with navigation (e.g., `my-story-title-123/chapter-one-45`)
+- `/stories/<story-slug-with-id>/chapters/<chapter-slug-with-id>` - Individual chapter page with navigation (e.g., `my-story-title-123/chapters/chapter-one-45`)
 - `/stories/<slug-with-id>/edit` - Edit story (author/co-author only)
 - `/stories/<slug-with-id>/co-authors` - Manage co-authors (authors and co-authors)
-- `/stories/<story-slug-with-id>/chapters/create` - Add new chapter (author/co-author, subject to limits)
+- `/stories/<story-slug-with-id>/chapters/create` - Add new chapter (author/co-author)
 - `/stories/<story-slug-with-id>/chapters/<chapter-slug-with-id>/edit` - Edit chapter (author/co-author only)
 
 Notes:
 - When a story title changes, the slug base changes but the `-id` suffix remains. Visiting an old slug that ends with the correct `-id` performs a 301 redirect to the canonical, updated slug.
+- When a chapter title changes, the chapter slug base changes but the `-id` suffix remains. Visiting an old chapter slug (with correct `-id`) performs a 301 redirect to the canonical chapter URL. This canonicalization applies independently to both story and chapter slug segments.
+
+### SEO
+- Chapter page `<title>`: "{Story Title} — {Chapter Title}" truncated to 160 characters (no HTML).
 
 ## User Stories
 
@@ -222,11 +224,11 @@ Notes:
 - As an author, I can create a new story with all configuration options
 - As an author, I can invite co-authors to collaborate on my stories
 - As an author, I can set visibility levels for my stories (independent of chapter status)
-- As an author, I can add chapters to my stories (within my chapter limit)
+- As an author, I can add chapters to my stories
 - As an author, I can increase my chapter limit by commenting on other stories
 - As an author, I can reorder chapters in bulk
 - As an author, I can edit my story metadata and chapters at any time
-- As an author, I can archive or delete chapters
+- As an author, I can delete chapters
 - As an author, I can control publication status of individual chapters
 - As a co-author, I can edit story content, add chapters, and invite co-authors; even the initial author can leave the story
 
@@ -247,19 +249,20 @@ Notes:
 ## Security Considerations
 - Authentication required for story creation and editing
 - Author-only access to story/chapter management
-- Visibility controls enforced at database query level
+- Visibility controls enforced at database query level (community requires role `user-confirmed`)
 - XSS protection in rich text content
 - Image upload validation and processing
   - Chapter embedded images are not supported initially; if introduced later, they will be stored under `storage/app/public/stories/chapters/`
 
 Unauthorized access handling:
 - For protected resources (e.g., private/community content without proper rights, or edit routes when not an author collaborator), the application returns 404 to avoid leaking existence.
+- Mark-as-read endpoints are forbidden for authors and co-authors.
 
 ## Performance Considerations
 - Database indexing on slug, visibility, and user_id fields
 - Pagination for story listings
 - Image optimization and CDN delivery
-- Efficient chapter ordering queries (use sparse ordering increments, e.g., steps of 100, to minimize renumbering on reorder)
+- Efficient chapter ordering queries (use sparse ordering increments on `sort_order`, e.g., steps of 100, to minimize renumbering on reorder)
 
 ## Clarified Requirements Summary
 
@@ -268,11 +271,11 @@ Unauthorized access handling:
 - **Chapter Titles**: Authors have complete control over chapter titles (no auto-numbering)
 - **Publication Model**: Story visibility is independent of chapter publication status
 - **Metadata Editing**: No fields are locked - authors can edit everything at any time
-- **Chapter Limits**: Dynamic limit based on community engagement (5 + comments on other stories)
+-- **Chapter Limits**: Deferred to Stage 4 (no enforcement in Phase 3)
 - **Reading Progress**: Tracked for logged users
 - **Trigger Warnings**: Prominently displayed, no pop-up modals
 - **Content Moderation**: Community-based reporting by verified users
-- **Rich Text Editor**: Same as Profile domain (ProseMirror with basic formatting)
+- **Rich Text Editor**: Quill with strict purifier; basic formatting; no links or headings; include blockquote
 - **Search**: Title/description + metadata filtering only (no full-text search)
 - **Chapter Navigation**: Next/previous buttons + table of contents
 - **Story Discovery**: Sort by latest update, random, recommended + extensive filtering
@@ -286,14 +289,15 @@ Unauthorized access handling:
 - **Permission Levels**: All co-authors have equal rights
 - **Removal Process**: No one can remove co-authors after acceptance; co-authors can leave voluntarily (creates copyright management concerns)
 
-#### Chapter Limit System
+#### Chapter Limit System (Deferred to Stage 4)
 - **Comment Counter**: Separate counter that increases with each comment made on other stories
 - **Comment Deletion**: Users cannot delete comments made on their stories; deleted stories still count toward commenter's limit
 - **Gaming Prevention**: Community reporting system for fake comments
 - **Retroactive Limits**: Block new chapter creation if limit exceeded; cannot publish/de-archive chapters when over limit
 
 #### Reading Progress & Reporting
-- **Progress Definition**: Manual "mark as read" for logged users; no anonymous persistence (overall reads counted via `chapters.views_count`)
+- **Progress Definition**: Manual "mark as read" for logged users; no anonymous persistence
+ - Overall reads are tracked via `reads_guest_count` and `reads_logged_count` (not page views)
 - **Report Handling**: Moderation team processes all reports (no automation initially)
 - **Verified Status**: Email-verified users can report content
 - **AI Cover Reporting**: Users can report AI-generated covers on story pages
@@ -390,7 +394,7 @@ CommentMadeOnStory::dispatch($story, $comment, $user);
 ## Dependencies
 - Existing StoryRef models and data
 - User authentication and verification system
-- ProseMirror rich text editor setup
+- Quill rich text editor setup + HTMLPurifier strict profile
 - Intervention Image processing
 - Filament admin panel integration
 - Comment system (for chapter limit calculation)
