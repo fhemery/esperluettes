@@ -11,10 +11,24 @@ We are using Docker and sail to simplify setup. You need to have Docker installe
 
 0. Specific steps for Windows: install WSL then Docker Desktop. If it works you should be able to launch docker command in WSL shell. Don't forget to launch Docker Desktop before doing any other steps.
 
+Ensure you have a distribution enabled, else the command won't work
+> wsl --list
+
+If you have no distribution enabled, or only Docker Desktop, run:
+```bash
+wsl --install
+wsl --set-default Ubuntu
+```
+
+Then running `wsl --list` again should show ubuntu as default.
+
 1. We first need to get the vendor module. For this :
 
-   For Linux (BASH) : docker run --rm -it -v "$PWD:/app" -w /app -e COMPOSER_MEMORY_LIMIT=-1 laravelsail/php84-composer composer install --no-interaction --prefer-dist --ignore-platform-reqs 
-   For Windows: you should launch the same command inside WSL, because if you do so inside Powershell you will have conflicted rights between linux & Windows. Note: your repo in WSL is inside /mnt/c/path_to_your_repo if your repo on Windows is in path_to_your_repo.
+From the root of the repository, launch: 
+
+> docker run --rm -it -v "$PWD:/app" -w /app -e COMPOSER_MEMORY_LIMIT=-1 laravelsail/php84-composer composer install --no-interaction --prefer-dist --ignore-platform-reqs
+
+Note: For **Windows**: to avoid permission issues, you should launch command from WSL (not from Powershell), from `/mnt/c/path_to_your_repo`.
 
 Use `docker compose` to first start the containers :
 
