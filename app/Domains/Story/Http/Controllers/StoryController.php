@@ -14,6 +14,7 @@ use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StorySummaryViewModel;
 use App\Domains\StoryRef\Services\StoryRefLookupService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -304,20 +305,13 @@ class StoryController
             }
         }
 
-        // Enforce visibility rules
+        // Enforce visibility rules via policy, while preserving login redirect for community guests
         $user = Auth::user();
-        if ($story->visibility === Story::VIS_PRIVATE) {
-            if (!$user || !$story->isCollaborator($user->id)) {
-                abort(404);
-            }
-        }
-        if ($story->visibility === Story::VIS_COMMUNITY) {
-            if (!$user) {
+        if (!Gate::allows('view', $story)) {
+            if ($story->visibility === Story::VIS_COMMUNITY && !$user) {
                 return redirect()->guest(route('login'));
             }
-            if (!$this->userPublicApi->isVerified($user)) {
-                abort(404);
-            }
+            abort(404);
         }
 
         // Fetch authors' public profiles and build ViewModel

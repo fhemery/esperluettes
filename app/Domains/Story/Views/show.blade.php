@@ -184,6 +184,11 @@
         </div>
     </div>
 
+    {{-- Chapters section --}}
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        @include('story::partials.chapters', ['isAuthor' => $viewModel->isAuthor(), 'story' => $viewModel->story])
+    </div>
+
     @if($viewModel->isAuthor())
         <x-shared::modal name="confirm-delete-story" maxWidth="md">
             <div class="p-6">

@@ -49,9 +49,9 @@ it('redirects guest to login for community story', function () {
     $this->get('/stories/' . $story->slug)->assertRedirect('/login');
 });
 
-it('returns 404 for community story to unverified user', function () {
+it('returns 404 for community story to non-confirmed users', function () {
     $author = alice($this);
-    $unverified = bob($this, [], false);
+    $unverified = bob($this, roles: ['user']);
     $story = communityStory('Community Story', $author->id);
 
     $this->actingAs($unverified);
@@ -146,4 +146,31 @@ it('shows the feedback when available', function () {
     $response->assertOk();
     $response->assertSee(trans('story::shared.feedback.label'));
     $response->assertSee('Open to feedback');
+});
+
+it('shows the create chapter button to the story author', function () {
+    $author = alice($this);
+    $story = publicStory('Author Story', $author->id);
+
+    // Author views their own story
+    $this->actingAs($author);
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    // Button text comes from chapters partial using this translation key
+    $response->assertSee('story::chapters.sections.add_chapter');
+    // And link points to chapters.create for this story
+    $response->assertSee(route('chapters.create', ['storySlug' => $story->slug]));
+});
+
+it('does not show the create chapter button to non-authors', function () {
+    $author = alice($this);
+    $other = bob($this);
+    $story = publicStory('Non Author Story', $author->id);
+
+    // Logged-in non-author
+    $this->actingAs($other);
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    $response->assertDontSee('story::chapters.sections.add_chapter');
+    $response->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]));
 });

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Domains\Story\Http\Controllers\StoryCreateController;
 use App\Domains\Story\Http\Controllers\StoryController;
+use App\Domains\Story\Http\Controllers\ChapterController;
 
 Route::middleware(['web'])->group(function () {
     Route::get('/stories', [StoryController::class, 'index'])
@@ -28,7 +29,22 @@ Route::middleware(['web'])->group(function () {
         Route::delete('/stories/{slug}', [StoryController::class, 'destroy'])
             ->where('slug', '.*')
             ->name('stories.destroy');
+
+        // Chapters: create + store (authors/co-authors only; controllers enforce 404 on unauthorized)
+        Route::get('/stories/{storySlug}/chapters/create', [ChapterController::class, 'create'])
+            ->where('storySlug', '.*')
+            ->name('chapters.create');
+
+        Route::post('/stories/{storySlug}/chapters', [ChapterController::class, 'store'])
+            ->where('storySlug', '.*')
+            ->name('chapters.store');
     });
+
+    // Chapter public show route (US-039 path with /chapters segment)
+    // IMPORTANT: define before the generic /stories/{slug} route to avoid greedy matching.
+    Route::get('/stories/{storySlug}/chapters/{chapterSlug}', [ChapterController::class, 'show'])
+        ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
+        ->name('chapters.show');
 
     // Public show route (visibility enforcement handled in controller/policies later)
     Route::get('/stories/{slug}', [StoryController::class, 'show'])

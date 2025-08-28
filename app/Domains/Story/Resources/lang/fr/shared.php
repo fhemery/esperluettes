@@ -68,5 +68,6 @@ return [
         'header' => 'Filtres'
     ]
     ,
-    'no_results' => 'Aucun résultat'
+    'no_results' => 'Aucun résultat',
+    'coming_soon' => 'À venir'
 ];

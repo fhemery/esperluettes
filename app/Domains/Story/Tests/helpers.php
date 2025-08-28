@@ -1,8 +1,25 @@
 <?php
 
+use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\Story;
+use App\Domains\StoryRef\Models\StoryRefType;
+use App\Domains\StoryRef\Models\StoryRefAudience;
+use App\Domains\StoryRef\Models\StoryRefCopyright;
+use App\Domains\StoryRef\Models\StoryRefGenre;
+use App\Domains\StoryRef\Models\StoryRefStatus;
+use App\Domains\StoryRef\Models\StoryRefFeedback;
+use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
+use App\Domains\StoryRef\Services\TypeService;
+use App\Domains\StoryRef\Services\AudienceService;
+use App\Domains\StoryRef\Services\CopyrightService;
+use App\Domains\StoryRef\Services\GenreService;
+use App\Domains\StoryRef\Services\StatusService;
+use App\Domains\StoryRef\Services\FeedbackService;
+use App\Domains\StoryRef\Services\TriggerWarningService;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Tests\TestCase;
 
 /**
  * Create a Story and attach the given author as 'author' collaborator.
@@ -80,27 +97,27 @@ function communityStory(string $title, int $authorId, array $attributes = []): S
 /**
  * Ensure a Story Type exists for tests and return it.
  */
-function makeStoryType(string $name): \App\Domains\StoryRef\Models\StoryRefType
+function makeStoryType(string $name): StoryRefType
 {
     // Use service to auto-generate slug and defaults
-    return app(\App\Domains\StoryRef\Services\TypeService::class)->create([
+    return app(TypeService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
         'is_active' => true,
     ]);
 }
 
-function defaultStoryType(): \App\Domains\StoryRef\Models\StoryRefType
+function defaultStoryType(): StoryRefType
 {
-    return \App\Domains\StoryRef\Models\StoryRefType::firstOrCreate([
+    return StoryRefType::firstOrCreate([
         'name' => 'Default type',
         'slug' => 'default-type',
         'is_active' => true]);
 }
 
-function defaultAudience(): \App\Domains\StoryRef\Models\StoryRefAudience
+function defaultAudience(): StoryRefAudience
 {
-    return \App\Domains\StoryRef\Models\StoryRefAudience::firstOrCreate([
+    return StoryRefAudience::firstOrCreate([
         'name' => 'DefaultAudience',
         'slug' => 'default-audience',
         'is_active' => true]);
@@ -109,80 +126,80 @@ function defaultAudience(): \App\Domains\StoryRef\Models\StoryRefAudience
 /**
  * Ensure a Story Audience exists for tests and return it.
  */
-function makeAudience(string $name): \App\Domains\StoryRef\Models\StoryRefAudience
+function makeAudience(string $name): StoryRefAudience
 {
-    return app(\App\Domains\StoryRef\Services\AudienceService::class)->create([
+    return app(AudienceService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
         'is_active' => true,
     ]);
 }
 
-function defaultCopyright(): \App\Domains\StoryRef\Models\StoryRefCopyright
+function defaultCopyright(): StoryRefCopyright
 {
-    return \App\Domains\StoryRef\Models\StoryRefCopyright::firstOrCreate([
+    return StoryRefCopyright::firstOrCreate([
         'name' => 'DefaultCopyright',
         'slug' => 'default-copyright',
         'is_active' => true]);
 }
 
-function makeCopyright(string $name): \App\Domains\StoryRef\Models\StoryRefCopyright
+function makeCopyright(string $name): StoryRefCopyright
 {
-    return app(\App\Domains\StoryRef\Services\CopyrightService::class)->create([
+    return app(CopyrightService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
         'is_active' => true,
     ]);
 }
 
-function defaultGenre(): \App\Domains\StoryRef\Models\StoryRefGenre
+function defaultGenre(): StoryRefGenre
 {
-    return \App\Domains\StoryRef\Models\StoryRefGenre::firstOrCreate([
+    return StoryRefGenre::firstOrCreate([
         'name' => 'DefaultGenre',
         'slug' => 'default-genre',
         'is_active' => true,
     ]);
 }
 
-function makeGenre(string $name): \App\Domains\StoryRef\Models\StoryRefGenre
+function makeGenre(string $name): StoryRefGenre
 {
-    return app(\App\Domains\StoryRef\Services\GenreService::class)->create([
+    return app(GenreService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
         'is_active' => true,
     ]);
 }
 
-function makeStatus(string $name): \App\Domains\StoryRef\Models\StoryRefStatus
+function makeStatus(string $name): StoryRefStatus
 {
-    return app(\App\Domains\StoryRef\Services\StatusService::class)->create([
+    return app(StatusService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
         'is_active' => true,
     ]);
 }
 
-function makeFeedback(string $name): \App\Domains\StoryRef\Models\StoryRefFeedback
+function makeFeedback(string $name): StoryRefFeedback
 {
-    return app(\App\Domains\StoryRef\Services\FeedbackService::class)->create([
+    return app(FeedbackService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
         'is_active' => true,
     ]);
 }
 
-function defaultTriggerWarning(): \App\Domains\StoryRef\Models\StoryRefTriggerWarning
+function defaultTriggerWarning(): StoryRefTriggerWarning
 {
-    return \App\Domains\StoryRef\Models\StoryRefTriggerWarning::firstOrCreate([
+    return StoryRefTriggerWarning::firstOrCreate([
         'name' => 'Violence',
         'slug' => 'violence',
         'is_active' => true,
     ]);
 }
 
-function makeTriggerWarning(string $name): \App\Domains\StoryRef\Models\StoryRefTriggerWarning
+function makeTriggerWarning(string $name): StoryRefTriggerWarning
 {
-    return app(\App\Domains\StoryRef\Services\TriggerWarningService::class)->create([
+    return app(TriggerWarningService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
         'is_active' => true,
@@ -204,4 +221,40 @@ function validStoryPayload(array $overrides = []): array
         'story_ref_genre_ids' => [defaultGenre()->id],
         'story_ref_feedback_id' => null,
     ], $overrides);
+}
+
+/**
+ * Build a valid payload for chapter create; override fields as needed.
+ */
+function validChapterPayload(array $overrides = []): array
+{
+    return array_merge([
+        'title' => 'Chapter Title',
+        'author_note' => null,
+        'content' => '<p>Content</p>',
+        // 'published' => '1' // set in published helper
+    ], $overrides);
+}
+
+/**
+ * Create a published chapter for a story through the real HTTP endpoint.
+ * Returns the freshly persisted Chapter model.
+ */
+function createPublishedChapter(TestCase $t, Story $story, Authenticatable $author, array $overrides = []): Chapter
+{
+    $t->actingAs($author);
+    $payload = validChapterPayload(array_merge(['published' => '1'], $overrides));
+    $t->post('/stories/' . $story->slug . '/chapters', $payload)->assertRedirect();
+    return Chapter::query()->latest('id')->firstOrFail();
+}
+
+/**
+ * Create an unpublished chapter for a story through the real HTTP endpoint.
+ */
+function createUnpublishedChapter(TestCase $t, Story $story, Authenticatable $author, array $overrides = []): Chapter
+{
+    $t->actingAs($author);
+    $payload = validChapterPayload($overrides); // no 'published' key -> draft
+    $t->post('/stories/' . $story->slug . '/chapters', $payload)->assertRedirect();
+    return Chapter::query()->latest('id')->firstOrFail();
 }

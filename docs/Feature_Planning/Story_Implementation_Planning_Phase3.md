@@ -14,6 +14,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 
 **Acceptance Criteria:**
 
+- **Access**: Only authors/co-authors (role `author`) can access create route/form. The form is accessible from the story details page, in a new "Chapters" area below the "Summary" area.
 - **Form fields and order**: The create form shows fields in this order: Title (text, required), Author Note (Quill editor, optional), Content (Quill editor, required), Published (toggle, default ON = published).
 - **Editors**: Use Quill-based editor component (same stack as story summary in `app/Domains/Story/Views/components/form.blade.php`) with strict purifier profile from `config/purifier.php`.
 - **Quill toolbar**: Buttons = bold, italic, underline, strikethrough, ordered list, unordered list, blockquote. Excluded: links, headings, images, code block, alignment.
@@ -267,3 +268,19 @@ everything.**
 - Purification uses the strict profile from `config/purifier.php` for Author Note and Content.
 - Quill configuration should mirror the story summary editor used in `app/Domains/Story/Views/components/form.blade.php`.
 - Quill toolbar: buttons = bold, italic, underline, strikethrough, ordered list, unordered list, blockquote. Excluded: links, headings, images, code block, alignment.
+
+## Decisions & Conventions (Phase 3)
+
+- **Slug helper (shared)**: Implement a reusable helper under `app/Domains/Shared/Support/SlugWithId.php` to:
+  - Parse IDs from `slug-with-id` strings (e.g., `my-title-123`).
+  - Build canonical slugs from a base title and numeric id.
+  - Provide utilities to compare a requested slug and the canonical slug (used by US-038/039 later).
+- **Slug storage and uniqueness**: Chapters will store a full `slug` including the `-id` suffix (same strategy as stories). A global unique index on `chapters.slug` will be added (uniqueness ensured by id suffix).
+- **Unauthorized handling**: For create/edit/delete routes, non-author collaborators receive 404 (not 403) to avoid existence leaks; consistent with Story domain policy.
+- **Publication vs visibility**: Publication status is independent from story visibility. A published chapter in a private story is visible to all collaborators; unpublished chapters are visible only to authors/co-authors (via edit/preview), and 404 to others.
+- **Author Note length**: Enforce 1000-character limit on logical plain text content. Implementation: sanitize HTML with the strict profile, strip tags, then measure and validate. Validation errors attach to the `author_note` field.
+- **Editor heights**: Reuse existing shared editor component. Author Note defaults to a compact height (~5 lines). Content uses the standard large editor; explicit `50vh` sizing is not implemented at this time.
+- **UI composition**: Create a dedicated Chapters partial included in the story details page (below “Summary”). This partial manages TOC, create entry point, and future chapter controls.
+- **Post-create redirect**: After creating a chapter, redirect to the chapter show page (US-039 path) when available; validation errors keep user on the create form.
+- **Translations**: Add chapter-related translations under `app/Domains/Story/Resources/lang/<locale>/chapters.php` and reuse `story::shared` keys when applicable.
+- **Collaborators**: Use `Story::authors` relationship for collaborator checks and display where needed.
