@@ -30,8 +30,6 @@ From the root of the repository, launch:
 
 Note: For **Windows**: to avoid permission issues, you should launch command from WSL (not from Powershell), from `/mnt/c/path_to_your_repo`.
 
-Use `docker compose` to first start the containers :
-
 2. Now sail should be available, you should be able to launch it (if in windows, you launch it inside WSL and not powershell)
 
 > ./vendor/bin/sail up -d
@@ -54,13 +52,24 @@ Use `docker compose` to first start the containers :
 
 > sail artisan db:seed
 
-7. Run npm build to create the assets
+7. Ensure resources like images are correctly shared
+
+> sail artisan storage:link
+
+8. Run npm build to create the assets
 
 > npm install
 
 > npm run build
 
 You are up and running on : http://localhost. The first user you can log with is admin@example.com / password.
+
+## First steps
+The admin user should work just fine, but it's better to create a new user to test the app and to give admin rights to this new user. There is no need for activation code by default.
+
+
+You are going to need to confirm the email. Email are sent to the [log file](./logs/laravel.log).
+
 
 ## Working with the app
 

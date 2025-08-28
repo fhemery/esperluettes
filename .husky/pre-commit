@@ -1,11 +1,31 @@
+#!/usr/bin/env bash
+
+# Choose runner based on HUSKY_RUNNER (php|sail), with fallbacks
+RUNNER="${HUSKY_RUNNER:-}"
+if [ -z "$RUNNER" ]; then
+  echo "[husky] HUSKY_RUNNER is not set; defaulting to 'sail'"
+  RUNNER="sail"
+fi
+
 # Skip with SKIP_DEPTRAC=1
 if [ "${SKIP_DEPTRAC:-}" = "1" ]; then
   echo "[husky] Skipping Deptrac (SKIP_DEPTRAC=1)"
 else
-  if [ -x ./vendor/bin/deptrac ]; then
-    ./vendor/bin/deptrac || exit 1
+  if [ "$RUNNER" = "php" ]; then
+    if [ -x ./vendor/bin/deptrac ]; then
+      ./vendor/bin/deptrac || exit 1
+    else
+      echo "[husky] deptrac not found; skipping"
+    fi
+  elif [ "$RUNNER" = "sail" ]; then
+    if [ -x ./vendor/bin/sail ]; then
+      ./vendor/bin/sail composer deptrac|| exit 1
+    else
+      echo "[husky] sail not found; skipping deptrac"
+    fi
   else
-    echo "[husky] deptrac not found; skipping"
+    echo "[husky] Invalid HUSKY_RUNNER value: $RUNNER"
+    exit 1
   fi
 fi
 
@@ -17,20 +37,12 @@ fi
 
 echo "[husky] Running test suite"
 
-# Choose runner based on HUSKY_TEST_RUNNER (php|sail), with fallbacks
-RUNNER="${HUSKY_TEST_RUNNER:-}"
-
-if [ -z "$RUNNER" ]; then
-  echo "[husky] HUSKY_TEST_RUNNER is not set; defaulting to 'sail'"
-  RUNNER="sail"
-fi
-
 if [ "$RUNNER" = "php" ]; then
   php artisan test || exit 1
 elif [ "$RUNNER" = "sail" ]; then
   ./vendor/bin/sail artisan test || exit 1
 else
-  echo "[husky] Invalid HUSKY_TEST_RUNNER value: $RUNNER"
+  echo "[husky] Invalid HUSKY_RUNNER value: $RUNNER"
   exit 1
 fi
 echo "[husky] Tests passed"
