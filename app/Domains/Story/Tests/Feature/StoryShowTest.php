@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Domains\Story\Models\Chapter;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -173,4 +174,40 @@ it('does not show the create chapter button to non-authors', function () {
     $response->assertOk();
     $response->assertDontSee('story::chapters.sections.add_chapter');
     $response->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]));
+});
+
+it('lists only published chapters to non authors without draft chip', function () {
+    $author = alice($this);
+    $story = publicStory('Chapters Story', $author->id);
+
+    // Create one published and one draft chapter
+    createPublishedChapter($this, $story, $author, ['title'=>'Chapter 1 - Published']);
+    createUnpublishedChapter($this, $story, $author, ['title'=>'Chapter 2 - Draft']);
+
+    // Guest (no auth)
+    Auth::logout();
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    // Sees only published chapter title
+    $response->assertSee('Chapter 1 - Published');
+    $response->assertDontSee('Chapter 2 - Draft');
+    // No draft chip
+    $response->assertDontSee(trans('story::chapters.list.draft'));
+});
+
+it('shows all chapters with draft chip to the author', function () {
+    $author = alice($this);
+    $story = publicStory('Chapters Story 2', $author->id);
+
+    createPublishedChapter($this, $story, $author, ['title'=>'P Chap']);
+    createUnpublishedChapter($this, $story, $author, ['title'=>'D Chap']);
+
+    $this->actingAs($author);
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    // Author sees both
+    $response->assertSee('P Chap');
+    $response->assertSee('D Chap');
+    // Draft chip visible
+    $response->assertSee(trans('story::chapters.list.draft'));
 });

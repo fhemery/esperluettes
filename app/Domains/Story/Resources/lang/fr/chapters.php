@@ -39,4 +39,9 @@ return [
         'chapters' => 'Chapitres',
         'add_chapter' => 'Ajouter un chapitre',
     ],
+
+    'list' => [
+        'empty' => 'Aucun chapitre disponible pour le moment.',
+        'draft' => 'Brouillon',
+    ],
 ];

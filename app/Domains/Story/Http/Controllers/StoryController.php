@@ -13,6 +13,7 @@ use App\Domains\Story\Support\StoryFilterAndPagination;
 use App\Domains\Story\ViewModels\StoryListViewModel;
 use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StorySummaryViewModel;
+use App\Domains\Story\ViewModels\ChapterSummaryViewModel;
 use App\Domains\StoryRef\Services\StoryRefLookupService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -365,10 +366,29 @@ class StoryController
             }
         }
 
+        // Build chapters list for the viewer
+        $isAuthor = $story->isAuthor(Auth::id());
+        $chapterQuery = $story->chapters()->select(['id','title','slug','status','sort_order'])->orderBy('sort_order','asc');
+        if (!$isAuthor) {
+            $chapterQuery->published();
+        }
+        $chapterRows = $chapterQuery->get();
+        $chapters = [];
+        foreach ($chapterRows as $c) {
+            $chapters[] = new ChapterSummaryViewModel(
+                id: (int)$c->id,
+                title: (string)$c->title,
+                slug: (string)$c->slug,
+                isDraft: (string)$c->status !== \App\Domains\Story\Models\Chapter::STATUS_PUBLISHED,
+                url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
+            );
+        }
+
         $viewModel = new StoryShowViewModel(
             $story,
             Auth::id(),
             $authors,
+            $chapters,
             $typeName,
             $audienceName,
             $copyrightName,

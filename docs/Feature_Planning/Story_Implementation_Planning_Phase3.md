@@ -8,7 +8,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 
 ---
 
-## **US-030: Add Chapter to Story**
+## ** [DONE] US-030: Add Chapter to Story**
 
 **As a story author, I want to add chapters to my story so that I can organize my content.**
 
@@ -35,7 +35,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 - Slug generation mirrors stories: base slug + `-id` suffix, with canonical redirect on mismatch (US-038).
 - Author Note storage: saved as TEXT with 1000-char plain-text limit (plain text, HTML stripped).
 
-## **US-031: Edit Chapter Content**
+## **[DONE] US-031: Edit Chapter Content**
 
 **As a story author, I want to edit chapter content with rich text so that I can format my writing.**
 
@@ -52,6 +52,69 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 
 - Route: `GET /stories/{story}/chapters/{chapter}/edit` and `PUT/PATCH /stories/{story}/chapters/{chapter}`.
 - Preserve user input on validation errors; tab/error indicators consistent with story forms.
+
+## **US-031-1: Chapter list on Story page**
+
+**As a reader, I want to see a list of chapters on a story page so that I can navigate easily.**
+
+**Acceptance Criteria:**
+
+- **Placement**:
+  - Rendered via partial `app/Domains/Story/Views/partials/chapters.blade.php`.
+  - Included in `app/Domains/Story/Views/show.blade.php` below the story header/summary.
+
+- **Visibility filtering**:
+  - Guests and non-authorized users: show only chapters with `status = published`.
+  - Authors/collaborators (authorized): show all chapters, including drafts.
+
+- **Ordering**:
+  - Always ascending by `sort_order`.
+
+- **Displayed per chapter**:
+  - Title only (no teaser, no dates, no read counts in this US).
+  - If the chapter is not published and the current user is authorized, show a “Brouillon” chip.
+
+- **Navigation**:
+  - Clicking an item navigates to `chapters.show` with `storySlug` and `chapterSlug`.
+  - Unpublished chapters are only visible/clickable for authorized users.
+
+- **Empty state**:
+  - If there are no chapters to display (per viewer permissions), show a single message (no CTA). The existing “Create” button elsewhere remains as-is.
+
+- **No pagination / sorting controls**:
+  - Do not paginate.
+  - No UI to change order; always ascending.
+
+- **Authorization**:
+  - Use policy/role checks already in place for author/collaborator visibility.
+
+- **i18n**:
+  - Use Story domain translations:
+    - `story::chapters.list.empty`
+    - `story::chapters.list.draft` (value: “Brouillon”)
+
+- **Accessibility**:
+  - Render as a semantic list (`<ul>/<li>`), links with descriptive text, and accessible chip markup.
+
+- **Performance**:
+  - Query only required fields (id, title, slug, status, sort_order); do not load `content`.
+  - Avoid N+1s; eager-load nothing extra unless needed.
+
+
+**Controller supplies partial:**
+
+- Controller (Story show action) provides the filtered and ordered chapters to the partial via the `StoryShowViewModel`:
+  - Public viewers: published-only.
+  - Authorized (author/collaborator): all chapters.
+
+**Tests to add:**
+
+- In `app/Domains/Story/Tests/Feature/StoryShowTest.php`:
+  - Guest viewing a story with one published and one draft:
+    - Sees only the published title; does not see “Brouillon”.
+    - Sees empty message if no published chapters exist.
+  - Author viewing the same:
+    - Sees both published and draft titles; sees “Brouillon” chip on drafts.
 
 ## **US-032: Publish/Unpublish Chapters**
 
@@ -284,3 +347,20 @@ everything.**
 - **Post-create redirect**: After creating a chapter, redirect to the chapter show page (US-039 path) when available; validation errors keep user on the create form.
 - **Translations**: Add chapter-related translations under `app/Domains/Story/Resources/lang/<locale>/chapters.php` and reuse `story::shared` keys when applicable.
 - **Collaborators**: Use `Story::authors` relationship for collaborator checks and display where needed.
+
+**ViewModel Composition:**
+
+- `app/Domains/Story/ViewModels/ChapterSummaryViewModel.php`
+  - Fields (read-only):
+    - `id: int`
+    - `title: string`
+    - `slug: string` (slug-with-id)
+    - `isDraft: bool` (derived from status)
+    - `url: string` (prebuilt route to `chapters.show`)
+  - Optional helpers: `ariaLabel()` for accessibility.
+
+- `app/Domains/Story/ViewModels/StoryShowViewModel.php`
+  - Exposes:
+    - `story: Story`
+    - `chapters: Collection<ChapterSummaryViewModel>` (already filtered for the current viewer and ordered ASC)
+  - Controller builds the `StoryShowViewModel` and passes it to the view. The view includes the partial with `$vm->chapters`.
