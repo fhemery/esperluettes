@@ -26,8 +26,8 @@ class ChapterController
         $storyId = SlugWithId::extractId($storySlug);
         $story = Story::query()->findOrFail($storyId);
 
-        $userId = (int) $request->user()->id;
-        if (!$story->isAuthor($userId)) {
+        // Authors only; use policy with Story context
+        if (!Gate::allows('create', [Chapter::class, $story])) {
             abort(404);
         }
 
@@ -41,11 +41,12 @@ class ChapterController
         $storyId = SlugWithId::extractId($storySlug);
         $story = Story::query()->findOrFail($storyId);
 
-        $userId = (int) $request->user()->id;
-        if (!$story->isAuthor($userId)) {
+        // Authors only; use policy with Story context
+        if (!Gate::allows('create', [Chapter::class, $story])) {
             abort(404);
         }
 
+        $userId = (int) $request->user()->id;
         try {
             $chapter = $this->service->createChapter($story, $request, $userId);
         } catch (\Illuminate\Validation\ValidationException $ve) {
@@ -82,5 +83,47 @@ class ChapterController
             'story' => $story,
             'chapter' => $chapter,
         ]);
+    }
+
+    public function edit(Request $request, string $storySlug, string $chapterSlug): View
+    {
+        $storyId = SlugWithId::extractId($storySlug);
+        $chapterId = SlugWithId::extractId($chapterSlug);
+
+        $story = Story::query()->findOrFail($storyId);
+        $chapter = Chapter::query()->where('story_id', $story->id)->findOrFail($chapterId);
+
+        if (!Gate::allows('edit', $chapter)) {
+            abort(404);
+        }
+
+        return view('story::chapters.edit', [
+            'story' => $story,
+            'chapter' => $chapter,
+        ]);
+    }
+
+    public function update(ChapterRequest $request, string $storySlug, string $chapterSlug): RedirectResponse
+    {
+        $storyId = SlugWithId::extractId($storySlug);
+        $chapterId = SlugWithId::extractId($chapterSlug);
+
+        $story = Story::query()->findOrFail($storyId);
+        $chapter = Chapter::query()->where('story_id', $story->id)->findOrFail($chapterId);
+
+        if (!Gate::allows('edit', $chapter)) {
+            abort(404);
+        }
+
+        try {
+            $chapter = $this->service->updateChapter($story, $chapter, $request);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            return back()->withErrors($ve->errors())->withInput();
+        }
+
+        return redirect()->route('chapters.show', [
+            'storySlug' => $story->slug,
+            'chapterSlug' => $chapter->slug,
+        ])->with('status', __('story::chapters.updated_success'));
     }
 }

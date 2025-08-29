@@ -15,12 +15,22 @@
     @else
         <ul class="divide-y divide-gray-200 rounded-md border border-gray-200 bg-white">
             @foreach($chapters as $ch)
-                <li class="p-3 flex items-center justify-between">
-                    <a href="{{ $ch->url }}" class="text-indigo-700 hover:text-indigo-900 font-medium">
-                        {{ $ch->title }}
-                    </a>
-                    @if($isAuthor && $ch->isDraft)
-                        <span class="ml-3 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-300" aria-label="{{ __('story::chapters.list.draft') }}">{{ __('story::chapters.list.draft') }}</span>
+                <li class="p-3 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <a href="{{ $ch->url }}" class="text-indigo-700 hover:text-indigo-900 font-medium">
+                            {{ $ch->title }}
+                        </a>
+                        @if($isAuthor && $ch->isDraft)
+                            <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-300" aria-label="{{ __('story::chapters.list.draft') }}">{{ __('story::chapters.list.draft') }}</span>
+                        @endif
+                    </div>
+                    @if($isAuthor)
+                        <a href="{{ route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}"
+                           class="inline-flex items-center gap-1 text-gray-500 hover:text-gray-700"
+                           title="{{ __('Editer') }}"
+                           aria-label="Editer">
+                            <span class="material-symbols-outlined text-[18px] leading-none">edit</span>
+                        </a>
                     @endif
                 </li>
             @endforeach

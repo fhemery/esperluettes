@@ -16,6 +16,17 @@ Route::middleware(['web'])->group(function () {
         Route::post('/stories', [StoryController::class, 'store'])
             ->name('stories.store');
 
+
+        // Chapters: edit + update (authors/co-authors only; controllers enforce 404 on unauthorized)
+        // To put before story edit to avoid agressive matching
+        Route::get('/stories/{storySlug}/chapters/{chapterSlug}/edit', [ChapterController::class, 'edit'])
+            ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
+            ->name('chapters.edit');
+
+        Route::match(['put', 'patch'], '/stories/{storySlug}/chapters/{chapterSlug}', [ChapterController::class, 'update'])
+            ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
+            ->name('chapters.update');
+
         // Edit/update own stories (authors only)
         Route::get('/stories/{slug}/edit', [StoryController::class, 'edit'])
             ->where('slug', '.*')

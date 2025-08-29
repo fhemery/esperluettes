@@ -35,7 +35,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 - Slug generation mirrors stories: base slug + `-id` suffix, with canonical redirect on mismatch (US-038).
 - Author Note storage: saved as TEXT with 1000-char plain-text limit (plain text, HTML stripped).
 
-## **[DONE] US-031: Edit Chapter Content**
+## ** US-031: Edit Chapter Content**
 
 **As a story author, I want to edit chapter content with rich text so that I can format my writing.**
 
@@ -47,13 +47,14 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 - **Validation**: Same as US-030 (Title required ≤255; Author Note optional ≤1000 logical chars; Content required; purifier strict profile).
 - **Authorization**: Only authors/co-authors (role `author`) can edit.
 - **UI**: Published toggle is present and reflects current state; changing it follows US-032 rules.
+- **Access**: Only authors/co-authors (role `author`) can access edit route/form. Access can be done from chapter list on story page, through an edit icon.
 
 **Implementation Notes:**
 
 - Route: `GET /stories/{story}/chapters/{chapter}/edit` and `PUT/PATCH /stories/{story}/chapters/{chapter}`.
 - Preserve user input on validation errors; tab/error indicators consistent with story forms.
 
-## **US-031-1: Chapter list on Story page**
+## **[DONE] US-031-1: Chapter list on Story page**
 
 **As a reader, I want to see a list of chapters on a story page so that I can navigate easily.**
 

@@ -92,4 +92,73 @@ class ChapterService
             return $chapter;
         });
     }
+
+    public function updateChapter(Story $story, Chapter $chapter, ChapterRequest $request): Chapter
+    {
+        // sanitize inputs with strict profile
+        $title = trim($request->input('title'));
+        $authorNoteRaw = $request->input('author_note');
+        $contentRaw = $request->input('content');
+        $published = (bool)($request->boolean('published', false));
+
+        $authorNoteHtml = $authorNoteRaw ? Purifier::clean($authorNoteRaw, 'strict') : null;
+        $contentHtml = Purifier::clean($contentRaw, 'strict');
+
+        // logical length for author_note (strip tags after purification)
+        if ($authorNoteHtml !== null) {
+            $plain = trim(strip_tags($authorNoteHtml));
+            if (mb_strlen($plain) > 1000) {
+                throw ValidationException::withMessages([
+                    'author_note' => __('story::validation.author_note_too_long'),
+                ]);
+            }
+        }
+
+        // Ensure non-empty title after trim
+        if ($title === '') {
+            throw ValidationException::withMessages([
+                'title' => __('validation.required', ['attribute' => 'title']),
+            ]);
+        }
+
+        // Ensure non-empty content after purification (strip tags and trim)
+        $contentPlain = trim(strip_tags($contentHtml));
+        if ($contentPlain === '') {
+            throw ValidationException::withMessages([
+                'content' => __('validation.required', ['attribute' => 'content']),
+            ]);
+        }
+
+        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published) {
+            $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
+
+            // Update basics
+            $chapter->title = $title;
+            $chapter->author_note = $authorNoteHtml;
+            $chapter->content = $contentHtml;
+            $chapter->status = $published ? Chapter::STATUS_PUBLISHED : Chapter::STATUS_NOT_PUBLISHED;
+
+            // Handle first publish timestamp
+            if ($published && !$wasPublished && $chapter->first_published_at === null) {
+                $chapter->first_published_at = now();
+            }
+
+            // Regenerate slug base but keep id suffix stable
+            $slugBase = Str::slug($title);
+            $chapter->slug = SlugWithId::build($slugBase, $chapter->id);
+
+            $chapter->save();
+
+            // Update story.last_chapter_published_at if needed
+            $latest = Chapter::where('story_id', $story->id)
+                ->whereNotNull('first_published_at')
+                ->max('first_published_at');
+            if ($latest && ($story->last_chapter_published_at === null || $latest > $story->last_chapter_published_at)) {
+                $story->last_chapter_published_at = $latest;
+                $story->save();
+            }
+
+            return $chapter;
+        });
+    }
 }

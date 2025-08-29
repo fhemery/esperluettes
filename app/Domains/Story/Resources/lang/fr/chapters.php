@@ -2,6 +2,7 @@
 
 return [
     'created_success' => 'Chapitre créé avec succès.',
+    'updated_success' => 'Chapitre mis à jour avec succès.',
 
     'back_to_story' => 'Retour à l\'histoire',
     'author_note' => 'Note de l\'auteur',
@@ -9,6 +10,11 @@ return [
     'create' => [
         'title' => 'Nouveau chapitre',
         'heading' => 'Ajouter un chapitre à ":story"',
+    ],
+
+    'edit' => [
+        'title' => 'Modifier le chapitre',
+        'heading' => 'Modifier un chapitre de ":story"',
     ],
 
     'form' => [
@@ -33,6 +39,7 @@ return [
         ],
         'cancel' => 'Annuler',
         'submit' => 'Créer le chapitre',
+        'update' => 'Enregistrer les modifications',
     ],
 
     'sections' => [
