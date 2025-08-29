@@ -25,8 +25,11 @@ return [
             'label' => 'Contenu',
         ],
         'published' => [
-            'label' => 'Publier tout de suite',
-            'help' => 'Si coché, le chapitre sera visible immédiatement selon la visibilité de l\'histoire.',
+            'label' => 'Publié',
+            'help' => [
+                'label' => 'Statut de publication',
+                'text' => 'Décochez si vous souhaitez garder le chapitre en brouillon, ou le cacher temporairement.',
+            ],
         ],
         'cancel' => 'Annuler',
         'submit' => 'Créer le chapitre',

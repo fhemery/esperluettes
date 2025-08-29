@@ -47,12 +47,16 @@
                             </div>
 
                             <!-- Published toggle (default ON) -->
-                            <div class="flex items-center gap-2">
-                                <x-input-label for="published" :value="__('story::chapters.form.published.label')" />
-                                <label class="inline-flex items-center cursor-pointer">
-                                    <input id="published" name="published" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('published', '1') ? 'checked' : '' }} value="1" />
-                                    <span class="ml-2 text-sm text-gray-700">{{ __('story::chapters.form.published.help') }}</span>
-                                </label>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <div class="mt-2">
+                                        <x-shared::toggle id="published" :label="__('story::chapters.form.published.label')" name="published" :checked="old('published', '1') ? true : false" value="1" />
+                                    </div>
+                                    <x-shared::tooltip type="help" :title="__('story::chapters.form.published.help.label')" placement="right">
+                                        {{ __('story::chapters.form.published.help.text') }}
+                                    </x-shared::tooltip>
+                                </div>
+                                
                             </div>
                         </div>
 
