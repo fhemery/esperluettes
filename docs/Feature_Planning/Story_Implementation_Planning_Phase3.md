@@ -35,7 +35,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 - Slug generation mirrors stories: base slug + `-id` suffix, with canonical redirect on mismatch (US-038).
 - Author Note storage: saved as TEXT with 1000-char plain-text limit (plain text, HTML stripped).
 
-## ** US-031: Edit Chapter Content**
+## ** [DONE] US-031: Edit Chapter Content**
 
 **As a story author, I want to edit chapter content with rich text so that I can format my writing.**
 
@@ -117,7 +117,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
   - Author viewing the same:
     - Sees both published and draft titles; sees “Brouillon” chip on drafts.
 
-## **US-032: Publish/Unpublish Chapters**
+## **[DONE] US-032: Publish/Unpublish Chapters**
 
 **As a story author, I want to control chapter publication status so that I can manage what readers see.**
 

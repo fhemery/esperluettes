@@ -211,3 +211,22 @@ it('shows all chapters with draft chip to the author', function () {
     // Draft chip visible
     $response->assertSee(trans('story::chapters.list.draft'));
 });
+
+it('appends newly created chapter at the end of the list', function () {
+    // Arrange: public story with existing chapters
+    $author = alice($this);
+    $story = publicStory('Ordered Story', $author->id);
+
+    // Create two published chapters via HTTP (ensures service logic is used)
+    createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1']);
+    createPublishedChapter($this, $story, $author, ['title' => 'Chapter 2']);
+
+    // Act: create a new chapter which should be appended (higher sort_order)
+    createPublishedChapter($this, $story, $author, ['title' => 'Chapter 3']);
+
+    // Assert: on the story page, chapters appear in order with the new one last
+    Auth::logout(); // guest view is enough since all are published
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    $response->assertSeeInOrder(['Chapter 1', 'Chapter 2', 'Chapter 3']);
+});
