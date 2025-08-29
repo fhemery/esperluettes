@@ -40,13 +40,13 @@ it('returns 404 for private story to non-author', function () {
     $this->get('/stories/' . $story->slug)->assertNotFound();
 });
 
-it('redirects guest to login for community story', function () {
+it('return 404 for guest for community story', function () {
     $author = alice($this);
     $story = communityStory('Community Story', $author->id);
 
     Auth::logout();
 
-    $this->get('/stories/' . $story->slug)->assertRedirect('/login');
+    $this->get('/stories/' . $story->slug)->assertNotFound();
 });
 
 it('returns 404 for community story to non-confirmed users', function () {

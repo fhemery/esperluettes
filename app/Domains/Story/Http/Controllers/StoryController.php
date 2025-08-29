@@ -307,12 +307,8 @@ class StoryController
             }
         }
 
-        // Enforce visibility rules via policy, while preserving login redirect for community guests
-        $user = Auth::user();
+        // Enforce visibility rules via policy
         if (!Gate::allows('view', $story)) {
-            if ($story->visibility === Story::VIS_COMMUNITY && !$user) {
-                return redirect()->guest(route('login'));
-            }
             abort(404);
         }
 
