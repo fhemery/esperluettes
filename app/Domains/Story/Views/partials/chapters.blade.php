@@ -1,7 +1,14 @@
 <section class="mt-10"
          @if($isAuthor)
          x-data="chapterReorder({
-            initial: @js(array_map(fn($c) => ['id'=>$c->id,'title'=>$c->title,'slug'=>$c->slug,'url'=>$c->url,'isDraft'=>$c->isDraft], $chapters ?? ($viewModel->chapters ?? []))),
+            initial: @js(array_map(fn($c) => [
+                'id'=>$c->id,
+                'title'=>$c->title,
+                'slug'=>$c->slug,
+                'url'=>$c->url,
+                'isDraft'=>$c->isDraft,
+                'editUrl'=>route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
+            ], $chapters ?? ($viewModel->chapters ?? []))),
             reorderUrl: @js(route('chapters.reorder', ['storySlug' => $story->slug])),
          })"
          data-success-msg="{{ __('story::chapters.reorder_success') }}"
@@ -49,78 +56,23 @@
     @if (empty($chapters))
         <p class="text-sm text-gray-600">{{ __('story::chapters.list.empty') }}</p>
     @else
-        <ul class="divide-y divide-gray-200 rounded-md border border-gray-200 bg-white"
-            @if($isAuthor)
-            x-ref="list"
-            @endif
-        >
-            @foreach($chapters as $ch)
-                <li class="p-3 flex items-center justify-between gap-3"
-                    @if($isAuthor)
-                    data-id="{{ $ch->id }}"
-                    draggable="true"
-                    :draggable="editing"
-                    @dragstart="onDragStartId($event, {{ $ch->id }})"
-                    @dragover.prevent="onDragOverId($event, {{ $ch->id }})"
-                    @drop.prevent="onDropId($event, {{ $ch->id }})"
-                    :class="editing ? 'bg-white' : ''"
-                    @endif
-                >
-                    <div class="flex items-center gap-3">
-                        @if($isAuthor)
-                            <span class="material-symbols-outlined text-[18px] leading-none text-gray-400"
-                                  :class="editing ? 'cursor-grab' : 'opacity-0'" title="Drag">
-                                drag_indicator
-                            </span>
-                        @endif
-                        <a href="{{ $ch->url }}" class="text-indigo-700 hover:text-indigo-900 font-medium"
-                           :class="editing ? 'pointer-events-none text-gray-500' : ''">
-                            {{ $ch->title }}
-                        </a>
-                        @if($isAuthor && $ch->isDraft)
-                            <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-300" aria-label="{{ __('story::chapters.list.draft') }}">{{ __('story::chapters.list.draft') }}</span>
-                        @endif
-                    </div>
-                    @if($isAuthor)
-                        <template x-if="editing">
-                            <div class="flex items-center gap-1">
-                                <button type="button"
-                                        class="inline-flex items-center justify-center h-7 w-7 rounded border text-gray-600 hover:bg-gray-50 disabled:opacity-40"
-                                        @click="moveUpId({{ $ch->id }})"
-                                        :disabled="indexById({{ $ch->id }}) === 0"
-                                        title="{{ __('story::chapters.actions.move_up') }}"
-                                        aria-label="{{ __('story::chapters.actions.move_up') }}">
-                                    <span class="material-symbols-outlined text-[18px] leading-none">arrow_upward</span>
-                                </button>
-                                <button type="button"
-                                        class="inline-flex items-center justify-center h-7 w-7 rounded border text-gray-600 hover:bg-gray-50 disabled:opacity-40"
-                                        @click="moveDownId({{ $ch->id }})"
-                                        :disabled="indexById({{ $ch->id }}) === items.length - 1"
-                                        title="{{ __('story::chapters.actions.move_down') }}"
-                                        aria-label="{{ __('story::chapters.actions.move_down') }}">
-                                    <span class="material-symbols-outlined text-[18px] leading-none">arrow_downward</span>
-                                </button>
-                            </div>
-                        </template>
-                        <template x-if="!editing">
-                            <a href="{{ route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}"
-                               class="inline-flex items-center gap-1 text-gray-500 hover:text-gray-700"
-                               title="{{ __('story::chapters.actions.edit') }}"
-                               aria-label="{{ __('story::chapters.actions.edit') }}">
-                                <span class="material-symbols-outlined text-[18px] leading-none">edit</span>
-                            </a>
-                        </template>
-                    @endif
-                </li>
-            @endforeach
-        </ul>
         @if($isAuthor)
-            <div class="mt-2 text-sm rounded-md px-3 py-2 border"
-                 x-show="status"
-                 x-text="status"
-                 :class="statusType === 'success' ? 'bg-green-50 text-green-700 border-green-200' : (statusType === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-gray-50 text-gray-700 border-gray-200')"
-            ></div>
+            <div x-show="!editing">
+                @include('story::partials.chapters-list', ['story' => $story, 'chapters' => $chapters, 'isAuthor' => $isAuthor])
+            </div>
+            <div x-show="editing">
+                @include('story::partials.chapters-reorder', ['story' => $story, 'chapters' => $chapters, 'isAuthor' => $isAuthor])
+            </div>
+        @else
+            @include('story::partials.chapters-list', ['story' => $story, 'chapters' => $chapters, 'isAuthor' => $isAuthor ?? false])
         @endif
+    @endif
+    @if($isAuthor)
+        <div class="mt-2 text-sm rounded-md px-3 py-2 border"
+             x-show="status"
+             x-text="status"
+             :class="statusType === 'success' ? 'bg-green-50 text-green-700 border-green-200' : (statusType === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-gray-50 text-gray-700 border-gray-200')"
+        ></div>
     @endif
 </section>
 
@@ -216,11 +168,14 @@
                             throw new Error(data.message || 'Failed to reorder');
                         }
                         const data = await res.json();
-                        this.status = this.successMsg;
-                        this.statusType = 'success';
-                        this.editing = false;
                         // Persist current order as new baseline for future sessions
                         initial = this.items.slice();
+                        // Switch to read-only view
+                        this.editing = false;
+                        this.status = this.successMsg;
+                        this.statusType = 'success';
+                        // Auto-hide status after a short delay
+                        setTimeout(() => { this.status = ''; this.statusType = ''; }, 3000);
                     } catch (e) {
                         this.status = (e && e.message) ? e.message : 'Error';
                         this.statusType = 'error';
