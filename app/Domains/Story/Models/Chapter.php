@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Chapter extends Model
 {
+    protected $table = 'story_chapters';
+
     protected $fillable = [
         'story_id',
         'title',

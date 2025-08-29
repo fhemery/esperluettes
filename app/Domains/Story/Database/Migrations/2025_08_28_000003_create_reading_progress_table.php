@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('reading_progress', function (Blueprint $table) {
+        Schema::create('story_reading_progress', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             // Denormalized `story_id` for performance and simpler queries.
@@ -16,7 +16,7 @@ return new class extends Migration {
             // - make index(['user_id','story_id']) effective for dashboards/filters
             // - allow straightforward cascade-by-story semantics
             $table->foreignId('story_id')->constrained('stories')->cascadeOnDelete();
-            $table->foreignId('chapter_id')->constrained('chapters')->cascadeOnDelete();
+            $table->foreignId('chapter_id')->constrained('story_chapters')->cascadeOnDelete();
             $table->timestamp('read_at');
             $table->timestamps();
 
@@ -27,6 +27,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('reading_progress');
+        Schema::dropIfExists('story_reading_progress');
     }
 };
