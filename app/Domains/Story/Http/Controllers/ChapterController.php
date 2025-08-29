@@ -8,6 +8,8 @@ use App\Domains\Story\Http\Requests\ChapterRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Services\ChapterService;
+use App\Domains\Story\Services\StoryService;
+use App\Domains\Story\ViewModels\ChapterViewModel;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +20,7 @@ class ChapterController
     public function __construct(
         private ChapterService $service,
         private UserPublicApi $userPublicApi,
+        private StoryService $storyService,
     ) {
     }
 
@@ -61,10 +64,11 @@ class ChapterController
 
     public function show(Request $request, string $storySlug, string $chapterSlug): View
     {
-        $storyId = SlugWithId::extractId($storySlug);
         $chapterId = SlugWithId::extractId($chapterSlug);
 
-        $story = Story::query()->findOrFail($storyId);
+        // Load story with ordered chapters (minimal fields) for navigation computation
+        $story = $this->storyService->getStory($storySlug, includeChapters: true);
+        // Load full chapter content separately
         $chapter = Chapter::query()->where('story_id', $story->id)->findOrFail($chapterId);
 
         $user = $request->user();
@@ -80,9 +84,11 @@ class ChapterController
             abort(404);
         }
 
+        // Build ViewModel that encapsulates navigation computation
+        $vm = ChapterViewModel::from($story, $chapter, $isAuthor);
+
         return view('story::chapters.show', [
-            'story' => $story,
-            'chapter' => $chapter,
+            'vm' => $vm,
         ]);
     }
 

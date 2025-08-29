@@ -54,4 +54,10 @@ return [
     'actions' => [
         'edit' => 'Éditer le chapitre'
     ]
+    ,
+    'navigation' => [
+        'previous' => 'Chapitre précédent',
+        'next' => 'Chapitre suivant',
+        'mark_read' => 'Marquer comme lu (bientôt)'
+    ]
 ];

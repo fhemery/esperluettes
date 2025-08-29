@@ -168,6 +168,28 @@ class StoryService
     }
 
     /**
+     * Fetch a story by slug (or slug-with-id). Optionally eager-load chapters ordered by sort_order.
+     * Only minimal fields are selected for chapters to keep payload small.
+     */
+    public function getStory(string $slug, bool $includeChapters = false): Story
+    {
+        $id = SlugWithId::extractId($slug);
+
+        $query = Story::query();
+
+        if ($includeChapters) {
+            $query->with(['chapters' => function ($q) {
+                $q->orderBy('sort_order', 'asc')
+                  ->select(['id', 'story_id', 'title', 'slug', 'status', 'sort_order']);
+            }]);
+        }
+
+        return $id
+            ? $query->findOrFail($id)
+            : $query->where('slug', $slug)->firstOrFail();
+    }
+
+    /**
      * Hard delete a story and let DB cascades clean related records.
      */
     public function deleteStory(Story $story): void

@@ -147,7 +147,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
   - Community: only users with role `user-confirmed`
   - Private: only authors/co-authors
 - **Unpublished handling**: Non-authors requesting an unpublished chapter receive 404.
-- **Authors**: Authors/co-authors can preview unpublished chapters via edit routes; reading routes still follow published-only policy (see US-034 for navigation).
+- **Authors**: Authors/co-authors can view unpublished chapters on the reading route as a preview; non-authors still receive 404 for unpublished (see US-034 for navigation).
 - **TOC on story page**: Readers see only published chapters; authors may see full list with status badges (in story details UI, not the chapter page).
 
 **Implementation Notes:**

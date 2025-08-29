@@ -155,3 +155,48 @@ it('shows an edit link next to chapter title for authors only', function () {
     $resp2->assertOk();
     $resp2->assertDontSee(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
 });
+
+it('shows navigation among published chapters for readers with disabled edges', function () {
+    $author = alice($this);
+    $story = publicStory('Nav Story', $author->id);
+
+    // Create three published chapters in order
+    $c1 = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+    $c2 = createPublishedChapter($this, $story, $author, ['title' => 'C2']);
+    $c3 = createPublishedChapter($this, $story, $author, ['title' => 'C3']);
+
+    // Guest on first chapter: no prev link (disabled), next points to C2
+    $resp1 = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c1->slug]));
+    $resp1->assertOk();
+    // Ensure there is no clickable previous anchor (by aria-label)
+    $resp1->assertDontSee('aria-label="story::chapters.navigation.previous"');
+    $resp1->assertSee(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c2->slug]));
+
+    // Guest on last chapter: prev points to C2, no next link (disabled)
+    $resp3 = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c3->slug]));
+    $resp3->assertOk();
+    $resp3->assertSee(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c2->slug]));
+    // Ensure there is no clickable next anchor (by aria-label)
+    $resp3->assertDontSee('aria-label="story::chapters.navigation.next"');
+});
+
+it('includes unpublished chapters in navigation for authors', function () {
+    $author = alice($this);
+    $this->actingAs($author);
+    $story = createStoryForAuthor($author->id, ['title' => 'Draft Nav']);
+
+    $c1 = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+    $c2 = createUnpublishedChapter($this, $story, $author, ['title' => 'Draft C2']);
+    $c3 = createPublishedChapter($this, $story, $author, ['title' => 'C3']);
+
+    // On C1, next should point to C2 (unpublished)
+    $resp1 = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c1->slug]));
+    $resp1->assertOk();
+    $resp1->assertSee(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c2->slug]));
+
+    // On C2 (unpublished), prev should point to C1 and next to C3
+    $resp2 = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c2->slug]));
+    $resp2->assertOk();
+    $resp2->assertSee(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c1->slug]));
+    $resp2->assertSee(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c3->slug]));
+});
