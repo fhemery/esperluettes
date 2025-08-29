@@ -23,4 +23,16 @@ class ChapterPolicy
     {
         return $chapter->story && $chapter->story->isAuthor((int)$user->id);
     }
+
+    /**
+     * View a chapter: allowed if chapter is published, or the viewer is an author of the story.
+     * Story visibility is enforced separately by StoryPolicy in controllers.
+     */
+    public function view(?User $user, Chapter $chapter, Story $story): bool
+    {
+        if ($chapter->status === Chapter::STATUS_PUBLISHED) {
+            return true;
+        }
+        return $user !== null && $story->isAuthor((int)$user->id);
+    }
 }

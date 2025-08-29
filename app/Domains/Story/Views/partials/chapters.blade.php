@@ -27,8 +27,8 @@
                     @if($isAuthor)
                         <a href="{{ route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}"
                            class="inline-flex items-center gap-1 text-gray-500 hover:text-gray-700"
-                           title="{{ __('Editer') }}"
-                           aria-label="Editer">
+                           title="{{ __('story::chapters.actions.edit') }}"
+                           aria-label="{{ __('story::chapters.actions.edit') }}">
                             <span class="material-symbols-outlined text-[18px] leading-none">edit</span>
                         </a>
                     @endif

@@ -126,3 +126,32 @@ it('allows author to view unpublished chapter', function () {
     $resp->assertOk();
     $resp->assertSee('Draft');
 });
+
+it('shows a draft badge on unpublished chapter', function () {
+    $author = alice($this);
+    $story = publicStory('Draft Story', $author->id);
+
+    $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Draft Chap']);
+
+    // Author view
+    $resp = $this->actingAs($author)->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    $resp->assertOk();
+    $resp->assertSee(trans('story::chapters.list.draft'));
+});
+
+it('shows an edit link next to chapter title for authors only', function () {
+    $author = alice($this);
+    $story = publicStory('Editable Story', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Editable Chap']);
+
+    // Author sees edit link
+    $resp = $this->actingAs($author)->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    $resp->assertOk();
+    $resp->assertSee(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+
+    // Guest does not see edit link
+    Auth::logout();
+    $resp2 = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    $resp2->assertOk();
+    $resp2->assertDontSee(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+});

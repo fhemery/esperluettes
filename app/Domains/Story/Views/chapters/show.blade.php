@@ -9,7 +9,25 @@
                         <a href="{{ url('/stories/'.$story->slug) }}" class="text-indigo-600 hover:text-indigo-800">&larr; {{ __('story::chapters.back_to_story') }}</a>
                     </div>
 
-                    <h1 class="font-semibold text-2xl mb-2">{{ $chapter->title }}</h1>
+                    <div class="flex items-start justify-between mb-2">
+                        <h1 class="font-semibold text-2xl flex items-center gap-2">
+                            {{ $chapter->title }}
+                            @if($chapter->status !== \App\Domains\Story\Models\Chapter::STATUS_PUBLISHED)
+                                <span class="inline-flex items-center rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 border border-yellow-200">
+                                    {{ trans('story::chapters.list.draft') }}
+                                </span>
+                            @endif
+                        </h1>
+
+                        @if(auth()->check() && $story->isAuthor((int)auth()->id()))
+                            <a href="{{ route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]) }}"
+                               class="text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1"
+                               aria-label="{{ __('story::chapters.actions.edit') }}"
+                               title="{{ __('story::chapters.actions.edit') }}">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                        @endif
+                    </div>
                     <div class="text-sm text-gray-600 mb-6">{{ $story->title }}</div>
 
                     @if(!empty($chapter->author_note))

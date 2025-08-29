@@ -51,4 +51,7 @@ return [
         'empty' => 'Aucun chapitre disponible pour le moment.',
         'draft' => 'Brouillon',
     ],
+    'actions' => [
+        'edit' => 'Éditer le chapitre'
+    ]
 ];

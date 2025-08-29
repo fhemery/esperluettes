@@ -75,7 +75,8 @@ class ChapterController
             abort(404);
         }
 
-        if ($chapter->status !== Chapter::STATUS_PUBLISHED && !$isAuthor) {
+        // Use chapter view policy for unpublished chapters access
+        if (!Gate::allows('view', [Chapter::class, $chapter, $story])) {
             abort(404);
         }
 
