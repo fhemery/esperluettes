@@ -186,7 +186,11 @@
 
     {{-- Chapters section --}}
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        @include('story::partials.chapters', ['isAuthor' => $viewModel->isAuthor(), 'story' => $viewModel->story, 'chapters' => $viewModel->chapters])
+        @if($viewModel->isAuthor())
+            @include('story::chapters.partials.chapter-list.author-view', ['story' => $viewModel->story, 'chapters' => $viewModel->chapters])
+        @else
+            @include('story::chapters.partials.chapter-list.reader-view', ['story' => $viewModel->story, 'chapters' => $viewModel->chapters])
+        @endif
     </div>
 
     @if($viewModel->isAuthor())

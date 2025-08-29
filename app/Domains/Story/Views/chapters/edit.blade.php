@@ -11,7 +11,7 @@
                         @csrf
                         @method('PUT')
 
-                        @include('story::chapters.components.form')
+                        @include('story::chapters.partials.form')
 
                         <div class="mt-8 flex justify-end gap-3">
                             <a href="{{ url('/stories/'.$story->slug.'/chapters/'.$chapter->slug) }}" class="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-50">{{ __('story::chapters.form.cancel') }}</a>
