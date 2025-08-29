@@ -4,6 +4,7 @@ namespace App\Domains\Story\Http\Controllers;
 
 use App\Domains\Auth\PublicApi\UserPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Shared\Support\Seo;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
@@ -224,7 +225,7 @@ class StoryController
         // If title changed, regenerate slug base but keep -id suffix
         if ($story->title !== $oldTitle) {
             $slugBase = Story::generateSlugBase($story->title);
-            $story->slug = $slugBase . '-' . $story->id;
+            $story->slug = SlugWithId::build($slugBase, $story->id);
         }
 
         $story->save();
@@ -298,9 +299,10 @@ class StoryController
     {
         $story = $this->service->getStoryForShow($slug, Auth::id());
 
-        // 301 redirect if slug base changed but id suffix matches
-        if ($story->slug !== $slug && preg_match('/-(\d+)$/', $slug, $m)) {
-            if ((int)$m[1] === (int)$story->id) {
+        // 301 redirect to canonical slug when base differs but id matches
+        if (!SlugWithId::isCanonical($slug, $story->slug)) {
+            $reqId = SlugWithId::extractId($slug);
+            if ($reqId !== null && $reqId === (int)$story->id) {
                 return redirect()->to('/stories/' . $story->slug, 301);
             }
         }

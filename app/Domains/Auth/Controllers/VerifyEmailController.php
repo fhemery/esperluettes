@@ -40,27 +40,27 @@ class VerifyEmailController extends Controller
 
         if (!$requireActivation) {
             // Feature disabled: confirmed by default
-            if ($user->hasRole('user')) {
+            if ($user->isOnProbation()) {
                 $user->removeRole('user');
             }
-            if (!$user->hasRole('user-confirmed')) {
+            if (!$user->isConfirmed()) {
                 $user->assignRole('user-confirmed');
             }
         } else {
             if ($usedActivation) {
                 // Used a code: promote to confirmed
-                if ($user->hasRole('user')) {
+                if ($user->isOnProbation()) {
                     $user->removeRole('user');
                 }
-                if (!$user->hasRole('user-confirmed')) {
+                if (!$user->isConfirmed()) {
                     $user->assignRole('user-confirmed');
                 }
             } else {
                 // No code used: keep as user only
-                if ($user->hasRole('user-confirmed')) {
+                if ($user->isConfirmed()) {
                     $user->removeRole('user-confirmed');
                 }
-                if (!$user->hasRole('user')) {
+                if (!$user->isOnProbation()) {
                     $user->assignRole('user');
                 }
             }

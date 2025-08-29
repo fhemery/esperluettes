@@ -20,7 +20,7 @@ class StoryPolicy
         }
 
         if ($story->visibility === Story::VIS_COMMUNITY) {
-            return $user !== null && method_exists($user, 'hasRole') && $user->hasRole('user-confirmed');
+            return $user !== null && method_exists($user, 'isConfirmed') && $user->isConfirmed();
         }
 
         if ($story->visibility === Story::VIS_PRIVATE) {

@@ -5,6 +5,7 @@ namespace App\Domains\Story\Services;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Support\StoryFilterAndPagination;
+use App\Domains\Shared\Support\SlugWithId;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -117,7 +118,7 @@ class StoryService
             $story->save();
 
             // 2) Update slug with id suffix
-            $story->slug = $slugBase . '-' . $story->id;
+            $story->slug = SlugWithId::build($slugBase, $story->id);
             $story->save();
 
             // 3) Attach genres (1..3)
@@ -151,10 +152,7 @@ class StoryService
     public function getStoryForShow(string $slug, ?int $viewerId): Story
     {
         // Extract id from trailing -{id}
-        $id = null;
-        if (preg_match('/-(\d+)$/', $slug, $m)) {
-            $id = (int) $m[1];
-        }
+        $id = SlugWithId::extractId($slug);
 
         // Only eager-load genre IDs to minimize payload; names are resolved via lookup in controller
         $base = Story::query()->with([
