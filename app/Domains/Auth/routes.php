@@ -34,6 +34,13 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    // Helper route to set intended URL before redirecting to login
+    Route::get('/auth/login-intended', function (\Illuminate\Http\Request $request) {
+        $redirect = $request->query('redirect', url('/'));
+        session()->put('url.intended', $redirect);
+        return redirect()->route('login');
+    })->name('login.with_intended');
 });
 
 Route::middleware('auth')->group(function () {
