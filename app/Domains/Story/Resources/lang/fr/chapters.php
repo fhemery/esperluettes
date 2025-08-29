@@ -52,9 +52,14 @@ return [
         'draft' => 'Brouillon',
     ],
     'actions' => [
-        'edit' => 'Éditer le chapitre'
-    ]
-    ,
+        'edit' => 'Éditer le chapitre',
+        'reorder' => 'Réorganiser',
+        'save_order' => "Enregistrer l'ordre",
+        'cancel' => 'Annuler',
+        'move_up' => 'Monter',
+        'move_down' => 'Descendre',
+    ],
+    'reorder_success' => "Ordre des chapitres enregistré avec succès.",
     'navigation' => [
         'previous' => 'Chapitre précédent',
         'next' => 'Chapitre suivant',

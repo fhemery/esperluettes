@@ -5,6 +5,7 @@ namespace App\Domains\Story\Http\Controllers;
 use App\Domains\Auth\PublicApi\UserPublicApi;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Http\Requests\ChapterRequest;
+use App\Domains\Story\Http\Requests\ReorderChaptersRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Services\ChapterService;
@@ -132,5 +133,30 @@ class ChapterController
             'storySlug' => $story->slug,
             'chapterSlug' => $chapter->slug,
         ])->with('status', __('story::chapters.updated_success'));
+    }
+
+    public function reorder(ReorderChaptersRequest $request, string $storySlug)
+    {
+        $storyId = SlugWithId::extractId($storySlug);
+        $story = Story::query()->findOrFail($storyId);
+
+        // Authors only (including co-authors); reuse create policy with Story context
+        if (!Gate::allows('create', [Chapter::class, $story])) {
+            abort(404);
+        }
+
+        $orderedIds = array_map('intval', $request->input('ordered_ids', []));
+
+        try {
+            $changes = $this->service->reorderChapters($story, $orderedIds, step: 100);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'message' => 'Invalid ordered_ids: must be a permutation of current chapter ids',
+            ], 422);
+        }
+
+        return response()->json([
+            'changes' => $changes,
+        ]);
     }
 }

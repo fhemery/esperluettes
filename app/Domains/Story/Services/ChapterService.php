@@ -3,6 +3,7 @@
 namespace App\Domains\Story\Services;
 
 use App\Domains\Shared\Support\SlugWithId;
+use App\Domains\Shared\Support\SparseReorder;
 use App\Domains\Story\Http\Requests\ChapterRequest;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\Story;
@@ -39,7 +40,7 @@ class ChapterService
 
             if ($published) {
                 $chapter->first_published_at = now();
-            }
+    }
 
             $chapter->save();
 
@@ -53,6 +54,34 @@ class ChapterService
             }
 
             return $chapter;
+        });
+    }
+
+    /**
+     * Reorder chapters of a story using SparseReorder and persist only changed rows.
+     * @return array<int,int> changes map id => new sort_order
+     */
+    public function reorderChapters(Story $story, array $orderedIds, int $step = 100): array
+    {
+        return DB::transaction(function () use ($story, $orderedIds, $step) {
+            $chapters = Chapter::query()
+                ->where('story_id', $story->id)
+                ->orderBy('sort_order')
+                ->get()
+                ->all();
+
+            // Compute changes (throws if not a permutation)
+            $changes = SparseReorder::computeChanges($chapters, $orderedIds, $step);
+
+            if (!empty($changes)) {
+                foreach ($changes as $id => $newOrder) {
+                    Chapter::where('story_id', $story->id)
+                        ->where('id', $id)
+                        ->update(['sort_order' => $newOrder]);
+                }
+            }
+
+            return $changes;
         });
     }
 

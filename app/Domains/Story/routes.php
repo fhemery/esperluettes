@@ -16,6 +16,11 @@ Route::middleware(['web'])->group(function () {
         Route::post('/stories', [StoryController::class, 'store'])
             ->name('stories.store');
 
+        // Chapters: reorder (authors/co-authors only; controller enforces 404 on unauthorized)
+        // MUST be defined before the generic /chapters/{chapterSlug} routes to avoid greedy matching
+        Route::put('/stories/{storySlug}/chapters/reorder', [ChapterController::class, 'reorder'])
+            ->where(['storySlug' => '.*'])
+            ->name('chapters.reorder');
 
         // Chapters: edit + update (authors/co-authors only; controllers enforce 404 on unauthorized)
         // To put before story edit to avoid agressive matching

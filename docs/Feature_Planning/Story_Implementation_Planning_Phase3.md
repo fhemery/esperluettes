@@ -136,7 +136,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 - Database: `chapters.first_published_at` (nullable timestamp) replaces `published_at` from preliminary spec.
 - Maintain efficient query to compute latest first_published_at.
 
-## **US-033: Read Published Chapters**
+## **[DONE] US-033: Read Published Chapters**
 
 **As a reader, I want to read published chapters so that I can enjoy the story.**
 
@@ -155,7 +155,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 - Route: `GET /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}` (see US-039).
 - Unauthorized/protected content returns 404 (no existence leak), consistent with `docs/Feature_Planning/Story.md`.
 
-## **US-034: Navigate Between Chapters**
+## **[DONE] US-034: Navigate Between Chapters**
 
 **As a reader, I want next/previous navigation so that I can easily move through the story.**
 
@@ -169,7 +169,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 
 - Precompute neighbor chapter ids via indexed `(story_id, sort_order)` queries.
 
-## **US-035: Reorder Chapters with Sparse Ordering**
+## **[DONE] US-035: Reorder Chapters with Sparse Ordering**
 
 **As an author/co-author, I want to reorder chapters efficiently so that large stories don't require renumbering
 everything.**

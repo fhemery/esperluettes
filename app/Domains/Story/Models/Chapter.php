@@ -4,8 +4,9 @@ namespace App\Domains\Story\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Domains\Shared\Contracts\Sortable;
 
-class Chapter extends Model
+class Chapter extends Model implements Sortable
 {
     protected $table = 'story_chapters';
 
@@ -39,4 +40,9 @@ class Chapter extends Model
     {
         return $this->slug; // stored with id suffix
     }
+
+    // Sortable contract
+    public function getId(): int { return (int)$this->id; }
+    public function getSortOrder(): int { return (int)$this->sort_order; }
+    public function setSortOrder(int $order): void { $this->sort_order = $order; }
 }
