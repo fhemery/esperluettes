@@ -45,8 +45,8 @@ it('assigns user role when activation is required and no activation code was use
     $response->assertRedirect();
     $user->refresh();
     expect($user->hasVerifiedEmail())->toBeTrue();
-    expect($user->hasRole('user'))->toBeTrue();
-    expect($user->hasRole('user-confirmed'))->toBeFalse();
+    expect($user->isOnProbation())->toBeTrue();
+    expect($user->isConfirmed())->toBeFalse();
 });
 
 it('assigns user-confirmed role when activation is required and an activation code was used', function () {
@@ -82,8 +82,8 @@ it('assigns user-confirmed role when activation is required and an activation co
     $response->assertRedirect();
     $user->refresh();
     expect($user->hasVerifiedEmail())->toBeTrue();
-    expect($user->hasRole('user-confirmed'))->toBeTrue();
-    expect($user->hasRole('user'))->toBeFalse();
+    expect($user->isConfirmed())->toBeTrue();
+    expect($user->isOnProbation())->toBeFalse();
 });
 
 it('assigns user-confirmed role when activation is not required', function () {
@@ -106,6 +106,6 @@ it('assigns user-confirmed role when activation is not required', function () {
     $response->assertRedirect();
     $user->refresh();
     expect($user->hasVerifiedEmail())->toBeTrue();
-    expect($user->hasRole('user-confirmed'))->toBeTrue();
-    expect($user->hasRole('user'))->toBeFalse();
+    expect($user->isConfirmed())->toBeTrue();
+    expect($user->isOnProbation())->toBeFalse();
 });

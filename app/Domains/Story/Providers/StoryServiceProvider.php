@@ -2,6 +2,11 @@
 
 namespace App\Domains\Story\Providers;
 
+use App\Domains\Story\Models\Story;
+use App\Domains\Story\Models\Chapter;
+use App\Domains\Story\Policies\StoryPolicy;
+use App\Domains\Story\Policies\ChapterPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class StoryServiceProvider extends ServiceProvider
@@ -20,6 +25,10 @@ class StoryServiceProvider extends ServiceProvider
         $this->loadViewsFrom(app_path('Domains/Story/Views'), 'story');
 
         // Load PHP translations for the Story domain under 'story::'
-        $this->loadTranslationsFrom(app_path('Domains/Story/Resources/lang'), 'story');
+        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'story');
+
+        // Register policies
+        Gate::policy(Story::class, StoryPolicy::class);
+        Gate::policy(Chapter::class, ChapterPolicy::class);
     }
 }

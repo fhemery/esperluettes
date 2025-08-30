@@ -4,26 +4,32 @@ namespace App\Domains\Story\Http\Controllers;
 
 use App\Domains\Auth\PublicApi\UserPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Shared\Support\Seo;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
+use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Services\StoryService;
 use App\Domains\Story\Support\StoryFilterAndPagination;
 use App\Domains\Story\ViewModels\StoryListViewModel;
 use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StorySummaryViewModel;
+use App\Domains\Story\ViewModels\ChapterSummaryViewModel;
+use App\Domains\Story\Services\ReadingProgressService;
 use App\Domains\StoryRef\Services\StoryRefLookupService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class StoryController
 {
     public function __construct(
-        private readonly StoryService          $service,
-        private readonly UserPublicApi         $userPublicApi,
-        private readonly ProfilePublicApi      $profileApi,
-        private readonly StoryRefLookupService $lookup
+        private readonly StoryService              $service,
+        private readonly UserPublicApi             $userPublicApi,
+        private readonly ProfilePublicApi          $profileApi,
+        private readonly StoryRefLookupService     $lookup,
+        private readonly ReadingProgressService    $progress
     )
     {
     }
@@ -125,6 +131,7 @@ class StoryController
                 title: $story->title,
                 slug: $story->slug,
                 description: $story->description,
+                readsLoggedTotal: (int)($story->reads_logged_total ?? 0),
                 authors: $authorDtos,
                 genreNames: $gNames,
                 triggerWarningNames: $twNames,
@@ -223,7 +230,7 @@ class StoryController
         // If title changed, regenerate slug base but keep -id suffix
         if ($story->title !== $oldTitle) {
             $slugBase = Story::generateSlugBase($story->title);
-            $story->slug = $slugBase . '-' . $story->id;
+            $story->slug = SlugWithId::build($slugBase, $story->id);
         }
 
         $story->save();
@@ -276,6 +283,7 @@ class StoryController
                 title: $story->title,
                 slug: $story->slug,
                 description: $story->description,
+                readsLoggedTotal: (int)($story->reads_logged_total ?? 0),
                 authors: $authorDtos,
             );
         }
@@ -297,27 +305,17 @@ class StoryController
     {
         $story = $this->service->getStoryForShow($slug, Auth::id());
 
-        // 301 redirect if slug base changed but id suffix matches
-        if ($story->slug !== $slug && preg_match('/-(\d+)$/', $slug, $m)) {
-            if ((int)$m[1] === (int)$story->id) {
+        // 301 redirect to canonical slug when base differs but id matches
+        if (!SlugWithId::isCanonical($slug, $story->slug)) {
+            $reqId = SlugWithId::extractId($slug);
+            if ($reqId !== null && $reqId === (int)$story->id) {
                 return redirect()->to('/stories/' . $story->slug, 301);
             }
         }
 
-        // Enforce visibility rules
-        $user = Auth::user();
-        if ($story->visibility === Story::VIS_PRIVATE) {
-            if (!$user || !$story->isCollaborator($user->id)) {
-                abort(404);
-            }
-        }
-        if ($story->visibility === Story::VIS_COMMUNITY) {
-            if (!$user) {
-                return redirect()->guest(route('login'));
-            }
-            if (!$this->userPublicApi->isVerified($user)) {
-                abort(404);
-            }
+        // Enforce visibility rules via policy
+        if (!Gate::allows('view', $story)) {
+            abort(404);
         }
 
         // Fetch authors' public profiles and build ViewModel
@@ -373,10 +371,37 @@ class StoryController
             }
         }
 
+        // Build chapters list for the viewer
+        $isAuthor = $story->isAuthor(Auth::id());
+        $chapterQuery = $story->chapters()
+            ->select(['id','title','slug','status','sort_order','reads_logged_count'])
+            ->when(!$isAuthor, fn($q) => $q->where('status', Chapter::STATUS_PUBLISHED))
+            ->orderBy('sort_order','asc');
+
+        $chapterRows = $chapterQuery->get();
+        $readIds = [];
+        if (Auth::check()) {
+            $readIds = $this->progress->getReadChapterIdsForUserInStory((int)Auth::id(), (int)$story->id);
+        }
+
+        $chapters = [];
+        foreach ($chapterRows as $c) {
+            $chapters[] = new ChapterSummaryViewModel(
+                id: (int)$c->id,
+                title: (string)$c->title,
+                slug: (string)$c->slug,
+                isDraft: (string)$c->status !== \App\Domains\Story\Models\Chapter::STATUS_PUBLISHED,
+                isRead: in_array((int)$c->id, $readIds, true),
+                readsLogged: (int)($c->reads_logged_count ?? 0),
+                url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
+            );
+        }
+
         $viewModel = new StoryShowViewModel(
             $story,
             Auth::id(),
             $authors,
+            $chapters,
             $typeName,
             $audienceName,
             $copyrightName,

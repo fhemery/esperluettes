@@ -12,12 +12,14 @@ class StorySummaryViewModel
     public readonly array $genreNames;
     /** @var array<int,string> */
     public readonly array $triggerWarningNames;
+    public readonly int $readsLoggedTotal;
 
     public function __construct(
         public readonly int $id,
         public readonly string $title,
         public readonly string $slug,
         public readonly ?string $description,
+        int $readsLoggedTotal = 0,
         array $authors,
         array $genreNames = [],
         array $triggerWarningNames = [],
@@ -26,6 +28,7 @@ class StorySummaryViewModel
         $this->authors = $authors;
         $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
         $this->triggerWarningNames = array_values(array_filter(array_map('strval', $triggerWarningNames)));
+        $this->readsLoggedTotal = max(0, (int)$readsLoggedTotal);
     }
 
     public function getTitle(): string
@@ -70,5 +73,10 @@ class StorySummaryViewModel
     public function getTriggerWarningNames(): array
     {
         return $this->triggerWarningNames;
+    }
+
+    public function getReadsLoggedTotal(): int
+    {
+        return $this->readsLoggedTotal;
     }
 }

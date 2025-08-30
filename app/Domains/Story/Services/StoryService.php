@@ -5,6 +5,7 @@ namespace App\Domains\Story\Services;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Support\StoryFilterAndPagination;
+use App\Domains\Shared\Support\SlugWithId;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -117,7 +118,7 @@ class StoryService
             $story->save();
 
             // 2) Update slug with id suffix
-            $story->slug = $slugBase . '-' . $story->id;
+            $story->slug = SlugWithId::build($slugBase, $story->id);
             $story->save();
 
             // 3) Attach genres (1..3)
@@ -151,10 +152,7 @@ class StoryService
     public function getStoryForShow(string $slug, ?int $viewerId): Story
     {
         // Extract id from trailing -{id}
-        $id = null;
-        if (preg_match('/-(\d+)$/', $slug, $m)) {
-            $id = (int) $m[1];
-        }
+        $id = SlugWithId::extractId($slug);
 
         // Only eager-load genre IDs to minimize payload; names are resolved via lookup in controller
         $base = Story::query()->with([
@@ -167,6 +165,28 @@ class StoryService
             : $base->where('slug', $slug)->firstOrFail();
 
         return $story;
+    }
+
+    /**
+     * Fetch a story by slug (or slug-with-id). Optionally eager-load chapters ordered by sort_order.
+     * Only minimal fields are selected for chapters to keep payload small.
+     */
+    public function getStory(string $slug, bool $includeChapters = false): Story
+    {
+        $id = SlugWithId::extractId($slug);
+
+        $query = Story::query();
+
+        if ($includeChapters) {
+            $query->with(['chapters' => function ($q) {
+                $q->orderBy('sort_order', 'asc')
+                  ->select(['id', 'story_id', 'title', 'slug', 'status', 'sort_order']);
+            }]);
+        }
+
+        return $id
+            ? $query->findOrFail($id)
+            : $query->where('slug', $slug)->firstOrFail();
     }
 
     /**

@@ -4,12 +4,15 @@ namespace App\Domains\Story\ViewModels;
 
 use App\Domains\Story\Models\Story;
 use App\Domains\Shared\Dto\ProfileDto;
+use App\Domains\Story\ViewModels\ChapterSummaryViewModel;
 
 class StoryShowViewModel
 {
     public readonly Story $story;
     public readonly ?int $currentUserId;
     public readonly array $authors;
+    /** @var array<int, ChapterSummaryViewModel> */
+    public readonly array $chapters;
     public readonly string $typeName;
     public readonly string $audienceName;
     public readonly string $copyrightName;
@@ -24,6 +27,7 @@ class StoryShowViewModel
         Story $story,
         ?int $currentUserId,
         array $authors,
+        array $chapters,
         string $typeName,
         string $audienceName,
         string $copyrightName,
@@ -35,6 +39,8 @@ class StoryShowViewModel
         $this->story = $story;
         /** @var ProfileDto[] $authors */
         $this->authors = $authors;
+        /** @var array<int, ChapterSummaryViewModel> $chapters */
+        $this->chapters = $chapters;
         $this->currentUserId = $currentUserId;
         $this->typeName = (string)$typeName;
         $this->audienceName = (string)$audienceName;
@@ -156,5 +162,10 @@ class StoryShowViewModel
     public function getTriggerWarningNames(): array
     {
         return $this->triggerWarningNames;
+    }
+
+    public function getReadsLoggedTotal(): int
+    {
+        return (int) ($this->story->reads_logged_total ?? 0);
     }
 }

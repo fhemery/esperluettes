@@ -73,6 +73,26 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Check if the user is on probation
+     *
+     * @return bool
+     */
+    public function isOnProbation(): bool
+    {
+        return $this->hasRole('user');
+    }
+
+    /**
+     * Check if the user is confirmed
+     *
+     * @return bool
+     */
+    public function isConfirmed(): bool
+    {
+        return $this->hasRole('user-confirmed');
+    }
+
+    /**
      * Check if the user has a specific role.
      *
      * @param  string|array  $roles

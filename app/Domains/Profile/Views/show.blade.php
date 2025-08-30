@@ -118,7 +118,7 @@
                     <!-- About Panel -->
                     @if(Auth::check())
                         <div x-show="tab==='about'" x-cloak>
-                            <x-profile.about-panel :profile="$profile"/>
+                            <x-profile::about-panel :profile="$profile"/>
                         </div>
                     @endif
 

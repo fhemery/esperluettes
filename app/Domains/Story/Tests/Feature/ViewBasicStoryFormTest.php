@@ -12,13 +12,13 @@ it('shows basic story form fields to authenticated users', function () {
 
     $response->assertOk();
     // Assert by translation keys to be locale-agnostic
-    $response->assertSee(trans('story::create.form.title.label'));
-    $response->assertSee(trans('story::shared.description.label'));
-    $response->assertSee(trans('story::shared.visibility.label'));
-    $response->assertSee(trans('story::shared.visibility.help'), false); // allow HTML
-    $response->assertSee(trans('story::shared.visibility.options.public'));
-    $response->assertSee(trans('story::shared.visibility.options.community'));
-    $response->assertSee(trans('story::shared.visibility.options.private'));
+    $response->assertSee('story::create.form.title.label');
+    $response->assertSee('story::shared.description.label');
+    $response->assertSee('story::shared.visibility.label');
+    $response->assertSee('story::shared.visibility.help', false); // allow HTML
+    $response->assertSee('story::shared.visibility.options.public');
+    $response->assertSee('story::shared.visibility.options.community');
+    $response->assertSee('story::shared.visibility.options.private');
 });
 
 it('shows story types details to authenticated used', function () {
@@ -29,10 +29,10 @@ it('shows story types details to authenticated used', function () {
     $response->assertOk();
 
     // Type field (label, placeholder/help, required note)
-    $response->assertSee(trans('story::shared.type.label'));
-    $response->assertSee(trans('story::shared.type.placeholder'));
-    $response->assertSee(trans('story::shared.type.help'));
-    $response->assertSee(trans('story::create.actions.continue'));
+    $response->assertSee('story::shared.type.label');
+    $response->assertSee('story::shared.type.placeholder');
+    $response->assertSee('story::shared.type.help');
+    $response->assertSee('story::create.actions.continue');
 });
 
 it('shows story audience details to authenticated user', function () {
@@ -43,9 +43,9 @@ it('shows story audience details to authenticated user', function () {
     $response->assertOk();
 
     // Audience field (label, placeholder/help, required note)
-    $response->assertSee(trans('story::shared.audience.label'));
-    $response->assertSee(trans('story::shared.audience.placeholder'));
-    $response->assertSee(trans('story::shared.audience.help'));
+    $response->assertSee('story::shared.audience.label');
+    $response->assertSee('story::shared.audience.placeholder');
+    $response->assertSee('story::shared.audience.help');
 });
 
 it('shows story copyright details to authenticated user', function () {
@@ -56,7 +56,7 @@ it('shows story copyright details to authenticated user', function () {
     $response->assertOk();
 
     // Copyright field (label, placeholder/help, required note)
-    $response->assertSee(trans('story::shared.copyright.label'));
-    $response->assertSee(trans('story::shared.copyright.placeholder'));
-    $response->assertSee(trans('story::shared.copyright.help'));
+    $response->assertSee('story::shared.copyright.label');
+    $response->assertSee('story::shared.copyright.placeholder');
+    $response->assertSee('story::shared.copyright.help');
 });

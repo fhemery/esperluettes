@@ -4,6 +4,7 @@ namespace App\Domains\Story\Models;
 
 use App\Domains\StoryRef\Models\StoryRefGenre;
 use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
+use App\Domains\Story\Models\Chapter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -16,6 +17,7 @@ class Story extends Model
         'description',
         'visibility',
         'last_chapter_published_at',
+        'reads_logged_total',
         'story_ref_type_id',
         'story_ref_audience_id',
         'story_ref_copyright_id',
@@ -89,5 +91,13 @@ class Story extends Model
     {
         return $this->belongsToMany(StoryRefTriggerWarning::class, 'story_trigger_warnings', 'story_id', 'story_ref_trigger_warning_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Chapters belonging to this story
+     */
+    public function chapters()
+    {
+        return $this->hasMany(Chapter::class);
     }
 }

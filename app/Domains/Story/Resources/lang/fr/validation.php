@@ -58,4 +58,7 @@ return [
         'integer' => 'Chaque avertissement de contenu doit être un entier',
         'exists' => 'Un avertissement de contenu sélectionné n\'existe pas',
     ],
+
+    // Chapters
+    'author_note_too_long' => 'La note de l\'auteur dépasse la limite de 1000 caractères.',
 ];
