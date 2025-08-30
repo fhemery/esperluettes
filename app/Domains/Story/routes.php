@@ -80,11 +80,6 @@ Route::middleware(['web'])->group(function () {
         });
     });
 
-    // Guests: one-way increment endpoint (must be outside role-protected group)
-    Route::post('/stories/{storySlug}/chapters/{chapterSlug}/read/guest', [ReadingProgressController::class, 'guestIncrement'])
-        ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
-        ->name('chapters.read.guest');
-
     // Chapter public show route (US-039 path with /chapters segment)
     // IMPORTANT: define before the generic /stories/{slug} route to avoid greedy matching.
     Route::get('/stories/{storySlug}/chapters/{chapterSlug}', [ChapterController::class, 'show'])

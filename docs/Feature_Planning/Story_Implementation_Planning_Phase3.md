@@ -217,7 +217,7 @@ everything.**
 - `DELETE /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read` — Logged users: mark-as-unread. Idempotent (no-op if already unread). Decrements `reads_logged_count` on successful unmark (not below zero). Responds `204 No Content` on success.
 - `POST /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read/guest` — Guests: one-way increment of `reads_guest_count`. Responds `204 No Content` on success.
 
-## **US-037: Manually Mark Chapter as Read (Readers)**
+## **[DONE] US-037: Manually Mark Chapter as Read (Readers)**
 
 **As a reader, I want to manually mark a chapter as read so that I can track my progress.**
 
@@ -225,7 +225,7 @@ everything.**
 
 - **Access**: Only available on published chapter pages. Not shown to authors/co-authors.
 - **Logged users**: A toggle button reflects current state (read/unread). Clicking “Mark as read” creates `reading_progress (user_id, chapter_id, read_at)` and increments `reads_logged_count`. Clicking “Mark as unread” deletes that row and decrements `reads_logged_count` (not below zero). Actions are idempotent: attempting to mark as read when already read or mark as unread when already unread is a no-op.
-- **Guests**: A one-way “Mark as read” button increments `reads_guest_count`. No per-guest persistence (cannot unmark).
+- **Guests**: No button. User has to log for reading progress to be updated
 - **UI**: Button shows “Read” state if logged user already marked it; guests always see it as not toggled. Add a brief debounce while requests are in-flight.
 - **TOC toggle**: For logged non-author users, the TOC shows a read-status icon per chapter; clicking it toggles read/unread using the same backend endpoints.
 
@@ -235,6 +235,7 @@ everything.**
   - `POST /stories/{story}/chapters/{chapter}/read` (logged mark-as-read, 204 on success)
   - `DELETE /stories/{story}/chapters/{chapter}/read` (logged mark-as-unread, 204 on success)
   - `POST /stories/{story}/chapters/{chapter}/read/guest` (guest one-way, 204 on success)
+  - Guest access currently not used (still checking if we need it)
   - All CSRF-protected.
 - Server rules and guards:
   - 403 for authors/co-authors attempting to call these endpoints.

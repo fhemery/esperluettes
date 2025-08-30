@@ -57,28 +57,6 @@ class ReadingProgressController
         return response()->noContent(); // 204
     }
 
-    public function guestIncrement(Request $request, string $storySlug, string $chapterSlug)
-    {
-        // Guests only
-        $storyId = SlugWithId::extractId($storySlug);
-        $chapterId = SlugWithId::extractId($chapterSlug);
-
-        $story = Story::query()->findOrFail($storyId);
-        $chapter = Chapter::query()->where('story_id', $story->id)->findOrFail($chapterId);
-
-        $this->assertChapterViewableAndPublished($story, $chapter);
-
-        $user = $request->user();
-        if ($user) {
-            abort(403);
-        }
-
-        // Delegate to service
-        $this->readingProgress->incrementGuest($chapter);
-
-        return response()->noContent(); // 204
-    }
-
     private function assertChapterViewableAndPublished(Story $story, Chapter $chapter): void
     {
         if (!Gate::allows('view', $story)) {

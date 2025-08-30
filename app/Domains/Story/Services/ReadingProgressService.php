@@ -57,11 +57,6 @@ class ReadingProgressService
         });
     }
 
-    public function incrementGuest(Chapter $chapter): void
-    {
-        $chapter->increment('reads_guest_count');
-    }
-
     /**
      * Return the list of read chapter IDs for a given user within a given story.
      *

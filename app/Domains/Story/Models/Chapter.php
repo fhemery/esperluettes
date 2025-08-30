@@ -19,7 +19,6 @@ class Chapter extends Model implements Sortable
         'sort_order',
         'status',
         'first_published_at',
-        'reads_guest_count',
         'reads_logged_count',
     ];
 

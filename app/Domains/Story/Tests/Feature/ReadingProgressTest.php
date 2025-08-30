@@ -28,13 +28,7 @@ function markAsUnread($test, $chapter)
     ]));
 }
 
-function markAsGuestRead($test, $chapter)
-{
-    return $test->post(route('chapters.read.guest', [
-        'storySlug' => $chapter->story->slug,
-        'chapterSlug' => $chapter->slug,
-    ]));
-}
+// Guest reading progress has been removed; no guest endpoints exist anymore.
 
 describe('Reading Progress - Errors', function () {
     it('should forbid author from toggling their own chapter reading status', function () {
@@ -57,14 +51,7 @@ describe('Reading Progress - Errors', function () {
         markAsUnread($this, $chapter)->assertRedirect('/login');
     });
 
-    it('should forbid guest to mark community story chapter as read', function () {
-        $author = alice($this);
-        $story = communityStory('Community Story', $author->id);
-        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Community']);
-
-        Auth::logout();
-        markAsGuestRead($this, $chapter)->assertNotFound();
-    });
+    // Removed: guest reading progress feature and endpoints
 
     it('should forbid non confirmed users from toggling reading status of community story', function () {
         $author = alice($this);
@@ -127,18 +114,5 @@ describe('Reading Progress - Success', function () {
         // TODO: check later in chapter view that stat says 0 view
     });
 
-    it('increments guest reads for published visible chapter; forbids authors and hides when not viewable', function () {
-        $author = alice($this);
-        $public = publicStory('Public Story', $author->id);
-        $pubCh = createPublishedChapter($this, $public, $author, ['title' => 'Pub']);
-
-        // guest on public: increments
-        Auth::logout();
-        markAsGuestRead($this, $pubCh)->assertNoContent();
-
-        // Second call is idempotent
-        markAsGuestRead($this, $pubCh)->assertNoContent();
-
-        // TODO: check later in chapter view that stat says 1 view
-    });
+    // Removed: guest read increment tests
 });

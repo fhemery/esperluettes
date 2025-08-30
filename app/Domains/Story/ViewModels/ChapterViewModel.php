@@ -15,7 +15,6 @@ class ChapterViewModel
         public readonly ?Chapter $prevChapter,
         public readonly ?Chapter $nextChapter,
         public readonly bool $isReadByMe,
-        public readonly int $readsGuest,
         public readonly int $readsLogged,
     ) {
     }
@@ -49,7 +48,6 @@ class ChapterViewModel
             prevChapter: $prevChapter ?: null,
             nextChapter: $nextChapter ?: null,
             isReadByMe: $isReadByMe,
-            readsGuest: (int) $chapter->reads_guest_count,
             readsLogged: (int) $chapter->reads_logged_count,
         );
     }
