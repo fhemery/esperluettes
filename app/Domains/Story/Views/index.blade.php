@@ -22,7 +22,7 @@
     <!-- Filters Section -->
     <div class="py-4">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <x-collapsible title="{{__('story::shared.filters.header')}}" :open="$hasFilters">
+            <x-shared::collapsible title="{{__('story::shared.filters.header')}}" :open="$hasFilters">
                 <form method="GET" action="{{ url('/stories') }}" class="flex items-start gap-6 flex-wrap" x-data
                       @submit="if($refs.type && $refs.type.value===''){ $refs.type.removeAttribute('name') }">
                     <div>
@@ -93,7 +93,7 @@
                         @endif
                     </div>
                 </form>
-            </x-collapsible>
+            </x-shared::collapsible>
         </div>
     </div>
 
@@ -107,7 +107,7 @@
                             {{ __('story::index.empty') }}
                         </div>
                     @else
-                        <x-story.list-grid :view-model="$viewModel"/>
+                        <x-story::list-grid :view-model="$viewModel"/>
                     @endif
                 </div>
             </div>

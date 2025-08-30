@@ -10,7 +10,7 @@
 @php($visOld = old('visibility', $story?->visibility ?? 'public'))
 
 <!-- Panel 1: General info -->
-<x-collapsible :title="__('story::shared.panels.general')" :open="true">
+<x-shared::collapsible :title="__('story::shared.panels.general')" :open="true">
     <div class="grid grid-cols-4 gap-6">
         <!-- Title -->
         <div class="col-span-4 md:col-span-3">
@@ -89,10 +89,10 @@
             <x-input-error :messages="$errors->get('story_ref_copyright_id')" class="mt-2"/>
         </div>
     </div>
-</x-collapsible>
+</x-shared::collapsible>
 
 <!-- Panel 2: Details -->
-<x-collapsible :title="__('story::shared.panels.details')" :open="true">
+<x-shared::collapsible :title="__('story::shared.panels.details')" :open="true">
     <div class="grid grid-cols-4 gap-6">
         <!-- Genres -->
         <div class="col-span-4 md:col-span-3">
@@ -140,10 +140,10 @@
         <x-shared::editor id="story-description-editor" name="description" :max="3000" :nbLines="15" class="mt-1 block w-full" defaultValue="{{ old('description', $story?->description ?? '') }}" />
         <x-input-error :messages="$errors->get('description')" class="mt-2"/>
     </div>
-</x-collapsible>
+</x-shared::collapsible>
 
 <!-- Panel 3: Audience -->
-<x-collapsible :title="__('story::shared.panels.audience')" :open="true">
+<x-shared::collapsible :title="__('story::shared.panels.audience')" :open="true">
     <div class="grid grid-cols-4 gap-6">
         <!-- Audience -->
         <div class="col-span-4 md:col-span-1">
@@ -178,10 +178,10 @@
         <x-input-error :messages="$errors->get('story_ref_trigger_warning_ids')" class="mt-2"/>
         </div>
     </div>
-</x-collapsible>
+</x-shared::collapsible>
 
 <!-- Panel 4: Miscellaneous -->
-<x-collapsible :title="__('story::shared.panels.misc')" :open="true">
+<x-shared::collapsible :title="__('story::shared.panels.misc')" :open="true">
     <div>
         <div class="flex items-center gap-2">
             <x-input-label for="story_ref_feedback_id" :value="__('story::shared.feedback.label')"/>
@@ -198,4 +198,4 @@
         </select>
         <x-input-error :messages="$errors->get('story_ref_feedback_id')" class="mt-2"/>
     </div>
-</x-collapsible>
+</x-shared::collapsible>

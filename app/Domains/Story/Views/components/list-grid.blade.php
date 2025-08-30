@@ -32,7 +32,7 @@
                 @if($displayAuthors)
                     <div class="p-4 pt-0 text-sm text-gray-600">
                         <span class="font-medium">{{ __('story::shared.by') }} </span>
-                        <x-profile.inline-names :profiles="$item->getAuthors()" />
+                        <x-profile::inline-names :profiles="$item->getAuthors()" />
                     </div>
                 @endif
                 @php($genres = $item->getGenreNames())
