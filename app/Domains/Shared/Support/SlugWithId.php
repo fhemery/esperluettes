@@ -15,8 +15,10 @@ class SlugWithId
     public static function build(string $baseSlug, int $id): string
     {
         $baseSlug = trim($baseSlug);
-        // Remove any trailing -{id} if present before appending the real id
-        $baseSlug = preg_replace('/-(\d+)$/', '', $baseSlug) ?? $baseSlug;
+        // Remove trailing -{id} only if it matches the provided id, to preserve
+        // numeric endings that are part of the title (e.g., "chapter-1").
+        $pattern = '/-' . preg_quote((string) $id, '/') . '$/';
+        $baseSlug = preg_replace($pattern, '', $baseSlug) ?? $baseSlug;
         return sprintf('%s-%d', $baseSlug, $id);
     }
 

@@ -32,7 +32,11 @@ class ChapterService
             $chapter = new Chapter();
             $chapter->story_id = $story->id;
             $chapter->title = $title;
-            $chapter->slug = $slugBase; // will update with id suffix after save
+            // Use a temporary unique slug to satisfy the unique index on first insert,
+            // then replace with the canonical slug including the -id suffix after we have the id.
+            // Keep it under 255 chars to avoid DB errors.
+            $tmpSlug = Str::limit($slugBase, 240, '') . '-' . Str::lower(Str::random(12));
+            $chapter->slug = $tmpSlug; // will update with id suffix after save
             $chapter->author_note = $authorNoteHtml;
             $chapter->content = $contentHtml;
             $chapter->sort_order = $sortOrder;

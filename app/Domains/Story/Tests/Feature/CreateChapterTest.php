@@ -69,6 +69,24 @@ it('creates a published chapter and redirects to its show page', function () {
     $show->assertSee('Chapter One');
 });
 
+it('should work properly with twice the same chapter name', function() {
+    $user = alice($this);
+    $this->actingAs($user);
+    $story = createStoryForAuthor($user->id, ['title' => 'My Story']);
+
+    $payload = [
+        'title' => 'Chapter 1',
+        'author_note' => '<p>Hello <strong>world</strong></p>',
+        'content' => '<p>Body</p>',
+        // published checkbox defaults to on; sending explicitly for clarity
+        'published' => '1',
+    ];
+    $this->post('/stories/' . $story->slug . '/chapters', $payload);
+    $secondPost = $this->post('/stories/' . $story->slug . '/chapters', $payload);
+    $secondPost->assertRedirect();
+    
+});
+
 it('returns 404 when a non-author tries to create a chapter on someone else\'s story', function () {
     $author = alice($this);
     $other = bob($this);
