@@ -1,4 +1,12 @@
-@section('title', $vm->story->title . ' — ' . $vm->chapter->title . ' – ' . config('app.name'))
+@section('title', $vm->seo->title)
+@push('meta')
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ $vm->seo->title }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $vm->seo->title }}">
+    <meta property="og:image" content="{{ $vm->seo->coverImage }}">
+    <meta name="twitter:image" content="{{ $vm->seo->coverImage }}">
+@endpush
 
 <x-app-layout>
     <div class="py-12">

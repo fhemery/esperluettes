@@ -4,7 +4,9 @@ namespace App\Domains\Story\ViewModels;
 
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\Story;
+use App\Domains\Shared\ViewModels\SeoViewModel;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class ChapterViewModel
 {
@@ -16,6 +18,7 @@ class ChapterViewModel
         public readonly ?Chapter $nextChapter,
         public readonly bool $isReadByMe,
         public readonly int $readsLogged,
+        public readonly SeoViewModel $seo,
     ) {
     }
 
@@ -41,6 +44,10 @@ class ChapterViewModel
             ->sortBy('sort_order')
             ->first();
 
+        $rawTitle = ($story->title ?? '') . ' — ' . ($chapter->title ?? '');
+        $pageTitle = Str::limit(strip_tags($rawTitle), 160, '');
+        $coverImage = asset('images/story/default-cover.svg');
+
         return new self(
             story: $story,
             chapter: $chapter,
@@ -49,6 +56,7 @@ class ChapterViewModel
             nextChapter: $nextChapter ?: null,
             isReadByMe: $isReadByMe,
             readsLogged: (int) $chapter->reads_logged_count,
+            seo: new SeoViewModel(title: $pageTitle, coverImage: $coverImage),
         );
     }
 }

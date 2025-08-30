@@ -259,7 +259,7 @@ everything.**
 - Controller logic implemented in `app/Domains/Story/Http/Controllers/ChapterController.php::show()` to issue a single 301 when story and/or chapter base slugs mismatch.
 - Tests added in `app/Domains/Story/Tests/Feature/ViewChapterTest.php` under "regarding SEO" to cover story mismatch, chapter mismatch, combined mismatch, and query string preservation.
 
-## **US-039: Chapter Routes Use "/chapters" Segment (Including Show)**
+## **[DONE] US-039: Chapter Routes Use "/chapters" Segment (Including Show)**
 
 **As a reader, I want consistent chapter URLs so that create/edit/show share the same route pattern.**
 
@@ -271,9 +271,14 @@ everything.**
 
 **Implementation Notes:**
 
-- Adjust route definitions and link generators. Ensure canonical redirect (US-038) still applies.
+- Implemented in `app/Domains/Story/routes.php`:
+  - `GET /stories/{storySlug}/chapters/{chapterSlug}` → `chapters.show`
+  - `GET /stories/{storySlug}/chapters/create` → `chapters.create`
+  - `GET /stories/{storySlug}/chapters/{chapterSlug}/edit` → `chapters.edit`
+  - `PUT/PATCH /stories/{storySlug}/chapters/{chapterSlug}` → `chapters.update`
+- Controller `ChapterController::show()` used by show route; canonical redirects from US-038 apply.
 
-## **US-040: Database Adjustments for Chapters**
+## **[DONE] US-040: Database Adjustments for Chapters**
 
 **As an engineer, I want the chapters schema to reflect Phase 3 behavior.**
 
@@ -283,7 +288,7 @@ everything.**
   - `first_published_at` (nullable timestamp) replaces preliminary `published_at`.
   - `status` enum only: `not_published`, `published`.
   - `sort_order` integer with index `(story_id, sort_order)`.
-  - `reads_logged_count` unsigned int default 0.
+  - `reads_logged_count` unsigned int default 0. (We also track `reads_guest_count` for potential future use.)
   - Cascade delete on story -> chapters.
   - Storage: `author_note` as TEXT; `content` as LONGTEXT.
 - `reading_progress` table:
@@ -292,7 +297,15 @@ everything.**
 - `stories` table:
   - Keep `last_chapter_published_at` updated only on first publishes (US-032).
 
-## **US-041: Story Details and Chapter Page SEO**
+**Implementation Notes:**
+
+- Migrations:
+  - `app/Domains/Story/Database/Migrations/2025_08_28_000002_create_chapters_table.php`
+  - `app/Domains/Story/Database/Migrations/2025_08_28_000003_create_reading_progress_table.php`
+- Service logic updates `stories.last_chapter_published_at` on first publish:
+  - `app/Domains/Story/Services/ChapterService.php::createChapter()` and `::updateChapter()`
+
+## **[DONE] US-041: Story Details and Chapter Page SEO**
 
 **As a visitor, I want meaningful titles for chapters so that I understand the page content.**
 
@@ -301,6 +314,14 @@ everything.**
 - Chapter `<title>`: "{Story Title} — {Chapter Title}" truncated to 160 characters (no HTML).
 - No HTML meta description tag for now.
 - OG/Twitter: keep title; image uses story cover (or default cover) — no chapter-specific image for now.
+
+**Implementation Notes:**
+
+- Implemented in `app/Domains/Story/Views/chapters/show.blade.php`:
+  - Compute `$pageTitle = Str::limit(strip_tags("{Story} — {Chapter}"), 160, '')`.
+  - `@section('title', $pageTitle)` without app name suffix.
+  - Push OG/Twitter tags with `og:type=article`, `og:title` and `twitter:title` set to `$pageTitle`.
+  - Use `asset('images/story/default-cover.svg')` as image source (default cover).
 
 ## **US-042: Stories Index Requires At Least One Published Public Chapter**
 

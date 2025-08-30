@@ -326,4 +326,28 @@ describe('regarding SEO', function () {
         parse_str($parsed['query'] ?? '', $qs);
         $this->assertEquals(['utm' => 'abc', 'ref' => 'xyz'], $qs);
     });
+
+    it('renders SEO meta tags for chapter page', function () {
+        $author = alice($this);
+        $story = publicStory('SEO Story Title', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'SEO Chapter Title']);
+
+        $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+        $resp->assertOk();
+
+        $expectedTitle = 'SEO Story Title — SEO Chapter Title';
+
+        // Title tag from layout
+        $resp->assertSee('<title>' . $expectedTitle . '</title>', false);
+
+        // OG/Twitter title tags
+        $resp->assertSee('property="og:title" content="' . $expectedTitle . '"', false);
+        $resp->assertSee('name="twitter:title" content="' . $expectedTitle . '"', false);
+
+        // Default cover image used in both OG and Twitter
+        $resp->assertSee('/images/story/default-cover.svg', false);
+
+        // No meta description for chapter page per US-041
+        $resp->assertDontSee('name="description"', false);
+    });
 });
