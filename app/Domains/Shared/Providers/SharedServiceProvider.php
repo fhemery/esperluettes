@@ -78,5 +78,10 @@ class SharedServiceProvider extends ServiceProvider
         if (app()->environment('testing') && config('database.default') !== 'sqlite') {
             throw new \RuntimeException('Tests must use sqlite. Clear config cache before running tests.');
         }
+
+        // Blade directive: compact number formatter
+        Blade::directive('compactNumber', function ($expression) {
+            return "<?php echo \\App\\Domains\\Shared\\Support\\NumberFormatter::compact($expression); ?>";
+        });
     }
 }
