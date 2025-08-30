@@ -27,6 +27,35 @@ class ChapterController
     ) {
     }
 
+    /**
+     * Canonical redirect (US-038): if either story or chapter slug base differs while ids match,
+     * redirect once to the combined canonical path, preserving query string. Do this before access checks.
+     */
+    private function canonicalRedirectIfNeeded(Request $request, Story $story, Chapter $chapter, string $requestedStorySlug, string $requestedChapterSlug): ?RedirectResponse
+    {
+        $requestStoryId = SlugWithId::extractId($requestedStorySlug);
+        $chapterId = SlugWithId::extractId($requestedChapterSlug);
+
+        $storyMatchesId = $requestStoryId !== null && (int) $requestStoryId === (int) $story->id;
+        $chapterMatchesId = $chapterId !== null && (int) $chapterId === (int) $chapter->id;
+        $storyCanonical = SlugWithId::isCanonical($requestedStorySlug, $story->slug);
+        $chapterCanonical = SlugWithId::isCanonical($requestedChapterSlug, $chapter->slug);
+
+        if (($storyMatchesId && !$storyCanonical) || ($chapterMatchesId && !$chapterCanonical)) {
+            $target = route('chapters.show', [
+                'storySlug' => $story->slug,
+                'chapterSlug' => $chapter->slug,
+            ]);
+            $qs = $request->getQueryString();
+            if ($qs) {
+                $target .= '?' . $qs;
+            }
+            return redirect()->to($target, 301);
+        }
+
+        return null;
+    }
+
     public function create(Request $request, string $storySlug): View
     {
         $storyId = SlugWithId::extractId($storySlug);
@@ -65,14 +94,17 @@ class ChapterController
         ])->with('status', __('story::chapters.created_success'));
     }
 
-    public function show(Request $request, string $storySlug, string $chapterSlug): View
+    public function show(Request $request, string $storySlug, string $chapterSlug): View|RedirectResponse
     {
-        $chapterId = SlugWithId::extractId($chapterSlug);
-
         // Load story with ordered chapters (minimal fields) for navigation computation
         $story = $this->storyService->getStory($storySlug, includeChapters: true);
         // Load full chapter content separately
+        $chapterId = SlugWithId::extractId($chapterSlug);
         $chapter = Chapter::query()->where('story_id', $story->id)->findOrFail($chapterId);
+
+        if ($redirect = $this->canonicalRedirectIfNeeded($request, $story, $chapter, $storySlug, $chapterSlug)) {
+            return $redirect;
+        }
 
         $user = $request->user();
         $userId = $user?->id ? (int) $user->id : null;

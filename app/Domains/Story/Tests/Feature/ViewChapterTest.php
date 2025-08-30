@@ -265,3 +265,65 @@ describe('Reading statistics', function () {
         $resp->assertSee('1');
     });
 });
+
+describe('regarding SEO', function () {
+    it('301-redirects when chapter slug base is outdated', function () {
+        $author = alice($this);
+        $story = publicStory('SEO Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'SEO Chapter']);
+
+        // Build a wrong base but same id for chapter slug
+        $wrongChapterSlug = 'old-chapter-' . $chapter->id;
+
+        $resp = $this->get(route('chapters.show', [
+            'storySlug' => $story->slug,
+            'chapterSlug' => $wrongChapterSlug,
+        ]));
+        $resp->assertStatus(301);
+        $resp->assertRedirect(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    });
+
+    it('301-redirects when story slug base is outdated', function () {
+        $author = alice($this);
+        $story = publicStory('SEO Story 2', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'SEO Chapter 2']);
+
+        // Build a wrong base but same id for story slug
+        $wrongStorySlug = 'old-story-' . $story->id;
+
+        $resp = $this->get(route('chapters.show', [
+            'storySlug' => $wrongStorySlug,
+            'chapterSlug' => $chapter->slug,
+        ]));
+        $resp->assertStatus(301);
+        $resp->assertRedirect(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    });
+
+    it('301-redirects once to combined canonical when both story and chapter bases are outdated and preserves query string', function () {
+        $author = alice($this);
+        $story = publicStory('SEO Story 3', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'SEO Chapter 3']);
+
+        $wrongStorySlug = 'ancient-story-' . $story->id;
+        $wrongChapterSlug = 'ancient-chapter-' . $chapter->id;
+
+        $url = route('chapters.show', [
+            'storySlug' => $wrongStorySlug,
+            'chapterSlug' => $wrongChapterSlug,
+        ]) . '?utm=abc&ref=xyz';
+
+        $resp = $this->get($url);
+        $resp->assertStatus(301);
+
+        $location = $resp->headers->get('Location');
+        $baseExpected = route('chapters.show', [
+            'storySlug' => $story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]);
+        $this->assertStringStartsWith($baseExpected, $location);
+
+        $parsed = parse_url($location);
+        parse_str($parsed['query'] ?? '', $qs);
+        $this->assertEquals(['utm' => 'abc', 'ref' => 'xyz'], $qs);
+    });
+});

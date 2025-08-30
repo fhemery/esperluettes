@@ -190,7 +190,7 @@ everything.**
 - Rebalance very occasionally when gaps are exhausted; O(n) rebalance acceptable as a rare maintenance action.
 - Add index `(story_id, sort_order)`.
 
-## **US-036: Read Counters (Guest vs Logged) and Stats**
+## **[DONE] US-036: Read Counters (Guest vs Logged) and Stats**
 
 **As an author, I want to see how many times a chapter was read so that I can understand engagement.**
 
@@ -240,20 +240,24 @@ everything.**
 - `reading_progress` table: unique key `(user_id, chapter_id)`; FK to `story_chapters` with CASCADE on delete.
 - Debounce client requests to prevent rapid re-clicks while a request is in-flight; also guard server-side with idempotency and non-negative counters.
 
-## **US-038: Canonical Redirects for Chapter Slugs**
+## **[DONE] US-038: Canonical Redirects for Chapter Slugs**
 
 **As a reader, I want stable chapter URLs so that old links redirect correctly after title/slug changes.**
 
 **Acceptance Criteria:**
 
 - If the request path ends with a valid `-id` for the chapter but the base slug is outdated, respond with HTTP 301 to the canonical slug.
-- This applies both to story slug and chapter slug; either mismatch triggers redirect to the canonical combined path.
+- Applies to both story slug and chapter slug; if either base is outdated but the `-id` matches, perform a single 301 redirect to the combined canonical path.
+- Preserve the original query string parameters on redirect.
+- Perform the redirect before any authorization checks.
+- Normalize trailing slashes (redirect to canonical URL without trailing slash).
 - No composite unique index on `(story_id, slug)` is required because the `-id` suffix ensures uniqueness.
 
 **Implementation Notes:**
 
-- Shared helper for extracting IDs from slug-with-id and building canonical URLs.
-- Add tests to assert 301 redirects for old slugs.
+- Shared helper `app/Domains/Shared/Support/SlugWithId.php` is used to extract IDs and validate canonical slugs.
+- Controller logic implemented in `app/Domains/Story/Http/Controllers/ChapterController.php::show()` to issue a single 301 when story and/or chapter base slugs mismatch.
+- Tests added in `app/Domains/Story/Tests/Feature/ViewChapterTest.php` under "regarding SEO" to cover story mismatch, chapter mismatch, combined mismatch, and query string preservation.
 
 ## **US-039: Chapter Routes Use "/chapters" Segment (Including Show)**
 
