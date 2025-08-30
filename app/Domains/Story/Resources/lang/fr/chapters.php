@@ -58,6 +58,8 @@ return [
         'cancel' => 'Annuler',
         'move_up' => 'Monter',
         'move_down' => 'Descendre',
+        'mark_as_read' => 'Marquer comme lu',
+        'marked_read' => 'Lu',
     ],
     'reorder_success' => "Ordre des chapitres enregistré avec succès.",
     'navigation' => [

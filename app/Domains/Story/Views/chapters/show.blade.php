@@ -59,7 +59,39 @@
                                 @endif
                             </div>
                             <div class="text-sm text-gray-500">
-                                {{ __('story::chapters.navigation.mark_read') }}
+                                @if($vm->chapter->status === \App\Domains\Story\Models\Chapter::STATUS_PUBLISHED && !$vm->isAuthor)
+                                    @auth
+                                        <button
+                                            type="button"
+                                            id="markReadToggle"
+                                            class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-sm transition-colors {{ $vm->isReadByMe ? 'bg-green-600 text-white hover:bg-green-700 border-green-600' : 'bg-blue-600 text-white hover:bg-blue-700 border-blue-600' }}"
+                                            data-read="{{ $vm->isReadByMe ? '1' : '0' }}"
+                                            data-url-read="{{ route('chapters.read.mark', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}"
+                                            data-url-unread="{{ route('chapters.read.unmark', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}"
+                                            data-label-read="{{ __('story::chapters.actions.marked_read') }}"
+                                            data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}"
+                                        >
+                                            <span class="material-symbols-outlined text-[18px] leading-none" id="markReadIcon">
+                                                {{ $vm->isReadByMe ? 'check_circle' : 'radio_button_unchecked' }}
+                                            </span>
+                                            <span id="markReadLabel">
+                                                {{ $vm->isReadByMe ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}
+                                            </span>
+                                        </button>
+                                    @else
+                                        <button
+                                            type="button"
+                                            id="guestMarkRead"
+                                            class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-sm transition-colors bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
+                                            data-url="{{ route('chapters.read.guest', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}"
+                                            data-label-read="{{ __('story::chapters.actions.marked_read') }}"
+                                            data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}"
+                                        >
+                                            <span class="material-symbols-outlined text-[18px] leading-none" id="guestReadIcon">radio_button_unchecked</span>
+                                            <span id="guestReadLabel">{{ __('story::chapters.actions.mark_as_read') }}</span>
+                                        </button>
+                                    @endauth
+                                @endif
                             </div>
                             <div>
                                 @if($vm->nextChapter)
@@ -82,4 +114,107 @@
             </div>
         </div>
     </div>
+
+
+@push('scripts')
+<script>
+    (function() {
+        let inFlight = false; // simple in-flight guard during network requests
+
+        function getCsrf() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        }
+
+        function setStateClasses(btn, read) {
+            const toBlue = ['bg-blue-600','hover:bg-blue-700','border-blue-600'];
+            const toGreen = ['bg-green-600','hover:bg-green-700','border-green-600'];
+            const neutralText = 'text-white';
+            btn.classList.remove(...toBlue, ...toGreen);
+            btn.classList.add(neutralText);
+            btn.classList.add(...(read ? toGreen : toBlue));
+        }
+
+        async function toggleLoggedRead(toggleBtn) {
+            if (inFlight) return;
+            inFlight = true;
+            toggleBtn.disabled = true;
+
+            const csrf = getCsrf();
+            const isRead = toggleBtn.getAttribute('data-read') === '1';
+            const url = isRead ? toggleBtn.getAttribute('data-url-unread') : toggleBtn.getAttribute('data-url-read');
+            const method = isRead ? 'DELETE' : 'POST';
+
+            const icon = document.getElementById('markReadIcon');
+            const label = document.getElementById('markReadLabel');
+            const labelRead = toggleBtn.getAttribute('data-label-read') || 'Read';
+            const labelUnread = toggleBtn.getAttribute('data-label-unread') || 'Mark as read';
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'text/plain',
+                    },
+                });
+                if (res.status === 204) {
+                    const nowRead = !isRead;
+                    icon.textContent = nowRead ? 'check_circle' : 'radio_button_unchecked';
+                    label.textContent = nowRead ? labelRead : labelUnread;
+                    toggleBtn.setAttribute('data-read', nowRead ? '1' : '0');
+                    setStateClasses(toggleBtn, nowRead);
+                }
+            } catch {}
+            toggleBtn.disabled = false;
+            inFlight = false;
+        }
+
+        async function incrementGuest(guestBtn) {
+            if (inFlight) return;
+            inFlight = true;
+            const csrf = getCsrf();
+            const url = guestBtn.getAttribute('data-url');
+            guestBtn.disabled = true; // optimistic disable
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    cache: 'no-store',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'text/plain',
+                    },
+                });
+                if (res.status === 204) {
+                    const icon = document.getElementById('guestReadIcon');
+                    const label = document.getElementById('guestReadLabel');
+                    const labelRead = guestBtn.getAttribute('data-label-read') || 'Read';
+                    icon.textContent = 'check_circle';
+                    label.textContent = labelRead;
+                    setStateClasses(guestBtn, true);
+                }
+            } catch (e) {
+                guestBtn.disabled = false;
+            }
+            inFlight = false;
+        }
+
+        function bindLoggedToggle() {
+            const toggleBtn = document.getElementById('markReadToggle');
+            if (!toggleBtn) return;
+            toggleBtn.addEventListener('click', () => toggleLoggedRead(toggleBtn));
+        }
+
+        function bindGuestButton() {
+            const guestBtn = document.getElementById('guestMarkRead');
+            if (!guestBtn) return;
+            guestBtn.addEventListener('click', () => incrementGuest(guestBtn));
+        }
+
+        // init
+        bindLoggedToggle();
+        bindGuestButton();
+    })();
+</script>
+@endpush
 </x-app-layout>

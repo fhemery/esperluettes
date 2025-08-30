@@ -14,10 +14,13 @@ class ChapterViewModel
         public readonly bool $isAuthor,
         public readonly ?Chapter $prevChapter,
         public readonly ?Chapter $nextChapter,
+        public readonly bool $isReadByMe,
+        public readonly int $readsGuest,
+        public readonly int $readsLogged,
     ) {
     }
 
-    public static function from(Story $story, Chapter $chapter, bool $isAuthor): self
+    public static function from(Story $story, Chapter $chapter, bool $isAuthor, bool $isReadByMe = false): self
     {
         // Chapters should be eager-loaded and ordered by sort_order
         /** @var Collection<int, Chapter> $chapters */
@@ -45,17 +48,9 @@ class ChapterViewModel
             isAuthor: $isAuthor,
             prevChapter: $prevChapter ?: null,
             nextChapter: $nextChapter ?: null,
+            isReadByMe: $isReadByMe,
+            readsGuest: (int) $chapter->reads_guest_count,
+            readsLogged: (int) $chapter->reads_logged_count,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'story' => $this->story,
-            'chapter' => $this->chapter,
-            'prevChapter' => $this->prevChapter,
-            'nextChapter' => $this->nextChapter,
-            'isAuthor' => $this->isAuthor,
-        ];
     }
 }

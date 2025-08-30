@@ -9,6 +9,7 @@ use App\Domains\Story\Http\Requests\ReorderChaptersRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Services\ChapterService;
+use App\Domains\Story\Services\ReadingProgressService;
 use App\Domains\Story\Services\StoryService;
 use App\Domains\Story\ViewModels\ChapterViewModel;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +23,7 @@ class ChapterController
         private ChapterService $service,
         private UserPublicApi $userPublicApi,
         private StoryService $storyService,
+        private ReadingProgressService $readingProgress,
     ) {
     }
 
@@ -85,8 +87,14 @@ class ChapterController
             abort(404);
         }
 
-        // Build ViewModel that encapsulates navigation computation
-        $vm = ChapterViewModel::from($story, $chapter, $isAuthor);
+        // Compute read status via service
+        $isReadByMe = false;
+        if ($userId !== null && !$isAuthor) {
+            $isReadByMe = $this->readingProgress->isChapterReadByUser($userId, (int) $chapter->id);
+        }
+
+        // Build ViewModel
+        $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe);
 
         return view('story::chapters.show', [
             'vm' => $vm,

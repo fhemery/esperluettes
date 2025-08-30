@@ -53,13 +53,18 @@ The Story & Chapter sharing feature is the core functionality of the platform, e
 Chapter caps and related UX are deferred to Stage 4. No limits are enforced in Phase 3.
 
 ### Reading & Viewing Experience
-- **Story Listing**: Browse available stories with filtering and sorting options
-- **Story Detail**: View story metadata, description, and table of contents
-- **Chapter Reading**: Sequential chapter reading with next/previous navigation
-- **Reading Progress**: Manually marked as read by logged users (no anonymous persistence). Guests can click "Mark as read" to increment guest reads (one-way; no persistence).
-- **Trigger Warning Display**: Prominently displayed on story description and search results
-- **Comment System**: Community commenting on stories and chapters (future phase)
- - **Stats Display**: Show total reads to everyone; open a click popover (`app/Domains/Shared/Resources/views/components/popover.blade.php`) for guest vs logged breakdown.
+ - **Story Listing**: Browse available stories with filtering and sorting options
+ - **Story Detail**: View story metadata, description, and table of contents
+ - **Chapter Reading**: Sequential chapter reading with next/previous navigation
+ - **Reading Progress**:
+   - Logged users can manually mark a chapter as read/unread. Read/unread actions are idempotent: attempting to mark as read when already read (or unread when already unread) is a no-op.
+   - Guests can click "Mark as read" to increment guest reads. One-way; no per-guest persistence or unmarking.
+ - **Trigger Warning Display**: Prominently displayed on story description and search results
+ - **Comment System**: Community commenting on stories and chapters (future phase)
+ - **Stats Display**:
+   - Show total reads (guest + logged) to everyone on chapter pages and in the story TOC.
+   - Clicking the total opens a popover (`app/Domains/Shared/Resources/views/components/popover.blade.php`) with guest vs logged breakdown.
+   - For logged non-author readers, the TOC shows a per-chapter read-status icon that can be clicked to toggle read/unread.
 
 
 ## Technical Specifications
@@ -211,6 +216,11 @@ app/Domains/Story/
 - `/stories/<story-slug-with-id>/chapters/create` - Add new chapter (author/co-author)
 - `/stories/<story-slug-with-id>/chapters/<chapter-slug-with-id>/edit` - Edit chapter (author/co-author only)
 
+#### Read/Stats Endpoints (CSRF-protected)
+- `POST /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read` — Logged users: mark-as-read. Idempotent (no-op if already read). Increments `reads_logged_count` only when newly marked. Responds `204 No Content` on success.
+- `DELETE /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read` — Logged users: mark-as-unread. Idempotent (no-op if already unread). Decrements `reads_logged_count` on successful unmark (not below zero). Responds `204 No Content` on success.
+- `POST /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read/guest` — Guests: one-way increment of `reads_guest_count`. Responds `204 No Content` on success.
+
 Notes:
 - When a story title changes, the slug base changes but the `-id` suffix remains. Visiting an old slug that ends with the correct `-id` performs a 301 redirect to the canonical, updated slug.
 - When a chapter title changes, the chapter slug base changes but the `-id` suffix remains. Visiting an old chapter slug (with correct `-id`) performs a 301 redirect to the canonical chapter URL. This canonicalization applies independently to both story and chapter slug segments.
@@ -256,7 +266,7 @@ Notes:
 
 Unauthorized access handling:
 - For protected resources (e.g., private/community content without proper rights, or edit routes when not an author collaborator), the application returns 404 to avoid leaking existence.
-- Mark-as-read endpoints are forbidden for authors and co-authors.
+- Mark-as-read endpoints are forbidden for authors and co-authors (return 403 when attempted).
 
 ## Performance Considerations
 - Database indexing on slug, visibility, and user_id fields

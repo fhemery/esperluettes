@@ -199,15 +199,23 @@ everything.**
 - **Counters**: Track two integers per chapter:
   - `reads_guest_count` (unsigned int) for anonymous reads
   - `reads_logged_count` (unsigned int) for logged-user reads
-- **Scope**: Counts increase only when users click the “Mark as read” control (see US-037), not on page view.
-- **Stats display**: On chapter pages and in the story TOC (for everyone), show the total reads; on click, open a popover (see `app/Domains/Shared/Resources/views/components/popover.blade.php`) with guest vs logged breakdown.
-- **No throttling**: MVP allows multiple increments; bot/dedupe mitigations deferred.
+- **Scope**: Counts change only via explicit actions (see US-037): logged users toggling read/unread; guests clicking one-way mark-as-read. No page view counting.
+- **Stats display**:
+  - On chapter pages and in the story TOC (for everyone), show the total reads (guest + logged).
+  - Clicking the total opens a popover (see `app/Domains/Shared/Resources/views/components/popover.blade.php`) with guest vs logged breakdown.
+  - For logged non-author readers, the TOC shows a per-chapter read-status icon that can be clicked to toggle read/unread (see US-037).
+- **No throttling**: MVP allows multiple guest increments; debouncing prevents rapid-fire requests during a single click.
 
 **Implementation:**
 
 - Database fields on `chapters`: `reads_guest_count` and `reads_logged_count` (unsigned int, default 0).
-- Efficient atomic increments on mark-as-read actions.
-- TOC aggregates from the chapter’s stored counts and `reading_progress` (see note below).
+- Efficient atomic increments/decrements tied to logged toggle and guest one-way increment.
+- TOC displays totals using the stored counts. Ignore reconciliation/data-drift for now; a maintenance job can be introduced later if needed.
+
+**Endpoints (CSRF-protected):**
+- `POST /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read` — Logged users: mark-as-read. Idempotent (no-op if already read). Increments `reads_logged_count` only when newly marked. Responds `204 No Content` on success.
+- `DELETE /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read` — Logged users: mark-as-unread. Idempotent (no-op if already unread). Decrements `reads_logged_count` on successful unmark (not below zero). Responds `204 No Content` on success.
+- `POST /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read/guest` — Guests: one-way increment of `reads_guest_count`. Responds `204 No Content` on success.
 
 ## **US-037: Manually Mark Chapter as Read (Readers)**
 
@@ -216,16 +224,24 @@ everything.**
 **Acceptance Criteria:**
 
 - **Access**: Only available on published chapter pages. Not shown to authors/co-authors.
-- **Logged users**: A toggle button reflects current state (read/unread). Clicking “Mark as read” creates `reading_progress (user_id, chapter_id, read_at)` and increments `reads_logged_count`. Clicking “Mark as unread” deletes that row and decrements `reads_logged_count` (not below zero).
+- **Logged users**: A toggle button reflects current state (read/unread). Clicking “Mark as read” creates `reading_progress (user_id, chapter_id, read_at)` and increments `reads_logged_count`. Clicking “Mark as unread” deletes that row and decrements `reads_logged_count` (not below zero). Actions are idempotent: attempting to mark as read when already read or mark as unread when already unread is a no-op.
 - **Guests**: A one-way “Mark as read” button increments `reads_guest_count`. No per-guest persistence (cannot unmark).
-- **UI**: Button shows “Read” state if logged user already marked it; guests always see it as not toggled.
+- **UI**: Button shows “Read” state if logged user already marked it; guests always see it as not toggled. Add a brief debounce while requests are in-flight.
+- **TOC toggle**: For logged non-author users, the TOC shows a read-status icon per chapter; clicking it toggles read/unread using the same backend endpoints.
 
 **Implementation:**
 
-- Endpoints to toggle read state for logged users and to increment guest reads. CSRF-protected.
-- Server forbids increment/decrement for authors and co-authors.
-- `reading_progress` table: unique key `(user_id, chapter_id)`; FK to `chapters` with CASCADE on delete.
-- Only counts for published chapters; server guards ensure no increments for unpublished.
+- Endpoints:
+  - `POST /stories/{story}/chapters/{chapter}/read` (logged mark-as-read, 204 on success)
+  - `DELETE /stories/{story}/chapters/{chapter}/read` (logged mark-as-unread, 204 on success)
+  - `POST /stories/{story}/chapters/{chapter}/read/guest` (guest one-way, 204 on success)
+  - All CSRF-protected.
+- Server rules and guards:
+  - 403 for authors/co-authors attempting to call these endpoints.
+  - Enforce story visibility (public/community/private) before acting.
+  - Only published chapters are actionable; unpublished hide controls and backend rejects changes.
+- `reading_progress` table: unique key `(user_id, chapter_id)`; FK to `story_chapters` with CASCADE on delete.
+- Debounce client requests to prevent rapid re-clicks while a request is in-flight; also guard server-side with idempotency and non-negative counters.
 
 ## **US-038: Canonical Redirects for Chapter Slugs**
 
