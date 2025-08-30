@@ -12,22 +12,6 @@ beforeEach(function () {
     \Illuminate\Support\Facades\Cache::flush();
 });
 
-function markAsRead($test, $chapter)
-{
-    return $test->post(route('chapters.read.mark', [
-        'storySlug' => $chapter->story->slug,
-        'chapterSlug' => $chapter->slug,
-    ]));
-}
-
-function markAsUnread($test, $chapter)
-{
-    return $test->delete(route('chapters.read.unmark', [
-        'storySlug' => $chapter->story->slug,
-        'chapterSlug' => $chapter->slug,
-    ]));
-}
-
 // Guest reading progress has been removed; no guest endpoints exist anymore.
 
 describe('Reading Progress - Errors', function () {

@@ -28,7 +28,20 @@
                             </a>
                         @endif
                     </div>
-                    <div class="text-sm text-gray-600 mb-6">{{ $vm->story->title }}</div>
+                    <div class="text-sm text-gray-600">{{ $vm->story->title }}</div>
+
+                    <div class="mt-2 mb-6 text-sm text-gray-700">
+                        <x-shared::popover placement="top" width="16rem">
+                            <x-slot name="trigger">
+                                <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
+                                    <span class="material-symbols-outlined text-[16px] leading-none">visibility</span>
+                                    <span>{{ number_format($vm->readsLogged, 0, ',', ' ') }}</span>
+                                </span>
+                            </x-slot>
+                            <div class="font-semibold text-gray-900">{{ __('story::chapters.reads.label') }}</div>
+                            <div class="text-gray-700">{{ __('story::chapters.reads.tooltip') }}</div>
+                        </x-shared::popover>
+                    </div>
 
                     @if(!empty($vm->chapter->author_note))
                         <aside class="mb-6 p-4 bg-gray-50 border rounded">

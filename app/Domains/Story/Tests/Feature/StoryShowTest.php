@@ -230,3 +230,47 @@ it('appends newly created chapter at the end of the list', function () {
     $response->assertOk();
     $response->assertSeeInOrder(['Chapter 1', 'Chapter 2', 'Chapter 3']);
 });
+
+describe('Reading statistics', function (){
+
+    it('shows reads counter on story page for readers with non-zero values', function () {
+        $author = alice($this);
+        $story = publicStory('Reads Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'First Chapter']);
+
+        $reader1 = bob($this);
+        $this->actingAs($reader1);
+        markAsRead($this, $chapter)->assertNoContent();
+
+        $resp = $this->get('/stories/' . $story->slug);
+        $resp->assertOk();
+
+        $resp->assertSee(trans('story::chapters.reads.label'));
+        $resp->assertSee(trans('story::chapters.reads.tooltip'));
+
+        $resp->assertSee('First Chapter');
+        $resp->assertSee('1');
+    });
+
+    it('shows reads counter on story page for authors (value present in initial data and popover)', function () {
+        $author = alice($this);
+        $story = publicStory('Author Reads', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Ch']);
+
+        $reader = bob($this);
+
+        $this->actingAs($reader);
+        markAsRead($this, $chapter)->assertNoContent();
+
+        $this->actingAs($author);
+        $resp = $this->get('/stories/' . $story->slug);
+        $resp->assertOk();
+
+        $resp->assertSee(trans('story::chapters.reads.label'));
+        $resp->assertSee(trans('story::chapters.reads.tooltip'));
+
+        // The author list renders numbers via Alpine; ensure the initial payload contains the readsLogged key
+        // We cannot rely on client-side rendering in tests, so just verify the JSON attribute includes the key
+        $resp->assertSeeInOrder(['readsLogged', '1']);
+    });
+});

@@ -372,7 +372,7 @@ class StoryController
         // Build chapters list for the viewer
         $isAuthor = $story->isAuthor(Auth::id());
         $chapterQuery = $story->chapters()
-            ->select(['id','title','slug','status','sort_order'])
+            ->select(['id','title','slug','status','sort_order','reads_logged_count'])
             ->when(!$isAuthor, fn($q) => $q->where('status', Chapter::STATUS_PUBLISHED))
             ->orderBy('sort_order','asc');
 
@@ -390,6 +390,7 @@ class StoryController
                 slug: (string)$c->slug,
                 isDraft: (string)$c->status !== \App\Domains\Story\Models\Chapter::STATUS_PUBLISHED,
                 isRead: in_array((int)$c->id, $readIds, true),
+                readsLogged: (int)($c->reads_logged_count ?? 0),
                 url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
             );
         }

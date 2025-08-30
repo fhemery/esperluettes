@@ -6,6 +6,7 @@
                 'slug'=>$c->slug,
                 'url'=>$c->url,
                 'isDraft'=>$c->isDraft,
+                'readsLogged'=>$c->readsLogged,
                 'editUrl'=>route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
             ], $chapters ?? ($viewModel->chapters ?? []))),
             reorderUrl: @js(route('chapters.reorder', ['storySlug' => $story->slug])),

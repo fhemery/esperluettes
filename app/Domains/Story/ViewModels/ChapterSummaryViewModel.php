@@ -10,6 +10,7 @@ class ChapterSummaryViewModel
         public readonly string $slug,
         public readonly bool $isDraft,
         public readonly bool $isRead,
+        public readonly int $readsLogged,
         public readonly string $url,
     ) {
     }

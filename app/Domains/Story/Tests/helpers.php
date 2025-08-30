@@ -258,3 +258,22 @@ function createUnpublishedChapter(TestCase $t, Story $story, Authenticatable $au
     $t->post('/stories/' . $story->slug . '/chapters', $payload)->assertRedirect();
     return Chapter::query()->latest('id')->firstOrFail();
 }
+
+/**
+ * Helpers to toggle logged reading state through real HTTP endpoints in tests.
+ */
+function markAsRead($test, Chapter $chapter)
+{
+    return $test->post(route('chapters.read.mark', [
+        'storySlug' => $chapter->story->slug,
+        'chapterSlug' => $chapter->slug,
+    ]));
+}
+
+function markAsUnread($test, Chapter $chapter)
+{
+    return $test->delete(route('chapters.read.unmark', [
+        'storySlug' => $chapter->story->slug,
+        'chapterSlug' => $chapter->slug,
+    ]));
+}

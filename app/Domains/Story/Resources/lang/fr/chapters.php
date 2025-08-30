@@ -66,5 +66,9 @@ return [
         'previous' => 'Chapitre précédent',
         'next' => 'Chapitre suivant',
         'mark_read' => 'Marquer comme lu (bientôt)'
-    ]
+    ],
+    'reads' => [
+        'label' => 'Lectures',
+        'tooltip' => "Nombre de lectures effectuées par des utilisateurs connectés.",
+    ],
 ];

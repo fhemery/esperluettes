@@ -196,26 +196,22 @@ everything.**
 
 **Acceptance Criteria:**
 
-- **Counters**: Track two integers per chapter:
-  - `reads_guest_count` (unsigned int) for anonymous reads
+- **Counters**: One logged user reads are available in chapter table:
   - `reads_logged_count` (unsigned int) for logged-user reads
-- **Scope**: Counts change only via explicit actions (see US-037): logged users toggling read/unread; guests clicking one-way mark-as-read. No page view counting.
+- **Scope**: Counts change only via explicit actions (see US-037): logged users toggling read/unread. No page view counting.
 - **Stats display**:
-  - On chapter pages and in the story TOC (for everyone), show the total reads (guest + logged).
-  - Clicking the total opens a popover (see `app/Domains/Shared/Resources/views/components/popover.blade.php`) with guest vs logged breakdown.
-  - For logged non-author readers, the TOC shows a per-chapter read-status icon that can be clicked to toggle read/unread (see US-037).
-- **No throttling**: MVP allows multiple guest increments; debouncing prevents rapid-fire requests during a single click.
+  - On chapter pages and in the story TOC (for everyone), show the total reads (logged).
+  - Add a tooltip (see `app/Domains/Shared/Resources/views/components/popover.blade.php`) on hover and click explaining this is the logged reads count
 
 **Implementation:**
 
-- Database fields on `chapters`: `reads_guest_count` and `reads_logged_count` (unsigned int, default 0).
-- Efficient atomic increments/decrements tied to logged toggle and guest one-way increment.
+- Database fields on `chapters`: `reads_logged_count` (unsigned int, default 0).
+- Efficient atomic increments/decrements tied to logged toggle.
 - TOC displays totals using the stored counts. Ignore reconciliation/data-drift for now; a maintenance job can be introduced later if needed.
 
 **Endpoints (CSRF-protected):**
 - `POST /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read` — Logged users: mark-as-read. Idempotent (no-op if already read). Increments `reads_logged_count` only when newly marked. Responds `204 No Content` on success.
 - `DELETE /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read` — Logged users: mark-as-unread. Idempotent (no-op if already unread). Decrements `reads_logged_count` on successful unmark (not below zero). Responds `204 No Content` on success.
-- `POST /stories/{story-slug-with-id}/chapters/{chapter-slug-with-id}/read/guest` — Guests: one-way increment of `reads_guest_count`. Responds `204 No Content` on success.
 
 ## **[DONE] US-037: Manually Mark Chapter as Read (Readers)**
 
@@ -283,7 +279,6 @@ everything.**
   - `first_published_at` (nullable timestamp) replaces preliminary `published_at`.
   - `status` enum only: `not_published`, `published`.
   - `sort_order` integer with index `(story_id, sort_order)`.
-  - `reads_guest_count` unsigned int default 0.
   - `reads_logged_count` unsigned int default 0.
   - Cascade delete on story -> chapters.
   - Storage: `author_note` as TEXT; `content` as LONGTEXT.

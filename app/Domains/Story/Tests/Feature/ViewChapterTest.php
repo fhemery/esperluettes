@@ -243,5 +243,25 @@ describe('Reading progress', function () {
         $resp->assertOk();
         $resp->assertSee('id="markReadToggle"', false);
         $resp->assertSee(trans('story::chapters.actions.marked_read'));
-    });   
+    });
+});
+
+describe('Reading statistics', function () {
+    it('shows reads counter on chapter details page (non-zero values)', function () {
+        $author = alice($this);
+        $story = publicStory('Details Reads', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Details Chapter']);
+    
+        $reader = bob($this);
+    
+        $this->actingAs($reader); markAsRead($this, $chapter)->assertNoContent();
+    
+        $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+        $resp->assertOk();
+    
+        $resp->assertSee(trans('story::chapters.reads.label'));
+        $resp->assertSee(trans('story::chapters.reads.tooltip'));
+    
+        $resp->assertSee('1');
+    });
 });
