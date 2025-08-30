@@ -78,18 +78,6 @@
                                                 {{ $vm->isReadByMe ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}
                                             </span>
                                         </button>
-                                    @else
-                                        <button
-                                            type="button"
-                                            id="guestMarkRead"
-                                            class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-sm transition-colors bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
-                                            data-url="{{ route('chapters.read.guest', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}"
-                                            data-label-read="{{ __('story::chapters.actions.marked_read') }}"
-                                            data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}"
-                                        >
-                                            <span class="material-symbols-outlined text-[18px] leading-none" id="guestReadIcon">radio_button_unchecked</span>
-                                            <span id="guestReadLabel">{{ __('story::chapters.actions.mark_as_read') }}</span>
-                                        </button>
                                     @endauth
                                 @endif
                             </div>
@@ -169,51 +157,14 @@
             inFlight = false;
         }
 
-        async function incrementGuest(guestBtn) {
-            if (inFlight) return;
-            inFlight = true;
-            const csrf = getCsrf();
-            const url = guestBtn.getAttribute('data-url');
-            guestBtn.disabled = true; // optimistic disable
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    cache: 'no-store',
-                    headers: {
-                        'X-CSRF-TOKEN': csrf,
-                        'Accept': 'text/plain',
-                    },
-                });
-                if (res.status === 204) {
-                    const icon = document.getElementById('guestReadIcon');
-                    const label = document.getElementById('guestReadLabel');
-                    const labelRead = guestBtn.getAttribute('data-label-read') || 'Read';
-                    icon.textContent = 'check_circle';
-                    label.textContent = labelRead;
-                    setStateClasses(guestBtn, true);
-                }
-            } catch (e) {
-                guestBtn.disabled = false;
-            }
-            inFlight = false;
-        }
-
         function bindLoggedToggle() {
             const toggleBtn = document.getElementById('markReadToggle');
             if (!toggleBtn) return;
             toggleBtn.addEventListener('click', () => toggleLoggedRead(toggleBtn));
         }
 
-        function bindGuestButton() {
-            const guestBtn = document.getElementById('guestMarkRead');
-            if (!guestBtn) return;
-            guestBtn.addEventListener('click', () => incrementGuest(guestBtn));
-        }
-
         // init
         bindLoggedToggle();
-        bindGuestButton();
     })();
 </script>
 @endpush

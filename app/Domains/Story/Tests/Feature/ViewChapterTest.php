@@ -212,7 +212,6 @@ describe('Reading progress', function () {
             ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
         $resp->assertOk();
         $resp->assertDontSee('id="markReadToggle"', false);
-        $resp->assertDontSee('id="guestMarkRead"', false);
     });
 
     it('shows unread read-button for a non-author user who has not read the chapter', function () {
@@ -244,17 +243,5 @@ describe('Reading progress', function () {
         $resp->assertOk();
         $resp->assertSee('id="markReadToggle"', false);
         $resp->assertSee(trans('story::chapters.actions.marked_read'));
-    });
-
-    it('shows the guest read button for guests on public chapters', function () {
-        $author = alice($this);
-        $story = publicStory('Public Story', $author->id);
-        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Pub Chap']);
-
-        Auth::logout();
-        $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
-        $resp->assertOk();
-        $resp->assertSee('id="guestMarkRead"', false);
-        $resp->assertSee(trans('story::chapters.actions.mark_as_read'));
-    });
+    });   
 });
