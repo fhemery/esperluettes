@@ -17,6 +17,7 @@ class Story extends Model
         'description',
         'visibility',
         'last_chapter_published_at',
+        'reads_logged_total',
         'story_ref_type_id',
         'story_ref_audience_id',
         'story_ref_copyright_id',

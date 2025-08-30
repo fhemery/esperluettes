@@ -37,12 +37,14 @@ class ReadingProgressService
             ]);
 
             $chapter->increment('reads_logged_count');
+            // Also increment story total denormalized counter
+            $story->increment('reads_logged_total');
         });
     }
 
     public function unmarkRead(int $userId, Story $story, Chapter $chapter): void
     {
-        DB::transaction(function () use ($userId, $chapter) {
+        DB::transaction(function () use ($userId, $story, $chapter) {
             $deleted = ReadingProgress::query()
                 ->where('user_id', $userId)
                 ->where('chapter_id', (int) $chapter->id)
@@ -52,6 +54,11 @@ class ReadingProgressService
                 $chapter->refresh();
                 if ((int) $chapter->reads_logged_count > 0) {
                     $chapter->decrement('reads_logged_count');
+                }
+                // Decrement story total but never below zero
+                $story->refresh();
+                if ((int) ($story->reads_logged_total ?? 0) > 0) {
+                    $story->decrement('reads_logged_total');
                 }
             }
         });

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 require_once __DIR__ . '/ide/TestResponseMacros.php';
 // Domain-scoped test helpers
 require_once __DIR__ . '/../app/Domains/Auth/Tests/helpers.php';
+require_once __DIR__ . '/../app/Domains/Profile/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Story/Tests/helpers.php';
 
 // Root tests directory

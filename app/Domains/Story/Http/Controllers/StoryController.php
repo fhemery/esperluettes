@@ -131,6 +131,7 @@ class StoryController
                 title: $story->title,
                 slug: $story->slug,
                 description: $story->description,
+                readsLoggedTotal: (int)($story->reads_logged_total ?? 0),
                 authors: $authorDtos,
                 genreNames: $gNames,
                 triggerWarningNames: $twNames,
@@ -282,6 +283,7 @@ class StoryController
                 title: $story->title,
                 slug: $story->slug,
                 description: $story->description,
+                readsLoggedTotal: (int)($story->reads_logged_total ?? 0),
                 authors: $authorDtos,
             );
         }

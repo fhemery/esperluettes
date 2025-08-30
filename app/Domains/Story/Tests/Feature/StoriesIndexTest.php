@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -347,4 +348,22 @@ it('filters stories by audience slug', function () {
     // UI bits
     $resp->assertSee(trans('story::index.filter'));
     $resp->assertSee(trans('story::index.reset_filters'));
+});
+
+describe('Reading statistics', function() {
+    it('shows total reads on stories index cards', function () {
+        $author = alice($this);
+        $story = publicStory('Index Total Reads', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $reader = bob($this);
+        $this->actingAs($reader);
+        markAsRead($this, $chapter)->assertNoContent();
+
+        Auth::logout();
+        $resp = $this->get('/stories');
+        $resp->assertOk();
+        $resp->assertSee('Index Total Reads');
+        $resp->assertSee('1');
+    });
 });

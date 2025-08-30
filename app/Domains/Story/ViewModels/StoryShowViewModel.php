@@ -163,4 +163,9 @@ class StoryShowViewModel
     {
         return $this->triggerWarningNames;
     }
+
+    public function getReadsLoggedTotal(): int
+    {
+        return (int) ($this->story->reads_logged_total ?? 0);
+    }
 }

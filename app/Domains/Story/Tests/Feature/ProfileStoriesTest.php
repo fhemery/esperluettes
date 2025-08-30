@@ -1,8 +1,6 @@
 <?php
-
-use App\Domains\Shared\Contracts\ProfilePublicApi;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -13,20 +11,9 @@ beforeEach(function () {
     Cache::flush();
 });
 
-function profileSlugFor(Authenticatable $user): string
-{
-    /** @var ProfilePublicApi $api */
-    $api = app(ProfilePublicApi::class);
-    $dto = $api->getPublicProfile($user->id);
-    if ($dto === null) {
-        throw new RuntimeException('Profile not found for user id ' . $user->id);
-    }
-    return $dto->slug;
-}
-
 it('does not render the site navigation for the profile stories partial', function () {
     $owner = alice($this);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     // Act
     $resp = $this->get("/profiles/{$slug}/stories");
@@ -39,7 +26,7 @@ it('does not render the site navigation for the profile stories partial', functi
 
 it('lists only public stories for guests', function () {
     $owner = alice($this);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     $public = publicStory('Guest Public Story', $owner->id);
     $community = communityStory('Guest Community Story', $owner->id);
@@ -61,7 +48,7 @@ it('returns 404 when profile slug does not exist', function () {
 it('lists public and community stories to logged-in viewers (non-owner)', function () {
     $owner = alice($this);
     $viewer = bob($this);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     $public = publicStory('Public Story', $owner->id);
     $community = communityStory('Community Story', $owner->id);
@@ -77,7 +64,7 @@ it('lists public and community stories to logged-in viewers (non-owner)', functi
 
 it('includes private stories when viewer is the owner', function () {
     $owner = alice($this);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     $private = privateStory('Owner Private', $owner->id);
 
@@ -90,7 +77,7 @@ it('includes private stories when viewer is the owner', function () {
 it('includes private stories when viewer is a contributor', function () {
     $owner = alice($this);
     $contrib = bob($this);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     $private = privateStory('Contributor Private', $owner->id);
 
@@ -113,7 +100,7 @@ it('includes private stories when viewer is a contributor', function () {
 it('lists only stories authored by the profile owner', function () {
     $owner = alice($this);
     $other = bob($this);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     $owned = publicStory('Owned Story', $owner->id);
     $foreign = publicStory('Foreign Story', $other->id);
@@ -127,7 +114,7 @@ it('lists only stories authored by the profile owner', function () {
 
 it('should show "My stories" instead of "Stories" and a new Story button for the owner', function () {
     $owner = alice($this);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     $resp = $this->actingAs($owner)->get("/profiles/{$slug}/stories");
     $resp->assertOk();
@@ -138,7 +125,7 @@ it('should show "My stories" instead of "Stories" and a new Story button for the
 it('should not show a new Story button for the owner without user-confirmed role', function () {
     // Owner has only the base 'user' role (not user-confirmed)
     $owner = alice($this, roles: ['user']);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     $resp = $this->actingAs($owner)->get("/profiles/{$slug}/stories");
 
@@ -151,7 +138,7 @@ it('should not show a new Story button for the owner without user-confirmed role
 
 it('does not list author names in the profile stories partial', function () {
     $owner = alice($this);
-    $slug = profileSlugFor($owner);
+    $slug = profileSlugFromApi($owner->id);
 
     publicStory('Some Story', $owner->id);
 
@@ -160,4 +147,23 @@ it('does not list author names in the profile stories partial', function () {
     $resp->assertOk();
     // Hidden authors mean we should not render the by-label key used elsewhere
     $resp->assertDontSee('story::shared.by');
+});
+
+describe('Reading statistics', function (){
+    it('shows total reads on profile stories cards', function () {
+        $owner = alice($this);
+        $slug = profileSlugFromApi($owner->id);
+        $story = publicStory('Profile Total Reads', $owner->id);
+        $chapter = createPublishedChapter($this, $story, $owner);
+
+        $reader = bob($this);
+        $this->actingAs($reader);
+        markAsRead($this, $chapter)->assertNoContent();
+
+        Auth::logout();
+        $resp = $this->get('/profiles/' . $slug . '/stories');
+        $resp->assertOk();
+        $resp->assertSee('Profile Total Reads');
+        $resp->assertSee('1');
+    });
 });

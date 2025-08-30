@@ -21,13 +21,14 @@ trigger: always_on
 - We use a Domain Oriented Architecture, with modules located in app/Domains
 - No test, no Middleware, no blade component should be created outside of app/Domains/<domain> subfolders unless explicitly requested
 - Controllers are not allowed to call the Databse directly (or through models). They must use a service. 
+- Database Migrations goes into /app/Domains/<relevant domain>/Database/Migrations folder
 
 # Laravel Coding Standards
 
 ## Models
 - Use singular names (User, Novel, Chapter)
 - Define relationships explicitly
-- Use `protected $fillable` or `protected $guarded`
+- Use `protected $fillable`
 - Implement soft deletes where appropriate: `use SoftDeletes`
 - Add validation rules in model methods
 - Use Eloquent conventions for foreign keys

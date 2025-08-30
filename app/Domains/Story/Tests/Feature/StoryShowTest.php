@@ -273,4 +273,22 @@ describe('Reading statistics', function (){
         // We cannot rely on client-side rendering in tests, so just verify the JSON attribute includes the key
         $resp->assertSeeInOrder(['readsLogged', '1']);
     });
+
+    it('shows total reads on the story page', function () {
+        $author = alice($this);
+        $story = publicStory('Total Reads Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Only Chapter']);
+
+        // One reader marks as read -> story total should be 1
+        $reader = bob($this);
+        $this->actingAs($reader);
+        markAsRead($this, $chapter)->assertNoContent();
+
+        // Guest view is fine; number rendered server-side
+        Auth::logout();
+        $resp = $this->get('/stories/' . $story->slug);
+        $resp->assertOk();
+        $resp->assertSee('1');
+    });
+
 });
