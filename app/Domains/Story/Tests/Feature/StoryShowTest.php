@@ -176,7 +176,7 @@ it('does not show the create chapter button to non-authors', function () {
     $response->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]));
 });
 
-it('lists only published chapters to non authors without draft chip', function () {
+it('lists only published chapters to non authors', function () {
     $author = alice($this);
     $story = publicStory('Chapters Story', $author->id);
 

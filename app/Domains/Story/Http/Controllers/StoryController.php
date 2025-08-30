@@ -8,12 +8,14 @@ use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Shared\Support\Seo;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
+use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Services\StoryService;
 use App\Domains\Story\Support\StoryFilterAndPagination;
 use App\Domains\Story\ViewModels\StoryListViewModel;
 use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StorySummaryViewModel;
 use App\Domains\Story\ViewModels\ChapterSummaryViewModel;
+use App\Domains\Story\Services\ReadingProgressService;
 use App\Domains\StoryRef\Services\StoryRefLookupService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -23,10 +25,11 @@ use Illuminate\Support\Facades\Auth;
 class StoryController
 {
     public function __construct(
-        private readonly StoryService          $service,
-        private readonly UserPublicApi         $userPublicApi,
-        private readonly ProfilePublicApi      $profileApi,
-        private readonly StoryRefLookupService $lookup
+        private readonly StoryService              $service,
+        private readonly UserPublicApi             $userPublicApi,
+        private readonly ProfilePublicApi          $profileApi,
+        private readonly StoryRefLookupService     $lookup,
+        private readonly ReadingProgressService    $progress
     )
     {
     }
@@ -368,11 +371,17 @@ class StoryController
 
         // Build chapters list for the viewer
         $isAuthor = $story->isAuthor(Auth::id());
-        $chapterQuery = $story->chapters()->select(['id','title','slug','status','sort_order'])->orderBy('sort_order','asc');
-        if (!$isAuthor) {
-            $chapterQuery->published();
-        }
+        $chapterQuery = $story->chapters()
+            ->select(['id','title','slug','status','sort_order'])
+            ->when(!$isAuthor, fn($q) => $q->where('status', Chapter::STATUS_PUBLISHED))
+            ->orderBy('sort_order','asc');
+
         $chapterRows = $chapterQuery->get();
+        $readIds = [];
+        if (Auth::check()) {
+            $readIds = $this->progress->getReadChapterIdsForUserInStory((int)Auth::id(), (int)$story->id);
+        }
+
         $chapters = [];
         foreach ($chapterRows as $c) {
             $chapters[] = new ChapterSummaryViewModel(
@@ -380,6 +389,7 @@ class StoryController
                 title: (string)$c->title,
                 slug: (string)$c->slug,
                 isDraft: (string)$c->status !== \App\Domains\Story\Models\Chapter::STATUS_PUBLISHED,
+                isRead: in_array((int)$c->id, $readIds, true),
                 url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
             );
         }

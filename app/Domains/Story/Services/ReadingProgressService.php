@@ -61,4 +61,21 @@ class ReadingProgressService
     {
         $chapter->increment('reads_guest_count');
     }
+
+    /**
+     * Return the list of read chapter IDs for a given user within a given story.
+     *
+     * @param int $userId
+     * @param int $storyId
+     * @return array<int,int>
+     */
+    public function getReadChapterIdsForUserInStory(int $userId, int $storyId): array
+    {
+        return ReadingProgress::query()
+            ->where('user_id', $userId)
+            ->where('story_id', $storyId)
+            ->pluck('chapter_id')
+            ->map(fn($v) => (int)$v)
+            ->all();
+    }
 }
