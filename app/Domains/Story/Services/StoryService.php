@@ -21,8 +21,16 @@ class StoryService
     public function getStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
     {
         $query = Story::query()
-            ->with(['authors', 'collaborators', 'genres:id', 'triggerWarnings:id'])
-            ->orderByDesc('created_at');
+            ->with(['authors', 'collaborators', 'genres:id', 'triggerWarnings:id']);
+
+        // Only require a published chapter for general listings; profile owner views can include drafts/no chapters
+        if ($filter->requirePublishedChapter) {
+            $query->whereNotNull('last_chapter_published_at');
+        }
+
+        // Order: newest publication first, then creation date; NULL last_chapter_published_at naturally sorts last on DESC
+        $query->orderByDesc('last_chapter_published_at')
+              ->orderByDesc('created_at');
 
         if ($filter->userId !== null) {
             $query->whereHas('authors', function ($q) use ($filter) {

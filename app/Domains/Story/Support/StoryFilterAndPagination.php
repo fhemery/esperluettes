@@ -27,6 +27,12 @@ class StoryFilterAndPagination
          * @var array<int,int> Trigger Warning IDs to EXCLUDE (multi-select, OR semantics)
          */
         public array $excludeTriggerWarningIds = [],
+        /**
+         * When true (default), only include stories that have at least one published chapter
+         * and sort primarily by last_chapter_published_at DESC.
+         * When false, include stories regardless of chapter presence (used in profile pages for owner).
+         */
+        public bool $requirePublishedChapter = true,
     ) {
         // Normalize visibilities: ensure values and not empty
         $this->visibilities = array_values($this->visibilities);

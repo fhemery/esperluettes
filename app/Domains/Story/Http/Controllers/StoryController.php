@@ -262,7 +262,14 @@ class StoryController
             $vis = [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE];
         }
 
-        $filter = new StoryFilterAndPagination(page: $page, perPage: 12, visibilities: $vis, userId: $userId);
+        $isOwner = Auth::id() !== null && Auth::id() === $userId;
+        $filter = new StoryFilterAndPagination(
+            page: $page,
+            perPage: 12,
+            visibilities: $vis,
+            userId: $userId,
+            requirePublishedChapter: false // profile pages list stories even without published chapters
+        );
         $paginator = $this->service->getStories($filter, Auth::id());
 
         // Authors profiles
@@ -293,7 +300,7 @@ class StoryController
 
         $viewModel = new StoryListViewModel($paginator, $items);
 
-        $canEdit = Auth::id() !== null && Auth::id() === $userId;
+        $canEdit = $isOwner;
         $canCreateStory = $canEdit && Auth::check() && Auth::user()->hasRole('user-confirmed');
 
         return view('story::partials.profile-stories', [
