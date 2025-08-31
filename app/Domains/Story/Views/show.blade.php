@@ -210,25 +210,15 @@
     </div>
 
     @if($viewModel->isAuthor())
-        <x-shared::modal name="confirm-delete-story" maxWidth="md">
-            <div class="p-6">
-                <h2 class="text-lg font-medium text-gray-900">{{ __('story::show.delete_confirm_title') }}</h2>
-                <p class="mt-2 text-sm text-gray-600">{{ __('story::show.delete_confirm_body') }}</p>
-
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" class="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-50"
-                            x-data x-on:click="$dispatch('close-modal', '{{ 'confirm-delete-story' }}')">
-                        {{ __('story::show.cancel') }}
-                    </button>
-                    <form method="POST" action="{{ route('stories.destroy', ['slug' => $viewModel->getSlug()]) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700">
-                            {{ __('story::show.confirm_delete') }}
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </x-shared::modal>
+        <x-shared::confirm-modal
+            name="confirm-delete-story"
+            :title="__('story::show.delete_confirm_title')"
+            :body="__('story::show.delete_confirm_body')"
+            :cancel="__('story::show.cancel')"
+            :confirm="__('story::show.confirm_delete')"
+            :action="route('stories.destroy', ['slug' => $viewModel->getSlug()])"
+            method="DELETE"
+            maxWidth="md"
+        />
     @endif
 </x-app-layout>

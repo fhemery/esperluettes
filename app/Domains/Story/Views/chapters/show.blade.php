@@ -201,25 +201,15 @@
 @endpush
 
 @if(auth()->check() && $vm->story->isAuthor((int)auth()->id()))
-    <x-shared::modal name="confirm-delete-chapter" maxWidth="md">
-        <div class="p-6">
-            <h2 class="text-lg font-medium text-gray-900">{{ __('story::chapters.actions.delete') }}</h2>
-            <p class="mt-2 text-sm text-gray-600">{{ __('story::show.chapter.confirm_delete_warning') }}</p>
-
-            <div class="mt-6 flex justify-end gap-3">
-                <button type="button" class="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-50"
-                        x-data x-on:click="$dispatch('close-modal', 'confirm-delete-chapter')">
-                    {{ __('story::show.cancel') }}
-                </button>
-                <form method="POST" action="{{ route('chapters.destroy', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700">
-                        {{ __('story::show.confirm_delete') }}
-                    </button>
-                </form>
-            </div>
-        </div>
-    </x-shared::modal>
+    <x-shared::confirm-modal
+        name="confirm-delete-chapter"
+        :title="__('story::chapters.actions.delete')"
+        :body="__('story::show.chapter.confirm_delete_warning')"
+        :cancel="__('story::show.cancel')"
+        :confirm="__('story::show.confirm_delete')"
+        :action="route('chapters.destroy', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug])"
+        method="DELETE"
+        maxWidth="md"
+    />
 @endif
 </x-app-layout>

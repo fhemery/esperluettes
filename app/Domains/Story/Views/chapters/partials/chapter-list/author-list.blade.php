@@ -45,25 +45,15 @@
                 </button>
             </div>
         </li>
-        <x-shared::modal name="confirm-delete-chapter-{{ $c->id }}" maxWidth="md">
-            <div class="p-6">
-                <h2 class="text-lg font-medium text-gray-900">{{ __('story::chapters.actions.delete') }}</h2>
-                <p class="mt-2 text-sm text-gray-600">{{ __('story::show.chapter.confirm_delete_warning') }}</p>
-
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" class="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-50"
-                            x-data x-on:click="$dispatch('close-modal', 'confirm-delete-chapter-{{ $c->id }}')">
-                        {{ __('story::show.cancel') }}
-                    </button>
-                    <form method="POST" action="{{ route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700">
-                            {{ __('story::show.chapter.confirm_delete') }}
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </x-shared::modal>
+        <x-shared::confirm-modal
+            name="confirm-delete-chapter-{{ $c->id }}"
+            :title="__('story::chapters.actions.delete')"
+            :body="__('story::show.chapter.confirm_delete_warning')"
+            :cancel="__('story::show.cancel')"
+            :confirm="__('story::show.chapter.confirm_delete')"
+            :action="route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug])"
+            method="DELETE"
+            maxWidth="md"
+        />
     @endforeach
 </ul>
