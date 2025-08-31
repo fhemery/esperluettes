@@ -157,4 +157,20 @@ class ChapterService
             $story->save();
         }
     }
+
+    /**
+     * Hard delete a chapter. Do not recompute story.last_chapter_published_at (immutability per US-032/US-043).
+     */
+    public function deleteChapter(Story $story, Chapter $chapter): void
+    {
+        DB::transaction(function () use ($story, $chapter) {
+            // Safety: ensure chapter belongs to the story
+            if ((int)$chapter->story_id !== (int)$story->id) {
+                throw new \InvalidArgumentException('Chapter does not belong to given story');
+            }
+
+            // Rely on FK cascade to delete related reading_progress rows
+            $chapter->delete();
+        });
+    }
 }

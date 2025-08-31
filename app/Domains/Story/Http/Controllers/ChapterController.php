@@ -177,6 +177,26 @@ class ChapterController
         ])->with('status', __('story::chapters.updated_success'));
     }
 
+    public function destroy(Request $request, string $storySlug, string $chapterSlug): RedirectResponse
+    {
+        $storyId = SlugWithId::extractId($storySlug);
+        $chapterId = SlugWithId::extractId($chapterSlug);
+
+        $story = Story::query()->findOrFail($storyId);
+        $chapter = Chapter::query()->where('story_id', $story->id)->findOrFail($chapterId);
+
+        // Authors/co-authors only; 404 for unauthorized
+        if (!Gate::allows('edit', $chapter)) {
+            abort(404);
+        }
+
+        // Hard delete chapter. Per US-032/043, do NOT recompute story.last_chapter_published_at
+        $this->service->deleteChapter($story, $chapter);
+
+        return redirect()->route('stories.show', ['slug' => $story->slug])
+            ->with('status', __('story::chapters.deleted_success'));
+    }
+
     public function reorder(ReorderChaptersRequest $request, string $storySlug)
     {
         $storyId = SlugWithId::extractId($storySlug);

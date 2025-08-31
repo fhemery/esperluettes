@@ -176,6 +176,30 @@ it('does not show the create chapter button to non-authors', function () {
     $response->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]));
 });
 
+it('shows edit and delete actions to authors for chapters when they exist', function () {
+    $author = alice($this);
+    $story = publicStory('Chapters Story', $author->id);
+    createPublishedChapter($this, $story, $author, ['title' => 'Temp Chap']);
+    
+    $response = $this->actingAs($author)->get('/stories/' . $story->slug);
+    
+    $response->assertOk();
+    $response->assertSee(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => Chapter::first()->slug]));
+    $response->assertSee(route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => Chapter::first()->slug]));
+});
+
+it('does not show edit and delete actions to non-authors for chapters', function () {
+    $author = alice($this);
+    $story = publicStory('Chapters Story', $author->id);
+    createPublishedChapter($this, $story, $author, ['title' => 'Temp Chap']);
+    
+    $this->actingAs(bob($this));
+    $response = $this->get('/stories/' . $story->slug);
+    $response->assertOk();
+    $response->assertDontSee("data-edit-url");
+    $response->assertDontSee("data-delete-url");
+});
+
 it('lists only published chapters to non authors', function () {
     $author = alice($this);
     $story = publicStory('Chapters Story', $author->id);

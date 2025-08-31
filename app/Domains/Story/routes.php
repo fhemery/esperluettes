@@ -53,6 +53,12 @@ Route::middleware(['web'])->group(function () {
             ->where('slug', '.*')
             ->name('stories.update');
 
+        // Chapters: delete (authors/co-authors only; controller enforces 404 on unauthorized)
+        // IMPORTANT: place BEFORE the story delete route to avoid greedy match and accidental story deletions
+        Route::delete('/stories/{storySlug}/chapters/{chapterSlug}', [ChapterController::class, 'destroy'])
+            ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
+            ->name('chapters.destroy');
+
         // Hard delete own story (authors only)
         Route::delete('/stories/{slug}', [StoryController::class, 'destroy'])
             ->where('slug', '.*')

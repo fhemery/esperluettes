@@ -148,12 +148,14 @@ it('shows an edit link next to chapter title for authors only', function () {
     $resp = $this->actingAs($author)->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
     $resp->assertOk();
     $resp->assertSee(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    $resp->assertSee(route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
 
     // Guest does not see edit link
     Auth::logout();
     $resp2 = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
     $resp2->assertOk();
     $resp2->assertDontSee(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    $resp2->assertDontSee(route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
 });
 
 it('shows navigation among published chapters for readers with disabled edges', function () {

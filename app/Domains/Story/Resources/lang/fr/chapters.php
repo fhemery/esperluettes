@@ -3,6 +3,7 @@
 return [
     'created_success' => 'Chapitre créé avec succès.',
     'updated_success' => 'Chapitre mis à jour avec succès.',
+    'deleted_success' => 'Chapitre supprimé avec succès.',
 
     'back_to_story' => 'Retour à l\'histoire',
     'author_note' => 'Note de l\'auteur',
@@ -53,6 +54,7 @@ return [
     ],
     'actions' => [
         'edit' => 'Éditer le chapitre',
+        'delete' => 'Supprimer le chapitre',
         'reorder' => 'Réorganiser',
         'save_order' => "Enregistrer l'ordre",
         'cancel' => 'Annuler',

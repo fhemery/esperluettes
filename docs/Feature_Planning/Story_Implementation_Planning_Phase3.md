@@ -323,7 +323,7 @@ everything.**
   - Push OG/Twitter tags with `og:type=article`, `og:title` and `twitter:title` set to `$pageTitle`.
   - Use `asset('images/story/default-cover.svg')` as image source (default cover).
 
-## **US-042: Stories Index Requires At Least One Published Public Chapter**
+## **[DONE] US-042: Stories Index Requires At Least One Published Public Chapter**
 
 **As a visitor, I want the stories index to list only stories with at least one published public chapter so that listings reflect readable content.**
 

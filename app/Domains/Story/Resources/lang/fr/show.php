@@ -10,5 +10,9 @@ return [
     'confirm_delete' => 'Oui, supprimer',
     'deleted' => 'Histoire supprimée.',
     'created' => 'Histoire créée !',
-    'no_description' => 'Aucun résumé pour le moment.'
+    'no_description' => 'Aucun résumé pour le moment.',
+    'chapter' => [
+        'confirm_delete' => 'Oui, supprimer le chapitre',
+        'confirm_delete_warning' => 'La suppression du chapitre est définitive.',
+    ],
 ];

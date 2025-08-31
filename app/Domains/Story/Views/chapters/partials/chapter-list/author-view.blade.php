@@ -1,14 +1,6 @@
 <section class="mt-10"
          x-data="chapterReorder({
-            initial: @js(array_map(fn($c) => [
-                'id'=>$c->id,
-                'title'=>$c->title,
-                'slug'=>$c->slug,
-                'url'=>$c->url,
-                'isDraft'=>$c->isDraft,
-                'readsLogged'=>$c->readsLogged,
-                'editUrl'=>route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
-            ], $chapters ?? ($viewModel->chapters ?? []))),
+            initial: [],
             reorderUrl: @js(route('chapters.reorder', ['storySlug' => $story->slug])),
          })"
          data-success-msg="{{ __('story::chapters.reorder_success') }}"
@@ -80,6 +72,28 @@
             dragIndex: null,
             init() {
                 this.successMsg = this.$root?.dataset?.successMsg || 'Saved';
+                // Build items from the server-rendered readonly list to avoid embedding JSON in HTML
+                if (!this.items || this.items.length === 0) {
+                    const ul = this.$refs.readonlyList;
+                    if (ul) {
+                        const lis = Array.from(ul.querySelectorAll('li[data-id]'));
+                        this.items = lis.map(li => {
+                            const d = li.dataset;
+                            return {
+                                id: parseInt(d.id),
+                                title: d.title || '',
+                                slug: d.slug || '',
+                                url: d.url || '#',
+                                isDraft: d.isDraft === '1' || d.isDraft === 'true',
+                                readsLogged: parseInt(d.readsLogged || '0'),
+                                editUrl: d.editUrl || '#',
+                                deleteUrl: d.deleteUrl || '#',
+                            };
+                        });
+                        // Set initial snapshot for cancel()
+                        initial = this.items.slice();
+                    }
+                }
             },
             start() {
                 this.editing = true;
