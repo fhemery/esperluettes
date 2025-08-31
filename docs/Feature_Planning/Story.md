@@ -54,6 +54,12 @@ Chapter caps and related UX are deferred to Stage 4. No limits are enforced in P
 
 ### Reading & Viewing Experience
  - **Story Listing**: Browse available stories with filtering and sorting options
+   - Visibility on `/stories`:
+     - Guests and users with role `user`: only `visibility = public` stories
+     - Users with role `user-confirmed`: `visibility IN (public, community)`
+   - Include only stories that have at least one published chapter, evaluated as `stories.last_chapter_published_at IS NOT NULL` (no `whereExists` check)
+   - Sort by `stories.last_chapter_published_at` DESC (newest chapter first)
+   - Scope: applies only to the public stories index; profile listings are unaffected
  - **Story Detail**: View story metadata, description, and table of contents
  - **Chapter Reading**: Sequential chapter reading with next/previous navigation
  - **Reading Progress**:
@@ -207,7 +213,10 @@ app/Domains/Story/
 ```
 
 ### URL Structure
-- `/stories/` - Story listing page with filtering and sorting (excludes stories without any published public chapter)
+- `/stories/` - Story listing page with filtering and sorting
+  - Role-based visibility (Public for guests/`user`, Public+Community for `user-confirmed`)
+  - Excludes stories where `last_chapter_published_at` is NULL
+  - Sorted by `last_chapter_published_at` DESC
 - `/stories/create` - Create new story (authenticated)
 - `/stories/<slug-with-id>` - Individual story page with table of contents (e.g., `my-story-title-123`)
 - `/stories/<story-slug-with-id>/chapters/<chapter-slug-with-id>` - Individual chapter page with navigation (e.g., `my-story-title-123/chapters/chapter-one-45`)

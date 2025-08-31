@@ -75,7 +75,7 @@ class StoryController
         $twSlugs = array_values(array_unique($twSlugs));
         $excludeTwIds = $this->lookup->findTriggerWarningIdsBySlugs($twSlugs);
         $vis = [Story::VIS_PUBLIC];
-        if (Auth::check()) {
+        if (Auth::check() && Auth::user()->isConfirmed()) {
             $vis[] = Story::VIS_COMMUNITY;
         }
         $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds);
@@ -95,7 +95,6 @@ class StoryController
         // Referentials lookup for display (types, ...)
         $referentials = $this->lookup->getStoryReferentials();
 
-        // Referentials lookup for display (types, ...)
         $items = [];
         $genresById = $this->lookup->getGenres()->keyBy('id');
         $twById = $this->lookup->getTriggerWarnings()->keyBy('id');

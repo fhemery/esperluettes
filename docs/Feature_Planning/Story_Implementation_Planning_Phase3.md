@@ -329,14 +329,19 @@ everything.**
 
 **Acceptance Criteria:**
 
-- `/stories` shows only stories that are Public AND have ≥1 chapter with `status = published` (and story visibility = public).
-- Filtering/sorting continues to work as in Phase 2.
+- `/stories` applies role-based visibility as in previous phases:
+  - Guests and users with role `user`: only `visibility = public` stories.
+  - Users with role `user-confirmed`: `visibility IN (public, community)` stories.
+- Index includes only stories that have at least one published chapter, implemented via `stories.last_chapter_published_at IS NOT NULL` (no `whereExists`).
+- Sorting is by `stories.last_chapter_published_at` (newest first).
 - Empty state and SEO unchanged.
 
 **Implementation Notes:**
 
-- Update index query to `where(visibility = public)` AND `whereExists` published chapters.
-- Optionally use `stories.last_chapter_published_at` to optimize listings.
+- Keep existing role-based visibility filter (guests/`user` -> Public; `user-confirmed` -> Public + Community).
+- Enforce the "has published chapter" rule using `whereNotNull(stories.last_chapter_published_at)`.
+- Order listings by `last_chapter_published_at` DESC (newest chapter first).
+- Scope: applies only to the public stories index route (`stories.index`). Profile listings (`profileStories`) and detail pages are unaffected.
 
 ---
 

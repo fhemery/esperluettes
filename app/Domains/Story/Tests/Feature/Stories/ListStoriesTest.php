@@ -229,7 +229,7 @@ it('should only list public stories to unlogged users, title and author', functi
     $resp->assertDontSee('Community Story');
 });
 
-it('should show public and community stories to logged users', function () {
+it('should show public and community stories to logged users with role user-confirmed', function () {
     // Arrange
     $author = alice($this);
 
@@ -257,6 +257,38 @@ it('should show public and community stories to logged users', function () {
     $resp->assertSee('story::shared.by');
     $resp->assertSee($community->title);
     $resp->assertDontSee('Private Story');
+});
+
+it('should only show public stories to logged users with role user', function () {
+    // Arrange
+    $author = alice($this);
+
+    // Public story (should appear)
+    $public = publicStory('Public Story For User', $author->id, [
+        'description' => '<p>Desc</p>',
+    ]);
+
+    // Community story (should not appear)
+    communityStory('Community Story For User', $author->id, [
+        'description' => '<p>Hidden</p>',
+    ]);
+
+    // Private story (should not appear)
+    privateStory('Private Story For User', $author->id, [
+        'description' => '<p>Hidden</p>',
+    ]);
+
+    // Logged-in user with role 'user' (not user-confirmed)
+    $regularUser = bob($this, roles: ['user']);
+
+    // Act
+    $resp = $this->actingAs($regularUser)->get('/stories');
+
+    // Assert
+    $resp->assertOk();
+    $resp->assertSee($public->title);
+    $resp->assertDontSee('Community Story For User');
+    $resp->assertDontSee('Private Story For User');
 });
 
 
