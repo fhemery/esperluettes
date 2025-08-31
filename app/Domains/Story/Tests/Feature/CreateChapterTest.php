@@ -181,6 +181,26 @@ it('shows validation error when content is empty', function () {
 // note: additional logical length validations may be added in service later; current tests
 // focus on request rules and explicit service checks covered elsewhere.
 
+it('accepts author_note logical length exactly 1000 characters', function () {
+    $user = alice($this);
+    $this->actingAs($user);
+    $story = createStoryForAuthor($user->id, ['title' => 'Len Test OK']);
+
+    $exactPlain = str_repeat('a', 1000);
+    $payload = [
+        'title' => 'Len Chap OK',
+        'author_note' => '<p>' . $exactPlain . '</p>',
+        'content' => '<p>ok</p>',
+        'published' => '1',
+    ];
+
+    $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
+        ->post('/stories/' . $story->slug . '/chapters', $payload);
+
+    $resp->assertRedirect();
+    expect(Chapter::query()->count())->toBe(1);
+});
+
 it('validates that author_note logical length must be <= 1000 characters', function () {
     $user = alice($this);
     $this->actingAs($user);

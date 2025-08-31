@@ -5,6 +5,7 @@ namespace App\Domains\Shared\Providers;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Listeners\AuditAllDomainEvents;
 use App\Domains\Shared\Views\Layouts\AppLayout;
+use App\Domains\Shared\Validation\CustomValidators;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
@@ -83,5 +84,13 @@ class SharedServiceProvider extends ServiceProvider
         Blade::directive('compactNumber', function ($expression) {
             return "<?php echo \\App\\Domains\\Shared\\Support\\NumberFormatter::compact($expression); ?>";
         });
+
+        // Register custom validators in a dedicated place
+        $this->registerValidators();
+    }
+
+    private function registerValidators(): void
+    {
+        CustomValidators::register();
     }
 }

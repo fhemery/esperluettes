@@ -4,6 +4,7 @@ namespace App\Domains\Story\Http\Requests;
 
 use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Http\FormRequest;
+use Mews\Purifier\Facades\Purifier;
 
 class StoryRequest extends FormRequest
 {
@@ -15,8 +16,8 @@ class StoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'min:1', 'max:255'],
-            'description' => ['nullable', 'string', 'max:3000'],
+            'title' => ['required_trimmed', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'maxstripped:1000'],
             'visibility' => ['required', 'in:' . implode(',', Story::visibilityOptions())],
             'story_ref_type_id' => ['required', 'integer', 'exists:story_ref_types,id'],
             'story_ref_audience_id' => ['required', 'integer', 'exists:story_ref_audiences,id'],
@@ -39,8 +40,15 @@ class StoryRequest extends FormRequest
             $title = trim($title);
         }
 
+        // Purify description if provided
+        $description = $this->input('description');
+        if ($description !== null) {
+            $description = Purifier::clean((string) $description, 'strict');
+        }
+
         $this->merge([
             'title' => $title,
+            'description' => $description,
         ]);
     }
 
@@ -48,13 +56,14 @@ class StoryRequest extends FormRequest
     {
         // Return raw translation keys so tests (APP_LOCALE=zz) can assert them
         return [
+            'title.required_trimmed' => __('story::validation.title.required'),
             'title.required' => __('story::validation.title.required'),
             'title.string' => __('story::validation.title.string'),
             'title.min' => __('story::validation.title.min'),
             'title.max' => __('story::validation.title.max'),
 
             'description.string' => __('story::validation.description.string'),
-            'description.max' => __('story::validation.description.max'),
+            'description.maxstripped' => __('story::validation.description.max'),
 
             'visibility.required' => __('story::validation.visibility.required'),
             'visibility.in' => __('story::validation.visibility.in'),

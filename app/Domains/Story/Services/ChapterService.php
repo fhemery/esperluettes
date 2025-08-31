@@ -8,18 +8,16 @@ use App\Domains\Story\Http\Requests\ChapterRequest;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\Story;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
-use Mews\Purifier\Facades\Purifier;
 
 class ChapterService
 {
     public function createChapter(Story $story, ChapterRequest $request, int $userId): Chapter
     {
-        // Default to false if checkbox not provided
+        $title = (string) $request->input('title');
+        $authorNoteHtml = $request->input('author_note'); 
+        $contentHtml = (string) $request->input('content');
         $published = (bool)($request->boolean('published', false));
-        // Shared sanitize + validate
-        [$title, $authorNoteHtml, $contentHtml] = $this->sanitizeAndValidate($request);
 
         return DB::transaction(function () use ($story, $title, $authorNoteHtml, $contentHtml, $published) {
             // compute sparse sort order
@@ -91,9 +89,10 @@ class ChapterService
 
     public function updateChapter(Story $story, Chapter $chapter, ChapterRequest $request): Chapter
     {
+        $title = (string) $request->input('title');
+        $authorNoteHtml = $request->input('author_note'); // purified or null
+        $contentHtml = (string) $request->input('content'); // purified
         $published = (bool)($request->boolean('published', false));
-        // Shared sanitize + validate
-        [$title, $authorNoteHtml, $contentHtml] = $this->sanitizeAndValidate($request);
 
         return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published) {
             $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
@@ -126,47 +125,7 @@ class ChapterService
         });
     }
 
-    /**
-     * Sanitize inputs and validate logical constraints shared by create/update.
-     * @return array{0:string,1:?string,2:string} [$title, $authorNoteHtml, $contentHtml]
-     * @throws ValidationException
-     */
-    private function sanitizeAndValidate(ChapterRequest $request): array
-    {
-        $title = trim($request->input('title'));
-        $authorNoteRaw = $request->input('author_note');
-        $contentRaw = $request->input('content');
-
-        $authorNoteHtml = $authorNoteRaw ? Purifier::clean($authorNoteRaw, 'strict') : null;
-        $contentHtml = Purifier::clean($contentRaw ?? '', 'strict');
-
-        // logical length for author_note (strip tags after purification)
-        if ($authorNoteHtml !== null) {
-            $plain = trim(strip_tags($authorNoteHtml));
-            if (mb_strlen($plain) > 1000) {
-                throw ValidationException::withMessages([
-                    'author_note' => __('story::validation.author_note_too_long'),
-                ]);
-            }
-        }
-
-        // Ensure non-empty title after trim
-        if ($title === '') {
-            throw ValidationException::withMessages([
-                'title' => __('validation.required', ['attribute' => 'title']),
-            ]);
-        }
-
-        // Ensure non-empty content after purification (strip tags and trim)
-        $contentPlain = trim(strip_tags($contentHtml));
-        if ($contentPlain === '') {
-            throw ValidationException::withMessages([
-                'content' => __('validation.required', ['attribute' => 'content']),
-            ]);
-        }
-
-        return [$title, $authorNoteHtml, $contentHtml];
-    }
+    // sanitizeAndValidate no longer needed; inputs are prepared in the FormRequest
 
     /**
      * Recompute and persist story.last_chapter_published_at if a newer first publish exists.
