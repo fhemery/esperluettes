@@ -8,9 +8,10 @@ use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Shared\Support\Seo;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
-use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Services\StoryService;
+use App\Domains\Story\Services\ChapterService;
 use App\Domains\Story\Support\StoryFilterAndPagination;
+use App\Domains\Story\Support\GetStoryOptions;
 use App\Domains\Story\ViewModels\StoryListViewModel;
 use App\Domains\Story\ViewModels\StoryShowViewModel;
 use App\Domains\Story\ViewModels\StorySummaryViewModel;
@@ -29,7 +30,8 @@ class StoryController
         private readonly UserPublicApi             $userPublicApi,
         private readonly ProfilePublicApi          $profileApi,
         private readonly StoryRefLookupService     $lookup,
-        private readonly ReadingProgressService    $progress
+        private readonly ReadingProgressService    $progress,
+        private readonly ChapterService            $chapters
     )
     {
     }
@@ -77,7 +79,7 @@ class StoryController
             $vis[] = Story::VIS_COMMUNITY;
         }
         $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds);
-        $paginator = $this->service->listStories($filter);
+        $paginator = $this->service->getStories($filter);
 
         // Collect all author user IDs from the page
         $authorIds = $paginator->getCollection()
@@ -176,7 +178,8 @@ class StoryController
 
     public function edit(string $slug): View
     {
-        $story = $this->service->getStoryForShow($slug, Auth::id());
+        $opts = new GetStoryOptions(includeAuthors: true, includeGenreIds: true, includeTriggerWarningIds: true);
+        $story = $this->service->getStory($slug, $opts);
 
         // Author-only: must be a collaborator with role=author
         if (!$story->isAuthor(Auth::id())) {
@@ -192,7 +195,8 @@ class StoryController
 
     public function update(StoryRequest $request, string $slug): RedirectResponse
     {
-        $story = $this->service->getStoryForShow($slug, Auth::id());
+        $opts = new GetStoryOptions(includeAuthors: true, includeGenreIds: true, includeTriggerWarningIds: true);
+        $story = $this->service->getStory($slug, $opts);
 
         // Author-only: must be a collaborator with role=author
         if (!$story->isAuthor(Auth::id())) {
@@ -260,7 +264,7 @@ class StoryController
         }
 
         $filter = new StoryFilterAndPagination(page: $page, perPage: 12, visibilities: $vis, userId: $userId);
-        $paginator = $this->service->listStories($filter, Auth::id());
+        $paginator = $this->service->getStories($filter, Auth::id());
 
         // Authors profiles
         $authorIds = $paginator->getCollection()
@@ -303,7 +307,15 @@ class StoryController
 
     public function show(string $slug): View|\Illuminate\Http\RedirectResponse
     {
-        $story = $this->service->getStoryForShow($slug, Auth::id());
+        $opts = new GetStoryOptions(includeAuthors: true, includeGenreIds: true, includeTriggerWarningIds: true);
+        
+        // Fetch all the data we need from DB
+        $story = $this->service->getStory($slug, $opts);
+        $chapterRows = $this->chapters->getChapters($story, Auth::id());
+        $readIds = [];
+        if (Auth::check()) {
+            $readIds = $this->progress->getReadChapterIdsForUserInStory((int)Auth::id(), (int)$story->id);
+        }
 
         // 301 redirect to canonical slug when base differs but id matches
         if (!SlugWithId::isCanonical($slug, $story->slug)) {
@@ -371,19 +383,6 @@ class StoryController
             }
         }
 
-        // Build chapters list for the viewer
-        $isAuthor = $story->isAuthor(Auth::id());
-        $chapterQuery = $story->chapters()
-            ->select(['id','title','slug','status','sort_order','reads_logged_count'])
-            ->when(!$isAuthor, fn($q) => $q->where('status', Chapter::STATUS_PUBLISHED))
-            ->orderBy('sort_order','asc');
-
-        $chapterRows = $chapterQuery->get();
-        $readIds = [];
-        if (Auth::check()) {
-            $readIds = $this->progress->getReadChapterIdsForUserInStory((int)Auth::id(), (int)$story->id);
-        }
-
         $chapters = [];
         foreach ($chapterRows as $c) {
             $chapters[] = new ChapterSummaryViewModel(
@@ -420,7 +419,8 @@ class StoryController
 
     public function destroy(string $slug): RedirectResponse
     {
-        $story = $this->service->getStoryForShow($slug, Auth::id());
+        $opts = new GetStoryOptions(includeAuthors: true);
+        $story = $this->service->getStory($slug, $opts);
 
         // Author-only: must be a collaborator with role=author
         if (!$story->isAuthor(Auth::id())) {

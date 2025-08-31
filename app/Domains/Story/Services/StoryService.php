@@ -5,6 +5,7 @@ namespace App\Domains\Story\Services;
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Support\StoryFilterAndPagination;
+use App\Domains\Story\Support\GetStoryOptions;
 use App\Domains\Shared\Support\SlugWithId;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ class StoryService
      * @param StoryFilterAndPagination $filter Filters and pagination (page, perPage, visibilities, userId)
      * @param int|null $viewerId If provided, include private stories where this user is a collaborator
      */
-    public function listStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
+    public function getStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
     {
         $query = Story::query()
             ->with(['authors', 'collaborators', 'genres:id', 'triggerWarnings:id'])
@@ -149,39 +150,35 @@ class StoryService
         });
     }
 
-    public function getStoryForShow(string $slug, ?int $viewerId): Story
-    {
-        // Extract id from trailing -{id}
-        $id = SlugWithId::extractId($slug);
-
-        // Only eager-load genre IDs to minimize payload; names are resolved via lookup in controller
-        $base = Story::query()->with([
-            'authors',
-            'genres:id',
-            'triggerWarnings:id',
-        ]);
-        $story = $id
-            ? $base->findOrFail($id)
-            : $base->where('slug', $slug)->firstOrFail();
-
-        return $story;
-    }
-
     /**
-     * Fetch a story by slug (or slug-with-id). Optionally eager-load chapters ordered by sort_order.
-     * Only minimal fields are selected for chapters to keep payload small.
+     * Fetch a story by slug (or slug-with-id).
+     * Eager-loading is controlled via GetStoryOptions to keep payload lean.
      */
-    public function getStory(string $slug, bool $includeChapters = false): Story
+    public function getStory(string $slug, ?GetStoryOptions $options = null): Story
     {
+        $opts = $options ?? new GetStoryOptions();
         $id = SlugWithId::extractId($slug);
 
         $query = Story::query();
 
-        if ($includeChapters) {
-            $query->with(['chapters' => function ($q) {
+        $with = [];
+        if ($opts->includeAuthors) {
+            $with[] = 'authors';
+        }
+        if ($opts->includeGenreIds) {
+            $with[] = 'genres:id';
+        }
+        if ($opts->includeTriggerWarningIds) {
+            $with[] = 'triggerWarnings:id';
+        }
+        if ($opts->includeChapters) {
+            $with['chapters'] = function ($q) {
                 $q->orderBy('sort_order', 'asc')
                   ->select(['id', 'story_id', 'title', 'slug', 'status', 'sort_order']);
-            }]);
+            };
+        }
+        if (!empty($with)) {
+            $query->with($with);
         }
 
         return $id

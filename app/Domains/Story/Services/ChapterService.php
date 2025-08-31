@@ -128,6 +128,23 @@ class ChapterService
     // sanitizeAndValidate no longer needed; inputs are prepared in the FormRequest
 
     /**
+     * Return chapters to display on story show page, filtered by viewer visibility,
+     * with minimal selected fields and correct ordering.
+     *
+     * @return \Illuminate\Support\Collection<int, Chapter>
+     */
+    public function getChapters(Story $story, ?int $viewerId): \Illuminate\Support\Collection
+    {
+        $isAuthor = $story->isAuthor($viewerId);
+
+        return $story->chapters()
+            ->select(['id','title','slug','status','sort_order','reads_logged_count'])
+            ->when(!$isAuthor, fn($q) => $q->where('status', Chapter::STATUS_PUBLISHED))
+            ->orderBy('sort_order','asc')
+            ->get();
+    }
+
+    /**
      * Recompute and persist story.last_chapter_published_at if a newer first publish exists.
      */
     private function updateStoryLastPublishedIfLatest(Story $story): void

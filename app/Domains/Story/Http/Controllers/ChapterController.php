@@ -11,6 +11,7 @@ use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Services\ChapterService;
 use App\Domains\Story\Services\ReadingProgressService;
 use App\Domains\Story\Services\StoryService;
+use App\Domains\Story\Support\GetStoryOptions;
 use App\Domains\Story\ViewModels\ChapterViewModel;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
@@ -97,7 +98,8 @@ class ChapterController
     public function show(Request $request, string $storySlug, string $chapterSlug): View|RedirectResponse
     {
         // Load story with ordered chapters (minimal fields) for navigation computation
-        $story = $this->storyService->getStory($storySlug, includeChapters: true);
+        $opts = new GetStoryOptions(includeChapters: true);
+        $story = $this->storyService->getStory($storySlug, $opts);
         // Load full chapter content separately
         $chapterId = SlugWithId::extractId($chapterSlug);
         $chapter = Chapter::query()->where('story_id', $story->id)->findOrFail($chapterId);
