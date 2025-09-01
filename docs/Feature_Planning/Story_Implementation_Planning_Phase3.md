@@ -345,7 +345,7 @@ everything.**
 
 ---
 
-## **US-043: Delete Chapter (Hard Delete)**
+## **[DONE] US-043: Delete Chapter (Hard Delete)**
 
 **As an author, I want to permanently delete a chapter so that I can remove content I no longer want to publish.**
 

@@ -15,7 +15,7 @@ This file has been broken down into phases to keep track of the status :
 - [Phase 1 : Basic Story Management](./Story_Implementation_Planning_Phase1.md)
 - [Phase 2 : Story Details Management](./Story_Implementation_Planning_Phase2.md)
 - [Phase 3 : Chapter Management](./Story_Implementation_Planning_Phase3.md)
-- [Phase 4 : Story Publishing Management
+- [Phase 4 : Story Publishing Management](./Story_Implementation_Planning_Phase4.md)
 
 ## Implementation Strategy
 
@@ -49,3 +49,16 @@ This file has been broken down into phases to keep track of the status :
 - **Demonstrable**: Stakeholders can see and validate each capability
 - **Flexible**: Stories can be reordered based on priorities
 - **Traceable**: Easy to track which features are complete
+
+## Future: Comments Annotations (V2)
+
+- **Composition model**: Story composes its own tabs (e.g., "General" and "Annotations") around the headless Comment provider (`comment::provider`). The Comment domain ships only primitives (`provider`, `list`, `editor`) and no tabs.
+- **General tab**: Uses `comment::list` and `comment::editor` to render and post general comments.
+- **Annotations tab (Story-owned)**:
+  - Implemented in Story as a separate panel (e.g., `app/Domains/Story/Resources/views/components/annotations-panel.blade.php`).
+  - Fetches from Story endpoints (e.g., `GET /stories/{story}/chapters/{chapter}/annotations[?commentId=...]`).
+  - Shows annotation items with excerpt, linked `comment_html`, and actions like "Jump to location".
+- **Per-comment hook**: In the General tab, Story may inject an "Annotations (n)" pill via the `meta` slot of `comment::list` to switch to the Annotations tab filtered to that comment.
+- **Inline marks**: Controlled by Story; visible only to authors/co-authors on the reading page. Readers can open the Annotations tab without inline marks.
+- **Contracts/Adapters**: Story implements Comment target adapters indicating `supportsAnnotations = true` without changing the Comment core.
+- **Testing**: Add feature tests for tabs visibility, permissions, annotation listing, and the per-comment pill behavior. Keep browser tests minimal (tab switching, anchor jump).
