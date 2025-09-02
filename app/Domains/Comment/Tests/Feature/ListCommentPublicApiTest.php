@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Comment\PublicApi\CommentPublicApi;
 use App\Domains\Comment\Contracts\CommentListDto;
 use App\Domains\Comment\Models\Comment;
@@ -31,14 +32,14 @@ describe('Access', function() {
     });
 
     it('should work for users on probation (simple user role)', function() {
-        $user = alice($this, roles:['user']);
+        $user = alice($this, roles:[Roles::USER]);
         $this->actingAs($user);
         $result = $this->api->getFor('chapter', 1);
         expect($result)->toBeInstanceOf(CommentListDto::class);
     });
 
     it('should work for confirmed users (user_confirmed role)', function() {
-        $user = alice($this, roles:['user-confirmed']);
+        $user = alice($this, roles:[Roles::USER_CONFIRMED]);
         $this->actingAs($user);
         $result = $this->api->getFor('chapter', 1);
         expect($result)->toBeInstanceOf(CommentListDto::class);

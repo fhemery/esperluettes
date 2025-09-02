@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Support\Facades\Route;
 use App\Domains\Story\Http\Controllers\StoryCreateController;
 use App\Domains\Story\Http\Controllers\StoryController;
@@ -10,7 +11,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/stories', [StoryController::class, 'index'])
         ->name('stories.index');
 
-    Route::middleware(['role:user-confirmed'])->group(function () {
+    Route::middleware(['role:'.Roles::USER_CONFIRMED])->group(function () {
         Route::get('/stories/create', [StoryCreateController::class, 'create'])
             ->name('stories.create');
 

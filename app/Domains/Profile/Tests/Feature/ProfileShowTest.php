@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Profile\Models\Profile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,7 +15,7 @@ it('redirects guests from own profile route to login', function () {
 
 it('allows authenticated user with proper role to access own profile', function () {
     $userConfirmed = alice($this);
-    $simpleUser = bob($this, roles: ['user']);
+    $simpleUser = bob($this, roles: [Roles::USER]);
 
     $this->actingAs($simpleUser)
         ->get('/profile')

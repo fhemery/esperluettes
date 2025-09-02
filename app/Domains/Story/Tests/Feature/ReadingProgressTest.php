@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\ReadingProgress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,7 +43,7 @@ describe('Reading Progress - Errors', function () {
         $story = communityStory('Community Story', $author->id);
         $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Community']);
 
-        $reader = bob($this, roles:['user']);
+        $reader = bob($this, roles:[Roles::USER]);
         $this->actingAs($reader);
         markAsRead($this, $chapter)->assertRedirect('/dashboard');
         markAsUnread($this, $chapter)->assertRedirect('/dashboard');

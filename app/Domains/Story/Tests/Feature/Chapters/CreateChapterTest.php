@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,7 +22,7 @@ it('redirects guests from chapter create page to login', function () {
 
 it('denies non-confirmed users from accessing chapter create page', function () {
     $author = alice($this);
-    $nonConfirmed = bob($this, roles: ['user']);
+    $nonConfirmed = bob($this, roles: [Roles::USER]);
     $this->actingAs($nonConfirmed);
 
     $story = createStoryForAuthor($author->id, ['title' => 'Blocked']);
@@ -106,7 +107,7 @@ it('returns 404 when a non-author tries to create a chapter on someone else\'s s
 });
 
 it('shows validation error when title is empty', function () {
-    $user = alice($this, roles: ['user-confirmed']);
+    $user = alice($this);
     $this->actingAs($user);
     $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
 
@@ -125,7 +126,7 @@ it('shows validation error when title is empty', function () {
 });
 
 it('shows validation error when title contains only whitespace', function () {
-    $user = alice($this, roles: ['user-confirmed']);
+    $user = alice($this);
     $this->actingAs($user);
     $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
 
@@ -143,7 +144,7 @@ it('shows validation error when title contains only whitespace', function () {
 });
 
 it('shows validation error when title is too long (>255)', function () {
-    $user = alice($this, roles: ['user-confirmed']);
+    $user = alice($this);
     $this->actingAs($user);
     $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
 
@@ -161,7 +162,7 @@ it('shows validation error when title is too long (>255)', function () {
 });
 
 it('shows validation error when content is empty', function () {
-    $user = alice($this, roles: ['user-confirmed']);
+    $user = alice($this);
     $this->actingAs($user);
     $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
 

@@ -228,7 +228,7 @@ deptrac:
     # Private domains - can access SharedContracts + other domain Public APIs + events
     AuthPrivate:
       - SharedContracts
-      - AuthPrivate
+      - AuthPublic
       - AuthEvents
 
     NewsPrivate:

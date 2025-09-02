@@ -10,7 +10,7 @@ class StoryPolicy
     /**
      * Determine whether the user can view the story according to visibility.
      * - public: everyone
-     * - community: confirmed users only (role: user-confirmed)
+     * - community: confirmed users only
      * - private: collaborators only
      */
     public function view(?Authenticatable $user, Story $story): bool

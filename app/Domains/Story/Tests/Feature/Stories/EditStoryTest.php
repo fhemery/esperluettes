@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ beforeEach(function () {
 
 it('redirects guests from edit page to login', function () {
     // Arrange: existing public story
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $story = publicStory('Guest Edit Test', $author->id);
 
     // Act
@@ -25,7 +26,7 @@ it('redirects guests from edit page to login', function () {
 
 it('allows the author to load edit page and update story', function () {
     // Arrange
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $this->actingAs($author);
     $story = publicStory('Original Title', $author->id, ['description' => '<p>desc</p>']);
 
@@ -56,8 +57,8 @@ it('allows the author to load edit page and update story', function () {
 
 it('allows a co-author with role author to update', function () {
     // Arrange
-    $author = alice($this, roles: ['user-confirmed']);
-    $coauthor = bob($this, roles: ['user-confirmed']);
+    $author = alice($this);
+    $coauthor = bob($this);
     $story = publicStory('Team Story', $author->id);
 
     // Add coauthor as author
@@ -84,8 +85,8 @@ it('allows a co-author with role author to update', function () {
 
 it('returns 404 for collaborator without author role', function () {
     // Arrange
-    $author = alice($this, roles: ['user-confirmed']);
-    $other = bob($this, roles: ['user-confirmed']);
+    $author = alice($this);
+    $other = bob($this);
     $story = publicStory('No Edit Perms', $author->id);
 
     // Add collaborator with non-author role
@@ -109,8 +110,8 @@ it('returns 404 for collaborator without author role', function () {
 
 it('returns 404 for non-collaborator trying to edit', function () {
     // Arrange
-    $author = alice($this, roles: ['user-confirmed']);
-    $intruder = bob($this, roles: ['user-confirmed']);
+    $author = alice($this);
+    $intruder = bob($this);
     $story = publicStory('No Access', $author->id);
 
     $this->actingAs($intruder);
@@ -124,7 +125,7 @@ it('returns 404 for non-collaborator trying to edit', function () {
 
 it('301-redirects from old slug base to canonical after title change', function () {
     // Arrange
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $this->actingAs($author);
     $story = publicStory('Old Title', $author->id);
     $oldSlug = $story->slug; // contains -id
@@ -145,8 +146,8 @@ it('301-redirects from old slug base to canonical after title change', function 
 
 it('denies edit access to co-authors without user-confirmed role (middleware)', function () {
     // Arrange: author is confirmed, coauthor is NOT (has only user role)
-    $author = alice($this, roles: ['user-confirmed']);
-    $coauthor = bob($this, roles: ['user']);
+    $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+    $coauthor = bob($this, roles: [Roles::USER]);
     $story = publicStory('Needs Confirmed Role', $author->id);
 
     // Add coauthor as author collaborator at story level
@@ -179,7 +180,7 @@ it('denies edit access to co-authors without user-confirmed role (middleware)', 
 
 it('syncs genres on update (replaces previous selection)', function () {
     // Arrange: author and story with default genre
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $this->actingAs($author);
     $story = publicStory('Genres Updatable', $author->id, [
         'description' => '<p>x</p>',
@@ -213,7 +214,7 @@ it('syncs genres on update (replaces previous selection)', function () {
 
 it('allows the author to set and change the optional status on update', function () {
     // Arrange
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $this->actingAs($author);
     $story = publicStory('Status Updatable', $author->id, [
         'description' => '<p>x</p>',
@@ -238,7 +239,7 @@ it('allows the author to set and change the optional status on update', function
 
 it('syncs trigger warnings on update (replaces previous selection)', function () {
     // Arrange
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $this->actingAs($author);
     $twA = makeTriggerWarning('Violence');
     $twB = makeTriggerWarning('Drogues');
@@ -274,7 +275,7 @@ it('syncs trigger warnings on update (replaces previous selection)', function ()
 
 it('allows the author to set and change the optional feedback on update', function () {
     // Arrange
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $this->actingAs($author);
     $story = publicStory('Feedback Updatable', $author->id, [
         'description' => '<p>x</p>',

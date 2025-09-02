@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\Database\Factories\UserFactory as DomainUserFactory;
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -79,7 +80,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isOnProbation(): bool
     {
-        return $this->hasRole('user');
+        return $this->hasRole(Roles::USER);
     }
 
     /**
@@ -89,7 +90,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isConfirmed(): bool
     {
-        return $this->hasRole('user-confirmed');
+        return $this->hasRole(Roles::USER_CONFIRMED);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Models\ActivationCode;
 use App\Domains\Auth\Models\User;
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -22,7 +23,7 @@ function verificationUrlFor(User $user): string
     );
 }
 
-it('assigns user role when activation is required and no activation code was used', function () {
+it('assigns '. Roles::USER.' role when activation is required and no activation code was used', function () {
     // Arrange: allow registration without activation code, then require it at verification time
     config(['app.require_activation_code' => false]);
 
@@ -49,7 +50,7 @@ it('assigns user role when activation is required and no activation code was use
     expect($user->isConfirmed())->toBeFalse();
 });
 
-it('assigns user-confirmed role when activation is required and an activation code was used', function () {
+it('assigns '. Roles::USER_CONFIRMED.' role when activation is required and an activation code was used', function () {
     // Arrange: allow registration without activation code, then require it at verification time
     config(['app.require_activation_code' => false]);
 
@@ -86,7 +87,7 @@ it('assigns user-confirmed role when activation is required and an activation co
     expect($user->isOnProbation())->toBeFalse();
 });
 
-it('assigns user-confirmed role when activation is not required', function () {
+it('assigns '. Roles::USER_CONFIRMED.' role when activation is not required', function () {
     // Arrange
     config(['app.require_activation_code' => false]);
 

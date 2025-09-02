@@ -1,4 +1,6 @@
 <?php
+
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -122,17 +124,14 @@ it('should show "My stories" instead of "Stories" and a new Story button for the
     $resp->assertSee('story::profile.new-story');
 });
 
-it('should not show a new Story button for the owner without user-confirmed role', function () {
-    // Owner has only the base 'user' role (not user-confirmed)
-    $owner = alice($this, roles: ['user']);
+it('should not show a new Story button for the owner without '.Roles::USER_CONFIRMED.' role', function () {
+    $owner = alice($this, roles: [Roles::USER]);
     $slug = profileSlugFromApi($owner->id);
 
     $resp = $this->actingAs($owner)->get("/profiles/{$slug}/stories");
 
     $resp->assertOk();
-    // Owner context still uses "My stories" label
     $resp->assertSee('story::profile.my-stories');
-    // But the create button should be hidden without the user-confirmed role
     $resp->assertDontSee('story::profile.new-story');
 });
 

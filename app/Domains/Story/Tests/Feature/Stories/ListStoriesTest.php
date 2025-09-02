@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -294,7 +295,7 @@ it('should only show public stories to logged users with role user', function ()
     ]);
 
     // Logged-in user with role 'user' (not user-confirmed)
-    $regularUser = bob($this, roles: ['user']);
+    $regularUser = bob($this, roles: [Roles::USER]);
 
     // Act
     $resp = $this->actingAs($regularUser)->get('/stories');
