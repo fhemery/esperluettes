@@ -1,5 +1,7 @@
 <?php
 
+use App\Domains\Comment\Contracts\CommentDto;
+
 /**
  * @param CommentPublicApi $api
  * @param int $authorId
@@ -15,3 +17,7 @@ function createComment($api,string $entityType = 'default', int $entityId = 1,  
     return $api->create($entityType, $entityId, $body, $parentCommentId);
 }
 
+function getComment($api, int $commentId): CommentDto
+{
+    return $api->getComment($commentId);
+}

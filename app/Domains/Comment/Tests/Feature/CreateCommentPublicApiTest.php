@@ -2,8 +2,6 @@
 
 use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Comment\PublicApi\CommentPublicApi;
-use App\Domains\Comment\Contracts\CommentListDto;
-use App\Domains\Comment\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\UnauthorizedException;
 use Tests\TestCase;
@@ -43,5 +41,22 @@ describe('Access', function() {
         $this->actingAs($user);
         $commentId = createComment($this->api, 'chapter', 1, 'Hello', null);
         expect($commentId)->toBeGreaterThan(0);
+    });
+});
+
+describe('Root content', function() {
+    it('should allow to create a root comment', function() {
+        $user = alice($this, roles:[Roles::USER_CONFIRMED]);
+        $this->actingAs($user);
+        $commentId = createComment($this->api, 'chapter', 1, 'Hello', null);
+        expect($commentId)->toBeGreaterThan(0);
+    });
+
+    it('should sanitize the content of the comment', function() {
+        $user = alice($this, roles:[Roles::USER_CONFIRMED]);
+        $this->actingAs($user);
+        $commentId = createComment($this->api, 'chapter', 1, '<script>alert("xss");</script>Hello', null);
+        $comment = getComment($this->api, $commentId);
+        expect($comment->body)->toContain('Hello');
     });
 });

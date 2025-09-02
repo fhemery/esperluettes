@@ -6,6 +6,7 @@ use App\Domains\Comment\Contracts\CommentListDto;
 use App\Domains\Comment\Contracts\CommentDto;
 use App\Domains\Comment\Services\CommentService;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\Dto\ProfileDto;
 use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Auth\PublicApi\AuthPublicApi;
 use Illuminate\Support\Facades\Auth;
@@ -38,7 +39,7 @@ class CommentPublicApi
         $items = [];
         foreach ($models as $model) {
             $authorId = (int) $model->author_id;
-            $profile = $profiles[$authorId] ?? new \App\Domains\Shared\Dto\ProfileDto(
+            $profile = $profiles[$authorId] ?? new ProfileDto(
                 user_id: $authorId,
                 display_name: '',
                 slug: '',
@@ -76,6 +77,13 @@ class CommentPublicApi
 
         $user = Auth::user();
         return $this->service->postComment($entityType, $entityId, $user->id, $body, $parentCommentId)->id;
+    }
+
+    public function getComment(int $commentId): CommentDto
+    {
+        $this->checkAccess();
+        $comment = $this->service->getComment($commentId);
+        return CommentDto::fromModel($comment, $this->profiles->getPublicProfile($comment->author_id));
     }
 }
 

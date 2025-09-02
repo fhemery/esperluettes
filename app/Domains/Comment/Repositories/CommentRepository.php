@@ -26,4 +26,9 @@ class CommentRepository
             'parent_comment_id' => $parentCommentId,
         ]);
     }
+
+    public function getById(int $commentId): Comment
+    {
+        return Comment::query()->findOrFail($commentId);
+    }
 }

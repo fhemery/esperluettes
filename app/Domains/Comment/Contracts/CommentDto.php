@@ -4,6 +4,7 @@ namespace App\Domains\Comment\Contracts;
 
 use App\Domains\Shared\Dto\ProfileDto;
 use App\Domains\Auth\PublicApi\Dto\RoleDto;
+use App\Domains\Comment\Models\Comment;
 
 class CommentDto
 {
@@ -15,6 +16,18 @@ class CommentDto
         public readonly string $createdAt,
         public readonly ?string $updatedAt = null,
     ) {
+    }
+
+    public static function fromModel(Comment $model, ProfileDto $authorProfile): self
+    {
+        return new self(
+            id: (int) $model->id,
+            body: (string) $model->body,
+            authorId: (int) $model->author_id,
+            authorProfile: $authorProfile,
+            createdAt: (string) $model->created_at,
+            updatedAt: $model->updated_at?->toISOString(),
+        );
     }
 
     public static function fromArray(array $data): self

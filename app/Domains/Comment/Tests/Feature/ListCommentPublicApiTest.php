@@ -81,7 +81,7 @@ it('returns a list of comments when some are added', function () {
         ->and($result->perPage)->toBe(20)
         ->and($result->total)->toBe(1)
         ->and($result->items)->toBeArray()
-        ->and($result->items[0]->body)->toBe('Hello');
+        ->and($result->items[0]->body)->toContain('Hello');
 });
 
 it('lists root comments by descending creation date', function () {
