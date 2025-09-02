@@ -32,6 +32,6 @@ class CommentController extends Controller
 
         $this->api->create($dto);
 
-        return back()->with('status', 'comment-posted');
+        return back()->with('status', 'comment::comments.posted');
     }
 }

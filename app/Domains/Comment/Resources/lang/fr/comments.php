@@ -19,4 +19,6 @@ return [
     'actions' => [
         'login' => 'Se connecter',
     ],
+
+    'posted' => 'Commentaire publié',
 ];
