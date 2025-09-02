@@ -1,6 +1,6 @@
-@props(['name', 'id', 'defaultValue' => '', 'max' => null, 'nbLines' => null])
+@props(['name', 'id', 'defaultValue' => '', 'max' => null, 'nbLines' => null, 'placeholder' => ''])
 <div {{ $attributes->merge(['class' => '']) }}>
-    <div class="mb-2" id="{{ $id }}"></div>
+    <div class="mb-2" id="{{ $id }}" data-placeholder="{{ e($placeholder) }}"></div>
     <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $name }}" value="{!! $defaultValue !!}" />
     <div class="mt-2 text-xs text-right " id="quill-counter-wrap-{{ $id }}">
         <span id="quill-counter-{{ $id }}">0</span>
@@ -16,6 +16,7 @@
                 const container = document.getElementById('{{ $id }}');
                 if (!container || typeof Quill === 'undefined') return;
 
+                const placeholder = container ? (container.dataset.placeholder || '') : '';
                 const editor = new Quill(container, {
                     theme: 'snow',
                     modules: {
@@ -26,7 +27,7 @@
                             ['clean']
                         ]
                     },
-                    placeholder: ''
+                    placeholder
                 });
 
                 // Height handling: enforce min and max lines, scroll when exceeding max
