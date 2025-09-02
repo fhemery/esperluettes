@@ -29,6 +29,20 @@ it('shows a published chapter to non-authors', function () {
     $resp->assertSee('Pub Chap');
 });
 
+it('should show the comments', function () {
+    $author = alice($this);
+    $story = publicStory('Public Story', $author->id);
+
+    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Pub Chap']);
+ 
+    Auth::logout();
+    $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    $resp->assertOk();
+    
+    // We cannot test much further, because the component will not be rendered in the future.
+    $resp->assertSee('comment-list');
+});
+
 it('not show a published chapter from a community story to guests', function () {
     $author = alice($this);
     $story = communityStory('Community Story', $author->id);

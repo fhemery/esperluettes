@@ -129,6 +129,11 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Comments -->
+                    <div class="mt-12">
+                        <x-comment-list entity-type="chapter" entity-id="{{ $vm->chapter->id }}" />
+                    </div>
                 </div>
             </div>
         </div>

@@ -11,4 +11,12 @@ return [
     'list' => [
         'empty' => 'Aucun commentaire pour le moment.',
     ],
+
+    'errors' => [
+        'members_only' => 'Seules les membres peuvent poster des commentaires.',
+    ],
+
+    'actions' => [
+        'login' => 'Se connecter',
+    ],
 ];
