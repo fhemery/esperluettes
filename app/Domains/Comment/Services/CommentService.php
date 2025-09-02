@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Domains\Comment\Services;
+
+use App\Domains\Comment\Repositories\CommentRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Domains\Comment\Models\Comment;
+
+class CommentService
+{
+    public function __construct(
+        private readonly CommentRepository $repository,
+    ) {}
+
+    /**
+     * Retrieve comments for a given entity type and id as domain models.
+     */
+    public function getFor(string $entityType, string $entityId, int $page = 1, int $perPage = 20): LengthAwarePaginator
+    {
+        // Assume caller passes normalized identifiers already.
+        return $this->repository->listByTarget($entityType, $entityId, $page, $perPage);
+    }
+
+    /**
+     * Create a root comment (no parent). No policy checks for now.
+     */
+    public function postComment(string $entityType, string $entityId, int $authorId, string $body): Comment
+    {
+        return $this->repository->createRoot($entityType, $entityId, $authorId, $body);
+    }
+}

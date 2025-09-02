@@ -30,5 +30,6 @@ class StoryServiceProvider extends ServiceProvider
         // Register policies
         Gate::policy(Story::class, StoryPolicy::class);
         Gate::policy(Chapter::class, ChapterPolicy::class);
+
     }
 }
