@@ -6,28 +6,29 @@ use App\Domains\Comment\Contracts\CommentListDto;
 use App\Domains\Comment\Contracts\CommentDto;
 use App\Domains\Comment\Services\CommentService;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\PublicApi\AuthPublicApi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
-use Illuminate\Support\Facades\Log;
 
 class CommentPublicApi
 {
     public function __construct(
         private CommentService $service,
         private ProfilePublicApi $profiles,
+        private AuthPublicApi $authApi,
     ) {}
 
-    private function checkUser($user)
+    public function checkAccess()
     {
-        if (!$user || !method_exists($user, 'hasRole') ||  !$user->hasRole(['user', 'user-confirmed']) ) {
+        if (!$this->authApi->hasAnyRole([Roles::USER, Roles::USER_CONFIRMED])) {
             throw new UnauthorizedException('Unauthorized');
         }
     }
 
     public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): CommentListDto
     {
-        $this->checkUser(Auth::user());
-
+        $this->checkAccess();
         $paginator = $this->service->getFor($entityType, $entityId, $page, $perPage);
 
         $models = $paginator->items();
@@ -71,8 +72,9 @@ class CommentPublicApi
      */
     public function create(string $entityType, int $entityId, string $body, ?int $parentCommentId = null): int
     {
+        $this->checkAccess();
+
         $user = Auth::user();
-        $this->checkUser($user);
         return $this->service->postComment($entityType, $entityId, $user->id, $body, $parentCommentId)->id;
     }
 }

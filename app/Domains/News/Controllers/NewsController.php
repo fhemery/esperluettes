@@ -2,6 +2,8 @@
 
 namespace App\Domains\News\Controllers;
 
+use App\Domains\Auth\PublicApi\AuthPublicApi;
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\News\Models\News;
 use App\Domains\News\Services\NewsService;
 use Illuminate\Routing\Controller as BaseController;
@@ -11,14 +13,19 @@ use Illuminate\View\View;
 
 class NewsController extends BaseController
 {
-    public function index(NewsService $service): View
+    public function __construct(
+        private NewsService $newsService,
+        private AuthPublicApi $authApi,
+    ) {}
+    
+    public function index(): View
     {
         $news = News::query()
             ->published()
             ->orderForListing()
             ->paginate(12);
 
-        $pinned = $service->getPinnedForCarousel();
+        $pinned = $this->newsService->getPinnedForCarousel();
 
         return view('news::index', [
             'news' => $news,
@@ -34,11 +41,9 @@ class NewsController extends BaseController
             ->published()
             ->first();
 
-        $user = $request->user();
-
         if (!$news) {
             // If not published and user is admin, allow preview of draft by direct lookup
-            if ($user && method_exists($user, 'isAdmin') && $user->isAdmin()) {
+            if ($this->authApi->hasAnyRole([Roles::ADMIN])) {
                 $news = News::query()->where('slug', $slug)->first();
                 if (!$news) {
                     abort(404);
@@ -50,7 +55,7 @@ class NewsController extends BaseController
 
         // If draft, only admins may access
         if ($news->status === 'draft') {
-            if (!$user || !$user->isAdmin()) {
+            if (!$this->authApi->hasAnyRole([Roles::ADMIN])) {
                 abort(404);
             }
         }
