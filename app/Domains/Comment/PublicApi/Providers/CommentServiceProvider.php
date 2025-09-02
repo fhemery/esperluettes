@@ -3,12 +3,16 @@
 namespace App\Domains\Comment\PublicApi\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Domains\Comment\Services\CommentPolicyRegistry;
 
 class CommentServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // No bindings required: services are auto-wired to concrete classes
+        // Share a single policy registry instance across the app/tests
+        $this->app->singleton(CommentPolicyRegistry::class, function () {
+            return new CommentPolicyRegistry();
+        });
     }
 
     public function boot(): void

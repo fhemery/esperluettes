@@ -4,7 +4,9 @@ namespace App\Domains\Comment\PublicApi;
 
 use App\Domains\Comment\Contracts\CommentListDto;
 use App\Domains\Comment\Contracts\CommentDto;
+use App\Domains\Comment\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Services\CommentService;
+use App\Domains\Comment\Services\CommentPolicyRegistry;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\ProfileDto;
 use App\Domains\Auth\PublicApi\Roles;
@@ -18,6 +20,7 @@ class CommentPublicApi
         private CommentService $service,
         private ProfilePublicApi $profiles,
         private AuthPublicApi $authApi,
+        private CommentPolicyRegistry $policies,
     ) {}
 
     public function checkAccess()
@@ -71,12 +74,14 @@ class CommentPublicApi
      * 
      * @return int The id of the created comment
      */
-    public function create(string $entityType, int $entityId, string $body, ?int $parentCommentId = null): int
+    public function create(CommentToCreateDto $comment): int
     {
         $this->checkAccess();
 
         $user = Auth::user();
-        return $this->service->postComment($entityType, $entityId, $user->id, $body, $parentCommentId)->id;
+        // Apply domain-specific posting policies if any
+        $this->policies->validateCreate($comment);
+        return $this->service->postComment($comment->entityType, $comment->entityId, $user->id, $comment->body, $comment->parentCommentId)->id;
     }
 
     public function getComment(int $commentId): CommentDto
