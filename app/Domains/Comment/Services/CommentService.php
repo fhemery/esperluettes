@@ -15,7 +15,7 @@ class CommentService
     /**
      * Retrieve comments for a given entity type and id as domain models.
      */
-    public function getFor(string $entityType, string $entityId, int $page = 1, int $perPage = 20): LengthAwarePaginator
+    public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): LengthAwarePaginator
     {
         // Assume caller passes normalized identifiers already.
         return $this->repository->listByTarget($entityType, $entityId, $page, $perPage);
@@ -24,8 +24,8 @@ class CommentService
     /**
      * Create a root comment (no parent). No policy checks for now.
      */
-    public function postComment(string $entityType, string $entityId, int $authorId, string $body): Comment
+    public function postComment(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment
     {
-        return $this->repository->createRoot($entityType, $entityId, $authorId, $body);
+        return $this->repository->create($entityType, $entityId, $authorId, $body, $parentCommentId);
     }
 }

@@ -14,8 +14,8 @@ class CommentServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Load domain assets; safe if directories don't exist yet
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../../Database/Migrations');
         $this->loadViewsFrom(app_path('Domains/Comment/Views'), 'comment');
-        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'comment');
+        $this->loadTranslationsFrom(__DIR__ . '/../../Resources/lang', 'comment');
     }
 }

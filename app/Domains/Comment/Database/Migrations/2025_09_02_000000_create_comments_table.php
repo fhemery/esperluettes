@@ -9,15 +9,22 @@ return new class extends Migration {
     {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->string('entity_type', 64)->index();
-            $table->string('entity_id', 191)->index();
+            $table->string('commentable_type', 64)->index();
+            $table->unsignedBigInteger('commentable_id')->index();
             // Store author_id without enforcing a cross-domain FK
             $table->unsignedBigInteger('author_id')->index();
+            // Parent for one-level replies (null for roots)
+            $table->unsignedBigInteger('parent_comment_id')->nullable()->index();
+            // Moderation/answering state
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_answered')->default(false);
             $table->text('body');
+            // Track edits separate from updated_at semantics
+            $table->timestamp('edited_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['entity_type', 'entity_id', 'created_at']);
+            $table->index(['commentable_type', 'commentable_id', 'created_at']);
         });
     }
 

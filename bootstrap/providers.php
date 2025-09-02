@@ -12,7 +12,7 @@ return [
     App\Domains\Auth\Providers\AuthServiceProvider::class,
     App\Domains\Profile\PublicApi\Providers\ProfileServiceProvider::class,
     App\Domains\StoryRef\Providers\StoryServiceRefProvider::class,
-    App\Domains\Comment\Providers\CommentServiceProvider::class,
+    App\Domains\Comment\PublicApi\Providers\CommentServiceProvider::class,
     App\Domains\Story\Providers\StoryServiceProvider::class,
     App\Domains\StaticPage\Providers\StaticPageServiceProvider::class,
     

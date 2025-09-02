@@ -14,7 +14,7 @@ class CommentPublicApi
         private ProfilePublicApi $profiles,
     ) {}
 
-    public function getFor(string $entityType, string $entityId, int $page = 1, int $perPage = 20): CommentListDto
+    public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): CommentListDto
     {
         $paginator = $this->service->getFor($entityType, $entityId, $page, $perPage);
 
@@ -44,11 +44,22 @@ class CommentPublicApi
 
         return new CommentListDto(
             entityType: $entityType,
-            entityId: $entityId,
+            entityId: (string) $entityId,
             page: $paginator->currentPage(),
             perPage: $paginator->perPage(),
             total: $paginator->total(),
             items: $items,
         );
     }
+
+    /**
+     * Create a root comment for a given target. Policies/validation deferred to service in future.
+     * 
+     * @return int The id of the created comment
+     */
+    public function create(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): int
+    {
+        return $this->service->postComment($entityType, $entityId, $authorId, $body, $parentCommentId)->id;
+    }
 }
+
