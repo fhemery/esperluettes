@@ -33,7 +33,7 @@ return [
         ],
         'strict' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
-            'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span,u,s',
+            'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span,u,s,blockquote',
             'HTML.AllowedAttributes' => 'p.style,p.class,span.style,span.class,li.class,ul.class,ol.class',
             'CSS.AllowedProperties' => 'text-align',
             'Attr.AllowedClasses' => ['ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify'],

@@ -24,6 +24,7 @@
         @stack('meta')
 
         <!-- Scripts -->
+        @stack('styles')
         @vite(['app/Domains/Shared/Resources/css/app.css', 'app/Domains/Shared/Resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">

@@ -6,6 +6,18 @@
   perPage: {{ (int) ($list->perPage ?? 20) }},
   hasMore: {{ ($list->total > count($list->items)) ? 'true' : 'false' }},
 })">
+  @push('styles')
+    <style>
+      /* Comment body blockquotes (applies to fragments appended later) */
+      .comment-body blockquote {
+        border-left: 3px solid #e5e7eb; /* gray-200 */
+        padding-left: 0.75rem; /* pl-3 */
+        margin: 0.75rem 0; /* my-3 */
+        font-style: normal; /* no italics */
+        color: #374151; /* gray-700 */
+      }
+    </style>
+  @endpush
   @if($error === 'not_allowed')
     <div class="p-3 rounded border border-yellow-300 bg-yellow-50 text-yellow-900 text-sm flex items-center justify-between gap-4">
       <div>{{ __('comment::comments.errors.members_only') }}</div>

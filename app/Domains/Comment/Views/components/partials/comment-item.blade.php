@@ -23,8 +23,8 @@
         </div>
       </div>
 
-      <!-- Body (escaped to keep tests stable) -->
-      <div class="mt-3 text-sm text-gray-700">{!! $comment->body !!}</div>
+      <!-- Body -->
+      <div class="comment-body mt-3 text-sm text-gray-700">{!! $comment->body !!}</div>
 
       <!-- Actions -->
       <div class="mt-3 flex gap-4 text-xs text-gray-500">
