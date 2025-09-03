@@ -15,6 +15,7 @@ use App\Domains\Auth\PublicApi\AuthPublicApi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
+use Mews\Purifier\Facades\Purifier;
 
 class CommentPublicApi
 {
@@ -110,6 +111,25 @@ class CommentPublicApi
         $this->checkAccess();
 
         $user = Auth::user();
+        // If creating a root comment, enforce canCreateRoot policy
+        if ($comment->parentCommentId === null) {
+            $allowed = $this->policies->canCreateRoot($comment->entityType, (int) $comment->entityId, (int) $user->id);
+            if (!$allowed) {
+                throw ValidationException::withMessages(['body' => ['Comment not allowed']]);
+            }
+        }
+        // Enforce minimum/maximum body length after purification and HTML stripping
+        $clean = Purifier::clean($comment->body, 'strict');
+        $plain = is_string($clean) ? trim(strip_tags($clean)) : '';
+        $len = mb_strlen($plain);
+        $min = $this->policies->getMinBodyLength($comment->entityType);
+        if ($min !== null && $len < $min) {
+            throw ValidationException::withMessages(['body' => ['Comment too short']]);
+        }
+        $max = $this->policies->getMaxBodyLength($comment->entityType);
+        if ($max !== null && $len > $max) {
+            throw ValidationException::withMessages(['body' => ['Comment too long']]);
+        }
         // Apply domain-specific posting policies if any
         $this->policies->validateCreate($comment);
         // Validate parent belongs to the same target if provided

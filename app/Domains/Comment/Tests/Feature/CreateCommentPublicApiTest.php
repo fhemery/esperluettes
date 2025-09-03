@@ -1,6 +1,5 @@
 <?php
 
-use App\Domains\Auth\PublicApi\AuthPublicApi;
 use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
@@ -44,32 +43,7 @@ describe('Access', function() {
 });
 
 describe('Policies', function() {
-    it('enforces confirmed role for chapter comments via policy', function() {
-        /** @var CommentPolicyRegistry $registry */
-        $registry = app(CommentPolicyRegistry::class);
-        $registry->register('chapter', new class extends DefaultCommentPolicy {
-            public function validateCreate(CommentToCreateDto $dto): void
-            {
-                $authApi = app(AuthPublicApi::class);
-                if (!$authApi->hasAnyRole([Roles::USER_CONFIRMED])) {
-                    throw new UnauthorizedException('Only confirmed users may comment');
-                }
-            }
-        });
-
-        $simple = alice($this, roles: [Roles::USER]);
-        $this->actingAs($simple);
-        expect(function() {
-            createComment('chapter', 1, 'Hello', null);
-        })->toThrow(UnauthorizedException::class);
-
-        $confirmed = alice($this, roles: [Roles::USER_CONFIRMED]);
-        $this->actingAs($confirmed);
-        $id = createComment('chapter', 1, 'Hello', null);
-        expect($id)->toBeGreaterThan(0);
-    });
-
-    it('enforces a 140 character limit via policy', function() {
+    it('throws an error if validateCreate fails', function() {
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register('chapter', new class extends DefaultCommentPolicy {
@@ -94,6 +68,51 @@ describe('Policies', function() {
         $ok = str_repeat('b', 140);
         $id = createComment('chapter', 1, $ok, null);
         expect($id)->toBeGreaterThan(0);
+    });
+
+    it('throws an error if min body length (once HTML stripped) is not matching the policy minimum', function() {
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register('chapter', new class extends DefaultCommentPolicy {
+            public function getMinBodyLength(): ?int { return 10; }
+        });
+
+        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $this->actingAs($user);
+
+        expect(function() {
+            createComment('chapter', 1, '<p>Hello</p><p></p>', null);
+        })->toThrow(ValidationException::withMessages(['body' => ['Comment too short']]));
+    });
+
+    it('throws an error if max body length (once HTML stripped) is not matching the policy maximum', function() {
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register('chapter', new class extends DefaultCommentPolicy {
+            public function getMaxBodyLength(): ?int { return 10; }
+        });
+
+        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $this->actingAs($user);
+
+        expect(function() {
+            createComment('chapter', 1, 'Hello world', null);
+        })->toThrow(ValidationException::withMessages(['body' => ['Comment too long']]));
+    });
+
+    it('throws an error if creating root comment is not allowed', function() {
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register('chapter', new class extends DefaultCommentPolicy {
+            public function canCreateRoot(string $entityType, int $entityId, int $userId): bool { return false; }
+        });
+
+        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $this->actingAs($user);
+
+        expect(function() {
+            createComment('chapter', 1, 'Hello world', null);
+        })->toThrow(ValidationException::withMessages(['body' => ['Comment not allowed']]));
     });
 });
 

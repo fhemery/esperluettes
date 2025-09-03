@@ -145,7 +145,7 @@ describe('When policies are in place', function(){
         $user = alice($this);
         $this->actingAs($user);
 
-        createComment($entityType, 123, 'Hello');
+        createComment($entityType, 123, 'Hello world!');
 
         $response = $this->get(route('comments.fragments', [
             'entity_type' => $entityType,
