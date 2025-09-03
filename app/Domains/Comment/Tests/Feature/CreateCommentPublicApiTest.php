@@ -3,8 +3,8 @@
 use App\Domains\Auth\PublicApi\AuthPublicApi;
 use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Comment\Services\CommentPolicyRegistry;
-use App\Domains\Comment\Contracts\CommentPostingPolicy;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Contracts\DefaultCommentPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
@@ -47,7 +47,7 @@ describe('Policies', function() {
     it('enforces confirmed role for chapter comments via policy', function() {
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
-        $registry->register('chapter', new class implements CommentPostingPolicy {
+        $registry->register('chapter', new class extends DefaultCommentPolicy {
             public function validateCreate(CommentToCreateDto $dto): void
             {
                 $authApi = app(AuthPublicApi::class);
@@ -72,14 +72,15 @@ describe('Policies', function() {
     it('enforces a 140 character limit via policy', function() {
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
-        $registry->register('chapter', new class implements CommentPostingPolicy {
+        $registry->register('chapter', new class extends DefaultCommentPolicy {
             public function validateCreate(CommentToCreateDto $dto): void
             {
                 $len = mb_strlen(trim(strip_tags($dto->body)));
-                if ($len > 140) {
+                if ($len > $this->getMaxBodyLength()) {
                     throw ValidationException::withMessages(['body' => ['Comment too long']]);
                 }
             }
+            public function getMaxBodyLength(): ?int { return 140; }
         });
 
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
