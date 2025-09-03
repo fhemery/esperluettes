@@ -12,6 +12,8 @@ class CommentDto
      * @var CommentDto[] $children
      */
     public function __construct(
+        public readonly string $entityType,
+        public readonly int $entityId,
         public readonly int $id,
         public readonly string $body,
         public readonly int $authorId,
@@ -25,6 +27,8 @@ class CommentDto
     public static function fromModel(Comment $model, ProfileDto $authorProfile, array $children = []): self
     {
         return new self(
+            entityType: (string) $model->commentable_type,
+            entityId: (int) $model->commentable_id,
             id: (int) $model->id,
             body: (string) $model->body,
             authorId: (int) $model->author_id,
@@ -35,45 +39,11 @@ class CommentDto
         );
     }
 
-    public static function fromArray(array $data): self
-    {
-        $profile = new ProfileDto(
-            user_id: (int) ($data['author_profile']['user_id'] ?? ($data['author_id'] ?? 0)),
-            display_name: (string) ($data['author_profile']['display_name'] ?? ''),
-            slug: (string) ($data['author_profile']['slug'] ?? ''),
-            avatar_url: (string) ($data['author_profile']['avatar_url'] ?? ''),
-        );
-
-        $roles = array_map(function (array $r) {
-            return new RoleDto(
-                id: (int) $r['id'],
-                name: (string) $r['name'],
-                slug: (string) $r['slug'],
-                description: $r['description'] ?? null,
-            );
-        }, $data['author_roles'] ?? []);
-
-        $children = [];
-        if (!empty($data['children']) && is_array($data['children'])) {
-            foreach ($data['children'] as $childArr) {
-                $children[] = self::fromArray($childArr);
-            }
-        }
-
-        return new self(
-            id: (int) $data['id'],
-            body: (string) $data['body'],
-            authorId: (int) $data['author_id'],
-            authorProfile: $profile,
-            createdAt: (string) $data['created_at'],
-            updatedAt: $data['updated_at'] ?? null,
-            children: $children,
-        );
-    }
-
     public function toArray(): array
     {
         return [
+            'entity_type' => $this->entityType,
+            'entity_id' => $this->entityId,
             'id' => $this->id,
             'body' => $this->body,
             'author_id' => $this->authorId,

@@ -36,7 +36,7 @@ class CommentController extends Controller
     
             return back()->with('status', 'comment::comments.posted');    
         } catch (ValidationException $e) {
-            return back()->withErrors($e);
+            return back()->withErrors($e->errors());
         }
         
     }

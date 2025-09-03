@@ -69,25 +69,10 @@ class CommentPublicApi
                     slug: '',
                     avatar_url: '',
                 );
-                $childrenDtos[] = new CommentDto(
-                    id: (int) $child->getKey(),
-                    body: (string) $child->body,
-                    authorId: $cAuthorId,
-                    authorProfile: $cProfile,
-                    createdAt: $child->created_at?->toISOString() ?? '',
-                    updatedAt: $child->updated_at?->toISOString(),
-                );
+                $childrenDtos[] = CommentDto::fromModel($child, $cProfile);
             }
 
-            $items[] = new CommentDto(
-                id: (int) $model->getKey(),
-                body: (string) $model->body,
-                authorId: $authorId,
-                authorProfile: $profile,
-                createdAt: $model->created_at?->toISOString() ?? '',
-                updatedAt: $model->updated_at?->toISOString(),
-                children: $childrenDtos,
-            );
+            $items[] = CommentDto::fromModel($model, $profile, $childrenDtos);
         }
 
         return new CommentListDto(

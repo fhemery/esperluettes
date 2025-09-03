@@ -1,7 +1,7 @@
 @props(['name', 'id', 'defaultValue' => '', 'max' => null, 'nbLines' => null, 'placeholder' => ''])
 <div {{ $attributes->merge(['class' => '']) }}>
     <div class="mb-2" id="{{ $id }}" data-placeholder="{{ e($placeholder) }}"></div>
-    <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $name }}" value="{!! $defaultValue !!}" />
+    <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $id }}" value="{!! $defaultValue !!}" />
     <div class="mt-2 text-xs text-right " id="quill-counter-wrap-{{ $id }}">
         <span id="quill-counter-{{ $id }}">0</span>
         @if($max)
@@ -53,7 +53,7 @@
                 editor.root.style.height = '100%';
                 editor.root.style.overflowY = 'auto';
 
-                const quillEditor = document.getElementById('quill-editor-area-{{ $name }}');
+                const quillEditor = document.getElementById('quill-editor-area-{{ $id }}');
                 const counterEl = document.getElementById('quill-counter-{{ $id }}');
                 const counterWrap = document.getElementById('quill-counter-wrap-{{ $id }}');
                 const max = {{ $max ? (int) $max : 'null' }};
