@@ -33,12 +33,22 @@ class CommentPublicApi
     public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): CommentListDto
     {
         $this->checkAccess();
-        $paginator = $this->service->getFor($entityType, $entityId, $page, $perPage);
+        $paginator = $this->service->getFor($entityType, $entityId, $page, $perPage, withChildren: true);
 
-        $models = $paginator->items();
-        $authorIds = array_values(array_unique(array_map(fn($m) => (int) $m->author_id, $models)));
+        $models = $paginator->items(); // roots only, children eager-loaded
+
+        // Collect author ids from roots and their children
+        $authorIds = [];
+        foreach ($models as $model) {
+            $authorIds[] = (int) $model->author_id;
+            foreach ($model->children as $child) {
+                $authorIds[] = (int) $child->author_id;
+            }
+        }
+        $authorIds = array_values(array_unique($authorIds));
         $profiles = $this->profiles->getPublicProfiles($authorIds); // [userId => ProfileDto|null]
 
+        // Map roots with their children
         $items = [];
         foreach ($models as $model) {
             $authorId = (int) $model->author_id;
@@ -49,6 +59,25 @@ class CommentPublicApi
                 avatar_url: '',
             );
 
+            $childrenDtos = [];
+            foreach ($model->children as $child) {
+                $cAuthorId = (int) $child->author_id;
+                $cProfile = $profiles[$cAuthorId] ?? new ProfileDto(
+                    user_id: $cAuthorId,
+                    display_name: '',
+                    slug: '',
+                    avatar_url: '',
+                );
+                $childrenDtos[] = new CommentDto(
+                    id: (int) $child->getKey(),
+                    body: (string) $child->body,
+                    authorId: $cAuthorId,
+                    authorProfile: $cProfile,
+                    createdAt: $child->created_at?->toISOString() ?? '',
+                    updatedAt: $child->updated_at?->toISOString(),
+                );
+            }
+
             $items[] = new CommentDto(
                 id: (int) $model->getKey(),
                 body: (string) $model->body,
@@ -56,6 +85,7 @@ class CommentPublicApi
                 authorProfile: $profile,
                 createdAt: $model->created_at?->toISOString() ?? '',
                 updatedAt: $model->updated_at?->toISOString(),
+                children: $childrenDtos,
             );
         }
 
@@ -81,6 +111,16 @@ class CommentPublicApi
         $user = Auth::user();
         // Apply domain-specific posting policies if any
         $this->policies->validateCreate($comment);
+        // Validate parent belongs to the same target if provided
+        if ($comment->parentCommentId !== null) {
+            $parent = $this->service->getComment($comment->parentCommentId);
+            if (
+                (string) $parent->commentable_type !== (string) $comment->entityType
+                || (int) $parent->commentable_id !== (int) $comment->entityId
+            ) {
+                throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Parent comment target mismatch');
+            }
+        }
         return $this->service->postComment($comment->entityType, $comment->entityId, $user->id, $comment->body, $comment->parentCommentId)->id;
     }
 

@@ -18,5 +18,16 @@ class Comment extends Model
         'commentable_id',
         'author_id',
         'body',
+        'parent_comment_id',
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo(self::class, 'parent_comment_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(self::class, 'parent_comment_id');
+    }
 }

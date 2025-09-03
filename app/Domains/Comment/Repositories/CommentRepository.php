@@ -7,13 +7,21 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class CommentRepository
 {
-    public function listByTarget(string $entityType, int $entityId, int $page = 1, int $perPage = 20): LengthAwarePaginator
+    public function listByTarget(string $entityType, int $entityId, int $page = 1, int $perPage = 20, bool $withChildren = false): LengthAwarePaginator
     {
-        return Comment::query()
+        $query = Comment::query()
             ->where('commentable_type', $entityType)
             ->where('commentable_id', $entityId)
-            ->orderByDesc('created_at')
-            ->paginate(perPage: $perPage, page: $page);
+            ->whereNull('parent_comment_id')
+            ->orderByDesc('created_at');
+
+        if ($withChildren) {
+            $query->with(['children' => function($q) {
+                $q->orderBy('created_at', 'asc');
+            }]);
+        }
+
+        return $query->paginate(perPage: $perPage, page: $page);
     }
 
     public function create(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment

@@ -16,10 +16,10 @@ class CommentService
     /**
      * Retrieve comments for a given entity type and id as domain models.
      */
-    public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): LengthAwarePaginator
+    public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20, bool $withChildren = false): LengthAwarePaginator
     {
         // Assume caller passes normalized identifiers already.
-        return $this->repository->listByTarget($entityType, $entityId, $page, $perPage);
+        return $this->repository->listByTarget($entityType, $entityId, $page, $perPage, $withChildren);
     }
 
     /**

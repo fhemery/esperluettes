@@ -8,6 +8,9 @@ use App\Domains\Comment\Models\Comment;
 
 class CommentDto
 {
+    /**
+     * @var CommentDto[] $children
+     */
     public function __construct(
         public readonly int $id,
         public readonly string $body,
@@ -15,10 +18,11 @@ class CommentDto
         public readonly ProfileDto $authorProfile,
         public readonly string $createdAt,
         public readonly ?string $updatedAt = null,
+        public readonly array $children = [],
     ) {
     }
 
-    public static function fromModel(Comment $model, ProfileDto $authorProfile): self
+    public static function fromModel(Comment $model, ProfileDto $authorProfile, array $children = []): self
     {
         return new self(
             id: (int) $model->id,
@@ -27,6 +31,7 @@ class CommentDto
             authorProfile: $authorProfile,
             createdAt: (string) $model->created_at,
             updatedAt: $model->updated_at?->toISOString(),
+            children: $children,
         );
     }
 
@@ -48,6 +53,13 @@ class CommentDto
             );
         }, $data['author_roles'] ?? []);
 
+        $children = [];
+        if (!empty($data['children']) && is_array($data['children'])) {
+            foreach ($data['children'] as $childArr) {
+                $children[] = self::fromArray($childArr);
+            }
+        }
+
         return new self(
             id: (int) $data['id'],
             body: (string) $data['body'],
@@ -55,6 +67,7 @@ class CommentDto
             authorProfile: $profile,
             createdAt: (string) $data['created_at'],
             updatedAt: $data['updated_at'] ?? null,
+            children: $children,
         );
     }
 
@@ -72,6 +85,7 @@ class CommentDto
             ],
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
+            'children' => array_map(fn(self $c) => $c->toArray(), $this->children),
         ];
     }
 }
