@@ -34,7 +34,7 @@ class CommentController extends Controller
     
             $this->api->create($dto);
     
-            return back()->with('status', 'comment::comments.posted');    
+            return back()->with('status', __('comment::comments.posted'));    
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
         }

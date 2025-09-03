@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Comment\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -66,4 +67,63 @@ it('returns 401 for guests (no role) when listing fragments', function () {
     ]));
 
     $response->assertStatus(401);
+});
+
+it('should render the Reply button only on the last child of a root comment', function () {
+    $entityType = 'chapter';
+    $entityId = 123;
+
+    $user = alice($this);
+    $this->actingAs($user);
+
+    // Create 3 root comments: Hello 0, Hello 1, Hello 2
+    $commentId = createComment($entityType, $entityId, 'Hello');
+    $childComment1Id = createComment($entityType, $entityId, 'Hello from child', $commentId);
+    $childComment2Id = createComment($entityType, $entityId, 'Hello from child 2', $commentId);
+
+    // Adjust times to be sure of the display order
+    Comment::query()->where('id', $childComment1Id)->update(['created_at' => now()->subMinutes(1)]);
+    Comment::query()->where('id', $childComment2Id)->update(['created_at' => now()]);
+
+    $response = $this->get(route('comments.fragments', [
+        'entity_type' => $entityType,
+        'entity_id' => $entityId,
+        'page' => 1,
+        'per_page' => 2,
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertDontSee('data-action="reply" data-comment-id="'.$childComment1Id.'"', false);
+    $response->assertDontSee('data-action="reply" data-comment-id="'.$childComment2Id.'"', false);
+    
+    // There is only one reply button, and it is after the last comment
+    expect(substr_count($response->getContent(), 'data-action="reply" data-comment-id="'.$commentId.'"'))->toBe(1);
+    $response->assertSeeInOrder([
+        'Hello from child 2',
+        'data-action="reply" data-comment-id="'.$commentId.'"',
+    ]);
+});
+
+it('should show the edit button is current user is the author', function () {
+    $entityType = 'chapter';
+    $entityId = 123;
+
+    $user = alice($this);
+    $this->actingAs($user);
+    $aliceCommentId = createComment($entityType, $entityId, 'Hello');
+
+    $otherUser = bob($this);
+    $this->actingAs($otherUser);
+    $bobCommentId = createComment($entityType, $entityId, 'Hello from bob', $aliceCommentId);
+
+    $response = $this->get(route('comments.fragments', [
+        'entity_type' => $entityType,
+        'entity_id' => $entityId,
+        'page' => 1,
+        'per_page' => 2,
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertDontSee('data-action="edit" data-comment-id="'.$aliceCommentId.'"', false);
+    $response->assertSee('data-action="edit" data-comment-id="'.$bobCommentId.'"', false);
 });

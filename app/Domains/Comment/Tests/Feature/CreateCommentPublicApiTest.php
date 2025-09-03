@@ -169,4 +169,17 @@ describe('Child comments', function () {
         expect($response->total)->toBe(5);
         expect($response->items)->toHaveCount(5);
     });
+
+    it('should not allow to create a comment with a parent comment that is not a root comment', function () {
+        // Auth as confirmed user
+        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $this->actingAs($user);
+
+        $commentId = createComment('chapter', 123, 'Hello', null);
+        $childCommentId = createComment('chapter', 123, 'Hello from child', $commentId);
+
+        expect(function() use ($childCommentId) {
+            createComment('chapter', 123, 'Hello', $childCommentId);
+        })->toThrow(ValidationException::class);
+    });
 });

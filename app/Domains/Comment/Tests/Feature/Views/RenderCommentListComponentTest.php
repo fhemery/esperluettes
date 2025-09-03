@@ -3,7 +3,6 @@
 use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);

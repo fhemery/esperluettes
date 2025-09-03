@@ -106,6 +106,10 @@ class CommentPublicApi
             ) {
                 throw ValidationException::withMessages(['parent_comment_id' => ['Parent comment target mismatch']]);
             }
+            // Enforce that parent comment is a root comment (no parent)
+            if ($parent->parent_comment_id !== null) {
+                throw ValidationException::withMessages(['parent_comment_id' => ['Parent comment must be a root comment']]);
+            }
         }
         return $this->service->postComment($comment->entityType, $comment->entityId, $user->id, $comment->body, $comment->parentCommentId)->id;
     }

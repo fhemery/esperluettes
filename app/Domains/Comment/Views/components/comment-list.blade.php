@@ -34,7 +34,7 @@
       @csrf
       <input type="hidden" name="entity_type" value="{{ $entityType }}">
       <input type="hidden" name="entity_id" value="{{ $entityId }}">
-      <x-shared::editor id="comment-body-editor" name="body" :nbLines="5" class="mt-1 block w-full" defaultValue="{{ old('body') }}" placeholder="{{ __('comment::comments.form.body.placeholder') }}" />
+      <x-shared::editor id="comment-body-editor" name="body" :nbLines="10" class="mt-1 block w-full" defaultValue="{{ old('body') }}" placeholder="{{ __('comment::comments.form.body.placeholder') }}" />
       @error('body')
         <div class="text-sm text-red-600">{{ $message }}</div>
       @enderror

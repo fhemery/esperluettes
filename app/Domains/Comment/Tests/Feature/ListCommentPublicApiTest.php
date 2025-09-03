@@ -103,3 +103,29 @@ it('lists root comments by descending creation date', function () {
         ->and($result->items[1]->id)->toBe($comment2Id)
         ->and($result->items[2]->id)->toBe($comment1Id);
 });
+
+it('lists child comments by ascending creation date', function () {
+    $entityType = 'chapter';
+    $entityId = 1;
+    $user = alice($this);
+    $this->actingAs($user);
+    
+    // Create three comments
+    $comment1Id = createComment($entityType, $entityId, 'Hello');
+
+    $comment2Id = createComment($entityType, $entityId, 'World', $comment1Id);
+    $comment3Id = createComment($entityType, $entityId, 'Universe', $comment1Id);
+    
+    // We need to go update the created_at timestamp for each comment to make sure the sorting works
+    Comment::query()->where('id', $comment2Id)->update(['created_at' => now()->subMinutes(5)]);
+    Comment::query()->where('id', $comment3Id)->update(['created_at' => now()]);
+    
+    // Act: get the comments
+    $result = listComments($entityType, $entityId);
+
+    // Assert
+    expect($result->items)->toBeArray()
+        ->and($result->items[0]->children)->toBeArray()
+        ->and($result->items[0]->children[0]->id)->toBe($comment2Id)
+        ->and($result->items[0]->children[1]->id)->toBe($comment3Id);
+});
