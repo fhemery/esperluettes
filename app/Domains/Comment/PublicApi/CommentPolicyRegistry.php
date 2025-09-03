@@ -5,11 +5,18 @@ namespace App\Domains\Comment\PublicApi;
 use App\Domains\Comment\Contracts\CommentDto;
 use App\Domains\Comment\Contracts\CommentPolicy;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Contracts\DefaultCommentPolicy;
 
 class CommentPolicyRegistry
 {
     /** @var array<string, CommentPolicy> */
     private array $policies = [];
+    private DefaultCommentPolicy $defaultPolicy;
+
+    public function __construct()
+    {
+        $this->defaultPolicy = new DefaultCommentPolicy();
+    }
 
     /**
      * Register a policy for a given entity type.
@@ -24,10 +31,7 @@ class CommentPolicyRegistry
      */
     public function validateCreate(CommentToCreateDto $dto): void
     {
-        $policy = $this->policies[$dto->entityType] ?? null;
-        if ($policy instanceof CommentPolicy) {
-            $policy->validateCreate($dto);
-        }
+        $this->getPolicy($dto->entityType)->validateCreate($dto);
     }
 
     /**
@@ -35,11 +39,7 @@ class CommentPolicyRegistry
      */
     public function canCreateRoot(string $entityType, int $entityId, int $userId): bool
     {
-        $policy = $this->policies[$entityType] ?? null;
-        if ($policy instanceof CommentPolicy) {
-            return $policy->canCreateRoot($entityType, $entityId, $userId);
-        }
-        return true;
+        return $this->getPolicy($entityType)->canCreateRoot($entityType, $entityId, $userId);
     }
 
     /**
@@ -47,11 +47,7 @@ class CommentPolicyRegistry
      */
     public function canReply(string $entityType, CommentDto $parentComment, int $userId): bool
     {
-        $policy = $this->policies[$entityType] ?? null;
-        if ($policy instanceof CommentPolicy) {
-            return $policy->canReply($parentComment, $userId);
-        }
-        return true;
+        return $this->getPolicy($entityType)->canReply($parentComment, $userId);
     }
 
     /**
@@ -59,11 +55,7 @@ class CommentPolicyRegistry
      */
     public function canEditOwn(string $entityType, CommentDto $comment, int $userId): bool
     {
-        $policy = $this->policies[$entityType] ?? null;
-        if ($policy instanceof CommentPolicy) {
-            return $policy->canEditOwn($comment, $userId);
-        }
-        return true;
+        return $this->getPolicy($entityType)->canEditOwn($comment, $userId);
     }
 
     /**
@@ -71,10 +63,7 @@ class CommentPolicyRegistry
      */
     public function validateEdit(string $entityType, CommentDto $comment, int $userId, string $newBody): void
     {
-        $policy = $this->policies[$entityType] ?? null;
-        if ($policy instanceof CommentPolicy) {
-            $policy->validateEdit($comment, $userId, $newBody);
-        }
+        $this->getPolicy($entityType)->validateEdit($comment, $userId, $newBody);
     }
 
     /**
@@ -82,11 +71,7 @@ class CommentPolicyRegistry
      */
     public function getMinBodyLength(string $entityType): ?int
     {
-        $policy = $this->policies[$entityType] ?? null;
-        if ($policy instanceof CommentPolicy) {
-            return $policy->getMinBodyLength();
-        }
-        return null;
+        return $this->getPolicy($entityType)->getMinBodyLength();
     }
 
     /**
@@ -94,10 +79,11 @@ class CommentPolicyRegistry
      */
     public function getMaxBodyLength(string $entityType): ?int
     {
-        $policy = $this->policies[$entityType] ?? null;
-        if ($policy instanceof CommentPolicy) {
-            return $policy->getMaxBodyLength();
-        }
-        return 155;
+        return $this->getPolicy($entityType)->getMaxBodyLength();
+    }
+
+    private function getPolicy(string $entityType): CommentPolicy
+    {
+        return $this->policies[$entityType] ?? $this->defaultPolicy;
     }
 }
