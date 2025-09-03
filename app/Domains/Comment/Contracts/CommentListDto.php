@@ -12,6 +12,7 @@ class CommentListDto
         public readonly int $perPage,
         public readonly int $total,
         public readonly array $items = [],
+        public readonly ?CommentUiConfigDto $config = null,
     ) {
     }
 
@@ -24,6 +25,7 @@ class CommentListDto
             perPage: $perPage,
             total: 0,
             items: [],
+            config: new CommentUiConfigDto(minBodyLength: null, maxBodyLength: null, canCreateRoot: true),
         );
     }
 
@@ -36,6 +38,7 @@ class CommentListDto
             'per_page' => $this->perPage,
             'total' => $this->total,
             'items' => array_map(fn(CommentDto $c) => $c->toArray(), $this->items),
+            'config' => $this->config?->toArray(),
         ];
     }
 }

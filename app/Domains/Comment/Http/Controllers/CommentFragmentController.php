@@ -39,6 +39,7 @@ class CommentFragmentController extends Controller
 
         $html = view('comment::fragments.items', [
             'items' => $list->items,
+            'config' => $list->config,
         ])->render();
 
         $response = new Response($html, 200, [

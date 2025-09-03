@@ -1,7 +1,9 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Comment\Contracts\DefaultCommentPolicy;
 use App\Domains\Comment\Models\Comment;
+use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +46,7 @@ it('renders child comments HTML for the first page', function () {
 
     // Create 3 root comments: Hello 0, Hello 1, Hello 2
     $commentId = createComment($entityType, $entityId, 'Hello');
-    $childCommentId = createComment($entityType, $entityId, 'Hello from child', $commentId);
+    createComment($entityType, $entityId, 'Hello from child', $commentId);
 
     $response = $this->get(route('comments.fragments', [
         'entity_type' => $entityType,
@@ -126,4 +128,58 @@ it('should show the edit button is current user is the author', function () {
     $response->assertStatus(200);
     $response->assertDontSee('data-action="edit" data-comment-id="'.$aliceCommentId.'"', false);
     $response->assertSee('data-action="edit" data-comment-id="'.$bobCommentId.'"', false);
+});
+
+describe('When policies are in place', function(){
+    it('should show a minimum number of character in the editor if specified ', function () {
+        $entityType = 'chapter';
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register($entityType, new class extends DefaultCommentPolicy {
+            public function getMinBodyLength(): ?int
+            {
+                return 10;
+            }
+        });
+        
+        $user = alice($this);
+        $this->actingAs($user);
+
+        createComment($entityType, 123, 'Hello');
+
+        $response = $this->get(route('comments.fragments', [
+            'entity_type' => $entityType,
+            'entity_id' => 123,
+            'page' => 1,
+            'per_page' => 2,
+        ]));
+
+        $response->assertSee(__('shared::editor.min-characters', ['count' => 10]));
+    });
+
+    it('should show a maximum number of character in the editor if specified ', function () {
+        $entityType = 'chapter';
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register($entityType, new class extends DefaultCommentPolicy {
+            public function getMaxBodyLength(): ?int
+            {
+                return 242;
+            }
+        });
+        
+        $user = alice($this);
+        $this->actingAs($user);
+
+        createComment($entityType, 123, 'Hello');
+
+        $response = $this->get(route('comments.fragments', [
+            'entity_type' => $entityType,
+            'entity_id' => 123,
+            'page' => 1,
+            'per_page' => 2,
+        ]));
+
+        $response->assertSee('/ 242');
+    });
 });

@@ -30,25 +30,42 @@
   @endif
 
   @if(!$error)
-    <form method="POST" action="{{ route('comments.store') }}" class="mt-4 space-y-2">
+    @if(($list->config?->canCreateRoot) ?? false)
+    <form
+      method="POST"
+      action="{{ route('comments.store') }}"
+      class="mt-4 space-y-2"
+      x-data="{ editorValid: {{ $list->config?->minBodyLength ? 'false' : 'true' }} }"
+      @editor-valid.window="if($event.detail.id==='comment-body-editor'){ editorValid = $event.detail.valid }"
+    >
       @csrf
       <input type="hidden" name="entity_type" value="{{ $entityType }}">
       <input type="hidden" name="entity_id" value="{{ $entityId }}">
-      <x-shared::editor id="comment-body-editor" name="body" :nbLines="10" class="mt-1 block w-full" defaultValue="{{ old('body') }}" placeholder="{{ __('comment::comments.form.body.placeholder') }}" />
+      <x-shared::editor
+        id="comment-body-editor"
+        name="body"
+        :nbLines="10"
+        class="mt-1 block w-full"
+        defaultValue="{{ old('body') }}"
+        placeholder="{{ __('comment::comments.form.body.placeholder') }}"
+        :min="$list->config?->minBodyLength"
+        :max="$list->config?->maxBodyLength"
+      />
       @error('body')
         <div class="text-sm text-red-600">{{ $message }}</div>
       @enderror
       <div>
-        <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded">{{ __('comment::comments.form.submit') }}</button>
+        <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded disabled:opacity-50" :disabled="!editorValid">{{ __('comment::comments.form.submit') }}</button>
       </div>
     </form>
+    @endif
 
     @if($list->total === 0)
       <p class="text-sm text-gray-500">{{ __('comment::comments.list.empty') }}</p>
     @else
       <ul class="space-y-3" x-ref="list">
         @foreach($list->items as $comment)
-          @include('comment::components.partials.comment-item', ['comment' => $comment])
+          @include('comment::components.partials.comment-item', ['comment' => $comment, 'config' => $list->config])
         @endforeach
       </ul>
       <div class="mt-3 text-sm text-gray-500" x-show="loading">Loading…</div>

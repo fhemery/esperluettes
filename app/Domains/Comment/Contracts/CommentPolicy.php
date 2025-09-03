@@ -36,9 +36,9 @@ interface CommentPolicy
 
     /**
      * Minimum allowed body length for comments for this entity type.
-     * Default implementation should return 1.
+     * Default implementation should return null (no limit).
      */
-    public function getMinBodyLength(): int;
+    public function getMinBodyLength(): ?int;
 
     /**
      * Maximum allowed body length for comments for this entity type.

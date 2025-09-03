@@ -4,9 +4,10 @@ namespace App\Domains\Comment\PublicApi;
 
 use App\Domains\Comment\Contracts\CommentListDto;
 use App\Domains\Comment\Contracts\CommentDto;
+use App\Domains\Comment\Contracts\CommentUiConfigDto;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Services\CommentService;
-use App\Domains\Comment\Services\CommentPolicyRegistry;
+use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\ProfileDto;
 use App\Domains\Auth\PublicApi\Roles;
@@ -34,6 +35,7 @@ class CommentPublicApi
     public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): CommentListDto
     {
         $this->checkAccess();
+        $userId = (int) (Auth::id() ?? 0);
         $paginator = $this->service->getFor($entityType, $entityId, $page, $perPage, withChildren: true);
 
         $models = $paginator->items(); // roots only, children eager-loaded
@@ -49,7 +51,7 @@ class CommentPublicApi
         $authorIds = array_values(array_unique($authorIds));
         $profiles = $this->profiles->getPublicProfiles($authorIds); // [userId => ProfileDto|null]
 
-        // Map roots with their children
+        // Map roots with their children and attach permissions
         $items = [];
         foreach ($models as $model) {
             $authorId = (int) $model->author_id;
@@ -69,10 +71,18 @@ class CommentPublicApi
                     slug: '',
                     avatar_url: '',
                 );
-                $childrenDtos[] = CommentDto::fromModel($child, $cProfile);
+                // Provisional DTO for policy checks
+                $childDto = CommentDto::fromModel($child, $cProfile);
+                $childDto->canReply = $this->policies->canReply($entityType, $childDto, $userId);
+                $childDto->canEditOwn = $this->policies->canEditOwn($entityType, $childDto, $userId);
+                $childrenDtos[] = $childDto;
             }
 
-            $items[] = CommentDto::fromModel($model, $profile, $childrenDtos);
+            // Provisional root DTO for policy checks
+            $rootCommentDto = CommentDto::fromModel($model, $profile, $childrenDtos);
+            $rootCommentDto->canReply = $this->policies->canReply($entityType, $rootCommentDto, $userId);
+            $rootCommentDto->canEditOwn = $this->policies->canEditOwn($entityType, $rootCommentDto, $userId);
+            $items[] = $rootCommentDto;
         }
 
         return new CommentListDto(
@@ -82,6 +92,11 @@ class CommentPublicApi
             perPage: $paginator->perPage(),
             total: $paginator->total(),
             items: $items,
+            config: new CommentUiConfigDto(
+                minBodyLength: $this->policies->getMinBodyLength($entityType),
+                maxBodyLength: $this->policies->getMaxBodyLength($entityType),
+                canCreateRoot: $this->policies->canCreateRoot($entityType, (int) $entityId, $userId),
+            ),
         );
     }
 

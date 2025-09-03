@@ -29,9 +29,9 @@ class DefaultCommentPolicy implements CommentPolicy
         // Allow by default
     }
 
-    public function getMinBodyLength(): int
+    public function getMinBodyLength(): ?int
     {
-        return 1;
+        return null;
     }
 
     public function getMaxBodyLength(): ?int

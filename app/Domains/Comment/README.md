@@ -22,7 +22,7 @@ This module provides comment creation/listing services and a pluggable policy me
     - `canReply(CommentDto $parentComment, int $userId): bool`
     - `canEditOwn(CommentDto $comment, int $userId): bool`
     - `validateEdit(CommentDto $comment, int $userId, string $newBody): void`
-    - `getMinBodyLength(): int`
+    - `getMinBodyLength(): ?int`
     - `getMaxBodyLength(): ?int` (null means no limit)
 - DTO: `App\Domains\Comment\Contracts\CommentToCreateDto`
   - Fields: `entityType`, `entityId`, `body`, `parentCommentId`.
@@ -38,7 +38,7 @@ Create a class implementing `CommentPolicy` (e.g., inside your domain) and regis
 namespace App\Domains\YourDomain\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Domains\Comment\Services\CommentPolicyRegistry;
+use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use App\Domains\Comment\Contracts\CommentPolicy;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
 use App\Domains\Auth\PublicApi\AuthPublicApi;
@@ -71,7 +71,7 @@ class YourDomainServiceProvider extends ServiceProvider
             public function canReply(\App\\Domains\\Comment\\Contracts\\CommentDto $parentComment, int $userId): bool { return true; }
             public function canEditOwn(\App\\Domains\\Comment\\Contracts\\CommentDto $comment, int $userId): bool { return true; }
             public function validateEdit(\App\\Domains\\Comment\\Contracts\\CommentDto $comment, int $userId, string $newBody): void {}
-            public function getMinBodyLength(): int { return 1; }
+            public function getMinBodyLength(): ?int { return 1; }
             public function getMaxBodyLength(): ?int { return 140; }
         });
     }

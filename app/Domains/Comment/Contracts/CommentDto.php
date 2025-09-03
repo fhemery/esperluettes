@@ -20,11 +20,13 @@ class CommentDto
         public readonly ProfileDto $authorProfile,
         public readonly string $createdAt,
         public readonly ?string $updatedAt = null,
+        public bool $canReply = true,
+        public bool $canEditOwn = false,
         public readonly array $children = [],
     ) {
     }
 
-    public static function fromModel(Comment $model, ProfileDto $authorProfile, array $children = []): self
+    public static function fromModel(Comment $model, ProfileDto $authorProfile, array $children = [], bool $canReply = true, bool $canEditOwn = false): self
     {
         return new self(
             entityType: (string) $model->commentable_type,
@@ -35,6 +37,8 @@ class CommentDto
             authorProfile: $authorProfile,
             createdAt: (string) $model->created_at,
             updatedAt: $model->updated_at?->toISOString(),
+            canReply: $canReply,
+            canEditOwn: $canEditOwn,
             children: $children,
         );
     }
@@ -55,6 +59,8 @@ class CommentDto
             ],
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
+            'can_reply' => $this->canReply,
+            'can_edit_own' => $this->canEditOwn,
             'children' => array_map(fn(self $c) => $c->toArray(), $this->children),
         ];
     }

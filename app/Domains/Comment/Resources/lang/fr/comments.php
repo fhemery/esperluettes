@@ -24,4 +24,5 @@ return [
     ],
 
     'posted' => 'Commentaire publié',
+    'posted_at' => 'Posté le',
 ];

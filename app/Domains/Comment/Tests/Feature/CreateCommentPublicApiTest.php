@@ -2,7 +2,7 @@
 
 use App\Domains\Auth\PublicApi\AuthPublicApi;
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Comment\Services\CommentPolicyRegistry;
+use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Contracts\DefaultCommentPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;

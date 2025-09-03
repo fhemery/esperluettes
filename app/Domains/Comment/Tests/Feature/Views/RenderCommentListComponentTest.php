@@ -1,8 +1,11 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Comment\Contracts\DefaultCommentPolicy;
+use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -58,5 +61,73 @@ describe('Content', function () {
         ]);
 
         expect($html)->toContain('Hello world');
+    });
+});
+
+describe('When policies are in place', function(){
+    it('should show a minimum number of character in the editor if specified ', function () {
+        $entityType = 'chapter';
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register($entityType, new class extends DefaultCommentPolicy {
+            public function getMinBodyLength(): ?int
+            {
+                return 10;
+            }
+        });
+        
+        $user = alice($this);
+        $this->actingAs($user);
+
+        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+            'id' => 123,
+        ]);
+
+
+        expect($html)->toContain(__('shared::editor.min-characters', ['count' => 10]));
+    });
+
+    it('should show a maximum number of character in the editor if specified ', function () {
+        $entityType = 'chapter';
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register($entityType, new class extends DefaultCommentPolicy {
+            public function getMaxBodyLength(): ?int
+            {
+                return 10;
+            }
+        });
+        
+        $user = alice($this);
+        $this->actingAs($user);
+
+        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+            'id' => 123,
+        ]);
+
+
+        expect($html)->toContain('/ 10');
+    });
+
+    it('should not show the form is root posting is disabled', function () {
+        $entityType = 'chapter';
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register($entityType, new class extends DefaultCommentPolicy {
+            public function canCreateRoot(string $entityType, int $entityId, int $userId): bool
+            {
+                return false;
+            }
+        });
+        
+        $user = alice($this);
+        $this->actingAs($user);
+
+        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+            'id' => 123,
+        ]);
+
+
+        expect($html)->not()->toContain('<form');
     });
 });

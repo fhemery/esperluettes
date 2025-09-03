@@ -1,13 +1,17 @@
-@props(['name', 'id', 'defaultValue' => '', 'max' => null, 'nbLines' => null, 'placeholder' => ''])
+@props(['name', 'id', 'defaultValue' => '', 'max' => null, 'min' => null, 'nbLines' => null, 'placeholder' => ''])
 <div {{ $attributes->merge(['class' => '']) }}>
-    <div class="mb-2" id="{{ $id }}" data-placeholder="{{ e($placeholder) }}"></div>
+    <div class="mb-2" id="{{ $id }}" data-placeholder="{{ e($placeholder) }}" @if($min) data-min="{{ (int) $min }}" @endif @if($max) data-max="{{ (int) $max }}" @endif></div>
     <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $id }}" value="{!! $defaultValue !!}" />
     <div class="mt-2 text-xs text-right " id="quill-counter-wrap-{{ $id }}">
         <span id="quill-counter-{{ $id }}">0</span>
         @if($max)
             <span>/ {{ $max }}</span>
         @endif
-        <span>{{ __('characters') }}</span>
+        <span>{{ __('shared::editor.characters') }}</span>
+        @if($min)
+            <span>({{ __('shared::editor.min-characters', ['min' => $min]) }})</span>
+        @endif
+        
     </div>
     @push('scripts')
     <script>
@@ -57,7 +61,8 @@
                 const quillEditor = document.getElementById('quill-editor-area-{{ $id }}');
                 const counterEl = document.getElementById('quill-counter-{{ $id }}');
                 const counterWrap = document.getElementById('quill-counter-wrap-{{ $id }}');
-                const max = {{ $max ? (int) $max : 'null' }};
+                const max = container.dataset.max ? parseInt(container.dataset.max, 10) : null;
+                const min = container.dataset.min ? parseInt(container.dataset.min, 10) : null;
 
                 // Set default value if it's not empty
                 const defaultValue = (quillEditor.value || '').trim();
@@ -73,12 +78,18 @@
                     if (counterEl) {
                         counterEl.textContent = max ? `${count}` : `${count}`;
                     }
-                    if (max && counterWrap) {
-                        // Toggle red when limit exceeded
-                        const over = count > max;
-                        counterWrap.classList.toggle('text-red-600', over);
-                        counterWrap.classList.toggle('text-gray-500', !over);
+                    const overMax = (max !== null) && count > max;
+                    const underMin = (min !== null) && count < min;
+                    const valid = !overMax && !underMin;
+                    if (counterWrap) {
+                        counterWrap.classList.toggle('text-red-600', !valid);
+                        counterWrap.classList.toggle('text-gray-500', valid);
                     }
+                    // Emit a validity event that bubbles up
+                    container.dispatchEvent(new CustomEvent('editor-valid', {
+                        detail: { id: '{{ $id }}', valid, count, min, max },
+                        bubbles: true
+                    }));
                 };
 
                 editor.on('text-change', function () {
@@ -92,7 +103,7 @@
                     updateCount();
                 });
 
-                // Initial count
+                // Initial count and validity emit
                 updateCount();
             };
 

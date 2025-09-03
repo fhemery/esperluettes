@@ -3,7 +3,7 @@
 namespace App\Domains\Comment\PublicApi\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Domains\Comment\Services\CommentPolicyRegistry;
+use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use App\Domains\Comment\View\Components\CommentList;
 use Illuminate\Support\Facades\Blade;
 

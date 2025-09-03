@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Comment\Services;
+namespace App\Domains\Comment\PublicApi;
 
 use App\Domains\Comment\Contracts\CommentDto;
 use App\Domains\Comment\Contracts\CommentPolicy;
@@ -78,15 +78,15 @@ class CommentPolicyRegistry
     }
 
     /**
-     * Minimum allowed body length for the given entity type. Default: 1
+     * Minimum allowed body length for the given entity type. Default: null (no limit)
      */
-    public function getMinBodyLength(string $entityType): int
+    public function getMinBodyLength(string $entityType): ?int
     {
         $policy = $this->policies[$entityType] ?? null;
         if ($policy instanceof CommentPolicy) {
             return $policy->getMinBodyLength();
         }
-        return 1;
+        return null;
     }
 
     /**
@@ -98,6 +98,6 @@ class CommentPolicyRegistry
         if ($policy instanceof CommentPolicy) {
             return $policy->getMaxBodyLength();
         }
-        return null;
+        return 155;
     }
 }
