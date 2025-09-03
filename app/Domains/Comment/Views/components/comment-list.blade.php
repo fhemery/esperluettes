@@ -1,4 +1,11 @@
-<div class="space-y-4" id="comment-list">
+<div class="space-y-4" id="comment-list" x-data="commentList({
+  url: '{{ route('comments.fragments') }}',
+  entityType: '{{ $entityType }}',
+  entityId: {{ (int) $entityId }},
+  page: {{ (int) ($list->page ?? 1) }},
+  perPage: {{ (int) ($list->perPage ?? 20) }},
+  hasMore: {{ ($list->total > count($list->items)) ? 'true' : 'false' }},
+})">
   @if($error === 'not_allowed')
     <div class="p-3 rounded border border-yellow-300 bg-yellow-50 text-yellow-900 text-sm flex items-center justify-between gap-4">
       <div>{{ __('comment::comments.errors.members_only') }}</div>
@@ -27,16 +34,75 @@
     @if($list->total === 0)
       <p class="text-sm text-gray-500">{{ __('comment::comments.list.empty') }}</p>
     @else
-      <ul class="space-y-3">
+      <ul class="space-y-3" x-ref="list">
         @foreach($list->items as $comment)
-          <li class="border border-gray-200 rounded p-3">
-            <div class="text-sm text-gray-700">{{ $comment->body }}</div>
-            @if($comment->authorProfile && $comment->authorProfile->display_name)
-              <div class="mt-1 text-xs text-gray-500">— {{ $comment->authorProfile->display_name }}</div>
-            @endif
-          </li>
+          @include('comment::components.partials.comment-item', ['comment' => $comment])
         @endforeach
       </ul>
+      <div class="mt-3 text-sm text-gray-500" x-show="loading">Loading…</div>
+      <div class="h-1" x-ref="sentinel"></div>
     @endif
   @endif
 </div>
+
+@push('scripts')
+<script>
+  window.commentList = function(opts){
+    return {
+      url: opts.url,
+      entityType: opts.entityType,
+      entityId: opts.entityId,
+      page: opts.page,
+      perPage: opts.perPage,
+      hasMore: !!opts.hasMore,
+      loading: false,
+      activeReplyId: null,
+      init(){
+        // Delegated events for reply UI (demo only)
+        this.$el.addEventListener('click', (e) => {
+          const replyBtn = e.target.closest('[data-action="reply"]');
+          const cancelBtn = e.target.closest('[data-action="cancel-reply"]');
+          if (replyBtn) {
+            const id = parseInt(replyBtn.getAttribute('data-comment-id'), 10);
+            this.activeReplyId = (this.activeReplyId === id) ? null : id;
+          }
+          if (cancelBtn) {
+            this.activeReplyId = null;
+          }
+        });
+
+        if (!this.hasMore) return;
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(e => { if (e.isIntersecting) this.loadMore(); });
+        }, { rootMargin: '200px 0px' });
+        io.observe(this.$refs.sentinel);
+      },
+      async loadMore(){
+        if (this.loading || !this.hasMore) return;
+        this.loading = true;
+        try {
+          const url = new URL(this.url, window.location.origin);
+          url.searchParams.set('entity_type', this.entityType);
+          url.searchParams.set('entity_id', this.entityId);
+          url.searchParams.set('page', this.page + 1);
+          url.searchParams.set('per_page', this.perPage);
+          const res = await fetch(url.toString(), { headers: { 'Accept': 'text/html' } });
+          if (res.status === 401) { this.hasMore = false; return; }
+          if (!res.ok) { this.hasMore = false; return; }
+          const html = await res.text();
+          this.$refs.list.insertAdjacentHTML('beforeend', html);
+          const next = res.headers.get('X-Next-Page');
+          if (next) {
+            this.page = parseInt(next, 10) - 1; // we increment below
+          } else {
+            this.hasMore = false;
+          }
+          this.page = this.page + 1;
+        } finally {
+          this.loading = false;
+        }
+      }
+    }
+  }
+</script>
+@endpush

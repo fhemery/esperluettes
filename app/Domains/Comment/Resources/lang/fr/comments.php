@@ -18,6 +18,9 @@ return [
 
     'actions' => [
         'login' => 'Se connecter',
+        'reply' => 'Répondre',
+        'edit' => 'Éditer',
+        'report' => 'Signaler',
     ],
 
     'posted' => 'Commentaire publié',

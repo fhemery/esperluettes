@@ -16,7 +16,7 @@ class CommentList extends Component
     public function __construct(
         public string $entityType,
         public int $entityId,
-        public int $perPage = 20
+        public int $perPage = 5
     ) {
         $api = app(CommentPublicApi::class);
         $this->isGuest = !auth()->check();
