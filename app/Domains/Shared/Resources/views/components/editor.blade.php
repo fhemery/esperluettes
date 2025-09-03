@@ -22,6 +22,7 @@
                     modules: {
                         toolbar: [
                             ['bold', 'italic', 'underline', 'strike'],
+                            ['blockquote'],
                             [{ 'align': [] }],
                             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                             ['clean']
