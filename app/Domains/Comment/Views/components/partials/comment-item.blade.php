@@ -25,4 +25,12 @@
       </div>
     </form>
   </div>
+
+  @if(!empty($comment->children))
+    <ul class="mt-3 space-y-3 border-l pl-3">
+      @foreach($comment->children as $child)
+        @include('comment::components.partials.comment-item', ['comment' => $child])
+      @endforeach
+    </ul>
+  @endif
 </li>
