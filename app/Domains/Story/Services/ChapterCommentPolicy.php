@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Domains\Comment\Contracts;
+namespace App\Domains\Story\Services;
 
-class DefaultCommentPolicy implements CommentPolicy
+use App\Domains\Comment\Contracts\CommentDto;
+use App\Domains\Comment\Contracts\CommentPolicy;
+use App\Domains\Comment\Contracts\CommentToCreateDto;
+
+class ChapterCommentPolicy implements CommentPolicy
 {
     public function validateCreate(CommentToCreateDto $dto): void
     {
-        // Allow by default
+        return;
     }
 
     public function canCreateRoot(int $entityId, int $userId): bool
@@ -26,12 +30,12 @@ class DefaultCommentPolicy implements CommentPolicy
 
     public function validateEdit(CommentDto $comment, int $userId, string $newBody): void
     {
-        // Allow by default
+        return;
     }
 
     public function getMinBodyLength(): ?int
     {
-        return null;
+        return 140;
     }
 
     public function getMaxBodyLength(): ?int

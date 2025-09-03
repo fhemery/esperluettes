@@ -9,7 +9,7 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('POST /comments route', function () {
     it('redirects guests to login', function () {
         $response = $this->post('/comments', [
-            'entity_type' => 'chapter',
+            'entity_type' => 'default',
             'entity_id' => 123,
             'body' => 'Hello',
         ]);
@@ -25,11 +25,11 @@ describe('POST /comments route', function () {
         $this->actingAs($user);
 
         // Use a fixed intended URL to simulate back()
-        $from = '/stories/some-slug/chapters/first#comment-list';
+        $from = '/default/123#comment-list';
         $this->from($from);
 
         $payload = [
-            'entity_type' => 'chapter',
+            'entity_type' => 'default',
             'entity_id' => 123,
             'body' => 'My first comment',
         ];

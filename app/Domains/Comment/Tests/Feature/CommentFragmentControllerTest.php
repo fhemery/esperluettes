@@ -10,7 +10,7 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 it('renders root comments HTML for the first page', function () {
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 123;
 
     $user = alice($this, roles: [Roles::USER]);
@@ -38,7 +38,7 @@ it('renders root comments HTML for the first page', function () {
 });
 
 it('renders child comments HTML for the first page', function () {
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 123;
 
     $user = alice($this, roles: [Roles::USER]);
@@ -60,7 +60,7 @@ it('renders child comments HTML for the first page', function () {
 });
 
 it('returns 401 for guests (no role) when listing fragments', function () {
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 1;
 
     $response = $this->get(route('comments.fragments', [
@@ -72,7 +72,7 @@ it('returns 401 for guests (no role) when listing fragments', function () {
 });
 
 it('should render the Reply button only on the last child of a root comment', function () {
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 123;
 
     $user = alice($this);
@@ -107,7 +107,7 @@ it('should render the Reply button only on the last child of a root comment', fu
 });
 
 it('should show the edit button is current user is the author', function () {
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 123;
 
     $user = alice($this);
@@ -132,7 +132,7 @@ it('should show the edit button is current user is the author', function () {
 
 describe('When policies are in place', function(){
     it('should show a minimum number of character in the editor if specified ', function () {
-        $entityType = 'chapter';
+        $entityType = 'default';
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register($entityType, new class extends DefaultCommentPolicy {
@@ -158,7 +158,7 @@ describe('When policies are in place', function(){
     });
 
     it('should show a maximum number of character in the editor if specified ', function () {
-        $entityType = 'chapter';
+        $entityType = 'default';
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register($entityType, new class extends DefaultCommentPolicy {

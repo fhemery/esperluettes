@@ -42,7 +42,7 @@ describe('Access', function() {
 
 it('returns an empty list when no comment are added', function () {   
     // Given a chapter-like target (entityType/id are placeholders until Story adapter is wired)
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 1;
     $user = alice($this);
     $this->actingAs($user);
@@ -59,7 +59,7 @@ it('returns an empty list when no comment are added', function () {
 });
 
 it('returns a list of comments when some are added', function () {
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 1;
     $alice = alice($this);
     $this->actingAs($alice);
@@ -79,7 +79,7 @@ it('returns a list of comments when some are added', function () {
 });
 
 it('lists root comments by descending creation date', function () {
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 1;
     $user = alice($this);
     $this->actingAs($user);
@@ -105,7 +105,7 @@ it('lists root comments by descending creation date', function () {
 });
 
 it('lists child comments by ascending creation date', function () {
-    $entityType = 'chapter';
+    $entityType = 'default';
     $entityId = 1;
     $user = alice($this);
     $this->actingAs($user);

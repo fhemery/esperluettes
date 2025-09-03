@@ -14,7 +14,7 @@ interface CommentPolicy
      * Whether the current user can create a root comment for the given entity.
      * Default: true
      */
-    public function canCreateRoot(string $entityType, int $entityId, int $userId): bool;
+    public function canCreateRoot(int $entityId, int $userId): bool;
 
     /**
      * Whether the current user can reply to the given parent comment.

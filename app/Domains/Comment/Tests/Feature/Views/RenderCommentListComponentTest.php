@@ -12,7 +12,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 describe('Access', function () {
     it('should display an alert if user is not logged', function () {
-        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+        $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
         ]);
 
@@ -26,7 +26,7 @@ describe('Access', function () {
         $user = alice($this, roles: [], isVerified: false);
         $this->actingAs($user);
 
-        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+        $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
         ]);
 
@@ -42,7 +42,7 @@ describe('Content', function () {
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
         $this->actingAs($user);
 
-        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+        $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
         ]);
 
@@ -54,9 +54,9 @@ describe('Content', function () {
         $this->actingAs($user);
 
         // Seed one comment
-        createComment('chapter', 123, 'Hello world', null);
+        createComment('default', 123, 'Hello world', null);
 
-        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+        $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
         ]);
 
@@ -66,7 +66,7 @@ describe('Content', function () {
 
 describe('When policies are in place', function(){
     it('should show a minimum number of character in the editor if specified ', function () {
-        $entityType = 'chapter';
+        $entityType = 'default';
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register($entityType, new class extends DefaultCommentPolicy {
@@ -79,7 +79,7 @@ describe('When policies are in place', function(){
         $user = alice($this);
         $this->actingAs($user);
 
-        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+        $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
         ]);
 
@@ -88,7 +88,7 @@ describe('When policies are in place', function(){
     });
 
     it('should show a maximum number of character in the editor if specified ', function () {
-        $entityType = 'chapter';
+        $entityType = 'default';
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register($entityType, new class extends DefaultCommentPolicy {
@@ -101,7 +101,7 @@ describe('When policies are in place', function(){
         $user = alice($this);
         $this->actingAs($user);
 
-        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+        $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
         ]);
 
@@ -110,11 +110,11 @@ describe('When policies are in place', function(){
     });
 
     it('should not show the form is root posting is disabled', function () {
-        $entityType = 'chapter';
+        $entityType = 'default';
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register($entityType, new class extends DefaultCommentPolicy {
-            public function canCreateRoot(string $entityType, int $entityId, int $userId): bool
+            public function canCreateRoot(int $entityId, int $userId): bool
             {
                 return false;
             }
@@ -123,7 +123,7 @@ describe('When policies are in place', function(){
         $user = alice($this);
         $this->actingAs($user);
 
-        $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
+        $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
         ]);
 

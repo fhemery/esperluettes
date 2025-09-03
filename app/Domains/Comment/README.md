@@ -18,7 +18,7 @@ This module provides comment creation/listing services and a pluggable policy me
 - Interface: `App\\Domains\\Comment\\Contracts\\CommentPolicy`
   - Methods:
     - `validateCreate(CommentToCreateDto $dto): void`
-    - `canCreateRoot(string $entityType, int $entityId, int $userId): bool`
+    - `canCreateRoot(int $entityId, int $userId): bool`
     - `canReply(CommentDto $parentComment, int $userId): bool`
     - `canEditOwn(CommentDto $comment, int $userId): bool`
     - `validateEdit(CommentDto $comment, int $userId, string $newBody): void`
@@ -67,7 +67,7 @@ class YourDomainServiceProvider extends ServiceProvider
                     throw ValidationException::withMessages(['body' => ['Comment too long']]);
                 }
             }
-            public function canCreateRoot(string $entityType, int $entityId, int $userId): bool { return true; }
+            public function canCreateRoot(int $entityId, int $userId): bool { return true; }
             public function canReply(\App\\Domains\\Comment\\Contracts\\CommentDto $parentComment, int $userId): bool { return true; }
             public function canEditOwn(\App\\Domains\\Comment\\Contracts\\CommentDto $comment, int $userId): bool { return true; }
             public function validateEdit(\App\\Domains\\Comment\\Contracts\\CommentDto $comment, int $userId, string $newBody): void {}

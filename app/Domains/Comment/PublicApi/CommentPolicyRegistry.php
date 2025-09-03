@@ -39,7 +39,7 @@ class CommentPolicyRegistry
      */
     public function canCreateRoot(string $entityType, int $entityId, int $userId): bool
     {
-        return $this->getPolicy($entityType)->canCreateRoot($entityType, $entityId, $userId);
+        return $this->getPolicy($entityType)->canCreateRoot($entityId, $userId);
     }
 
     /**
