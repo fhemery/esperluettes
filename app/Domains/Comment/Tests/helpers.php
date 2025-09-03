@@ -6,7 +6,6 @@ use App\Domains\Comment\Contracts\CommentToCreateDto;
 use App\Domains\Comment\PublicApi\CommentPublicApi;
 
 /**
- * @param CommentPublicApi $api
  * @param int $authorId
  * @param string $entityType
  * @param int $entityId
@@ -14,13 +13,14 @@ use App\Domains\Comment\PublicApi\CommentPublicApi;
  * @param int $parentCommentId
  * @return int the Id of the comment
  */
-function createComment($api,string $entityType = 'default', int $entityId = 1,  string $body = 'Hello', ?int $parentCommentId = null): int
+function createComment(string $entityType = 'default', int $entityId = 1,  string $body = 'Hello', ?int $parentCommentId = null): int
 {
+    /** @var CommentPublicApi $api */
+    $api = app(CommentPublicApi::class);
     return $api->create(new CommentToCreateDto($entityType, $entityId, $body, $parentCommentId));
 }
 
 /**
- * @param CommentPublicApi $api
  * @param int $number
  * @param string $entityType
  * @param int $entityId
@@ -29,20 +29,23 @@ function createComment($api,string $entityType = 'default', int $entityId = 1,  
  * @return int[] the Ids of the created comments
  */
 function createSeveralComments($number,string $entityType = 'default', int $entityId = 1,  string $body = 'Hello', ?int $parentCommentId = null): array {
-    $api = app(CommentPublicApi::class);
     $commentIds = [];
     for ($i = 0; $i < $number; $i++) {
-        $commentIds[] = createComment($api, $entityType, $entityId, $body . ' ' . $i, $parentCommentId);
+        $commentIds[] = createComment($entityType, $entityId, $body . ' ' . $i, $parentCommentId);
     }
     return $commentIds;
 }
 
-function getComment($api, int $commentId): CommentDto
+function getComment(int $commentId): CommentDto
 {
+    /** @var CommentPublicApi $api */
+    $api = app(CommentPublicApi::class);
     return $api->getComment($commentId);
 }
 
-function listComments($api, string $entityType = 'default', int $entityId = 1): CommentListDto
+function listComments(string $entityType = 'default', int $entityId = 1, int $page = 1, int $perPage = 5): CommentListDto
 {
-    return $api->getFor($entityType, $entityId, 1, 5);
+    /** @var CommentPublicApi $api */
+    $api = app(CommentPublicApi::class);
+    return $api->getFor($entityType, $entityId, $page, $perPage);
 }

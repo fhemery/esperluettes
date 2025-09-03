@@ -13,6 +13,7 @@ use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Auth\PublicApi\AuthPublicApi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
+use Illuminate\Validation\ValidationException;
 
 class CommentPublicApi
 {
@@ -118,7 +119,7 @@ class CommentPublicApi
                 (string) $parent->commentable_type !== (string) $comment->entityType
                 || (int) $parent->commentable_id !== (int) $comment->entityId
             ) {
-                throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Parent comment target mismatch');
+                throw ValidationException::withMessages(['parent_comment_id' => ['Parent comment target mismatch']]);
             }
         }
         return $this->service->postComment($comment->entityType, $comment->entityId, $user->id, $comment->body, $comment->parentCommentId)->id;

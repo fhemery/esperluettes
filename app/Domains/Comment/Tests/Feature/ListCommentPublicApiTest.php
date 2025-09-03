@@ -1,7 +1,6 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
 use App\Domains\Comment\Contracts\CommentListDto;
 use App\Domains\Comment\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,15 +10,10 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-beforeEach(function () {
-    // Ensure container can resolve the Public API.
-    $this->api = app(CommentPublicApi::class);
-});
-
 describe('Access', function() {
     it('should return 401 if user is not Logged', function() {
         expect(function() {
-            $this->api->getFor('chapter', 1);
+            listComments('chapter', 1);
         })->toThrow(UnauthorizedException::class);
     });
 
@@ -27,21 +21,21 @@ describe('Access', function() {
         expect(function() {
             $user = alice($this, roles: [], isVerified: false);
             $this->actingAs($user);
-            $this->api->getFor('chapter', 1);
+            listComments('chapter', 1);
         })->toThrow(UnauthorizedException::class);
     });
 
     it('should work for users on probation (simple user role)', function() {
         $user = alice($this, roles:[Roles::USER]);
         $this->actingAs($user);
-        $result = $this->api->getFor('chapter', 1);
+        $result = listComments('chapter', 1);
         expect($result)->toBeInstanceOf(CommentListDto::class);
     });
 
     it('should work for confirmed users (user_confirmed role)', function() {
         $user = alice($this, roles:[Roles::USER_CONFIRMED]);
         $this->actingAs($user);
-        $result = $this->api->getFor('chapter', 1);
+        $result = listComments('chapter', 1);
         expect($result)->toBeInstanceOf(CommentListDto::class);
     });
 });
@@ -53,7 +47,7 @@ it('returns an empty list when no comment are added', function () {
     $user = alice($this);
     $this->actingAs($user);
 
-    $result = $this->api->getFor($entityType, $entityId, page: 1, perPage: 20);
+    $result = listComments($entityType, $entityId, page: 1, perPage: 20);
 
     expect($result)->toBeInstanceOf(CommentListDto::class)
         ->and($result->entityType)->toBe($entityType)
@@ -70,9 +64,9 @@ it('returns a list of comments when some are added', function () {
     $alice = alice($this);
     $this->actingAs($alice);
 
-    createComment($this->api, $entityType, $entityId, 'Hello');
+    createComment($entityType, $entityId, 'Hello');
 
-    $result = $this->api->getFor($entityType, $entityId, page: 1, perPage: 20);
+    $result = listComments($entityType, $entityId, page: 1, perPage: 20);
 
     expect($result)->toBeInstanceOf(CommentListDto::class)
         ->and($result->entityType)->toBe($entityType)
@@ -91,9 +85,9 @@ it('lists root comments by descending creation date', function () {
     $this->actingAs($user);
     
     // Create three comments
-    $comment1Id = createComment($this->api, $entityType, $entityId, 'Hello');
-    $comment2Id = createComment($this->api, $entityType, $entityId, 'World');
-    $comment3Id = createComment($this->api, $entityType, $entityId, 'Universe');
+    $comment1Id = createComment($entityType, $entityId, 'Hello');
+    $comment2Id = createComment($entityType, $entityId, 'World');
+    $comment3Id = createComment($entityType, $entityId, 'Universe');
     
     // We need to go update the created_at timestamp for each comment to make sure the sorting works
     Comment::query()->where('id', $comment1Id)->update(['created_at' => now()->subMinutes(10)]);
@@ -101,7 +95,7 @@ it('lists root comments by descending creation date', function () {
     Comment::query()->where('id', $comment3Id)->update(['created_at' => now()]);
     
     // Act: get the comments
-    $result = $this->api->getFor($entityType, $entityId);
+    $result = listComments($entityType, $entityId);
 
     // Assert
     expect($result->items)->toBeArray()

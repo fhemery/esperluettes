@@ -52,7 +52,7 @@ describe('Content', function () {
         $this->actingAs($user);
 
         // Seed one comment
-        createComment(app(CommentPublicApi::class), 'chapter', 123, 'Hello world', null);
+        createComment('chapter', 123, 'Hello world', null);
 
         $html = Blade::render('<x-comment-list entity-type="chapter" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
