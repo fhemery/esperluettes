@@ -187,7 +187,12 @@ class CommentPublicApi
     {
         $this->checkAccess();
         $comment = $this->service->getComment($commentId);
-        return CommentDto::fromModel($comment, $this->profiles->getPublicProfile($comment->author_id));
+        $userId = (int) (Auth::id() ?? 0);
+        $profile = $this->profiles->getPublicProfile($comment->author_id);
+        $dto = CommentDto::fromModel($comment, $profile);
+        $dto->canReply = $this->policies->canReply($comment->commentable_type, $dto, $userId);
+        $dto->canEditOwn = $this->policies->canEditOwn($comment->commentable_type, $dto, $userId);
+        return $dto;
     }
 
     /**
@@ -198,6 +203,68 @@ class CommentPublicApi
     {
         // No access gate here: this is intended for internal policy checks where $userId is provided
         return $this->service->userHasRoot($entityType, $entityId, $userId);
+    }
+
+    /**
+     * Edit a comment by id. Only the owner can edit. Policies decide if edit is allowed and constraints.
+     */
+    public function edit(int $commentId, string $newBody): CommentDto
+    {
+        $this->checkAccess();
+
+        $user = Auth::user();
+        $model = $this->service->getComment($commentId);
+
+        // Ownership check
+        if ((int) $model->author_id !== (int) $user->id) {
+            throw new UnauthorizedException('Cannot edit comment you do not own');
+        }
+
+        // Build provisional DTO for policy checks
+        $profile = $this->profiles->getPublicProfile($model->author_id);
+        $dto = CommentDto::fromModel($model, $profile);
+
+        // High-level policy gate for edit
+        if (!$this->policies->canEditOwn($model->commentable_type, $dto, (int) $user->id)) {
+            throw ValidationException::withMessages(['body' => ['Edit not allowed']]);
+        }
+
+        // Enforce min/max policy by type (root vs reply) on plain text length of the sanitized body
+        $clean = Purifier::clean($newBody, 'strict');
+        $plain = is_string($clean) ? trim(strip_tags($clean)) : '';
+        $len = mb_strlen($plain);
+        $isRoot = $model->parent_comment_id === null;
+        if ($isRoot) {
+            $min = $this->policies->getRootCommentMinLength($model->commentable_type);
+            if ($min !== null && $len < $min) {
+                throw ValidationException::withMessages(['body' => ['Comment too short']]);
+            }
+            $max = $this->policies->getRootCommentMaxLength($model->commentable_type);
+            if ($max !== null && $len > $max) {
+                throw ValidationException::withMessages(['body' => ['Comment too long']]);
+            }
+        } else {
+            $min = $this->policies->getReplyCommentMinLength($model->commentable_type);
+            if ($min !== null && $len < $min) {
+                throw ValidationException::withMessages(['body' => ['Comment too short']]);
+            }
+            $max = $this->policies->getReplyCommentMaxLength($model->commentable_type);
+            if ($max !== null && $len > $max) {
+                throw ValidationException::withMessages(['body' => ['Comment too long']]);
+            }
+        }
+
+        // Domain-specific edit validation
+        $this->policies->validateEdit($model->commentable_type, $dto, (int) $user->id, $newBody);
+
+        // Perform update via service (sanitizes and persists)
+        $updated = $this->service->updateComment($commentId, $newBody);
+
+        // Return updated DTO with permissions flags
+        $updatedDto = CommentDto::fromModel($updated, $profile);
+        $updatedDto->canReply = $this->policies->canReply($updated->commentable_type, $updatedDto, (int) $user->id);
+        $updatedDto->canEditOwn = $this->policies->canEditOwn($updated->commentable_type, $updatedDto, (int) $user->id);
+        return $updatedDto;
     }
 }
 

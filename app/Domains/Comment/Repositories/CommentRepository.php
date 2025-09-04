@@ -53,6 +53,17 @@ class CommentRepository
     }
 
     /**
+     * Update the body of a comment and persist changes.
+     */
+    public function updateBody(int $commentId, string $body): Comment
+    {
+        $comment = $this->getById($commentId);
+        $comment->body = $body;
+        $comment->save();
+        return $comment;
+    }
+
+    /**
      * Check if a given user already has a root comment on the specified target.
      */
     public function userHasRoot(string $entityType, int $entityId, int $userId): bool

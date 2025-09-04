@@ -4,6 +4,7 @@ namespace App\Domains\Comment\Http\Controllers;
 
 use App\Domains\Comment\PublicApi\CommentPublicApi;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Http\Requests\UpdateCommentRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -50,5 +51,25 @@ class CommentController extends Controller
             return back()->withErrors($e->errors());
         }
         
+    }
+
+    public function update(UpdateCommentRequest $request, int $commentId): RedirectResponse
+    {
+        try {
+            $data = $request->validated();
+            $this->api->edit($commentId, $data['body']);
+
+            $previous = url()->previous();
+            $base = preg_replace('/#.*/', '', $previous ?? '');
+            $path = parse_url($base, PHP_URL_PATH) ?: '/';
+            $query = parse_url($base, PHP_URL_QUERY) ?: null;
+            $relative = './' . ltrim($path, '/');
+            $qs = $query ? ('?' . $query) : '';
+
+            return redirect()->to($relative . $qs . '#comments')
+                ->with('status', __('comment::comments.updated'));
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
     }
 }

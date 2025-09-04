@@ -36,6 +36,13 @@ function createSeveralComments($number,string $entityType = 'default', int $enti
     return $commentIds;
 }
 
+function editComment(int $commentId, string $body): void
+{
+    /** @var CommentPublicApi $api */
+    $api = app(CommentPublicApi::class);
+    $api->edit($commentId, $body);
+}
+
 function getComment(int $commentId): CommentDto
 {
     /** @var CommentPublicApi $api */

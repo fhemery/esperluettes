@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Comment\Contracts\CommentDto;
 use App\Domains\Comment\Contracts\DefaultCommentPolicy;
 use App\Domains\Comment\Models\Comment;
 use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
@@ -182,5 +183,32 @@ describe('When policies are in place', function(){
 
 
         $response->assertSee('/ 242');
+    });
+
+    it('should not show the edit button if edit is forbidden by policy', function () {
+        $entityType = 'default';
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register($entityType, new class extends DefaultCommentPolicy {
+            public function canEditOwn(CommentDto $comment, int $userId): bool
+            {
+                return false;
+            }
+        });
+        
+        $user = alice($this);
+        $this->actingAs($user);
+
+        createComment($entityType, 123, 'Hello');
+
+        $response = $this->get(route('comments.fragments', [
+            'entity_type' => $entityType,
+            'entity_id' => 123,
+            'page' => 1,
+            'per_page' => 2,
+        ]));
+
+
+        $response->assertDontSee('data-action="edit"', false);
     });
 });

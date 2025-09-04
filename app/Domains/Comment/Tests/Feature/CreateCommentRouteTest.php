@@ -20,8 +20,7 @@ describe('POST /comments route', function () {
     });
 
     it('allows confirmed users to create a comment and redirects back to comments with flash', function () {
-        // Auth as confirmed user
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         // Use a fixed intended URL to simulate back()

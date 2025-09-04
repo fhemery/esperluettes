@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
 
 // Include auth routes from Auth domain
 require app_path('Domains/Auth/routes.php');
@@ -20,6 +18,9 @@ require app_path('Domains/Dashboard/routes.php');
 
 // Include story routes from Story domain
 require app_path('Domains/Story/routes.php');
+
+// Include comment routes from Comment domain
+require app_path('Domains/Comment/routes.php');
 
 // Include static page routes from StaticPage domain (must be last due to catch-all)
 require app_path('Domains/StaticPage/routes.php');

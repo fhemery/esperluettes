@@ -63,4 +63,13 @@ class CommentService
         $clean = Purifier::clean($body, 'strict');
         return is_string($clean) ? trim($clean) : '';
     }
+
+    /**
+     * Update a comment body after sanitization.
+     */
+    public function updateComment(int $commentId, string $newBody): Comment
+    {
+        $cleanBody = $this->sanitizeBody($newBody);
+        return $this->repository->updateBody($commentId, $cleanBody);
+    }
 }
