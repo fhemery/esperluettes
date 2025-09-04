@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -18,7 +19,7 @@ describe('Page access', function () {
     });
     
     it('denies non-confirmed users from accessing the create page', function () {
-        $user = alice($this, roles: ['user']);
+        $user = alice($this, roles: [Roles::USER]);
         
         $resp = $this->actingAs($user)->get('/stories/create');
         
@@ -27,7 +28,7 @@ describe('Page access', function () {
     });
 
     it('allows user-confirmed users to access the story creation page', function () {
-        $user = alice($this, roles: ['user-confirmed']);
+        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
 
         $response = $this->actingAs($user)->get('/stories/create');
 
@@ -98,7 +99,7 @@ describe('Page display', function() {
 describe('Story creation', function () {
     
     it('denies non-confirmed users from posting new stories', function () {
-        $user = alice($this, roles: ['user']);
+        $user = alice($this, roles: [Roles::USER]);
         $this->actingAs($user);
 
         $payload = validStoryPayload([
@@ -117,7 +118,7 @@ describe('Story creation', function () {
 
     it('produces unique slugs for duplicate titles', function () {
         // Arrange
-        $user = alice($this, roles: ['user-confirmed']);
+        $user = alice($this);
         $this->actingAs($user);
 
         $payload = validStoryPayload([
@@ -137,7 +138,7 @@ describe('Story creation', function () {
         $second = $stories[1];
 
         // Both slugs start with the same base, and end with their respective ids
-        $base = \App\Domains\Story\Models\Story::generateSlugBase('Same Title');
+        $base = Story::generateSlugBase('Same Title');
         expect($first->slug)->toStartWith($base . '-')
             ->and($first->slug)->toEndWith('-' . $first->id)
             ->and($second->slug)->toStartWith($base . '-')
@@ -149,9 +150,9 @@ describe('Story creation', function () {
         $this->get('/stories/' . $second->slug)->assertOk();
     });
 
-    it('allows an authenticated user to create a story and see it', function () {
+    it('allows a confirmed user to create a story and see it', function () {
         // Arrange
-        $user = alice($this, roles: ['user-confirmed']);
+        $user = alice($this);
         $this->actingAs($user);
 
         // Act
@@ -187,7 +188,7 @@ describe('Story creation', function () {
 
     it('displays multiple selected genres as badges on show page', function () {
         // Arrange
-        $user = alice($this, roles: ['user-confirmed']);
+        $user = alice($this);
         $this->actingAs($user);
 
         $g1 = makeGenre('Fantasy');
@@ -213,7 +214,7 @@ describe('Story creation', function () {
 
     it('allows creating a story with an optional status which is shown on the page', function () {
         // Arrange
-        $user = alice($this, roles: ['user-confirmed']);
+        $user = alice($this);
         $this->actingAs($user);
         $status = makeStatus('Ongoing');
 
@@ -238,7 +239,7 @@ describe('Story creation', function () {
 
     it('allows creating a story with multiple trigger warnings and displays them on show page', function () {
         // Arrange
-        $user = alice($this, roles: ['user-confirmed']);
+        $user = alice($this);
         $this->actingAs($user);
 
         $tw1 = makeTriggerWarning('Violence');
@@ -268,7 +269,7 @@ describe('Story creation', function () {
 
     it('allows creating a story with an optional feedback which is shown on the page', function () {
         // Arrange
-        $user = alice($this, roles: ['user-confirmed']);
+        $user = alice($this);
         $this->actingAs($user);
         $feedback = makeFeedback('Beta Readers Wanted');
 

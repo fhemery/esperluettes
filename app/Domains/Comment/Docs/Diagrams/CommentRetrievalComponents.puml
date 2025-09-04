@@ -1,0 +1,29 @@
+@startuml Comment Retrieval Components
+skinparam monochrome true
+skinparam shadowing false
+
+package "View Layer" {
+  [CommentList (Blade Component)] as CommentList
+}
+
+package "Comment Domain" {
+  [CommentPublicApi]
+  [CommentService]
+  [CommentRepository]
+  [CommentPolicyRegistry]
+  [CommentDtoMapper]
+}
+
+package "Shared" {
+  [ProfilePublicApi]
+}
+
+CommentList --> CommentPublicApi : getFor(entityType, entityId, page, perPage)
+CommentPublicApi --> CommentService : getFor(... withChildren=true)\ncountFor(...)
+CommentService --> CommentRepository : listByTarget(...)
+CommentService --> CommentRepository : countByTarget(...)
+CommentPublicApi --> ProfilePublicApi : getPublicProfiles(authorIds)
+CommentPublicApi --> CommentDtoMapper : mapRootWithChildren(models, profiles, policies, entityType, userId)
+CommentPublicApi --> CommentPolicyRegistry : canCreateRoot()/canReply()/canEditOwn()
+
+@enduml

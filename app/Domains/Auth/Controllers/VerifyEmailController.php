@@ -7,6 +7,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
 use App\Domains\Auth\Models\ActivationCode;
+use App\Domains\Auth\PublicApi\Roles;
 
 class VerifyEmailController extends Controller
 {
@@ -41,27 +42,27 @@ class VerifyEmailController extends Controller
         if (!$requireActivation) {
             // Feature disabled: confirmed by default
             if ($user->isOnProbation()) {
-                $user->removeRole('user');
+                $user->removeRole(Roles::USER);
             }
             if (!$user->isConfirmed()) {
-                $user->assignRole('user-confirmed');
+                $user->assignRole(Roles::USER_CONFIRMED);
             }
         } else {
             if ($usedActivation) {
                 // Used a code: promote to confirmed
                 if ($user->isOnProbation()) {
-                    $user->removeRole('user');
+                    $user->removeRole(Roles::USER);
                 }
                 if (!$user->isConfirmed()) {
-                    $user->assignRole('user-confirmed');
+                    $user->assignRole(Roles::USER_CONFIRMED);
                 }
             } else {
                 // No code used: keep as user only
                 if ($user->isConfirmed()) {
-                    $user->removeRole('user-confirmed');
+                    $user->removeRole(Roles::USER_CONFIRMED);
                 }
                 if (!$user->isOnProbation()) {
-                    $user->assignRole('user');
+                    $user->assignRole(Roles::USER);
                 }
             }
         }

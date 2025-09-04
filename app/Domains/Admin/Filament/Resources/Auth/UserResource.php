@@ -5,6 +5,7 @@ namespace App\Domains\Admin\Filament\Resources\Auth;
 use App\Domains\Admin\Filament\Resources\Auth\UserResource\Pages;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Models\Role;
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Auth\Services\UserActivationService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -159,24 +160,24 @@ class UserResource extends Resource
                     ->label(__('admin::auth.users.promote.action_label'))
                     ->icon('heroicon-o-arrow-up-circle')
                     ->color('primary')
-                    ->visible(fn (User $record): bool => $record->hasRole('user'))
+                    ->visible(fn (User $record): bool => $record->hasRole(Roles::USER))
                     ->requiresConfirmation()
                     ->modalHeading(__('admin::auth.users.promote.confirm_title'))
                     ->modalDescription(function () {
-                        $from = Role::where('slug', 'user')->value('name') ?? 'user';
-                        $to = Role::where('slug', 'user-confirmed')->value('name') ?? 'user-confirmed';
+                        $from = Role::where('slug', Roles::USER)->value('name') ?? 'user';
+                        $to = Role::where('slug', Roles::USER_CONFIRMED)->value('name') ?? Roles::USER_CONFIRMED;
                         return __('admin::auth.users.promote.confirm_message', ['from' => $from, 'to' => $to]);
                     })
                     ->action(function (User $record) {
-                        if ($record->hasRole('user')) {
-                            $record->removeRole('user');
+                        if ($record->hasRole(Roles::USER)) {
+                            $record->removeRole(Roles::USER);
                         }
-                        if (!$record->hasRole('user-confirmed')) {
-                            $record->assignRole('user-confirmed');
+                        if (!$record->hasRole(Roles::USER_CONFIRMED)) {
+                            $record->assignRole(Roles::USER_CONFIRMED);
                         }
                         Notification::make()
                             ->title(function () {
-                                $role = Role::where('slug', 'user-confirmed')->value('name') ?? 'user-confirmed';
+                                $role = Role::where('slug', Roles::USER_CONFIRMED)->value('name') ?? Roles::USER_CONFIRMED;
                                 return __('admin::auth.users.promote.success', ['role' => $role]);
                             })
                             ->success()

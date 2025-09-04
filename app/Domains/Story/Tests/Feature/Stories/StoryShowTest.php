@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +53,7 @@ it('return 404 for guest for community story', function () {
 
 it('returns 404 for community story to non-confirmed users', function () {
     $author = alice($this);
-    $unverified = bob($this, roles: ['user']);
+    $unverified = bob($this, roles: [Roles::USER]);
     $story = communityStory('Community Story', $author->id);
 
     $this->actingAs($unverified);

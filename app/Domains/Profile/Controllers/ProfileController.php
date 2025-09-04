@@ -2,7 +2,7 @@
 
 namespace App\Domains\Profile\Controllers;
 
-use App\Domains\Auth\PublicApi\UserPublicApi;
+use App\Domains\Auth\PublicApi\AuthPublicApi;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Services\ProfileService;
@@ -17,7 +17,7 @@ class ProfileController extends Controller
     public function __construct(
         private ProfileService $profileService,
         private ProfileAvatarUrlService $avatarUrlService,
-        private UserPublicApi $userPublicApi
+        private AuthPublicApi $authApi
     ) {
     }
 
@@ -87,6 +87,6 @@ class ProfileController extends Controller
 
     private function adjustProfileRoles(Profile $profile): void
     {
-        $profile->roles = $this->userPublicApi->getRolesByUserIds([$profile->user_id])[$profile->user_id] ?? [];
+        $profile->roles = $this->authApi->getRolesByUserIds([$profile->user_id])[$profile->user_id] ?? [];
     }
 }

@@ -1,10 +1,11 @@
 <?php
 
 use App\Domains\Auth\Models\User;
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
-function alice(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = ['user-confirmed']): User
+function alice(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER_CONFIRMED]): User
 {
     return registerUserThroughForm($t, array_merge([
         'name' => 'Alice',
@@ -12,7 +13,7 @@ function alice(TestCase $t, array $overrides = [], bool $isVerified = true, arra
     ], $overrides), $isVerified, $roles);
 }
 
-function bob(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = ['user-confirmed']): User
+function bob(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER_CONFIRMED]): User
 {
     return registerUserThroughForm($t, array_merge([
         'name' => 'Bob',
@@ -20,7 +21,7 @@ function bob(TestCase $t, array $overrides = [], bool $isVerified = true, array 
     ], $overrides), $isVerified, $roles);
 }
 
-function admin(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = ['admin', 'user-confirmed']): User
+function admin(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::ADMIN, Roles::USER_CONFIRMED]): User
 {
     return registerUserThroughForm($t, array_merge([
         'name' => 'Admin',
@@ -34,7 +35,7 @@ function admin(TestCase $t, array $overrides = [], bool $isVerified = true, arra
  * If $isVerified is true (default), the user's email will be marked as verified.
  * If $ensureGuest is true (default), we'll log out any existing session before registering.
  */
-function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = ['user']): User
+function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER]): User
 {
     $payload = array_merge([
         'name' => 'John Doe',

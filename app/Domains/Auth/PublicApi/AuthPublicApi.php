@@ -5,9 +5,9 @@ namespace App\Domains\Auth\PublicApi;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\PublicApi\Dto\RoleDto;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Facades\Auth;
 
-class UserPublicApi
+class AuthPublicApi
 {
     /**
      * @param array<int,int> $userIds
@@ -42,18 +42,26 @@ class UserPublicApi
         return $result;
     }
 
-    /**
-     * Check whether a user has a verified email
-     * 
-     * TODO: implement a search based on role attribution (user) instead of 
-     * checking verified
-     */
+    public function isAuthenticated(): bool
+    {
+        return Auth::check();
+    }
+
     public function isVerified(?Authenticatable $user): bool
     {
         if (!$user) {
+            $user=  Auth::user();
+        }
+       return $this->hasAnyRole([Roles::USER, Roles::USER_CONFIRMED]);
+    }
+
+    public function hasAnyRole(array $roles): bool
+    {
+        /** @var \App\Domains\Auth\Models\User|null */
+        $user = Auth::user() ;
+        if (!$user || !$user->hasRole($roles)) {
             return false;
         }
-
-        return !($user instanceof MustVerifyEmail) || $user->hasVerifiedEmail();
+        return true;
     }
 }

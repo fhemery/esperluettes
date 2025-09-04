@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Story\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -45,7 +46,7 @@ it('not show a published chapter from a community story to non confirmed users',
 
     $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Pub Chap']);
 
-    $resp = $this->actingAs(bob($this, roles: ['user']))->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    $resp = $this->actingAs(bob($this, roles: [Roles::USER]))->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
     $resp->assertNotFound();
 });
 

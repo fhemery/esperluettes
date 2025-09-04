@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -13,7 +14,7 @@ beforeEach(function () {
 
 it('redirects to intended URL after visiting login-intended and logging in', function () {
     // Create a verified user with known password via helper (logs out afterwards)
-    $user = alice($this, [], true, ['user-confirmed']);
+    $user = alice($this, [], true, [Roles::USER_CONFIRMED]);
 
     // Ensure guest
     Auth::logout();

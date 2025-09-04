@@ -12,7 +12,7 @@ beforeEach(function () {
 });
 
 it('allows an author to hard delete a chapter and redirects to story page with flash', function () {
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $this->actingAs($author);
     $story = publicStory('Deletable Story', $author->id);
 
@@ -56,8 +56,8 @@ it('allows a co-author to delete a chapter', function () {
 });
 
 it('returns 404 when a non-author collaborator tries to delete', function () {
-    $author = alice($this, roles: ['user-confirmed']);
-    $collab = bob($this, roles: ['user-confirmed']);
+    $author = alice($this);
+    $collab = bob($this);
     $this->actingAs($author);
     $story = publicStory('No Delete Perms', $author->id);
     $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Keep']);
@@ -80,8 +80,8 @@ it('returns 404 when a non-author collaborator tries to delete', function () {
 });
 
 it('deletes associated reading progress via FK cascade', function () {
-    $author = alice($this, roles: ['user-confirmed']);
-    $reader = bob($this, roles: ['user-confirmed']);
+    $author = alice($this);
+    $reader = bob($this);
     $this->actingAs($author);
     $story = publicStory('Cascade Story', $author->id);
     $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Progress Chapter']);
@@ -105,7 +105,7 @@ it('deletes associated reading progress via FK cascade', function () {
 });
 
 it('returns 404 when story and chapter belong to different stories (slug id mismatch)', function () {
-    $author = alice($this, roles: ['user-confirmed']);
+    $author = alice($this);
     $this->actingAs($author);
 
     // Two separate stories

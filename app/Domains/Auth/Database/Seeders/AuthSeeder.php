@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Database\Seeders;
 
 use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\Models\User;
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -17,8 +18,8 @@ class AuthSeeder extends Seeder
         // Ensure roles exist (idempotent by slug)
         $roles = [
             ['name' => 'admin', 'slug' => 'admin', 'description' => 'Administrator role'],
-            ['name' => 'user', 'slug' => 'user', 'description' => 'Unconfirmed user role'],
-            ['name' => 'user-confirmed', 'slug' => 'user-confirmed', 'description' => 'Confirmed user role'],
+            ['name' => Roles::USER, 'slug' => Roles::USER, 'description' => 'Unconfirmed user role'],
+            ['name' => Roles::USER_CONFIRMED, 'slug' => Roles::USER_CONFIRMED, 'description' => 'Confirmed user role'],
         ];
 
         foreach ($roles as $data) {
@@ -28,8 +29,8 @@ class AuthSeeder extends Seeder
             );
         }
 
-        $confirmedRoleId = Role::where('slug', 'user-confirmed')->value('id');
-        $userRoleId = Role::where('slug', 'user')->value('id');
+        $confirmedRoleId = Role::where('slug', Roles::USER_CONFIRMED)->value('id');
+        $userRoleId = Role::where('slug', Roles::USER)->value('id');
 
         // Backfill existing users
         // - Admins keep admin; also get user-confirmed

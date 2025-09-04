@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +16,7 @@ it('redirects guests from profile edit route to login', function () {
 
 it('allows authenticated user with proper role to access edit page', function () {
     $userConfirmed = alice($this);
-    $simpleUser = bob($this, roles: ['user']);
+    $simpleUser = bob($this, roles: [Roles::USER]);
 
     $this->actingAs($simpleUser)
         ->get('/profile/edit')

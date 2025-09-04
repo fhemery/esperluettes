@@ -2,7 +2,8 @@
 
 namespace App\Domains\Story\Http\Controllers;
 
-use App\Domains\Auth\PublicApi\UserPublicApi;
+use App\Domains\Auth\PublicApi\AuthPublicApi;
+use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Shared\Support\Seo;
@@ -27,7 +28,7 @@ class StoryController
 {
     public function __construct(
         private readonly StoryService              $service,
-        private readonly UserPublicApi             $userPublicApi,
+        private readonly AuthPublicApi             $authApi,
         private readonly ProfilePublicApi          $profileApi,
         private readonly StoryRefLookupService     $lookup,
         private readonly ReadingProgressService    $progress,
@@ -75,7 +76,7 @@ class StoryController
         $twSlugs = array_values(array_unique($twSlugs));
         $excludeTwIds = $this->lookup->findTriggerWarningIdsBySlugs($twSlugs);
         $vis = [Story::VIS_PUBLIC];
-        if (Auth::check() && Auth::user()->isConfirmed()) {
+        if ($this->authApi->hasAnyRole([Roles::USER_CONFIRMED])) {
             $vis[] = Story::VIS_COMMUNITY;
         }
         $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds);
@@ -301,7 +302,7 @@ class StoryController
         $viewModel = new StoryListViewModel($paginator, $items);
 
         $canEdit = $isOwner;
-        $canCreateStory = $canEdit && Auth::check() && Auth::user()->hasRole('user-confirmed');
+        $canCreateStory = $canEdit && $this->authApi->hasAnyRole([Roles::USER_CONFIRMED]);
 
         return view('story::partials.profile-stories', [
             'viewModel' => $viewModel,

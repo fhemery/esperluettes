@@ -2,7 +2,6 @@
 
 namespace App\Domains\Story\Http\Controllers;
 
-use App\Domains\Auth\PublicApi\UserPublicApi;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Http\Requests\ChapterRequest;
 use App\Domains\Story\Http\Requests\ReorderChaptersRequest;
@@ -22,7 +21,6 @@ class ChapterController
 {
     public function __construct(
         private ChapterService $service,
-        private UserPublicApi $userPublicApi,
         private StoryService $storyService,
         private ReadingProgressService $readingProgress,
     ) {
