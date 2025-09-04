@@ -51,7 +51,7 @@ it('returns an empty list when no comment are added', function () {
 
     expect($result)->toBeInstanceOf(CommentListDto::class)
         ->and($result->entityType)->toBe($entityType)
-        ->and($result->entityId)->toBe((string) $entityId)
+        ->and($result->entityId)->toBe($entityId)
         ->and($result->page)->toBe(1)
         ->and($result->perPage)->toBe(20)
         ->and($result->total)->toBe(0)
@@ -70,7 +70,7 @@ it('returns a list of comments when some are added', function () {
 
     expect($result)->toBeInstanceOf(CommentListDto::class)
         ->and($result->entityType)->toBe($entityType)
-        ->and($result->entityId)->toBe((string) $entityId)
+        ->and($result->entityId)->toBe($entityId)
         ->and($result->page)->toBe(1)
         ->and($result->perPage)->toBe(20)
         ->and($result->total)->toBe(1)

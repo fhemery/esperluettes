@@ -30,7 +30,7 @@ class CommentList extends Component
             // Provide a safe empty list object
             $this->comments = CommentListDto::empty(
                 entityType: $this->entityType,
-                entityId: (string) $this->entityId,
+                entityId: $this->entityId,
                 page: $this->page > 0 ? $this->page : 0,
                 perPage: $this->perPage,
             );

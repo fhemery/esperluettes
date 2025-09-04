@@ -7,7 +7,7 @@ class CommentListDto
     /** @param CommentDto[] $items */
     public function __construct(
         public readonly string $entityType,
-        public readonly string $entityId,
+        public readonly int $entityId,
         public readonly int $page,
         public readonly int $perPage,
         public readonly int $total,
@@ -16,7 +16,7 @@ class CommentListDto
     ) {
     }
 
-    public static function empty(string $entityType, string $entityId, int $page = 1, int $perPage = 20): self
+    public static function empty(string $entityType, int $entityId, int $page = 1, int $perPage = 20): self
     {
         return new self(
             entityType: $entityType,

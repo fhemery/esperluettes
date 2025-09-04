@@ -45,7 +45,7 @@ class CommentPublicApi
             $total = $this->service->countFor($entityType, $entityId);
             return new CommentListDto(
                 entityType: $entityType,
-                entityId: (string) $entityId,
+                entityId: $entityId,
                 page: 0,
                 perPage: $perPage,
                 total: $total,
@@ -53,7 +53,7 @@ class CommentPublicApi
                 config: new CommentUiConfigDto(
                     minRootCommentLength: $this->policies->getRootCommentMinLength($entityType),
                     maxRootCommentLength: $this->policies->getRootCommentMaxLength($entityType),
-                    canCreateRoot: $this->policies->canCreateRoot($entityType, (int) $entityId, $userId),
+                    canCreateRoot: $this->policies->canCreateRoot($entityType, $entityId, $userId),
                     minReplyCommentLength: $this->policies->getReplyCommentMinLength($entityType),
                     maxReplyCommentLength: $this->policies->getReplyCommentMaxLength($entityType),
                 ),
@@ -111,7 +111,7 @@ class CommentPublicApi
 
         return new CommentListDto(
             entityType: $entityType,
-            entityId: (string) $entityId,
+            entityId: $entityId,
             page: $paginator->currentPage(),
             perPage: $paginator->perPage(),
             total: $paginator->total(),
@@ -119,7 +119,7 @@ class CommentPublicApi
             config: new CommentUiConfigDto(
                 minRootCommentLength: $this->policies->getRootCommentMinLength($entityType),
                 maxRootCommentLength: $this->policies->getRootCommentMaxLength($entityType),
-                canCreateRoot: $this->policies->canCreateRoot($entityType, (int) $entityId, $userId),
+                canCreateRoot: $this->policies->canCreateRoot($entityType, $entityId, $userId),
                 minReplyCommentLength: $this->policies->getReplyCommentMinLength($entityType),
                 maxReplyCommentLength: $this->policies->getReplyCommentMaxLength($entityType),
             ),
