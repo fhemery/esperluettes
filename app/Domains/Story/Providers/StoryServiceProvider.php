@@ -35,6 +35,7 @@ class StoryServiceProvider extends ServiceProvider
 
         // Register policies
         $registry = app(CommentPolicyRegistry::class);
-        $registry->register('chapter', new ChapterCommentPolicy());
+        $policy = app(ChapterCommentPolicy::class);
+        $registry->register('chapter', $policy);
     }
 }

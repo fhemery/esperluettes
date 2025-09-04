@@ -49,3 +49,7 @@ function listComments(string $entityType = 'default', int $entityId = 1, int $pa
     $api = app(CommentPublicApi::class);
     return $api->getFor($entityType, $entityId, $page, $perPage);
 }
+
+function generateCommentText(int $length): string {
+    return str_repeat('a', $length);
+}

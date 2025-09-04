@@ -42,7 +42,7 @@ class ChapterService
 
             if ($published) {
                 $chapter->first_published_at = now();
-    }
+            }
 
             $chapter->save();
 
@@ -172,5 +172,22 @@ class ChapterService
             // Rely on FK cascade to delete related reading_progress rows
             $chapter->delete();
         });
+    }
+
+    /**
+     * Return true when the given user is an author/co-author of the chapter's parent story.
+     * Returns false if the chapter cannot be found.
+     */
+    public function isUserAuthorOfChapter(int $chapterId, int $userId): bool
+    {
+        // Single query: find any story that has the chapter and where the user is an author
+        return Story::query()
+            ->whereHas('chapters', function ($q) use ($chapterId) {
+                $q->whereKey($chapterId);
+            })
+            ->whereHas('authors', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->exists();
     }
 }

@@ -8,6 +8,10 @@ use App\Domains\Comment\Contracts\CommentToCreateDto;
 
 class ChapterCommentPolicy implements CommentPolicy
 {
+    public function __construct(private readonly ChapterService $chapters, private readonly StoryService $stories)
+    {
+    }
+
     public function validateCreate(CommentToCreateDto $dto): void
     {
         return;
@@ -15,7 +19,9 @@ class ChapterCommentPolicy implements CommentPolicy
 
     public function canCreateRoot(int $entityId, int $userId): bool
     {
-        return true;
+        $isAuthor = $this->chapters->isUserAuthorOfChapter($entityId, $userId);
+        // If chapter not found, default to allow (policy should not 404)
+        return $isAuthor ? false : true;
     }
 
     public function canReply(CommentDto $parentComment, int $userId): bool
