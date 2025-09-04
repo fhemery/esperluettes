@@ -94,3 +94,20 @@ it('should show "My stories" tab instead of "Stories" if user is current user', 
     $this->actingAs($user)->get('/profile')
         ->assertSee('profile::show.my-stories');
 });
+
+describe('tab selection', function () {
+    it('should select the "About" tab by default if user is not current user', function () {
+        $user = alice($this);
+        $bob = bob($this);
+
+        $this->actingAs($bob)->get("/profile/alice")
+            ->assertSee("tab: 'about'");
+    });
+
+    it('should select the "Stories" tab by default if user is current user', function () {
+        $user = alice($this);
+
+        $this->actingAs($user)->get('/profile')
+            ->assertSee("tab: 'stories'");
+    });
+});

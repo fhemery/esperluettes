@@ -26,12 +26,12 @@ class ProfileController extends Controller
      */
     public function show(Profile $profile): View
     {
-        $canEdit = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
+        $isOwn = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
 
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
 
-        return view('profile::show', compact('profile', 'canEdit'));
+        return view('profile::show', compact('profile', 'isOwn'));
     }
 
     /**

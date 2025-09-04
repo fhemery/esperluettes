@@ -15,7 +15,7 @@
                     <div class="flex-1">
                         <div class="flex items-center gap-3">
                             <h1 class="text-3xl font-bold text-white">{{ $profile->display_name }}</h1>
-                            @if($canEdit)
+                            @if($isOwn)
                                 <div x-data="{ url: '{{ route('profile.show', $profile) }}', copied: false }"
                                      class="relative">
                                     <button type="button"
@@ -50,7 +50,7 @@
                         @endif
                         <p class="text-blue-100 mt-1">{{ __('profile::show.member_since') }} {{ $profile->created_at->translatedFormat('F Y') }}</p>
 
-                        @if($canEdit)
+                        @if($isOwn)
                             <div class="mt-4">
                                 <a href="{{ route('profile.edit') }}"
                                    class="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors duration-200">
@@ -66,12 +66,13 @@
                 </div>
             </div>
 
+            @php $tab = $isOwn ? "'stories'" : "'about'"; @endphp
             <!-- Profile Content -->
             <div class="px-6 py-8 w-full">
                 <!-- Main Content -->
                 <div class="lg:col-span-2"
                      x-data="{
-                            tab: @json(Auth::check()) ? 'about' : 'stories',
+                            tab: {{ $tab }},
                             storiesLoaded: false,
                             loading: false,
                             async loadStories() {
@@ -109,7 +110,7 @@
                                     @click="tab='stories'; loadStories()"
                                     :class="tab==='stories' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                     class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                                {{ $canEdit ? __('profile::show.my-stories') : __('profile::show.stories') }}
+                                {{ $isOwn ? __('profile::show.my-stories') : __('profile::show.stories') }}
                             </button>
                             <!-- Future: stats, comments, etc. -->
                         </nav>
