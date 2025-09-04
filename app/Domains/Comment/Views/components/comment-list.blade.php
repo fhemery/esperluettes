@@ -121,6 +121,18 @@
           if (!res.ok) { this.hasMore = false; return; }
           const html = await res.text();
           this.$refs.list.insertAdjacentHTML('beforeend', html);
+          // Initialize any reply editors in the newly appended HTML
+          try {
+            if (window.initQuillEditor) {
+              // Find any containers with ids that match our editor pattern
+              const containers = this.$refs.list.querySelectorAll('[id^="reply-editor-"]');
+              containers.forEach((el) => {
+                window.initQuillEditor(el.id);
+              });
+            }
+          } catch (e) {
+            // no-op: editor initialization failures should not block pagination
+          }
           const next = res.headers.get('X-Next-Page');
           if (next) {
             this.page = parseInt(next, 10) - 1; // we increment below

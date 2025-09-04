@@ -59,7 +59,6 @@
             <x-shared::editor
               id="reply-editor-{{ $replyId }}"
               name="body"
-              :nbLines="5"
               class="mt-1 block w-full"
               placeholder="{{ __('comment::comments.form.body.placeholder') }}"
               :min="$config?->minBodyLength"
