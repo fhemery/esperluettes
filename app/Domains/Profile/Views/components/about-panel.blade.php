@@ -12,7 +12,7 @@
 
     @if($profile->hasSocialNetworks())
         <div class="bg-gray-50 rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('profile::about-networks') }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('profile::about.networks') }}</h3>
             <div class="space-y-3">
                 @if($profile->facebook_url)
                     <a href="{{ $profile->facebook_url }}" target="_blank" rel="noopener noreferrer"
