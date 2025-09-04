@@ -8,12 +8,12 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 describe('Chapter comment policy integration (min length = 140)', function () {
-    it('exposes minBodyLength=140 in list config for entityType=chapter', function () {
+    it('exposes minRootCommentLength=140 in list config for entityType=chapter', function () {
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
         $this->actingAs($user);
 
         $list = listComments('chapter', 123);
-        expect($list->config->minBodyLength)->toBe(140);
+        expect($list->config->minRootCommentLength)->toBe(140);
     });
 
     it('rejects creating a chapter root comment shorter than 140 characters', function () {

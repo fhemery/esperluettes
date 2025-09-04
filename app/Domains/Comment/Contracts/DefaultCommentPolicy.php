@@ -29,12 +29,22 @@ class DefaultCommentPolicy implements CommentPolicy
         // Allow by default
     }
 
-    public function getMinBodyLength(): ?int
+    public function getRootCommentMinLength(): ?int
     {
         return null;
     }
 
-    public function getMaxBodyLength(): ?int
+    public function getRootCommentMaxLength(): ?int
+    {
+        return null;
+    }
+
+    public function getReplyCommentMinLength(): ?int
+    {
+        return null;
+    }
+
+    public function getReplyCommentMaxLength(): ?int
     {
         return null;
     }

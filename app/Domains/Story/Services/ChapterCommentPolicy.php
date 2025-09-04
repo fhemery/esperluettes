@@ -51,12 +51,22 @@ class ChapterCommentPolicy implements CommentPolicy
         return;
     }
 
-    public function getMinBodyLength(): ?int
+    public function getRootCommentMinLength(): ?int
     {
         return 140;
     }
 
-    public function getMaxBodyLength(): ?int
+    public function getRootCommentMaxLength(): ?int
+    {
+        return null;
+    }
+
+    public function getReplyCommentMinLength(): ?int
+    {
+        return null;
+    }
+
+    public function getReplyCommentMaxLength(): ?int
     {
         return null;
     }

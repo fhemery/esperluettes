@@ -67,20 +67,37 @@ class CommentPolicyRegistry
     }
 
     /**
-     * Minimum allowed body length for the given entity type. Default: null (no limit)
+     * Minimum allowed root comment length for the given entity type. Default: null (no limit)
      */
-    public function getMinBodyLength(string $entityType): ?int
+    public function getRootCommentMinLength(string $entityType): ?int
     {
-        return $this->getPolicy($entityType)->getMinBodyLength();
+        return $this->getPolicy($entityType)->getRootCommentMinLength();
     }
 
     /**
-     * Maximum allowed body length for the given entity type. Default: null (no limit)
+     * Maximum allowed root comment length for the given entity type. Default: null (no limit)
      */
-    public function getMaxBodyLength(string $entityType): ?int
+    public function getRootCommentMaxLength(string $entityType): ?int
     {
-        return $this->getPolicy($entityType)->getMaxBodyLength();
+        return $this->getPolicy($entityType)->getRootCommentMaxLength();
     }
+
+    /**
+     * Minimum allowed reply comment length for the given entity type. Default: null (no limit)
+     */
+    public function getReplyCommentMinLength(string $entityType): ?int
+    {
+        return $this->getPolicy($entityType)->getReplyCommentMinLength();
+    }
+
+    /**
+     * Maximum allowed reply comment length for the given entity type. Default: null (no limit)
+     */
+    public function getReplyCommentMaxLength(string $entityType): ?int
+    {
+        return $this->getPolicy($entityType)->getReplyCommentMaxLength();
+    }
+
 
     private function getPolicy(string $entityType): CommentPolicy
     {

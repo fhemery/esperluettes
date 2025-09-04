@@ -36,7 +36,7 @@
       method="POST"
       action="{{ route('comments.store') }}"
       class="mt-4 space-y-2"
-      x-data="{ editorValid: {{ $list->config?->minBodyLength ? 'false' : 'true' }} }"
+      x-data="{ editorValid: {{ $list->config?->minRootCommentLength ? 'false' : 'true' }} }"
       @editor-valid.window="if($event.detail.id==='comment-body-editor'){ editorValid = $event.detail.valid }"
     >
       @csrf
@@ -49,8 +49,9 @@
         class="mt-1 block w-full"
         defaultValue="{{ old('body') }}"
         placeholder="{{ __('comment::comments.form.body.placeholder') }}"
-        :min="$list->config?->minBodyLength"
-        :max="$list->config?->maxBodyLength"
+        :min="$list->config?->minRootCommentLength"
+        :max="$list->config?->maxRootCommentLength"
+        isMandatory="true"
       />
       @error('body')
         <div class="text-sm text-red-600">{{ $message }}</div>
@@ -124,10 +125,14 @@
           // Initialize any reply editors in the newly appended HTML
           try {
             if (window.initQuillEditor) {
-              // Find any containers with ids that match our editor pattern
-              const containers = this.$refs.list.querySelectorAll('[id^="reply-editor-"]');
-              containers.forEach((el) => {
-                window.initQuillEditor(el.id);
+              // Defer 2 animation frames to let Alpine bind listeners after DOM insertion
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  const containers = this.$refs.list.querySelectorAll('[id^="reply-editor-"]');
+                  containers.forEach((el) => {
+                    window.initQuillEditor(el.id);
+                  });
+                });
               });
             }
           } catch (e) {

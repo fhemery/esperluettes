@@ -49,9 +49,11 @@ class CommentPublicApi
                 total: $total,
                 items: [],
                 config: new CommentUiConfigDto(
-                    minBodyLength: $this->policies->getMinBodyLength($entityType),
-                    maxBodyLength: $this->policies->getMaxBodyLength($entityType),
+                    minRootCommentLength: $this->policies->getRootCommentMinLength($entityType),
+                    maxRootCommentLength: $this->policies->getRootCommentMaxLength($entityType),
                     canCreateRoot: $this->policies->canCreateRoot($entityType, (int) $entityId, $userId),
+                    minReplyCommentLength: $this->policies->getReplyCommentMinLength($entityType),
+                    maxReplyCommentLength: $this->policies->getReplyCommentMaxLength($entityType),
                 ),
             );
         }
@@ -113,9 +115,11 @@ class CommentPublicApi
             total: $paginator->total(),
             items: $items,
             config: new CommentUiConfigDto(
-                minBodyLength: $this->policies->getMinBodyLength($entityType),
-                maxBodyLength: $this->policies->getMaxBodyLength($entityType),
+                minRootCommentLength: $this->policies->getRootCommentMinLength($entityType),
+                maxRootCommentLength: $this->policies->getRootCommentMaxLength($entityType),
                 canCreateRoot: $this->policies->canCreateRoot($entityType, (int) $entityId, $userId),
+                minReplyCommentLength: $this->policies->getReplyCommentMinLength($entityType),
+                maxReplyCommentLength: $this->policies->getReplyCommentMaxLength($entityType),
             ),
         );
     }
@@ -130,29 +134,27 @@ class CommentPublicApi
         $this->checkAccess();
 
         $user = Auth::user();
-        // If creating a root comment, enforce canCreateRoot policy
+        // Clean and compute plain length once
+        $clean = Purifier::clean($comment->body, 'strict');
+        $plain = is_string($clean) ? trim(strip_tags($clean)) : '';
+        $len = mb_strlen($plain);
+
         if ($comment->parentCommentId === null) {
+            // Root comment path
             $allowed = $this->policies->canCreateRoot($comment->entityType, (int) $comment->entityId, (int) $user->id);
             if (!$allowed) {
                 throw ValidationException::withMessages(['body' => ['Comment not allowed']]);
             }
-        }
-        // Enforce minimum/maximum body length after purification and HTML stripping
-        $clean = Purifier::clean($comment->body, 'strict');
-        $plain = is_string($clean) ? trim(strip_tags($clean)) : '';
-        $len = mb_strlen($plain);
-        $min = $this->policies->getMinBodyLength($comment->entityType);
-        if ($min !== null && $len < $min) {
-            throw ValidationException::withMessages(['body' => ['Comment too short']]);
-        }
-        $max = $this->policies->getMaxBodyLength($comment->entityType);
-        if ($max !== null && $len > $max) {
-            throw ValidationException::withMessages(['body' => ['Comment too long']]);
-        }
-        // Apply domain-specific posting policies if any
-        $this->policies->validateCreate($comment);
-        // Validate parent belongs to the same target if provided
-        if ($comment->parentCommentId !== null) {
+            $min = $this->policies->getRootCommentMinLength($comment->entityType);
+            if ($min !== null && $len < $min) {
+                throw ValidationException::withMessages(['body' => ['Comment too short']]);
+            }
+            $max = $this->policies->getRootCommentMaxLength($comment->entityType);
+            if ($max !== null && $len > $max) {
+                throw ValidationException::withMessages(['body' => ['Comment too long']]);
+            }
+        } else {
+            // Reply path: validate parent first
             $parent = $this->service->getComment($comment->parentCommentId);
             if (
                 (string) $parent->commentable_type !== (string) $comment->entityType
@@ -164,7 +166,20 @@ class CommentPublicApi
             if ($parent->parent_comment_id !== null) {
                 throw ValidationException::withMessages(['parent_comment_id' => ['Parent comment must be a root comment']]);
             }
+            // Apply reply-specific length limits
+            $min = $this->policies->getReplyCommentMinLength($comment->entityType);
+            if ($min !== null && $len < $min) {
+                throw ValidationException::withMessages(['body' => ['Comment too short']]);
+            }
+            $max = $this->policies->getReplyCommentMaxLength($comment->entityType);
+            if ($max !== null && $len > $max) {
+                throw ValidationException::withMessages(['body' => ['Comment too long']]);
+            }
         }
+
+        // Apply domain-specific posting policies if any
+        $this->policies->validateCreate($comment);
+
         return $this->service->postComment($comment->entityType, $comment->entityId, $user->id, $comment->body, $comment->parentCommentId)->id;
     }
 

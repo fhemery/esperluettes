@@ -1,6 +1,6 @@
-@props(['name', 'id', 'defaultValue' => '', 'max' => null, 'min' => null, 'nbLines' => 5, 'placeholder' => ''])
+@props(['name', 'id', 'defaultValue' => '', 'max' => null, 'min' => null, 'nbLines' => 5, 'placeholder' => '', 'isMandatory' => false])
 <div {{ $attributes->merge(['class' => '']) }}>
-    <div class="mb-2" id="{{ $id }}" data-placeholder="{{ e($placeholder) }}" data-nb-lines="{{ $nbLines }}" @if($min) data-min="{{ (int) $min }}" @endif @if($max) data-max="{{ (int) $max }}" @endif></div>
+    <div class="mb-2" id="{{ $id }}" data-placeholder="{{ e($placeholder) }}" data-nb-lines="{{ $nbLines }}" data-is-mandatory="{{ $isMandatory ? 'true' : 'false' }}" @if($min) data-min="{{ (int) $min }}" @endif @if($max) data-max="{{ (int) $max }}" @endif></div>
     <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $id }}" value="{!! $defaultValue !!}" />
     <div class="mt-2 text-xs text-right " id="quill-counter-wrap-{{ $id }}">
         <span id="quill-counter-{{ $id }}">0</span>
@@ -11,7 +11,6 @@
         @if($min)
             <span>({{ __('shared::editor.min-characters', ['min' => $min]) }})</span>
         @endif
-        
     </div>
     @push('scripts')
     <script>

@@ -50,11 +50,11 @@ describe('Policies', function() {
             public function validateCreate(CommentToCreateDto $dto): void
             {
                 $len = mb_strlen(trim(strip_tags($dto->body)));
-                if ($len > $this->getMaxBodyLength()) {
+                if ($len > $this->getRootCommentMaxLength()) {
                     throw ValidationException::withMessages(['body' => ['Comment too long']]);
                 }
             }
-            public function getMaxBodyLength(): ?int { return 140; }
+            public function getRootCommentMaxLength(): ?int { return 140; }
         });
 
         $user = alice($this);
@@ -70,14 +70,14 @@ describe('Policies', function() {
         expect($id)->toBeGreaterThan(0);
     });
 
-    it('throws an error if min body length (once HTML stripped) is not matching the policy minimum', function() {
+    it('throws an error if min body length (once HTML stripped) is not matching the policy minimum for root comments', function() {
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register('default', new class extends DefaultCommentPolicy {
-            public function getMinBodyLength(): ?int { return 10; }
+            public function getRootCommentMinLength(): ?int { return 10; }
         });
 
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         expect(function() {
@@ -85,18 +85,50 @@ describe('Policies', function() {
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too short']]));
     });
 
-    it('throws an error if max body length (once HTML stripped) is not matching the policy maximum', function() {
+    it('throws an error if max body length (once HTML stripped) is not matching the policy maximum for root comments', function() {
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register('default', new class extends DefaultCommentPolicy {
-            public function getMaxBodyLength(): ?int { return 10; }
+            public function getRootCommentMaxLength(): ?int { return 10; }
         });
 
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         expect(function() {
             createComment('default', 1, 'Hello world', null);
+        })->toThrow(ValidationException::withMessages(['body' => ['Comment too long']]));
+    });
+
+    it('throws an error if min body length (once HTML stripped) is not matching the policy minimum for replies', function() {
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register('default', new class extends DefaultCommentPolicy {
+            public function getReplyCommentMinLength(): ?int { return 10; }
+        });
+
+        $user = alice($this);
+        $this->actingAs($user);
+        createComment('default', 1, 'Hello', null);
+
+        expect(function() {
+            createComment('default', 1, '<p>Hello</p><p></p>', 1);
+        })->toThrow(ValidationException::withMessages(['body' => ['Comment too short']]));
+    });
+
+    it('throws an error if max body length (once HTML stripped) is not matching the policy maximum for replies', function() {
+        /** @var CommentPolicyRegistry $registry */
+        $registry = app(CommentPolicyRegistry::class);
+        $registry->register('default', new class extends DefaultCommentPolicy {
+            public function getReplyCommentMaxLength(): ?int { return 10; }
+        });
+
+        $user = alice($this);
+        $this->actingAs($user);
+        createComment('default', 1, 'Hello', null);
+
+        expect(function() {
+            createComment('default', 1, '<p>' . generateCommentText(11) . '</p>', 1);
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too long']]));
     });
 
@@ -107,7 +139,7 @@ describe('Policies', function() {
             public function canCreateRoot(int $entityId, int $userId): bool { return false; }
         });
 
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         expect(function() {
@@ -118,14 +150,14 @@ describe('Policies', function() {
 
 describe('Root content', function() {
     it('should allow to create a root comment', function() {
-        $user = alice($this, roles:[Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
         $commentId = createComment('default', 1, 'Hello', null);
         expect($commentId)->toBeGreaterThan(0);
     });
 
     it('should sanitize the content of the comment', function() {
-        $user = alice($this, roles:[Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
         $commentId = createComment('default', 1, '<script>alert("xss");</script>Hello', null);
         $comment = getComment($commentId);
@@ -137,7 +169,7 @@ describe('Child comments', function () {
 
     it('should not allow to create a comment with non matching entity type', function () {
         // Auth as confirmed user
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         $commentId = createComment('default', 123, 'Hello', null);
@@ -149,7 +181,7 @@ describe('Child comments', function () {
 
     it('should not allow to create a comment with non matching entity id', function () {
         // Auth as confirmed user
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         $commentId = createComment('default', 123, 'Hello', null);
@@ -161,7 +193,7 @@ describe('Child comments', function () {
 
     it('should allow to create a comment with a parent comment', function () {
         // Auth as confirmed user
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         $commentId = createComment('default', 123, 'Hello', null);
@@ -177,7 +209,7 @@ describe('Child comments', function () {
 
     it('should not count the comment replies in the pagination', function () {
         // Auth as confirmed user
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         $commentIds = createSeveralComments(5, 'default', 123, 'Hello', null);
@@ -192,7 +224,7 @@ describe('Child comments', function () {
 
     it('should not allow to create a comment with a parent comment that is not a root comment', function () {
         // Auth as confirmed user
-        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $user = alice($this);
         $this->actingAs($user);
 
         $commentId = createComment('default', 123, 'Hello', null);

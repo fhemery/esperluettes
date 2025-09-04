@@ -42,6 +42,7 @@
       </div>
 
       <!-- Reply form -->
+      <!-- Comments are mandatory, so editor is never valid at start-->
       @if($comment->canReply && (((!$isChild && !$hasChildren) || ($isLastChild??false))))
       @php($replyId = $isChild ? $parentCommentId : $comment->id)
         <div class="mt-3" x-show="activeReplyId === {{ $replyId }}">
@@ -49,7 +50,7 @@
             method="POST"
             action="{{ route('comments.store') }}"
             class="space-y-2"
-            x-data="{ editorValid: {{ ($config?->minBodyLength) ? 'false' : 'true' }} }"
+            x-data="{ editorValid: false }"
             @editor-valid.window="if($event.detail.id==='reply-editor-{{ $replyId }}'){ editorValid = $event.detail.valid }"
           >
             @csrf
@@ -61,8 +62,9 @@
               name="body"
               class="mt-1 block w-full"
               placeholder="{{ __('comment::comments.form.body.placeholder') }}"
-              :min="$config?->minBodyLength"
-              :max="$config?->maxBodyLength"
+              :min="$config?->minReplyCommentLength"
+              :max="$config?->maxReplyCommentLength"
+              isMandatory="true"
             />
             @error('body')
               <div class="text-sm text-red-600">{{ $message }}</div>

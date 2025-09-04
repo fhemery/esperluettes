@@ -72,7 +72,7 @@ describe('When policies are in place', function(){
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register($entityType, new class extends DefaultCommentPolicy {
-            public function getMinBodyLength(): ?int
+            public function getRootCommentMinLength(): ?int
             {
                 return 10;
             }
@@ -94,7 +94,7 @@ describe('When policies are in place', function(){
         /** @var CommentPolicyRegistry $registry */
         $registry = app(CommentPolicyRegistry::class);
         $registry->register($entityType, new class extends DefaultCommentPolicy {
-            public function getMaxBodyLength(): ?int
+            public function getRootCommentMaxLength(): ?int
             {
                 return 10;
             }

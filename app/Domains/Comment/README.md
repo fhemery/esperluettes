@@ -22,8 +22,8 @@ This module provides comment creation/listing services and a pluggable policy me
     - `canReply(CommentDto $parentComment, int $userId): bool`
     - `canEditOwn(CommentDto $comment, int $userId): bool`
     - `validateEdit(CommentDto $comment, int $userId, string $newBody): void`
-    - `getMinBodyLength(): ?int`
-    - `getMaxBodyLength(): ?int` (null means no limit)
+    - `getRootCommentMinLength(): ?int`
+    - `getRootCommentMaxLength(): ?int` (null means no limit)
 - DTO: `App\Domains\Comment\Contracts\CommentToCreateDto`
   - Fields: `entityType`, `entityId`, `body`, `parentCommentId`.
 - Registry: `App\\Domains\\Comment\\Services\\CommentPolicyRegistry`
@@ -71,8 +71,8 @@ class YourDomainServiceProvider extends ServiceProvider
             public function canReply(\App\\Domains\\Comment\\Contracts\\CommentDto $parentComment, int $userId): bool { return true; }
             public function canEditOwn(\App\\Domains\\Comment\\Contracts\\CommentDto $comment, int $userId): bool { return true; }
             public function validateEdit(\App\\Domains\\Comment\\Contracts\\CommentDto $comment, int $userId, string $newBody): void {}
-            public function getMinBodyLength(): ?int { return 1; }
-            public function getMaxBodyLength(): ?int { return 140; }
+            public function getRootCommentMinLength(): ?int { return 1; }
+            public function getRootCommentMaxLength(): ?int { return 140; }
         });
     }
 }

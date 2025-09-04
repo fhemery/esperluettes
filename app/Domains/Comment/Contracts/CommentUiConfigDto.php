@@ -5,18 +5,22 @@ namespace App\Domains\Comment\Contracts;
 class CommentUiConfigDto
 {
     public function __construct(
-        public readonly ?int $minBodyLength,
-        public readonly ?int $maxBodyLength,
-        public readonly bool $canCreateRoot,
+        public readonly ?int $minRootCommentLength = null,
+        public readonly ?int $maxRootCommentLength = null,
+        public readonly bool $canCreateRoot = true,
+        public readonly ?int $minReplyCommentLength = null,
+        public readonly ?int $maxReplyCommentLength = null,
     ) {
     }
 
     public function toArray(): array
     {
         return [
-            'min_body_length' => $this->minBodyLength,
-            'max_body_length' => $this->maxBodyLength,
+            'min_root_comment_length' => $this->minRootCommentLength,
+            'max_root_comment_length' => $this->maxRootCommentLength,
             'can_create_root' => $this->canCreateRoot,
+            'min_reply_comment_length' => $this->minReplyCommentLength,
+            'max_reply_comment_length' => $this->maxReplyCommentLength,
         ];
     }
 }

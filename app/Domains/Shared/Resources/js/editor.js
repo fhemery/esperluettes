@@ -71,18 +71,21 @@ export function initQuillEditor(id) {
       }
       const overMax = max !== null && count > max;
       const underMin = min !== null && count < min;
-      const valid = !overMax && !underMin;
+      const isMandatory = container.getAttribute('data-is-mandatory') === 'true';
+      let valid = !overMax && !underMin;
+      if (isMandatory) {
+        valid = valid && count > 0;
+      }
       if (counterWrap) {
         counterWrap.classList.toggle('text-red-600', !valid);
         counterWrap.classList.toggle('text-gray-500', valid);
       }
       // Emit a validity event that bubbles up
-      container.dispatchEvent(
-        new CustomEvent('editor-valid', {
-          detail: { id, valid, count, min, max },
-          bubbles: true,
-        })
-      );
+      const evt = new CustomEvent('editor-valid', {
+        detail: { id, valid, count, min, max, isMandatory },
+        bubbles: true,
+      });
+      container.dispatchEvent(evt);
     };
 
     editor.on('text-change', function () {
@@ -98,6 +101,8 @@ export function initQuillEditor(id) {
 
     // Initial count and validity emit
     updateCount();
+    // Fire once more on next tick to catch late-bound listeners (e.g., Alpine after DOM insertion)
+    setTimeout(updateCount, 0);
   };
 
   if (document.readyState === 'loading') {

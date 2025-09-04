@@ -25,7 +25,7 @@ class CommentListDto
             perPage: $perPage,
             total: 0,
             items: [],
-            config: new CommentUiConfigDto(minBodyLength: null, maxBodyLength: null, canCreateRoot: true),
+            config: new CommentUiConfigDto(),
         );
     }
 

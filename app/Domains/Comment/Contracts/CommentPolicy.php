@@ -35,14 +35,26 @@ interface CommentPolicy
     public function validateEdit(CommentDto $comment, int $userId, string $newBody): void;
 
     /**
-     * Minimum allowed body length for comments for this entity type.
+     * Minimum allowed body length for root comments for this entity type.
      * Default implementation should return null (no limit).
      */
-    public function getMinBodyLength(): ?int;
+    public function getRootCommentMinLength(): ?int;
 
     /**
-     * Maximum allowed body length for comments for this entity type.
+     * Maximum allowed body length for root comments for this entity type.
      * Default implementation should return null (no limit).
      */
-    public function getMaxBodyLength(): ?int;
+    public function getRootCommentMaxLength(): ?int;
+
+    /**
+     * Minimum allowed body length for reply comments for this entity type.
+     * Default implementation should return null (no limit).
+     */
+    public function getReplyCommentMinLength(): ?int;
+
+    /**
+     * Maximum allowed body length for reply comments for this entity type.
+     * Default implementation should return null (no limit).
+     */
+    public function getReplyCommentMaxLength(): ?int;
 }
