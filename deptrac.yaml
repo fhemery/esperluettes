@@ -67,6 +67,33 @@ deptrac:
         - type: directory
           value: 'app/Domains/Auth/Tests/'
 
+    # Comment Domain
+    - name: CommentPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Comment/PublicApi/'
+        - type: directory
+          value: 'app/Domains/Comment/Contracts/'
+
+    - name: CommentPrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/Comment/PublicApi/
+            - type: directory
+              value: app/Domains/Comment/Contracts/
+            - type: directory
+              value: app/Domains/Comment/Tests/
+          must:
+            - type: directory
+              value: app/Domains/Comment/
+
+    - name: CommentTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Comment/Tests/'
+
     # Dashboard Domain
     - name: DashboardPrivate
       collectors:
@@ -204,6 +231,11 @@ deptrac:
       - SharedContracts
       - AuthPrivate
 
+    CommentPublic: 
+      - SharedContracts
+      - AuthPublic
+      - CommentPrivate
+
     NewsPublic:
       - SharedContracts
       - NewsPrivate
@@ -218,6 +250,7 @@ deptrac:
       - StaticPagePrivate
 
     StoryPublic:
+      - CommentPublic
       - SharedContracts
       - StoryPrivate
       - StoryRef
@@ -247,6 +280,7 @@ deptrac:
     StoryPrivate:
       - SharedContracts
       - AuthPublic
+      - CommentPublic
       - ProfilePublic
       - StoryRef
 
@@ -270,6 +304,11 @@ deptrac:
       - DashboardPrivate
       - HomePrivate
 
+    CommentPrivate:
+      - SharedContracts
+      - AuthPublic
+      - CommentPublic
+
     DashboardPrivate:
       - SharedContracts
       - AuthPublic
@@ -286,6 +325,11 @@ deptrac:
       - AuthPrivate
       - AuthPublic
       - AuthEvents
+
+    CommentTests:
+      - TestHelpers
+      - CommentPrivate
+      - CommentPublic
 
     NewsTests:
       - SharedContracts
