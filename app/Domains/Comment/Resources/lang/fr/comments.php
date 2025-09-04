@@ -22,6 +22,8 @@ return [
         'reply' => 'Répondre',
         'edit' => 'Éditer',
         'report' => 'Signaler',
+        'cancel' => 'Annuler',
+        'save' => 'Sauvegarder',
     ],
 
     'posted' => 'Commentaire publié',

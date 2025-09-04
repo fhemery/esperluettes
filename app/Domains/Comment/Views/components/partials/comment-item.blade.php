@@ -29,8 +29,41 @@
         </div>
       </div>
 
-      <!-- Body -->
-      <div class="comment-body mt-3 text-sm text-gray-700">{!! $comment->body !!}</div>
+      <!-- Body or Edit form -->
+      <div class="comment-body mt-3 text-sm text-gray-700" x-show="activeEditId !== {{ $comment->id }}">{!! $comment->body !!}</div>
+      @if($comment->canEditOwn && Auth::check() && Auth::id() === $comment->authorId)
+        <div class="mt-3" x-show="activeEditId === {{ $comment->id }}">
+          <form
+            method="POST"
+            action="{{ route('comments.update', ['commentId' => $comment->id]) }}"
+            class="space-y-2"
+            x-data="{ editorValid: false }"
+            @editor-valid.window="if($event.detail.id==='edit-editor-{{ $comment->id }}'){ editorValid = $event.detail.valid }"
+          >
+            @csrf
+            @method('PATCH')
+            @php($isChild = $isChild ?? false)
+            <x-shared::editor
+              id="edit-editor-{{ $comment->id }}"
+              name="body"
+              class="mt-1 block w-full"
+              :nbLines="$isChild ? 5 : 10"
+              defaultValue="{{ $comment->body }}"
+              placeholder="{{ __('comment::comments.form.body.placeholder') }}"
+              :min="$isChild ? ($config?->minReplyCommentLength) : ($config?->minRootCommentLength)"
+              :max="$isChild ? ($config?->maxReplyCommentLength) : ($config?->maxRootCommentLength)"
+              isMandatory="true"
+            />
+            @error('body')
+              <div class="text-sm text-red-600">{{ $message }}</div>
+            @enderror
+            <div class="mt-2 flex gap-2">
+              <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded disabled:opacity-50" :disabled="!editorValid">{{ __('comment::comments.actions.save') }}</button>
+              <button type="button" class="px-3 py-1.5 bg-gray-200 text-gray-800 rounded" data-action="cancel-edit" data-comment-id="{{ $comment->id }}">{{ __('comment::comments.actions.cancel') }}</button>
+            </div>
+          </form>
+        </div>
+      @endif
 
       <!-- Actions -->
       <div class="mt-3 flex gap-4 text-xs text-gray-500">
@@ -45,7 +78,7 @@
       <!-- Comments are mandatory, so editor is never valid at start-->
       @if($comment->canReply && (((!$isChild && !$hasChildren) || ($isLastChild??false))))
       @php($replyId = $isChild ? $parentCommentId : $comment->id)
-        <div class="mt-3" x-show="activeReplyId === {{ $replyId }}">
+        <div class="mt-3" x-show="activeReplyId === {{ $replyId }} && activeEditId === null">
           <form
             method="POST"
             action="{{ route('comments.store') }}"

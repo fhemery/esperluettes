@@ -88,17 +88,40 @@
       hasMore: !!opts.hasMore,
       loading: false,
       activeReplyId: null,
+      activeEditId: null,
       init(){
         // Delegated events for reply UI (demo only)
         this.$el.addEventListener('click', (e) => {
           const replyBtn = e.target.closest('[data-action="reply"]');
           const cancelBtn = e.target.closest('[data-action="cancel-reply"]');
+          const editBtn = e.target.closest('[data-action="edit"]');
+          const cancelEditBtn = e.target.closest('[data-action="cancel-edit"]');
           if (replyBtn) {
             const id = parseInt(replyBtn.getAttribute('data-comment-id'), 10);
             this.activeReplyId = (this.activeReplyId === id) ? null : id;
+            // Close edit when opening a reply
+            if (this.activeReplyId !== null) this.activeEditId = null;
           }
           if (cancelBtn) {
             this.activeReplyId = null;
+          }
+          if (editBtn) {
+            const id = parseInt(editBtn.getAttribute('data-comment-id'), 10);
+            this.activeEditId = (this.activeEditId === id) ? null : id;
+            // Close reply when opening edit
+            if (this.activeEditId !== null) this.activeReplyId = null;
+            // Try initializing the edit editor after it becomes visible
+            const editorId = `edit-editor-${id}`;
+            try {
+              if (this.activeEditId && window.initQuillEditor) {
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => { window.initQuillEditor(editorId); });
+                });
+              }
+            } catch (e) { /* no-op */ }
+          }
+          if (cancelEditBtn) {
+            this.activeEditId = null;
           }
         });
 
