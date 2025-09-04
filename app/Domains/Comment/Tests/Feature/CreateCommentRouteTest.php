@@ -19,13 +19,13 @@ describe('POST /comments route', function () {
             ->toContain('login');
     });
 
-    it('allows confirmed users to create a comment and redirects back with flash', function () {
+    it('allows confirmed users to create a comment and redirects back to comments with flash', function () {
         // Auth as confirmed user
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
         $this->actingAs($user);
 
         // Use a fixed intended URL to simulate back()
-        $from = '/default/123#comment-list';
+        $from = '/default/123?param1=value1#anotherAnchor';
         $this->from($from);
 
         $payload = [
@@ -37,7 +37,7 @@ describe('POST /comments route', function () {
         $response = $this->post('/comments', $payload);
 
         // Assert redirect back and flash
-        $response->assertRedirect($from);
+        $response->assertRedirect('./default/123?param1=value1#comments');
         $response->assertSessionHas('status', __('comment::comments.posted'));
     });
   

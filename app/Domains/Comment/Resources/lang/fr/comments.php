@@ -9,6 +9,7 @@ return [
     ],
 
     'list' => [
+        'title' => 'Commentaires',
         'empty' => 'Aucun commentaire pour le moment.',
     ],
 

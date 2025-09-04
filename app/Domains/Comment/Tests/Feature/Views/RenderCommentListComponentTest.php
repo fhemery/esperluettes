@@ -11,13 +11,15 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 describe('Access', function () {
-    it('should display an alert if user is not logged', function () {
+    it('should display an alert if user is not logged, with a login button redirecting directly to comment area', function () {
         $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
             'id' => 123,
         ]);
 
         expect($html)->toContain(__('comment::comments.errors.members_only'));
         expect($html)->toContain(__('comment::comments.actions.login'));
+        // Regex: ensure link contains login-intended and encoded #comments anchor
+        expect($html)->toMatch('/login-intended\?redirect=[^"\s>]*%23comments/');
         expect($html)->not()->toContain(__('comment::comments.list.empty'));
         expect($html)->not()->toContain('<form');
     });
