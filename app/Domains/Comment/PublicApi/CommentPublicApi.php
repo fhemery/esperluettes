@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Domains\Comment\PublicApi;
 
@@ -8,6 +9,7 @@ use App\Domains\Comment\Contracts\CommentUiConfigDto;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Services\CommentService;
 use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
+use App\Domains\Comment\Support\CommentBodySanitizer;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\ProfileDto;
 use App\Domains\Auth\PublicApi\Roles;
@@ -15,7 +17,6 @@ use App\Domains\Auth\PublicApi\AuthPublicApi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
-use Mews\Purifier\Facades\Purifier;
 
 class CommentPublicApi
 {
@@ -24,6 +25,7 @@ class CommentPublicApi
         private ProfilePublicApi $profiles,
         private AuthPublicApi $authApi,
         private CommentPolicyRegistry $policies,
+        private readonly CommentBodySanitizer $sanitizer,
     ) {}
 
     public function checkAccess()
@@ -134,10 +136,8 @@ class CommentPublicApi
         $this->checkAccess();
 
         $user = Auth::user();
-        // Clean and compute plain length once
-        $clean = Purifier::clean($comment->body, 'strict');
-        $plain = is_string($clean) ? trim(strip_tags($clean)) : '';
-        $len = mb_strlen($plain);
+        // Compute plain length once using sanitizer
+        $len = $this->sanitizer->plainTextLength($comment->body);
 
         if ($comment->parentCommentId === null) {
             // Root comment path
@@ -230,9 +230,7 @@ class CommentPublicApi
         }
 
         // Enforce min/max policy by type (root vs reply) on plain text length of the sanitized body
-        $clean = Purifier::clean($newBody, 'strict');
-        $plain = is_string($clean) ? trim(strip_tags($clean)) : '';
-        $len = mb_strlen($plain);
+        $len = $this->sanitizer->plainTextLength($newBody);
         $isRoot = $model->parent_comment_id === null;
         if ($isRoot) {
             $min = $this->policies->getRootCommentMinLength($model->commentable_type);

@@ -28,4 +28,6 @@ return [
 
     'posted' => 'Commentaire publié',
     'posted_at' => 'Posté le',
+    'updated' => 'Commentaire modifié',
+    'updated_at' => 'Modifié le',
 ];

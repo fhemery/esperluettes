@@ -63,7 +63,7 @@ comments:
 - commentable_type (string, indexed)
 - commentable_id (unsigned bigint, indexed)
 - parent_comment_id (unsigned bigint, nullable, indexed)      -- null for root; non-null for one-level reply
-- body (longtext)                                      -- sanitized HTML; also store a plain-text cache for search/limits if needed
+- body (text/longtext; prefer longtext)                -- sanitized HTML; also store a plain-text cache for search/limits if needed
 - edited_at (timestamp, nullable)
 - is_active (boolean) default true                     -- when false, hide the comment; when a root is inactive, hide its children
 - is_answered (boolean) default false                  -- used by Story: for root comments, true when any author/co-author replied; updated by service/event
@@ -86,35 +86,34 @@ Notes:
 app/Domains/Comment/
 ├── Http/
 │   └── Controllers/
-│       └── CommentController.php     # JSON endpoints for fetch/create/update/delete
+│       ├── CommentController.php          # POST/PATCH form endpoints
+│       └── CommentFragmentController.php  # GET /comments/fragments → HTML (Blade) items
 ├── Models/
-│   └── Comment.php                   # use SoftDeletes; relationships to user and morph target
+│   └── Comment.php                        # use SoftDeletes; relationships to user and morph target
 ├── Policies/
-│   └── CommentPolicy.php             # create/update/delete/restore rules
+│   └── CommentPolicy.php                  # create/update/delete/restore rules
+├── PublicApi/
+│   └── CommentPublicApi.php               # domain façade: authorization + orchestration
 ├── Services/
-│   └── CommentService.php            # core business logic and sanitization
+│   └── CommentService.php                 # core business logic and sanitization
 ├── Requests/
-│   └── CommentRequest.php            # validation and body sanitization rules
-├── Resources/
-│   ├── lang/
-│   └── views/
-│       └── components/
-│           ├── provider.blade.php    # headless provider: Alpine store, data loading, actions
-│           ├── list.blade.php        # renders threads using parent provider state (no own store)
-│           └── editor.blade.php      # create/edit form using parent provider state
+│   ├── StoreCommentRequest.php            # form validation for create
+│   └── UpdateCommentRequest.php           # form validation for edit
+├── Views/
+│   ├── components/
+│   │   ├── comment-list.blade.php         # mount + Alpine + lazy load (fetches HTML fragment)
+│   │   └── partials/comment-item.blade.php
+│   └── fragments/items.blade.php          # server-rendered list items
 └── Database/
     └── Migrations/
 ```
 
-### Frontend Composition (Headless Provider + Primitives)
-- The Comment domain ships only generic UI primitives; it does not render domain-specific tabs (e.g., Annotations).
-- `provider.blade.php` wraps the comments area and exposes an Alpine store, e.g. `commentsApp({ targetType, targetId })`.
-  - Responsibilities: lazy fetch, pagination, create/reply/edit, anchors, permission prompts.
-- `list.blade.php` renders current threads from the provider (newest roots DESC, replies ASC).
-- `editor.blade.php` renders the Quill editor and posts through the provider.
-- __Extension points__ (non-breaking):
-  - Per-item slots in `list.blade.php`, e.g., `meta` to inject badges like “Annotations (n)”.
-  - The provider renders no extra tabs; domains compose around it.
+### Frontend Composition (Blade fragments)
+- The Comment domain provides a server-rendered Blade component `comment::components.comment-list` that mounts a comments section with Alpine.js.
+- Lazy loading is implemented by fetching an HTML fragment from `GET /comments/fragments` and appending it to the list; no client-side JSON rendering is used.
+- Items are rendered via `comment::components.partials.comment-item` and reused by the fragment view `comment::fragments.items` to avoid divergence.
+- The component supports anchors (`#comments`, `#comment-<id>`), pagination, and inline forms for create/edit.
+- Extension remains compositional: domains can add surrounding tabs or badges, but the Comment domain ships no domain-specific tabs.
 
 ### Annotations Integration (Story-owned, V2)
 - Comment core remains annotations-agnostic. No tabs or panels are shipped by the Comment domain.
@@ -129,38 +128,25 @@ app/Domains/Comment/
 
 
 ### URL Structure
-- Fetch comments (lazy): JSON endpoint under the target context.
-  - Chapters: `GET /stories/{storySlug}/chapters/{chapterSlug}/comments` → paginated, includes threads with replies.
-  - News: `GET /news/{newsSlug}/comments`.
-- Create comment:
-  - Chapters: `POST /stories/{storySlug}/chapters/{chapterSlug}/comments` (root or reply via `parent_id`).
-  - News: `POST /news/{newsSlug}/comments`.
-- Update comment: `PUT /comments/{id}` (author only).
-- Deactivate comment: `PUT /comments/{id}/deactivate` (admin/moderation; Phase 2+).
-- Delete comment (soft): `DELETE /comments/{id}` (admin-only; Phase 2+).
+- Fetch comments (lazy): HTML fragment endpoint
+  - `GET /comments/fragments?entity_type={type}&entity_id={id}&page={n}&per_page={m}`
+- Create comment: `POST /comments` (root or reply via `parent_comment_id`)
+- Update comment: `PATCH /comments/{id}` (author only)
+- Deactivate and delete are reserved for later phases.
 
 All mutating routes are CSRF-protected and governed by policies. Controllers never access DB directly; use `CommentService`.
 
 ### Rendering & Lazy Loading
 - The comments section places a lightweight mount element on the page (`#comments`).
-- An IntersectionObserver triggers a fetch to the JSON endpoint when the section becomes visible (or immediately if URL has `#comments` or `#comment-<id>`).
-- Server returns:
-  - Root comments with metadata and nested replies (one level only).
-  - Pagination of root threads; each root includes all its replies (ASC).
-  - Inactive comments (`is_active = false`) are excluded in Phase 1.
-  - If the viewer lacks permission to read comments, the server responds 401/403 and the UI shows a permission/login message (no comments data shown).
+- An IntersectionObserver triggers a fetch to the HTML fragment endpoint when the section becomes visible (or immediately if URL has `#comments` or `#comment-<id>`).
+- The fragment renders a list of items using the same Blade partials as the component to keep rendering paths identical.
+- Pagination of root threads; each root includes all its replies (ASC).
+- Inactive comments (`is_active = false`) are excluded in Phase 1.
+- If the viewer lacks permission to read comments, the server responds 401/403 and the UI shows a permission/login message (no comments HTML is emitted).
 
-#### SSR Preload for Tests (showComments)
-- To enable Feature tests without a browser runner, we support an opt-in server-side render path:
-  - When `?showComments=1` and the user is authorized to read comments, the owning page controller fetches the first page via `CommentService::listForTarget($target, page: 1)` and passes it to the view as `$preloadedComments`.
-  - The `comment::provider` detects preloaded data (e.g., a `preloaded` flag) and skips the initial JS fetch. `comment::list` renders the first page server-side.
-  - If unauthorized, we still render the usual permission/login prompt; no comment HTML is emitted.
-  - Only the first page is preloaded; normal lazy-load resumes for subsequent pages.
-- Defaults remain unchanged: if `showComments` is absent/false, we use IntersectionObserver and fetch via JSON as usual.
-- Implementation notes (non-breaking):
-  - Reuse the same `comment::list` partial for SSR to avoid divergence with the JS-rendered list.
-  - Prevent double-rendering by hydrating the Alpine store from the preloaded dataset or by marking the SSR list container (e.g., `data-testid="comments-ssr"`).
-  - Enforce the exact same policies/adapters on the SSR path as on the JSON endpoints.
+#### Testing without JS (Fragments and optional SSR)
+- Feature tests can hit `GET /comments/fragments` directly and assert on returned HTML (order, content, anchors, pagination hints via `X-Next-Page`).
+- Optionally, a page can SSR the first page when `?showComments=1` to make non-JS tests assert the comments in-page; avoid double-rendering by marking preloaded content or hydrating Alpine state from it.
 
 ### Sorting & Pagination
 - Root threads: order by `created_at DESC`.
@@ -176,23 +162,19 @@ All mutating routes are CSRF-protected and governed by policies. Controllers nev
 
 ## Testing Strategy
 
-- **Feature (API) tests — primary**
-  - Hit JSON endpoints in `CommentController` backed by `CommentService`.
-  - Assert permissions (401/403/404/200), sorting, pagination, one-level replies, edit rules, sanitization (no links), and `is_answered` events.
+- **Feature tests — fragments + forms (primary)**
+  - Call `GET /comments/fragments` and assert HTML contents, order, anchors, and pagination (via `X-Next-Page`).
+  - Submit `POST /comments` and `PATCH /comments/{id}` with CSRF; assert redirects, flash messages, and that updated content appears in subsequent fragment fetches.
+  - Assert permissions (401/403/404/200), one-level replies, edit rules, sanitization (no links), and `is_answered` events (when implemented).
 
-- **Feature (Page) tests — SSR on demand (no JS)**
-  - Request pages with `?showComments=1` to SSR the first page of comments when authorized.
-  - Assert HTML contains expected comment author/body snippets and order; assert permission prompt when unauthorized.
-  - Combine with `focusCommentId` in the list endpoint to verify anchors by ensuring the targeted root appears in the preloaded HTML.
+- **Feature (Page) tests — optional SSR path (no JS)**
+  - Request pages with `?showComments=1` to SSR the first page of comments when authorized and assert HTML inline; otherwise, assert permission prompt.
 
 - **Unit tests — policies/adapters**
   - Validate per-domain rules via `CommentTargetPolicyContract` adapters (read/post root/reply, forbid author root, authorship resolution).
 
-- **Serialization/snapshots (optional)**
-  - Snapshot a curated JSON payload (with volatile fields stripped) for the list endpoint to detect regressions.
-
 - **Out of scope for now**
-  - No Dusk/browser tests. Lazy-load remains exercised indirectly by API tests; page HTML assertions rely on `showComments` SSR.
+  - No Dusk/browser tests. Lazy-load remains exercised via fragment requests; page HTML assertions can rely on optional SSR.
 
 ## User Stories (High-Level)
 - As an authenticated user with sufficient role, I can post a new comment on a chapter/news.

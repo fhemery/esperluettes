@@ -1,16 +1,18 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Domains\Comment\Services;
 
 use App\Domains\Comment\Repositories\CommentRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Domains\Comment\Models\Comment;
-use Mews\Purifier\Facades\Purifier;
+use App\Domains\Comment\Support\CommentBodySanitizer;
 
 class CommentService
 {
     public function __construct(
         private readonly CommentRepository $repository,
+        private readonly CommentBodySanitizer $sanitizer,
     ) {}
 
     /**
@@ -60,8 +62,7 @@ class CommentService
      */
     private function sanitizeBody(string $body): string
     {
-        $clean = Purifier::clean($body, 'strict');
-        return is_string($clean) ? trim($clean) : '';
+        return $this->sanitizer->sanitizeToHtml($body);
     }
 
     /**
