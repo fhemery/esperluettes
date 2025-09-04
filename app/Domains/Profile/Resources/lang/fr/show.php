@@ -11,4 +11,5 @@ return [
     'stories' => 'Histoires',
     'my-stories' => 'Mes histoires',
     'loading' => 'Chargement…',
+    'title' => 'Profil de :name',
 ];

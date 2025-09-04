@@ -27,3 +27,12 @@ it('allows authenticated user with proper role to access edit page', function ()
         ->assertOk()
         ->assertSee('Alice');
 });
+
+describe('SEO', function () {
+    it('should have the correct title', function () {
+        $user = alice($this);
+
+        $this->actingAs($user)->get('/profile/edit')
+            ->assertSee(__('profile::edit.title', ['name' => 'Alice']));
+    });
+});

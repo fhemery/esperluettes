@@ -111,3 +111,12 @@ describe('tab selection', function () {
             ->assertSee("tab: 'stories'");
     });
 });
+
+describe('SEO', function () {
+    it('should have the correct title', function () {
+        $user = alice($this);
+
+        $this->actingAs($user)->get('/profile')
+            ->assertSee(__('profile::show.title', ['name' => 'Alice']));
+    });
+});
