@@ -1,0 +1,103 @@
+@startuml Comment Retrieval Sequence
+' Title and legend
+skinparam monochrome true
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 10
+skinparam BoxPadding 10
+
+title Comment retrieval (initial render and paginated fetch)
+
+autonumber
+
+actor User as U
+box "Laravel View Layer"
+  participant "Blade Component\nApp\\Domains\\Comment\\View\\Components\\CommentList" as Component
+end box
+
+box "Comment Domain Public API"
+  participant "CommentPublicApi" as PublicApi
+  participant "CommentPolicyRegistry" as Policies
+end box
+
+box "Comment Domain Application"
+  participant "CommentService" as Service
+end box
+
+box "Infrastructure"
+  participant "CommentRepository" as Repo
+end box
+
+box "Shared Services"
+  participant "ProfilePublicApi" as Profiles
+end box
+
+== Initial render (page > 0) ==
+U -> Component: HTTP GET page
+activate Component
+Component -> PublicApi: getFor(entityType, entityId, page=1, perPage)
+activate PublicApi
+PublicApi -> PublicApi: checkAccess()
+
+alt page <= 0 (Lazy Mode)
+  PublicApi -> Service: countFor(entityType, entityId)
+  activate Service
+  Service -> Repo: countByTarget(entityType, entityId)
+  activate Repo
+  Repo --> Service: total
+  deactivate Repo
+  Service --> PublicApi: total
+  deactivate Service
+  PublicApi -> Policies: canCreateRoot(entityType, entityId, userId)
+  PublicApi --> Component: CommentListDto(page=0, items=[], total, config)
+  deactivate PublicApi
+  deactivate Component
+  note right of Component
+    Component stores a minimal list DTO
+    with config and total only.
+  end note
+else page > 0 (Eager List)
+  PublicApi -> Service: getFor(entityType, entityId, page, perPage, withChildren=true)
+  activate Service
+  Service -> Repo: listByTarget(entityType, entityId, page, perPage, withChildren)
+  activate Repo
+  Repo --> Service: paginator(models: roots + eager children)
+  deactivate Repo
+  Service --> PublicApi: paginator
+  deactivate Service
+
+  ' collect author ids and hydrate profiles
+  PublicApi -> Profiles: getPublicProfiles(authorIds)
+  activate Profiles
+  Profiles --> PublicApi: map<userId, ProfileDto>
+  deactivate Profiles
+
+  ' map models -> DTOs and compute permissions
+  PublicApi -> Policies: canReply / canEditOwn (per item)
+  PublicApi --> Component: CommentListDto(page, items[], total, config)
+  deactivate PublicApi
+  deactivate Component
+end
+
+== Subsequent page fetch (AJAX/Fragment) ==
+U -> Component: triggers next page load (e.g., button/scroll)
+activate Component
+Component -> PublicApi: getFor(entityType, entityId, page=n, perPage)
+activate PublicApi
+PublicApi -> PublicApi: checkAccess()
+PublicApi -> Service: getFor(...withChildren=true)
+activate Service
+Service -> Repo: listByTarget(...)
+activate Repo
+Repo --> Service: paginator(models)
+deactivate Repo
+Service --> PublicApi: paginator
+deactivate Service
+PublicApi -> Profiles: getPublicProfiles(authorIds)
+Profiles --> PublicApi: profiles
+PublicApi -> Policies: canReply/canEditOwn
+PublicApi --> Component: CommentListDto(page=n, items, total, config)
+ deactivate PublicApi
+ deactivate Component
+
+@enduml
