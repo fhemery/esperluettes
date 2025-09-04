@@ -7,6 +7,8 @@ use App\Domains\Comment\Contracts\CommentListDto;
 use App\Domains\Comment\Contracts\CommentDto;
 use App\Domains\Comment\Contracts\CommentUiConfigDto;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Mappers\CommentDtoMapper;
+use App\Domains\Comment\Mappers\CommentListDtoMapper;
 use App\Domains\Comment\Services\CommentService;
 use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use App\Domains\Comment\Support\CommentBodySanitizer;
@@ -26,6 +28,8 @@ class CommentPublicApi
         private AuthPublicApi $authApi,
         private CommentPolicyRegistry $policies,
         private readonly CommentBodySanitizer $sanitizer,
+        private readonly CommentDtoMapper $dtoMapper = new CommentDtoMapper(),
+        private readonly CommentListDtoMapper $listDtoMapper = new CommentListDtoMapper(),
     ) {}
 
     public function checkAccess()
@@ -43,7 +47,7 @@ class CommentPublicApi
         // Lazy mode: page <= 0 → return config and total only, no items
         if ($page <= 0) {
             $total = $this->service->countFor($entityType, $entityId);
-            return new CommentListDto(
+            return $this->listDtoMapper->make(
                 entityType: $entityType,
                 entityId: $entityId,
                 page: 0,
@@ -75,41 +79,10 @@ class CommentPublicApi
         $authorIds = array_values(array_unique($authorIds));
         $profiles = $this->profiles->getPublicProfiles($authorIds); // [userId => ProfileDto|null]
 
-        // Map roots with their children and attach permissions
-        $items = [];
-        foreach ($models as $model) {
-            $authorId = (int) $model->author_id;
-            $profile = $profiles[$authorId] ?? new ProfileDto(
-                user_id: $authorId,
-                display_name: '',
-                slug: '',
-                avatar_url: '',
-            );
+        // Map roots with their children and attach permissions via mapper
+        $items = $this->dtoMapper->mapRootWithChildren($models, $profiles, $this->policies, $entityType, $userId);
 
-            $childrenDtos = [];
-            foreach ($model->children as $child) {
-                $cAuthorId = (int) $child->author_id;
-                $cProfile = $profiles[$cAuthorId] ?? new ProfileDto(
-                    user_id: $cAuthorId,
-                    display_name: '',
-                    slug: '',
-                    avatar_url: '',
-                );
-                // Provisional DTO for policy checks
-                $childDto = CommentDto::fromModel($child, $cProfile);
-                $childDto->canReply = $this->policies->canReply($entityType, $childDto, $userId);
-                $childDto->canEditOwn = $this->policies->canEditOwn($entityType, $childDto, $userId);
-                $childrenDtos[] = $childDto;
-            }
-
-            // Provisional root DTO for policy checks
-            $rootCommentDto = CommentDto::fromModel($model, $profile, $childrenDtos);
-            $rootCommentDto->canReply = $this->policies->canReply($entityType, $rootCommentDto, $userId);
-            $rootCommentDto->canEditOwn = $this->policies->canEditOwn($entityType, $rootCommentDto, $userId);
-            $items[] = $rootCommentDto;
-        }
-
-        return new CommentListDto(
+        return $this->listDtoMapper->make(
             entityType: $entityType,
             entityId: $entityId,
             page: $paginator->currentPage(),
