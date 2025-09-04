@@ -40,6 +40,14 @@ class CommentService
     }
 
     /**
+     * Check whether the given user already posted a root comment on the specified target.
+     */
+    public function userHasRoot(string $entityType, int $entityId, int $userId): bool
+    {
+        return $this->repository->userHasRoot($entityType, $entityId, $userId);
+    }
+
+    /**
      * Sanitize using configured HTML Purifier with the 'strict' profile.
      */
     private function sanitizeBody(string $body): string

@@ -155,5 +155,15 @@ class CommentPublicApi
         $comment = $this->service->getComment($commentId);
         return CommentDto::fromModel($comment, $this->profiles->getPublicProfile($comment->author_id));
     }
+
+    /**
+     * Public API to check if the current or specified user has already posted a root comment
+     * on a given entity. Prefer using the explicit $userId for policies.
+     */
+    public function userHasRoot(string $entityType, int $entityId, int $userId): bool
+    {
+        // No access gate here: this is intended for internal policy checks where $userId is provided
+        return $this->service->userHasRoot($entityType, $entityId, $userId);
+    }
 }
 

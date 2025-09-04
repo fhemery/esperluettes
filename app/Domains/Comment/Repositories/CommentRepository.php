@@ -39,4 +39,17 @@ class CommentRepository
     {
         return Comment::query()->findOrFail($commentId);
     }
+
+    /**
+     * Check if a given user already has a root comment on the specified target.
+     */
+    public function userHasRoot(string $entityType, int $entityId, int $userId): bool
+    {
+        return Comment::query()
+            ->where('commentable_type', $entityType)
+            ->where('commentable_id', $entityId)
+            ->whereNull('parent_comment_id')
+            ->where('author_id', $userId)
+            ->exists();
+    }
 }

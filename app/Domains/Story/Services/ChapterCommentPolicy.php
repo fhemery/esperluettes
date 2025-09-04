@@ -5,10 +5,15 @@ namespace App\Domains\Story\Services;
 use App\Domains\Comment\Contracts\CommentDto;
 use App\Domains\Comment\Contracts\CommentPolicy;
 use App\Domains\Comment\Contracts\CommentToCreateDto;
+use App\Domains\Comment\PublicApi\CommentPublicApi;
 
 class ChapterCommentPolicy implements CommentPolicy
 {
-    public function __construct(private readonly ChapterService $chapters, private readonly StoryService $stories)
+    public function __construct(
+        private readonly ChapterService $chapters,
+        private readonly StoryService $stories,
+        private readonly CommentPublicApi $comments,
+    )
     {
     }
 
@@ -19,9 +24,16 @@ class ChapterCommentPolicy implements CommentPolicy
 
     public function canCreateRoot(int $entityId, int $userId): bool
     {
+        // entityId is the Chapter id. Forbid root comments when:
+        // - the user is an author/co-author of the chapter's parent story, OR
+        // - the user already posted a root comment on this chapter.
+        // Otherwise allow.
         $isAuthor = $this->chapters->isUserAuthorOfChapter($entityId, $userId);
-        // If chapter not found, default to allow (policy should not 404)
-        return $isAuthor ? false : true;
+        if ($isAuthor) {
+            return false;
+        }
+        $alreadyPosted = $this->comments->userHasRoot('chapter', $entityId, $userId);
+        return !$alreadyPosted;
     }
 
     public function canReply(CommentDto $parentComment, int $userId): bool

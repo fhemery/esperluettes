@@ -21,7 +21,7 @@ describe('Chapter comment policy integration (min length = 140)', function () {
         $this->actingAs($user);
 
         expect(function () {
-            createComment('chapter', 123, 'too short', null);
+            createComment('chapter', 123, generateCommentText(139), null);
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too short']]));
     });
 
@@ -29,8 +29,7 @@ describe('Chapter comment policy integration (min length = 140)', function () {
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
         $this->actingAs($user);
 
-        $exact140 = str_repeat('a', 140);
-        $commentId = createComment('chapter', 123, $exact140, null);
+        $commentId = createComment('chapter', 123, generateCommentText(140), null);
         expect($commentId)->toBeGreaterThan(0);
     });
 });
@@ -45,7 +44,24 @@ describe('Regarding root comment creation', function () {
         expect($list->config->canCreateRoot)->toBe(false);
 
         expect(function () use ($chapter) {
-            createComment('chapter', $chapter->id, 'too short', null);
+            createComment('chapter', $chapter->id, generateCommentText(140), null);
+        })->toThrow(ValidationException::withMessages(['body' => ['Comment not allowed']]));
+    });
+
+    it('should allow only one root comment per user', function () {
+        $user = alice($this);
+        $story = publicStory('Public Story', $user->id);
+        $chapter = createPublishedChapter($this, $story, $user, ['title' => 'Pub Chap']);
+
+        $bob = bob($this);
+        $this->actingAs($bob);
+        createComment('chapter', $chapter->id, generateCommentText(140), null);
+
+        $list = listComments('chapter', $chapter->id);
+        expect($list->config->canCreateRoot)->toBe(false);
+
+        expect(function () use ($chapter) {
+            createComment('chapter', $chapter->id, generateCommentText(140), null);
         })->toThrow(ValidationException::withMessages(['body' => ['Comment not allowed']]));
     });
 });
