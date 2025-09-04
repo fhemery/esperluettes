@@ -23,6 +23,14 @@ class CommentService
     }
 
     /**
+     * Count total root comments for a given target.
+     */
+    public function countFor(string $entityType, int $entityId): int
+    {
+        return $this->repository->countByTarget($entityType, $entityId);
+    }
+
+    /**
      * Create a root comment (no parent). No policy checks for now.
      */
     public function postComment(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment

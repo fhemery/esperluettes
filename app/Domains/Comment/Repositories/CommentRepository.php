@@ -24,6 +24,18 @@ class CommentRepository
         return $query->paginate(perPage: $perPage, page: $page);
     }
 
+    /**
+     * Efficiently count root comments for a given target without loading items.
+     */
+    public function countByTarget(string $entityType, int $entityId): int
+    {
+        return Comment::query()
+            ->where('commentable_type', $entityType)
+            ->where('commentable_id', $entityId)
+            ->whereNull('parent_comment_id')
+            ->count();
+    }
+
     public function create(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment
     {
         return Comment::query()->create([

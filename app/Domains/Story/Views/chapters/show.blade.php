@@ -132,7 +132,7 @@
 
                     <!-- Comments -->
                     <div class="mt-12">
-                        <x-comment-list entity-type="chapter" entity-id="{{ $vm->chapter->id }}" />
+                        <x-comment-list entity-type="chapter" entity-id="{{ $vm->chapter->id }}" page="0" perPage="5" />
                     </div>
                 </div>
             </div>

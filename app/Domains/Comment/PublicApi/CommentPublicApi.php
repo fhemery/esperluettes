@@ -37,6 +37,25 @@ class CommentPublicApi
     {
         $this->checkAccess();
         $userId = (int) (Auth::id() ?? 0);
+
+        // Lazy mode: page <= 0 → return config and total only, no items
+        if ($page <= 0) {
+            $total = $this->service->countFor($entityType, $entityId);
+            return new CommentListDto(
+                entityType: $entityType,
+                entityId: (string) $entityId,
+                page: 0,
+                perPage: $perPage,
+                total: $total,
+                items: [],
+                config: new CommentUiConfigDto(
+                    minBodyLength: $this->policies->getMinBodyLength($entityType),
+                    maxBodyLength: $this->policies->getMaxBodyLength($entityType),
+                    canCreateRoot: $this->policies->canCreateRoot($entityType, (int) $entityId, $userId),
+                ),
+            );
+        }
+
         $paginator = $this->service->getFor($entityType, $entityId, $page, $perPage, withChildren: true);
 
         $models = $paginator->items(); // roots only, children eager-loaded

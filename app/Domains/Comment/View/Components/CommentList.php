@@ -16,12 +16,14 @@ class CommentList extends Component
     public function __construct(
         public string $entityType,
         public int $entityId,
-        public int $perPage = 5
+        public int $perPage = 5,
+        public int $page = 1,
     ) {
         $api = app(CommentPublicApi::class);
         $this->isGuest = !auth()->check();
         try {
-            $this->comments = $api->getFor($this->entityType, $this->entityId, 1, $this->perPage);
+            // page <= 0 triggers lazy mode in PublicApi (config + total only)
+            $this->comments = $api->getFor($this->entityType, $this->entityId, $this->page, $this->perPage);
         } catch (\Throwable $e) {
             // If listing is not allowed (unauthenticated or unauthorized), mark error and provide an empty list
             $this->error = 'not_allowed';
@@ -29,7 +31,7 @@ class CommentList extends Component
             $this->comments = CommentListDto::empty(
                 entityType: $this->entityType,
                 entityId: (string) $this->entityId,
-                page: 1,
+                page: $this->page > 0 ? $this->page : 0,
                 perPage: $this->perPage,
             );
         }
