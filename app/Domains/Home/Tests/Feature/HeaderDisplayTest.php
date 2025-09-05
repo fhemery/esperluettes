@@ -7,17 +7,16 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-it('should show the register and login button to unlogged users', function () {
+it('should show only show login button to unlogged users', function () {
     $this->assertGuest();
 
     $response = $this->get('/');
 
     $response->assertOk();
     $response->assertSee('shared::navigation.login');
-    $response->assertSee('shared::navigation.register');
 });
 
-it('should not show the register and login button to logged user', function () {
+it('should not show login button to logged user', function () {
     $user = alice($this);
 
     $this->actingAs($user);
@@ -25,8 +24,7 @@ it('should not show the register and login button to logged user', function () {
     $response = $this->get('/');
 
     $response->assertOk();
-    $this->assertStringNotContainsString('shared::navigation.login', $response->content());
-    $this->assertStringNotContainsString('shared::navigation.register', $response->content());
+    $response->assertDontSee(__('shared::navigation.login'));
 });
 
 it('should show dashboard, account, profile access and logout, but not admin to logged user', function () {
@@ -37,11 +35,11 @@ it('should show dashboard, account, profile access and logout, but not admin to 
     $response = $this->get('/');
 
     $response->assertOk();
-    $response->assertSee('shared::navigation.dashboard');
-    $response->assertSee('shared::navigation.account');
-    $response->assertSee('shared::navigation.profile');
-    $response->assertSee('shared::navigation.logout');
-    $response->assertDontSee('shared::navigation.admin');
+    $response->assertSee(__('shared::navigation.dashboard'));
+    $response->assertSee(__('shared::navigation.account'));
+    $response->assertSee(__('shared::navigation.profile'));
+    $response->assertSee(__('shared::navigation.logout'));
+    $response->assertDontSee(__('shared::navigation.admin'));
 });
 
 it('should show admin link to admins', function () {
@@ -52,7 +50,7 @@ it('should show admin link to admins', function () {
     $response = $this->get('/');
 
     $response->assertOk();
-    $response->assertSee('shared::navigation.admin');
+    $response->assertSee(__('shared::navigation.admin'));
 });
 
 it('should show news and stories to authenticated users', function () {
@@ -63,8 +61,8 @@ it('should show news and stories to authenticated users', function () {
     $response = $this->get('/');
 
     $response->assertOk();
-    $response->assertSee('shared::navigation.news');
-    $response->assertSee('shared::navigation.stories');
+    $response->assertSee(__('shared::navigation.news'));
+    $response->assertSee(__('shared::navigation.stories'));
 });
 
 it('should not show dashboard/admin to unverified users but show news/stories', function () {
@@ -77,9 +75,9 @@ it('should not show dashboard/admin to unverified users but show news/stories', 
 
     $response->assertOk();
     // Visible menu entries
-    $response->assertSee('shared::navigation.news');
-    $response->assertSee('shared::navigation.stories');
+    $response->assertSee(__('shared::navigation.news'));
+    $response->assertSee(__('shared::navigation.stories'));
     // Not visible when email not verified
-    $response->assertDontSee('shared::navigation.dashboard');
-    $response->assertDontSee('shared::navigation.admin');
+    $response->assertDontSee(__('shared::navigation.dashboard'));
+    $response->assertDontSee(__('shared::navigation.admin'));
 });

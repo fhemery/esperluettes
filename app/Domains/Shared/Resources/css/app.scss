@@ -5,20 +5,24 @@
 /* Design tokens as CSS variables (RGB triplets for alpha support) */
 :root {
   /* Base colors */
-  --color-bg: 255 255 255;        /* white */
-  --color-fg: 17 24 39;           /* gray-900 */
-  --color-primary: 30 64 175;     /* blue-700 */
-  --color-accent: 234 88 12;      /* orange-600 */
+  --color-bg: 255 255 255;        
+  --color-fg: 17 24 39;           
+  --color-primary: 30 64 175;     
+  --color-accent: 234 88 12;      
+  --color-tertiary: 99 157 165;   
 
   /* Images */
   --home-bg-image: none;
+  --home-bg-size: auto;
 }
 
 :root[data-season="autumn"] {
   --color-bg: 247 234 223;        // Blanc cassé
   --color-primary: 201 129 41;    // Brun
   --color-accent: 164 52 92;      // Fuschia
-  --home-bg-image: url('/public/images/themes/autumn/background.png');
+  --color-tertiary: 99 157 165;   // Bleu / vert
+  /* Public web root is /, so image path should not include /public */
+  --home-bg-image: url('/images/themes/autumn/background.png');
 }
 
 /* Rich content defaults (for sanitized HTML display) */
@@ -52,6 +56,10 @@
   .btn-primary {
     @apply inline-flex items-center justify-center rounded-md bg-primary text-white px-4 py-2 font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed;
   }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center rounded-md bg-accent text-white px-4 py-2 font-medium hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
 }
 
 /* Utility layer: one-off helpers, escape hatches */
@@ -59,6 +67,7 @@
   .bg-seasonal {
     background-image: var(--home-bg-image);
     background-repeat: repeat;
-    background-position: center;
+    background-position: top left;
+    background-size: var(--home-bg-size);
   }
 }

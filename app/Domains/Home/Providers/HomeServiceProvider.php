@@ -10,5 +10,8 @@ class HomeServiceProvider extends ServiceProvider
     {
         // Load namespaced views for the Home public domain
         $this->loadViewsFrom(__DIR__ . '/../Views', 'home');
+
+        // Load namespaced language files for the Home public domain
+        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'home');
     }
 }

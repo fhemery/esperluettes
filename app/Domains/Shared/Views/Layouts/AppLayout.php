@@ -4,6 +4,7 @@ namespace App\Domains\Shared\Views\Layouts;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class AppLayout extends Component
 {
@@ -12,6 +13,13 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        return view('shared::layouts.app');
+        // Switch layout depending on authentication status
+        if (Auth::check()) {
+            // Logged-in users get the full application chrome
+            return view('shared::layouts.app');
+        }
+
+        // Guests get a minimal layout without the application navigation
+        return view('shared::layouts.guest');
     }
 }

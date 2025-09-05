@@ -28,7 +28,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Manrope', ...defaultTheme.fontFamily.sans],
             },
             // Map CSS variables to Tailwind colors for runtime theming
             // Each expects an RGB triplet variable (e.g., 30 64 175)
@@ -37,6 +37,7 @@ export default {
                 fg: 'rgb(var(--color-fg) / <alpha-value>)',
                 primary: 'rgb(var(--color-primary) / <alpha-value>)',
                 accent: 'rgb(var(--color-accent) / <alpha-value>)',
+                tertiary: 'rgb(var(--color-tertiary) / <alpha-value>)',
             },
         },
     },

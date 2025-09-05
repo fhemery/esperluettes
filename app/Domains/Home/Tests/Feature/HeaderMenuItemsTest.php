@@ -86,25 +86,6 @@ function assertSameClickableCountOrDiff(string $desktopHtml, string $responsiveH
     expect($dc)->toBe($rc);
 }
 
-it('guest: desktop and responsive header have same number of top-level links', function () {
-    $this->assertGuest();
-
-    $html = $this->get('/')
-        ->assertOk()
-        ->getContent();
-
-    // Desktop: combine left main links (news, stories) + right guest actions (login, register)
-    $desktopLeft = extractFirstDivByClass($html, 'hidden space-x-8 sm:-my-px sm:ms-10 sm:flex');
-    $desktopRight = extractFirstDivByClass($html, 'hidden sm:flex sm:items-center sm:ms-6 gap-3');
-    $desktopSection = $desktopLeft . $desktopRight;
-
-    // Responsive: guest menu block (first links container inside guest responsive wrapper)
-    [$before, $responsiveAll] = explode('<!-- Responsive Navigation Menu -->', $html, 2);
-    $responsiveSection = extractFirstDivByClass($responsiveAll, 'pt-2 pb-3 space-y-1');
-
-    assertSameClickableCountOrDiff($desktopSection, $responsiveSection, 'guest');
-});
-
 it('unverified: desktop and responsive header have same number of top-level links', function () {
     $user = alice($this, [], false); // unverified
     $this->actingAs($user);
