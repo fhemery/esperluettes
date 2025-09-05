@@ -86,7 +86,7 @@
                     </div>
 
                     <div class="pt-6">
-                        <x-primary-button type="submit">{{ __('story::index.filter') }}</x-primary-button>
+                        <x-shared::button color="accent" type="submit">{{ __('story::index.filter') }}</x-shared::button>
                         @if($hasFilters)
                             <a href="{{ url('/stories') }}"
                                class="ml-3 text-sm text-gray-600 hover:text-gray-900">{{ __('story::index.reset_filters') }}</a>

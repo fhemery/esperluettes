@@ -16,9 +16,9 @@
                     @csrf
 
                     <div>
-                        <x-primary-button>
+                        <x-shared::button color="accent">
                             {{ __('auth::verify.actions.resend') }}
-                        </x-primary-button>
+                        </x-shared::button>
                     </div>
                 </form>
             </div>

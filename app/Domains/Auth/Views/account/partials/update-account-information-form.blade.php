@@ -42,7 +42,7 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-shared::button color="accent">{{ __('Save') }}</x-shared::button>
 
             @if (session('status') === __('auth::account.account-updated'))
                 <p

@@ -21,9 +21,9 @@
                 </div>
 
                 <div class="flex justify-end mt-4">
-                    <x-primary-button>
+                    <x-shared::button color="accent">
                         {{ __('auth::confirm.submit') }}
-                    </x-primary-button>
+                    </x-shared::button>
                 </div>
             </form>
         </div>

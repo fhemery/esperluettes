@@ -8,15 +8,6 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 describe('guest header display', function () {
-    it('should show only show login button to unlogged users', function () {
-        $this->assertGuest();
-
-        $response = $this->get(route('home'));
-
-        $response->assertOk();
-        $response->assertSee('shared::navigation.login');
-    });
-
     it('should have logo link point to home', function () {
         $this->assertGuest();
 
@@ -24,6 +15,24 @@ describe('guest header display', function () {
 
         $response->assertOk();
         $response->assertSeeInOrder(['<a href="' . route('home'), 'id="header-logo"'], false);
+    });
+
+    it('should show only show login button to unlogged users', function () {
+        $this->assertGuest();
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee(__('shared::navigation.login'));
+    });
+
+    it('should not show login button when on login page', function () {
+        $this->assertGuest();
+
+        $response = $this->get(route('login'));
+
+        $response->assertOk();
+        $response->assertDontSee(__('shared::navigation.login'));
     });
 });
 

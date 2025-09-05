@@ -16,9 +16,9 @@
                             <x-story::form :referentials="$referentials"/>
 
                             <div class="mt-6 flex justify-center">
-                                <x-primary-button type="submit">
+                                <x-shared::button color="accent" type="submit">
                                     {{ __('story::create.actions.continue') }}
-                                </x-primary-button>
+                                </x-shared::button>
                             </div>
                         </form>
                     </div>

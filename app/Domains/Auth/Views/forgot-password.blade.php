@@ -19,9 +19,9 @@
                 </div>
 
                 <div class="flex items-center justify-end mt-4">
-                    <x-primary-button>
+                    <x-shared::button color="accent">
                         {{ __('auth::forgot.submit') }}
-                    </x-primary-button>
+                    </x-shared::button>
                 </div>
             </form>
         </div>

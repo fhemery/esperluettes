@@ -9,7 +9,11 @@
 
             <!-- Right actions -->
             <div class="flex items-center gap-3 -mt-1">
-                <a href="{{ route('login') }}" class="btn-accent h-[40px]">{{ __('shared::navigation.login') }}</a>
+                @unless (request()->routeIs('login'))
+                    <a href="{{ route('login') }}" class="h-[40px]">
+                        <x-shared::button color="accent">{{ __('shared::navigation.login') }}</x-shared::button>
+                    </a>
+                @endunless
             </div>
         </div>
     </div>
