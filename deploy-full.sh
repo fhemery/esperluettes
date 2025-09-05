@@ -150,6 +150,6 @@ echo "2. Launch migrations if needed: ./vendor/bin/sail artisan config:clear && 
 # We are not touching public_html and storage repository because :
 # - storage is the repository of the application
 # - public_html has a link to storage that should not be messed up with
-echo "3. Launch rm -rf app bootstrap config database public resources routes vendor && unzip -o esperluettes.zip"
+echo "3. Run (safely): if [ -f esperluettes.zip ]; then rm -rf app bootstrap config database public resources routes vendor && unzip -o esperluettes.zip; else echo '❌ esperluettes.zip not found, aborting'; fi"
 echo ""
 echo -e "${GREEN}Happy deploying! 🚀${NC}"

@@ -38,6 +38,7 @@ export default {
                 primary: 'rgb(var(--color-primary) / <alpha-value>)',
                 accent: 'rgb(var(--color-accent) / <alpha-value>)',
                 tertiary: 'rgb(var(--color-tertiary) / <alpha-value>)',
+                dark: 'rgb(var(--dark) / <alpha-value>)',
             },
         },
     },

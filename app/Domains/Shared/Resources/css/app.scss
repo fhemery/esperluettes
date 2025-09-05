@@ -10,6 +10,7 @@
   --color-primary: 30 64 175;     
   --color-accent: 234 88 12;      
   --color-tertiary: 99 157 165;   
+  --dark: 0 0 0; 
 
   /* Images */
   --home-bg-image: none;
@@ -21,6 +22,7 @@
   --color-primary: 201 129 41;    // Brun
   --color-accent: 164 52 92;      // Fuschia
   --color-tertiary: 99 157 165;   // Bleu / vert
+  --dark: 65 37 10; 
   /* Public web root is /, so image path should not include /public */
   --home-bg-image: url('/images/themes/autumn/background.png');
 }
