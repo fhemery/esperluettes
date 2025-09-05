@@ -74,4 +74,34 @@
     background-position: top left;
     background-size: var(--home-bg-size);
   }
+
+  /* Surface system: season-agnostic light/dark panels */
+  .surface-secondary {
+    /* Set surface background/foreground tokens for children */
+    --surface-bg: var(--dark);
+    --surface-fg: 255 255 255;
+    --surface-error-bg: 218 59 57; 
+    /* Hint to browser for built-in UI (inputs, etc.) */
+    color-scheme: dark;
+    /* Apply colors */
+    background-color: rgb(var(--dark) / 0.9);
+    /* Do NOT set text color here; use .text-on-surface opt-in on text elements */
+  }
+
+  .surface-primary {
+    --surface-bg: var(--color-bg);
+    --surface-fg: var(--color-fg);
+    color-scheme: light;
+    background-color: rgb(var(--color-bg));
+    /* Do NOT set text color here; use .text-on-surface opt-in on text elements */
+  }
+
+  .text-on-surface {
+    color: rgb(var(--surface-fg));
+  }
+
+  .error-on-surface {
+    color: rgb(var(--surface-fg));
+    background-color: rgb(var(--surface-error-bg));
+  }
 }
