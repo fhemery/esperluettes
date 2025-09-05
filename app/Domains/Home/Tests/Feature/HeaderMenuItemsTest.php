@@ -90,7 +90,7 @@ it('unverified: desktop and responsive header have same number of top-level link
     $user = alice($this, [], false); // unverified
     $this->actingAs($user);
 
-    $html = $this->get('/')
+    $html = $this->get(route('verification.notice'))
         ->assertOk()
         ->getContent();
 
@@ -108,7 +108,7 @@ it('verified: desktop and responsive header have same number of top-level links'
     $user = alice($this); // verified
     $this->actingAs($user);
 
-    $html = $this->get('/')
+    $html = $this->get(route('dashboard'))
         ->assertOk()
         ->getContent();
 
@@ -124,7 +124,7 @@ it('admins: desktop and responsive header have same number of top-level links', 
     $user = admin($this);
     $this->actingAs($user);
 
-    $html = $this->get('/')
+    $html = $this->get(route('dashboard'))
         ->assertOk()
         ->getContent();
 

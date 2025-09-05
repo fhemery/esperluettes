@@ -10,7 +10,7 @@ uses(TestCase::class, RefreshDatabase::class);
 it('should show only show login button to unlogged users', function () {
     $this->assertGuest();
 
-    $response = $this->get('/');
+    $response = $this->get(route('home'));
 
     $response->assertOk();
     $response->assertSee('shared::navigation.login');
@@ -21,7 +21,7 @@ it('should not show login button to logged user', function () {
 
     $this->actingAs($user);
 
-    $response = $this->get('/');
+    $response = $this->get(route('dashboard'));
 
     $response->assertOk();
     $response->assertDontSee(__('shared::navigation.login'));
@@ -32,7 +32,7 @@ it('should show dashboard, account, profile access and logout, but not admin to 
 
     $this->actingAs($user);
 
-    $response = $this->get('/');
+    $response = $this->get(route('dashboard'));
 
     $response->assertOk();
     $response->assertSee(__('shared::navigation.dashboard'));
@@ -47,7 +47,7 @@ it('should show admin link to admins', function () {
 
     $this->actingAs($user);
 
-    $response = $this->get('/');
+    $response = $this->get(route('dashboard'));
 
     $response->assertOk();
     $response->assertSee(__('shared::navigation.admin'));
@@ -58,7 +58,7 @@ it('should show news and stories to authenticated users', function () {
 
     $this->actingAs($user);
 
-    $response = $this->get('/');
+    $response = $this->get(route('dashboard'));
 
     $response->assertOk();
     $response->assertSee(__('shared::navigation.news'));
@@ -71,7 +71,7 @@ it('should not show dashboard/admin to unverified users but show news/stories', 
 
     $this->actingAs($user);
 
-    $response = $this->get('/');
+    $response = $this->get(route('verification.notice'));
 
     $response->assertOk();
     // Visible menu entries

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="flex flex-col h-full">
+    <div class="flex flex-col h-full" data-test-id="home-page">
         <!-- Patterned background area -->
         <div class="bg-seasonal flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 flex-1">
             <!-- Center translucent panel -->
