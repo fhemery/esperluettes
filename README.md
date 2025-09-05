@@ -22,6 +22,8 @@ Please read our [Contributing Guide](CONTRIBUTING.md) for the workflow, Conventi
 
 ## Deploying
 
+**IMPORTANT**: You must shut down vite dev server (`npm run dev`) before running the deployment script. Else the assets are going to point to your local server
+
 To prepare the files, just launch
 
 > npm run build-and-deploy:full

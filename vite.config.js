@@ -7,18 +7,23 @@ export default defineConfig(({ mode }) => {
 
     return {
         server: {
-            // Ensure requests to /images, /storage, etc. hit the Laravel app (APP_URL)
-            // instead of the Vite dev server origin.
-            proxy: {
-                '/images': {
-                    target: appUrl,
-                    changeOrigin: true,
-                },
-                '/storage': {
-                    target: appUrl,
-                    changeOrigin: true,
-                },
-            },
+            // Only enable proxy during development
+            ...(mode === 'development'
+                ? {
+                      // Ensure requests to /images, /storage, etc. hit the Laravel app (APP_URL)
+                      // instead of the Vite dev server origin.
+                      proxy: {
+                          '/images': {
+                              target: appUrl,
+                              changeOrigin: true,
+                          },
+                          '/storage': {
+                              target: appUrl,
+                              changeOrigin: true,
+                          },
+                      },
+                  }
+                : {}),
         },
         plugins: [
             laravel({
