@@ -3,8 +3,9 @@
         <div class="h-32 flex items-center justify-between">
             <!-- Logo placeholder -->
             <div class="flex items-center">
-                <!-- TODO: Make seasonal logo -->
-                <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-24">
+                <a href="{{ route('home') }}">
+                    <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-24" id="header-logo">
+                </a>
             </div>
 
             <!-- Right actions -->
