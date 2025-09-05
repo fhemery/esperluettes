@@ -30,8 +30,17 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            // Map CSS variables to Tailwind colors for runtime theming
+            // Each expects an RGB triplet variable (e.g., 30 64 175)
+            colors: {
+                bg: 'rgb(var(--color-bg) / <alpha-value>)',
+                fg: 'rgb(var(--color-fg) / <alpha-value>)',
+                primary: 'rgb(var(--color-primary) / <alpha-value>)',
+                accent: 'rgb(var(--color-accent) / <alpha-value>)',
+            },
         },
     },
 
     plugins: [forms],
 };
+
