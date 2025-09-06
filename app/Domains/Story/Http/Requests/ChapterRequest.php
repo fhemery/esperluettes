@@ -31,6 +31,9 @@ class ChapterRequest extends FormRequest
         }
 
         $authorNote = $this->input('author_note');
+        if (trim(strip_tags($authorNote)) === '') {
+            $authorNote = null;
+        }
         $content = $this->input('content');
 
         $this->merge([

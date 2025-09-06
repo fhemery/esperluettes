@@ -204,6 +204,31 @@ it('includes unpublished chapters in navigation for authors', function () {
     $resp2->assertSee(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c3->slug]));
 });
 
+describe('Author note', function() {
+    it('should show the author note if there is some content provided', function(){ 
+        $author = alice($this);
+        $story = publicStory('Public Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Pub Chap', 'author_note' => 'Author note']);
+
+        $resp = $this->actingAs($author)
+            ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+        $resp->assertOk();
+        $resp->assertSee(__('story::chapters.author_note'));
+        $resp->assertSee('Author note');
+    });
+
+    it('should not show the author note if there is no content provided (including empty html)', function(){ 
+        $author = alice($this);
+        $story = publicStory('Public Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Pub Chap', 'author_note' => '<p><br></p>']);
+
+        $resp = $this->actingAs($author)
+            ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+        $resp->assertOk();
+        $resp->assertDontSee(__('story::chapters.author_note'));
+    });
+});
+
 describe('Reading progress', function () {
 
     it('does not show the read button to the author', function () {
