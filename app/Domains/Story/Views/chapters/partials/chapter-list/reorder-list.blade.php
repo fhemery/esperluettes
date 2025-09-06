@@ -19,7 +19,9 @@
                     <span class="font-medium text-gray-700">
                         {{ $ch->title }}
                     </span>
-                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-300" aria-label="{{ __('story::chapters.list.draft') }}">{{ __('story::chapters.list.draft') }}</span>
+                    @if($ch->isDraft)
+                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-300" aria-label="{{ __('story::chapters.list.draft') }}">{{ __('story::chapters.list.draft') }}</span>
+                    @endif
                 </div>
                 <div class="flex items-center gap-1">
                     <button type="button"

@@ -132,13 +132,17 @@
                 this.syncDom();
             },
             syncDom() {
-                const ul = this.$refs.list;
-                if (!ul) return;
-                const byId = new Map(Array.from(ul.children).map(li => [parseInt(li.getAttribute('data-id')), li]));
-                this.items.forEach(it => {
-                    const li = byId.get(it.id);
-                    if (li) ul.appendChild(li);
-                });
+                const sync = (ul) => {
+                    if (!ul) return;
+                    const byId = new Map(Array.from(ul.children).map(li => [parseInt(li.getAttribute('data-id')), li]));
+                    this.items.forEach(it => {
+                        const li = byId.get(it.id);
+                        if (li) ul.appendChild(li);
+                    });
+                };
+                // Sync both the editable list and the read-only list
+                sync(this.$refs.list);
+                sync(this.$refs.readonlyList);
             },
             moveById(id, delta) {
                 if (!this.editing) return;
@@ -171,6 +175,8 @@
                     }
                     await res.json();
                     initial = this.items.slice();
+                    // Ensure both lists reflect the new order immediately
+                    this.syncDom();
                     this.editing = false;
                     this.status = this.successMsg;
                     this.statusType = 'success';
