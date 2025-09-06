@@ -150,113 +150,126 @@ it('shows the feedback when available', function () {
     $response->assertSee('Open to feedback');
 });
 
-it('shows the create chapter button to the story author', function () {
-    $author = alice($this);
-    $story = publicStory('Author Story', $author->id);
+describe('chapters', function () {
 
-    // Author views their own story
-    $this->actingAs($author);
-    $response = $this->get('/stories/' . $story->slug);
-    $response->assertOk();
-    // Button text comes from chapters partial using this translation key
-    $response->assertSee('story::chapters.sections.add_chapter');
-    // And link points to chapters.create for this story
-    $response->assertSee(route('chapters.create', ['storySlug' => $story->slug]));
+    it('shows the create chapter button to the story author', function () {
+        $author = alice($this);
+        $story = publicStory('Author Story', $author->id);
+
+        // Author views their own story
+        $this->actingAs($author);
+        $response = $this->get('/stories/' . $story->slug);
+        $response->assertOk();
+        // Button text comes from chapters partial using this translation key
+        $response->assertSee('story::chapters.sections.add_chapter');
+        // And link points to chapters.create for this story
+        $response->assertSee(route('chapters.create', ['storySlug' => $story->slug]));
+    });
+
+    it('does not show the create chapter button to non-authors', function () {
+        $author = alice($this);
+        $other = bob($this);
+        $story = publicStory('Non Author Story', $author->id);
+
+        // Logged-in non-author
+        $this->actingAs($other);
+        $response = $this->get('/stories/' . $story->slug);
+        $response->assertOk();
+        $response->assertDontSee('story::chapters.sections.add_chapter');
+        $response->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]));
+    });
+
+    it('shows edit and delete actions to authors for chapters when they exist', function () {
+        $author = alice($this);
+        $story = publicStory('Chapters Story', $author->id);
+        createPublishedChapter($this, $story, $author, ['title' => 'Temp Chap']);
+
+        $response = $this->actingAs($author)->get('/stories/' . $story->slug);
+
+        $response->assertOk();
+        $response->assertSee(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => Chapter::first()->slug]));
+        $response->assertSee(route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => Chapter::first()->slug]));
+    });
+
+    it('does not show edit and delete actions to non-authors for chapters', function () {
+        $author = alice($this);
+        $story = publicStory('Chapters Story', $author->id);
+        createPublishedChapter($this, $story, $author, ['title' => 'Temp Chap']);
+
+        $this->actingAs(bob($this));
+        $response = $this->get('/stories/' . $story->slug);
+        $response->assertOk();
+        $response->assertDontSee("data-edit-url");
+        $response->assertDontSee("data-delete-url");
+    });
+
+    it('lists only published chapters to non authors', function () {
+        $author = alice($this);
+        $story = publicStory('Chapters Story', $author->id);
+
+        // Create one published and one draft chapter
+        createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1 - Published']);
+        createUnpublishedChapter($this, $story, $author, ['title' => 'Chapter 2 - Draft']);
+
+        // Guest (no auth)
+        Auth::logout();
+        $response = $this->get('/stories/' . $story->slug);
+        $response->assertOk();
+        // Sees only published chapter title
+        $response->assertSee('Chapter 1 - Published');
+        $response->assertDontSee('Chapter 2 - Draft');
+        // No draft chip
+        $response->assertDontSee(trans('story::chapters.list.draft'));
+    });
+
+    it('shows all chapters with draft chip to the author', function () {
+        $author = alice($this);
+        $story = publicStory('Chapters Story 2', $author->id);
+
+        createPublishedChapter($this, $story, $author, ['title' => 'P Chap']);
+        createUnpublishedChapter($this, $story, $author, ['title' => 'D Chap']);
+
+        $this->actingAs($author);
+        $response = $this->get('/stories/' . $story->slug);
+        $response->assertOk();
+        // Author sees both
+        $response->assertSee('P Chap');
+        $response->assertSee('D Chap');
+        // Draft chip visible
+        $response->assertSee(trans('story::chapters.list.draft'));
+    });
+
+    it('appends newly created chapter at the end of the list', function () {
+        // Arrange: public story with existing chapters
+        $author = alice($this);
+        $story = publicStory('Ordered Story', $author->id);
+
+        // Create two published chapters via HTTP (ensures service logic is used)
+        createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1']);
+        createPublishedChapter($this, $story, $author, ['title' => 'Chapter 2']);
+
+        // Act: create a new chapter which should be appended (higher sort_order)
+        createPublishedChapter($this, $story, $author, ['title' => 'Chapter 3']);
+
+        // Assert: on the story page, chapters appear in order with the new one last
+        Auth::logout(); // guest view is enough since all are published
+        $response = $this->get('/stories/' . $story->slug);
+        $response->assertOk();
+        $response->assertSeeInOrder(['Chapter 1', 'Chapter 2', 'Chapter 3']);
+    });
+
+    it('should not show reorder button if there are no chapters', function() {
+        $author = alice($this);
+        $story = publicStory('No Chapters Story', $author->id);
+
+        $this->actingAs($author);
+        $response = $this->get('/stories/' . $story->slug);
+        $response->assertOk();
+        $response->assertDontSee('story::chapters.actions.reorder');
+    });
 });
 
-it('does not show the create chapter button to non-authors', function () {
-    $author = alice($this);
-    $other = bob($this);
-    $story = publicStory('Non Author Story', $author->id);
-
-    // Logged-in non-author
-    $this->actingAs($other);
-    $response = $this->get('/stories/' . $story->slug);
-    $response->assertOk();
-    $response->assertDontSee('story::chapters.sections.add_chapter');
-    $response->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]));
-});
-
-it('shows edit and delete actions to authors for chapters when they exist', function () {
-    $author = alice($this);
-    $story = publicStory('Chapters Story', $author->id);
-    createPublishedChapter($this, $story, $author, ['title' => 'Temp Chap']);
-    
-    $response = $this->actingAs($author)->get('/stories/' . $story->slug);
-    
-    $response->assertOk();
-    $response->assertSee(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => Chapter::first()->slug]));
-    $response->assertSee(route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => Chapter::first()->slug]));
-});
-
-it('does not show edit and delete actions to non-authors for chapters', function () {
-    $author = alice($this);
-    $story = publicStory('Chapters Story', $author->id);
-    createPublishedChapter($this, $story, $author, ['title' => 'Temp Chap']);
-    
-    $this->actingAs(bob($this));
-    $response = $this->get('/stories/' . $story->slug);
-    $response->assertOk();
-    $response->assertDontSee("data-edit-url");
-    $response->assertDontSee("data-delete-url");
-});
-
-it('lists only published chapters to non authors', function () {
-    $author = alice($this);
-    $story = publicStory('Chapters Story', $author->id);
-
-    // Create one published and one draft chapter
-    createPublishedChapter($this, $story, $author, ['title'=>'Chapter 1 - Published']);
-    createUnpublishedChapter($this, $story, $author, ['title'=>'Chapter 2 - Draft']);
-
-    // Guest (no auth)
-    Auth::logout();
-    $response = $this->get('/stories/' . $story->slug);
-    $response->assertOk();
-    // Sees only published chapter title
-    $response->assertSee('Chapter 1 - Published');
-    $response->assertDontSee('Chapter 2 - Draft');
-    // No draft chip
-    $response->assertDontSee(trans('story::chapters.list.draft'));
-});
-
-it('shows all chapters with draft chip to the author', function () {
-    $author = alice($this);
-    $story = publicStory('Chapters Story 2', $author->id);
-
-    createPublishedChapter($this, $story, $author, ['title'=>'P Chap']);
-    createUnpublishedChapter($this, $story, $author, ['title'=>'D Chap']);
-
-    $this->actingAs($author);
-    $response = $this->get('/stories/' . $story->slug);
-    $response->assertOk();
-    // Author sees both
-    $response->assertSee('P Chap');
-    $response->assertSee('D Chap');
-    // Draft chip visible
-    $response->assertSee(trans('story::chapters.list.draft'));
-});
-
-it('appends newly created chapter at the end of the list', function () {
-    // Arrange: public story with existing chapters
-    $author = alice($this);
-    $story = publicStory('Ordered Story', $author->id);
-
-    // Create two published chapters via HTTP (ensures service logic is used)
-    createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1']);
-    createPublishedChapter($this, $story, $author, ['title' => 'Chapter 2']);
-
-    // Act: create a new chapter which should be appended (higher sort_order)
-    createPublishedChapter($this, $story, $author, ['title' => 'Chapter 3']);
-
-    // Assert: on the story page, chapters appear in order with the new one last
-    Auth::logout(); // guest view is enough since all are published
-    $response = $this->get('/stories/' . $story->slug);
-    $response->assertOk();
-    $response->assertSeeInOrder(['Chapter 1', 'Chapter 2', 'Chapter 3']);
-});
-
-describe('Reading statistics', function (){
+describe('Reading statistics', function () {
 
     it('shows reads counter on story page for readers with non-zero values', function () {
         $author = alice($this);
@@ -315,5 +328,4 @@ describe('Reading statistics', function (){
         $resp->assertOk();
         $resp->assertSee('1');
     });
-
 });
