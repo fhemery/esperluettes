@@ -14,7 +14,7 @@ return [
     ],
 
     'errors' => [
-        'members_only' => 'Seules les membres peuvent poster des commentaires.',
+        'members_only' => 'Seuls les membres peuvent poster des commentaires.',
     ],
 
     'actions' => [
