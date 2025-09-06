@@ -24,7 +24,7 @@ return [
             'placeholder' => 'Titre du chapitre',
         ],
         'author_note' => [
-            'label' => 'Note de l\'auteur',
+            'label' => 'Note de l\'Esperluette',
             'placeholder' => 'Utilisez ces notes librement. Elles peuvent vous permettre de demander des retours sur certains points particuliers, de donner à vos lectrices et lecteurs une précision sur votre processus d\'écriture (par exemple un délai long depuis le chapitre précédent…) ou d\'ajouter des avertissements spécifiques à ce chapitre.',
         ],
         'content' => [

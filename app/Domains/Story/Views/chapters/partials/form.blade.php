@@ -16,9 +16,6 @@
     <div>
         <div class="flex items-center gap-2">
             <x-input-label for="author_note" :value="__('story::chapters.form.author_note.label')" />
-            <x-shared::tooltip type="help" :title="__('story::chapters.form.author_note.label')" placement="right">
-                {{ __('story::chapters.form.author_note.help') }}
-            </x-shared::tooltip>
         </div>
         <x-shared::editor id="chapter-author-note-editor" name="author_note" 
             :nbLines="5" max="1000" class="mt-1 block w-full" 
