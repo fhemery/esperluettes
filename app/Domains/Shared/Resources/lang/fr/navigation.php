@@ -2,7 +2,7 @@
 
 return [
     'news' => 'Actualités',
-    'stories' => 'Histoires',
+    'stories' => 'Bibliothèque',
     'dashboard' => 'Tableau de bord',
     'admin' => 'Admin',
     'profile' => 'Profil',

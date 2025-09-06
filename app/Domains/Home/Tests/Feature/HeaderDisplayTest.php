@@ -17,13 +17,15 @@ describe('guest header display', function () {
         $response->assertSeeInOrder(['<a href="' . route('home'), 'id="header-logo"'], false);
     });
 
-    it('should show only show login button to unlogged users', function () {
+    it('should show only show login button, news and stories to unlogged users', function () {
         $this->assertGuest();
 
         $response = $this->get(route('home'));
 
         $response->assertOk();
         $response->assertSee(__('shared::navigation.login'));
+        $response->assertSee(__('shared::navigation.news'));
+        $response->assertSee(__('shared::navigation.stories'));
     });
 
     it('should not show login button when on login page', function () {
