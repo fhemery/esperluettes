@@ -29,9 +29,9 @@ class CommentController extends Controller
     
             $dto = new CommentToCreateDto(
                 entityType: $data['entity_type'],
-                entityId: (int) $data['entity_id'],
+                entityId: $data['entity_id'],
                 body: $data['body'],
-                parentCommentId: $data['parent_comment_id'] ?? null,
+                parentCommentId: $data['parent_comment_id'],
             );
     
             $this->api->create($dto);

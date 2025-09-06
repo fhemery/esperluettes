@@ -23,4 +23,19 @@ class StoreCommentRequest extends FormRequest
             'parent_comment_id' => ['nullable', 'integer'],
         ];
     }
+
+    /**
+     * Normalize numeric inputs so they are integers in the input bag prior to validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $entityId = $this->input('entity_id');
+        $parentId = $this->input('parent_comment_id');
+
+        $this->merge([
+            'entity_id' => isset($entityId) ? (int) $entityId : null,
+            // Keep null when not provided; cast to int when provided (even if a numeric string)
+            'parent_comment_id' => $parentId === null || $parentId === '' ? null : (int) $parentId,
+        ]);
+    }
 }
