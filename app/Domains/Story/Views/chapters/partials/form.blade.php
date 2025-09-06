@@ -20,9 +20,11 @@
                 {{ __('story::chapters.form.author_note.help') }}
             </x-shared::tooltip>
         </div>
-        <x-shared::editor id="chapter-author-note-editor" name="author_note" :nbLines="5" class="mt-1 block w-full" defaultValue="{{ old('author_note', $chapter->author_note ?? '') }}" />
+        <x-shared::editor id="chapter-author-note-editor" name="author_note" 
+            :nbLines="5" max="1000" class="mt-1 block w-full" 
+            defaultValue="{{ old('author_note', $chapter->author_note ?? '') }}" 
+            placeholder="{{ __('story::chapters.form.author_note.placeholder') }}"/>
         <x-input-error :messages="$errors->get('author_note')" class="mt-2" />
-        <p class="mt-1 text-xs text-gray-500">{{ __('story::chapters.form.author_note.note_limit') }}</p>
     </div>
 
     <!-- Content -->

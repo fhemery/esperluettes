@@ -8,7 +8,9 @@ export function initQuillEditor(id) {
     // Idempotency: prevent double initialization
     if (container.dataset.quillInited === '1') return;
 
-    const placeholder = container ? (container.dataset.placeholder || '') : '';
+    let placeholder = container ? container.dataset.placeholder : '';
+    // Fix: The single quote character is encoded as &#039; in HTML attributes
+    placeholder = placeholder.replace(/&#039;/g, "'");
     const editor = new window.Quill(container, {
       theme: 'snow',
       modules: {

@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Créer une nouvelle histoire',
+    'hint' => "L'ajout de chapitre(s) se fait après la validation",
 
     'form' => [
         'title' => [

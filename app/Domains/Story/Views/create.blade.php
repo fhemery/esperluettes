@@ -15,6 +15,8 @@
 
                             <x-story::form :referentials="$referentials"/>
 
+                            <div class="text-sm">{{ __('story::create.hint')}}</div>
+
                             <div class="mt-6 flex justify-center">
                                 <x-shared::button color="accent" type="submit">
                                     {{ __('story::create.actions.continue') }}
