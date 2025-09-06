@@ -37,7 +37,10 @@
             "App\\Domains\\Profile\\": "app/Domains/Profile/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "exclude-from-classmap": [
+            "app/Domains/*/Tests/"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
