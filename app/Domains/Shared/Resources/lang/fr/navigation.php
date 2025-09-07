@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'news' => 'Actualités',
+    'news' => 'Actus',
     'stories' => 'Bibliothèque',
     'admin' => 'Admin',
     'profile' => 'Profil',
