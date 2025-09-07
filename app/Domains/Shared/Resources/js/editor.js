@@ -54,6 +54,7 @@ export function initQuillEditor(id) {
     const quillEditor = document.getElementById('quill-editor-area-' + id);
     const counterEl = document.getElementById('quill-counter-' + id);
     const counterWrap = document.getElementById('quill-counter-wrap-' + id);
+    const unitEl = document.getElementById('quill-unit-' + id);
     const max = container.dataset.max ? parseInt(container.dataset.max, 10) : null;
     const min = container.dataset.min ? parseInt(container.dataset.min, 10) : null;
 
@@ -70,6 +71,12 @@ export function initQuillEditor(id) {
       const count = text.length;
       if (counterEl) {
         counterEl.textContent = max ? `${count}` : `${count}`;
+      }
+      // Update unit label based on pluralization
+      if (unitEl) {
+        const singular = unitEl.getAttribute('data-singular') || 'character';
+        const plural = unitEl.getAttribute('data-plural') || 'characters';
+        unitEl.textContent = (count === 1) ? singular : plural;
       }
       const overMax = max !== null && count > max;
       const underMin = min !== null && count < min;

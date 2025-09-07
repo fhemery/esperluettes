@@ -7,9 +7,13 @@
         @if($max)
             <span>/ {{ $max }}</span>
         @endif
-        <span>{{ __('shared::editor.characters') }}</span>
+        <span id="quill-unit-{{ $id }}"
+              data-singular="{{ trans_choice('shared::editor.character', 1) }}"
+              data-plural="{{ trans_choice('shared::editor.character', 2) }}">
+            {{ trans_choice('shared::editor.character', 2) }}
+        </span>
         @if($min)
-            <span>({{ __('shared::editor.min-characters', ['min' => $min]) }})</span>
+            <span>({{ trans_choice('shared::editor.min-characters', (int) $min, ['min' => (int) $min]) }})</span>
         @endif
     </div>
     @push('scripts')
