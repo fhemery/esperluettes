@@ -27,6 +27,10 @@
                     @endauth
                 </div>
             </div>
+
+            <div class="flex items-center justify-center w-full">
+                <img src="{{ asset('images/errors/404.png') }}" alt="404" class="w-full">
+            </div>
         </div>
     </div>
     
