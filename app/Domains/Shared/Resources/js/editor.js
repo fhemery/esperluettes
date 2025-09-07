@@ -11,6 +11,7 @@ export function initQuillEditor(id) {
     let placeholder = container ? container.dataset.placeholder : '';
     // Fix: The single quote character is encoded as &#039; in HTML attributes
     placeholder = placeholder.replace(/&#039;/g, "'");
+    const allowedFormats = ['bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'align'];
     const editor = new window.Quill(container, {
       theme: 'snow',
       modules: {
@@ -21,7 +22,10 @@ export function initQuillEditor(id) {
           [{ list: 'ordered' }, { list: 'bullet' }],
           ['clean'],
         ],
+        // No image module registered, so user cannot insert images via toolbar
       },
+      // Whitelist formats so unsupported formatting is dropped on paste
+      formats: allowedFormats,
       placeholder,
     });
     // Mark as initialized
@@ -63,6 +67,41 @@ export function initQuillEditor(id) {
     if (defaultValue) {
       editor.clipboard.dangerouslyPasteHTML(defaultValue);
     }
+
+    // Disallow pasted <img> elements (including base64 embeds)
+    try {
+      const Delta = window.Quill.import('delta');
+      editor.clipboard.addMatcher('IMG', function() {
+        return new Delta(); // drop images entirely
+      });
+    } catch (e) {
+      // no-op if Quill import fails
+    }
+
+    // Intercept paste events that include image files and block them
+    const blockImageFiles = (evt) => {
+      const cd = evt.clipboardData || evt.originalEvent?.clipboardData;
+      if (!cd) return false;
+      const items = cd.items ? Array.from(cd.items) : [];
+      const hasImage = items.some(i => i.kind === 'file' && i.type && i.type.startsWith('image/'));
+      if (hasImage) {
+        evt.preventDefault();
+        return true;
+      }
+      return false;
+    };
+    container.addEventListener('paste', blockImageFiles);
+
+    // Intercept dropping image files
+    const blockImageDrop = (evt) => {
+      const dt = evt.dataTransfer;
+      if (!dt) return;
+      const files = dt.files ? Array.from(dt.files) : [];
+      if (files.some(f => f.type && f.type.startsWith('image/'))) {
+        evt.preventDefault();
+      }
+    };
+    container.addEventListener('drop', blockImageDrop);
 
     // Sync Quill with the hidden input
     const updateCount = () => {
