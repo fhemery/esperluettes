@@ -8,10 +8,10 @@ use PHPUnit\Framework\Assert;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-function extractFirstDivByClass(string $html, string $classFragment): string
+function extractFirstDivById(string $html, string $id): string
 {
-    $start = strpos($html, $classFragment);
-    expect($start)->not()->toBeFalse("Start marker not found: {$classFragment}");
+    $start = strpos($html, $id);
+    expect($start)->not()->toBeFalse("Start marker not found: {$id}");
     // Find the beginning of the div tag that contains this class fragment
     $divOpen = strrpos(substr($html, 0, $start), '<div');
     expect($divOpen)->not()->toBeFalse('Enclosing div not found');
@@ -95,11 +95,10 @@ it('unverified: desktop and responsive header have same number of top-level link
         ->getContent();
 
     // Desktop: left-side main nav links
-    $desktopSection = extractFirstDivByClass($html, 'hidden space-x-8 sm:-my-px sm:ms-10 sm:flex');
+    $desktopSection = extractFirstDivById($html, 'desktop-nav');
 
     // Responsive: authenticated responsive top links
-    [$before, $responsiveAll] = explode('<!-- Responsive Navigation Menu -->', $html, 2);
-    $responsiveSection = extractFirstDivByClass($responsiveAll, 'pt-2 pb-3 space-y-1');
+    $responsiveSection = extractFirstDivById($html, 'mobile-nav');
 
     assertSameClickableCountOrDiff($desktopSection, $responsiveSection, 'unverified');
 });
@@ -112,10 +111,9 @@ it('verified: desktop and responsive header have same number of top-level links'
         ->assertOk()
         ->getContent();
 
-    $desktopSection = extractFirstDivByClass($html, 'hidden space-x-8 sm:-my-px sm:ms-10 sm:flex');
+    $desktopSection = extractFirstDivById($html, 'desktop-nav');
 
-    [$before, $responsiveAll] = explode('<!-- Responsive Navigation Menu -->', $html, 2);
-    $responsiveSection = extractFirstDivByClass($responsiveAll, 'pt-2 pb-3 space-y-1');
+    $responsiveSection = extractFirstDivById($html, 'mobile-nav');
 
     assertSameClickableCountOrDiff($desktopSection, $responsiveSection, 'verified');
 });
@@ -128,10 +126,9 @@ it('admins: desktop and responsive header have same number of top-level links', 
         ->assertOk()
         ->getContent();
 
-    $desktopSection = extractFirstDivByClass($html, 'hidden space-x-8 sm:-my-px sm:ms-10 sm:flex');
+    $desktopSection = extractFirstDivById($html, 'desktop-nav');
 
-    [$before, $responsiveAll] = explode('<!-- Responsive Navigation Menu -->', $html, 2);
-    $responsiveSection = extractFirstDivByClass($responsiveAll, 'pt-2 pb-3 space-y-1');
+    $responsiveSection = extractFirstDivById($html, 'mobile-nav');
 
     assertSameClickableCountOrDiff($desktopSection, $responsiveSection, 'admins');
 });

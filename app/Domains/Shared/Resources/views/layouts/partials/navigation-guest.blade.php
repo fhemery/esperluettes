@@ -10,8 +10,7 @@
                 </a>
             </div>
 
-            <!-- Right actions -->
-            <div class="flex items-center gap-2 sm:gap-4 md:gap-8">
+            <div class="flex-1 flex items-center justify-center sm:justify-end gap-2 sm:gap-4 md:gap-8 sm:px-4 md:px-8">
                 <x-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')" class="uppercase h-full">
                     {{ __('shared::navigation.stories') }}
                 </x-nav-link>
