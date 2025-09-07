@@ -21,22 +21,7 @@
                             <h1 class="font-semibold text-2xl text-gray-900 leading-tight mr-2">
                                 {{ $viewModel->getTitle() }}
                             </h1>
-                            @php
-                                $label = match($viewModel->getVisibility()) {
-                                'public' => __('story::shared.visibility.options.public'),
-                                'community' => __('story::shared.visibility.options.community'),
-                                'private' => __('story::shared.visibility.options.private'),
-                                default => $viewModel->getVisibility(),
-                                };
-                                $badgeClasses = match($viewModel->getVisibility()) {
-                                'public' => 'bg-green-100 text-green-800 ring-green-600/20',
-                                'community' => 'bg-blue-100 text-blue-800 ring-blue-600/20',
-                                'private' => 'bg-orange-100 text-orange-800 ring-orange-600/20',
-                                default => 'bg-gray-100 text-gray-800 ring-gray-600/20',
-                                };
-                            @endphp
-                            <span
-                                class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $badgeClasses }}">{{ $label }}</span>
+                            <x-story::story-visibility-badge :visibility="$viewModel->getVisibility()"/>
                         </div>
                         @if($viewModel->isAuthor())
                             <div class="flex items-center gap-3">
