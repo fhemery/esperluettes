@@ -68,7 +68,7 @@
                         </aside>
                     @endif
 
-                    <article class="prose max-w-none [text-indent:2rem] leading-8">
+                    <article class="prose rich-content max-w-none [text-indent:2rem] leading-8">
                         {!! $vm->chapter->content !!}
                     </article>
 

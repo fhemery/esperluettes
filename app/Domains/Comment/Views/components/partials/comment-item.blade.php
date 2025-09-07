@@ -30,7 +30,7 @@
       </div>
 
       <!-- Body or Edit form -->
-      <div class="comment-body mt-3 text-sm text-gray-700" x-show="activeEditId !== {{ $comment->id }}">{!! $comment->body !!}</div>
+      <div class="rich-content comment-body mt-3 text-sm text-gray-700" x-show="activeEditId !== {{ $comment->id }}">{!! $comment->body !!}</div>
       @if($comment->canEditOwn && Auth::check() && Auth::id() === $comment->authorId)
         <div class="mt-3" x-show="activeEditId === {{ $comment->id }}">
           <form
