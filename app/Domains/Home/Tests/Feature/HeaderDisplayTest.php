@@ -69,7 +69,6 @@ describe('Logged header display', function () {
         $response = $this->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee(__('shared::navigation.dashboard'));
         $response->assertSee(__('shared::navigation.account'));
         $response->assertSee(__('shared::navigation.profile'));
         $response->assertSee(__('shared::navigation.logout'));
@@ -112,7 +111,6 @@ describe('Logged header display', function () {
         $response->assertSee(__('shared::navigation.news'));
         $response->assertSee(__('shared::navigation.stories'));
         // Not visible when email not verified
-        $response->assertDontSee(__('shared::navigation.dashboard'));
         $response->assertDontSee(__('shared::navigation.admin'));
     });
 });

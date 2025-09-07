@@ -7,11 +7,6 @@
             {{ __('shared::navigation.stories') }}
         </x-responsive-nav-link>
         @if (Auth::user())
-            @if(Auth::user()->hasVerifiedEmail())
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('shared::navigation.dashboard') }}
-                </x-responsive-nav-link>
-            @endif
             @if(Auth::user()->isAdmin())
                 <x-responsive-nav-link :href="route('filament.admin.pages.dashboard')"
                                        :active="request()->routeIs('filament.admin.*')">

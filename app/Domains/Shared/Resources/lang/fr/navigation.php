@@ -3,7 +3,6 @@
 return [
     'news' => 'Actualités',
     'stories' => 'Bibliothèque',
-    'dashboard' => 'Tableau de bord',
     'admin' => 'Admin',
     'profile' => 'Profil',
     'account' => 'Gestion du compte',
