@@ -64,7 +64,7 @@
                     @if(!empty($vm->chapter->author_note))
                         <aside class="mb-6 p-4 bg-gray-50 border rounded">
                             <div class="font-medium mb-2">{{ __('story::chapters.author_note') }}</div>
-                            <div class="prose max-w-none">{!! $vm->chapter->author_note !!}</div>
+                            <div class="prose max-w-none rich-content">{!! $vm->chapter->author_note !!}</div>
                         </aside>
                     @endif
 
