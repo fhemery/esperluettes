@@ -19,6 +19,8 @@ export default function registerTooltip(Alpine) {
   Alpine.data('popover', () => ({
     open: false, // derived
     hoverOpen: false,
+    hoverPanel: false,
+    hoverTrigger: false,
     pinned: false,
     styleObj: {},
     trigger: null,
@@ -44,15 +46,35 @@ export default function registerTooltip(Alpine) {
           const rect = el.getBoundingClientRect();
           this.panelH = rect.height || el.scrollHeight || 0;
           this.panelW = rect.width || el.scrollWidth || 0;
+          // Bind hover listeners once to prevent blinking when panel overlaps trigger
+          if (!el._popoverHoverBound) {
+            el.addEventListener('mouseenter', () => {
+              this.hoverPanel = true;
+              this.hoverOpen = true;
+              this.updateOpen();
+            });
+            el.addEventListener('mouseleave', () => {
+              this.hoverPanel = false;
+              this.closeWithDelay();
+            });
+            el._popoverHoverBound = true;
+          }
         }
         this.compute();
       });
     },
     closeWithDelay() {
-      setTimeout(() => { if (!this.pinned) { this.hoverOpen = false; this.updateOpen() } }, 220);
+      setTimeout(() => {
+        // Do not close if still hovering either the trigger (managed by Alpine bindings)
+        // or the panel itself (tracked here). Only close when neither is hovered and not pinned.
+        if (!this.pinned && !this.hoverPanel && !this.hoverTrigger) {
+          this.hoverOpen = false;
+          this.updateOpen();
+        }
+      }, 220);
     },
     updateOpen() {
-      this.open = this.hoverOpen || this.pinned;
+      this.open = (this.hoverOpen || this.hoverPanel || this.hoverTrigger || this.pinned);
     },
     compute() {
       if (!this.trigger) return;
@@ -61,15 +83,33 @@ export default function registerTooltip(Alpine) {
       const vh = window.innerHeight;
       const panelWidth = this.panelW || this.parseWidth(this.width) || 320;
       const candidates = this.order(this.placement);
-      let pos = null;
+      let pos = { top: 0, left: 0 };
       for (const place of candidates) {
-        pos = this.positionFor(place, t, panelWidth);
-        if (this.fits(pos, panelWidth, vw, vh)) { break; }
+        const candidate = this.positionFor(place, t, panelWidth);
+        if (this.fits(candidate, panelWidth, vw, vh)) {
+          pos = candidate;
+          break;
+        } else {
+          pos = candidate; // fallback to last computed and clamp below
+        }
       }
-      // Clamp within viewport
-      pos.left = Math.min(Math.max(this.margin, pos.left), vw - panelWidth - this.margin);
-      pos.top = Math.max(this.margin, pos.top);
-      this.styleObj = { top: pos.top + 'px', left: pos.left + 'px', width: this.width, maxWidth: '90vw' };
+      // Clamp within viewport (both axes)
+      const h = this.panelH || 0;
+      const clamp = (min, val, max) => Math.min(Math.max(min, val), max);
+      pos.left = clamp(this.margin, pos.left, vw - panelWidth - this.margin);
+      pos.top = clamp(this.margin, pos.top, vh - h - this.margin);
+
+      // Set safe max dimensions and enable scrolling inside the panel as needed
+      const maxW = `calc(100vw - ${this.margin * 2}px)`;
+      const maxH = `calc(100vh - ${this.margin * 2}px)`;
+      this.styleObj = {
+        top: pos.top + 'px',
+        left: pos.left + 'px',
+        width: this.width,
+        maxWidth: maxW,
+        maxHeight: maxH,
+        overflowY: 'auto',
+      };
     },
     order(primary) {
       const all = ['right','left','bottom','top'];
@@ -96,8 +136,9 @@ export default function registerTooltip(Alpine) {
       return isNaN(n) ? 0 : n;
     },
     fits(pos, w, vw, vh) {
+      const h = this.panelH || 0;
       const withinX = pos.left >= this.margin && (pos.left + w + this.margin) <= vw;
-      const withinY = pos.top >= this.margin && pos.top <= (vh - this.margin);
+      const withinY = pos.top >= this.margin && (pos.top + h + this.margin) <= vh;
       return withinX && withinY;
     }
   }));

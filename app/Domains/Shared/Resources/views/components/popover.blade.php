@@ -12,8 +12,8 @@
             aria-haspopup="dialog"
             :aria-expanded="(hoverOpen || pinned) ? 'true' : 'false'"
             x-ref="trigger"
-            @mouseenter="hoverOpen = true; updateOpen()"
-            @mouseleave="closeWithDelay()"
+            @mouseenter="hoverTrigger = true; hoverOpen = true; updateOpen()"
+            @mouseleave="hoverTrigger = false; closeWithDelay()"
             @mousedown.stop.prevent="pinned = !pinned; if (pinned) { hoverOpen = true } updateOpen()"
             @click.stop.prevent
             @blur="setTimeout(() => { if (!pinned) { hoverOpen = false; updateOpen() } }, 220)">
