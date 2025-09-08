@@ -10,7 +10,7 @@
         @include('shared::layouts.partials.head')
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-bg text-fg">
+        <div class="min-h-screen bg-bg text-fg h-full flex flex-col">
             @include('shared::layouts.navigation')
 
             <!-- Page Heading -->
@@ -79,10 +79,13 @@
             @endif
 
             <!-- Page Content -->
-            <main>
+            <main class="flex-1 flex flex-col">
                 {{ $slot }}
             </main>
+
+            @include('shared::components.footer')
         </div>
         @stack('scripts')
+        
     </body>
 </html>

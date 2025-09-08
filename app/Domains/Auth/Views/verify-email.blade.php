@@ -1,12 +1,12 @@
 <x-app-layout>
-    <div class="min-h-screen flex flex-col items-center pt-16">
-        <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-            <div class="mb-4 text-sm text-gray-600">
+    <div class="bg-seasonal flex-1 py-16">
+        <div class="surface-secondary w-full sm:max-w-md mt-6 px-6 py-4 shadow-md overflow-hidden sm:rounded-lg">
+            <div class="mb-4 text-sm text-on-surface">
                 {{ __('auth::verify.intro') }}
             </div>
 
             @if (session('status') == __('verification-link-sent'))
-                <div class="mb-4 font-medium text-sm text-green-600">
+                <div class="mb-4 font-medium text-sm text-on-surface">
                     {{ __('auth::verify.link_sent') }}
                 </div>
             @endif
@@ -16,7 +16,7 @@
                     @csrf
 
                     <div>
-                        <x-shared::button color="accent">
+                        <x-shared::button color="accent" type="submit">
                             {{ __('auth::verify.actions.resend') }}
                         </x-shared::button>
                     </div>
