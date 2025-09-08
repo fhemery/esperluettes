@@ -4,39 +4,38 @@
         <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-24">
         <div class="grid grid-cols-3 md:grid-cols-5 gap-8 md:-mt-4">
            <div class="col-span-3 md:col-span-2 md:pl-24">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Necessitatibus id nam ratione quibusdam officia alias, sint ipsa, nesciunt commodi minus veniam 
+                {{ __('shared::footer.brand_description') }}
            </div>
 
             <div>
-                <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">Le Jardin</h3>
+                <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">{{ __('shared::footer.title_garden') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="hover:text-primary">Le règlement</a></li>
-                    <li><a href="#" class="hover:text-primary">L’équipe</a></li>
-                    <li><a href="#" class="hover:text-primary">À propos</a></li>
-                    <li><a href="#" class="hover:text-primary">Historique</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_team') }}</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_about') }}</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_history') }}</a></li>
                 </ul>
             </div>
 
             <div>
-                <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">En savoir plus</h3>
+                <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">{{ __('shared::footer.title_learn_more') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="hover:text-primary">Le règlement</a></li>
-                    <li><a href="#" class="hover:text-primary">FAQ</a></li>
-                    <li><a href="#" class="hover:text-primary">Contact</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_rules') }}</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_faq') }}</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_contact') }}</a></li>
                 </ul>
             </div>
 
             <div>
-                <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">Le Droit</h3>
+                <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">{{ __('shared::footer.title_legal') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="hover:text-primary">Mentions légales</a></li>
-                    <li><a href="#" class="hover:text-primary">CGU</a></li>
-                    <li><a href="#" class="hover:text-primary">L’association</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_legal_notice') }}</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_tos') }}</a></li>
+                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_association') }}</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="w-full flex items-center justify-center text-xs text-fg/70">
+        <div class="w-full flex items-center justify-center text-xs text-fg/70 mt-4">
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}</p>
         </div>
     </div>
