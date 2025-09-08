@@ -29,14 +29,14 @@
                 <!-- Remember Me -->
                 <div class="block mt-4">
                     <label for="remember_me" class="inline-flex items-center text-on-surface">
-                        <input id="remember_me" type="checkbox" class="rounded border-accent-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
+                        <input id="remember_me" type="checkbox" class="rounded border-accent/90 text-on-surface/90 shadow-sm focus:ring-accent" name="remember">
                         <span class="ms-2 text-sm">{{ __('auth::login.remember') }}</span>
                     </label>
                 </div>
 
                 <div class="flex items-center justify-end mt-4">
                     @if (Route::has('password.request'))
-                    <a class="text-on-surface underline text-sm hover:text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                    <a class="text-on-surface underline text-sm hover:text-on-surface/90 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                         {{ __('auth::login.forgot') }}
                     </a>
                     @endif
@@ -50,7 +50,7 @@
             <!-- Account creation CTA -->
             <p class="mt-6 text-sm text-on-surface text-center">
                 {{ __('auth::login.no_account') }}
-                <a href="{{ route('register') }}" class="hover:text-gray-300 hover:underline font-medium">
+                <a href="{{ route('register') }}" class="hover:text-on-surface/90 underline font-medium">
                     {{ __('auth::login.create_one') }}
                 </a>
             </p>
