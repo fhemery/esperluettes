@@ -186,10 +186,11 @@ class CommentPublicApi
         $this->checkAccess();
 
         $user = Auth::user();
+        $userId = (int) $user->id;
         $model = $this->service->getComment($commentId);
 
         // Ownership check
-        if ((int) $model->author_id !== (int) $user->id) {
+        if ($model->author_id !== $userId) {
             throw new UnauthorizedException('Cannot edit comment you do not own');
         }
 
@@ -198,7 +199,7 @@ class CommentPublicApi
         $dto = CommentDto::fromModel($model, $profile);
 
         // High-level policy gate for edit
-        if (!$this->policies->canEditOwn($model->commentable_type, $dto, (int) $user->id)) {
+        if (!$this->policies->canEditOwn($model->commentable_type, $dto, $userId)) {
             throw ValidationException::withMessages(['body' => ['Edit not allowed']]);
         }
 
@@ -226,15 +227,15 @@ class CommentPublicApi
         }
 
         // Domain-specific edit validation
-        $this->policies->validateEdit($model->commentable_type, $dto, (int) $user->id, $newBody);
+        $this->policies->validateEdit($model->commentable_type, $dto, $userId, $newBody);
 
         // Perform update via service (sanitizes and persists)
         $updated = $this->service->updateComment($commentId, $newBody);
 
         // Return updated DTO with permissions flags
         $updatedDto = CommentDto::fromModel($updated, $profile);
-        $updatedDto->canReply = $this->policies->canReply($updated->commentable_type, $updatedDto, (int) $user->id);
-        $updatedDto->canEditOwn = $this->policies->canEditOwn($updated->commentable_type, $updatedDto, (int) $user->id);
+        $updatedDto->canReply = $this->policies->canReply($updated->commentable_type, $updatedDto, $userId);
+        $updatedDto->canEditOwn = $this->policies->canEditOwn($updated->commentable_type, $updatedDto, $userId);
         return $updatedDto;
     }
 }

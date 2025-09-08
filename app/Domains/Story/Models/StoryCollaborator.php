@@ -20,6 +20,9 @@ class StoryCollaborator extends Model
     ];
 
     protected $casts = [
+        'story_id' => 'integer',
+        'user_id' => 'integer',
+        'invited_by_user_id' => 'integer',
         'invited_at' => 'datetime',
         'accepted_at' => 'datetime',
     ];

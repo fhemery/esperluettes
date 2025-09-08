@@ -21,6 +21,12 @@ class Comment extends Model
         'parent_comment_id',
     ];
 
+    protected $casts = [
+        'commentable_id' => 'integer',
+        'author_id' => 'integer',
+        'parent_comment_id' => 'integer',
+    ];
+
     public function parent()
     {
         return $this->belongsTo(self::class, 'parent_comment_id');

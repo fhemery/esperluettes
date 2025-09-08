@@ -27,6 +27,7 @@ class DomainEvent extends Model
         'payload' => 'array',
         'meta' => 'array',
         'occurred_at' => 'datetime',
+        'triggered_by_user_id' => 'integer',
     ];
 
     public function prunable()

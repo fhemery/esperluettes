@@ -23,6 +23,8 @@ class ActivationCode extends Model
     ];
 
     protected $casts = [
+        'sponsor_user_id' => 'integer',
+        'used_by_user_id' => 'integer',
         'expires_at' => 'datetime',
         'used_at' => 'datetime',
     ];

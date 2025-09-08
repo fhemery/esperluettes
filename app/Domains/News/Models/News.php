@@ -34,6 +34,8 @@ class News extends Model
     protected $casts = [
         'is_pinned' => 'boolean',
         'published_at' => 'datetime',
+        'created_by' => 'integer',
+        'display_order' => 'integer',
     ];
 
     public function getSlugOptions(): SlugOptions

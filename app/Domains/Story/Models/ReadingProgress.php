@@ -20,6 +20,7 @@ class ReadingProgress extends Model
 
     protected $casts = [
         'user_id' => 'integer',
+        'story_id' => 'integer',
         'chapter_id' => 'integer',
         'read_at' => 'datetime',
     ];

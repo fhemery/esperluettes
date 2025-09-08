@@ -24,6 +24,16 @@ class Story extends Model
         'story_ref_feedback_id'
     ];
 
+    protected $casts = [
+        'created_by_user_id' => 'integer',
+        'story_ref_type_id' => 'integer',
+        'story_ref_audience_id' => 'integer',
+        'story_ref_copyright_id' => 'integer',
+        'story_ref_feedback_id' => 'integer',
+        'reads_logged_total' => 'integer',
+        'last_chapter_published_at' => 'datetime',
+    ];
+
     public const VIS_PUBLIC = 'public';
     public const VIS_COMMUNITY = 'community';
     public const VIS_PRIVATE = 'private';

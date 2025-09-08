@@ -29,6 +29,7 @@ class StaticPage extends Model
 
     protected $casts = [
         'published_at' => 'datetime',
+        'created_by' => 'integer',
     ];
 
     public function getSlugOptions(): SlugOptions

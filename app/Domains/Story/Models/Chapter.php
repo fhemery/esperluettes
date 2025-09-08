@@ -22,6 +22,13 @@ class Chapter extends Model implements Sortable
         'reads_logged_count',
     ];
 
+    protected $casts = [
+        'story_id' => 'integer',
+        'sort_order' => 'integer',
+        'reads_logged_count' => 'integer',
+        'first_published_at' => 'datetime',
+    ];
+
     public const STATUS_NOT_PUBLISHED = 'not_published';
     public const STATUS_PUBLISHED = 'published';
 
