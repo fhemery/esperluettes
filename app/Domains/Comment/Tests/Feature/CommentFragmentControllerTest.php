@@ -38,6 +38,26 @@ it('renders root comments HTML for the first page', function () {
     $response->assertHeader('X-Next-Page', '2');
 });
 
+it('should put a profile link on each comment author', function() {
+    $entityType = 'default';
+    $entityId = 123;
+
+    $user = alice($this);
+    $this->actingAs($user);
+
+    createComment($entityType, $entityId, 'Hello');
+
+    $response = $this->get(route('comments.fragments', [
+        'entity_type' => $entityType,
+        'entity_id' => $entityId,
+        'page' => 1,
+        'per_page' => 2,
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertSeeInOrder(['<a href="'.route('profile.show', ['profile' => 'alice']), 'Hello'], false);
+});
+
 it('renders child comments HTML for the first page', function () {
     $entityType = 'default';
     $entityId = 123;

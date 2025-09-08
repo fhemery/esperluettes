@@ -17,7 +17,9 @@
     <div class="flex-1">
       <!-- Header: author + date + edit icon (right) -->
       <div class="flex items-center gap-3">
-        <div class="font-semibold text-gray-800">{{ $comment->authorProfile->display_name ?: '—' }}</div>
+        <div class="font-semibold text-gray-800">
+          <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-gray-600">{{ $comment->authorProfile->display_name ?: '—' }}</a>
+        </div>
         @if($comment->canEditOwn && Auth::check() && Auth::id() === $comment->authorId)
           <button type="button" class="text-gray-400 hover:text-gray-600" data-action="edit" data-comment-id="{{ $comment->id }}" title="{{ __('comment::comments.actions.edit') }}" aria-label="{{ __('comment::comments.actions.edit') }}">
             <span class="material-symbols-outlined text-[16px] leading-none">edit</span>
