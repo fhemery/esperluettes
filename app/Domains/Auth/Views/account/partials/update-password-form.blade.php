@@ -32,7 +32,7 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <x-shared::button color="accent">{{ __('Save') }}</x-shared::button>
+            <x-shared::button color="accent" type="submit">{{ __('Save') }}</x-shared::button>
         </div>
     </form>
 </section>

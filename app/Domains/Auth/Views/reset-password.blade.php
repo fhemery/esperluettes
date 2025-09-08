@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="flex items-center justify-end mt-4">
-                    <x-shared::button color="accent">
+                    <x-shared::button color="accent" type="submit">
                         {{ __('auth::reset.submit') }}
                     </x-shared::button>
                 </div>
