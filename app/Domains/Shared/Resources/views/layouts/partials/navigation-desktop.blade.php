@@ -30,8 +30,7 @@
                     :class="open? 'bg-primary/20' : ''"
                     >
                     @if(isset($currentProfile) && $currentProfile)
-                    <img src="{{ $currentProfile->avatar_url }}" alt="avatar"
-                        class="h-6 w-6 rounded-full me-2" />
+                    <x-shared::avatar :src="$currentProfile->avatar_url" alt="avatar" class="h-6 w-6 rounded-full me-2" />
                     <div>{{ $currentProfile->display_name }}</div>
                     @else
                     <div>{{ Auth::user()->email }}</div>

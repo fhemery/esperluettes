@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Default user avatar">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9CA3AF"/>
+      <stop offset="100%" stop-color="#6B7280"/>
+    </linearGradient>
+    <clipPath id="clipCircle">
+      <circle cx="64" cy="64" r="60"/>
+    </clipPath>
+  </defs>
+  <rect width="128" height="128" rx="64" fill="url(#grad)"/>
+  <g clip-path="url(#clipCircle)">
+    <!-- Head -->
+    <circle cx="64" cy="50" r="22" fill="#F3F4F6"/>
+    <!-- Shoulders -->
+    <path d="M24 112c0-22.091 17.909-40 40-40s40 17.909 40 40" fill="#F3F4F6"/>
+  </g>
+</svg>

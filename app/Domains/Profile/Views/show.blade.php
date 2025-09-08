@@ -7,9 +7,9 @@
                 <div class="flex items-center space-x-6">
                     <!-- Profile Picture -->
                     <div class="flex-shrink-0">
-                        <img class="h-24 w-24 rounded-full border-4 border-white shadow-lg"
-                             src="{{ $profile->profile_picture_path }}"
-                             alt="{{ __('profile::show.alt_profile_picture', ['name' => $profile->display_name]) }}">
+                        <x-shared::avatar :src="$profile->profile_picture_path"
+                                          class="h-24 w-24 rounded-full border-4 border-white shadow-lg"
+                                          alt="{{ __('profile::show.alt_profile_picture', ['name' => $profile->display_name]) }}" />
                     </div>
 
                     <!-- User Info -->

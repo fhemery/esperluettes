@@ -48,7 +48,7 @@
                     <div class="">
                         @if(isset($currentProfile) && $currentProfile)
                         <div class="flex items-center gap-2">
-                            <img src="{{ $currentProfile->avatar_url }}" alt="avatar" class="h-8 w-8 rounded-full" />
+                            <x-shared::avatar :src="$currentProfile->avatar_url" alt="avatar" class="h-8 w-8 rounded-full" />
                             <div>
                                 <div class="font-medium text-base text-gray-800">{{ $currentProfile->display_name }}</div>
                                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>

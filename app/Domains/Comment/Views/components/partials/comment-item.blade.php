@@ -5,11 +5,9 @@
     <div class="shrink-0">
       @php($avatar = $comment->authorProfile->avatar_url ?? '')
       @if($avatar)
-        <img src="{{ $avatar }}" alt="{{ $comment->authorProfile->display_name ?? 'User' }}" class="h-12 w-12 rounded-full object-cover" />
+        <img src="{{ $avatar }}" data-fallback="{{ asset('images/default-avatar.svg') }}" onerror="this.src=this.dataset.fallback;this.onerror=null;" alt="{{ $comment->authorProfile->display_name ?? 'User' }}" class="h-12 w-12 rounded-full object-cover" />
       @else
-        <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
-          {{ mb_substr($comment->authorProfile->display_name ?? '?', 0, 1) }}
-        </div>
+        <img src="{{ asset('images/default-avatar.svg') }}" alt="{{ $comment->authorProfile->display_name ?? 'User' }}" class="h-12 w-12 rounded-full object-cover" />
       @endif
     </div>
 
