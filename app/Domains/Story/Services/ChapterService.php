@@ -8,6 +8,7 @@ use App\Domains\Story\Http\Requests\ChapterRequest;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\Story;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ChapterService
@@ -52,7 +53,7 @@ class ChapterService
 
             // Update story.last_chapter_published_at only on first publish
             if ($published && $chapter->first_published_at) {
-                $this->updateStoryLastPublishedIfLatest($story);
+                $this->updateStoryLastPublished($story);
             }
 
             return $chapter;
@@ -96,6 +97,7 @@ class ChapterService
 
         return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published) {
             $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
+            $publishChanged = $wasPublished !== $published;
 
             // Update basics
             $chapter->title = $title;
@@ -117,8 +119,8 @@ class ChapterService
             $chapter->save();
 
             // Update story.last_chapter_published_at only if this request performed the first publish
-            if ($firstPublishedNow) {
-                $this->updateStoryLastPublishedIfLatest($story);
+            if ($firstPublishedNow || $publishChanged) {
+                $this->updateStoryLastPublished($story);
             }
 
             return $chapter;
@@ -147,15 +149,14 @@ class ChapterService
     /**
      * Recompute and persist story.last_chapter_published_at if a newer first publish exists.
      */
-    private function updateStoryLastPublishedIfLatest(Story $story): void
+    private function updateStoryLastPublished(Story $story): void
     {
         $latest = Chapter::where('story_id', $story->id)
+            ->where('status', Chapter::STATUS_PUBLISHED)
             ->whereNotNull('first_published_at')
-            ->max('first_published_at');
-        if ($latest && ($story->last_chapter_published_at === null || $latest > $story->last_chapter_published_at)) {
-            $story->last_chapter_published_at = $latest;
-            $story->save();
-        }
+            ->max('first_published_at') ?? null;
+        $story->last_chapter_published_at = $latest;
+        $story->save();
     }
 
     /**
@@ -171,6 +172,8 @@ class ChapterService
 
             // Rely on FK cascade to delete related reading_progress rows
             $chapter->delete();
+
+            $this->updateStoryLastPublished($story);
         });
     }
 

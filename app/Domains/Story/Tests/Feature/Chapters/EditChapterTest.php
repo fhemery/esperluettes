@@ -99,3 +99,53 @@ it('fails validation when author note exceeds logical 1000 chars', function () {
     $resp->assertRedirect();
     $resp->assertSessionHasErrors(['author_note']);
 });
+
+it('should remove the story last_published if the last chapter is unpublished', function () {
+    $author = alice($this);
+    $story = publicStory('Story F', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Ch 6']);
+
+    $this->actingAs($author);
+    $payload = [
+        'title' => 'New Title',
+        'author_note' => '<script>alert(1)</script><p>Note</p>',
+        'content' => '<h1>  New <em>Content</em></h1>',
+        'published' => '0',
+    ];
+    $resp = $this->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
+
+    $resp->assertRedirect();
+    
+    $storyRefreshed = getStory($story->id);
+    expect($storyRefreshed->last_chapter_published_at)->toBeNull();
+});
+
+it('should add back the story last_published if the last chapter is republished', function () {
+    $author = alice($this);
+    $story = publicStory('Story F', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Ch 6']);
+
+    $this->actingAs($author);
+    $payload = [
+        'title' => 'New Title',
+        'author_note' => '<script>alert(1)</script><p>Note</p>',
+        'content' => '<h1>  New <em>Content</em></h1>',
+        'published' => '0',
+    ];
+    $resp = $this->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
+
+    $resp->assertRedirect();
+
+    $payload = [
+        'title' => 'New Title',
+        'author_note' => '<script>alert(1)</script><p>Note</p>',
+        'content' => '<h1>  New <em>Content</em></h1>',
+        'published' => '1',
+    ];
+    $resp = $this->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
+
+    $resp->assertRedirect();
+    
+    $storyRefreshed = getStory($story->id);
+    expect($storyRefreshed->last_chapter_published_at)->not->toBeNull();
+});

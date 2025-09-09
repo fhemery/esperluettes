@@ -122,3 +122,15 @@ it('returns 404 when story and chapter belong to different stories (slug id mism
     // Chapter still exists
     expect(Chapter::query()->whereKey($chapterA->id)->exists())->toBeTrue();
 });
+
+it('should set story last_chapter_published_at to null if last published chapter is deleted', function () {
+    $author = alice($this);
+    $this->actingAs($author);
+    $story = publicStory('Last Published', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Last Chapter']);
+
+    $this->delete('/stories/' . $story->slug . '/chapters/' . $chapter->slug)->assertRedirect();
+
+    $storyRefreshed = getStory($story->id);
+    expect($storyRefreshed->last_chapter_published_at)->toBeNull();
+});

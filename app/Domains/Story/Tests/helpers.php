@@ -94,6 +94,11 @@ function communityStory(string $title, int $authorId, array $attributes = []): S
     return createStoryForAuthor($authorId, array_merge(['title' => $title, 'visibility' => Story::VIS_COMMUNITY], $attributes));
 }
 
+function getStory(int $id): Story
+{
+    return Story::query()->findOrFail($id);
+}
+
 /**
  * Ensure a Story Type exists for tests and return it.
  */
