@@ -45,7 +45,7 @@ describe('Page display', function() {
     
         $response->assertOk();
         // Assert by translation keys to be locale-agnostic
-        $response->assertSee('story::create.form.title.label');
+        $response->assertSee('story::shared.title.label');
         $response->assertSee('story::shared.description.label');
         $response->assertSee('story::shared.visibility.label');
         $response->assertSee('story::shared.visibility.help', false); // allow HTML

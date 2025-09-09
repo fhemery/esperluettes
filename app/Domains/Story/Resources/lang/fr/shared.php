@@ -21,8 +21,14 @@ return [
             'private' => 'Privée : visible uniquement par vous et vos co-auteurs',
         ],
     ],
+    'title' => [
+        'label' => 'Titre',
+        'placeholder' => 'Entrez le titre de votre histoire.',
+        'help' => 'En panne d\'inspiration ? Vous pourrez le changer plus tard !',
+    ],
     'description' => [
         'label' => 'Résumé',
+        'help' => 'Un résumé court de votre histoire, type quatrième de couverture, qui donnera envie à vos lecteurices.',
     ],
     'type' => [
         'label' => 'Type',

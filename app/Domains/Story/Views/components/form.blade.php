@@ -15,14 +15,14 @@
         <!-- Title -->
         <div class="col-span-4 md:col-span-3">
             <div class="flex items-center gap-2">
-                <x-input-label for="title" :value="__('story::create.form.title.label')"/>
+                <x-input-label for="title" :value="__('story::shared.title.label')"/>
                 <span class="text-red-600" aria-hidden="true">*</span>
-                <x-shared::tooltip type="help" :title="__('story::create.form.title.label')" placement="right">
-                    {{ __('story::create.form.title.help') ?? '' }}
+                <x-shared::tooltip type="help" :title="__('story::shared.title.label')" placement="right">
+                    {{ __('story::shared.title.help') ?? '' }}
                 </x-shared::tooltip>
             </div>
             <x-text-input id="title" name="title" type="text" class="mt-1 block w-full"
-                          placeholder="{{ __('story::create.form.title.placeholder') }}"
+                          placeholder="{{ __('story::shared.title.placeholder') }}"
                           value="{{ old('title', $story?->title ?? '') }}"/>
             <x-input-error :messages="$errors->get('title')" class="mt-2"/>
         </div>
