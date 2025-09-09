@@ -2,6 +2,7 @@
 
 namespace App\Domains\Shared\Validation;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Mews\Purifier\Facades\Purifier;
 
@@ -20,7 +21,9 @@ class CustomValidators
             }
             $profile = $parameters[1] ?? 'strict';
             $clean = Purifier::clean((string) $value, $profile);
-            $plain = trim(strip_tags($clean));
+            $plain = str_replace("\n\n", "\n", trim(strip_tags($clean)));
+            Log::info('before: ' . $value);
+            Log::info('maxstripped: ' . $plain . ' (' . mb_strlen($plain) . ' <= ' . $max . ')');
             return mb_strlen($plain) <= $max;
         });
 

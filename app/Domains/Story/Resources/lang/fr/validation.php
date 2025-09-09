@@ -10,7 +10,7 @@ return [
 
     'description' => [
         'string' => 'La description doit être une chaîne de caractères.',
-        'max' => 'La description ne peut pas dépasser 3000 caractères.',
+        'max' => 'La description ne peut pas dépasser :max caractères.',
     ],
 
     'visibility' => [

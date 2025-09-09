@@ -46,12 +46,11 @@ it('validates title too long (>255)', function () {
     $page->assertOk();
     $page->assertSee('story::validation.title.max');
 });
-
-it('validates description max length (3000)', function () {
+it('validates description max length (1000)', function () {
     $user = alice($this);
 
     $payload = validStoryPayload([
-        'description' => str_repeat('a', 3001),
+        'description' => str_repeat('a', 1001),
     ]);
 
     $response = $this->actingAs($user)

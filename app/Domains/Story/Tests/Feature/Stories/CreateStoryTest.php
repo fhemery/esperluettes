@@ -96,8 +96,7 @@ describe('Page display', function() {
     
 });
 
-describe('Story creation', function () {
-    
+describe('Story creation', function () {   
     it('denies non-confirmed users from posting new stories', function () {
         $user = alice($this, roles: [Roles::USER]);
         $this->actingAs($user);

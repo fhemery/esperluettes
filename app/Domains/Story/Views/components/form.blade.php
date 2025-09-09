@@ -137,7 +137,7 @@
                 {{ __('story::shared.description.help') ?? '' }}
             </x-shared::tooltip>
         </div>
-        <x-shared::editor id="story-description-editor" name="description" :max="3000" :nbLines="15" class="mt-1 block w-full" defaultValue="{{ old('description', $story?->description ?? '') }}" />
+        <x-shared::editor id="story-description-editor" name="description" :max="1000" :nbLines="15" class="mt-1 block w-full" defaultValue="{{ old('description', $story?->description ?? '') }}" />
         <x-input-error :messages="$errors->get('description')" class="mt-2"/>
     </div>
 </x-shared::collapsible>

@@ -63,7 +63,7 @@ class StoryRequest extends FormRequest
             'title.max' => __('story::validation.title.max'),
 
             'description.string' => __('story::validation.description.string'),
-            'description.maxstripped' => __('story::validation.description.max'),
+            'description.maxstripped' => __('story::validation.description.max', ['max' => 1000]),
 
             'visibility.required' => __('story::validation.visibility.required'),
             'visibility.in' => __('story::validation.visibility.in'),
