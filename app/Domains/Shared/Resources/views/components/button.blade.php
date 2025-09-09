@@ -22,7 +22,7 @@
         'tertiary' => 'bg-tertiary hover:bg-tertiary/90 focus:ring-tertiary/40',
         'success' => 'bg-green-600 hover:bg-green-700 focus:ring-green-500/40',
         'danger' => 'bg-red-600 hover:bg-red-700 focus:ring-red-500/40',
-        'neutral' => 'bg-gray-700 hover:bg-gray-800 focus:ring-gray-500/40',
+        'neutral' => 'bg-white hover:bg-gray-100 hover:text-gray-700 focus:ring-gray-500/40 text-black',
     ];
     $colorClasses = $variants[$color] ?? $variants['primary'];
 @endphp

@@ -23,8 +23,10 @@
     <div class="p-3 rounded border border-yellow-300 bg-yellow-50 text-yellow-900 text-sm flex items-center justify-between gap-4">
       <div>{{ __('comment::comments.errors.members_only') }}</div>
       @if($isGuest)
-        <a href="{{ url('/auth/login-intended?redirect=' . urlencode(request()->fullUrl() . '#comments')) }}" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
-          {{ __('comment::comments.actions.login') }}
+        <a href="{{ url('/auth/login-intended?redirect=' . urlencode(request()->fullUrl() . '#comments')) }}">
+          <x-shared::button color="accent">
+            {{ __('comment::comments.actions.login') }}
+          </x-shared::button>
         </a>
       @endif
     </div>

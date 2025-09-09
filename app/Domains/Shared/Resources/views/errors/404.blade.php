@@ -1,5 +1,5 @@
 <x-shared::app-layout>
-    <div class="min-h-screen flex items-center">
+    <div class="h-full flex items-center">
         <div class="max-w-2xl mx-auto px-4 w-full">
             <div class="bg-white shadow sm:rounded-lg p-8 text-center">
                 <h1 class="text-3xl font-semibold text-gray-900 mb-3">{{ __('shared::errors.404.title') }}</h1>
@@ -9,20 +9,23 @@
                 @endguest
 
                 <div class="flex items-center justify-center gap-3">
-                    <button type="button" onclick="history.back()" class="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-50">
+                    <x-shared::button onclick="history.back()" color="neutral">
                         {{ __('shared::errors.actions.back') }}
-                    </button>
+                    </x-shared::button>
                     @auth
-                        <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
+                        <a href="{{ route('dashboard') }}">
                             {{ __('shared::errors.actions.go_to_dashboard') }}
                         </a>
                     @else
-                        <a href="{{ route('home') }}" class="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-50">
-                            {{ __('shared::errors.actions.back_home') }}
+                        <a href="{{ route('home') }}">
+                            <x-shared::button color="primary">
+                                {{ __('shared::errors.actions.back_home') }}
+                            </x-shared::button>
                         </a>
-                        <a href="{{ route('login.with_intended', ['redirect' => request()->fullUrl()]) }}"
-                           class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
-                            {{ __('shared::errors.actions.login_to_continue') }}
+                        <a href="{{ route('login.with_intended', ['redirect' => request()->fullUrl()]) }}">
+                            <x-shared::button color="accent">
+                                {{ __('shared::errors.actions.login_to_continue') }}
+                            </x-shared::button>
                         </a>
                     @endauth
                 </div>
