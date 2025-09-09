@@ -8,20 +8,14 @@
             </div>
 
             <div class="mt-12 space-y-4 leading-relaxed text-center text-white">
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent elementum ipsum vitae velit sagittis
-                    sodales. Suspendisse eu felis scelerisque, rhoncus dolor ac, blandit velit. Nunc mollis non risus id
-                    eleifend.
-                </p>
-                <p>
-                    Proin non risus et libero consectetur congue. Phasellus fringilla interdum dui eu egestas. Nam sit amet
-                    suscipit. Proin luctus, libero vel auctor maximus, ante arcu lacinia nulla, sit amet sodales risus nisi at
-                    tortor.
-                </p>
-                <p>
-                    Sed sagittis odio in elit tincidunt aliquet. Nullam maximus felis a nibh molestie euismod. Pellentesque non
-                    mattis augue.
-                </p>
+                <p>Salut à toi qui arrives en ces lieux.</p>
+
+                <p>Ici se trouve l’entrée de notre havre : un jardin luxuriant où poussent les tiges, les feuilles, les vrilles de notre imagination. Les clairières sont peuplées de carnets, de plumes et de chapitres. Les tasses de thé sont toujours fumantes et les chats surgissent de nulle part, porteurs de mystères ou de réconfort. Parfois on croise une fée, un détective ou un vaisseau…</p>
+
+                <p>Ici on s’entraide. On se lit, on se commente, on se conseille. Avec sincérité et bienveillance. Parce qu’on sait qu’écrire réclame du temps, du courage, de l’esprit et de l’âme. </p>
+
+                <p>Si ces quelques mots résonnent pour toi, scribouilleur fortuit ou autrice ambitieuse, lectrice picoreuse ou dévoreur d’histoires, alors pousse la barrière, viens poser tes cahiers.
+                    Le Jardin des Esperluettes t’ouvre ses branches.</p>
             </div>
 
             <div class="mt-12 flex items-center justify-center">
