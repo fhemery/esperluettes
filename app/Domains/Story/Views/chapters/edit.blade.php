@@ -1,4 +1,4 @@
-@section('title', __('story::chapters.edit.title') . ' – ' . config('app.name'))
+@section('title', __('story::chapters.edit.title', ['title' => $chapter->title]) . ' – ' . $story->title)
 
 <x-app-layout>
     <div class="py-12">

@@ -1,3 +1,4 @@
+@section('title', __('story::edit.title', ['title' => $story->title]))
 <x-app-layout>
     <div class="bg-transparent">
         <div class="p-6 text-gray-900">
