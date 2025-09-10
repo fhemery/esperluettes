@@ -2,6 +2,11 @@
     <div class="bg-transparent">
         <div class="p-6 text-gray-900">
             <div class="max-w-3xl mx-auto">
+                <div class="my-2">
+                    <x-shared::button color="neutral" onclick="window.history.back()">
+                        {{ __('shared::actions.back') }}
+                    </x-shared::button>
+                </div>
                 <form action="{{ route('stories.update', ['slug' => $story->slug]) }}" method="POST" novalidate>
                     @csrf
                     @method('PUT')
