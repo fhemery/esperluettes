@@ -5,26 +5,22 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-transparent">
-                <div class="p-6 text-gray-900">
-                    <div class="max-w-3xl mx-auto">
-                        <form action="{{ route('stories.store') }}" method="POST" novalidate>
-                            @csrf
+    <div class="bg-transparent">
+        <div class="p-6 text-gray-900">
+            <div class="max-w-3xl mx-auto">
+                <form action="{{ route('stories.store') }}" method="POST" novalidate>
+                    @csrf
 
-                            <x-story::form :referentials="$referentials"/>
+                    <x-story::form :referentials="$referentials" />
 
-                            <div class="text-sm">{{ __('story::create.hint')}}</div>
+                    <div class="text-sm">{{ __('story::create.hint')}}</div>
 
-                            <div class="mt-6 flex justify-center">
-                                <x-shared::button color="accent" type="submit">
-                                    {{ __('story::create.actions.continue') }}
-                                </x-shared::button>
-                            </div>
-                        </form>
+                    <div class="mt-6 flex justify-center">
+                        <x-shared::button color="accent" type="submit">
+                            {{ __('story::create.actions.continue') }}
+                        </x-shared::button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>

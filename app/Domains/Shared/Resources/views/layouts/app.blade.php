@@ -79,7 +79,7 @@
             @endif
 
             <!-- Page Content -->
-            <main class="flex-1 flex flex-col">
+            <main class="flex-1 flex flex-col max-w-7xl mx-auto sm:px-6 lg:px-8 py-4 sm:py-8">
                 {{ $slot }}
             </main>
 

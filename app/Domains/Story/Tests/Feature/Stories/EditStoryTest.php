@@ -32,8 +32,7 @@ it('allows the author to load edit page and update story', function () {
 
     // Load edit page
     $this->get('/stories/' . $story->slug . '/edit')
-        ->assertOk()
-        ->assertSee('story::edit.title');
+        ->assertOk();
 
     // Update
     $payload = validStoryPayload([

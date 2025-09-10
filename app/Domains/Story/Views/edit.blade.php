@@ -1,29 +1,19 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('story::edit.title') }}
-        </h2>
-    </x-slot>
+    <div class="bg-transparent">
+        <div class="p-6 text-gray-900">
+            <div class="max-w-3xl mx-auto">
+                <form action="{{ route('stories.update', ['slug' => $story->slug]) }}" method="POST" novalidate>
+                    @csrf
+                    @method('PUT')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-transparent">
-                <div class="p-6 text-gray-900">
-                    <div class="max-w-3xl mx-auto">
-                        <form action="{{ route('stories.update', ['slug' => $story->slug]) }}" method="POST" novalidate>
-                            @csrf
-                            @method('PUT')
+                    <x-story::form :story="$story" :referentials="$referentials" />
 
-                            <x-story::form :story="$story" :referentials="$referentials"/>
-
-                            <div class="mt-6 flex justify-center">
-                                <x-shared::button color="accent" type="submit">
-                                    {{ __('story::edit.actions.save') }}
-                                </x-shared::button>
-                            </div>
-                        </form>
+                    <div class="mt-6 flex justify-center">
+                        <x-shared::button color="accent" type="submit">
+                            {{ __('story::edit.actions.save') }}
+                        </x-shared::button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>

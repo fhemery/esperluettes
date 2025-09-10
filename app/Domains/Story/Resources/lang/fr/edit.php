@@ -1,8 +1,6 @@
 <?php
 
 return [
-    'title' => 'Modifier l\'histoire',
-
     'actions' => [
         'save' => 'Enregistrer',
     ],
