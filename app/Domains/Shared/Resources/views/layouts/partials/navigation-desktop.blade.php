@@ -20,59 +20,62 @@
         @endif
     </div>
 
-    <!-- Profile with dropdown -->
+    <!-- Profile with drawer -->
     <div class="hidden sm:flex sm:items-center sm:ms-6">
-        <x-dropdown width="w-64" contentClasses="bg-bg">
-            <x-slot name="trigger">
-                
-                <button
-                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
-                    :class="open? 'bg-primary/20' : ''"
-                    >
-                    @if(isset($currentProfile) && $currentProfile)
-                    <x-shared::avatar :src="$currentProfile->avatar_url" alt="avatar" class="h-6 w-6 rounded-full me-2" />
-                    <div>{{ $currentProfile->display_name }}</div>
-                    @else
-                    <div>{{ Auth::user()->email }}</div>
-                    @endif
-
-                    <div class="ms-1">
-                        <i x-show="!open" class="material-symbols-outlined text-accent">arrow_drop_down</i>
-                        <i x-show="open" class="material-symbols-outlined text-accent">close</i>
-                    </div>
-                </button>
-            </x-slot>
-
-            <x-slot name="content">
-                <div class="-mt-2 border-2 border-primary bg-primary/20 py-2 px-4">
-                    @if (Auth::user()->hasVerifiedEmail())
-                    <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
-                        {{ __('shared::navigation.profile') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('account.edit')" :active="request()->routeIs('account.edit')">
-                        {{ __('shared::navigation.account') }}
-                    </x-responsive-nav-link>
-                    @else
-                    <x-responsive-nav-link :href="route('verification.notice')" :active="request()->routeIs('verification.notice')">
-                        {{ __('shared::navigation.verify-email') }}
-                    </x-responsive-nav-link>
-                    @endif
-
-                    <!-- Authentication -->
-                     <div class="flex justify-center pt-2">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-
-                        <a onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                            <x-shared::button color="accent">
-                                {{ __('shared::navigation.logout') }}
-                            </x-shared::button>
-                        </a>
-                    </form>
-                     </div>
-                </div>
-            </x-slot>
-        </x-dropdown>
+        <button
+            @click="$dispatch('drawer-open-profile')"
+            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
+        >
+            @if(isset($currentProfile) && $currentProfile)
+            <x-shared::avatar :src="$currentProfile->avatar_url" alt="avatar" class="h-6 w-6 rounded-full me-2" />
+            <div>{{ $currentProfile->display_name }}</div>
+            @else
+            <div>{{ Auth::user()->email }}</div>
+            @endif
+            <div class="ms-1">
+                <i class="material-symbols-outlined text-accent">arrow_drop_down</i>
+            </div>
+        </button>
     </div>
+
+    <!-- Desktop-only Profile Drawer -->
+    <x-shared::drawer name="profile" class="hidden sm:block">
+        <x-slot:header>
+            <div class="flex items-center gap-2">
+                @if(isset($currentProfile) && $currentProfile)
+                <x-shared::avatar :src="$currentProfile->avatar_url" alt="avatar" class="h-8 w-8 rounded-full" />
+                <div>
+                    <div class="font-medium text-base text-gray-800">{{ $currentProfile->display_name }}</div>
+                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                </div>
+                @else
+                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                @endif
+            </div>
+        </x-slot:header>
+
+        <div class="mt-1 space-y-1">
+            @if (Auth::user()->hasVerifiedEmail())
+            <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
+                {{ __('shared::navigation.profile') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('account.edit')" :active="request()->routeIs('account.edit')">
+                {{ __('shared::navigation.account') }}
+            </x-responsive-nav-link>
+            @else
+            <x-responsive-nav-link :href="route('verification.notice')" :active="request()->routeIs('verification.notice')">
+                {{ __('shared::navigation.verify-email') }}
+            </x-responsive-nav-link>
+            @endif
+
+            <!-- Authentication -->
+            <form method="POST" action="{{ route('logout') }}" class="pt-2">
+                @csrf
+                <x-responsive-nav-link :href="route('logout')"
+                    onclick="event.preventDefault(); this.closest('form').submit();">
+                    {{ __('shared::navigation.logout') }}
+                </x-responsive-nav-link>
+            </form>
+        </div>
+    </x-shared::drawer>
 </div>

@@ -41,8 +41,7 @@ function extractFirstDivById(string $html, string $id): string
 function countClickables(string $html): int
 {
     $anchors = preg_match_all('/<a\s[^>]*href=/i', $html) ?: 0;
-    $buttons = preg_match_all('/<button\b[^>]*>/i', $html) ?: 0;
-    return $anchors + $buttons;
+    return $anchors;
 }
 
 function extractClickables(string $html): array
@@ -54,17 +53,6 @@ function extractClickables(string $html): array
             // Strip tags inside link, collapse whitespace
             $text = trim(preg_replace('/\s+/', ' ', strip_tags($match[4])));
             $items[] = '[a] ' . $text . ' => ' . $href;
-        }
-    }
-    if (preg_match_all('/<button\b([^>]*)>(.*?)<\/button>/is', $html, $b, PREG_SET_ORDER)) {
-        foreach ($b as $match) {
-            $attrs = $match[1] ?? '';
-            $text = trim(preg_replace('/\s+/', ' ', strip_tags($match[2] ?? '')));
-            $classes = '';
-            if (preg_match('/class\s*=\s*(\"|\')(.*?)(\1)/i', $attrs, $cm)) {
-                $classes = trim($cm[2]);
-            }
-            $items[] = '[button] ' . $text . ($classes ? ' {'.$classes.'}' : '');
         }
     }
     return $items;
