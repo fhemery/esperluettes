@@ -5,4 +5,6 @@ return [
     'character' => 'caractère|caractères',
     // Minimum requirement message (server-side known number)
     'min-characters' => ':min caractère minimum|:min caractères minimum',
+    // Tooltip for the Quill "Remove formatting" button
+    'clean' => 'Effacer la mise en forme',
 ];

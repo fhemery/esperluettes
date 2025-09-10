@@ -31,6 +31,22 @@ export function initQuillEditor(id) {
     // Mark as initialized
     container.dataset.quillInited = '1';
 
+    // Enhance accessibility and clarity: add tooltip to the "Remove formatting" button
+    try {
+      const toolbar = editor.getModule('toolbar');
+      const label = container.getAttribute('data-clean-label') || 'Remove formatting';
+      if (toolbar && toolbar.container) {
+        const btn = toolbar.container.querySelector('button.ql-clean');
+        if (btn && !btn.getAttribute('data-labeled')) {
+          btn.setAttribute('title', label);
+          btn.setAttribute('aria-label', label);
+          btn.setAttribute('data-labeled', '1');
+        }
+      }
+    } catch (e) {
+      // no-op
+    }
+
     // Height handling: enforce min and max lines, scroll when exceeding max
     // Defaults: min 5 lines, max nbLines (from data-nb-lines or 5)
     const nbLines = container.getAttribute('data-nb-lines') || 5;
