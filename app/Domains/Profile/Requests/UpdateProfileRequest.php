@@ -4,6 +4,7 @@ namespace App\Domains\Profile\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Domains\Shared\Validation\Rules\UniqueProfileDisplayName;
 
 class UpdateProfileRequest extends FormRequest
 {
@@ -23,7 +24,7 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'display_name' => ['nullable', 'string', 'max:100'],
+            'display_name' => ['nullable', 'string', 'max:100', new UniqueProfileDisplayName(Auth::id())],
             'facebook_url' => ['nullable', 'string', 'max:255'],
             'x_url' => ['nullable', 'string', 'max:255'],
             'instagram_url' => ['nullable', 'string', 'max:255'],

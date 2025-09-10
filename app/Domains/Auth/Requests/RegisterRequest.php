@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Requests;
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Services\ActivationCodeService;
+use App\Domains\Shared\Validation\Rules\UniqueProfileDisplayName;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -17,7 +18,7 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', new UniqueProfileDisplayName(null)],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Password::defaults()],
         ];

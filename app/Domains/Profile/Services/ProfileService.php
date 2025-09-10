@@ -6,6 +6,7 @@ use App\Domains\Profile\Events\ProfileDisplayNameChanged;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\Support\AvatarGenerator;
 use App\Domains\Profile\Services\ProfileCacheService;
+use App\Domains\Shared\Support\SimpleSlug;
 use App\Domains\Shared\Services\ImageService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
@@ -35,7 +36,7 @@ class ProfileService
             ['user_id' => $userId],
             [   
                 'display_name' => $display,
-                'slug' => $this->makeUniqueSlugForName($display, $userId),
+                'slug' => SimpleSlug::normalize($display),
                 'profile_picture_path' => $avatarPath,
             ]
         );
@@ -138,7 +139,7 @@ class ProfileService
         }
 
         $profile->display_name = $normalized;
-        $profile->slug = $this->makeUniqueSlugForName($normalized, $profile->user_id);
+        $profile->slug = SimpleSlug::normalize($normalized);
 
         return ['old' => $old, 'new' => $normalized];
     }
@@ -304,22 +305,4 @@ class ProfileService
         return $currentUserId === $profile_user_id;
     }
 
-    /**
-     * Make a unique slug from an arbitrary name for the given user ID.
-     */
-    private function makeUniqueSlugForName(string $name, int $userId): string
-    {
-        $base = Str::slug($name) ?: 'user-' . $userId;
-        $slug = $base;
-        $i = 0;
-        while (
-            Profile::where('slug', $slug)
-                ->where('user_id', '!=', $userId)
-                ->exists()
-        ) {
-            $i++;
-            $slug = $base . '-' . $i;
-        }
-        return $slug;
-    }
 }
