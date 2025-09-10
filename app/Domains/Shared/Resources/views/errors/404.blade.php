@@ -14,7 +14,9 @@
                     </x-shared::button>
                     @auth
                         <a href="{{ route('dashboard') }}">
-                            {{ __('shared::errors.actions.go_to_dashboard') }}
+                            <x-shared::button color="primary">
+                                {{ __('shared::errors.actions.go_to_dashboard') }}
+                            </x-shared::button>
                         </a>
                     @else
                         <a href="{{ route('home') }}">
