@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'brand_description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Necessitatibus id nam ratione quibusdam officia alias, sint ipsa, nesciunt commodi minus veniam',
+    'brand_description' => 'Ce site est une plateforme de publication d’histoires en ligne et d’entraide sur l’écriture créative.',
 
     'title_garden' => 'Le Jardin',
     'link_team' => "L'équipe",
