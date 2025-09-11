@@ -1,12 +1,12 @@
 <nav class="bg-bg text-fg">
     <div class="max-w-7xl mx-auto px-1 sm:px-4 lg:px-6">
-        <div class="h-20 flex justify-between">
+        <div class="h-16 flex justify-between">
             <div class="flex items-center shrink-0">
                 <a href="{{ route('home') }}" class="hidden md:block">
-                    <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-16" id="header-logo">
+                    <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-14" id="header-logo">
                 </a>
                 <a href="{{ route('home') }}" class="block md:hidden">
-                    <img src="{{ asset('images/themes/autumn/logo.png') }}" alt="{{config('app.name')}}" class="h-16" id="header-logo">
+                    <img src="{{ asset('images/themes/autumn/logo.png') }}" alt="{{config('app.name')}}" class="h-14" id="header-logo">
                 </a>
             </div>
 
@@ -28,5 +28,5 @@
             @endunless
         </div>
     </div>
-    <div class="min-h-8 bg-primary w-full"></div>
+    <div class="h-6 bg-primary w-full"></div>
 </nav>

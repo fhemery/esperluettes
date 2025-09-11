@@ -11,7 +11,7 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-bg text-fg h-full flex flex-col">
-            @include('shared::layouts.navigation')
+            @include('shared::layouts.partials.navigation')
 
             <!-- Page Heading -->
             @isset($header)

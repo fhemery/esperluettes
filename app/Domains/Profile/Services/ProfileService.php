@@ -11,7 +11,6 @@ use App\Domains\Shared\Services\ImageService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ProfileService
 {

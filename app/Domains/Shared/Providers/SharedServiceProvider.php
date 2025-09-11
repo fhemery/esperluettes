@@ -60,7 +60,7 @@ class SharedServiceProvider extends ServiceProvider
         Blade::component('shared::app-layout', AppLayout::class);
 
         // Share current profile DTO to navigation layout via contract
-        View::composer('shared::layouts.navigation', function ($view) {
+        View::composer('shared::layouts.partials.navigation', function ($view) {
             $dto = null;
             if (Auth::check()) {
                 /** @var ProfilePublicApi $api */
