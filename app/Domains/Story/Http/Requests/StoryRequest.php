@@ -17,7 +17,7 @@ class StoryRequest extends FormRequest
     {
         return [
             'title' => ['required_trimmed', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'maxstripped:1000'],
+            'description' => ['required', 'string', 'minstripped:100', 'maxstripped:1000'],
             'visibility' => ['required', 'in:' . implode(',', Story::visibilityOptions())],
             'story_ref_type_id' => ['required', 'integer', 'exists:story_ref_types,id'],
             'story_ref_audience_id' => ['required', 'integer', 'exists:story_ref_audiences,id'],
@@ -40,10 +40,12 @@ class StoryRequest extends FormRequest
             $title = trim($title);
         }
 
-        // Purify description if provided
+        // Purify description if provided; if empty after stripping tags, set to null
         $description = $this->input('description');
         if ($description !== null) {
             $description = Purifier::clean((string) $description, 'strict');
+            $plain = trim(strip_tags($description));
+            
         }
 
         $this->merge([
@@ -62,7 +64,9 @@ class StoryRequest extends FormRequest
             'title.min' => __('story::validation.title.min'),
             'title.max' => __('story::validation.title.max'),
 
+            'description.required' => __('story::validation.description.required'),
             'description.string' => __('story::validation.description.string'),
+            'description.minstripped' => __('story::validation.description.min', ['min' => 100]),
             'description.maxstripped' => __('story::validation.description.max', ['max' => 1000]),
 
             'visibility.required' => __('story::validation.visibility.required'),

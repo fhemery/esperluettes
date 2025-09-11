@@ -69,11 +69,11 @@ describe('Policies', function() {
 
         $user = alice($this);
         $this->actingAs($user);
-        $commentId = createComment('default', 1, generateCommentText(15), null);
+        $commentId = createComment('default', 1, generateDummyText(15), null);
 
 
         expect(function() use ($commentId) {
-            editComment($commentId, generateCommentText(5));
+            editComment($commentId, generateDummyText(5));
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too short']]));
     });
 
@@ -86,10 +86,10 @@ describe('Policies', function() {
 
         $user = alice($this);
         $this->actingAs($user);
-        $commentId = createComment('default', 1, generateCommentText(8), null);
+        $commentId = createComment('default', 1, generateDummyText(8), null);
 
         expect(function() use ($commentId) {
-            editComment($commentId, generateCommentText(20));
+            editComment($commentId, generateDummyText(20));
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too long']]));
     });
 
@@ -102,11 +102,11 @@ describe('Policies', function() {
 
         $user = alice($this);
         $this->actingAs($user);
-        $commentId = createComment('default', 1, generateCommentText(15), null);
-        $childCommentId = createComment('default', 1, generateCommentText(15), $commentId);
+        $commentId = createComment('default', 1, generateDummyText(15), null);
+        $childCommentId = createComment('default', 1, generateDummyText(15), $commentId);
 
         expect(function() use ($childCommentId) {
-            editComment($childCommentId, generateCommentText(5));
+            editComment($childCommentId, generateDummyText(5));
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too short']]));
     });
 
@@ -119,11 +119,11 @@ describe('Policies', function() {
 
         $user = alice($this);
         $this->actingAs($user);
-        $commentId = createComment('default', 1, generateCommentText(10), null);
-        $childCommentId = createComment('default', 1, generateCommentText(10), $commentId);
+        $commentId = createComment('default', 1, generateDummyText(10), null);
+        $childCommentId = createComment('default', 1, generateDummyText(10), $commentId);
 
         expect(function() use ($childCommentId) {
-            editComment($childCommentId, generateCommentText(20));
+            editComment($childCommentId, generateDummyText(20));
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too long']]));
     });
 });

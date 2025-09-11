@@ -21,7 +21,7 @@ describe('Chapter comment policy integration (min length = 140)', function () {
         $this->actingAs($user);
 
         expect(function () {
-            createComment('chapter', 123, generateCommentText(139), null);
+            createComment('chapter', 123, generateDummyText(139), null);
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too short']]));
     });
 
@@ -29,7 +29,7 @@ describe('Chapter comment policy integration (min length = 140)', function () {
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
         $this->actingAs($user);
 
-        $commentId = createComment('chapter', 123, generateCommentText(140), null);
+        $commentId = createComment('chapter', 123, generateDummyText(140), null);
         expect($commentId)->toBeGreaterThan(0);
     });
 });
@@ -44,7 +44,7 @@ describe('Regarding root comment creation', function () {
         expect($list->config->canCreateRoot)->toBe(false);
 
         expect(function () use ($chapter) {
-            createComment('chapter', $chapter->id, generateCommentText(140), null);
+            createComment('chapter', $chapter->id, generateDummyText(140), null);
         })->toThrow(ValidationException::withMessages(['body' => ['Comment not allowed']]));
     });
 
@@ -55,13 +55,13 @@ describe('Regarding root comment creation', function () {
 
         $bob = bob($this);
         $this->actingAs($bob);
-        createComment('chapter', $chapter->id, generateCommentText(140), null);
+        createComment('chapter', $chapter->id, generateDummyText(140), null);
 
         $list = listComments('chapter', $chapter->id);
         expect($list->config->canCreateRoot)->toBe(false);
 
         expect(function () use ($chapter) {
-            createComment('chapter', $chapter->id, generateCommentText(140), null);
+            createComment('chapter', $chapter->id, generateDummyText(140), null);
         })->toThrow(ValidationException::withMessages(['body' => ['Comment not allowed']]));
     });
 });

@@ -128,7 +128,7 @@ describe('Policies', function() {
         createComment('default', 1, 'Hello', null);
 
         expect(function() {
-            createComment('default', 1, '<p>' . generateCommentText(11) . '</p>', 1);
+            createComment('default', 1, '<p>' . generateDummyText(11) . '</p>', 1);
         })->toThrow(ValidationException::withMessages(['body' => ['Comment too long']]));
     });
 

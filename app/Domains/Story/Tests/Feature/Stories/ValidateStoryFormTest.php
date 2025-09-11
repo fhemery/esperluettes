@@ -24,8 +24,6 @@ it('shows errors for missing required fields (title, visibility, type, audience,
     $page->assertSee('story::validation.type.required');
     $page->assertSee('story::validation.audience.required');
     $page->assertSee('story::validation.copyright.required');
-    // Description is optional; should not show required error
-    $page->assertDontSee('story::validation.description.required');
 });
 
 it('validates title too long (>255)', function () {
@@ -33,7 +31,6 @@ it('validates title too long (>255)', function () {
 
     $payload = validStoryPayload([
         'title' => str_repeat('a', 256),
-        'description' => 'Ok',
     ]);
 
     $response = $this->actingAs($user)
@@ -50,7 +47,7 @@ it('validates description max length (1000)', function () {
     $user = alice($this);
 
     $payload = validStoryPayload([
-        'description' => str_repeat('a', 1001),
+        'description' => str_repeat('<p>a</p>', 1001),
     ]);
 
     $response = $this->actingAs($user)
@@ -62,6 +59,24 @@ it('validates description max length (1000)', function () {
     $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
     $page->assertOk();
     $page->assertSee('story::validation.description.max');
+});
+
+it('validates description min (100)', function() {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        'description' => str_repeat('<p>a</p>', 99),
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.description.min');
 });
 
 it('validates visibility must be in allowed set', function () {

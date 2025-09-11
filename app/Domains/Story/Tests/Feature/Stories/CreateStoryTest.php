@@ -103,7 +103,6 @@ describe('Story creation', function () {
 
         $payload = validStoryPayload([
             'title' => 'Blocked Title',
-            'description' => '<p>blocked</p>',
         ]);
 
         $resp = $this->post('/stories', $payload);
@@ -122,7 +121,6 @@ describe('Story creation', function () {
 
         $payload = validStoryPayload([
             'title' => 'Same Title',
-            'description' => '<p>content</p>',
         ]);
 
         // Act: create two stories with identical titles
@@ -157,7 +155,6 @@ describe('Story creation', function () {
         // Act
         $payload = validStoryPayload([
             'title' => 'My First Story',
-            'description' => '<p>This is a great story</p>',
         ]);
 
         $response = $this->post('/stories', $payload);
@@ -220,7 +217,6 @@ describe('Story creation', function () {
         // Act
         $payload = validStoryPayload([
             'title' => 'Status Story',
-            'description' => '<p>desc</p>',
             'story_ref_status_id' => $status->id,
         ]);
         $resp = $this->post('/stories', $payload);
@@ -247,7 +243,6 @@ describe('Story creation', function () {
         // Act
         $payload = validStoryPayload([
             'title' => 'TW Story',
-            'description' => '<p>desc</p>',
             'story_ref_trigger_warning_ids' => [$tw1->id, $tw2->id],
         ]);
         $resp = $this->post('/stories', $payload);
@@ -275,7 +270,6 @@ describe('Story creation', function () {
         // Act
         $payload = validStoryPayload([
             'title' => 'Feedback Story',
-            'description' => '<p>desc</p>',
             'story_ref_feedback_id' => $feedback->id,
         ]);
         $resp = $this->post('/stories', $payload);

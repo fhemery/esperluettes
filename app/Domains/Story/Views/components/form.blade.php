@@ -133,11 +133,12 @@
     <div class="mt-6">
         <div class="flex items-center gap-2">
             <x-input-label for="description" :value="__('story::shared.description.label')"/>
+            <span class="text-red-600" aria-hidden="true">*</span>
             <x-shared::tooltip type="help" :title="__('story::shared.description.label')" placement="right">
                 {{ __('story::shared.description.help') ?? '' }}
             </x-shared::tooltip>
         </div>
-        <x-shared::editor id="story-description-editor" name="description" :max="1000" :nbLines="15" class="mt-1 block w-full" defaultValue="{{ old('description', $story?->description ?? '') }}" />
+        <x-shared::editor id="story-description-editor" name="description" :min="100" :max="1000" :nbLines="15" class="mt-1 block w-full" defaultValue="{{ old('description', $story?->description ?? '') }}" />
         <x-input-error :messages="$errors->get('description')" class="mt-2"/>
     </div>
 </x-shared::collapsible>

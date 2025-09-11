@@ -218,7 +218,7 @@ function validStoryPayload(array $overrides = []): array
 {
     return array_merge([
         'title' => 'Valid',
-        'description' => null,
+        'description' => generateDummyText(150),
         'visibility' => Story::VIS_PUBLIC,
         'story_ref_type_id' => defaultStoryType()->id,
         'story_ref_audience_id' => defaultAudience()->id,

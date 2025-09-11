@@ -37,7 +37,6 @@ it('allows the author to load edit page and update story', function () {
     // Update
     $payload = validStoryPayload([
         'title' => 'Updated Title',
-        'description' => '<p>new desc</p>',
     ]);
 
     $resp = $this->put('/stories/' . $story->slug, $payload);
@@ -74,7 +73,6 @@ it('allows a co-author with role author to update', function () {
 
     $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Coauthored Title',
-        'description' => '<p>x</p>',
     ]));
 
     $resp->assertRedirect();
@@ -103,7 +101,6 @@ it('returns 404 for collaborator without author role', function () {
     $this->get('/stories/' . $story->slug . '/edit')->assertNotFound();
     $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Should Fail',
-        'description' => '<p>x</p>',
     ]))->assertNotFound();
 });
 
@@ -118,7 +115,6 @@ it('returns 404 for non-collaborator trying to edit', function () {
     $this->get('/stories/' . $story->slug . '/edit')->assertNotFound();
     $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Nope',
-        'description' => '<p>x</p>',
     ]))->assertNotFound();
 });
 
@@ -132,7 +128,6 @@ it('301-redirects from old slug base to canonical after title change', function 
     // Update title
     $this->put('/stories/' . $oldSlug, validStoryPayload([
         'title' => 'New Canonical Title',
-        'description' => '<p>desc</p>',
     ]))->assertRedirect();
 
     $story->refresh();
@@ -168,7 +163,6 @@ it('denies edit access to co-authors without user-confirmed role (middleware)', 
     // And update attempts should also be blocked by middleware
     $this->put('/stories/' . $story->slug, [
         'title' => 'Should Not Be Applied',
-        'description' => '<p>x</p>',
         'visibility' => Story::VIS_PUBLIC,
     ])->assertRedirect(route('dashboard'));
 
@@ -182,7 +176,6 @@ it('syncs genres on update (replaces previous selection)', function () {
     $author = alice($this);
     $this->actingAs($author);
     $story = publicStory('Genres Updatable', $author->id, [
-        'description' => '<p>x</p>',
         'story_ref_genre_ids' => [defaultGenre()->id],
     ]);
 
@@ -193,7 +186,6 @@ it('syncs genres on update (replaces previous selection)', function () {
     // Act: update with two genres
     $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Genres Updatable',
-        'description' => '<p>x</p>',
         'story_ref_genre_ids' => [$g1->id, $g2->id],
     ]));
     $resp->assertRedirect();
@@ -215,15 +207,12 @@ it('allows the author to set and change the optional status on update', function
     // Arrange
     $author = alice($this);
     $this->actingAs($author);
-    $story = publicStory('Status Updatable', $author->id, [
-        'description' => '<p>x</p>',
-    ]);
+    $story = publicStory('Status Updatable', $author->id);
 
     $status = makeStatus('Draft');
 
     $resp1 = $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Status Updatable',
-        'description' => '<p>x</p>',
         'story_ref_status_id' => $status->id,
     ]));
     $resp1->assertRedirect();
@@ -245,15 +234,12 @@ it('syncs trigger warnings on update (replaces previous selection)', function ()
     $twC = makeTriggerWarning('Suicide');
 
     // Story initially with one TW (A)
-    $story = publicStory('TW Updatable', $author->id, [
-        'description' => '<p>x</p>',
-    ]);
+    $story = publicStory('TW Updatable', $author->id);
     $story->triggerWarnings()->sync([$twA->id]);
 
     // Act: update with [B, C]
     $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'TW Updatable',
-        'description' => '<p>x</p>',
         'story_ref_trigger_warning_ids' => [$twB->id, $twC->id],
     ]));
     $resp->assertRedirect();
@@ -276,16 +262,13 @@ it('allows the author to set and change the optional feedback on update', functi
     // Arrange
     $author = alice($this);
     $this->actingAs($author);
-    $story = publicStory('Feedback Updatable', $author->id, [
-        'description' => '<p>x</p>',
-    ]);
+    $story = publicStory('Feedback Updatable', $author->id);
 
     $fb = makeFeedback('Looking for critique');
 
     // First set feedback
     $resp1 = $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Feedback Updatable',
-        'description' => '<p>x</p>',
         'story_ref_feedback_id' => $fb->id,
     ]));
     $resp1->assertRedirect();
@@ -300,7 +283,6 @@ it('allows the author to set and change the optional feedback on update', functi
     // Then clear feedback by sending null
     $resp2 = $this->put('/stories/' . $story->slug, validStoryPayload([
         'title' => 'Feedback Updatable',
-        'description' => '<p>x</p>',
         'story_ref_feedback_id' => null,
     ]));
     $resp2->assertRedirect();

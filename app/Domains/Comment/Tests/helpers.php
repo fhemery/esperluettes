@@ -57,6 +57,6 @@ function listComments(string $entityType = 'default', int $entityId = 1, int $pa
     return $api->getFor($entityType, $entityId, $page, $perPage);
 }
 
-function generateCommentText(int $length): string {
+function generateDummyText(int $length): string {
     return str_repeat('a', $length);
 }

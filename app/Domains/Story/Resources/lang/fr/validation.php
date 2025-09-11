@@ -9,7 +9,9 @@ return [
     ],
 
     'description' => [
+        'required' => 'La description est requise.',
         'string' => 'La description doit être une chaîne de caractères.',
+        'min' => 'La description doit contenir au moins :min caractères.',
         'max' => 'La description ne peut pas dépasser :max caractères.',
     ],
 
