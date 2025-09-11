@@ -4,7 +4,7 @@ namespace App\Domains\Shared\Listeners;
 
 use App\Domains\Shared\Services\DomainEventService;
 
-class AuditAllDomainEvents
+class RecordAllDomainEvents
 {
     public function __construct(private DomainEventService $auditor)
     {

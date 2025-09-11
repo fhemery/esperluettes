@@ -3,7 +3,7 @@
 namespace App\Domains\Shared\Providers;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi;
-use App\Domains\Shared\Listeners\AuditAllDomainEvents;
+use App\Domains\Shared\Listeners\RecordAllDomainEvents;
 use App\Domains\Shared\Views\Layouts\AppLayout;
 use App\Domains\Shared\Validation\CustomValidators;
 use Illuminate\Support\Facades\Auth;
@@ -72,7 +72,7 @@ class SharedServiceProvider extends ServiceProvider
 
         // Register wildcard event auditing if enabled
         if (config('shared.event_auditing_enabled', true)) {
-            Event::listen('*', [AuditAllDomainEvents::class, 'handle']);
+            Event::listen('*', [RecordAllDomainEvents::class, 'handle']);
         }
 
         // Safety guard: never run tests against a non-SQLite database
