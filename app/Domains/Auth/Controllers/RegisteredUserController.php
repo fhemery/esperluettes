@@ -7,6 +7,7 @@ use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Services\ActivationCodeService;
 use App\Domains\Auth\Requests\RegisterRequest;
+use App\Domains\Events\PublicApi\EventBus;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -48,7 +49,7 @@ class RegisteredUserController extends Controller
         // but will rely on our own domain events.
         event(new Registered($user));
         // Emit domain event for cross-domain consumers (e.g., Profile)
-        event(new UserRegistered(userId: $user->id, name: $data['name'] ?? null, registeredAt: now()));
+        app(EventBus::class)->emitSync(new UserRegistered(userId: $user->id, displayName: $data['name'] ?? null));
 
         Auth::login($user);
 

@@ -14,6 +14,6 @@ class CreateProfileOnUserRegistered implements ShouldHandleEventsAfterCommit
 
     public function handle(UserRegistered $event): void
     {
-        $this->profiles->createOrInitProfileOnRegistration($event->userId, $event->name);
+        $this->profiles->createOrInitProfileOnRegistration($event->userId, $event->displayName);
     }
 }

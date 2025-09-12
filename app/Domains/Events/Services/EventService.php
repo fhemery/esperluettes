@@ -34,6 +34,13 @@ class EventService
         return $events->all();
     }
 
+    public function latest(string $name): ?StoredDomainEvent {
+        return StoredDomainEvent::query()
+            ->where('name', $name)
+            ->latest('occurred_at')
+            ->first();
+    }
+
     public function store(DomainEvent $event): void {
         // Build base record
         $record = [

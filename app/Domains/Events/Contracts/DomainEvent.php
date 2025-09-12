@@ -31,11 +31,6 @@ interface DomainEvent
     public function summary(): string;
 
     /**
-     * Returns the occurred date of the event
-     */
-    public function occurredAt(): \DateTimeInterface;
-
-    /**
      * Reconstruct a DTO from stored payload.
      *
      * @param array<string, mixed> $payload

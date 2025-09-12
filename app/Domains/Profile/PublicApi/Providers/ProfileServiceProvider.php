@@ -5,11 +5,11 @@ namespace App\Domains\Profile\PublicApi\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Event;
-use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Profile\Listeners\CreateProfileOnUserRegistered;
 use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
 use App\Domains\Profile\PublicApi\ProfilePublicApi;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Auth\Events\UserRegistered;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -44,9 +44,7 @@ class ProfileServiceProvider extends ServiceProvider
         // Ensure Carbon uses the current app locale (for translated month/day names)
         Carbon::setLocale(app()->getLocale());
 
-        Event::listen(
-            UserRegistered::class,
-            [CreateProfileOnUserRegistered::class, 'handle']
-        );
+        // Subscribe to domain event via EventBus
+        app(EventBus::class)->subscribe(UserRegistered::name(), [CreateProfileOnUserRegistered::class, 'handle']);
     }
 }

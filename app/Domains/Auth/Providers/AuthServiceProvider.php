@@ -3,6 +3,8 @@
 namespace App\Domains\Auth\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Auth\Events\UserRegistered;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -44,5 +46,8 @@ class AuthServiceProvider extends ServiceProvider
 
         // Register auth views namespace
         \Illuminate\Support\Facades\View::addNamespace('auth', app_path('Domains/Auth/Views'));
+
+        // Register Auth domain events mapping with EventBus
+        app(EventBus::class)->registerEvent(UserRegistered::name(), UserRegistered::class);
     }
 }

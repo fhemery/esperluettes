@@ -2,6 +2,7 @@
 
 namespace App\Domains\Events\PublicApi;
 
+use App\Domains\Events\Contracts\DomainEvent;
 use App\Domains\Events\Models\StoredDomainEvent;
 use App\Domains\Events\Services\EventService;
 use App\Domains\Events\Services\DomainEventFactory;
@@ -44,5 +45,10 @@ class EventPublicApi
                 meta: $e->meta
             );
         })->all();
+    }
+
+    public function latest(string $name): ?DomainEvent {
+        $event = $this->eventService->latest($name);
+        return $event ? $this->eventFactory->make($event->name, $event->payload ?? []) : null;
     }
 }
