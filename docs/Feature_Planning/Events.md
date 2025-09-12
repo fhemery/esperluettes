@@ -85,10 +85,67 @@ Gaps we should address:
   - `Replayer` service: `replay(types: array, from?: datetime, to?: datetime, projection: Projection)` streams events without re-dispatching to the bus. Supports batching and dry-run.
   - Example projections: `ComputeAverageCharsPerStory`, `RebuildDailyStoryStats`.
 
+## 5) Contracts and Public API (architecture only)
+
+- EventDTO (interface)
+  - Purpose: a base contract for emitted domain events. Keeps Eloquent inside services and exposes a minimal, serializable contract outside.
+  - Shape (conceptual):
+    - Static: `public static function name(): string` → logical event name used for storage and routing (not necessarily the FQCN).
+    - Instance: `public function toPayload(): array` → returns a JSON-serializable array (scalars/arrays/IDs only; no models).
+    - Static: `public static function fromPayload(array $payload): static` → reconstructs the DTO from stored payload.
+    - Optional: `public static function version(): int` → default 1; we can also version by class name (V2) instead of a method.
+  - Conventions:
+    - DTOs are immutable in practice (readonly properties, no setters).
+
+- EventBus (Public API) and implementation
+  - Purpose: single entry point to emit and subscribe to events; fully hides Laravel’s events from domains.
+  - Emit methods:
+    - `emit(EventDTO $event): void` → default path. If event is non-critical, emit after-commit; if critical, emit immediately.
+    - `emitSync(EventDTO $event): void` → explicit sync (for rare, critical cases like `UserRegistered`).
+  - Subscribe methods (for listeners):
+    - `subscribe(string|array $eventNames, callable|string $listener): void` → register interest in given event names; under the hood maps to Laravel listeners.
+    - Domains call subscribe from their own ServiceProvider `boot()` to listen to other domains’ events, without referencing Laravel.
+  - Storage policy: EventBus stores to `domain_events` directly, then dispatches to listeners; `RecordAllDomainEvents` can be disabled to avoid double-write.
+  - Rule: No direct `Event::dispatch()` or `Event::listen()` usage outside the EventBus Public API.
+
+- Auditable marker/trait
+  - A marker (interface or trait) that indicates the event should capture extra context when stored (url, user_agent, ip, triggered_by_user_id, etc.).
+  - Rationale: save space for non-auditable events (we currently audit all; marker gives us a future opt-out).
+
+- Critical marker (optional)
+  - A marker or method on the DTO (e.g., `public static function isCritical(): bool`) to signal that handlers must run synchronously within the request. For now, only `UserRegistered` is critical.
+
+- EventFactory / registry
+  - Purpose: map stored `(name, version)` to the right DTO class to reconstruct events for projections/replay.
+  - Registration model:
+    - Programmatic registration in each domain’s `ServiceProvider::boot()` via the Public API:
+      - `EventBus::registerEvent(string $name, class-string<EventDTO> $dtoClass): void`
+    - The EventBus maintains an internal in-memory registry (and may cache it) to support rehydration via `fromPayload()`.
+    - This keeps each domain responsible for declaring the events it emits, and avoids global config coupling.
+
+- Placement
+  - Dedicated domain recommended: `app/Domains/Events/` to centralize contracts and API.
+  - Contracts (including DTO interface) under `app/Domains/Events/Contracts/` (e.g., `EventDTO.php`, `EventBus.php`, `Projection.php`).
+  - Public API under `app/Domains/Events/PublicApi/` (e.g., `EventBus.php` facade/contract exposure for other domains; implemented in Services).
+  - Services under `app/Domains/Events/Services/` (e.g., `LaravelEventBus.php`). The EventBus holds the registry internally (no global config required).
+  - Provider: `app/Domains/Events/Providers/EventsServiceProvider.php` binds the contracts and exposes the Public API.
+
+- Validation and testing
+  - DTOs validate their payload in constructors/factories; `toPayload()` must return only JSON-serializable primitives.
+  - Tests use `EventBus` fakes to assert emissions; no direct `Event::fake()` in producers.
+
+### Domain registration pattern
+
+- Each domain registers, in its own `ServiceProvider::boot()`:
+  - Its events into the registry via `EventBus::registerEvent('Domain.EventName', DTO::class)`.
+  - Subscriptions to other domains’ event names via `EventBus::subscribe(...)` using the Public API.
+- This ensures domains never touch Laravel events directly and keeps wiring declarative and local to each domain.
+
 ## 5) Decisions (V1)
 
 - Domain placement
-  - Keep event infrastructure in `App\Domains\Shared\*` for now. If it grows significantly, we can revisit a dedicated `Events` domain later.
+  - Given the added complexity (DTO contract, Public API, subscription routing, registry), we will use a dedicated `Events` domain now: `app/Domains/Events/*`.
+  - We will migrate the current cross-cutting pieces (recorder, model, service) from `Shared` into `Events` incrementally, keeping namespaces stable for other domains.
 
 - Table and listener names
   - Table stays `domain_events` (we are not doing full event sourcing; the intent is audit + targeted replays).
@@ -99,3 +156,42 @@ Gaps we should address:
 
 - User display in admin
   - Canonical field is `triggered_by_user_id`.
+
+## 6) Implementation plan (architecture-only)
+
+Phase 0 — Prep and registry pattern
+- Programmatic registry: each domain will call `EventBus::registerEvent(name, dtoClass)` from its own `ServiceProvider::boot()` to declare events it emits. The EventBus maintains the registry internally.
+- Why programmatic vs config:
+  - Keeps ownership within each domain (the domain that emits declares it), avoids a central config bottleneck, and stays explicit and testable.
+
+Phase 1 — Create Events domain skeleton
+- Create `app/Domains/Events/` with:
+  - `Contracts/` — `EventDTO.php` interface, `EventBus.php`, `Projection.php`, `EventRegistry.php` (optional).
+  - `PublicApi/` — `EventBus` facade/contract exposure for other domains.
+  - `Services/` — `LaravelEventBus.php` (stores to DB then dispatches; holds in-memory registry).
+  - `Models/` — `Event.php` Eloquent model (mimics `App\Domains\Shared\Models\DomainEvent`), table: `events_domain`.
+  - `Providers/EventsServiceProvider.php` — binds contracts, loads config, registers any internal listeners if needed.
+  - `Database/Migrations/` — create `events_domain` table (columns: name, payload JSON, triggered_by_user_id, context_ip, context_user_agent, context_url, meta JSON, occurred_at datetime; plus indexes on name, occurred_at).
+
+Phase 2 — Public API wiring (no Laravel Event facade in domains)
+- Bind `EventBus` in `EventsServiceProvider` and expose it via `PublicApi`.
+- Enforce rule: producers use `EventBus::emit()`/`emitSync()`; domains subscribe via `EventBus::subscribe()` from their own `ServiceProvider::boot()`.
+
+- DTO: copy `@[/app/Domains/Auth/Events/UserRegistered.php]` into the new DTO interface style (minimal payload, static name/fromPayload) and register it via `EventBus::registerEvent('Auth.UserRegistered', DTO::class)` in Auth’s provider.
+- Listener: create a listener equivalent to `@[/app/Domains/Profile/Listeners/CreateProfileOnUserRegistered.php]` but subscribed via `EventBus::subscribe('Auth.UserRegistered', [Listener::class, 'handle'])` in the Profile domain provider.
+- Storage: ensure `LaravelEventBus` stores to `events_domain` at emit time, then dispatches listeners.
+- Disable the wildcard recorder temporarily for this path to avoid double-write (only for the event under test).
+
+Phase 4 — Validation and admin visibility
+- Add Filament resource for `Events\Models\Event` (list/view) mirroring the current DomainEvent resource.
+- Optionally add `SummarizableDomainEvent` support via DTO static summarization method or a separate summary contract.
+
+Phase 5 — Cleanup and migration plan
+- Decide whether to:
+  - Keep both `domain_events` and `events_domain` during transition, or
+  - Migrate existing data from `domain_events` to `events_domain` and deprecate the Shared model/listener.
+- Remove `RecordAllDomainEvents` once EventBus covers storage for all producers.
+- Update documentation to reflect Events domain as the source of truth.
+
+Notes
+- This plan remains architecture-only for now. We will implement once conventions are fully locked.
