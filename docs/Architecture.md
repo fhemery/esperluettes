@@ -22,55 +22,12 @@ This has two consequences :
 
 - When we need to send a command in the wrong direction, we use **Event-Driven Architecture**. Check below for more details. 
 
-## Event-Driven Architecture
-Event-Driven Architecture is a way to send events so that other domains can react in consequence.
+ ## Event-Driven Architecture
+Event-Driven Architecture lets domains react to changes without tight coupling. Domains publish logical events; subscribers in other domains handle them via their own services. This keeps dependencies one-way while enabling rich cross-domain workflows.
 
-Let's take an example with user registration and profile creation.
+For the full guide (contracts, EventBus, persistence model, summaries, translations, and an end-to-end example), see:
 
-### The problem
-- When a user registers, they need an account (handled by the **Auth** domain)
-- But they also need a profile created automatically (handled by the **Profile** domain)
-- The **Profile** domain depends on **Auth**, so **Auth** cannot directly call Profile services without creating circular dependencies
-
-### The solution: event driven architecture
-When a user registers, the **Auth** domain fires an event "into the wild" without knowing who will handle it.
-
-**In the Auth domain** (`app/Domains/Auth/Events/UserRegistered.php`):
-```php
-class UserRegistered implements SummarizableDomainEvent
-{
-    public function __construct(
-        public int $userId,
-        public ?string $name,
-        public ?\DateTimeInterface $registeredAt = null,
-    ) {}
-}
-```
-
-**After user registration, Auth fires the event:**
-```php
-// In registration controller
-event(new UserRegistered(
-    userId: $user->id,
-    name: $user->name,
-    registeredAt: now(),
-));
-```
-
-**The Profile domain listens** (`app/Domains/Profile/Listeners/CreateProfileOnUserRegistered.php`):
-```php
-class CreateProfileOnUserRegistered implements ShouldHandleEventsAfterCommit
-{
-    public function __construct(private ProfileService $profiles) {}
-
-    public function handle(UserRegistered $event): void
-    {
-        $this->profiles->createOrInitProfileOnRegistration($event->userId, $event->name);
-    }
-}
-```
-
-And we're done! The **Auth** domain doesn't need to know about profiles, and the **Profile** domain automatically creates profiles when users register.
+- [Events](../app/Domains/Events/README.md)
 
 ## Deptrac architectural rules
 
