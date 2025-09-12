@@ -3,12 +3,15 @@
 namespace App\Domains\Admin\Filament\Resources\Shared;
 
 use App\Domains\Admin\Filament\Resources\Shared\DomainEventResource\Pages;
-use App\Domains\Shared\Models\DomainEvent;
+use App\Domains\Events\Models\StoredDomainEvent as DomainEvent;
+use App\Domains\Events\Services\DomainEventFactory;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DateTimePicker;
 
 class DomainEventResource extends Resource
 {
@@ -16,6 +19,10 @@ class DomainEventResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-bolt';
     protected static ?int $navigationSort = 99;
+
+    public function __construct(
+        private readonly DomainEventFactory $eventFactory,
+    ) {}
 
     public static function getNavigationLabel(): string
     {
@@ -53,6 +60,14 @@ class DomainEventResource extends Resource
                     ->formatStateUsing(fn (string $state): string => last(explode('\\', $state))),
                 Tables\Columns\TextColumn::make('summary')
                     ->label(__('admin::domain_events.columns.summary'))
+                    ->getStateUsing(function ($record) {
+                        try {
+                            $event = app(DomainEventFactory::class)->make($record->name, $record->payload ?? []);
+                            return $event?->summary();
+                        } catch (\Throwable $e) {
+                            return null;
+                        }
+                    })
                     ->wrap()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('triggered_by_user_id')
@@ -73,6 +88,55 @@ class DomainEventResource extends Resource
             ])
             ->defaultSort('occurred_at', 'desc')
             ->filters([
+                Tables\Filters\Filter::make('name_filter')
+                    ->form([
+                        TextInput::make('name_filter')
+                            ->label(__('admin::domain_events.filters.name_filter'))
+                            ->live(debounce: 750),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (!empty($data['name_filter'])) {
+                            $query->where('name', 'like', '%' . $data['name_filter'] . '%');
+                        }
+                        return $query;
+                    }),
+                Tables\Filters\Filter::make('user_id')
+                    ->form([
+                        TextInput::make('user_id')
+                            ->numeric()
+                            ->label(__('admin::domain_events.filters.user_id'))
+                            ->live(debounce: 750),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (!empty($data['user_id'])) {
+                            $query->where('triggered_by_user_id', (int) $data['user_id']);
+                        }
+                        return $query;
+                    }),
+                Tables\Filters\Filter::make('occurred_after')
+                    ->form([
+                        DateTimePicker::make('occurred_after')
+                            ->label(__('admin::domain_events.filters.occurred_after'))
+                            ->live(onBlur: true),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (!empty($data['occurred_after'])) {
+                            $query->where('occurred_at', '>=', $data['occurred_after']);
+                        }
+                        return $query;
+                    }),
+                Tables\Filters\Filter::make('occurred_before')
+                    ->form([
+                        DateTimePicker::make('occurred_before')
+                            ->label(__('admin::domain_events.filters.occurred_before'))
+                            ->live(onBlur: true),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (!empty($data['occurred_before'])) {
+                            $query->where('occurred_at', '<=', $data['occurred_before']);
+                        }
+                        return $query;
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -96,7 +160,15 @@ class DomainEventResource extends Resource
                 TextEntry::make('name')
                     ->label(__('admin::domain_events.columns.event')),
                 TextEntry::make('summary')
-                    ->label(__('admin::domain_events.columns.summary')),
+                    ->label(__('admin::domain_events.columns.summary'))
+                    ->getStateUsing(function ($record) {
+                        try {
+                            $event = app(\App\Domains\Events\Services\DomainEventFactory::class)->make($record->name, $record->payload ?? []);
+                            return $event?->summary();
+                        } catch (\Throwable $e) {
+                            return null;
+                        }
+                    }),
                 TextEntry::make('triggered_by_user_id')
                     ->label(__('admin::domain_events.columns.user_id')),
                 TextEntry::make('context_url')

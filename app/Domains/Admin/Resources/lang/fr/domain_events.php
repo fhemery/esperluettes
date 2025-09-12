@@ -17,4 +17,11 @@ return [
         'id' => 'Id',
         'user_agent' => 'Agent utilisateur',
     ],
+    'filters' => [
+        'name_filter' => 'Nom',
+        'user_id' => 'ID utilisateur',
+        'occurred_after' => 'Après le',
+        'occurred_before' => 'Avant le',
+        'per_page' => 'Éléments par page',
+    ],
 ];
