@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\Shared;
 
 use App\Domains\Admin\Filament\Resources\Shared\DomainEventResource\Pages;
-use App\Domains\Events\Models\StoredDomainEvent as DomainEvent;
+use App\Domains\Events\Models\StoredDomainEvent;
 use App\Domains\Events\Services\DomainEventFactory;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -15,7 +15,7 @@ use Filament\Forms\Components\DateTimePicker;
 
 class DomainEventResource extends Resource
 {
-    protected static ?string $model = DomainEvent::class;
+    protected static ?string $model = StoredDomainEvent::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-bolt';
     protected static ?int $navigationSort = 99;
