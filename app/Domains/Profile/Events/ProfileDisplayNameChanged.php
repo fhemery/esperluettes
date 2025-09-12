@@ -2,31 +2,46 @@
 
 namespace App\Domains\Profile\Events;
 
-use App\Domains\Shared\Contracts\SummarizableDomainEvent;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
+use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Contracts\AuditableEvent;
 
-class ProfileDisplayNameChanged implements SummarizableDomainEvent
+class ProfileDisplayNameChanged implements DomainEvent, AuditableEvent
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
-
     public function __construct(
         public readonly int $userId,
         public readonly string $oldDisplayName,
         public readonly string $newDisplayName,
-        public readonly \DateTimeInterface $changedAt,
-    ) {
+    ) {}
+
+    public static function name(): string { return 'Profile.DisplayNameChanged'; }
+
+    public static function version(): int { return 1; }
+
+    public function toPayload(): array
+    {
+        return [
+            'userId' => $this->userId,
+            'oldDisplayName' => $this->oldDisplayName,
+            'newDisplayName' => $this->newDisplayName,
+        ];
     }
 
-    public static function summarizePayload(array $payload): string
+    public function summary(): string
     {
-        $old = $payload['oldDisplayName'] ?? null;
-        $new = $payload['newDisplayName'] ?? null;
-        $id = $payload['userId'] ?? 'n/a';
-        if ($old && $new) {
-            return "User #{$id} changed display name from {$old} to {$new}";
-        }
-        return "User #{$id} updated display name";
+        return trans('profile::events.display_name_changed.summary', [
+            'id' => $this->userId,
+            'old' => $this->oldDisplayName,
+            'new' => $this->newDisplayName,
+        ]);
+    }
+
+    public static function fromPayload(array $payload): static
+    {
+        return new static(
+            userId: (int) ($payload['userId'] ?? 0),
+            oldDisplayName: (string) ($payload['oldDisplayName'] ?? ''),
+            newDisplayName: (string) ($payload['newDisplayName'] ?? ''),
+        );
     }
 }
+

@@ -8,14 +8,18 @@ use App\Domains\Profile\Support\AvatarGenerator;
 use App\Domains\Profile\Services\ProfileCacheService;
 use App\Domains\Shared\Support\SimpleSlug;
 use App\Domains\Shared\Services\ImageService;
+use App\Domains\Events\PublicApi\EventBus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileService
 {
-    public function __construct(private readonly ImageService $images, private readonly ProfileCacheService $cache)
-    {
+    public function __construct(
+        private readonly ImageService $images, 
+        private readonly ProfileCacheService $cache,
+        private readonly EventBus $eventBus,
+    ) {
     }
     
     public function createOrInitProfileOnRegistration(int $userId, ?string $name): Profile
@@ -107,11 +111,10 @@ class ProfileService
 
         // Dispatch event after successful save, if display changed
         if (is_array($displayChanged)) {
-            event(new ProfileDisplayNameChanged(
+            $this->eventBus->emit(new ProfileDisplayNameChanged(
                 $profile->user_id,
                 $displayChanged['old'],
                 $displayChanged['new'],
-                new \DateTimeImmutable('now')
             ));
         }
 

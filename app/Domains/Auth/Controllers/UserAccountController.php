@@ -3,7 +3,6 @@
 namespace App\Domains\Auth\Controllers;
 
 use App\Domains\Auth\Requests\UserAccountUpdateRequest;
-use App\Domains\Auth\Events\UserNameUpdated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

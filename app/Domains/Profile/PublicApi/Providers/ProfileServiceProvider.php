@@ -10,6 +10,7 @@ use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
 use App\Domains\Profile\PublicApi\ProfilePublicApi;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Auth\Events\UserRegistered;
+use App\Domains\Profile\Events\ProfileDisplayNameChanged;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -46,5 +47,8 @@ class ProfileServiceProvider extends ServiceProvider
 
         // Subscribe to domain event via EventBus
         app(EventBus::class)->subscribe(UserRegistered::name(), [CreateProfileOnUserRegistered::class, 'handle']);
+
+        // Register Profile domain events mapping
+        app(EventBus::class)->registerEvent(ProfileDisplayNameChanged::name(), ProfileDisplayNameChanged::class);
     }
 }
