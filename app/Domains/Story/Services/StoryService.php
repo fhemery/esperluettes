@@ -7,11 +7,22 @@ use App\Domains\Story\Models\Story;
 use App\Domains\Story\Support\StoryFilterAndPagination;
 use App\Domains\Story\Support\GetStoryOptions;
 use App\Domains\Shared\Support\SlugWithId;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Story\Events\StoryCreated;
+use App\Domains\Story\Events\DTO\StorySnapshot;
+use App\Domains\Story\Events\StoryUpdated;
+use App\Domains\Story\Events\StoryDeleted;
+use App\Domains\Story\Events\DTO\ChapterSnapshot;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class StoryService
 {
+    public function __construct(
+        private EventBus $eventBus,
+    ) {
+    }
+
     /**
      * Generic listing with optional filters.
      *
@@ -154,6 +165,10 @@ class StoryService
                 'accepted_at' => now(),
             ]);
 
+            // 5) Emit Story.Created event with full snapshot
+            $snapshot = StorySnapshot::fromModel($story, $userId);
+            $this->eventBus->emit(new StoryCreated($snapshot));
+
             return $story;
         });
     }
@@ -195,13 +210,74 @@ class StoryService
     }
 
     /**
+     * Update a story's core fields and relations, emitting Story.Updated with before/after snapshots.
+     */
+    public function updateStory(StoryRequest $request, Story $story): Story
+    {
+        return DB::transaction(function () use ($request, $story) {
+            // Snapshot before
+            $before = StorySnapshot::fromModel($story, (int) $story->created_by_user_id);
+
+            $oldTitle = (string) $story->title;
+
+            // Core fields
+            $story->title = (string)$request->input('title');
+            $story->description = (string)$request->input('description');
+            $story->visibility = (string)$request->input('visibility');
+            $story->story_ref_type_id = (int)$request->input('story_ref_type_id');
+            $story->story_ref_audience_id = (int)$request->input('story_ref_audience_id');
+            $story->story_ref_copyright_id = (int)$request->input('story_ref_copyright_id');
+            $statusId = $request->input('story_ref_status_id');
+            $story->story_ref_status_id = $statusId !== null ? (int)$statusId : null;
+            $feedbackId = $request->input('story_ref_feedback_id');
+            $story->story_ref_feedback_id = $feedbackId !== null ? (int)$feedbackId : null;
+
+            // Sync genres (1..3)
+            $genreIds = $request->input('story_ref_genre_ids', []);
+            if (is_array($genreIds)) {
+                $ids = array_values(array_unique(array_map('intval', $genreIds)));
+                $story->genres()->sync($ids);
+            }
+
+            // Sync trigger warnings (optional)
+            $twIds = $request->input('story_ref_trigger_warning_ids', []);
+            if (is_array($twIds)) {
+                $ids = array_values(array_unique(array_map('intval', $twIds)));
+                $story->triggerWarnings()->sync($ids);
+            }
+
+            // If title changed, regenerate slug base but keep -id suffix
+            if ($story->title !== $oldTitle) {
+                $slugBase = Story::generateSlugBase($story->title);
+                $story->slug = SlugWithId::build($slugBase, $story->id);
+            }
+
+            $story->save();
+
+            // Snapshot after & emit
+            $after = StorySnapshot::fromModel($story, (int) $story->created_by_user_id);
+            $this->eventBus->emit(new StoryUpdated($before, $after));
+
+            return $story;
+        });
+    }
+
+    /**
      * Hard delete a story and let DB cascades clean related records.
      */
     public function deleteStory(Story $story): void
     {
         DB::transaction(function () use ($story) {
-            // If additional cleanup is needed later (files, events), add here.
+            // Build snapshots before deletion
+            $before = StorySnapshot::fromModel($story, (int) $story->created_by_user_id);
+            $chapters = $story->chapters()->orderBy('sort_order')->get();
+            $chapterSnaps = $chapters->map(fn($c) => ChapterSnapshot::fromModel($c))->all();
+
+            // Perform deletion (DB cascades will remove related rows)
             $story->delete();
+
+            // Emit deletion event
+            $this->eventBus->emit(new StoryDeleted($before, $chapterSnaps));
         });
     }
 }

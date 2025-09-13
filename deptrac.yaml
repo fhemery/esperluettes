@@ -282,6 +282,7 @@ deptrac:
       - SharedContracts
       - StoryPrivate
       - StoryRef
+      - EventsPublic
 
     StoryRef:
       - SharedContracts
@@ -353,6 +354,7 @@ deptrac:
       - CommentPublic
       - ProfilePublic
       - StoryRef
+      - EventsPublic
 
     # ###################################################
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation

@@ -8,6 +8,10 @@ use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Policies\StoryPolicy;
 use App\Domains\Story\Policies\ChapterPolicy;
 use App\Domains\Story\Services\ChapterCommentPolicy;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Story\Events\StoryCreated;
+use App\Domains\Story\Events\StoryUpdated;
+use App\Domains\Story\Events\StoryDeleted;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -37,5 +41,10 @@ class StoryServiceProvider extends ServiceProvider
         $registry = app(CommentPolicyRegistry::class);
         $policy = app(ChapterCommentPolicy::class);
         $registry->register('chapter', $policy);
+
+        // Register Story domain events mapping
+        app(EventBus::class)->registerEvent(StoryCreated::name(), StoryCreated::class);
+        app(EventBus::class)->registerEvent(StoryUpdated::name(), StoryUpdated::class);
+        app(EventBus::class)->registerEvent(StoryDeleted::name(), StoryDeleted::class);
     }
 }

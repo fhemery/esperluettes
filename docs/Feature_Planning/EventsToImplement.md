@@ -63,13 +63,13 @@ Legend:
   - Consumers: `Admin` audit.
 
 ## Story
-- [A] `Story.Created` — story created (draft or published depending on workflow).
+- [I][A] `Story.Created` — story created (draft or published depending on workflow).
   - Producers: `Story` create service.
   - Consumers: `Admin` audit, `Activity/Notifications`, projections.
 - [A] `Story.Updated` — metadata updated (title/summary/tags...).
   - Producers: `Story` update service.
   - Consumers: projections, caches, search indexing.
-- [A] `Story.Deleted` — story deleted (soft delete).
+- [I][A] `Story.Deleted` — story deleted (soft delete).
   - Producers: `Story` delete service.
   - Consumers: projections cleanup, admin audit.
 - [A] `Story.VisibilityChanged` — public/private/listed toggles.

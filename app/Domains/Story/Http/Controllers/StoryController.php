@@ -203,41 +203,7 @@ class StoryController
             abort(404);
         }
 
-        $oldSlug = $story->slug;
-        $oldTitle = $story->title;
-
-        $story->title = (string)$request->input('title');
-        $story->description = (string)$request->input('description');
-        $story->visibility = (string)$request->input('visibility');
-        $story->story_ref_type_id = (int)$request->input('story_ref_type_id');
-        $story->story_ref_audience_id = (int)$request->input('story_ref_audience_id');
-        $story->story_ref_copyright_id = (int)$request->input('story_ref_copyright_id');
-        $statusId = $request->input('story_ref_status_id');
-        $story->story_ref_status_id = $statusId !== null ? (int)$statusId : null;
-        $feedbackId = $request->input('story_ref_feedback_id');
-        $story->story_ref_feedback_id = $feedbackId !== null ? (int)$feedbackId : null;
-
-        // Sync genres (1..3)
-        $genreIds = $request->input('story_ref_genre_ids', []);
-        if (is_array($genreIds)) {
-            $ids = array_values(array_unique(array_map('intval', $genreIds)));
-            $story->genres()->sync($ids);
-        }
-
-        // Sync trigger warnings (optional)
-        $twIds = $request->input('story_ref_trigger_warning_ids', []);
-        if (is_array($twIds)) {
-            $ids = array_values(array_unique(array_map('intval', $twIds)));
-            $story->triggerWarnings()->sync($ids);
-        }
-
-        // If title changed, regenerate slug base but keep -id suffix
-        if ($story->title !== $oldTitle) {
-            $slugBase = Story::generateSlugBase($story->title);
-            $story->slug = SlugWithId::build($slugBase, $story->id);
-        }
-
-        $story->save();
+        $this->service->updateStory($request, $story);
 
         return redirect()->to('/stories/' . $story->slug)
             ->with('status', __('story::edit.updated'));
