@@ -5,6 +5,7 @@ namespace App\Domains\Admin\Filament\Resources\Shared;
 use App\Domains\Admin\Filament\Resources\Shared\DomainEventResource\Pages;
 use App\Domains\Events\Models\StoredDomainEvent;
 use App\Domains\Events\Services\DomainEventFactory;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,10 +20,6 @@ class DomainEventResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-bolt';
     protected static ?int $navigationSort = 99;
-
-    public function __construct(
-        private readonly DomainEventFactory $eventFactory,
-    ) {}
 
     public static function getNavigationLabel(): string
     {
@@ -70,10 +67,19 @@ class DomainEventResource extends Resource
                     })
                     ->wrap()
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('display_name')
+                    ->label(__('admin::domain_events.columns.display_name'))
+                    ->getStateUsing(function ($record) {
+                        if ($record->triggered_by_user_id === null) {
+                            return '-';
+                        }
+                        return app(ProfilePublicApi::class)->getPublicProfile($record->triggered_by_user_id)?->display_name ?? '-';
+                    })
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('triggered_by_user_id')
                     ->label(__('admin::domain_events.columns.user_id'))
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('context_url')
                     ->label(__('admin::domain_events.columns.url'))
                     ->limit(60)
@@ -163,11 +169,19 @@ class DomainEventResource extends Resource
                     ->label(__('admin::domain_events.columns.summary'))
                     ->getStateUsing(function ($record) {
                         try {
-                            $event = app(\App\Domains\Events\Services\DomainEventFactory::class)->make($record->name, $record->payload ?? []);
+                            $event = app(DomainEventFactory::class)->make($record->name, $record->payload ?? []);
                             return $event?->summary();
                         } catch (\Throwable $e) {
                             return null;
                         }
+                    }),
+                TextEntry::make('display_name')
+                    ->label(__('admin::domain_events.columns.display_name'))
+                    ->getStateUsing(function ($record) {
+                        if ($record->triggered_by_user_id === null) {
+                            return '-';
+                        }
+                        return app(ProfilePublicApi::class)->getPublicProfile($record->triggered_by_user_id)?->display_name ?? '-';
                     }),
                 TextEntry::make('triggered_by_user_id')
                     ->label(__('admin::domain_events.columns.user_id')),
