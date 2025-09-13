@@ -75,4 +75,16 @@ class CommentRepository
             ->where('author_id', $userId)
             ->exists();
     }
+
+    /**
+     * Soft delete all comments (roots and replies) for a given target.
+     * Returns affected rows count.
+     */
+    public function deleteByTarget(string $entityType, int $entityId): int
+    {
+        return Comment::query()
+            ->where('commentable_type', $entityType)
+            ->where('commentable_id', $entityId)
+            ->forceDelete();
+    }
 }

@@ -4,6 +4,8 @@ namespace App\Domains\Comment\PublicApi\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
+use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
+use App\Domains\Comment\Repositories\CommentRepository;
 use App\Domains\Comment\View\Components\CommentList;
 use Illuminate\Support\Facades\Blade;
 
@@ -14,6 +16,11 @@ class CommentServiceProvider extends ServiceProvider
         // Share a single policy registry instance across the app/tests
         $this->app->singleton(CommentPolicyRegistry::class, function () {
             return new CommentPolicyRegistry();
+        });
+
+        // Maintenance API (system-level operations)
+        $this->app->singleton(CommentMaintenancePublicApi::class, function ($app) {
+            return new CommentMaintenancePublicApi($app->make(CommentRepository::class));
         });
     }
 

@@ -4,6 +4,9 @@ use App\Domains\Story\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use App\Domains\Comment\PublicApi\CommentPublicApi;
+use App\Domains\Comment\Contracts\CommentToCreateDto;
+use App\Domains\Auth\PublicApi\Roles;
 
 uses(TestCase::class, RefreshDatabase::class);
 
@@ -133,4 +136,34 @@ it('should set story last_chapter_published_at to null if last published chapter
 
     $storyRefreshed = getStory($story->id);
     expect($storyRefreshed->last_chapter_published_at)->toBeNull();
+});
+
+it('deletes comments for the deleted chapter only', function () {
+    $author = alice($this);
+    $this->actingAs($author);
+    $story = publicStory('Keep Others', $author->id);
+    $c1 = createPublishedChapter($this, $story, $author, ['title' => 'To Purge']);
+    $c2 = createPublishedChapter($this, $story, $author, ['title' => 'To Keep']);
+
+    /** @var CommentPublicApi $comments */
+    $comments = app(CommentPublicApi::class);
+
+    // Post as a non-author viewer to satisfy policy and min length
+    $viewer = bob($this, roles: [Roles::USER_CONFIRMED]);
+    $this->actingAs($viewer);
+    $long = str_repeat('y', 160);
+    $comments->create(new CommentToCreateDto('chapter', (int) $c1->id, $long, null));
+    $comments->create(new CommentToCreateDto('chapter', (int) $c2->id, $long, null));
+
+    // Sanity: each chapter has one root comment
+    expect($comments->getFor('chapter', (int) $c1->id, 1, 10)->total)->toBe(1);
+    expect($comments->getFor('chapter', (int) $c2->id, 1, 10)->total)->toBe(1);
+
+    // Delete c1 as author
+    $this->actingAs($author);
+    $this->delete('/stories/' . $story->slug . '/chapters/' . $c1->slug)->assertRedirect();
+
+    // Comments for c1 gone, c2 still present
+    expect($comments->getFor('chapter', (int) $c1->id, 1, 10)->total)->toBe(0);
+    expect($comments->getFor('chapter', (int) $c2->id, 1, 10)->total)->toBe(1);
 });

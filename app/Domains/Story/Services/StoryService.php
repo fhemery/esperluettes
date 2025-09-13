@@ -13,6 +13,7 @@ use App\Domains\Story\Events\DTO\StorySnapshot;
 use App\Domains\Story\Events\StoryUpdated;
 use App\Domains\Story\Events\StoryDeleted;
 use App\Domains\Story\Events\DTO\ChapterSnapshot;
+use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +21,7 @@ class StoryService
 {
     public function __construct(
         private EventBus $eventBus,
+        private CommentMaintenancePublicApi $comments,
     ) {
     }
 
@@ -272,6 +274,12 @@ class StoryService
             $before = StorySnapshot::fromModel($story, (int) $story->created_by_user_id);
             $chapters = $story->chapters()->orderBy('sort_order')->get();
             $chapterSnaps = $chapters->map(fn($c) => ChapterSnapshot::fromModel($c))->all();
+
+            // Purge comments for all chapters and the story itself (if any)
+            $chapterIds = $chapters->pluck('id')->all();
+            foreach ($chapterIds as $cid) {
+                $this->comments->deleteFor('chapter', (int) $cid);
+            }
 
             // Perform deletion (DB cascades will remove related rows)
             $story->delete();

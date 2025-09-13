@@ -7,12 +7,17 @@ use App\Domains\Shared\Support\SparseReorder;
 use App\Domains\Story\Http\Requests\ChapterRequest;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\Story;
+use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ChapterService
 {
+    public function __construct(
+        private readonly CommentMaintenancePublicApi $comments,
+    ) {}
+
     public function createChapter(Story $story, ChapterRequest $request, int $userId): Chapter
     {
         $title = (string) $request->input('title');
@@ -169,6 +174,9 @@ class ChapterService
             if ((int)$chapter->story_id !== (int)$story->id) {
                 throw new \InvalidArgumentException('Chapter does not belong to given story');
             }
+
+            // Purge comments for this chapter (hard delete via maintenance API)
+            $this->comments->deleteFor('chapter', (int) $chapter->id);
 
             // Rely on FK cascade to delete related reading_progress rows
             $chapter->delete();

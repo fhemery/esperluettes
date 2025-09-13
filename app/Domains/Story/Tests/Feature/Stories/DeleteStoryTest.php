@@ -2,9 +2,11 @@
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-
 use App\Domains\Story\Events\StoryDeleted;
 use App\Domains\Events\PublicApi\EventPublicApi;
+use App\Domains\Comment\PublicApi\CommentPublicApi;
+use App\Domains\Comment\Contracts\CommentToCreateDto;
+use App\Domains\Auth\PublicApi\Roles;
 
 uses(TestCase::class, RefreshDatabase::class);
 
@@ -20,6 +22,45 @@ it('allows an author to hard delete their story and then show returns 404', func
     // Assert via controller: show should now 404
     $this->get(route('stories.show', ['slug' => $story->slug]))
         ->assertNotFound();
+});
+
+it('deletes chapter comments when deleting a story', function () {
+    $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+    $this->actingAs($author);
+
+    // Create story and two chapters with content
+    $story = publicStory('Comments Go Away', $author->id);
+    $c1 = createPublishedChapter($this, $story, $author, ['title' => 'Ch 1', 'content' => '<p>Alpha beta gamma</p>']);
+    $c2 = createPublishedChapter($this, $story, $author, ['title' => 'Ch 2', 'content' => '<p>Delta epsilon</p>']);
+
+    /** @var CommentPublicApi $comments */
+    $comments = app(CommentPublicApi::class);
+
+    // Post comments as a non-author viewer (authors cannot post root per policy)
+    $viewer = bob($this, roles: [Roles::USER_CONFIRMED]);
+    $this->actingAs($viewer);
+
+    $long = str_repeat('x', 160);
+    // Add comments on both chapters (roots + a reply)
+    $root1 = $comments->create(new CommentToCreateDto('chapter', (int) $c1->id, $long, null));
+    $comments->create(new CommentToCreateDto('chapter', (int) $c1->id, $long, $root1));
+    $comments->create(new CommentToCreateDto('chapter', (int) $c2->id, $long, null));
+
+    // Sanity check: comments exist
+    $list1 = $comments->getFor('chapter', (int) $c1->id, page: 1, perPage: 10);
+    $list2 = $comments->getFor('chapter', (int) $c2->id, page: 1, perPage: 10);
+    expect($list1->total)->toBe(1);
+    expect($list2->total)->toBe(1);
+
+    // Delete story (as author)
+    $this->actingAs($author)->delete(route('stories.destroy', ['slug' => $story->slug]))
+        ->assertRedirect(route('stories.index'));
+
+    // Comments should be gone for both chapters
+    $after1 = $comments->getFor('chapter', (int) $c1->id, page: 1, perPage: 10);
+    $after2 = $comments->getFor('chapter', (int) $c2->id, page: 1, perPage: 10);
+    expect($after1->total)->toBe(0);
+    expect($after2->total)->toBe(0);
 });
 
 it('returns 404 to non-author attempting to delete; show still works', function () {
