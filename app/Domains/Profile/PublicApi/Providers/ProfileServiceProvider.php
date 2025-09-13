@@ -14,6 +14,7 @@ use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Events\EmailVerified;
 use App\Domains\Profile\Events\ProfileDisplayNameChanged;
 use App\Domains\Profile\Events\AvatarChanged;
+use App\Domains\Profile\Events\BioUpdated;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -57,5 +58,6 @@ class ProfileServiceProvider extends ServiceProvider
         // Register Profile domain events mapping
         $eventBus->registerEvent(ProfileDisplayNameChanged::name(), ProfileDisplayNameChanged::class);
         $eventBus->registerEvent(AvatarChanged::name(), AvatarChanged::class);
+        $eventBus->registerEvent(BioUpdated::name(), BioUpdated::class);
     }
 }

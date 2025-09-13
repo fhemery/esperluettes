@@ -4,6 +4,7 @@ namespace App\Domains\Profile\Services;
 
 use App\Domains\Profile\Events\ProfileDisplayNameChanged;
 use App\Domains\Profile\Events\AvatarChanged;
+use App\Domains\Profile\Events\BioUpdated;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\Support\AvatarGenerator;
 use App\Domains\Profile\Services\ProfileCacheService;
@@ -21,6 +22,36 @@ class ProfileService
         private readonly ProfileCacheService $cache,
         private readonly EventBus $eventBus,
     ) {
+    }
+
+    /**
+     * Emit BioUpdated if any of the bio/network fields changed.
+     *
+     * @param array{description:mixed,facebook_url:mixed,x_url:mixed,instagram_url:mixed,youtube_url:mixed} $old
+     */
+    private function emitBioUpdatedIfChanged(array $old, Profile $fresh): void
+    {
+        $new = [
+            'description' => $fresh->description,
+            'facebook_url' => $fresh->facebook_url,
+            'x_url' => $fresh->x_url,
+            'instagram_url' => $fresh->instagram_url,
+            'youtube_url' => $fresh->youtube_url,
+        ];
+
+        foreach ($new as $k => $v) {
+            if (($old[$k] ?? null) !== $v) {
+                $this->eventBus->emit(new BioUpdated(
+                    userId: $fresh->user_id,
+                    description: $new['description'],
+                    facebookUrl: $new['facebook_url'],
+                    xUrl: $new['x_url'],
+                    instagramUrl: $new['instagram_url'],
+                    youtubeUrl: $new['youtube_url'],
+                ));
+                break;
+            }
+        }
     }
     
     public function createOrInitProfileOnRegistration(int $userId, ?string $name): Profile
@@ -106,6 +137,15 @@ class ProfileService
             unset($data['display_name']);
         }
 
+        // Capture old bio/network fields to detect changes
+        $old = [
+            'description' => $profile->description,
+            'facebook_url' => $profile->facebook_url,
+            'x_url' => $profile->x_url,
+            'instagram_url' => $profile->instagram_url,
+            'youtube_url' => $profile->youtube_url,
+        ];
+
         // Apply remaining fields, then persist once
         $profile->fill($data);
         $profile->save();
@@ -120,6 +160,10 @@ class ProfileService
         }
 
         $fresh = $profile->fresh();
+
+        // Detect bio/networks changes and emit event if any changed
+        $this->emitBioUpdatedIfChanged($old, $fresh);
+
         // Update cache after mutations
         $this->cache->putByUserId($fresh->user_id, $fresh);
         return $fresh;

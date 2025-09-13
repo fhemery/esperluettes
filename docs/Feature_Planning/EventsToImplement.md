@@ -58,7 +58,7 @@ Legend:
 - [I][A] `Profile.AvatarChanged` — avatar updated.
   - Producers: `Profile` edit service (avatar upload/crop).
   - Consumers: `Admin` audit, `Comment`/`Story` avatar caches.
-- [A] `Profile.BioUpdated` — biography updated.
+- [I][A] `Profile.BioUpdated` — biography or networks updated.
   - Producers: `Profile` edit service.
   - Consumers: `Admin` audit.
 

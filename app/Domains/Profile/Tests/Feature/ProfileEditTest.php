@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Profile\Events\AvatarChanged;
 use App\Domains\Profile\Events\ProfileDisplayNameChanged;
+use App\Domains\Profile\Events\BioUpdated;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\PublicApi\ProfilePublicApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -175,6 +176,46 @@ describe('Editing profile', function () {
             expect($event)->not->toBeNull();
             expect($event->userId)->toBe($user->id);
             expect($event->profilePicturePath)->toBeNull();
+        });
+
+        it('emits BioUpdated when updating the bio/description', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            // Update only the description
+            $response = $this->from('/profile/edit')->put('/profile', [
+                'description' => '<b>Hello</b> world',
+            ]);
+            $response->assertRedirect('/profile/edit');
+
+            /** @var BioUpdated $event */
+            $event = latestEventOf(BioUpdated::name(), BioUpdated::class);
+            expect($event)->not->toBeNull();
+            // sanitized content expected; the purifier wraps plain text in a <p>
+            expect($event->description)->toBe('<p>Hello world</p>');
+            expect($event->userId)->toBe($user->id);
+        });
+
+        it('emits BioUpdated when updating social network links', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            $response = $this->from('/profile/edit')->put('/profile', [
+                'facebook_url' => 'facebook.com/someone',
+                'x_url' => 'twitter.com/someone',
+                'instagram_url' => 'https://instagram.com/someone',
+                'youtube_url' => 'youtu.be/abc123',
+            ]);
+            $response->assertRedirect('/profile/edit');
+
+            /** @var BioUpdated $event */
+            $event = latestEventOf(BioUpdated::name(), BioUpdated::class);
+            expect($event)->not->toBeNull();
+            expect($event->facebookUrl)->toContain('https://');
+            expect($event->xUrl)->toContain('https://');
+            expect($event->instagramUrl)->toContain('https://');
+            expect($event->youtubeUrl)->toContain('https://');
+            expect($event->userId)->toBe($user->id);
         });
     });
 

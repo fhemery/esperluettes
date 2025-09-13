@@ -9,4 +9,7 @@ return [
         'summary' => "Avatar modifié",
         'summary_deleted' => "Avatar supprimé",
     ],
+    'bio_updated' => [
+        'summary' => "Biographie mise à jour",
+    ],
 ];
