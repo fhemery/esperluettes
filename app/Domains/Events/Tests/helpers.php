@@ -2,6 +2,7 @@
 // Events domain test helpers
 
 use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Events\PublicApi\EventPublicApi;
 
 /**
@@ -16,4 +17,9 @@ function latestEventOf(string $name, string $domainEventClass): ?DomainEvent
         return $event;
     }
     return null;
+}
+
+function dispatchEvent(DomainEvent $event): void
+{
+    app(EventBus::class)->emit($event);
 }

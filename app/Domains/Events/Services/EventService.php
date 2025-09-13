@@ -48,15 +48,14 @@ class EventService
             'payload' => $event->toPayload(),
             'occurred_at' => now(),
             'meta' => null,
-            'triggered_by_user_id' => null,
             'context_ip' => null,
             'context_user_agent' => null,
             'context_url' => null,
+            'triggered_by_user_id' => Auth::id(),
         ];
 
         // If auditable, enrich with request/user context
         if ($event instanceof AuditableEvent) {
-            $record['triggered_by_user_id'] = Auth::id();
             // Request facade may be unavailable in some contexts (CLI). Guard accordingly.
             try {
                 $record['context_ip'] = Request::ip();

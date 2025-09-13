@@ -15,6 +15,7 @@ class ProfilePublicApi implements ProfilePublicApiContract
     )
     {
     }
+
     public function getPublicProfile(int $userId): ?ProfileDto
     {
         $results = $this->getPublicProfiles([$userId]);

@@ -5,6 +5,7 @@ namespace App\Domains\Auth\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Auth\Events\UserRegistered;
+use App\Domains\Auth\Events\EmailVerified;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -32,9 +33,6 @@ class AuthServiceProvider extends ServiceProvider
         // Register domain-specific migrations
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         
-        // Register domain-specific factories
-        $this->loadFactoriesFrom(__DIR__ . '/../Database/Factories');
-        
         // Register language files
         $this->loadJsonTranslationsFrom(
             __DIR__.'/../Resources/lang',
@@ -49,5 +47,6 @@ class AuthServiceProvider extends ServiceProvider
 
         // Register Auth domain events mapping with EventBus
         app(EventBus::class)->registerEvent(UserRegistered::name(), UserRegistered::class);
+        app(EventBus::class)->registerEvent(EmailVerified::name(), EmailVerified::class);
     }
 }

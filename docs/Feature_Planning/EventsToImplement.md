@@ -14,7 +14,7 @@ Conventions:
 
 Process:
 1) Validate the event name and event class name, the data, the consumers.
-2) Create class under the emitting domain `Events/` folder.
+2) Create class under the emitting domain `Events/` folder. (using translations for summary)
 3) Register with `EventBus::registerEvent()` in the domain’s `ServiceProvider::boot()`.
 4) Emit from the relevant domain service once the operation succeeds.
 5) Write tests to ensure event is emitted properly in all cases.
@@ -31,9 +31,10 @@ Legend:
 - [I][A][C] `Auth.UserRegistered` — emitted on successful user registration.
   - Producers: `Auth` registration flow.
   - Consumers: `Profile` (create profile), future `Activity/Notifications`.
-- [A] `Auth.EmailVerified` — on email verification.
+- [I][A] `Auth.EmailVerified` — on email verification.
   - Producers: `Auth` email verification controller/service.
-  - Consumers: `Activity`, `Admin` audit, `Profile` (badge), `Story` gates (if needed).
+  - Consumers: `Admin` audit, `Profile` (clears cache), `Story` gates (if needed).
+  - Summary: `UserId = <id> : Email vérifié`
 - [A] `Auth.PasswordResetRequested` — when reset link is requested (audit sensitive).
   - Producers: `Auth` password reset request flow.
   - Consumers: `Admin` audit/monitoring.

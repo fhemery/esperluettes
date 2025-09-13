@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\Events\EmailVerified;
 use App\Domains\Auth\Models\ActivationCode;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\PublicApi\Roles;
@@ -16,97 +17,134 @@ uses(TestCase::class, RefreshDatabase::class);
 function verificationUrlFor(User $user): string
 {
     return URL::temporarySignedRoute(
-        'verification.verify', now()->addMinutes(60), [
+        'verification.verify',
+        now()->addMinutes(60),
+        [
             'id' => $user->getKey(),
             'hash' => sha1($user->getEmailForVerification()),
         ]
     );
 }
 
-it('assigns '. Roles::USER.' role when activation is required and no activation code was used', function () {
-    // Arrange: allow registration without activation code, then require it at verification time
-    config(['app.require_activation_code' => false]);
+describe('Email verification process', function () {
 
-    /** @var User $user */
-    $user = registerUserThroughForm($this, [
-        'email' => 'need-code@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
-    ], false); // not verified yet
+    it('assigns ' . Roles::USER . ' role when activation is required and no activation code was used', function () {
+        // Arrange: allow registration without activation code, then require it at verification time
+        config(['app.require_activation_code' => false]);
 
-    // Now require activation code for verification logic
-    config(['app.require_activation_code' => true]);
+        /** @var User $user */
+        $user = registerUserThroughForm($this, [
+            'email' => 'need-code@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ], false); // not verified yet
 
-    $this->actingAs($user);
+        // Now require activation code for verification logic
+        config(['app.require_activation_code' => true]);
 
-    // Act
-    $response = $this->get(verificationUrlFor($user));
+        $this->actingAs($user);
 
-    // Assert
-    $response->assertRedirect();
-    $user->refresh();
-    expect($user->hasVerifiedEmail())->toBeTrue();
-    expect($user->isOnProbation())->toBeTrue();
-    expect($user->isConfirmed())->toBeFalse();
-});
+        // Act
+        $response = $this->get(verificationUrlFor($user));
 
-it('assigns '. Roles::USER_CONFIRMED.' role when activation is required and an activation code was used', function () {
-    // Arrange: allow registration without activation code, then require it at verification time
-    config(['app.require_activation_code' => false]);
+        // Assert
+        $response->assertRedirect();
+        $user->refresh();
+        expect($user->hasVerifiedEmail())->toBeTrue();
+        expect($user->isOnProbation())->toBeTrue();
+        expect($user->isConfirmed())->toBeFalse();
+    });
 
-    /** @var User $user */
-    $user = registerUserThroughForm($this, [
-        'email' => 'used-code@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
-    ], false); // not verified yet
+    it('assigns ' . Roles::USER_CONFIRMED . ' role when activation is required and an activation code was used', function () {
+        // Arrange: allow registration without activation code, then require it at verification time
+        config(['app.require_activation_code' => false]);
 
-    // Simulate an activation code that has been used by this user
-    ActivationCode::create([
-        'code' => (string) Str::uuid(),
-        'sponsor_user_id' => null,
-        'used_by_user_id' => $user->id,
-        'comment' => null,
-        'expires_at' => null,
-        'used_at' => now(),
-    ]);
+        /** @var User $user */
+        $user = registerUserThroughForm($this, [
+            'email' => 'used-code@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ], false); // not verified yet
 
-    // Now require activation code for verification logic
-    config(['app.require_activation_code' => true]);
+        // Simulate an activation code that has been used by this user
+        ActivationCode::create([
+            'code' => (string) Str::uuid(),
+            'sponsor_user_id' => null,
+            'used_by_user_id' => $user->id,
+            'comment' => null,
+            'expires_at' => null,
+            'used_at' => now(),
+        ]);
 
-    $this->actingAs($user);
+        // Now require activation code for verification logic
+        config(['app.require_activation_code' => true]);
 
-    // Act
-    $response = $this->get(verificationUrlFor($user));
+        $this->actingAs($user);
 
-    // Assert
-    $response->assertRedirect();
-    $user->refresh();
-    expect($user->hasVerifiedEmail())->toBeTrue();
-    expect($user->isConfirmed())->toBeTrue();
-    expect($user->isOnProbation())->toBeFalse();
-});
+        // Act
+        $response = $this->get(verificationUrlFor($user));
 
-it('assigns '. Roles::USER_CONFIRMED.' role when activation is not required', function () {
-    // Arrange
-    config(['app.require_activation_code' => false]);
+        // Assert
+        $response->assertRedirect();
+        $user->refresh();
+        expect($user->hasVerifiedEmail())->toBeTrue();
+        expect($user->isConfirmed())->toBeTrue();
+        expect($user->isOnProbation())->toBeFalse();
+    });
 
-    /** @var User $user */
-    $user = registerUserThroughForm($this, [
-        'email' => 'no-code-required@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
-    ], false); // not verified yet
+    it('assigns ' . Roles::USER_CONFIRMED . ' role when activation is not required', function () {
+        // Arrange
+        config(['app.require_activation_code' => false]);
 
-    $this->actingAs($user);
+        /** @var User $user */
+        $user = registerUserThroughForm($this, [
+            'email' => 'no-code-required@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ], false); // not verified yet
 
-    // Act
-    $response = $this->get(verificationUrlFor($user));
+        $this->actingAs($user);
 
-    // Assert
-    $response->assertRedirect();
-    $user->refresh();
-    expect($user->hasVerifiedEmail())->toBeTrue();
-    expect($user->isConfirmed())->toBeTrue();
-    expect($user->isOnProbation())->toBeFalse();
+        // Act
+        $response = $this->get(verificationUrlFor($user));
+
+        // Assert
+        $response->assertRedirect();
+        $user->refresh();
+        expect($user->hasVerifiedEmail())->toBeTrue();
+        expect($user->isConfirmed())->toBeTrue();
+        expect($user->isOnProbation())->toBeFalse();
+    });
+
+    describe('Events', function () {
+        it('emits Auth.EmailVerified with display name when user verifies email', function () {
+            // Arrange
+            config(['app.require_activation_code' => false]);
+
+            /** @var User $user */
+            $user = registerUserThroughForm($this, [
+                'email' => 'no-code-required@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+            ], false); // not verified yet
+
+            $this->actingAs($user);
+
+            // Act
+            $response = $this->get(verificationUrlFor($user));
+
+            // Assert
+            $response->assertRedirect();
+            $event = latestEventOf('Auth.EmailVerified', EmailVerified::class);
+            expect($event)->not->toBeNull();
+
+            // Ensure payload contains userId and displayName (from Profile)
+            /** @var EmailVerified $event */
+            expect($event->userId)->toBe($user->id);
+
+            // Summary uses translation; we just assert it contains the name and id
+            expect($event->summary())
+                ->toBe(__('auth::events.email_verified.summary'));
+        });
+    });
 });

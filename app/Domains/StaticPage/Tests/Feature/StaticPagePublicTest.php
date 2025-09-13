@@ -1,7 +1,6 @@
 <?php
 
 use App\Domains\StaticPage\Models\StaticPage;
-use App\Domains\Auth\Models\User;
 use App\Domains\StaticPage\Services\StaticPageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;

@@ -2,39 +2,38 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-it('sends verification email to unverified user', function () {
-    Notification::fake();
+describe('email verification request', function () {
+    it('sends verification email to unverified user', function () {
+        Notification::fake();
 
-    $user = alice($this, [], false);
+        $user = alice($this, [], false);
 
-    $this->actingAs($user)
-        ->post(route('verification.send'))
-        ->assertRedirect();
+        $this->actingAs($user)
+            ->post(route('verification.send'))
+            ->assertRedirect();
 
-    Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, VerifyEmail::class);
 
-    expect(session('status'))
-        ->toBe('verification-link-sent');
-});
+        expect(session('status'))
+            ->toBe('verification-link-sent');
+    });
 
-it('does not send verification if already verified and redirects to dashboard', function () {
-    $user = alice($this, [], true);
-    
-    Notification::fake();
-    $response = $this->actingAs($user)
-        ->post(route('verification.send'));
+    it('does not send verification if already verified and redirects to dashboard', function () {
+        $user = alice($this, [], true);
 
-    $response->assertRedirect(route('dashboard'));
+        Notification::fake();
+        $response = $this->actingAs($user)
+            ->post(route('verification.send'));
 
-    Notification::assertNothingSent();
+        $response->assertRedirect(route('dashboard'));
 
+        Notification::assertNothingSent();
+    });
 });

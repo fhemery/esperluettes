@@ -8,41 +8,58 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
+describe('EventBus storage', function () {
+    it('persists an auditable event and lists it via EventPublicApi', function () {
+        app(EventBus::class)->registerEvent('Test.Auditable', TestAuditableEvent::class);
 
-it('persists an auditable event and lists it via EventPublicApi', function () {
-    app(EventBus::class)->registerEvent('Test.Auditable', TestAuditableEvent::class);
+        app(EventBus::class)->emit(new TestAuditableEvent(userId: 123));
 
-    app(EventBus::class)->emit(new TestAuditableEvent(userId: 123));
+        $items = app(EventPublicApi::class)->list();
+        expect($items)->not->toBeEmpty();
 
-    $items = app(EventPublicApi::class)->list();
-    expect($items)->not->toBeEmpty();
+        // Find the first DTO with matching name
+        $dto = collect($items)->first(fn($it) => $it->name() === 'Test.Auditable');
+        expect($dto)->not->toBeNull();
+        expect($dto->payload())->toBe(['userId' => 123]);
+        // Context exists on DTO accessors; values depend on runtime (CLI vs HTTP)
+        expect($dto->occurredAt())->not->toBeNull();
+        // Accessors should be callable; no strict value assertions
+        $dto->triggeredByUserId();
+        $dto->contextIp();
+        $dto->contextUserAgent();
+        $dto->contextUrl();
+    });
 
-    // Find the first DTO with matching name
-    $dto = collect($items)->first(fn($it) => $it->name() === 'Test.Auditable');
-    expect($dto)->not->toBeNull();
-    expect($dto->payload())->toBe(['userId' => 123]);
-    // Context exists on DTO accessors; values depend on runtime (CLI vs HTTP)
-    expect($dto->occurredAt())->not->toBeNull();
-    // Accessors should be callable; no strict value assertions
-    $dto->triggeredByUserId();
-    $dto->contextIp();
-    $dto->contextUserAgent();
-    $dto->contextUrl();
-});
+    it('persists a non-auditable event and lists it via EventPublicApi', function () {
+        app(EventBus::class)->registerEvent('Test.NonAuditable', TestNonAuditableEvent::class);
 
-it('persists a non-auditable event and lists it via EventPublicApi', function () {
-    app(EventBus::class)->registerEvent('Test.NonAuditable', TestNonAuditableEvent::class);
+        app(EventBus::class)->emit(new TestNonAuditableEvent(id: 42));
 
-    app(EventBus::class)->emit(new TestNonAuditableEvent(id: 42));
+        $items = app(EventPublicApi::class)->list();
+        expect($items)->not->toBeEmpty();
 
-    $items = app(EventPublicApi::class)->list();
-    expect($items)->not->toBeEmpty();
+        $dto = collect($items)->first(fn($it) => $it->name() === 'Test.NonAuditable');
+        expect($dto)->not->toBeNull();
+        expect($dto->payload())->toBe(['id' => 42]);
+        // Non-auditable: context accessors should exist
+        $dto->triggeredByUserId();
+    });
 
-    $dto = collect($items)->first(fn($it) => $it->name() === 'Test.NonAuditable');
-    expect($dto)->not->toBeNull();
-    expect($dto->payload())->toBe(['id' => 42]);
-    // Non-auditable: context accessors should exist
-    $dto->triggeredByUserId();
+    it('persists triggered_by_user_id even if event is not auditable', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+
+        app(EventBus::class)->registerEvent('Test.NonAuditable', TestNonAuditableEvent::class);
+        app(EventBus::class)->emit(new TestNonAuditableEvent(id: 42));
+
+        $items = app(EventPublicApi::class)->list();
+        expect($items)->not->toBeEmpty();
+
+        $dto = collect($items)->first(fn($it) => $it->name() === 'Test.NonAuditable');
+        expect($dto)->not->toBeNull();
+        expect($dto->payload())->toBe(['id' => 42]);
+        expect($dto->triggeredByUserId())->toBe($user->id);
+    });
 });
 
 // Test event implementations
@@ -51,8 +68,14 @@ final class TestAuditableEvent implements DomainEvent, AuditableEvent
 {
     public function __construct(public readonly int $userId) {}
 
-    public static function name(): string { return 'Test.Auditable'; }
-    public static function version(): int { return 1; }
+    public static function name(): string
+    {
+        return 'Test.Auditable';
+    }
+    public static function version(): int
+    {
+        return 1;
+    }
 
     public function toPayload(): array
     {
@@ -80,8 +103,14 @@ final class TestNonAuditableEvent implements DomainEvent
 {
     public function __construct(public readonly int $id) {}
 
-    public static function name(): string { return 'Test.NonAuditable'; }
-    public static function version(): int { return 1; }
+    public static function name(): string
+    {
+        return 'Test.NonAuditable';
+    }
+    public static function version(): int
+    {
+        return 1;
+    }
 
     public function toPayload(): array
     {

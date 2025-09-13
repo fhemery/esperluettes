@@ -46,4 +46,13 @@ class ProfileCacheService
         $key = $this->keyForUserId($userId);
         Cache::put($key, $profile, $this->ttlSeconds);
     }
+
+    /**
+     * Forget the cached Profile entry for a given user ID.
+     */
+    public function forgetByUserId(int $userId): void
+    {
+        $key = $this->keyForUserId($userId);
+        Cache::forget($key);
+    }
 }
