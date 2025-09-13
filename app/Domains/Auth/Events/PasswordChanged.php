@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Domains\Auth\Events;
+
+use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Contracts\AuditableEvent;
+
+class PasswordChanged implements DomainEvent, AuditableEvent
+{
+    public function __construct(
+        public readonly int $userId,
+    ) {}
+
+    public static function name(): string { return 'Auth.PasswordChanged'; }
+
+    public static function version(): int { return 1; }
+
+    public function toPayload(): array
+    {
+        return [
+            'userId' => $this->userId,
+        ];
+    }
+
+    public function summary(): string
+    {
+        return trans('auth::events.password_changed.summary', ['id' => $this->userId]);
+    }
+
+    public static function fromPayload(array $payload): static
+    {
+        return new static(
+            userId: (int) ($payload['userId'] ?? 0),
+        );
+    }
+}

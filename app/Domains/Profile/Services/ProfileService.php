@@ -3,6 +3,7 @@
 namespace App\Domains\Profile\Services;
 
 use App\Domains\Profile\Events\ProfileDisplayNameChanged;
+use App\Domains\Profile\Events\AvatarChanged;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\Support\AvatarGenerator;
 use App\Domains\Profile\Services\ProfileCacheService;
@@ -165,6 +166,12 @@ class ProfileService
         
         // Update profile with new picture path
         $profile->update(['profile_picture_path' => $path]);
+
+        // Emit AvatarChanged after successful update
+        $this->eventBus->emit(new AvatarChanged(
+            userId: $profile->user_id,
+            profilePicturePath: $path,
+        ));
         
         return $path;
     }
@@ -177,6 +184,12 @@ class ProfileService
         if ($profile->profile_picture_path) {
             Storage::disk('public')->delete($profile->profile_picture_path);
             $profile->update(['profile_picture_path' => null]);
+
+            // Emit AvatarChanged with null path to indicate removal
+            $this->eventBus->emit(new AvatarChanged(
+                userId: $profile->user_id,
+                profilePicturePath: null,
+            ));
             return true;
         }
         

@@ -5,11 +5,15 @@ namespace App\Domains\Auth\Controllers;
 use App\Domains\Shared\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Domains\Auth\Services\PasswordService;
 
 class PasswordController extends Controller
 {
+
+    public function __construct(
+        private readonly PasswordService $passwordService,
+    ) {}
     /**
      * Update the user's password.
      */
@@ -20,9 +24,8 @@ class PasswordController extends Controller
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 
-        $request->user()->update([
-            'password' => Hash::make($validated['password']),
-        ]);
+        // Delegate to domain service which emits Auth.PasswordChanged
+        $this->passwordService->changePassword($request->user(), $validated['password']);
 
         return back()->with('success', __('auth::account.password.updated'));
     }

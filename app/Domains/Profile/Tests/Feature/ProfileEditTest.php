@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Profile\Events\AvatarChanged;
 use App\Domains\Profile\Events\ProfileDisplayNameChanged;
 use App\Domains\Profile\Models\Profile;
 use App\Domains\Profile\PublicApi\ProfilePublicApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -109,6 +112,10 @@ describe('Editing profile', function () {
     });
 
     describe('Events', function () {
+        beforeEach(function () {
+            Storage::fake('public');
+        });
+    
         it('dispatches ProfileDisplayNameChanged event when updating the display name', function () {
             // Arrange: register user and verify
             $user = registerUserThroughForm($this, [
@@ -129,6 +136,45 @@ describe('Editing profile', function () {
             expect($event->userId)->toBe($user->id);
             expect($event->oldDisplayName)->toBe('John Doe');
             expect($event->newDisplayName)->toBe('Johnny Bravo');
+        });
+
+        it('emits AvatarChanged event when uploading a new avatar', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+    
+            $file = UploadedFile::fake()->image('avatar.jpg', 300, 300);
+    
+            $response = $this->from('/profile/edit')->put('/profile', [
+                'profile_picture' => $file,
+            ]);
+            $response->assertRedirect('/profile/edit');
+    
+            /** @var AvatarChanged $event */
+            $event = latestEventOf(AvatarChanged::name(), AvatarChanged::class);
+            expect($event)->not->toBeNull();
+            expect($event->userId)->toBe($user->id);
+            expect($event->profilePicturePath)->not->toBeNull();
+        });
+    
+        it('emits AvatarChanged event when removing the avatar', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+    
+            // First upload to ensure there is an avatar to remove
+            $file = UploadedFile::fake()->image('avatar.jpg', 300, 300);
+            $this->put('/profile', ['profile_picture' => $file])->assertRedirect('/profile/edit');
+    
+            // Then remove
+            $response = $this->from('/profile/edit')->put('/profile', [
+                'remove_profile_picture' => true,
+            ]);
+            $response->assertRedirect('/profile/edit');
+    
+            /** @var AvatarChanged $event */
+            $event = latestEventOf(AvatarChanged::name(), AvatarChanged::class);
+            expect($event)->not->toBeNull();
+            expect($event->userId)->toBe($user->id);
+            expect($event->profilePicturePath)->toBeNull();
         });
     });
 

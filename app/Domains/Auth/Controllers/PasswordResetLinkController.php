@@ -3,6 +3,8 @@
 namespace App\Domains\Auth\Controllers;
 
 use App\Domains\Shared\Controllers\Controller;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Auth\Events\PasswordResetRequested;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -10,6 +12,10 @@ use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {}
+
     /**
      * Display the password reset link request view.
      */
@@ -36,9 +42,20 @@ class PasswordResetLinkController extends Controller
             $request->only('email')
         );
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        if ($status == Password::RESET_LINK_SENT) {
+            // Try to resolve user id if present for auditing
+            $userId = \App\Domains\Auth\Models\User::where('email', $request->string('email'))
+                ->value('id');
+
+            $this->eventBus->emit(new PasswordResetRequested(
+                email: (string) $request->string('email'),
+                userId: $userId ? (int) $userId : null,
+            ));
+
+            return back()->with('status', __($status));
+        }
+
+        return back()->withInput($request->only('email'))
+            ->withErrors(['email' => __($status)]);
     }
 }

@@ -13,6 +13,7 @@ use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Events\EmailVerified;
 use App\Domains\Profile\Events\ProfileDisplayNameChanged;
+use App\Domains\Profile\Events\AvatarChanged;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -47,11 +48,14 @@ class ProfileServiceProvider extends ServiceProvider
         // Ensure Carbon uses the current app locale (for translated month/day names)
         Carbon::setLocale(app()->getLocale());
 
+        $eventBus = app(EventBus::class);
+
         // Subscribe to domain event via EventBus
-        app(EventBus::class)->subscribe(UserRegistered::name(), [CreateProfileOnUserRegistered::class, 'handle']);
-        app(EventBus::class)->subscribe(EmailVerified::name(), [ClearProfileCacheOnEmailVerified::class, 'handle']);
+        $eventBus->subscribe(UserRegistered::name(), [CreateProfileOnUserRegistered::class, 'handle']);
+        $eventBus->subscribe(EmailVerified::name(), [ClearProfileCacheOnEmailVerified::class, 'handle']);
 
         // Register Profile domain events mapping
-        app(EventBus::class)->registerEvent(ProfileDisplayNameChanged::name(), ProfileDisplayNameChanged::class);
+        $eventBus->registerEvent(ProfileDisplayNameChanged::name(), ProfileDisplayNameChanged::class);
+        $eventBus->registerEvent(AvatarChanged::name(), AvatarChanged::class);
     }
 }

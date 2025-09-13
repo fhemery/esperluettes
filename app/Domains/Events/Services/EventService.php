@@ -17,7 +17,9 @@ class EventService
     {
         // No filtering/pagination for now; cap the result size defensively
         $events = StoredDomainEvent::query()
-            ->latest('occurred_at')
+            // We could have used occured_at, but we would risk collision. And actually, using the primary key
+            // is more performant.
+            ->orderBy('id', 'desc')
             ->limit(200)
             ->get([
                 'id',
@@ -37,7 +39,9 @@ class EventService
     public function latest(string $name): ?StoredDomainEvent {
         return StoredDomainEvent::query()
             ->where('name', $name)
-            ->latest('occurred_at')
+            // We could have used occured_at, but we would risk collision. And actually, using the primary key
+            // is more performant.
+            ->orderBy('id', 'desc')
             ->first();
     }
 

@@ -6,6 +6,10 @@ use Illuminate\Support\ServiceProvider;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Events\EmailVerified;
+use App\Domains\Auth\Events\PasswordChanged;
+use App\Domains\Auth\Events\PasswordResetRequested;
+use App\Domains\Auth\Events\UserLoggedIn;
+use App\Domains\Auth\Events\UserLoggedOut;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -46,7 +50,12 @@ class AuthServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\View::addNamespace('auth', app_path('Domains/Auth/Views'));
 
         // Register Auth domain events mapping with EventBus
-        app(EventBus::class)->registerEvent(UserRegistered::name(), UserRegistered::class);
-        app(EventBus::class)->registerEvent(EmailVerified::name(), EmailVerified::class);
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(UserRegistered::name(), UserRegistered::class);
+        $eventBus->registerEvent(EmailVerified::name(), EmailVerified::class);
+        $eventBus->registerEvent(PasswordChanged::name(), PasswordChanged::class);
+        $eventBus->registerEvent(PasswordResetRequested::name(), PasswordResetRequested::class);
+        $eventBus->registerEvent(UserLoggedIn::name(), UserLoggedIn::class);
+        $eventBus->registerEvent(UserLoggedOut::name(), UserLoggedOut::class);
     }
 }

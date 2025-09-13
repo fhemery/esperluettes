@@ -33,20 +33,20 @@ Legend:
   - Consumers: `Profile` (create profile), future `Activity/Notifications`.
 - [I][A] `Auth.EmailVerified` — on email verification.
   - Producers: `Auth` email verification controller/service.
-  - Consumers: `Admin` audit, `Profile` (clears cache), `Story` gates (if needed).
+  - Consumers: `Admin` audit, `Profile` (clears cache).
   - Summary: `UserId = <id> : Email vérifié`
-- [A] `Auth.PasswordResetRequested` — when reset link is requested (audit sensitive).
+- [I][A] `Auth.PasswordResetRequested` — when reset link is requested (audit sensitive).
   - Producers: `Auth` password reset request flow.
   - Consumers: `Admin` audit/monitoring.
-- [A] `Auth.PasswordChanged` — after password update.
+- [I][A] `Auth.PasswordChanged` — after password update.
   - Producers: `Auth` password update flow.
-  - Consumers: `Admin` audit, `Security` projections.
-- [A] `Auth.UserLoggedIn` — successful login.
+  - Consumers: `Admin` audit
+- [I][A] `Auth.UserLoggedIn` — successful login.
   - Producers: login flow.
   - Consumers: `Admin` audit, analytics.
-- [A] `Auth.UserLoggedOut` — explicit logout.
+- [I][A] `Auth.UserLoggedOut` — explicit logout.
   - Producers: logout flow.
-  - Consumers: analytics.
+  - Consumers: `Admin` audit.
 - [A][C] `Auth.UserDeleted` — user deleted (hard delete).
   - Producers: `Auth` delete service.
   - Consumers: `Story` (to clean up the stories), `Comment` (to clean up the comments), `Profile` (to clean up the profile).
@@ -55,7 +55,7 @@ Legend:
 - [I][A] `Profile.DisplayNameChanged` — display name updated.
   - Producers: `Profile` edit service.
   - Consumers: `Admin` audit, `Story` projections, `Comment` display cache.
-- [A] `Profile.AvatarChanged` — avatar updated.
+- [I][A] `Profile.AvatarChanged` — avatar updated.
   - Producers: `Profile` edit service (avatar upload/crop).
   - Consumers: `Admin` audit, `Comment`/`Story` avatar caches.
 - [A] `Profile.BioUpdated` — biography updated.
