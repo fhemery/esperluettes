@@ -5,26 +5,10 @@ use App\Domains\Auth\Models\ActivationCode;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
-
-/**
- * Helper to build a valid signed verification URL for the given user.
- */
-function verificationUrlFor(User $user): string
-{
-    return URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        [
-            'id' => $user->getKey(),
-            'hash' => sha1($user->getEmailForVerification()),
-        ]
-    );
-}
 
 describe('Email verification process', function () {
 

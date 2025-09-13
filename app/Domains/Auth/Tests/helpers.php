@@ -3,6 +3,7 @@
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 function alice(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER_CONFIRMED]): User
@@ -27,6 +28,21 @@ function admin(TestCase $t, array $overrides = [], bool $isVerified = true, arra
         'name' => 'Admin',
         'email' => 'admin@admin.com',
     ], $overrides), $isVerified, $roles);
+}
+
+/**
+ * Helper to build a valid signed verification URL for the given user.
+ */
+function verificationUrlFor(User $user): string
+{
+    return URL::temporarySignedRoute(
+        'verification.verify',
+        now()->addMinutes(60),
+        [
+            'id' => $user->getKey(),
+            'hash' => sha1($user->getEmailForVerification()),
+        ]
+    );
 }
 
 /**

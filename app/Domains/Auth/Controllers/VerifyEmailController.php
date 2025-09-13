@@ -10,12 +10,14 @@ use App\Domains\Auth\Models\ActivationCode;
 use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Auth\Events\EmailVerified as EmailVerifiedEvent;
+use App\Domains\Auth\Services\RoleCacheService;
 use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
 
 class VerifyEmailController extends Controller
 {
     public function __construct(
         private readonly EventBus $eventBus,
+        private readonly RoleCacheService $roleCache,
     ) {}
 
     /**
@@ -34,6 +36,7 @@ class VerifyEmailController extends Controller
 
             // Emit domain event after verification and role assignment
             $this->eventBus->emit(new EmailVerifiedEvent(userId: (int) $request->user()->id));
+            $this->roleCache->clearForUser($request->user()->id);
         }
 
         return redirect()->intended(route('dashboard', absolute: false).'?verified=1')->with('success', __('verification.verified'));

@@ -2,43 +2,35 @@
 
 namespace App\Domains\Auth\PublicApi;
 
-use App\Domains\Auth\Models\User;
 use App\Domains\Auth\PublicApi\Dto\RoleDto;
+use App\Domains\Auth\Services\RoleCacheService;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 
 class AuthPublicApi
 {
+    public function __construct(
+        private RoleCacheService $roleCache,
+    ) {}
+
     /**
      * @param array<int,int> $userIds
      * @return array<int,array<int,RoleDto>>
      */
     public function getRolesByUserIds(array $userIds): array
     {
-        $userIds = array_values(array_unique(array_map('intval', $userIds)));
-        if (empty($userIds)) {
-            return [];
-        }
-
-        $users = User::query()
-            ->with('roles')
-            ->whereIn('id', $userIds)
-            ->get(['id']);
-
+        $byId = $this->roleCache->fetchByUserIds($userIds);
         $result = [];
-        foreach ($users as $user) {
-            $result[$user->id] = $user->roles
-                ->map(fn ($role) => RoleDto::fromModel($role))
-                ->all();
+        foreach ($byId as $userId => $roles) {
+            $result[$userId] = array_map(fn ($role) => RoleDto::fromModel($role), $roles);
         }
-
-        // Ensure all requested IDs exist as keys (with empty roles) to make the API predictable
+        // Ensure predictable keys for requested ids even if cache/db misses
+        $userIds = array_values(array_unique(array_map('intval', $userIds)));
         foreach ($userIds as $id) {
             if (!array_key_exists($id, $result)) {
                 $result[$id] = [];
             }
         }
-
         return $result;
     }
 

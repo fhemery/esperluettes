@@ -30,7 +30,7 @@ describe('Profile public API', function () {
             $this->actingAs($user);
 
             // Get profile once, then patch user name directly in db
-            $profile = $api->getPublicProfile($user->id);
+            $api->getPublicProfile($user->id);
             Profile::where('user_id', $user->id)->update(['display_name' => 'Bob']);
 
             $profile2 = $api->getPublicProfile($user->id);
@@ -46,7 +46,7 @@ describe('Profile public API', function () {
 
             // Get profile once, then patch user name directly in db
             // Then dispatch event to flush cache
-            $profile = $api->getPublicProfile($user->id);
+            $api->getPublicProfile($user->id);
             Profile::where('user_id', $user->id)->update(['display_name' => 'Bob']);
             dispatchEvent(new EmailVerified($user->id));
 
