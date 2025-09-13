@@ -37,9 +37,7 @@
                                 <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Profile Picture') }}</h2>
 
                                 <div class="text-center">
-                                    <img class="h-32 w-32 rounded-full mx-auto border-4 border-white shadow-lg"
-                                         src="{{ $profile->profile_picture_path }}"
-                                         alt="{{ __('Current profile picture') }}">
+                                    <x-shared::avatar :src="$profile->profile_picture_path" class="h-32 w-32 rounded-full mx-auto border-4 border-white shadow-lg" />
                                 </div>
 
                                 @if($profile->hasCustomProfilePicture())
