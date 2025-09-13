@@ -3,17 +3,14 @@
 namespace App\Domains\Auth\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Domains\Auth\Models\Role;
-use App\Domains\Auth\Database\Factories\UserFactory as DomainUserFactory;
 use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\App\Domains\Auth\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -172,13 +169,5 @@ class User extends Authenticatable implements MustVerifyEmail
     public function deactivate(): void
     {
         $this->update(['is_active' => false]);
-    }
-
-    /**
-     * Specify the factory for this model.
-     */
-    protected static function newFactory(): DomainUserFactory
-    {
-        return DomainUserFactory::new();
     }
 }
