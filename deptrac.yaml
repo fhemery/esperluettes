@@ -42,9 +42,6 @@ deptrac:
       collectors:
         - type: directory
           value: 'app/Domains/Auth/PublicApi/'
-
-    - name: AuthEvents
-      collectors:
         - type: directory
           value: 'app/Domains/Auth/Events/'
 
@@ -104,6 +101,33 @@ deptrac:
           must:
             - type: directory
               value: app/Domains/Dashboard/
+
+    # Events domains
+    - name: EventsPublic
+      collectors:
+        - type: directory
+          value: app/Domains/Events/PublicApi/
+        - type: directory
+          value: app/Domains/Events/Contracts/
+        
+    - name: EventsPrivate
+      collectors:
+        - type: bool
+          must_not:
+            - type: directory
+              value: app/Domains/Events/PublicApi/
+            - type: directory
+              value: app/Domains/Events/Contracts/
+            - type: directory
+              value: app/Domains/Events/Tests/
+          must:
+            - type: directory
+              value: app/Domains/Events/
+
+    - name: EventsTests
+      collectors:
+        - type: directory
+          value: app/Domains/Events/Tests/
 
     # Home Domain
     - name: HomePrivate
@@ -222,19 +246,22 @@ deptrac:
     # Test helpers - accessible by all domain tests
     TestHelpers: [ ]
 
-    # Events - can only depend on SharedContracts
-    AuthEvents:
-      - SharedContracts
-
+    # ###################################################
     # Public APIs - can only depend on SharedContracts and their own domain
+    # ###################################################
     AuthPublic:
       - SharedContracts
       - AuthPrivate
+      - EventsPublic
 
     CommentPublic: 
       - SharedContracts
       - AuthPublic
       - CommentPrivate
+
+    EventsPublic:
+      - SharedContracts
+      - EventsPrivate
 
     NewsPublic:
       - SharedContracts
@@ -243,7 +270,8 @@ deptrac:
     ProfilePublic:
       - SharedContracts
       - ProfilePrivate
-      - AuthEvents
+      - AuthPublic
+      - EventsPublic
 
     StaticPagePublic:
       - SharedContracts
@@ -258,39 +286,16 @@ deptrac:
     StoryRef:
       - SharedContracts
 
+    # ###################################################
     # Private domains - can access SharedContracts + other domain Public APIs + events
-    AuthPrivate:
-      - SharedContracts
-      - AuthPublic
-      - AuthEvents
+    # ###################################################
 
-    NewsPrivate:
-      - SharedContracts
-      - AuthPublic
-
-    ProfilePrivate:
-      - SharedContracts
-      - AuthPublic
-      - AuthEvents
-
-    StaticPagePrivate:
-      - SharedContracts
-      - AuthPublic
-
-    StoryPrivate:
-      - SharedContracts
-      - AuthPublic
-      - CommentPublic
-      - ProfilePublic
-      - StoryRef
-
-    # Admin can use both Public and Private parts
+    # [Exception] Admin can use both Public and Private parts
     # This is because the Admin dashboards are centered in this module
     # But they actually could be spread in their own modules
     AdminPrivate:
       - SharedContracts
       - AuthPublic
-      - AuthEvents
       - AuthPrivate
       - NewsPublic
       - NewsPrivate
@@ -303,7 +308,14 @@ deptrac:
       - StoryRef
       - DashboardPrivate
       - HomePrivate
+      - EventsPublic
+      - EventsPrivate
 
+    AuthPrivate:
+      - SharedContracts
+      - AuthPublic
+      - EventsPublic
+ 
     CommentPrivate:
       - SharedContracts
       - AuthPublic
@@ -313,23 +325,53 @@ deptrac:
       - SharedContracts
       - AuthPublic
 
+    EventsPrivate:
+      - SharedContracts
+      - EventsPublic
+
     HomePrivate:
       - SharedContracts
       - AuthPublic
       - NewsPublic
 
+    NewsPrivate:
+      - SharedContracts
+      - AuthPublic
+
+    ProfilePrivate:
+      - SharedContracts
+      - AuthPublic
+      - EventsPublic
+
+    StaticPagePrivate:
+      - SharedContracts
+      - AuthPublic
+
+    StoryPrivate:
+      - SharedContracts
+      - AuthPublic
+      - CommentPublic
+      - ProfilePublic
+      - StoryRef
+
+    # ###################################################
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
+    # ###################################################
     AuthTests:
       - SharedContracts
       - TestHelpers
       - AuthPrivate
       - AuthPublic
-      - AuthEvents
 
     CommentTests:
       - TestHelpers
       - CommentPrivate
       - CommentPublic
+
+    EventsTests:
+      - TestHelpers
+      - EventsPrivate
+      - EventsPublic
 
     NewsTests:
       - SharedContracts
