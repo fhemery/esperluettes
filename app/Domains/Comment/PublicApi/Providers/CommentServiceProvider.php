@@ -10,6 +10,7 @@ use App\Domains\Comment\View\Components\CommentList;
 use Illuminate\Support\Facades\Blade;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Comment\Events\CommentPosted;
+use App\Domains\Comment\Events\CommentEdited;
 
 class CommentServiceProvider extends ServiceProvider
 {
@@ -42,5 +43,6 @@ class CommentServiceProvider extends ServiceProvider
         // Register Comment domain events
         $eventBus = app(EventBus::class);
         $eventBus->registerEvent(CommentPosted::name(), CommentPosted::class);
+        $eventBus->registerEvent(CommentEdited::name(), CommentEdited::class);
     }
 }

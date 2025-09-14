@@ -89,7 +89,7 @@ Legend:
 - [I][A] `Chapter.Unpublished` — chapter unpublished.
   - Producers: `Chapter` unpublish service.
   - Consumers: sitemap/update caches.
-- [A] `Chapter.Deleted` — chapter deleted (soft delete).
+- [I][A] `Chapter.Deleted` — chapter deleted (soft delete).
   - Producers: `Chapter` delete service.
   - Consumers: projections cleanup.
 
@@ -97,12 +97,9 @@ Legend:
 - [I][A] `Comment.Posted` — new comment posted.
   - Producers: `Comment` post service.
   - Consumers: notify story authors, moderation pipeline, counters.
-- [A] `Comment.Edited` — comment edited.
+- [I][A] `Comment.Edited` — comment edited.
   - Producers: `Comment` edit service.
   - Consumers: moderation pipeline, counters.
-- [A] `Comment.Deleted` — comment deleted (soft delete or moderated removal).
-  - Producers: `Comment` delete/moderate service.
-  - Consumers: counters, audit.
 
 ## News
 - [A] `News.Published`

@@ -10,6 +10,7 @@ use App\Domains\Comment\Support\CommentBodySanitizer;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Comment\Events\CommentPosted;
 use App\Domains\Comment\Events\DTO\CommentSnapshot;
+use App\Domains\Comment\Events\CommentEdited;
 
 class CommentService
 {
@@ -79,7 +80,18 @@ class CommentService
      */
     public function updateComment(int $commentId, string $newBody): Comment
     {
+        // Build BEFORE snapshot
+        $existing = $this->repository->getById($commentId);
+        $before = CommentSnapshot::fromModel($existing);
+
+        // Update
         $cleanBody = $this->sanitizeBody($newBody);
-        return $this->repository->updateBody($commentId, $cleanBody);
+        $updated = $this->repository->updateBody($commentId, $cleanBody);
+
+        // Build AFTER snapshot and emit event
+        $after = CommentSnapshot::fromModel($updated);
+        $this->eventBus->emit(new CommentEdited($before, $after));
+
+        return $updated;
     }
 }
