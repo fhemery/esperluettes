@@ -2,6 +2,7 @@
 // Events domain test helpers
 
 use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Contracts\StoredDomainEventDto;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Events\PublicApi\EventPublicApi;
 
@@ -22,4 +23,11 @@ function latestEventOf(string $name, string $domainEventClass): ?DomainEvent
 function dispatchEvent(DomainEvent $event): void
 {
     app(EventBus::class)->emit($event);
+}
+
+function countEvents(string $name): int
+{
+    $events = app(EventPublicApi::class)->list();
+    $events = array_filter($events, fn(StoredDomainEventDto $e) => $e->name() == $name);
+    return count($events);
 }

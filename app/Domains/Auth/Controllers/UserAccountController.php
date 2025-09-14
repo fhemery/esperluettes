@@ -9,9 +9,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Domains\Shared\Controllers\Controller;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Auth\Events\UserDeleted;
 
 class UserAccountController extends Controller
 {
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {}
     /**
      * Display the user's Account form.
      */
@@ -52,6 +57,9 @@ class UserAccountController extends Controller
         Auth::logout();
 
         $user->delete();
+
+        // Emit deletion event
+        $this->eventBus->emit(new UserDeleted(userId: (int) $user->id));
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

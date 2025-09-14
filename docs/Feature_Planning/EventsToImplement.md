@@ -47,11 +47,11 @@ Legend:
 - [I][A] `Auth.UserLoggedOut` — explicit logout.
   - Producers: logout flow.
   - Consumers: `Admin` audit.
-- [C]`Auth.UserRoleGranted` — role granted to a user.
-- [C]`Auth.UserRoleRevoked` — role revoked.
-- [C]`Auth.UserDeactivated` — user deactivated.
-- [C]`Auth.UserReactivated` — user reactivated.
-- [A][C] `Auth.UserDeleted` — user deleted (hard delete).
+- [I][C]`Auth.UserRoleGranted` — role granted to a user.
+- [I][C]`Auth.UserRoleRevoked` — role revoked.
+- [I][C]`Auth.UserDeactivated` — user deactivated.
+- [I][C]`Auth.UserReactivated` — user reactivated.
+- [I][C] `Auth.UserDeleted` — user deleted (hard delete).
   - Producers: `Auth` delete service.
   - Consumers: `Story` (to clean up the stories), `Comment` (to clean up the comments), `Profile` (to clean up the profile).
 

@@ -31,4 +31,13 @@ return [
             'summary' => "Rôle révoqué par le système : :role, ID user : :id",
         ],
     ],
+    'user_deactivated' => [
+        'summary' => "Utilisateur désactivé (id=:id)",
+    ],
+    'user_reactivated' => [
+        'summary' => "Utilisateur réactivé (id=:id)",
+    ],
+    'user_deleted' => [
+        'summary' => "Utilisateur supprimé (id=:id)",
+    ],
 ];

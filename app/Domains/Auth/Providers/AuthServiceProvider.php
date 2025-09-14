@@ -12,6 +12,9 @@ use App\Domains\Auth\Events\UserLoggedIn;
 use App\Domains\Auth\Events\UserLoggedOut;
 use App\Domains\Auth\Events\UserRoleGranted;
 use App\Domains\Auth\Events\UserRoleRevoked;
+use App\Domains\Auth\Events\UserDeactivated;
+use App\Domains\Auth\Events\UserReactivated;
+use App\Domains\Auth\Events\UserDeleted;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -61,5 +64,8 @@ class AuthServiceProvider extends ServiceProvider
         $eventBus->registerEvent(UserLoggedOut::name(), UserLoggedOut::class);
         $eventBus->registerEvent(UserRoleGranted::name(), UserRoleGranted::class);
         $eventBus->registerEvent(UserRoleRevoked::name(), UserRoleRevoked::class);
+        $eventBus->registerEvent(UserDeactivated::name(), UserDeactivated::class);
+        $eventBus->registerEvent(UserReactivated::name(), UserReactivated::class);
+        $eventBus->registerEvent(UserDeleted::name(), UserDeleted::class);
     }
 }

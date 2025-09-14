@@ -3,12 +3,16 @@
 namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\Models\User;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Auth\Events\UserDeactivated;
+use App\Domains\Auth\Events\UserReactivated;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 
 class UserActivationService
 {
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {}
     /**
      * Activate a user
      */
@@ -19,6 +23,12 @@ class UserActivationService
         }
 
         $user->activate();
+        // Verify persisted state and emit event
+        if ($user->fresh()->isActive()) {
+            $this->eventBus->emit(new UserReactivated(
+                userId: (int) $user->id,
+            ));
+        }
         
         return true;
     }
@@ -36,6 +46,13 @@ class UserActivationService
         
         // Terminate all sessions for this user
         $this->terminateUserSessions($user);
+        
+        // Verify persisted state and emit event
+        if (!$user->fresh()->isActive()) {
+            $this->eventBus->emit(new UserDeactivated(
+                userId: (int) $user->id,
+            ));
+        }
         
         return true;
     }
