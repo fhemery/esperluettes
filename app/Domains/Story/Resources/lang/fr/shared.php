@@ -70,6 +70,11 @@ return [
     'required' => 'Champ requis',
     'optional' => 'Champ facultatif',
     'by' => 'Par ',
+    'metrics' => [
+        // Pluralized labels for meta rows
+        'chapters' => '{0} Aucun chapitre|{1} :count Chapitre|[2,*] :count Chapitres',
+        'words' => '{0} 0 mot|{1} :count mot|[2,*] :count mots',
+    ],
     'filters' => [
         'header' => 'Filtres'
     ]

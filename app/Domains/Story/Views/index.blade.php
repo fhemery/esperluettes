@@ -89,7 +89,7 @@
 
     <!-- Results Section -->
     <div class="w-full mt-4">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
                 @if ($viewModel->isEmpty())
                 <div class="text-center text-gray-600 py-16">
