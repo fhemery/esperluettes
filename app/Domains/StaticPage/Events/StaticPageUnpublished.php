@@ -2,10 +2,9 @@
 
 namespace App\Domains\StaticPage\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 
-class StaticPageUnpublished implements DomainEvent, AuditableEvent
+class StaticPageUnpublished implements DomainEvent
 {
     public function __construct(
         public readonly int $pageId,

@@ -2,11 +2,10 @@
 
 namespace App\Domains\Story\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 use App\Domains\Story\Events\DTO\ChapterSnapshot;
 
-class ChapterPublished implements DomainEvent, AuditableEvent
+class ChapterPublished implements DomainEvent
 {
     public function __construct(
         public readonly int $storyId,

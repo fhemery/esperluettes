@@ -2,10 +2,9 @@
 
 namespace App\Domains\StaticPage\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 
-class StaticPageDeleted implements DomainEvent, AuditableEvent
+class StaticPageDeleted implements DomainEvent
 {
     public function __construct(
         public readonly int $pageId,

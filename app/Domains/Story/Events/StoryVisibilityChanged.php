@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Story\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 
-class StoryVisibilityChanged implements DomainEvent, AuditableEvent
+class StoryVisibilityChanged implements DomainEvent
 {
     public function __construct(
         public readonly int $storyId,

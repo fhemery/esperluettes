@@ -3,9 +3,8 @@
 namespace App\Domains\Profile\Events;
 
 use App\Domains\Events\Contracts\DomainEvent;
-use App\Domains\Events\Contracts\AuditableEvent;
 
-class AvatarChanged implements DomainEvent, AuditableEvent
+class AvatarChanged implements DomainEvent
 {
     public function __construct(
         public readonly int $userId,

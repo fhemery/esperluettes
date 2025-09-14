@@ -2,12 +2,11 @@
 
 namespace App\Domains\Story\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
-use App\Domains\Events\Contracts\DomainEvent;
 use App\Domains\Story\Events\DTO\ChapterSnapshot;
 use App\Domains\Story\Events\DTO\StorySnapshot;
+use App\Domains\Events\Contracts\DomainEvent;
 
-class StoryDeleted implements DomainEvent, AuditableEvent
+class StoryDeleted implements DomainEvent
 {
     /** @param ChapterSnapshot[] $chapters */
     public function __construct(

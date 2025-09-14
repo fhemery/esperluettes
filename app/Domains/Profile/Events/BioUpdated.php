@@ -2,10 +2,9 @@
 
 namespace App\Domains\Profile\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 
-class BioUpdated implements DomainEvent, AuditableEvent
+class BioUpdated implements DomainEvent
 {
     public function __construct(
         public int $userId,

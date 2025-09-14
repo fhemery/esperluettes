@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Comment\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 use App\Domains\Comment\Events\DTO\CommentSnapshot;
 
-class CommentEdited implements DomainEvent, AuditableEvent
+class CommentEdited implements DomainEvent
 {
     public function __construct(
         public readonly CommentSnapshot $before,

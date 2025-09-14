@@ -52,68 +52,68 @@ Legend:
   - Consumers: `Story` (to clean up the stories), `Comment` (to clean up the comments), `Profile` (to clean up the profile).
 
 ## Profile
-- [I][A] `Profile.DisplayNameChanged` — display name updated.
+- [I] `Profile.DisplayNameChanged` — display name updated.
   - Producers: `Profile` edit service.
   - Consumers: `Admin` audit, `Story` projections, `Comment` display cache.
-- [I][A] `Profile.AvatarChanged` — avatar updated.
+- [I] `Profile.AvatarChanged` — avatar updated.
   - Producers: `Profile` edit service (avatar upload/crop).
   - Consumers: `Admin` audit, `Comment`/`Story` avatar caches.
-- [I][A] `Profile.BioUpdated` — biography or networks updated.
+- [I] `Profile.BioUpdated` — biography or networks updated.
   - Producers: `Profile` edit service.
   - Consumers: `Admin` audit.
 
 ## Story
-- [I][A] `Story.Created` — story created (draft or published depending on workflow).
+- [I] `Story.Created` — story created (draft or published depending on workflow).
   - Producers: `Story` create service.
   - Consumers: `Admin` audit, `Activity/Notifications`, projections.
-- [I][A] `Story.Updated` — metadata updated (title/summary/tags...).
+- [I] `Story.Updated` — metadata updated (title/summary/tags...).
   - Producers: `Story` update service.
   - Consumers: projections, caches, search indexing.
-- [I][A] `Story.Deleted` — story deleted (soft delete).
+- [I] `Story.Deleted` — story deleted (soft delete).
   - Producers: `Story` delete service.
   - Consumers: projections cleanup, admin audit.
-- [I][A] `Story.VisibilityChanged` — public/private/listed toggles.
+- [I] `Story.VisibilityChanged` — public/private/listed toggles.
   - Producers: `Story` settings service.
   - Consumers: search indexing, caches.
 
 ## Chapter
-- [I][A] `Chapter.Created` — chapter created (typically draft).
+- [I] `Chapter.Created` — chapter created (typically draft).
   - Producers: `Chapter` create service.
   - Consumers: stats, notifications.
-- [I][A] `Chapter.Updated` — chapter metadata/content updated.
+- [I] `Chapter.Updated` — chapter metadata/content updated.
   - Producers: `Chapter` update service.
   - Consumers: projections (word count), search indexing.
-- [I][A] `Chapter.Published` — chapter published.
+- [I] `Chapter.Published` — chapter published.
   - Producers: `Chapter` publish service.
   - Consumers: notifications to followers, stats, sitemap.
-- [I][A] `Chapter.Unpublished` — chapter unpublished.
+- [I] `Chapter.Unpublished` — chapter unpublished.
   - Producers: `Chapter` unpublish service.
   - Consumers: sitemap/update caches.
-- [I][A] `Chapter.Deleted` — chapter deleted (soft delete).
+- [I] `Chapter.Deleted` — chapter deleted (soft delete).
   - Producers: `Chapter` delete service.
   - Consumers: projections cleanup.
 
 ## Comment
-- [I][A] `Comment.Posted` — new comment posted.
+- [I] `Comment.Posted` — new comment posted.
   - Producers: `Comment` post service.
   - Consumers: notify story authors, moderation pipeline, counters.
-- [I][A] `Comment.Edited` — comment edited.
+- [I] `Comment.Edited` — comment edited.
   - Producers: `Comment` edit service.
   - Consumers: moderation pipeline, counters.
 
 ## News
-- [I][A] `News.Published`
-- [I][A] `News.Unpublished`
-- [I][A] `News.Updated`
-- [I][A] `News.Deleted`
+- [I] `News.Published`
+- [I] `News.Unpublished`
+- [I] `News.Updated`
+- [I] `News.Deleted`
   - Producers: `News` CRUD services.
   - Consumers: sitemap, notifications, audit.
 
 ## StaticPage
-- [I][A] `StaticPage.Published`
-- [I][A] `StaticPage.Unpublished`
-- [I][A] `StaticPage.Updated`
-- [I][A] `StaticPage.Deleted`
+- [I] `StaticPage.Published`
+- [I] `StaticPage.Unpublished`
+- [I] `StaticPage.Updated`
+- [I] `StaticPage.Deleted`
   - Producers: `StaticPage` CRUD services.
   - Consumers: sitemap, audit.
 

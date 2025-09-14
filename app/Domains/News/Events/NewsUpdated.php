@@ -2,10 +2,9 @@
 
 namespace App\Domains\News\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 
-class NewsUpdated implements DomainEvent, AuditableEvent
+class NewsUpdated implements DomainEvent
 {
     /**
      * @param array<int, string> $changedFields

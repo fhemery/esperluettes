@@ -2,10 +2,9 @@
 
 namespace App\Domains\News\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 
-class NewsUnpublished implements DomainEvent, AuditableEvent
+class NewsUnpublished implements DomainEvent
 {
     public function __construct(
         public readonly int $newsId,

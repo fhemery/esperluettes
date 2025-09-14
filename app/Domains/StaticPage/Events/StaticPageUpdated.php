@@ -2,10 +2,9 @@
 
 namespace App\Domains\StaticPage\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
 use App\Domains\Events\Contracts\DomainEvent;
 
-class StaticPageUpdated implements DomainEvent, AuditableEvent
+class StaticPageUpdated implements DomainEvent
 {
     /**
      * @param array<int, string> $changedFields
