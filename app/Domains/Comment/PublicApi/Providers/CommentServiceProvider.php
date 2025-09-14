@@ -8,6 +8,8 @@ use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
 use App\Domains\Comment\Repositories\CommentRepository;
 use App\Domains\Comment\View\Components\CommentList;
 use Illuminate\Support\Facades\Blade;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Comment\Events\CommentPosted;
 
 class CommentServiceProvider extends ServiceProvider
 {
@@ -36,5 +38,9 @@ class CommentServiceProvider extends ServiceProvider
 
         // Load domain routes
         $this->loadRoutesFrom(app_path('Domains/Comment/Routes/web.php'));
+
+        // Register Comment domain events
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(CommentPosted::name(), CommentPosted::class);
     }
 }

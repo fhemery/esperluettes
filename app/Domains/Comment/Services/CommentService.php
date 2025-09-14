@@ -7,12 +7,16 @@ use App\Domains\Comment\Repositories\CommentRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Domains\Comment\Models\Comment;
 use App\Domains\Comment\Support\CommentBodySanitizer;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Comment\Events\CommentPosted;
+use App\Domains\Comment\Events\DTO\CommentSnapshot;
 
 class CommentService
 {
     public function __construct(
         private readonly CommentRepository $repository,
         private readonly CommentBodySanitizer $sanitizer,
+        private readonly EventBus $eventBus,
     ) {}
 
     /**
@@ -38,7 +42,12 @@ class CommentService
     public function postComment(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment
     {
         $cleanBody = $this->sanitizeBody($body);
-        return $this->repository->create($entityType, $entityId, $authorId, $cleanBody, $parentCommentId);
+        $comment = $this->repository->create($entityType, $entityId, $authorId, $cleanBody, $parentCommentId);
+        
+        $snapshot = CommentSnapshot::fromModel($comment);
+        $this->eventBus->emit(new CommentPosted($snapshot));
+        
+        return $comment;
     }
 
     /**

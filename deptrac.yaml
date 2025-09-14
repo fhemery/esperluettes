@@ -258,6 +258,7 @@ deptrac:
       - SharedContracts
       - AuthPublic
       - CommentPrivate
+      - EventsPublic
 
     EventsPublic:
       - SharedContracts
@@ -321,6 +322,7 @@ deptrac:
       - SharedContracts
       - AuthPublic
       - CommentPublic
+      - EventsPublic
 
     DashboardPrivate:
       - SharedContracts

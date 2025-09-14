@@ -66,41 +66,35 @@ Legend:
 - [I][A] `Story.Created` — story created (draft or published depending on workflow).
   - Producers: `Story` create service.
   - Consumers: `Admin` audit, `Activity/Notifications`, projections.
-- [A] `Story.Updated` — metadata updated (title/summary/tags...).
+- [I][A] `Story.Updated` — metadata updated (title/summary/tags...).
   - Producers: `Story` update service.
   - Consumers: projections, caches, search indexing.
 - [I][A] `Story.Deleted` — story deleted (soft delete).
   - Producers: `Story` delete service.
   - Consumers: projections cleanup, admin audit.
-- [A] `Story.VisibilityChanged` — public/private/listed toggles.
+- [I][A] `Story.VisibilityChanged` — public/private/listed toggles.
   - Producers: `Story` settings service.
   - Consumers: search indexing, caches.
-- [A] `Story.SlugChanged` — canonical slug updated.
-  - Producers: `Story` slug service.
-  - Consumers: SEO/canonical helpers, link tracking.
 
 ## Chapter
-- [A] `Chapter.Created` — chapter created (typically draft).
+- [I][A] `Chapter.Created` — chapter created (typically draft).
   - Producers: `Chapter` create service.
   - Consumers: stats, notifications.
-- [A] `Chapter.Updated` — chapter metadata/content updated.
+- [I][A] `Chapter.Updated` — chapter metadata/content updated.
   - Producers: `Chapter` update service.
   - Consumers: projections (word count), search indexing.
-- [A] `Chapter.Published` — chapter published.
+- [I][A] `Chapter.Published` — chapter published.
   - Producers: `Chapter` publish service.
   - Consumers: notifications to followers, stats, sitemap.
-- [A] `Chapter.Unpublished` — chapter unpublished.
+- [I][A] `Chapter.Unpublished` — chapter unpublished.
   - Producers: `Chapter` unpublish service.
   - Consumers: sitemap/update caches.
 - [A] `Chapter.Deleted` — chapter deleted (soft delete).
   - Producers: `Chapter` delete service.
   - Consumers: projections cleanup.
-- [A] `Chapter.SlugChanged` — canonical slug updated.
-  - Producers: `Chapter` slug service (ties with canonical redirect rules).
-  - Consumers: SEO/canonical helpers, link tracking.
 
 ## Comment
-- [A] `Comment.Posted` — new comment posted.
+- [I][A] `Comment.Posted` — new comment posted.
   - Producers: `Comment` post service.
   - Consumers: notify story authors, moderation pipeline, counters.
 - [A] `Comment.Edited` — comment edited.
