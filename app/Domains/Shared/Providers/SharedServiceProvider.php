@@ -46,6 +46,9 @@ class SharedServiceProvider extends ServiceProvider
         Blade::anonymousComponentPath(app_path('Domains/Shared/Resources/views/components'));
         Blade::anonymousComponentPath(app_path('Domains/Shared/Resources/views/components'), 'shared');
 
+        // Register class-based components under the 'shared' prefix
+        Blade::componentNamespace('App\\Domains\\Shared\\Views\\Components', 'shared');
+
         // Register vendor notification views
         $this->loadViewsFrom(
             app_path('Domains/Shared/Views'),

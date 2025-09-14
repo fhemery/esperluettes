@@ -9,7 +9,7 @@
         {{ __('story::index.empty') }}
     </div>
 @else
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-16 gap-y-8">
         @foreach ($viewModel->getItems() as $item)
             <x-story::card :item="$item" :display-authors="$displayAuthors" />
         @endforeach

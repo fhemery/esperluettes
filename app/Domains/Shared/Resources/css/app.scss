@@ -96,6 +96,27 @@
     /* Do NOT set text color here; use .text-on-surface opt-in on text elements */
   }
 
+  .surface-accent {
+    --surface-bg: var(--color-accent);
+    --surface-fg: 255 255 255;
+    color-scheme: light;
+    background-color: rgb(var(--color-accent));
+  }
+
+  .surface-tertiary {
+    --surface-bg: var(--color-tertiary);
+    --surface-fg: 255 255 255;
+    color-scheme: light;
+    background-color: rgb(var(--color-tertiary));
+  }
+
+  .surface-neutral {
+    --surface-bg: transparent;
+    --surface-fg: black;
+    color-scheme: light;
+    background-color: transparent;
+  }
+
   .text-on-surface {
     color: rgb(var(--surface-fg));
   }

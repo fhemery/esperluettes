@@ -4,14 +4,14 @@
     'title' => null,
     'placement' => 'right', // right|left|top|bottom
     'width' => '20rem',
+    'iconClass' => '', // optional extra classes for the inner icon span
 ])
 @php($resolvedIcon = $icon ?? ($type === 'help' ? 'help' : 'info'))
 
 <x-shared::popover :placement="$placement" :width="$width">
     <x-slot name="trigger">
-        <button type="button"
-                class="inline-flex items-center justify-center h-5 w-5 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <span class="material-symbols-outlined text-[18px] leading-none">{{ $resolvedIcon }}</span>
+        <button type="button" {{ $attributes->class('inline-flex items-center justify-center h-5 w-5 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500') }}>
+            <span class="material-symbols-outlined text-[18px] leading-none {{ $iconClass }}">{{ $resolvedIcon }}</span>
         </button>
     </x-slot>
     @if($title)
