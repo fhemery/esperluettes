@@ -118,10 +118,11 @@ Legend:
   - Consumers: sitemap, audit.
 
 ## StoryRef
-- [A] `StoryRef.Added` — reference/link created (story-to-story or external).
-- [A] `StoryRef.Removed` — reference removed.
+- [I] `StoryRef.Added` — referential created (type/genre/audience/status/trigger_warning/feedback/copyright).
+- [I] `StoryRef.Updated` — referential updated.
+- [I] `StoryRef.Removed` — referential removed.
   - Producers: `StoryRef` manage service.
-  - Consumers: projections, link integrity checks.
+  - Consumers: projections, admin audit, caches.
 
 ## Admin
 - [A] `Admin.RoleGranted` — role granted to a user.

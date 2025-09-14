@@ -9,4 +9,5 @@ class FeedbackService extends BaseRefService
     protected string $modelClass = StoryRefFeedback::class;
     protected bool $hasOrder = true;
     protected bool $hasDescription = false;
+    protected string $refKind = 'feedback';
 }

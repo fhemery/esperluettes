@@ -9,4 +9,5 @@ class GenreService extends BaseRefService
     protected string $modelClass = StoryRefGenre::class;
     protected bool $hasOrder = true;
     protected bool $hasDescription = true;
+    protected string $refKind = 'genre';
 }

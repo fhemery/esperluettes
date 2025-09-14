@@ -4,6 +4,10 @@ namespace App\Domains\StoryRef\Services;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\StoryRef\Events\StoryRefAdded;
+use App\Domains\StoryRef\Events\StoryRefUpdated;
+use App\Domains\StoryRef\Events\StoryRefRemoved;
 
 abstract class BaseRefService
 {
@@ -16,9 +20,15 @@ abstract class BaseRefService
     /** Whether the table has a 'description' column (only used for fillable convenience) */
     protected bool $hasDescription = false;
 
-    public function __construct()
-    {
-        // Children must set $modelClass and flags in their constructor or property defaults
+    /**
+     * Logical ref kind used in events (e.g., type, genre, audience, status, trigger_warning, feedback, copyright)
+     */
+    protected string $refKind = 'ref';
+
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {
+        // Children must set $modelClass, $refKind and flags in their constructor or property defaults
     }
 
     protected function newQuery()
@@ -56,6 +66,13 @@ abstract class BaseRefService
         $payload = $this->preparePayload($data, isUpdate: false);
         /** @var Model $created */
         $created = $this->newQuery()->create($payload);
+        // Emit added event
+        $this->eventBus->emit(new StoryRefAdded(
+            refKind: $this->refKind,
+            refId: (int) $created->getKey(),
+            refSlug: (string) ($created->slug ?? ''),
+            refName: (string) ($created->name ?? ''),
+        ));
         return $created;
     }
 
@@ -67,7 +84,18 @@ abstract class BaseRefService
         }
         $payload = $this->preparePayload($data, isUpdate: true, current: $model);
         $model->fill($payload);
+        // Capture changed fields before saving
+        $changedFields = array_keys($model->getDirty());
         $model->save();
+        if (!empty($changedFields)) {
+            $this->eventBus->emit(new StoryRefUpdated(
+                refKind: $this->refKind,
+                refId: (int) $model->getKey(),
+                refSlug: (string) ($model->slug ?? ''),
+                refName: (string) ($model->name ?? ''),
+                changedFields: $changedFields,
+            ));
+        }
         return $model;
     }
 
@@ -77,7 +105,19 @@ abstract class BaseRefService
         if (!$model) {
             return false;
         }
-        return (bool) $model->delete();
+        $refId = (int) $model->getKey();
+        $refSlug = (string) ($model->slug ?? '');
+        $refName = (string) ($model->name ?? '');
+        $deleted = (bool) $model->delete();
+        if ($deleted) {
+            $this->eventBus->emit(new StoryRefRemoved(
+                refKind: $this->refKind,
+                refId: $refId,
+                refSlug: $refSlug,
+                refName: $refName,
+            ));
+        }
+        return $deleted;
     }
 
     protected function preparePayload(array $data, bool $isUpdate = false, ?Model $current = null): array

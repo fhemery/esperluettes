@@ -9,4 +9,5 @@ class StatusService extends BaseRefService
     protected string $modelClass = StoryRefStatus::class;
     protected bool $hasOrder = true;
     protected bool $hasDescription = true;
+    protected string $refKind = 'status';
 }
