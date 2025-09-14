@@ -1,5 +1,5 @@
-<x-app-layout>
-    <div class="bg-seasonal flex flex-col h-full items-center justify-center py-12 px-8 flex-1" data-test-id="home-page">
+<x-app-layout seasonal-background="true">
+    <div class="flex flex-col h-full items-center justify-center py-12 px-8 flex-1" data-test-id="home-page">
         <!-- Center translucent panel -->
         <div class="w-full max-w-[600px] bg-dark/90 text-white rounded-lg shadow-xl px-6 py-4">
             <!-- Top logo placeholder -->

@@ -10,6 +10,10 @@
         @include('shared::layouts.partials.head')
     </head>
     <body class="font-sans antialiased">
+        @php
+            $seasonalBackground = filter_var($attributes->get('seasonal-background', false), FILTER_VALIDATE_BOOLEAN);
+            $class = $seasonalBackground ? 'bg-seasonal' : '';
+        @endphp
         <div class="min-h-screen bg-bg text-fg h-full flex flex-col">
             @include('shared::layouts.partials.navigation')
 
@@ -79,8 +83,10 @@
             @endif
 
             <!-- Page Content -->
-            <main class="flex-1 flex flex-col max-w-7xl mx-auto sm:px-6 lg:px-8 py-4 sm:py-8">
-                {{ $slot }}
+            <main class="flex-1 flex flex-col w-full py-4 sm:py-8 {{ $class }}">
+                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    {{ $slot }}
+                </div>
             </main>
 
             @include('shared::components.footer')

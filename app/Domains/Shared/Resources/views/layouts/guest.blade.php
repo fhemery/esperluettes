@@ -12,9 +12,17 @@
     <body class="font-sans antialiased bg-bg text-fg flex flex-col h-full">
         @include('shared::layouts.partials.navigation-guest')
 
+        @php
+            // Attributes from the class-based component (<x-app-layout ...>)
+            $seasonalBackground = filter_var($attributes->get('seasonal-background', false), FILTER_VALIDATE_BOOLEAN);
+            $mainClass = $seasonalBackground ? 'bg-seasonal' : '';
+        @endphp
+
         <!-- Page Content (guest) -->
-        <main class="flex-1">
-            {{ $slot }}
+        <main class="flex-1 flex flex-col w-full py-4 sm:py-8 {{ $mainClass }}">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                {{ $slot }}
+            </div>
         </main>
 
         <!-- Shared footer -->
