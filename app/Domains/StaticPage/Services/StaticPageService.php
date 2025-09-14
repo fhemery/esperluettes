@@ -7,9 +7,15 @@ use App\Domains\Shared\Services\ImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\UploadedFile;
 use Mews\Purifier\Facades\Purifier;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\StaticPage\Events\StaticPagePublished;
+use App\Domains\StaticPage\Events\StaticPageUnpublished;
 
 class StaticPageService
 {
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {}
     public const CACHE_KEY_SLUG_MAP = 'static_pages:slug_map';
 
     public function sanitizeContent(string $html): string
@@ -42,6 +48,13 @@ class StaticPageService
         }
         $page->save();
         $this->rebuildSlugMapCache();
+        // Emit domain event
+        $this->eventBus->emit(new StaticPagePublished(
+            pageId: (int) $page->id,
+            slug: (string) $page->slug,
+            title: (string) $page->title,
+            publishedAt: optional($page->published_at)->toISOString(),
+        ));
         return $page;
     }
 
@@ -50,6 +63,12 @@ class StaticPageService
         $page->status = 'draft';
         $page->save();
         $this->rebuildSlugMapCache();
+        // Emit domain event
+        $this->eventBus->emit(new StaticPageUnpublished(
+            pageId: (int) $page->id,
+            slug: (string) $page->slug,
+            title: (string) $page->title,
+        ));
         return $page;
     }
 

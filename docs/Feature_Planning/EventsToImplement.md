@@ -110,9 +110,10 @@ Legend:
   - Consumers: sitemap, notifications, audit.
 
 ## StaticPage
-- [A] `StaticPage.Published`
-- [A] `StaticPage.Updated`
-- [A] `StaticPage.Deleted`
+- [I][A] `StaticPage.Published`
+- [I][A] `StaticPage.Unpublished`
+- [I][A] `StaticPage.Updated`
+- [I][A] `StaticPage.Deleted`
   - Producers: `StaticPage` CRUD services.
   - Consumers: sitemap, audit.
 

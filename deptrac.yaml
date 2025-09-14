@@ -278,6 +278,7 @@ deptrac:
     StaticPagePublic:
       - SharedContracts
       - StaticPagePrivate
+      - EventsPublic
 
     StoryPublic:
       - CommentPublic
@@ -351,6 +352,7 @@ deptrac:
     StaticPagePrivate:
       - SharedContracts
       - AuthPublic
+      - EventsPublic
 
     StoryPrivate:
       - SharedContracts
