@@ -25,6 +25,9 @@ return [
     'chapter_unpublished' => [
         'summary' => "Chapitre :title (id: :id) dépublié pour l'histoire :storyId.",
     ],
+    'chapter_deleted' => [
+        'summary' => "Chapitre :title (id: :id) supprimé pour l'histoire :storyId.",
+    ],
     'story_visibility_changed' => [
         'summary' => "Histoire :title (id: :id) visibilité changée : :old → :new.",
     ],

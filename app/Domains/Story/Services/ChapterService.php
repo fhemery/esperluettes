@@ -214,6 +214,9 @@ class ChapterService
                 throw new \InvalidArgumentException('Chapter does not belong to given story');
             }
 
+            // Capture snapshot before deletion for event payload
+            $snapshot = ChapterSnapshot::fromModel($chapter);
+
             // Purge comments for this chapter (hard delete via maintenance API)
             $this->comments->deleteFor('chapter', (int) $chapter->id);
 
@@ -221,6 +224,12 @@ class ChapterService
             $chapter->delete();
 
             $this->updateStoryLastPublished($story);
+
+            // Emit Chapter.Deleted event
+            $this->eventBus->emit(new \App\Domains\Story\Events\ChapterDeleted(
+                storyId: (int) $story->id,
+                chapter: $snapshot,
+            ));
         });
     }
 
