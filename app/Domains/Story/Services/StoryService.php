@@ -14,6 +14,7 @@ use App\Domains\Story\Events\StoryUpdated;
 use App\Domains\Story\Events\StoryDeleted;
 use App\Domains\Story\Events\DTO\ChapterSnapshot;
 use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
+use App\Domains\Story\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -259,6 +260,16 @@ class StoryService
             // Snapshot after & emit
             $after = StorySnapshot::fromModel($story, (int) $story->created_by_user_id);
             $this->eventBus->emit(new StoryUpdated($before, $after));
+
+            // Emit Story.VisibilityChanged if visibility changed
+            if ($before->visibility !== $story->visibility) {
+                $this->eventBus->emit(new StoryVisibilityChanged(
+                    storyId: (int) $story->id,
+                    title: (string) $story->title,
+                    oldVisibility: (string) $before->visibility,
+                    newVisibility: (string) $story->visibility,
+                ));
+            }
 
             return $story;
         });

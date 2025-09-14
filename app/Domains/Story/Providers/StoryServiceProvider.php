@@ -12,6 +12,11 @@ use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Story\Events\StoryCreated;
 use App\Domains\Story\Events\StoryUpdated;
 use App\Domains\Story\Events\StoryDeleted;
+use App\Domains\Story\Events\ChapterCreated;
+use App\Domains\Story\Events\ChapterUpdated;
+use App\Domains\Story\Events\ChapterPublished;
+use App\Domains\Story\Events\ChapterUnpublished;
+use App\Domains\Story\Events\StoryVisibilityChanged;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -46,5 +51,10 @@ class StoryServiceProvider extends ServiceProvider
         app(EventBus::class)->registerEvent(StoryCreated::name(), StoryCreated::class);
         app(EventBus::class)->registerEvent(StoryUpdated::name(), StoryUpdated::class);
         app(EventBus::class)->registerEvent(StoryDeleted::name(), StoryDeleted::class);
+        app(EventBus::class)->registerEvent(ChapterCreated::name(), ChapterCreated::class);
+        app(EventBus::class)->registerEvent(ChapterUpdated::name(), ChapterUpdated::class);
+        app(EventBus::class)->registerEvent(ChapterPublished::name(), ChapterPublished::class);
+        app(EventBus::class)->registerEvent(ChapterUnpublished::name(), ChapterUnpublished::class);
+        app(EventBus::class)->registerEvent(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Story\Events\ChapterCreated;
 use App\Domains\Story\Models\Chapter;
-use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,214 +12,249 @@ beforeEach(function () {
     \Illuminate\Support\Facades\Cache::flush();
 });
 
-it('redirects guests from chapter create page to login', function () {
-    $author = alice($this);
-    $story = createStoryForAuthor($author->id, ['title' => 'Guest Blocked Story']);
+describe('Creating a chapter', function () {
 
-    $resp = $this->get('/stories/' . $story->slug . '/chapters/create');
-    $resp->assertRedirect('/login');
-});
+    it('redirects guests from chapter create page to login', function () {
+        $author = alice($this);
+        $story = createStoryForAuthor($author->id, ['title' => 'Guest Blocked Story']);
 
-it('denies non-confirmed users from accessing chapter create page', function () {
-    $author = alice($this);
-    $nonConfirmed = bob($this, roles: [Roles::USER]);
-    $this->actingAs($nonConfirmed);
+        $resp = $this->get('/stories/' . $story->slug . '/chapters/create');
+        $resp->assertRedirect('/login');
+    });
 
-    $story = createStoryForAuthor($author->id, ['title' => 'Blocked']);
+    it('denies non-confirmed users from accessing chapter create page', function () {
+        $author = alice($this);
+        $nonConfirmed = bob($this, roles: [Roles::USER]);
+        $this->actingAs($nonConfirmed);
 
-    $resp = $this->get('/stories/' . $story->slug . '/chapters/create');
-    // CheckRole middleware redirects unauthorized roles to dashboard
-    $resp->assertRedirect(route('dashboard'));
-});
+        $story = createStoryForAuthor($author->id, ['title' => 'Blocked']);
 
-it('allows an author to access chapter create page', function () {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'Writable']);
+        $resp = $this->get('/stories/' . $story->slug . '/chapters/create');
+        // CheckRole middleware redirects unauthorized roles to dashboard
+        $resp->assertRedirect(route('dashboard'));
+    });
 
-    $resp = $this->get('/stories/' . $story->slug . '/chapters/create');
-    $resp->assertOk();
-    $resp->assertSee(trans('story::chapters.create.title'));
-});
+    it('allows an author to access chapter create page', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Writable']);
 
-it('creates a published chapter and redirects to its show page', function () {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'My Story']);
+        $resp = $this->get('/stories/' . $story->slug . '/chapters/create');
+        $resp->assertOk();
+        $resp->assertSee(trans('story::chapters.create.title'));
+    });
 
-    $payload = [
-        'title' => 'Chapter One',
-        'author_note' => '<p>Hello <strong>world</strong></p>',
-        'content' => '<p>Body</p>',
-        // published checkbox defaults to on; sending explicitly for clarity
-        'published' => '1',
-    ];
+    it('creates a published chapter and redirects to its show page', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'My Story']);
 
-    $resp = $this->post('/stories/' . $story->slug . '/chapters', $payload);
-    $resp->assertRedirect();
+        $payload = [
+            'title' => 'Chapter One',
+            'author_note' => '<p>Hello <strong>world</strong></p>',
+            'content' => '<p>Body</p>',
+            // published checkbox defaults to on; sending explicitly for clarity
+            'published' => '1',
+        ];
 
-    $chapter = Chapter::query()->firstOrFail();
-    expect($chapter->title)->toBe('Chapter One')
-        ->and($chapter->status)->toBe(Chapter::STATUS_PUBLISHED)
-        ->and($chapter->first_published_at)->not->toBeNull()
-        ->and($chapter->slug)->toEndWith('-' . $chapter->id);
+        $resp = $this->post('/stories/' . $story->slug . '/chapters', $payload);
+        $resp->assertRedirect();
 
-    // Show page should be reachable publicly since published
-    $show = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
-    $show->assertOk();
-    $show->assertSee('Chapter One');
-});
+        $chapter = Chapter::query()->firstOrFail();
+        expect($chapter->title)->toBe('Chapter One')
+            ->and($chapter->status)->toBe(Chapter::STATUS_PUBLISHED)
+            ->and($chapter->first_published_at)->not->toBeNull()
+            ->and($chapter->slug)->toEndWith('-' . $chapter->id);
 
-it('should work properly with twice the same chapter name', function() {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'My Story']);
+        // Show page should be reachable publicly since published
+        $show = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+        $show->assertOk();
+        $show->assertSee('Chapter One');
+    });
 
-    $payload = [
-        'title' => 'Chapter 1',
-        'author_note' => '<p>Hello <strong>world</strong></p>',
-        'content' => '<p>Body</p>',
-        // published checkbox defaults to on; sending explicitly for clarity
-        'published' => '1',
-    ];
-    $this->post('/stories/' . $story->slug . '/chapters', $payload);
-    $secondPost = $this->post('/stories/' . $story->slug . '/chapters', $payload);
-    $secondPost->assertRedirect();
-    
-});
+    it('should work properly with twice the same chapter name', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'My Story']);
 
-it('returns 404 when a non-author tries to create a chapter on someone else\'s story', function () {
-    $author = alice($this);
-    $other = bob($this);
-    $this->actingAs($other);
+        $payload = [
+            'title' => 'Chapter 1',
+            'author_note' => '<p>Hello <strong>world</strong></p>',
+            'content' => '<p>Body</p>',
+            // published checkbox defaults to on; sending explicitly for clarity
+            'published' => '1',
+        ];
+        $this->post('/stories/' . $story->slug . '/chapters', $payload);
+        $secondPost = $this->post('/stories/' . $story->slug . '/chapters', $payload);
+        $secondPost->assertRedirect();
+    });
 
-    $story = createStoryForAuthor($author->id, ['title' => 'Alice\'s']);
+    it('returns 404 when a non-author tries to create a chapter on someone else\'s story', function () {
+        $author = alice($this);
+        $other = bob($this);
+        $this->actingAs($other);
 
-    $payload = [
-        'title' => 'Should Not Work',
-        'content' => '<p>x</p>',
-        'published' => '1',
-    ];
+        $story = createStoryForAuthor($author->id, ['title' => 'Alice\'s']);
 
-    $resp = $this->post('/stories/' . $story->slug . '/chapters', $payload);
-    $resp->assertNotFound();
-    expect(Chapter::query()->count())->toBe(0);
-});
+        $payload = [
+            'title' => 'Should Not Work',
+            'content' => '<p>x</p>',
+            'published' => '1',
+        ];
 
-it('shows validation error when title is empty', function () {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
+        $resp = $this->post('/stories/' . $story->slug . '/chapters', $payload);
+        $resp->assertNotFound();
+        expect(Chapter::query()->count())->toBe(0);
+    });
 
-    $payload = [
-        'title' => '',
-        'content' => '<p>ok</p>',
-        'published' => '1',
-    ];
+    it('shows validation error when title is empty', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
 
-    $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
-        ->post('/stories/' . $story->slug . '/chapters', $payload);
+        $payload = [
+            'title' => '',
+            'content' => '<p>ok</p>',
+            'published' => '1',
+        ];
 
-    $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
-    $resp->assertSessionHasErrors(['title']);
-    expect(Chapter::query()->count())->toBe(0);
-});
+        $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
+            ->post('/stories/' . $story->slug . '/chapters', $payload);
 
-it('shows validation error when title contains only whitespace', function () {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
+        $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
+        $resp->assertSessionHasErrors(['title']);
+        expect(Chapter::query()->count())->toBe(0);
+    });
 
-    $payload = [
-        'title' => '   ',
-        'content' => '<p>ok</p>',
-    ];
+    it('shows validation error when title contains only whitespace', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
 
-    $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
-        ->post('/stories/' . $story->slug . '/chapters', $payload);
+        $payload = [
+            'title' => '   ',
+            'content' => '<p>ok</p>',
+        ];
 
-    $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
-    $resp->assertSessionHasErrors(['title']);
-    expect(Chapter::query()->count())->toBe(0);
-});
+        $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
+            ->post('/stories/' . $story->slug . '/chapters', $payload);
 
-it('shows validation error when title is too long (>255)', function () {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
+        $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
+        $resp->assertSessionHasErrors(['title']);
+        expect(Chapter::query()->count())->toBe(0);
+    });
 
-    $payload = [
-        'title' => str_repeat('a', 256),
-        'content' => '<p>ok</p>',
-    ];
+    it('shows validation error when title is too long (>255)', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
 
-    $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
-        ->post('/stories/' . $story->slug . '/chapters', $payload);
+        $payload = [
+            'title' => str_repeat('a', 256),
+            'content' => '<p>ok</p>',
+        ];
 
-    $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
-    $resp->assertSessionHasErrors(['title']);
-    expect(Chapter::query()->count())->toBe(0);
-});
+        $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
+            ->post('/stories/' . $story->slug . '/chapters', $payload);
 
-it('shows validation error when content is empty', function () {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
+        $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
+        $resp->assertSessionHasErrors(['title']);
+        expect(Chapter::query()->count())->toBe(0);
+    });
 
-    $payload = [
-        'title' => 'Valid Title',
-        'content' => '',
-    ];
+    it('shows validation error when content is empty', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Val Story']);
 
-    $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
-        ->post('/stories/' . $story->slug . '/chapters', $payload);
+        $payload = [
+            'title' => 'Valid Title',
+            'content' => '',
+        ];
 
-    $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
-    $resp->assertSessionHasErrors(['content']);
-    expect(Chapter::query()->count())->toBe(0);
-});
+        $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
+            ->post('/stories/' . $story->slug . '/chapters', $payload);
 
-// note: additional logical length validations may be added in service later; current tests
-// focus on request rules and explicit service checks covered elsewhere.
+        $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
+        $resp->assertSessionHasErrors(['content']);
+        expect(Chapter::query()->count())->toBe(0);
+    });
 
-it('accepts author_note logical length exactly 1000 characters', function () {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'Len Test OK']);
+    // note: additional logical length validations may be added in service later; current tests
+    // focus on request rules and explicit service checks covered elsewhere.
 
-    $exactPlain = str_repeat('a', 1000);
-    $payload = [
-        'title' => 'Len Chap OK',
-        'author_note' => '<p>' . $exactPlain . '</p>',
-        'content' => '<p>ok</p>',
-        'published' => '1',
-    ];
+    it('accepts author_note logical length exactly 1000 characters', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Len Test OK']);
 
-    $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
-        ->post('/stories/' . $story->slug . '/chapters', $payload);
+        $exactPlain = str_repeat('a', 1000);
+        $payload = [
+            'title' => 'Len Chap OK',
+            'author_note' => '<p>' . $exactPlain . '</p>',
+            'content' => '<p>ok</p>',
+            'published' => '1',
+        ];
 
-    $resp->assertRedirect();
-    expect(Chapter::query()->count())->toBe(1);
-});
+        $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
+            ->post('/stories/' . $story->slug . '/chapters', $payload);
 
-it('validates that author_note logical length must be <= 1000 characters', function () {
-    $user = alice($this);
-    $this->actingAs($user);
-    $story = createStoryForAuthor($user->id, ['title' => 'Len Test']);
+        $resp->assertRedirect();
+        expect(Chapter::query()->count())->toBe(1);
+    });
 
-    // Build an author_note that exceeds 1000 chars after strip_tags
-    $longPlain = str_repeat('a', 1001);
-    $payload = [
-        'title' => 'Len Chap',
-        'author_note' => '<p>' . $longPlain . '</p>',
-        'content' => '<p>ok</p>',
-        'published' => '1',
-    ];
+    it('validates that author_note logical length must be <= 1000 characters', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Len Test']);
 
-    $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
-        ->post('/stories/' . $story->slug . '/chapters', $payload);
+        // Build an author_note that exceeds 1000 chars after strip_tags
+        $longPlain = str_repeat('a', 1001);
+        $payload = [
+            'title' => 'Len Chap',
+            'author_note' => '<p>' . $longPlain . '</p>',
+            'content' => '<p>ok</p>',
+            'published' => '1',
+        ];
 
-    $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
-    $resp->assertSessionHasErrors(['author_note']);
-    expect(Chapter::query()->count())->toBe(0);
+        $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
+            ->post('/stories/' . $story->slug . '/chapters', $payload);
+
+        $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
+        $resp->assertSessionHasErrors(['author_note']);
+        expect(Chapter::query()->count())->toBe(0);
+    });
+
+    describe('Events', function () {
+        it('is emitted when creating a draft chapter', function () {
+            $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $this->actingAs($user);
+
+            $story = createStoryForAuthor($user->id, ['title' => 'Event Story']);
+
+            $payload = validChapterPayload([
+                'title' => 'My First Chapter',
+                'content' => '<p>Some words here</p>',
+            ]);
+
+            $resp = $this->post(route('chapters.store', ['storySlug' => $story->slug]), $payload);
+            $resp->assertRedirect();
+
+            /** @var Chapter $chapter */
+            $chapter = Chapter::query()->latest('id')->firstOrFail();
+
+            /** @var ChapterCreated|null $event */
+            $event = latestEventOf(ChapterCreated::name(), ChapterCreated::class);
+            expect($event)->not->toBeNull();
+            expect($event->storyId)->toBe($story->id);
+            expect($event->chapter->id)->toBe($chapter->id);
+            expect($event->chapter->title)->toBe('My First Chapter');
+            expect($event->chapter->slug)->toBe($chapter->slug);
+            expect($event->chapter->sortOrder)->toBe($chapter->sort_order);
+            expect($event->chapter->status)->toBe($chapter->status);
+            // sanity check counts are positive
+            expect($event->chapter->wordCount)->toBeGreaterThan(0);
+            expect($event->chapter->charCount)->toBeGreaterThan(0);
+        });
+    });
 });

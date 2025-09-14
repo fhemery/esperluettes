@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
+use App\Domains\Story\Events\StoryVisibilityChanged;
 
 uses(TestCase::class, RefreshDatabase::class);
 
@@ -368,6 +369,37 @@ describe('Editing story', function () {
                 expect($after->audienceId)->toBe((int) $createPayload['story_ref_audience_id']);
                 expect($after->copyrightId)->toBe((int) $createPayload['story_ref_copyright_id']);
                 expect($after->genreIds)->toBeArray();
+            });
+        });
+
+        describe('Story.VisibilityChanged event', function () {
+            it('is emitted when changing visibility and contains id, title, old/new visibility', function () {
+                $user = alice($this);
+                $this->actingAs($user);
+
+                // Create story PUBLIC
+                $payload = validStoryPayload([
+                    'title' => 'Visibility Tale',
+                    'visibility' => \App\Domains\Story\Models\Story::VIS_PUBLIC,
+                ]);
+                $this->post(route('stories.store'), $payload)->assertRedirect();
+
+                /** @var \App\Domains\Story\Models\Story $story */
+                $story = \App\Domains\Story\Models\Story::query()->latest('id')->firstOrFail();
+
+                // Update to PRIVATE (only visibility change)
+                $update = array_merge($payload, [
+                    'visibility' => \App\Domains\Story\Models\Story::VIS_PRIVATE,
+                ]);
+                $this->put('/stories/' . $story->slug, $update)->assertRedirect();
+
+                /** @var StoryVisibilityChanged|null $event */
+                $event = latestEventOf(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
+                expect($event)->not->toBeNull();
+                expect($event->storyId)->toBe($story->id);
+                expect($event->title)->toBe('Visibility Tale');
+                expect($event->oldVisibility)->toBe(\App\Domains\Story\Models\Story::VIS_PUBLIC);
+                expect($event->newVisibility)->toBe(\App\Domains\Story\Models\Story::VIS_PRIVATE);
             });
         });
     });

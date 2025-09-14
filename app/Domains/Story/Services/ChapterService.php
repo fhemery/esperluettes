@@ -7,15 +7,21 @@ use App\Domains\Shared\Support\SparseReorder;
 use App\Domains\Story\Http\Requests\ChapterRequest;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Models\Story;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Story\Events\ChapterCreated;
+use App\Domains\Story\Events\ChapterUpdated;
+use App\Domains\Story\Events\ChapterPublished;
+use App\Domains\Story\Events\ChapterUnpublished;
+use App\Domains\Story\Events\DTO\ChapterSnapshot;
 use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ChapterService
 {
     public function __construct(
         private readonly CommentMaintenancePublicApi $comments,
+        private readonly EventBus $eventBus,
     ) {}
 
     public function createChapter(Story $story, ChapterRequest $request, int $userId): Chapter
@@ -61,6 +67,12 @@ class ChapterService
                 $this->updateStoryLastPublished($story);
             }
 
+            // Emit Chapter.Created with a lightweight snapshot
+            $this->eventBus->emit(new ChapterCreated(
+                storyId: (int) $story->id,
+                chapter: ChapterSnapshot::fromModel($chapter),
+            ));
+
             return $chapter;
         });
     }
@@ -101,6 +113,8 @@ class ChapterService
         $published = (bool)($request->boolean('published', false));
 
         return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published) {
+            // Snapshot BEFORE changes
+            $before = ChapterSnapshot::fromModel($chapter);
             $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
             $publishChanged = $wasPublished !== $published;
 
@@ -127,6 +141,31 @@ class ChapterService
             if ($firstPublishedNow || $publishChanged) {
                 $this->updateStoryLastPublished($story);
             }
+
+            // Snapshot AFTER changes
+            $after = ChapterSnapshot::fromModel($chapter);
+
+            // Emit Chapter.Published/Unpublished transitions on status change
+            if ($publishChanged) {
+                if ($published) {
+                    $this->eventBus->emit(new ChapterPublished(
+                        storyId: (int) $story->id,
+                        chapter: $after,
+                    ));
+                } else {
+                    $this->eventBus->emit(new ChapterUnpublished(
+                        storyId: (int) $story->id,
+                        chapter: $after,
+                    ));
+                }
+            }
+
+            // Emit update event with before/after
+            $this->eventBus->emit(new ChapterUpdated(
+                storyId: (int) $story->id,
+                before: $before,
+                after: $after,
+            ));
 
             return $chapter;
         });
