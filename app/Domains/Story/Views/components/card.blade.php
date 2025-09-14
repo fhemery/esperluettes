@@ -20,20 +20,22 @@
         </a>
     </div>
 
-    <div class="pb-3 pt-3 flex-1">
+    <div class="pb-1 pt-3 flex-1 flex flex-col">
         @if(!empty($genres))
             <x-shared::genre-badges :genres="$genres" placement="right" width="20rem" color="accent" />
         @endif
 
         {{-- Title + summary tooltip icon --}}
-        <div class="flex items-center gap-1">
+        <div class="flex-1 flex items-center gap-1">
             <a href="{{ url('/stories/' . $item->getSlug()) }}" class="block">
-                <h2 class="flex-1 font-extrabold text-gray-900 text-lg leading-7 line-clamp-2">{{ $item->getTitle() }}</h2>
+                <h2 class="flex-1 font-extrabold text-gray-900 text-lg leading-7 line-clamp-2 hover:underline">{{ $item->getTitle() }}</h2>
             </a>
             @if(trim($item->getDescription()) !== '')
-            <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" width="20rem" iconClass="text-black">
-                {{ strip_tags($item->getDescription()) }}
-            </x-shared::tooltip>
+            <div class="pt-1">
+                <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" width="20rem" iconClass="text-black">
+                    {{ strip_tags($item->getDescription()) }}
+                </x-shared::tooltip>
+            </div>
             @endif
         </div>
 
@@ -48,9 +50,9 @@
     </a>
 
     {{-- Bottom meta row: chapters and words (hardcoded for now) + TW icon/tooltip --}}
-    <div class="py-2 border-t border-gray-700">
+    <div class="pb-2 border-b border-gray-700">
         <div class="flex items-center justify-between text-md font-bold">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 text-gray-600">
                 <span>{{ trans_choice('story::shared.metrics.chapters', 8, ['count' => 8]) }}</span>
                 <span class="text-gray-400">|</span>
                 <span>{{ trans_choice('story::shared.metrics.words', 15000, ['count' => '15k']) }}</span>
