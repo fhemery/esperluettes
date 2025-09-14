@@ -7,9 +7,16 @@ use App\Domains\Shared\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Mews\Purifier\Facades\Purifier;
 use Illuminate\Support\Facades\Cache;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\News\Events\NewsPublished;
+use App\Domains\News\Events\NewsUnpublished;
 
 class NewsService
 {
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {}
+
     public function sanitizeContent(string $html): string
     {
         return Purifier::clean($html, 'admin-content');
@@ -37,6 +44,13 @@ class NewsService
         }
         $news->save();
         $this->bustCarouselCache();
+        // Emit domain event
+        $this->eventBus->emit(new NewsPublished(
+            newsId: (int) $news->id,
+            slug: (string) $news->slug,
+            title: (string) $news->title,
+            publishedAt: optional($news->published_at)->toISOString(),
+        ));
         return $news;
     }
 
@@ -45,6 +59,12 @@ class NewsService
         $news->status = 'draft';
         $news->save();
         $this->bustCarouselCache();
+        // Emit domain event
+        $this->eventBus->emit(new NewsUnpublished(
+            newsId: (int) $news->id,
+            slug: (string) $news->slug,
+            title: (string) $news->title,
+        ));
         return $news;
     }
 

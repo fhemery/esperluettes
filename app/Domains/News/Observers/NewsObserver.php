@@ -6,9 +6,16 @@ use App\Domains\News\Models\News;
 use App\Domains\Shared\Services\ImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\News\Events\NewsUpdated;
+use App\Domains\News\Events\NewsDeleted;
 
 class NewsObserver
 {
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {}
+
     public function creating(News $news): void
     {
         // Auto-assign display_order if pinned and order not provided
@@ -50,6 +57,17 @@ class NewsObserver
     public function updated(News $news): void
     {
         $this->bustIfRelevant($news);
+
+        // Emit News.Updated with changed fields
+        $changes = array_keys($news->getChanges());
+        if (!empty($changes)) {
+            $this->eventBus->emit(new NewsUpdated(
+                newsId: (int) $news->id,
+                slug: (string) $news->slug,
+                title: (string) $news->title,
+                changedFields: $changes,
+            ));
+        }
     }
 
     public function deleted(News $news): void
@@ -59,6 +77,13 @@ class NewsObserver
             app(ImageService::class)->deleteWithVariants('public', $news->header_image_path);
         }
         Cache::forget('news.carousel');
+
+        // Emit News.Deleted
+        $this->eventBus->emit(new NewsDeleted(
+            newsId: (int) $news->id,
+            slug: (string) $news->slug,
+            title: (string) $news->title,
+        ));
     }
 
     public function restored(News $news): void

@@ -102,9 +102,10 @@ Legend:
   - Consumers: moderation pipeline, counters.
 
 ## News
-- [A] `News.Published`
-- [A] `News.Updated`
-- [A] `News.Deleted`
+- [I][A] `News.Published`
+- [I][A] `News.Unpublished`
+- [I][A] `News.Updated`
+- [I][A] `News.Deleted`
   - Producers: `News` CRUD services.
   - Consumers: sitemap, notifications, audit.
 

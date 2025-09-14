@@ -267,6 +267,7 @@ deptrac:
     NewsPublic:
       - SharedContracts
       - NewsPrivate
+      - EventsPublic
 
     ProfilePublic:
       - SharedContracts
@@ -340,6 +341,7 @@ deptrac:
     NewsPrivate:
       - SharedContracts
       - AuthPublic
+      - EventsPublic
 
     ProfilePrivate:
       - SharedContracts

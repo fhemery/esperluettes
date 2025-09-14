@@ -5,6 +5,11 @@ namespace App\Domains\News\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\News\Models\News;
 use App\Domains\News\Observers\NewsObserver;
+use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\News\Events\NewsPublished;
+use App\Domains\News\Events\NewsUpdated;
+use App\Domains\News\Events\NewsDeleted;
+use App\Domains\News\Events\NewsUnpublished;
 
 class NewsServiceProvider extends ServiceProvider
 {
@@ -21,5 +26,12 @@ class NewsServiceProvider extends ServiceProvider
 
         // Model observers
         News::observe(NewsObserver::class);
+
+        // Register News domain events mapping with EventBus
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(NewsPublished::name(), NewsPublished::class);
+        $eventBus->registerEvent(NewsUpdated::name(), NewsUpdated::class);
+        $eventBus->registerEvent(NewsDeleted::name(), NewsDeleted::class);
+        $eventBus->registerEvent(NewsUnpublished::name(), NewsUnpublished::class);
     }
 }
