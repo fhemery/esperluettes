@@ -11,13 +11,14 @@ use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Auth\Events\EmailVerified as EmailVerifiedEvent;
 use App\Domains\Auth\Services\RoleCacheService;
-use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
+use App\Domains\Auth\Services\RoleService;
 
 class VerifyEmailController extends Controller
 {
     public function __construct(
         private readonly EventBus $eventBus,
         private readonly RoleCacheService $roleCache,
+        private readonly RoleService $roles,
     ) {}
 
     /**
@@ -55,27 +56,27 @@ class VerifyEmailController extends Controller
         if (!$requireActivation) {
             // Feature disabled: confirmed by default
             if ($user->isOnProbation()) {
-                $user->removeRole(Roles::USER);
+                $this->roles->revoke($user, Roles::USER);
             }
             if (!$user->isConfirmed()) {
-                $user->assignRole(Roles::USER_CONFIRMED);
+                $this->roles->grant($user, Roles::USER_CONFIRMED);
             }
         } else {
             if ($usedActivation) {
                 // Used a code: promote to confirmed
                 if ($user->isOnProbation()) {
-                    $user->removeRole(Roles::USER);
+                    $this->roles->revoke($user, Roles::USER);
                 }
                 if (!$user->isConfirmed()) {
-                    $user->assignRole(Roles::USER_CONFIRMED);
+                    $this->roles->grant($user, Roles::USER_CONFIRMED);
                 }
             } else {
                 // No code used: keep as user only
                 if ($user->isConfirmed()) {
-                    $user->removeRole(Roles::USER_CONFIRMED);
+                    $this->roles->revoke($user, Roles::USER_CONFIRMED);
                 }
                 if (!$user->isOnProbation()) {
-                    $user->assignRole(Roles::USER);
+                    $this->roles->grant($user, Roles::USER);
                 }
             }
         }

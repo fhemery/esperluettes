@@ -6,6 +6,7 @@ use App\Domains\Admin\Filament\Resources\Auth\UserResource\Pages;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Models\Role;
 use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Services\RoleService;
 use App\Domains\Auth\Services\UserActivationService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -76,7 +77,26 @@ class UserResource extends Resource
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload()
-                    ->searchable(),
+                    ->searchable()
+                    ->saveRelationshipsUsing(function (User $record, ?array $state) {
+                        // $state is an array of role IDs selected in the form
+                        $selectedIds = collect($state ?? [])->map(fn ($v) => (int) $v)->filter()->values();
+
+                        $selectedSlugs = Role::query()->whereIn('id', $selectedIds)->pluck('slug')->all();
+                        $currentSlugs = $record->roles()->pluck('slug')->all();
+
+                        $toGrant = array_values(array_diff($selectedSlugs, $currentSlugs));
+                        $toRevoke = array_values(array_diff($currentSlugs, $selectedSlugs));
+
+                        /** @var RoleService $roles */
+                        $roles = app(RoleService::class);
+                        foreach ($toGrant as $slug) {
+                            $roles->grant($record, $slug);
+                        }
+                        foreach ($toRevoke as $slug) {
+                            $roles->revoke($record, $slug);
+                        }
+                    }),
             ]);
     }
 
@@ -168,12 +188,12 @@ class UserResource extends Resource
                         $to = Role::where('slug', Roles::USER_CONFIRMED)->value('name') ?? Roles::USER_CONFIRMED;
                         return __('admin::auth.users.promote.confirm_message', ['from' => $from, 'to' => $to]);
                     })
-                    ->action(function (User $record) {
+                    ->action(function (User $record, RoleService $roles) {
                         if ($record->hasRole(Roles::USER)) {
-                            $record->removeRole(Roles::USER);
+                            $roles->revoke($record, Roles::USER);
                         }
                         if (!$record->hasRole(Roles::USER_CONFIRMED)) {
-                            $record->assignRole(Roles::USER_CONFIRMED);
+                            $roles->grant($record, Roles::USER_CONFIRMED);
                         }
                         Notification::make()
                             ->title(function () {

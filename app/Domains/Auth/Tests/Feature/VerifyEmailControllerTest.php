@@ -1,10 +1,13 @@
 <?php
 
 use App\Domains\Auth\Events\EmailVerified;
+use App\Domains\Auth\Events\UserRoleGranted;
+use App\Domains\Auth\Events\UserRoleRevoked;
 use App\Domains\Auth\Models\ActivationCode;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -130,5 +133,30 @@ describe('Email verification process', function () {
             expect($event->summary())
                 ->toBe(__('auth::events.email_verified.summary'));
         });
+
+        describe('email verification events', function () {
+            it('emits role events on verification when promotion occurs (no activation code required)', function () {
+                // Explicitly disable activation code requirement to trigger promotion to confirmed
+                config()->set('app.require_activation_code', false);
+    
+                // Unverified user on probation (role: user)
+                $user = alice($this, roles: [], isVerified: false);
+    
+                // Build signed verification URL
+                $verificationUrl = verificationUrlFor($user);
+    
+                $response = $this->actingAs($user)->get($verificationUrl);
+                $response->assertRedirect();
+    
+                // As the actor is the same user and user is not admin, summary should be system variant
+                /** @var UserRoleGranted|null $granted */
+                $granted = latestEventOf(UserRoleGranted::name(), UserRoleGranted::class);
+                expect($granted)->not->toBeNull();
+                expect($granted->userId)->toBe($user->id);
+                expect($granted->role)->toBe(Roles::USER_CONFIRMED);
+                expect($granted->summary())->toContain('system');
+            });
+        });
+    
     });
 });

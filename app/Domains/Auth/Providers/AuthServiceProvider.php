@@ -10,6 +10,8 @@ use App\Domains\Auth\Events\PasswordChanged;
 use App\Domains\Auth\Events\PasswordResetRequested;
 use App\Domains\Auth\Events\UserLoggedIn;
 use App\Domains\Auth\Events\UserLoggedOut;
+use App\Domains\Auth\Events\UserRoleGranted;
+use App\Domains\Auth\Events\UserRoleRevoked;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -57,5 +59,7 @@ class AuthServiceProvider extends ServiceProvider
         $eventBus->registerEvent(PasswordResetRequested::name(), PasswordResetRequested::class);
         $eventBus->registerEvent(UserLoggedIn::name(), UserLoggedIn::class);
         $eventBus->registerEvent(UserLoggedOut::name(), UserLoggedOut::class);
+        $eventBus->registerEvent(UserRoleGranted::name(), UserRoleGranted::class);
+        $eventBus->registerEvent(UserRoleRevoked::name(), UserRoleRevoked::class);
     }
 }

@@ -19,4 +19,16 @@ return [
     'user_logged_out' => [
         'summary' => "Déconnexion",
     ],
+    'user_role_granted' => [
+        'summary' => "Rôle attribué : :role, ID user : :id",
+        'system' => [
+            'summary' => "Rôle attribué par le système : :role, ID user : :id",
+        ],
+    ],
+    'user_role_revoked' => [
+        'summary' => "Rôle révoqué : :role, ID user : :id",
+        'system' => [
+            'summary' => "Rôle révoqué par le système : :role, ID user : :id",
+        ],
+    ],
 ];

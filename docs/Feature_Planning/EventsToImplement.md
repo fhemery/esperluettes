@@ -47,6 +47,10 @@ Legend:
 - [I][A] `Auth.UserLoggedOut` — explicit logout.
   - Producers: logout flow.
   - Consumers: `Admin` audit.
+- [C]`Auth.UserRoleGranted` — role granted to a user.
+- [C]`Auth.UserRoleRevoked` — role revoked.
+- [C]`Auth.UserDeactivated` — user deactivated.
+- [C]`Auth.UserReactivated` — user reactivated.
 - [A][C] `Auth.UserDeleted` — user deleted (hard delete).
   - Producers: `Auth` delete service.
   - Consumers: `Story` (to clean up the stories), `Comment` (to clean up the comments), `Profile` (to clean up the profile).
@@ -123,15 +127,6 @@ Legend:
 - [I] `StoryRef.Removed` — referential removed.
   - Producers: `StoryRef` manage service.
   - Consumers: projections, admin audit, caches.
-
-## Admin
-- [A] `Admin.RoleGranted` — role granted to a user.
-- [A] `Admin.RoleRevoked` — role revoked.
-- [A] `Admin.FeatureToggled` — feature flag toggled.
-- [A] `Admin.UserBanned` — user banned.
-- [A] `Admin.UserUnbanned` — user unbanned.
-  - Producers: `Admin` actions.
-  - Consumers: security audit, enforcement services, cache invalidation.
 
 ---
 
