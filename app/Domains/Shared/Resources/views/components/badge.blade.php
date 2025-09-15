@@ -11,6 +11,7 @@
 
     // Size map
     $sizes = [
+        'xs' => 'p-1.5 text-xs font-bold',
         'sm' => 'p-2.5 text-sm font-bold',
         'md' => 'p-3.5 text-md font-bold',
     ];

@@ -30,7 +30,7 @@ class GenreBadges extends Component
         int $gap = 8,
         int $badgeBase = 20,
         int $fontSize = 14,
-        float $avgCharRatio = 0.6,
+        float $avgCharRatio = 0.65,
         int $plusMin = 40,
         int $maxCandidates = 3,
     ) {
