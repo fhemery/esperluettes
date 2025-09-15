@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Shared\Views\Components;
+namespace App\Domains\Story\Views\Components;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -94,6 +94,6 @@ class GenreBadges extends Component
 
     public function render(): View
     {
-        return view('shared::components.genre-badges');
+        return view('story::components.genre-badges');
     }
 }

@@ -2,10 +2,10 @@
 
 use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Support\Facades\Route;
-use App\Domains\Story\Http\Controllers\StoryCreateController;
-use App\Domains\Story\Http\Controllers\StoryController;
-use App\Domains\Story\Http\Controllers\ChapterController;
-use App\Domains\Story\Http\Controllers\ReadingProgressController;
+use App\Domains\Story\Controllers\StoryCreateController;
+use App\Domains\Story\Controllers\StoryController;
+use App\Domains\Story\Controllers\ChapterController;
+use App\Domains\Story\Controllers\ReadingProgressController;
 
 Route::middleware(['web'])->group(function () {
     Route::get('/stories', [StoryController::class, 'index'])

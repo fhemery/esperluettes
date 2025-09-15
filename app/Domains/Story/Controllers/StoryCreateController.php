@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Story\Http\Controllers;
+namespace App\Domains\Story\Controllers;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;

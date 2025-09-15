@@ -22,7 +22,7 @@
 
     <div class="pb-1 pt-3 flex-1 flex flex-col">
         @if(!empty($genres))
-            <x-shared::genre-badges :genres="$genres" placement="right" width="20rem" color="accent" />
+            <x-story::genre-badges :genres="$genres" placement="right" width="20rem" color="accent" />
         @endif
 
         {{-- Title + summary tooltip icon --}}

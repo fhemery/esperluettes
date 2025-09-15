@@ -256,7 +256,7 @@ everything.**
 **Implementation Notes:**
 
 - Shared helper `app/Domains/Shared/Support/SlugWithId.php` is used to extract IDs and validate canonical slugs.
-- Controller logic implemented in `app/Domains/Story/Http/Controllers/ChapterController.php::show()` to issue a single 301 when story and/or chapter base slugs mismatch.
+- Controller logic implemented in `app/Domains/Story/Controllers/ChapterController.php::show()` to issue a single 301 when story and/or chapter base slugs mismatch.
 - Tests added in `app/Domains/Story/Tests/Feature/ViewChapterTest.php` under "regarding SEO" to cover story mismatch, chapter mismatch, combined mismatch, and query string preservation.
 
 ## **[DONE] US-039: Chapter Routes Use "/chapters" Segment (Including Show)**

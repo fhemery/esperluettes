@@ -18,6 +18,7 @@ use App\Domains\Story\Events\ChapterPublished;
 use App\Domains\Story\Events\ChapterUnpublished;
 use App\Domains\Story\Events\ChapterDeleted;
 use App\Domains\Story\Events\StoryVisibilityChanged;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -34,7 +35,9 @@ class StoryServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         // Register views under the 'story' namespace
-        $this->loadViewsFrom(app_path('Domains/Story/Views'), 'story');
+        $this->loadViewsFrom(app_path('Domains/Story/Resources/views'), 'story');
+        // Register class-based components under the 'shared' prefix
+        Blade::componentNamespace('App\\Domains\\Story\\Views\\Components', 'story');
 
         // Load PHP translations for the Story domain under 'story::'
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'story');

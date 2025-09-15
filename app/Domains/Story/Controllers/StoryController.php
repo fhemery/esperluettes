@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Story\Http\Controllers;
+namespace App\Domains\Story\Controllers;
 
 use App\Domains\Auth\PublicApi\AuthPublicApi;
 use App\Domains\Auth\PublicApi\Roles;
