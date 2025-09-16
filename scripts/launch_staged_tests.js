@@ -1,23 +1,20 @@
 #!/usr/bin/env node
 /*
-  Launch tests only for Domains impacted by staged changes.
+  Launch tests only for Domains impacted by modified (non-staged) changes and their dependent domains (via deptrac).
 
-  Approach:
-  - Read staged files via `git diff --cached --name-only`.
-  - Parse deptrac.yaml with js-yaml to understand layers and ruleset.
-  - Map each staged file to one or more layers using `directory` collectors and conventions:
-      * If a file is under app/Domains/<Domain>/Tests/ => <Domain>Tests layer
-      * If under app/Domains/<Domain>/PublicApi/ => <Domain>Public layer (if exists)
-      * Else under app/Domains/<Domain>/ => <Domain>Private layer (if exists)
-    Additionally, for layers with `collectors: [{type: directory, value: ...}]` we match by path prefix.
-  - Build a dependency graph from ruleset (layer -> allowed layers). Then compute reverse reachability
-    from changed layers to determine which Test layers depend on them.
-  - Translate impacted Test layers to test directories (app/Domains/<Domain>/Tests) and run
-    `php artisan test` (or Sail) for just those directories.
+  Approach (as specified):
+  - For each file that is modified (not staged), check its domain.
+    * If it belongs to docs/ or any path segment starts with a '.', ignore it.
+    * Else, if it starts with app/Domains/XXX/, extract the domain XXX.
+    * In all other cases, run all tests.
+  - Parse deptrac.yaml and build a reverse domain dependency map from the ruleset, removing Public/Private/Tests suffixes.
+    Example: AuthPublic: [Shared, AuthPrivate, EventsPublic] -> Shared -> Auth, Events -> Auth
+  - Compute the transitive closure of this reverse map (e.g., if Shared -> Auth and Auth -> Comment, then Shared -> [Auth, Comment]).
+  - Take all touched domains, expand through the closure, and compute which tests to run.
 
-  Notes:
-  - If no staged files map to any domain, run full test suite as fallback.
-  - If we can't parse deptrac or graph resolution fails, fallback to full tests.
+  Output:
+  - Print the Domains impacted by the modified files
+  - Print the list of impacts from deptrac (reverse closure map)
 */
 
 import fs from 'fs';
@@ -26,6 +23,16 @@ import { fileURLToPath } from 'url';
 import { spawnSync } from 'child_process';
 import yaml from 'js-yaml';
 import { parse as dotenvParse } from 'dotenv';
+
+const excludeFoldersOrFiles = [
+  'docs/',
+  'scripts/',
+  'deptrac.yaml',
+  '.windsurf',
+  '.husky',
+  '.vscode',
+]
+
 
 function log(msg) { process.stdout.write(`[staged-tests] ${msg}\n`); }
 
@@ -36,10 +43,17 @@ function runCmd(cmd, args, opts = {}) {
   return res.status === 0;
 }
 
-function getStagedFiles() {
-  const res = spawnSync('git', ['diff', '--cached', '--name-only'], { encoding: 'utf8' });
-  if (res.status !== 0) return [];
-  return (res.stdout || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+function getModifiedFiles() {
+  // Unstaged modified files
+  const diffRes = spawnSync('git', ['diff', '--name-only'], { encoding: 'utf8' });
+  const modified = diffRes.status === 0 ? (diffRes.stdout || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+
+  // Untracked files
+  const untrackedRes = spawnSync('git', ['ls-files', '--others', '--exclude-standard'], { encoding: 'utf8' });
+  const untracked = untrackedRes.status === 0 ? (untrackedRes.stdout || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+
+  const set = new Set([...modified, ...untracked]);
+  return [...set];
 }
 
 function getCurrentBranch() {
@@ -60,125 +74,90 @@ function readDeptracConfig() {
   }
 }
 
-function buildLayerDirectoryMap(deptrac) {
-  const layers = deptrac?.deptrac?.layers || [];
-  const dirMap = new Map(); // layerName -> [dir prefixes]
-  for (const layer of layers) {
-    const name = layer.name;
-    const dirs = [];
-    for (const c of layer.collectors || []) {
-      if (c.type === 'directory' && typeof c.value === 'string') {
-        // Normalize to forward slashes and ensure trailing slash
-        let v = c.value.replace(/\\/g, '/');
-        if (!v.endsWith('/')) v += '/';
-        dirs.push(v);
-      }
-    }
-    if (dirs.length) dirMap.set(name, dirs);
-  }
-  return dirMap;
-}
-
 function deriveDomainFromPath(relPath) {
   // expects forward slashes
   const m = relPath.match(/^app\/Domains\/([^/]+)\//);
   return m ? m[1] : null;
 }
 
-function probableLayerNamesForPath(relPath, deptracLayers) {
-  // Using conventions to cover layers that use complex collectors
-  const domain = deriveDomainFromPath(relPath);
-  if (!domain) return [];
-  const names = deptracLayers.map(l => l.name);
-  const candidates = [];
-  if (relPath.startsWith(`app/Domains/${domain}/Tests/`)) {
-    const testLayer = `${domain}Tests`;
-    if (names.includes(testLayer)) candidates.push(testLayer);
-  } else if (relPath.startsWith(`app/Domains/${domain}/PublicApi/`)) {
-    const pubLayer = `${domain}Public`;
-    if (names.includes(pubLayer)) candidates.push(pubLayer);
-  } else {
-    const privLayer = `${domain}Private`;
-    if (names.includes(privLayer)) candidates.push(privLayer);
-  }
-  return candidates;
-}
-
-function mapFilesToLayers(stagedFiles, deptrac) {
-  const layers = deptrac?.deptrac?.layers || [];
-  const dirMap = buildLayerDirectoryMap(deptrac); // dir-based mapping
-  const impacted = new Set();
-  const directTestDirs = new Set();
-
-  for (const f of stagedFiles) {
+function extractDomainsFromFiles(files) {
+  const domains = new Set();
+  let runAll = false;
+  for (const f of files) {
     const rel = f.replace(/\\/g, '/');
-    if (!rel.startsWith('app/Domains/')) continue;
+    if (!rel) continue;
+    // ignore docs and hidden folders
+    if (excludeFoldersOrFiles.some(ex => rel.startsWith(ex))) continue;
 
-    // If a staged file is itself a test under a domain, schedule that domain's tests directly
-    const testMatch = rel.match(/^app\/Domains\/([^/]+)\/Tests\//);
-    if (testMatch) {
-      const domain = testMatch[1];
-      directTestDirs.add(`app/Domains/${domain}/Tests`);
+    const domain = deriveDomainFromPath(rel);
+    if (domain) {
+      domains.add(domain);
+      continue;
     }
 
-    // 1) Exact directory collectors mapping
-    for (const [layer, dirs] of dirMap.entries()) {
-      if (dirs.some(d => rel.startsWith(d))) impacted.add(layer);
-    }
-    // 2) Convention-based fallback for layers defined via bool collectors (e.g., *Private)
-    for (const name of probableLayerNamesForPath(rel, layers)) {
-      impacted.add(name);
-    }
+    // Any other case => run all tests
+    runAll = true;
   }
-  return { changedLayers: [...impacted], directTestDirs: [...directTestDirs] };
+  return { domains: [...domains], runAll };
 }
 
-function buildReverseGraph(deptrac) {
+function stripSuffixToDomain(layerName) {
+  if (!layerName) return null;
+  const m = layerName.match(/^(.*?)(Public|Private|Tests)$/);
+  return m ? m[1] : layerName;
+}
+
+function buildDomainReverseMap(deptrac) {
   const ruleset = deptrac?.deptrac?.ruleset || {};
-  const reverse = new Map(); // node -> set(of dependents)
-  const nodes = new Set(Object.keys(ruleset));
-  // Include any layers that are only on RHS
-  for (const deps of Object.values(ruleset)) for (const d of deps) nodes.add(d);
-  for (const n of nodes) reverse.set(n, new Set());
-  for (const [layer, deps] of Object.entries(ruleset)) {
+  const reverse = new Map(); // domain -> Set(of dependent domains)
+
+  function ensure(k) { if (!reverse.has(k)) reverse.set(k, new Set()); }
+
+  // Collect all domain keys from LHS and RHS
+  for (const [lhs, deps] of Object.entries(ruleset)) {
+    ensure(stripSuffixToDomain(lhs));
+    for (const d of deps) ensure(stripSuffixToDomain(d));
+  }
+
+  // Build reverse edges on domain level, ignoring self-loops
+  for (const [lhs, deps] of Object.entries(ruleset)) {
+    const lhsDom = stripSuffixToDomain(lhs);
     for (const d of deps) {
-      if (!reverse.has(d)) reverse.set(d, new Set());
-      reverse.get(d).add(layer);
+      const rhsDom = stripSuffixToDomain(d);
+      if (!lhsDom || !rhsDom) continue;
+      if (lhsDom === rhsDom) continue; // ignore self
+      reverse.get(rhsDom).add(lhsDom);
     }
   }
   return reverse;
 }
 
-function collectDependentTestsLayers(changedLayers, deptrac) {
-  const reverse = buildReverseGraph(deptrac);
-  const testsLayers = (deptrac?.deptrac?.layers || [])
-    .map(l => l.name)
-    .filter(n => n.endsWith('Tests'));
-
-  const impactedTests = new Set();
-  // BFS/DFS upwards: from changed layer to all dependents; capture *Tests layers
-  const visited = new Set();
-  const stack = [...changedLayers];
-  while (stack.length) {
-    const node = stack.pop();
-    if (visited.has(node)) continue;
-    visited.add(node);
-    if (testsLayers.includes(node)) impactedTests.add(node);
-    const ups = reverse.get(node);
-    if (ups) for (const u of ups) stack.push(u);
-  }
-
-  // Also include test layers for the same domain of each changed layer by convention
-  for (const layer of changedLayers) {
-    const m = layer.match(/^(.*?)(Public|Private|Tests)$/);
-    const domain = m ? m[1] : (layer === 'StoryRef' ? 'StoryRef' : null);
-    if (domain) {
-      const t = `${domain}Tests`;
-      if (testsLayers.includes(t)) impactedTests.add(t);
+function computeTransitiveClosure(reverseMap) {
+  // For each domain X, compute all domains that depend on X (including multi-hop)
+  const closure = new Map(); // domain -> Set(of dependents)
+  const domains = [...reverseMap.keys()];
+  for (const d of domains) {
+    const visited = new Set();
+    const stack = [...(reverseMap.get(d) || [])];
+    while (stack.length) {
+      const cur = stack.pop();
+      if (visited.has(cur)) continue;
+      visited.add(cur);
+      for (const up of reverseMap.get(cur) || []) stack.push(up);
     }
+    closure.set(d, visited);
   }
+  return closure;
+}
 
-  return [...impactedTests];
+function testsDirsForDomains(domains) {
+  // Map domain -> app/Domains/<Domain>/Tests
+  const dirs = [];
+  for (const d of domains) {
+    const candidate = `app/Domains/${d}/Tests`;
+    if (fileExists(path.resolve(process.cwd(), candidate))) dirs.push(candidate);
+  }
+  return dirs;
 }
 
 function testsDirsForTestLayers(testLayers) {
@@ -214,9 +193,9 @@ function runStagedTests(skipBranchCheck = false) {
     return 0;
   }
 
-  const staged = getStagedFiles();
-  if (staged.length === 0) {
-    log('No staged files; running full test suite.');
+  const modified = getModifiedFiles();
+  if (modified.length === 0) {
+    log('No modified files; running full test suite.');
     const runner = determineRunner();
     if (runner === 'php') return runCmd('php', ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
     else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
@@ -230,18 +209,36 @@ function runStagedTests(skipBranchCheck = false) {
     else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
   }
 
-  const { changedLayers, directTestDirs } = mapFilesToLayers(staged, deptrac);
-  if (changedLayers.length === 0 && directTestDirs.length === 0) {
-    log('No staged files mapped to domains; running full test suite.');
+  const { domains, runAll } = extractDomainsFromFiles(modified);
+  if (runAll) {
+    log('Changes include files outside app/Domains (and not ignored); running full test suite.');
+    const runner = determineRunner();
+    if (runner === 'php') return runCmd('php', ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
+  }
+  if (domains.length === 0) {
+    log('No modified domain files after applying ignore rules; running full test suite.');
     const runner = determineRunner();
     if (runner === 'php') return runCmd('php', ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
     else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
   }
 
-  if (changedLayers.length) log(`Changed layers: ${changedLayers.join(', ')}`);
-  const impactedTestsLayers = collectDependentTestsLayers(changedLayers, deptrac);
-  if (impactedTestsLayers.length) log(`Impacted test layers: ${impactedTestsLayers.join(', ')}`);
-  const testDirs = [...testsDirsForTestLayers(impactedTestsLayers), ...directTestDirs];
+  // Build domain-level reverse dependency graph and its transitive closure
+  const reverse = buildDomainReverseMap(deptrac);
+  const closure = computeTransitiveClosure(reverse);
+
+  // Compute impacted domains: directly modified + dependents via closure
+  const impactedDomains = new Set(domains);
+  for (const d of domains) for (const dep of closure.get(d) || []) impactedDomains.add(dep);
+
+  // Print required info
+  log(`Impacted domains (from modified files): ${[...new Set(domains)].join(', ')}`);
+  // Print deptrac impacts (closure) succinctly
+  for (const [src, deps] of closure.entries()) {
+    if (deps.size > 0) log(`dep-impact ${src} -> ${[...deps].join(', ')}`);
+  }
+
+  const testDirs = testsDirsForDomains([...impactedDomains]);
 
   if (testDirs.length === 0) {
     log('No specific test directories resolved; running full test suite.');
