@@ -9,11 +9,12 @@
  * Expected refs & wiring:
  *   - x-ref="trigger" on the trigger button
  *   - The panel can be teleported to body and should bind :style="styleObj"
- *   - Call x-init="init($refs.trigger, '<placement>', '<maxWidth>')"
+ *   - Call x-init="init($refs.trigger, '<placement>', '<maxWidth>', '<maxHeight>')"
  *   - Optionally call x-effect="(hoverOpen || pinned) && measureAndCompute()" to re-measure when shown
  *
  * Placements: right | left | top | bottom
  * Max width: any CSS size (e.g. '20rem', '280px'). Actual panel shrinks to content.
+ * Max height: any CSS size (e.g. '20rem'). Panel scrolls vertically when content exceeds it.
  */
 export default function registerTooltip(Alpine) {
   Alpine.data('popover', () => ({
@@ -26,13 +27,15 @@ export default function registerTooltip(Alpine) {
     trigger: null,
     placement: 'right',
     maxWidth: '20rem',
+    maxHeight: '20rem',
     margin: 8,
     panelH: 0,
     panelW: 0,
-    init(trigger, placement, maxWidth) {
+    init(trigger, placement, maxWidth, maxHeight) {
       this.trigger = trigger;
       this.placement = placement || 'right';
       this.maxWidth = maxWidth || '20rem';
+      this.maxHeight = maxHeight || '20rem';
       this.$nextTick(() => {
         this.compute();
         window.addEventListener('resize', this.compute.bind(this));
@@ -106,12 +109,14 @@ export default function registerTooltip(Alpine) {
 
       // Set safe max dimensions and enable scrolling inside the panel as needed
       const maxWViewport = `calc(100vw - ${this.margin * 2}px)`;
-      const maxH = `calc(100vh - ${this.margin * 2}px)`;
+      const maxHViewport = `calc(100vh - ${this.margin * 2}px)`;
+      // Compose maxHeight as the minimum of configured and viewport constraint
+      const maxHCombined = `min(${this.maxHeight}, ${maxHViewport})`;
       this.styleObj = {
         top: pos.top + 'px',
         left: pos.left + 'px',
         maxWidth: `min(${this.maxWidth}, ${maxWViewport})`,
-        maxHeight: maxH,
+        maxHeight: maxHCombined,
         overflowY: 'auto',
       };
     },
