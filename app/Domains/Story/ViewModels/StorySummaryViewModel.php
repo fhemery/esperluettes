@@ -13,6 +13,8 @@ class StorySummaryViewModel
     /** @var array<int,string> */
     public readonly array $triggerWarningNames;
     public readonly int $readsLoggedTotal;
+    public readonly int $chaptersCount;
+    public readonly int $wordsTotal;
 
     public function __construct(
         public readonly int $id,
@@ -20,6 +22,8 @@ class StorySummaryViewModel
         public readonly string $slug,
         public readonly ?string $description,
         int $readsLoggedTotal = 0,
+        int $chaptersCount = 0,
+        int $wordsTotal = 0,
         array $authors,
         array $genreNames = [],
         array $triggerWarningNames = [],
@@ -29,6 +33,8 @@ class StorySummaryViewModel
         $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
         $this->triggerWarningNames = array_values(array_filter(array_map('strval', $triggerWarningNames)));
         $this->readsLoggedTotal = max(0, (int)$readsLoggedTotal);
+        $this->chaptersCount = max(0, (int)$chaptersCount);
+        $this->wordsTotal = max(0, (int)$wordsTotal);
     }
 
     public function getTitle(): string
@@ -78,5 +84,15 @@ class StorySummaryViewModel
     public function getReadsLoggedTotal(): int
     {
         return $this->readsLoggedTotal;
+    }
+
+    public function getChaptersCount(): int
+    {
+        return $this->chaptersCount;
+    }
+
+    public function getWordsTotal(): int
+    {
+        return $this->wordsTotal;
     }
 }

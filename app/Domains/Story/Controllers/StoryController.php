@@ -128,12 +128,18 @@ class StoryController
                 }
             }
 
+            // Use preloaded aggregates to avoid N+1
+            $chaptersCount = (int) ($story->published_chapters_count ?? 0);
+            $wordsTotal = (int) ($story->published_words_total ?? 0);
+
             $items[] = new StorySummaryViewModel(
                 id: $story->id,
                 title: $story->title,
                 slug: $story->slug,
                 description: $story->description,
                 readsLoggedTotal: (int)($story->reads_logged_total ?? 0),
+                chaptersCount: $chaptersCount,
+                wordsTotal: $wordsTotal,
                 authors: $authorDtos,
                 genreNames: $gNames,
                 triggerWarningNames: $twNames,
@@ -255,12 +261,17 @@ class StoryController
                     $authorDtos[] = $dto;
                 }
             }
+            $chaptersCount = (int) $story->chapters()->where('status', \App\Domains\Story\Models\Chapter::STATUS_PUBLISHED)->count();
+            $wordsTotal = (int) $story->publishedWordCount();
+
             $items[] = new StorySummaryViewModel(
                 id: $story->id,
                 title: $story->title,
                 slug: $story->slug,
                 description: $story->description,
                 readsLoggedTotal: (int)($story->reads_logged_total ?? 0),
+                chaptersCount: $chaptersCount,
+                wordsTotal: $wordsTotal,
                 authors: $authorDtos,
             );
         }
@@ -365,6 +376,7 @@ class StoryController
                 isDraft: (string)$c->status !== \App\Domains\Story\Models\Chapter::STATUS_PUBLISHED,
                 isRead: in_array((int)$c->id, $readIds, true),
                 readsLogged: (int)($c->reads_logged_count ?? 0),
+                wordCount: (int)($c->word_count ?? 0),
                 url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
             );
         }

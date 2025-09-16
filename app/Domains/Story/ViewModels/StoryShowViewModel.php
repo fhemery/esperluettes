@@ -168,4 +168,12 @@ class StoryShowViewModel
     {
         return (int) ($this->story->reads_logged_total ?? 0);
     }
+
+    /**
+     * Sum of words across published chapters (computed on the fly)
+     */
+    public function getWordsTotal(): int
+    {
+        return (int) $this->story->publishedWordCount();
+    }
 }

@@ -72,4 +72,8 @@ return [
         'label' => 'Lectures',
         'tooltip' => "Nombre de lectures effectuées par des utilisateurs connectés.",
     ],
+    'words' => [
+        'label' => 'Mots',
+        'tooltip' => "Nombre de mots de ce chapitre (contenu uniquement).",
+    ],
 ];

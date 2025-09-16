@@ -4,6 +4,7 @@ namespace App\Domains\Story\Services;
 
 use App\Domains\Story\Http\Requests\StoryRequest;
 use App\Domains\Story\Models\Story;
+use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Support\StoryFilterAndPagination;
 use App\Domains\Story\Support\GetStoryOptions;
 use App\Domains\Shared\Support\SlugWithId;
@@ -36,6 +37,19 @@ class StoryService
     {
         $query = Story::query()
             ->with(['authors', 'collaborators', 'genres:id', 'triggerWarnings:id']);
+
+        // Aggregate metrics for each story (avoid N+1):
+        // - published_chapters_count: count of published chapters
+        // - published_words_total: sum of word_count across published chapters
+        $query->withCount([
+            'chapters as published_chapters_count' => function ($q) {
+                $q->where('status', Chapter::STATUS_PUBLISHED);
+            },
+        ])->withSum([
+            'chapters as published_words_total' => function ($q) {
+                $q->where('status', Chapter::STATUS_PUBLISHED);
+            },
+        ], 'word_count');
 
         // Only require a published chapter for general listings; profile owner views can include drafts/no chapters
         if ($filter->requirePublishedChapter) {

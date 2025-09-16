@@ -49,13 +49,13 @@
     </div>
     </a>
 
-    {{-- Bottom meta row: chapters and words (hardcoded for now) + TW icon/tooltip --}}
+    {{-- Bottom meta row: chapters and words + TW icon/tooltip --}}
     <div class="pb-2 border-b border-gray-700">
         <div class="flex items-center justify-between text-md font-bold">
             <div class="flex items-center gap-2 text-gray-600">
-                <span>{{ trans_choice('story::shared.metrics.chapters', 8, ['count' => 8]) }}</span>
+                <span>{{ trans_choice('story::shared.metrics.chapters', $item->getChaptersCount(), ['count' => $item->getChaptersCount()]) }}</span>
                 <span class="text-gray-400">|</span>
-                <span>{{ trans_choice('story::shared.metrics.words', 15000, ['count' => '15k']) }}</span>
+                <span>{{ trans_choice('story::shared.metrics.words', $item->getWordsTotal(), ['count' => \App\Domains\Shared\Support\NumberFormatter::compact($item->getWordsTotal())]) }}</span>
             </div>
             @if(!empty($tws))
             <x-shared::popover placement="left" width="18rem">

@@ -110,4 +110,12 @@ class Story extends Model
     {
         return $this->hasMany(Chapter::class);
     }
+
+    /**
+     * Sum of word_count across published chapters (computed on the fly).
+     */
+    public function publishedWordCount(): int
+    {
+        return (int) $this->chapters()->published()->sum('word_count');
+    }
 }

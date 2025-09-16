@@ -184,7 +184,7 @@ class ChapterService
         $isAuthor = $story->isAuthor($viewerId);
 
         return $story->chapters()
-            ->select(['id','title','slug','status','sort_order','reads_logged_count'])
+            ->select(['id','title','slug','status','sort_order','reads_logged_count','word_count'])
             ->when(!$isAuthor, fn($q) => $q->where('status', Chapter::STATUS_PUBLISHED))
             ->orderBy('sort_order','asc')
             ->get();

@@ -328,4 +328,43 @@ describe('Reading statistics', function () {
         $resp->assertOk();
         $resp->assertSee('1');
     });
+
+    it('shows total words on the story page', function () {
+        $author = alice($this);
+        $story = publicStory('Total Words Story', $author->id);
+        // Two chapters with 2 and 3 words respectively => total 5
+        createPublishedChapter($this, $story, $author, ['title' => 'Only Chapter', 'content' => '<p>one two</p>']);
+        createPublishedChapter($this, $story, $author, ['title' => 'Second', 'content' => '<p>three four five</p>']);
+
+        Auth::logout();
+        $resp = $this->get('/stories/' . $story->slug);
+        $resp->assertOk();
+        $resp->assertSee(trans('story::chapters.words.label'));
+        $resp->assertSee('5');
+    });
+});
+
+describe('Chapter list word statistics', function () {
+    it('shows words counter on chapter list for readers', function () {
+        $author = alice($this);
+        $story = publicStory('Words List Story', $author->id);
+        createPublishedChapter($this, $story, $author, ['title' => 'C1', 'content' => '<p>alpha beta</p>']); // 2 words
+
+        Auth::logout();
+        $resp = $this->get('/stories/' . $story->slug);
+        $resp->assertOk();
+        $resp->assertSee(trans('story::chapters.words.label'));
+        $resp->assertSee('2');
+    });
+
+    it('shows words counter on chapter list for authors', function () {
+        $author = alice($this);
+        $story = publicStory('Words Author List', $author->id);
+        createPublishedChapter($this, $story, $author, ['title' => 'C1', 'content' => '<p>one two three</p>']); // 3
+
+        $resp = $this->actingAs($author)->get('/stories/' . $story->slug);
+        $resp->assertOk();
+        $resp->assertSee(trans('story::chapters.words.label'));
+        $resp->assertSee('3');
+    });
 });

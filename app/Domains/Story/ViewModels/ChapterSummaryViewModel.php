@@ -11,6 +11,7 @@ class ChapterSummaryViewModel
         public readonly bool $isDraft,
         public readonly bool $isRead,
         public readonly int $readsLogged,
+        public readonly int $wordCount,
         public readonly string $url,
     ) {
     }

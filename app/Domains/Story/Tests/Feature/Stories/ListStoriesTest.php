@@ -535,4 +535,35 @@ describe('Reading statistics', function () {
         $resp->assertSee('Index Total Reads');
         $resp->assertSee('1');
     });
+
+    it('shows total words on stories index cards', function () {
+        $author = alice($this);
+        $story = publicStory('Index Total Words', $author->id);
+
+        // Create two published chapters with known word counts: 2 + 3 = 5
+        createPublishedChapter($this, $story, $author, ['content' => '<p>one two</p>']);
+        createPublishedChapter($this, $story, $author, ['content' => '<p>three four five</p>']);
+
+        // Guest view is fine
+        Auth::logout();
+        $resp = $this->get('/stories');
+        $resp->assertOk();
+        $resp->assertSee('Index Total Words');
+        $resp->assertSee('5');
+    });
+
+    it('shows published chapters count on stories index cards', function () {
+        $author = alice($this);
+        $story = publicStory('Index Chapters Count', $author->id);
+
+        // Create two published chapters
+        createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+        createPublishedChapter($this, $story, $author, ['title' => 'C2']);
+
+        Auth::logout();
+        $resp = $this->get('/stories');
+        $resp->assertOk();
+        $resp->assertSee('Index Chapters Count');
+        $resp->assertSee('2');
+    });
 });

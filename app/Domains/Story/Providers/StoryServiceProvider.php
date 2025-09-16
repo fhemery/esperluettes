@@ -5,6 +5,7 @@ namespace App\Domains\Story\Providers;
 use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Models\Chapter;
+use App\Domains\Story\Observers\ChapterObserver;
 use App\Domains\Story\Policies\StoryPolicy;
 use App\Domains\Story\Policies\ChapterPolicy;
 use App\Domains\Story\Services\ChapterCommentPolicy;
@@ -45,6 +46,9 @@ class StoryServiceProvider extends ServiceProvider
         // Register policies
         Gate::policy(Story::class, StoryPolicy::class);
         Gate::policy(Chapter::class, ChapterPolicy::class);
+
+        // Register model observers
+        Chapter::observe(ChapterObserver::class);
 
         // Register policies
         $registry = app(CommentPolicyRegistry::class);
