@@ -12,6 +12,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawnSync } from 'child_process';
 import { parse as dotenvParse } from 'dotenv';
+import { runStagedTests } from './launch_staged_tests.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -111,19 +112,27 @@ function main() {
         process.exit(0);
     }
 
-    log('Running test suite');
-    if (runner === 'php') {
-        if (!runCmd('php', ['artisan', 'test', '--stop-on-failure'])) process.exit(1);
-    } else {
-        if (fileExists(path.join('vendor', 'bin', 'sail'))) {
-            if (!runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure'])) process.exit(1);
+    // Delegate test execution to the staged tests launcher (imported)
+    try {
+        log('Delegating tests to scripts/launch_staged_tests.js (import call)');
+        const code = runStagedTests();
+        if (code !== 0) process.exit(code);
+    } catch (e) {
+        // Fallback to previous behavior if launcher is missing
+        log('Staged tests launcher not found; running full test suite');
+        if (runner === 'php') {
+            if (!runCmd('php', ['artisan', 'test', '--stop-on-failure'])) process.exit(1);
         } else {
-            log('sail not found; cannot run tests');
-            process.exit(1);
+            if (fileExists(path.join('vendor', 'bin', 'sail'))) {
+                if (!runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure'])) process.exit(1);
+            } else {
+                log('sail not found; cannot run tests');
+                process.exit(1);
+            }
         }
     }
 
-    log('Tests passed');
+    log('Pre-commit checks passed');
     process.exit(0);
 }
 

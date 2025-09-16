@@ -9,7 +9,8 @@
         "build-and-deploy:app-only": "./deploy-app-only.sh",
         "prepare": "husky",
         "dep:check": "./vendor/bin/sail composer deptrac",
-        "husky:precommit": "node scripts/husky-precommit.js"
+        "husky:precommit": "node scripts/husky-precommit.js",
+        "launch-staged:tests": "node scripts/launch_staged_tests.js"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.5.0",
@@ -22,6 +23,7 @@
         "concurrently": "^9.0.1",
         "husky": "^9.1.6",
         "dotenv": "^16.4.5",
+        "js-yaml": "^4.1.0",
         "laravel-vite-plugin": "^2.0.0",
         "postcss": "^8.4.31",
         "sass": "^1.92.0",

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Delegate to Node.js implementation if available, then exit.
+# Delegate to Node.js precommit script (which handles deptrac + staged tests), then exit.
 if command -v node >/dev/null 2>&1; then
   if [ -f scripts/husky-precommit.js ]; then
     node scripts/husky-precommit.js
