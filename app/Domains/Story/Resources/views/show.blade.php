@@ -101,12 +101,10 @@
                                 :tooltip="__('story::chapters.reads.tooltip')"
                             />
 
-                            <x-shared::metric-badge
+                            <x-story::words-metric-badge
                                 class="ml-2"
-                                icon="article"
-                                :value="$viewModel->getWordsTotal()"
-                                :label="__('story::shared.metrics.words_and_signs', ['nbWords' => $viewModel->getWordsTotal(), 'nbCharacters' => $viewModel->getCharactersTotal()])"
-                                :tooltip="''"
+                                :nb-words="$viewModel->getWordsTotal()"
+                                :nb-characters="$viewModel->getCharactersTotal()"
                             />
                         </div>
                     </div>

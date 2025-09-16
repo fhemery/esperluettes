@@ -29,11 +29,9 @@
                 :tooltip="__('story::chapters.reads.tooltip')"
             />
 
-            <x-shared::metric-badge
-                icon="article"
-                :value="$ch->wordCount"
-                :label="__('story::shared.metrics.words_and_signs', ['nbWords' => $ch->wordCount, 'nbCharacters' => $ch->characterCount])"
-                :tooltip="''"
+            <x-story::words-metric-badge
+                :nb-words="$ch->wordCount"
+                :nb-characters="$ch->characterCount"
             />
         </div>
     </li>

@@ -25,11 +25,9 @@
                     :tooltip="__('story::chapters.reads.tooltip')"
                 />
 
-                <x-shared::metric-badge
-                    icon="article"
-                    :value="$c->wordCount"
-                    :label="__('story::shared.metrics.words_and_signs', ['nbWords' => $c->wordCount, 'nbCharacters' => $c->characterCount])"
-                    :tooltip="''"
+                <x-story::words-metric-badge
+                    :nb-words="$c->wordCount"
+                    :nb-characters="$c->characterCount"
                 />
 
                 <a href="{{ route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]) }}"

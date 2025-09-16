@@ -56,12 +56,10 @@
                             :tooltip="__('story::chapters.reads.tooltip')"
                         />
 
-                        <x-shared::metric-badge
+                        <x-story::words-metric-badge
                             class="ml-2"
-                            icon="article"
-                            :value="$vm->wordCount"
-                            :label="__('story::shared.metrics.words_and_signs', ['nbWords' => $vm->wordCount, 'nbCharacters' => $vm->characterCount])"
-                            :tooltip="''"
+                            :nb-words="$vm->wordCount"
+                            :nb-characters="$vm->characterCount"
                         />
                     </div>
 
