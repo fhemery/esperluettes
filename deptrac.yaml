@@ -6,14 +6,10 @@ deptrac:
 
   layers:
     # Shared contracts and DTOs - accessible by all domains
-    - name: SharedContracts
+    - name: Shared
       collectors:
         - type: directory
-          value: 'app/Domains/Shared/Contracts/'
-        - type: directory
-          value: 'app/Domains/Shared/Dto/'
-        - type: directory
-          value: 'app/Domains/Shared/Events/'
+          value: 'app/Domains/Shared/'
 
     # Test helpers - can be shared between domain tests
     - name: TestHelpers
@@ -241,65 +237,65 @@ deptrac:
 
   ruleset:
     # Shared contracts and DTOs - accessible by all domains
-    SharedContracts: [ ]
+    Shared: [ ]
 
     # Test helpers - accessible by all domain tests
     TestHelpers: [ ]
 
     # ###################################################
-    # Public APIs - can only depend on SharedContracts and their own domain
+    # Public APIs - can only depend on Shared and their own domain
     # ###################################################
     AuthPublic:
-      - SharedContracts
+      - Shared
       - AuthPrivate
       - EventsPublic
 
     CommentPublic: 
-      - SharedContracts
+      - Shared
       - AuthPublic
       - CommentPrivate
       - EventsPublic
 
     EventsPublic:
-      - SharedContracts
+      - Shared
       - EventsPrivate
 
     NewsPublic:
-      - SharedContracts
+      - Shared
       - NewsPrivate
       - EventsPublic
 
     ProfilePublic:
-      - SharedContracts
+      - Shared
       - ProfilePrivate
       - AuthPublic
       - EventsPublic
 
     StaticPagePublic:
-      - SharedContracts
+      - Shared
       - StaticPagePrivate
       - EventsPublic
 
     StoryPublic:
       - CommentPublic
-      - SharedContracts
+      - Shared
       - StoryPrivate
       - StoryRef
       - EventsPublic
 
     StoryRef:
-      - SharedContracts
+      - Shared
       - EventsPublic
 
     # ###################################################
-    # Private domains - can access SharedContracts + other domain Public APIs + events
+    # Private domains - can access Shared + other domain Public APIs + events
     # ###################################################
 
     # [Exception] Admin can use both Public and Private parts
     # This is because the Admin dashboards are centered in this module
     # But they actually could be spread in their own modules
     AdminPrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
       - AuthPrivate
       - NewsPublic
@@ -317,46 +313,46 @@ deptrac:
       - EventsPrivate
 
     AuthPrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
       - EventsPublic
  
     CommentPrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
       - CommentPublic
       - EventsPublic
 
     DashboardPrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
 
     EventsPrivate:
-      - SharedContracts
+      - Shared
       - EventsPublic
 
     HomePrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
       - NewsPublic
 
     NewsPrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
       - EventsPublic
 
     ProfilePrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
       - EventsPublic
 
     StaticPagePrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
       - EventsPublic
 
     StoryPrivate:
-      - SharedContracts
+      - Shared
       - AuthPublic
       - CommentPublic
       - ProfilePublic
@@ -367,7 +363,7 @@ deptrac:
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
     # ###################################################
     AuthTests:
-      - SharedContracts
+      - Shared
       - TestHelpers
       - AuthPrivate
       - AuthPublic
@@ -383,14 +379,14 @@ deptrac:
       - EventsPublic
 
     NewsTests:
-      - SharedContracts
+      - Shared
       - TestHelpers
       - NewsPrivate
       - NewsPublic
       - AuthPublic
 
     ProfileTests:
-      - SharedContracts
+      - Shared
       - TestHelpers
       - ProfilePrivate
       - ProfilePublic
@@ -398,14 +394,14 @@ deptrac:
 
 
     StaticPageTests:
-      - SharedContracts
+      - Shared
       - TestHelpers
       - StaticPagePrivate
       - StaticPagePublic
       - AuthPublic
 
     StoryTests:
-      - SharedContracts
+      - Shared
       - TestHelpers
       - StoryPrivate
       - StoryPublic
@@ -414,7 +410,7 @@ deptrac:
       - StoryRef
 
     AdminTests:
-      - SharedContracts
+      - Shared
       - TestHelpers
       - AdminPrivate
       - AuthPublic
