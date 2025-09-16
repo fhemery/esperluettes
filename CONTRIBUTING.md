@@ -16,7 +16,7 @@ The project is managed mostly by a French community, therefore :
 - We use a single GitHub repository with Pull Requests.
 - Create a feature branch from `main` for each change.
 - Open a PR early (drafts welcome). Keep PRs focused and small.
-- We have no CI and automated checks for now, only commit hooks.
+- CI is going to run deptrac and tests if you haven't done so.
 - Ask for at least one review.
 - We favor integration tests, see [Testing](./docs/Testing.md) for more details
 
