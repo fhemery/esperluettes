@@ -20,7 +20,7 @@
 
         <!-- Page Content (guest) -->
         <main class="flex-1 flex flex-col w-full py-4 sm:py-8 {{ $mainClass }}">
-            <div class="w-full mx-auto sm:px-6 lg:px-8">
+            <div class="w-full max-w-7xl mx-auto sm:px-6 lg:px-8">
                 {{ $slot }}
             </div>
         </main>
