@@ -1,6 +1,6 @@
 @props([
     'placement' => 'right', // right|left|top|bottom
-    'width' => '20rem',
+    'maxWidth' => '20rem',
 ])
 
 <span class="inline-flex items-center align-middle select-none z-10 cursor-pointer">
@@ -26,7 +26,7 @@
                  x-ref="panel"
                  :style="styleObj"
                  style="display:none"
-                 x-init="init($refs.trigger, '{{ $placement }}', '{{ $width }}')"
+                 x-init="init($refs.trigger, '{{ $placement }}', '{{ $maxWidth }}')"
                  x-effect="(hoverOpen || pinned) && measureAndCompute()"
                  @mouseenter="hoverOpen = true; updateOpen()"
                  @mouseleave="closeWithDelay()"

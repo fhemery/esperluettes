@@ -9,11 +9,11 @@
  * Expected refs & wiring:
  *   - x-ref="trigger" on the trigger button
  *   - The panel can be teleported to body and should bind :style="styleObj"
- *   - Call x-init="init($refs.trigger, '<placement>', '<width>')"
+ *   - Call x-init="init($refs.trigger, '<placement>', '<maxWidth>')"
  *   - Optionally call x-effect="(hoverOpen || pinned) && measureAndCompute()" to re-measure when shown
  *
  * Placements: right | left | top | bottom
- * Width: any CSS size (e.g. '20rem', '280px')
+ * Max width: any CSS size (e.g. '20rem', '280px'). Actual panel shrinks to content.
  */
 export default function registerTooltip(Alpine) {
   Alpine.data('popover', () => ({
@@ -25,14 +25,14 @@ export default function registerTooltip(Alpine) {
     styleObj: {},
     trigger: null,
     placement: 'right',
-    width: '20rem',
+    maxWidth: '20rem',
     margin: 8,
     panelH: 0,
     panelW: 0,
-    init(trigger, placement, width) {
+    init(trigger, placement, maxWidth) {
       this.trigger = trigger;
       this.placement = placement || 'right';
-      this.width = width || '20rem';
+      this.maxWidth = maxWidth || '20rem';
       this.$nextTick(() => {
         this.compute();
         window.addEventListener('resize', this.compute.bind(this));
@@ -81,7 +81,12 @@ export default function registerTooltip(Alpine) {
       const t = this.trigger.getBoundingClientRect();
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const panelWidth = this.panelW || this.parseWidth(this.width) || 320;
+      // Use measured width when available; otherwise estimate from maxWidth.
+      // Also clamp by viewport max (accounting for margins) to avoid offscreen.
+      const maxFromProp = this.parseSize(this.maxWidth) || 320;
+      const maxByViewport = Math.max(0, vw - this.margin * 2);
+      const estimatedW = Math.min(maxFromProp, maxByViewport);
+      const panelWidth = this.panelW || estimatedW;
       const candidates = this.order(this.placement);
       let pos = { top: 0, left: 0 };
       for (const place of candidates) {
@@ -100,13 +105,12 @@ export default function registerTooltip(Alpine) {
       pos.top = clamp(this.margin, pos.top, vh - h - this.margin);
 
       // Set safe max dimensions and enable scrolling inside the panel as needed
-      const maxW = `calc(100vw - ${this.margin * 2}px)`;
+      const maxWViewport = `calc(100vw - ${this.margin * 2}px)`;
       const maxH = `calc(100vh - ${this.margin * 2}px)`;
       this.styleObj = {
         top: pos.top + 'px',
         left: pos.left + 'px',
-        width: this.width,
-        maxWidth: maxW,
+        maxWidth: `min(${this.maxWidth}, ${maxWViewport})`,
         maxHeight: maxH,
         overflowY: 'auto',
       };
@@ -122,10 +126,10 @@ export default function registerTooltip(Alpine) {
       if (place === 'top')   return { top: t.top - this.panelH - m, left: t.left + (t.width / 2) - (w / 2) };
       return { top: t.bottom + m, left: t.left + (t.width / 2) - (w / 2) };
     },
-    parseWidth(width) {
-      if (!width) return 0;
-      if (typeof width === 'number') return width;
-      const str = String(width).trim();
+    parseSize(size) {
+      if (!size) return 0;
+      if (typeof size === 'number') return size;
+      const str = String(size).trim();
       if (str.endsWith('rem')) {
         const n = parseFloat(str);
         const fs = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
@@ -143,3 +147,4 @@ export default function registerTooltip(Alpine) {
     }
   }));
 }
+

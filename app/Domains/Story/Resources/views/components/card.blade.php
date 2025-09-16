@@ -22,7 +22,7 @@
 
     <div class="pb-1 pt-3 flex-1 flex flex-col">
         @if(!empty($genres))
-            <x-story::genre-badges :genres="$genres" placement="right" width="20rem" color="accent" />
+            <x-story::genre-badges :genres="$genres" placement="right" maxWidth="20rem" color="accent" />
         @endif
 
         {{-- Title + summary tooltip icon --}}
@@ -32,7 +32,7 @@
             </a>
             @if(trim($item->getDescription()) !== '')
             <div class="pt-1">
-                <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" width="20rem" iconClass="text-black">
+                <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" maxWidth="20rem" iconClass="text-black">
                     {{ strip_tags($item->getDescription()) }}
                 </x-shared::tooltip>
             </div>
@@ -58,7 +58,7 @@
                 <span>{{ trans_choice('story::shared.metrics.words', $item->getWordsTotal(), ['count' => \App\Domains\Shared\Support\NumberFormatter::compact($item->getWordsTotal())]) }}</span>
             </div>
             @if(!empty($tws))
-            <x-shared::popover placement="left" width="18rem">
+            <x-shared::popover placement="left" maxWidth="18rem">
                 <x-slot name="trigger">
                     <button type="button" aria-label="{{ __('story::shared.trigger_warnings.label') }}"
                         class="inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/40">

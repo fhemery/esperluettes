@@ -17,7 +17,7 @@ default => 'bg-gray-100 text-gray-800 ring-gray-600/20',
 };
 @endphp
 
-<x-shared::popover placement="bottom" width="16rem">
+<x-shared::popover placement="bottom" maxWidth="16rem">
     <x-slot name="trigger">
         <span class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $badgeClasses }}">{{ $label }}</span>
     </x-slot>

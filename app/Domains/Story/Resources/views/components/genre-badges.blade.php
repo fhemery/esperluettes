@@ -1,7 +1,7 @@
 @props([
     'genres' => [],
     'placement' => 'right',
-    'width' => '20rem',
+    'maxWidth' => '20rem',
     'color' => 'accent', // badge color variant
 ])
 
@@ -11,7 +11,7 @@
     @endforeach
 
     @if(count($hidden) > 0)
-        <x-shared::popover :placement="$placement" :width="$width">
+        <x-shared::popover :placement="$placement" :maxWidth="$maxWidth">
             <x-slot name="trigger">
                 <x-shared::badge :color="$color" size="sm" class="min-w-[40px] justify-center">+{{ count($hidden) }}</x-shared::badge>
             </x-slot>

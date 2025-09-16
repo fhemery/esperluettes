@@ -124,7 +124,7 @@
                     <div class="mt-6 text-sm text-gray-700">
                         <span class="inline-flex flex-wrap gap-2">
                             @if($viewModel->getTypeName())
-                            <x-shared::popover placement="top" width="16rem">
+                            <x-shared::popover placement="top" maxWidth="16rem">
                                 <x-slot name="trigger">
                                     <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
                                         <span class="material-symbols-outlined text-[16px] leading-none">category</span>
@@ -135,7 +135,7 @@
                             </x-shared::popover>
                             @endif
                             @if($viewModel->getAudienceName())
-                            <x-shared::popover placement="top" width="16rem">
+                            <x-shared::popover placement="top" maxWidth="16rem">
                                 <x-slot name="trigger">
                                     <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
                                         <span class="material-symbols-outlined text-[16px] leading-none">group</span>
@@ -146,7 +146,7 @@
                             </x-shared::popover>
                             @endif
                             @if($viewModel->getCopyrightName())
-                            <x-shared::popover placement="top" width="16rem">
+                            <x-shared::popover placement="top" maxWidth="16rem">
                                 <x-slot name="trigger">
                                     <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
                                         <span class="material-symbols-outlined text-[16px] leading-none">copyright</span>
@@ -157,7 +157,7 @@
                             </x-shared::popover>
                             @endif
                             @if($viewModel->getStatusName())
-                            <x-shared::popover placement="top" width="16rem">
+                            <x-shared::popover placement="top" maxWidth="16rem">
                                 <x-slot name="trigger">
                                     <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
                                         <span class="material-symbols-outlined text-[16px] leading-none">edit_note</span>
@@ -168,7 +168,7 @@
                             </x-shared::popover>
                             @endif
                             @if($viewModel->getFeedbackName())
-                            <x-shared::popover placement="top" width="16rem">
+                            <x-shared::popover placement="top" maxWidth="16rem">
                                 <x-slot name="trigger">
                                     <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
                                         <span class="material-symbols-outlined text-[16px] leading-none">forum</span>
