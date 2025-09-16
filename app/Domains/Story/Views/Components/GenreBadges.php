@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Shared\Views\Components;
+namespace App\Domains\Story\Views\Components;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -30,7 +30,7 @@ class GenreBadges extends Component
         int $gap = 8,
         int $badgeBase = 20,
         int $fontSize = 14,
-        float $avgCharRatio = 0.6,
+        float $avgCharRatio = 0.65,
         int $plusMin = 40,
         int $maxCandidates = 3,
     ) {
@@ -94,6 +94,6 @@ class GenreBadges extends Component
 
     public function render(): View
     {
-        return view('shared::components.genre-badges');
+        return view('story::components.genre-badges');
     }
 }

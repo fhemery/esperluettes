@@ -11,18 +11,18 @@
 
 <div class="group flex flex-col overflow-hidden w-[230px]">
 
-    <div class="w-[230px] h-[295px] mx-auto overflow-hidden">
+    <div class="w-[230px] h-[306px] mx-auto overflow-hidden">
         <a href="{{ url('/stories/' . $item->getSlug()) }}" class="block">
             <img
                 src="{{ asset('images/story/default-cover.svg') }}"
                 alt="{{ $item->getTitle() }}"
-                class="w-[230px] h-[295px] object-contain">
+                class="w-[230px] object-contain">
         </a>
     </div>
 
     <div class="pb-1 pt-3 flex-1 flex flex-col">
         @if(!empty($genres))
-            <x-shared::genre-badges :genres="$genres" placement="right" width="20rem" color="accent" />
+            <x-story::genre-badges :genres="$genres" placement="right" width="20rem" color="accent" />
         @endif
 
         {{-- Title + summary tooltip icon --}}
@@ -68,7 +68,7 @@
                 <div class="font-semibold text-gray-900 mb-1">{{ __('story::shared.trigger_warnings.label') }}</div>
                 <div class="flex flex-wrap gap-2">
                     @foreach($tws as $tw)
-                    <x-shared::badge color="tertiary" size="sm">{{ $tw }}</x-shared::badge>
+                    <x-shared::badge color="tertiary" size="xs">{{ $tw }}</x-shared::badge>
                     @endforeach
                 </div>
             </x-shared::popover>

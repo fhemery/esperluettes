@@ -20,7 +20,9 @@ class CustomValidators
             }
             $profile = $parameters[1] ?? 'strict';
             $clean = Purifier::clean((string) $value, $profile);
-            $plain = str_replace("\n\n", "\n", trim(strip_tags($clean)));
+            // Normalize Windows CRLF to LF and collapse multiple blank lines for consistent counting across OSes
+            $normalized = str_replace(["\r\n", "\r"], "\n", $clean);
+            $plain = preg_replace("/\n{2,}/", "\n", trim(strip_tags($normalized)));
             return mb_strlen($plain) <= $max;
         });
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Story\Http\Controllers;
+namespace App\Domains\Story\Controllers;
 
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Http\Requests\ChapterRequest;
