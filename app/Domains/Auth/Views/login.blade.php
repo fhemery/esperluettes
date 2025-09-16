@@ -1,6 +1,6 @@
 <x-app-layout seasonal-background="true">
     <div class="h-full flex flex-col items-center pt-16">
-        <div class="surface-secondary w-full sm:max-w-md mt-6 px-6 py-4 shadow-md overflow-hidden sm:rounded-lg">
+        <div class="surface-secondary w-full sm:max-w-xl mt-6 px-6 py-4 shadow-md overflow-hidden sm:rounded-lg">
             <!-- Session Status -->
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
