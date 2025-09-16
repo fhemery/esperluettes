@@ -377,6 +377,7 @@ class StoryController
                 isRead: in_array((int)$c->id, $readIds, true),
                 readsLogged: (int)($c->reads_logged_count ?? 0),
                 wordCount: (int)($c->word_count ?? 0),
+                characterCount: (int)($c->character_count ?? 0),
                 url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
             );
         }

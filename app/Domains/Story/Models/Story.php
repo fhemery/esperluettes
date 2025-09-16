@@ -118,4 +118,12 @@ class Story extends Model
     {
         return (int) $this->chapters()->published()->sum('word_count');
     }
+
+    /**
+     * Sum of character_count across published chapters (computed on the fly).
+     */
+    public function publishedCharacterCount(): int
+    {
+        return (int) $this->chapters()->published()->sum('character_count');
+    }
 }

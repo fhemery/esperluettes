@@ -32,8 +32,8 @@
             <x-shared::metric-badge
                 icon="article"
                 :value="$ch->wordCount"
-                :label="__('story::chapters.words.label')"
-                :tooltip="__('story::chapters.words.tooltip')"
+                :label="__('story::shared.metrics.words_and_signs', ['nbWords' => $ch->wordCount, 'nbCharacters' => $ch->characterCount])"
+                :tooltip="''"
             />
         </div>
     </li>

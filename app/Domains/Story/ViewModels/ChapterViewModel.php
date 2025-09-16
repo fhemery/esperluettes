@@ -19,6 +19,7 @@ class ChapterViewModel
         public readonly bool $isReadByMe,
         public readonly int $readsLogged,
         public readonly int $wordCount,
+        public readonly int $characterCount,
         public readonly SeoViewModel $seo,
     ) {
     }
@@ -58,6 +59,7 @@ class ChapterViewModel
             isReadByMe: $isReadByMe,
             readsLogged: (int) $chapter->reads_logged_count,
             wordCount: (int) ($chapter->word_count ?? 0),
+            characterCount: (int) ($chapter->character_count ?? 0),
             seo: new SeoViewModel(title: $pageTitle, coverImage: $coverImage),
         );
     }

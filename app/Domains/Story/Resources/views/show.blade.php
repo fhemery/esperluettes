@@ -105,8 +105,8 @@
                                 class="ml-2"
                                 icon="article"
                                 :value="$viewModel->getWordsTotal()"
-                                :label="__('story::chapters.words.label')"
-                                :tooltip="__('story::chapters.words.tooltip')"
+                                :label="__('story::shared.metrics.words_and_signs', ['nbWords' => $viewModel->getWordsTotal(), 'nbCharacters' => $viewModel->getCharactersTotal()])"
+                                :tooltip="''"
                             />
                         </div>
                     </div>

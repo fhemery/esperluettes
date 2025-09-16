@@ -12,6 +12,7 @@ class ChapterSummaryViewModel
         public readonly bool $isRead,
         public readonly int $readsLogged,
         public readonly int $wordCount,
+        public readonly int $characterCount,
         public readonly string $url,
     ) {
     }

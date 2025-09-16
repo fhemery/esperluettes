@@ -324,6 +324,7 @@ describe('Reading statistics', function () {
 
         // Guest view is fine; number rendered server-side
         Auth::logout();
+        app()->setLocale('fr');
         $resp = $this->get('/stories/' . $story->slug);
         $resp->assertOk();
         $resp->assertSee('1');
@@ -339,8 +340,9 @@ describe('Reading statistics', function () {
         Auth::logout();
         $resp = $this->get('/stories/' . $story->slug);
         $resp->assertOk();
-        $resp->assertSee(trans('story::chapters.words.label'));
-        $resp->assertSee('5');
+        $resp->assertSee(trans('story::shared.metrics.words_and_signs'));
+        $resp->assertSee('5'); // words total (2 + 3)
+        $resp->assertSee('22'); // characters total: 'one two' (7) + 'three four five' (15)
     });
 });
 
@@ -353,8 +355,7 @@ describe('Chapter list word statistics', function () {
         Auth::logout();
         $resp = $this->get('/stories/' . $story->slug);
         $resp->assertOk();
-        $resp->assertSee(trans('story::chapters.words.label'));
-        $resp->assertSee('2');
+        $resp->assertSee(trans('story::shared.metrics.words_and_signs'));
     });
 
     it('shows words counter on chapter list for authors', function () {
@@ -364,7 +365,6 @@ describe('Chapter list word statistics', function () {
 
         $resp = $this->actingAs($author)->get('/stories/' . $story->slug);
         $resp->assertOk();
-        $resp->assertSee(trans('story::chapters.words.label'));
-        $resp->assertSee('3');
+        $resp->assertSee(trans('story::shared.metrics.words_and_signs'));
     });
 });

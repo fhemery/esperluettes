@@ -74,6 +74,7 @@ return [
         // Pluralized labels for meta rows
         'chapters' => '{0} Aucun chapitre|{1} :count chapitre|[2,*] :count chapitres',
         'words' => '{0} 0 mot|{1} :count mot|[2,*] :count mots',
+        'words_and_signs' => ':nbWords mots, :nbCharacters car.'
     ],
     'filters' => [
         'header' => 'Filtres'

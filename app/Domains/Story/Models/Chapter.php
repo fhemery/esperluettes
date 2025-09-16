@@ -21,6 +21,7 @@ class Chapter extends Model implements Sortable
         'first_published_at',
         'reads_logged_count',
         'word_count',
+        'character_count',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class Chapter extends Model implements Sortable
         'reads_logged_count' => 'integer',
         'first_published_at' => 'datetime',
         'word_count' => 'integer',
+        'character_count' => 'integer',
     ];
 
     public const STATUS_NOT_PUBLISHED = 'not_published';

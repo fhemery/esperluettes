@@ -60,8 +60,8 @@
                             class="ml-2"
                             icon="article"
                             :value="$vm->wordCount"
-                            :label="__('story::chapters.words.label')"
-                            :tooltip="__('story::chapters.words.tooltip')"
+                            :label="__('story::shared.metrics.words_and_signs', ['nbWords' => $vm->wordCount, 'nbCharacters' => $vm->characterCount])"
+                            :tooltip="''"
                         />
                     </div>
 

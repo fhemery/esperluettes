@@ -176,4 +176,12 @@ class StoryShowViewModel
     {
         return (int) $this->story->publishedWordCount();
     }
+
+    /**
+     * Sum of characters across published chapters (computed on the fly)
+     */
+    public function getCharactersTotal(): int
+    {
+        return (int) $this->story->publishedCharacterCount();
+    }
 }
