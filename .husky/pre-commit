@@ -1,73 +1,9 @@
 #!/usr/bin/env bash
 
-# Choose runner based on HUSKY_RUNNER (php|sail), with fallbacks
-RUNNER="${HUSKY_RUNNER:-}"
-if [ -z "$RUNNER" ]; then
-  echo "[husky] HUSKY_RUNNER is not set; defaulting to 'sail'"
-  RUNNER="sail"
-fi
-
-# Block newly added files in restricted paths (database/, tests/), with bypass options
-# Bypass methods:
-#  - git commit --no-verify (standard git behavior)
-#  - set env var SKIP_FORBIDDEN=1
-#  - create sentinel file .git/allow-new-in-restricted
-if [ -f .git/allow-new-in-restricted ]; then
-  echo "[husky] Skipping forbidden-paths check (sentinel file present: .git/allow-new-in-restricted)"
-elif [ "${SKIP_FORBIDDEN:-}" = "1" ]; then
-  echo "[husky] Skipping forbidden-paths check (SKIP_FORBIDDEN=1)"
-else
-  # Only consider newly added files in the index (not modifications)
-  ADDED_ALL=$(git diff --cached --name-only --diff-filter=A)
-  # Filter to forbidden prefixes (POSIX-sh compatible, no arrays)
-  FORBIDDEN_ADDED=$(echo "$ADDED_ALL" | grep -E '^(database/|tests/|resources/|routes/|vendor/)' || true)
-  if [ -n "$FORBIDDEN_ADDED" ]; then
-    echo "[husky] Error: New files cannot be added under 'database/', 'tests/', 'resources/', or 'routes/'"
-    echo "$FORBIDDEN_ADDED" | sed 's/^/ - /'
-    echo "[husky] If legitimate, relocate per architecture rules (e.g., app/Domains/<domain>/Database/Migrations)"
-    echo "[husky] To bypass: use --no-verify, set SKIP_FORBIDDEN=1, or create .git/allow-new-in-restricted"
-    exit 1
+# Delegate to Node.js implementation if available, then exit.
+if command -v node >/dev/null 2>&1; then
+  if [ -f scripts/husky-precommit.js ]; then
+    node scripts/husky-precommit.js
+    exit $?
   fi
 fi
-
-# Skip with SKIP_DEPTRAC=1
-if [ "${SKIP_DEPTRAC:-}" = "1" ]; then
-  echo "[husky] Skipping Deptrac (SKIP_DEPTRAC=1)"
-else
-  if [ "$RUNNER" = "php" ]; then
-    if [ -x ./vendor/bin/deptrac ]; then
-      ./vendor/bin/deptrac || exit 1
-    else
-      echo "[husky] deptrac not found; skipping"
-    fi
-  elif [ "$RUNNER" = "sail" ]; then
-    if [ -x ./vendor/bin/sail ]; then
-      ./vendor/bin/sail composer deptrac|| exit 1
-    else
-      echo "[husky] sail not found; skipping deptrac"
-    fi
-  else
-    echo "[husky] Invalid HUSKY_RUNNER value: $RUNNER"
-    exit 1
-  fi
-fi
-
-# Optionally skip tests with SKIP_TESTS=1
-if [ "${SKIP_TESTS:-}" = "1" ]; then
-  echo "[husky] Skipping tests (SKIP_TESTS=1)"
-  exit 0
-fi
-
-echo "[husky] Running test suite"
-
-if [ "$RUNNER" = "php" ]; then
-  php artisan test || exit 1
-elif [ "$RUNNER" = "sail" ]; then
-  ./vendor/bin/sail artisan test || exit 1
-else
-  echo "[husky] Invalid HUSKY_RUNNER value: $RUNNER"
-  exit 1
-fi
-echo "[husky] Tests passed"
-
-exit 0
