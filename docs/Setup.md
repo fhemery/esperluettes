@@ -68,7 +68,7 @@ You are up and running on : http://localhost. The first user you can log with is
 The admin user should work just fine, but it's better to create a new user to test the app and to give admin rights to this new user. There is no need for activation code by default.
 
 
-You are going to need to confirm the email. Email are sent to the [log file](./logs/laravel.log).
+You are going to need to confirm the email. Email are sent to the [log file](../storage/logs/laravel.log).
 
 
 ## Working with the app
