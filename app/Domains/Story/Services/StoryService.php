@@ -60,9 +60,11 @@ class StoryService
         $query->orderByDesc('last_chapter_published_at')
               ->orderByDesc('created_at');
 
-        if ($filter->userId !== null) {
-            $query->whereHas('authors', function ($q) use ($filter) {
-                $q->where('user_id', $filter->userId);
+        // Filter by author user ID (prefer authorId, fallback to userId for BC)
+        $authorId = $filter->authorId;
+        if ($authorId !== null) {
+            $query->whereHas('authors', function ($q) use ($authorId) {
+                $q->where('user_id', $authorId);
             });
         }
 

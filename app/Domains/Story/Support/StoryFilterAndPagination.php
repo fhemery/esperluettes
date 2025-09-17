@@ -13,7 +13,10 @@ class StoryFilterAndPagination
          * @var array<int,string>
          */
         public array $visibilities = [Story::VIS_PUBLIC],
-        public ?int $userId = null,
+        /**
+         * Preferred alias for filtering by author user ID. If provided, it takes precedence over userId.
+         */
+        public ?int $authorId = null,
         public ?int $typeId = null,
         /**
          * @var array<int,int> Audience IDs to filter by (multi-select)
