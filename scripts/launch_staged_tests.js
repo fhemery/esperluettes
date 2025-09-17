@@ -44,16 +44,25 @@ function runCmd(cmd, args, opts = {}) {
 }
 
 function getModifiedFiles() {
+  // Collect modified files from staged, unstaged, and untracked sources
+  // Staged changes
+  const stagedRes = spawnSync('git', ['diff', '--name-only', '--cached'], { encoding: 'utf8' });
+  const staged = stagedRes.status === 0 ? (stagedRes.stdout || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+
   // Unstaged modified files
   const diffRes = spawnSync('git', ['diff', '--name-only'], { encoding: 'utf8' });
-  const modified = diffRes.status === 0 ? (diffRes.stdout || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+  const unstaged = diffRes.status === 0 ? (diffRes.stdout || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
 
   // Untracked files
   const untrackedRes = spawnSync('git', ['ls-files', '--others', '--exclude-standard'], { encoding: 'utf8' });
   const untracked = untrackedRes.status === 0 ? (untrackedRes.stdout || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
 
-  const set = new Set([...modified, ...untracked]);
-  return [...set];
+  const set = new Set([...staged, ...unstaged, ...untracked]);
+  const files = [...set];
+  // Debug log to aid diagnosis (kept concise)
+  log(`Detected modified files: ${files.join(', ')}`);
+
+  return files;
 }
 
 function getCurrentBranch() {
@@ -217,10 +226,8 @@ function runStagedTests(skipBranchCheck = false) {
     else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
   }
   if (domains.length === 0) {
-    log('No modified domain files after applying ignore rules; running full test suite.');
-    const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
+    log('Changes contain only non code files, ignoring the  full test suite.');
+    return 0;
   }
 
   // Build domain-level reverse dependency graph and its transitive closure
