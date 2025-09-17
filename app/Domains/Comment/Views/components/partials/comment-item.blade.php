@@ -14,7 +14,7 @@
     <!-- Content -->
     <div class="flex-1">
       <!-- Header: author + date + edit icon (right) -->
-      <div class="flex items-center gap-3">
+	  <div class="flex items-center gap-3">
         <div class="font-semibold text-gray-800">
           <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-gray-600">{{ $comment->authorProfile->display_name ?: '—' }}</a>
         </div>
@@ -26,6 +26,11 @@
         <div class="text-xs text-gray-500">
           {{ __('comment::comments.posted_at') }}
           {{ \Carbon\Carbon::parse($comment->createdAt)->translatedFormat('d/m/Y') }}
+		  @if($comment->createdAt !== $comment->updatedAt)
+			<span class="ml-2 text-gray-400">
+				(Dernière édition : {{ \Carbon\Carbon::parse($comment->updatedAt)->translatedFormat('d/m/Y H:i') }})
+			</span>
+		  @endif
         </div>
       </div>
 
