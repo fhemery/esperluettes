@@ -3,6 +3,7 @@
 namespace App\Domains\Story\ViewModels;
 
 use App\Domains\Shared\Dto\ProfileDto;
+use App\Domains\Story\Models\Story;
 
 class StorySummaryViewModel
 {
@@ -28,7 +29,7 @@ class StorySummaryViewModel
         array $authors,
         array $genreNames = [],
         array $triggerWarningNames = [],
-        string $twDisclosure = 'unspoiled',
+        string $twDisclosure = Story::TW_UNSPOILED,
     ) {
         /** @var ProfileDto[] $authors */
         $this->authors = $authors;

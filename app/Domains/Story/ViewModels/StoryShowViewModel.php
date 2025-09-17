@@ -36,7 +36,7 @@ class StoryShowViewModel
         ?string $statusName = null,
         ?string $feedbackName = null,
         array $triggerWarningNames = [],
-        string $twDisclosure = 'unspoiled',
+        string $twDisclosure = Story::TW_UNSPOILED,
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
@@ -179,12 +179,12 @@ class StoryShowViewModel
 
     public function isNoTw(): bool
     {
-        return $this->twDisclosure === 'no_tw';
+        return $this->twDisclosure === Story::TW_NO_TW;
     }
 
     public function isUnspoiledTw(): bool
     {
-        return $this->twDisclosure === 'unspoiled';
+        return $this->twDisclosure === Story::TW_UNSPOILED;
     }
 
     public function getReadsLoggedTotal(): int

@@ -30,7 +30,7 @@ class StoryRequest extends FormRequest
             'story_ref_trigger_warning_ids' => ['nullable', 'array'],
             'story_ref_trigger_warning_ids.*' => ['integer', 'exists:story_ref_trigger_warnings,id'],
             // TW disclosure: listed | no_tw | unspoiled (required)
-            'tw_disclosure' => ['required', 'in:listed,no_tw,unspoiled'],
+            'tw_disclosure' => ['required', 'in:' . implode(',', Story::twDisclosureOptions())],
         ];
     }
 
@@ -53,7 +53,7 @@ class StoryRequest extends FormRequest
         // Normalize TWs based on tw_disclosure: if not 'listed', drop any provided TW IDs
         $twDisclosure = $this->input('tw_disclosure');
         $twIds = $this->input('story_ref_trigger_warning_ids');
-        if ($twDisclosure !== 'listed') {
+        if ($twDisclosure !== Story::TW_LISTED) {
             $twIds = [];
         }
 
@@ -125,7 +125,7 @@ class StoryRequest extends FormRequest
             $disclosure = $this->input('tw_disclosure');
 
             // When 'listed' is selected, at least one TW must be provided
-            if ($disclosure === 'listed' && empty($twIds)) {
+            if ($disclosure === Story::TW_LISTED && empty($twIds)) {
                 $v->errors()->add('tw_disclosure', __('story::validation.tw_disclosure.listed_requires_tw'));
             }
         });

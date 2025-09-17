@@ -97,7 +97,7 @@ class StoryService
 
         // Filter only explicit No-TW stories if requested
         if ($filter->noTwOnly === true) {
-            $query->where('tw_disclosure', 'no_tw');
+            $query->where('tw_disclosure', Story::TW_NO_TW);
         }
 
         // Visibilities already normalized in DTO
@@ -175,7 +175,7 @@ class StoryService
             // 3b) Attach trigger warnings and persist tw_disclosure as selected
             $twIds = $request->input('story_ref_trigger_warning_ids', []);
             $disclosure = $request->input('tw_disclosure'); // listed | no_tw | unspoiled
-            $allowedDisclosure = ['listed', 'no_tw', 'unspoiled'];
+            $allowedDisclosure = Story::twDisclosureOptions();
             if (!in_array($disclosure, $allowedDisclosure, true)) {
                 throw new \InvalidArgumentException('Invalid tw_disclosure value: ' . (string)$disclosure);
             }
@@ -270,7 +270,7 @@ class StoryService
             // Sync trigger warnings and tw_disclosure
             $twIds = $request->input('story_ref_trigger_warning_ids', []);
             $disclosure = $request->input('tw_disclosure');
-            $allowedDisclosure = ['listed', 'no_tw', 'unspoiled'];
+            $allowedDisclosure = Story::twDisclosureOptions();
             if (!in_array($disclosure, $allowedDisclosure, true)) {
                 throw new \InvalidArgumentException('Invalid tw_disclosure value: ' . (string)$disclosure);
             }

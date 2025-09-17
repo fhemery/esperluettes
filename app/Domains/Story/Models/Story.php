@@ -45,6 +45,16 @@ class Story extends Model
         return [self::VIS_PUBLIC, self::VIS_COMMUNITY, self::VIS_PRIVATE];
     }
 
+    // Trigger Warning disclosure options
+    public const TW_LISTED = 'listed';
+    public const TW_NO_TW = 'no_tw';
+    public const TW_UNSPOILED = 'unspoiled';
+
+    public static function twDisclosureOptions(): array
+    {
+        return [self::TW_LISTED, self::TW_NO_TW, self::TW_UNSPOILED];
+    }
+
     public static function generateSlugBase(string $title): string
     {
         return Str::slug($title);

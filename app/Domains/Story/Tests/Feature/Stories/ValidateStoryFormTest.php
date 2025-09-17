@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Story\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -279,7 +280,7 @@ it('validates trigger warnings, when provided, must be an array', function () {
 
     // Not an array
     $payloadNotArray = validStoryPayload([
-        'tw_disclosure' => 'listed',
+        'tw_disclosure' => Story::TW_LISTED,
         'story_ref_trigger_warning_ids' => 1,
     ]);
     $resp = $this->actingAs($user)
@@ -296,7 +297,7 @@ it('validates each trigger warning id must be integer and exist when provided', 
 
     // Non-integer item
     $payloadType = validStoryPayload([
-        'tw_disclosure' => 'listed',
+        'tw_disclosure' => Story::TW_LISTED,
         'story_ref_trigger_warning_ids' => ['x'],
     ]);
     $resp = $this->actingAs($user)->from('/stories/create')->post('/stories', $payloadType);
@@ -307,7 +308,7 @@ it('validates each trigger warning id must be integer and exist when provided', 
 
     // Non-existent id
     $payloadExists = validStoryPayload([
-        'tw_disclosure' => 'listed',
+        'tw_disclosure' => Story::TW_LISTED,
         'story_ref_trigger_warning_ids' => [999999],
     ]);
     $resp = $this->actingAs($user)->from('/stories/create')->post('/stories', $payloadExists);
