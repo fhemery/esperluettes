@@ -1,6 +1,6 @@
 @section('title', __('profile::show.title', ['name' => $profile->display_name]))
 <x-app-layout>
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
             <!-- Profile Header -->
             <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-8">
