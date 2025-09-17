@@ -20,18 +20,18 @@
         </a>
     </div>
 
-    <div class="pb-1 pt-3 flex-1 flex flex-col">
+    <div class="pb-1 pt-2 flex-1 flex flex-col">
         @if(!empty($genres))
-            <x-story::genre-badges :genres="$genres" placement="right" maxWidth="20rem" color="accent" />
+            <x-story::genre-badges :genres="$genres" placement="right" color="accent" />
         @endif
 
         {{-- Title + summary tooltip icon --}}
-        <div class="flex-1 flex items-center gap-1">
+        <div class="flex items-center gap-1">
             <a href="{{ url('/stories/' . $item->getSlug()) }}" class="block">
-                <h2 class="flex-1 font-extrabold text-gray-900 text-lg leading-7 line-clamp-2 hover:underline">{{ $item->getTitle() }}</h2>
+                <h2 class="flex-1 font-extrabold text-gray-900 text-md leading-5 line-clamp-2 hover:underline">{{ $item->getTitle() }}</h2>
             </a>
             @if(trim($item->getDescription()) !== '')
-            <div class="pt-1">
+            <div class="-mb-1">
                 <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" maxWidth="20rem" iconClass="text-black">
                     {{ strip_tags($item->getDescription()) }}
                 </x-shared::tooltip>
@@ -41,7 +41,7 @@
 
         {{-- Authors --}}
         @if($displayAuthors)
-        <div class="mt-1 text-md text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
+        <div class="mt-1 text-sm text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
             {{ __('story::shared.by') }}
             <x-profile::inline-names :profiles="$item->getAuthors()" />
         </div>
@@ -50,8 +50,8 @@
     </a>
 
     {{-- Bottom meta row: chapters and words + TW icon/tooltip --}}
-    <div class="pb-2 border-b border-gray-700">
-        <div class="flex items-center justify-between text-md font-bold">
+    <div class="pb-1 border-b border-gray-700">
+        <div class="flex items-center justify-between text-sm font-bold">
             <div class="flex items-center gap-2 text-gray-600">
 
                 <span>{!! trans_choice('story::shared.metrics.chapters', $item->getChaptersCount(), ['count' => '<span class="text-accent">'. $item->getChaptersCount() . '</span>']) !!}</span>
@@ -61,15 +61,15 @@
                 @endif
             </div>
             @if(!empty($tws))
-            <x-shared::popover placement="left" maxWidth="18rem">
+            <x-shared::popover placement="top">
                 <x-slot name="trigger">
                     <button type="button" aria-label="{{ __('story::shared.trigger_warnings.label') }}"
-                        class="inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/40">
+                        class="pt-2 inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/40">
                         <span class="material-symbols-outlined text-[18px] leading-none">warning</span>
                     </button>
                 </x-slot>
                 <div class="font-semibold text-gray-900 mb-1">{{ __('story::shared.trigger_warnings.label') }}</div>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 ">
                     @foreach($tws as $tw)
                     <x-shared::badge color="tertiary" size="xs">{{ $tw }}</x-shared::badge>
                     @endforeach

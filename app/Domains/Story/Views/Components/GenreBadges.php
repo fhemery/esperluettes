@@ -17,7 +17,6 @@ class GenreBadges extends Component
     public int $fontSize;     // px
     public float $avgCharRatio; // average char width relative to font size
     public int $plusMin;      // px (minimum width for +X badge, excluding gap)
-    public int $maxCandidates; // max number of badges to try to show
 
     /** @var array<int,string> */
     public array $shown = [];
@@ -28,11 +27,10 @@ class GenreBadges extends Component
         array $genres = [],
         int $totalWidth = 250,
         int $gap = 8,
-        int $badgeBase = 20,
-        int $fontSize = 14,
-        float $avgCharRatio = 0.65,
-        int $plusMin = 40,
-        int $maxCandidates = 3,
+        int $badgeBase = 12,
+        int $fontSize = 12,
+        float $avgCharRatio = 0.5,
+        int $plusMin = 20,
     ) {
         $this->genres = array_values($genres);
         $this->totalWidth = $totalWidth;
@@ -41,7 +39,6 @@ class GenreBadges extends Component
         $this->fontSize = $fontSize;
         $this->avgCharRatio = $avgCharRatio;
         $this->plusMin = $plusMin;
-        $this->maxCandidates = $maxCandidates;
 
         $this->compute();
     }
@@ -54,42 +51,24 @@ class GenreBadges extends Component
 
     private function compute(): void
     {
-        $candidates = array_slice($this->genres, 0, $this->maxCandidates);
-        $rest = array_slice($this->genres, $this->maxCandidates);
+        $this->shown = [];
+        $this->hidden = [];
+        $remainingWidth = $this->totalWidth;
 
-        $shown = [];
-        $currentWidth = 0;
-
-        foreach ($candidates as $name) {
+        foreach ($this->genres as $name) {
             $badgeWidth = $this->badgeBase + $this->textWidth($name);
-            $withGap = empty($shown) ? $badgeWidth : ($this->gap + $badgeWidth);
 
-            $placedCount = count($shown) + 1;
-            $remainingAfterPlace = (count($candidates) - $placedCount) + count($rest);
+            $placedCount = count($this->shown) + 1;
+            $remainingAfterPlace = (count($this->genres) - $placedCount);
 
-            if ($remainingAfterPlace > 0) {
-                $needForPlus = (empty($shown) && $withGap === $badgeWidth ? 0 : $this->gap) + $this->plusMin;
-                if ($currentWidth + $withGap + $needForPlus <= $this->totalWidth) {
-                    $shown[] = $name;
-                    $currentWidth += $withGap;
-                    continue;
-                }
-                break;
-            }
-
-            if ($currentWidth + $withGap <= $this->totalWidth) {
-                $shown[] = $name;
-                $currentWidth += $withGap;
+            if ($remainingWidth > $badgeWidth + ($remainingAfterPlace > 0 ? $this->gap + $this->plusMin : 0)) {
+                $this->shown[] = $name;
+                $remainingWidth -= $badgeWidth;
+                $remainingWidth -= $this->gap;
             } else {
-                break;
+                $this->hidden[] = $name;
             }
         }
-
-        $hiddenFromCandidates = array_values(array_diff($candidates, $shown));
-        $hidden = array_merge($hiddenFromCandidates, $rest);
-
-        $this->shown = $shown;
-        $this->hidden = $hidden;
     }
 
     public function render(): View
