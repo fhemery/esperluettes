@@ -253,6 +253,7 @@ describe('Editing story', function () {
             // Act: update with [B, C]
             $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
                 'title' => 'TW Updatable',
+                'tw_disclosure' => 'listed',
                 'story_ref_trigger_warning_ids' => [$twB->id, $twC->id],
             ]));
             $resp->assertRedirect();

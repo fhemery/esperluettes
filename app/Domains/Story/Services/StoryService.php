@@ -95,6 +95,11 @@ class StoryService
             });
         }
 
+        // Filter only explicit No-TW stories if requested
+        if ($filter->noTwOnly === true) {
+            $query->where('tw_disclosure', 'no_tw');
+        }
+
         // Visibilities already normalized in DTO
         $visibilities = $filter->visibilities;
 
@@ -167,12 +172,16 @@ class StoryService
                 $story->genres()->sync($ids);
             }
 
-            // 3b) Attach trigger warnings (optional)
+            // 3b) Attach trigger warnings and persist tw_disclosure as selected
             $twIds = $request->input('story_ref_trigger_warning_ids', []);
-            if (is_array($twIds)) {
-                $ids = array_values(array_unique(array_map('intval', $twIds)));
-                $story->triggerWarnings()->sync($ids);
+            $disclosure = $request->input('tw_disclosure'); // listed | no_tw | unspoiled
+            $allowedDisclosure = ['listed', 'no_tw', 'unspoiled'];
+            if (!in_array($disclosure, $allowedDisclosure, true)) {
+                throw new \InvalidArgumentException('Invalid tw_disclosure value: ' . (string)$disclosure);
             }
+            $twIds = is_array($twIds) ? array_values(array_unique(array_map('intval', $twIds))) : [];
+            $story->tw_disclosure = $disclosure;
+            $story->triggerWarnings()->sync($twIds);
 
             // 4) Seed collaborator row for creator
             DB::table('story_collaborators')->insert([
@@ -258,12 +267,16 @@ class StoryService
                 $story->genres()->sync($ids);
             }
 
-            // Sync trigger warnings (optional)
+            // Sync trigger warnings and tw_disclosure
             $twIds = $request->input('story_ref_trigger_warning_ids', []);
-            if (is_array($twIds)) {
-                $ids = array_values(array_unique(array_map('intval', $twIds)));
-                $story->triggerWarnings()->sync($ids);
+            $disclosure = $request->input('tw_disclosure');
+            $allowedDisclosure = ['listed', 'no_tw', 'unspoiled'];
+            if (!in_array($disclosure, $allowedDisclosure, true)) {
+                throw new \InvalidArgumentException('Invalid tw_disclosure value: ' . (string)$disclosure);
             }
+            $twIds = is_array($twIds) ? array_values(array_unique(array_map('intval', $twIds))) : [];
+            $story->tw_disclosure = $disclosure;
+            $story->triggerWarnings()->sync($twIds);
 
             // If title changed, regenerate slug base but keep -id suffix
             if ($story->title !== $oldTitle) {

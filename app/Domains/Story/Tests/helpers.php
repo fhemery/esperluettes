@@ -225,6 +225,7 @@ function validStoryPayload(array $overrides = []): array
         'story_ref_copyright_id' => defaultCopyright()->id,
         'story_ref_genre_ids' => [defaultGenre()->id],
         'story_ref_feedback_id' => null,
+        'tw_disclosure' => 'no_tw',
     ], $overrides);
 }
 

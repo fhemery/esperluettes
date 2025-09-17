@@ -22,6 +22,7 @@ class StoryShowViewModel
     public readonly array $genreNames;
     /** @var array<int,string> */
     public readonly array $triggerWarningNames;
+    public readonly string $twDisclosure;
 
     public function __construct(
         Story $story,
@@ -35,6 +36,7 @@ class StoryShowViewModel
         ?string $statusName = null,
         ?string $feedbackName = null,
         array $triggerWarningNames = [],
+        string $twDisclosure = 'unspoiled',
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
@@ -49,6 +51,7 @@ class StoryShowViewModel
         $this->statusName = $statusName;
         $this->feedbackName = $feedbackName;
         $this->triggerWarningNames = array_values(array_filter(array_map('strval', $triggerWarningNames)));
+        $this->twDisclosure = (string)$twDisclosure;
     }
 
     
@@ -162,6 +165,26 @@ class StoryShowViewModel
     public function getTriggerWarningNames(): array
     {
         return $this->triggerWarningNames;
+    }
+
+    public function getTwDisclosure(): string
+    {
+        return $this->twDisclosure;
+    }
+
+    public function hasListedTriggerWarnings(): bool
+    {
+        return !empty($this->triggerWarningNames);
+    }
+
+    public function isNoTw(): bool
+    {
+        return $this->twDisclosure === 'no_tw';
+    }
+
+    public function isUnspoiledTw(): bool
+    {
+        return $this->twDisclosure === 'unspoiled';
     }
 
     public function getReadsLoggedTotal(): int

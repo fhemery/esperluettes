@@ -7,6 +7,7 @@
 @php
     $genres = $item->getGenreNames();
     $tws = $item->getTriggerWarningNames();
+    $twDisclosure = $item->getTwDisclosure();
 @endphp
 
 <div class="group flex flex-col overflow-hidden w-[230px]">
@@ -61,20 +62,33 @@
                 @endif
             </div>
             @if(!empty($tws))
-            <x-shared::popover placement="top">
-                <x-slot name="trigger">
-                    <button type="button" aria-label="{{ __('story::shared.trigger_warnings.label') }}"
-                        class="pt-2 inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/40">
-                        <span class="material-symbols-outlined text-[18px] leading-none">warning</span>
-                    </button>
-                </x-slot>
-                <div class="font-semibold text-gray-900 mb-1">{{ __('story::shared.trigger_warnings.label') }}</div>
-                <div class="flex flex-wrap gap-2 ">
-                    @foreach($tws as $tw)
-                    <x-shared::badge color="tertiary" size="xs">{{ $tw }}</x-shared::badge>
-                    @endforeach
-                </div>
-            </x-shared::popover>
+                <x-shared::popover placement="top">
+                    <x-slot name="trigger">
+                        <button type="button" aria-label="{{ __('story::shared.trigger_warnings.label') }}"
+                            class="pt-2 inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                            title="{{ __('story::shared.trigger_warnings.tooltips.listed') }}">
+                            <span class="material-symbols-outlined text-[18px] leading-none text-red-600">warning</span>
+                        </button>
+                    </x-slot>
+                    <div class="font-semibold text-gray-900 mb-1">{{ __('story::shared.trigger_warnings.label') }}</div>
+                    <div class="flex flex-wrap gap-2 ">
+                        @foreach($tws as $tw)
+                        <x-shared::badge color="tertiary" size="xs">{{ $tw }}</x-shared::badge>
+                        @endforeach
+                    </div>
+                </x-shared::popover>
+            @elseif($twDisclosure === 'no_tw')
+                <x-shared::tooltip type="info" :title="__('story::shared.trigger_warnings.tooltips.no_tw')" placement="top">
+                    <span class="pt-2 inline-flex items-center justify-center h-5 w-5 rounded-full">
+                        <span class="material-symbols-outlined text-[18px] leading-none text-green-600">check_circle</span>
+                    </span>
+                </x-shared::tooltip>
+            @elseif($twDisclosure === 'unspoiled')
+                <x-shared::tooltip type="info" :title="__('story::shared.trigger_warnings.tooltips.unspoiled')" placement="top">
+                    <span class="pt-2 inline-flex items-center justify-center h-5 w-5 rounded-full">
+                        <span class="material-symbols-outlined text-[18px] leading-none text-blue-600">help</span>
+                    </span>
+                </x-shared::tooltip>
             @endif
         </div>
     </div>

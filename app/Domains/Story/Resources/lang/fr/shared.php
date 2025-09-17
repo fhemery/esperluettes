@@ -59,7 +59,23 @@ return [
     'trigger_warnings' => [
         'label' => 'Avertissements de contenu',
         'placeholder' => 'Rechercher des avertissements…',
-        'help' => 'Sélectionnez les avertissements de contenu pertinents (facultatif)',
+        'help' => 'Sélectionnez les avertissements de contenu pertinents (facultatif) ou choisissez une option ci-dessous.',
+        'listed' => 'Avertissements listés',
+        'listed_help' => "Sélectionnez et listez les avertissements pertinents",
+        'no_tw' => 'Aucun avertissement',
+        'no_tw_help' => "Mon histoire n'a pas d'avertissements de contenu",
+        'unspoiled' => 'Avertissements non dévoilés',
+        'unspoiled_help' => "Mon histoire contient des avertissements, mais je ne souhaite pas les dévoiler",
+        'tooltips' => [
+            'no_tw' => "L'auteurice indique qu'il n'y a pas d'avertissements de contenu",
+            'unspoiled' => "L'auteurice indique qu'il existe des avertissements, mais préfère ne pas les dévoiler",
+            'listed' => 'Avertissements listés',
+        ],
+        'form_options' => [
+            'listed' => 'Oui',
+            'no_tw' => 'Aucun',
+            'unspoiled' => 'Non dévoilés',
+        ],
     ],
     'genres' => [
         'label' => 'Genres',

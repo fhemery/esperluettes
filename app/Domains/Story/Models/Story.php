@@ -21,7 +21,8 @@ class Story extends Model
         'story_ref_type_id',
         'story_ref_audience_id',
         'story_ref_copyright_id',
-        'story_ref_feedback_id'
+        'story_ref_feedback_id',
+        'tw_disclosure',
     ];
 
     protected $casts = [
@@ -32,6 +33,7 @@ class Story extends Model
         'story_ref_feedback_id' => 'integer',
         'reads_logged_total' => 'integer',
         'last_chapter_published_at' => 'datetime',
+        'tw_disclosure' => 'string',
     ];
 
     public const VIS_PUBLIC = 'public';

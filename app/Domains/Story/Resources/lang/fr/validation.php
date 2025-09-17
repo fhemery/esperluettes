@@ -61,6 +61,12 @@ return [
         'exists' => 'Un avertissement de contenu sélectionné n\'existe pas',
     ],
 
+    'tw_disclosure' => [
+        'required' => 'Veuillez indiquer comment vous gérez les avertissements de contenu.',
+        'in' => 'Choix invalide pour l\'indication des avertissements.',
+        'listed_requires_tw' => 'Si vous choisissez « Avertissements listés », vous devez en sélectionner au moins un.',
+    ],
+
     // Chapters
     'author_note_too_long' => 'La note de l\'auteur dépasse la limite de 1000 caractères.',
 ];

@@ -23,7 +23,11 @@ return [
         'type' => [
             'label' => 'Type d\'histoire',
             'placeholder' => '— Tous —'
-        ]
+        ],
+        'no_tw_only' => [
+            'label' => 'Sans avertissements seulement',
+            'help' => 'N\'afficher que les histoires marquées sans avertissements de contenu',
+        ],        
         
     ],
 ];
