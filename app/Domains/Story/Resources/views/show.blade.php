@@ -109,7 +109,7 @@
                         </div>
                     </div>
 
-                    <article class="prose flex-1">
+                    <article class="prose flex-1 overflow-hidden">
                         <h2>{{ __('story::shared.description.label') }}</h2>
                         @if(!$viewModel->hasDescription())
                         <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>

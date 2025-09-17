@@ -53,9 +53,10 @@
     <div class="pb-2 border-b border-gray-700">
         <div class="flex items-center justify-between text-md font-bold">
             <div class="flex items-center gap-2 text-gray-600">
-                <span>{{ trans_choice('story::shared.metrics.chapters', $item->getChaptersCount(), ['count' => $item->getChaptersCount()]) }}</span>
+
+                <span>{!! trans_choice('story::shared.metrics.chapters', $item->getChaptersCount(), ['count' => '<span class="text-accent">'. $item->getChaptersCount() . '</span>']) !!}</span>
                 <span class="text-gray-400">|</span>
-                <span>{{ trans_choice('story::shared.metrics.words', $item->getWordsTotal(), ['count' => \App\Domains\Shared\Support\NumberFormatter::compact($item->getWordsTotal())]) }}</span>
+                <span>{!! trans_choice('story::shared.metrics.words', $item->getWordsTotal(), ['count' => '<span class="text-accent">'. \App\Domains\Shared\Support\NumberFormatter::compact($item->getWordsTotal()) . '</span>']) !!}</span>
             </div>
             @if(!empty($tws))
             <x-shared::popover placement="left" maxWidth="18rem">
