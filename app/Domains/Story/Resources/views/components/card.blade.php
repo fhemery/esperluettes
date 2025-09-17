@@ -55,8 +55,10 @@
             <div class="flex items-center gap-2 text-gray-600">
 
                 <span>{!! trans_choice('story::shared.metrics.chapters', $item->getChaptersCount(), ['count' => '<span class="text-accent">'. $item->getChaptersCount() . '</span>']) !!}</span>
-                <span class="text-gray-400">|</span>
-                <span>{!! trans_choice('story::shared.metrics.words', $item->getWordsTotal(), ['count' => '<span class="text-accent">'. \App\Domains\Shared\Support\NumberFormatter::compact($item->getWordsTotal()) . '</span>']) !!}</span>
+                @if($item->getChaptersCount() > 0)
+                    <span class="text-gray-400">|</span>
+                    <span>{!! trans_choice('story::shared.metrics.words', $item->getWordsTotal(), ['count' => '<span class="text-accent">'. \App\Domains\Shared\Support\NumberFormatter::compact($item->getWordsTotal()) . '</span>']) !!}</span>
+                @endif
             </div>
             @if(!empty($tws))
             <x-shared::popover placement="left" maxWidth="18rem">
