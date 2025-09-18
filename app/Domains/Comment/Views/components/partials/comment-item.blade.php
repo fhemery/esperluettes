@@ -30,12 +30,12 @@
                         fmt(d, opts){ return new Intl.DateTimeFormat(this.lang, opts).format(d); } }">
           {{ __('comment::comments.posted_at') }}
           <span x-text="fmt(created, { day: '2-digit', month: '2-digit', year: 'numeric' })"></span>
-          <template x-if="updated > created">
+          @if($comment->updatedAt !== $comment->createdAt)
             <span class="ml-2 text-gray-400">
               {{ __('comment::comments.updated_at') }}
               <span x-text="fmt(updated, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })"></span>
             </span>
-          </template>
+          @endif
         </div>
       </div>
 
