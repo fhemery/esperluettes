@@ -22,7 +22,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawnSync } from 'child_process';
 import yaml from 'js-yaml';
-import { parse as dotenvParse } from 'dotenv';
+import { makeLog, fileExists, runCmd, determineRunner } from './utils.js';
 
 const excludeFoldersOrFiles = [
   'docs/',
@@ -33,15 +33,9 @@ const excludeFoldersOrFiles = [
   '.vscode',
 ]
 
+const log = makeLog('staged-tests');
 
-function log(msg) { process.stdout.write(`[staged-tests] ${msg}\n`); }
-
-function fileExists(p) { try { return fs.existsSync(p); } catch { return false; } }
-
-function runCmd(cmd, args, opts = {}) {
-  const res = spawnSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32', ...opts });
-  return res.status === 0;
-}
+// runCmd imported from utils
 
 function getModifiedFiles() {
   // Collect modified files from staged, unstaged, and untracked sources
@@ -181,18 +175,7 @@ function testsDirsForTestLayers(testLayers) {
   return dirs;
 }
 
-function determineRunner() {
-  let localRunner = process.env.LOCAL_RUNNER;
-  if (!localRunner) {
-    const envFile = path.resolve(process.cwd(), '.env');
-    if (fileExists(envFile)) {
-      try { localRunner = dotenvParse(fs.readFileSync(envFile, 'utf8')).LOCAL_RUNNER; } catch {}
-    }
-  }
-  localRunner = (localRunner || '').trim().toLowerCase();
-  if (!localRunner || !['php', 'sail'].includes(localRunner)) localRunner = 'sail';
-  return localRunner;
-}
+// determineRunner imported from utils
 
 function runStagedTests(skipBranchCheck = false) {
   // Skip entirely if not on main

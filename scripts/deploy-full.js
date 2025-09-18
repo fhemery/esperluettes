@@ -9,9 +9,8 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { spawnSync } from 'child_process';
 import archiver from 'archiver';
-import { parse as dotenvParse } from 'dotenv';
+import { makeLog, run, determineRunner } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,72 +18,29 @@ const projectRoot = path.resolve(__dirname, '..');
 
 const DIST_DIR = 'dist';
 const ENV_FILE = '.env.test';
-const LOCAL_RUNNER = process.env.LOCAL_RUNNER || '';
 
-function log(section, msg) {
-  const BLUE = '\u001b[34m';
-  const GREEN = '\u001b[32m';
-  const YELLOW = '\u001b[33m';
-  const NC = '\u001b[0m';
-  const icon = section === 'header' ? `${BLUE}🚀${NC}` : section === 'ok' ? `${GREEN}✅${NC}` : section === 'warn' ? `${YELLOW}⚠️${NC}` : '';
-  console.log(`${icon} ${msg}`);
-}
+const log = makeLog('deploy');
 
-function fileExists(p) { try { return fs.existsSync(p); } catch { return false; } }
-
-function run(cmd, args, options = {}) {
-  const isWin = process.platform === 'win32';
-  const joined = [cmd, ...args].join(' ');
-  log(null, `Running ${joined}`);
-  // First try without a shell
-  let res = spawnSync(cmd, args, { stdio: 'inherit', cwd: projectRoot, shell: false, ...options });
-  if ((res.error || res.status !== 0) && isWin) {
-    // Fallback: run through shell so Git Bash/CMD can resolve composer/composer.cmd and shims
-    const cmdline = [cmd, ...args.map(a => /\s/.test(a) ? `"${a}"` : a)].join(' ');
-    log('warn', `Retrying via shell: ${cmdline}`);
-    res = spawnSync(cmdline, { stdio: 'inherit', cwd: projectRoot, shell: true, ...options });
-  }
-  if (res.error) throw res.error;
-  if (res.status !== 0) throw new Error(`Command failed: ${joined}`);
-}
-
-function determineRunner() {
-  let localRunner = process.env.LOCAL_RUNNER;
-  if (!localRunner) {
-    const envFile = path.resolve(process.cwd(), '.env');
-    if (fileExists(envFile)) {
-      try { 
-        localRunner = dotenvParse(fs.readFileSync(envFile, 'utf8')).LOCAL_RUNNER; 
-      } catch (e) {
-      }
-    }
-  }
-  localRunner = (localRunner || '').trim().toLowerCase();
-  if (!localRunner || !['php', 'sail'].includes(localRunner)) localRunner = 'sail';
-  return localRunner;
-}
+// Wrapper to ensure cwd defaults to projectRoot for our run calls
+function runHere(cmd, args, options = {}) { return run(cmd, args, { cwd: projectRoot, ...options }); }
 
 function runner() {
   const chosen = determineRunner();
   if (chosen === 'php') {
     return {
-      composer: (args) => run('composer', args, { shell: process.platform === 'win32' }),
-      artisan: (args) => run('php', ['artisan', ...args], { shell: process.platform === 'win32' }),
-      composerInDist: (args) => run('composer', [...args, `--working-dir=${path.join(projectRoot, DIST_DIR)}`], { shell: process.platform === 'win32' }),
+      composer: (args) => runHere('composer', args, { shell: process.platform === 'win32' }),
+      artisan: (args) => runHere('php', ['artisan', ...args], { shell: process.platform === 'win32' }),
+      composerInDist: (args) => runHere('composer', [...args, `--working-dir=${path.join(projectRoot, DIST_DIR)}`], { shell: process.platform === 'win32' }),
     };
   }
   const sailPath = path.join(projectRoot, 'vendor', 'bin', 'sail');
   // On Windows, sail is a bash script; execute via bash if available
   const sailRunner = (subArgs) => {
-    if (isWin) {
+    if (process.platform === 'win32') {
       // Prefer bash if present in PATH (e.g., Git Bash); fallback to wsl if available
-      if (process.env.COMSPEC && process.env.COMSPEC.toLowerCase().includes('cmd.exe')) {
-        // Try bash first
-        return run('bash', [sailPath, ...subArgs]);
-      }
-      return run('bash', [sailPath, ...subArgs]);
+      return runHere('bash', [sailPath, ...subArgs]);
     }
-    return run(sailPath, subArgs);
+    return runHere(sailPath, subArgs);
   };
   return {
     composer: (args) => sailRunner(['composer', ...args]),
@@ -107,8 +63,22 @@ async function ensureDir(d) {
 }
 
 async function copyRecursive(src, dest) {
-  const stat = await fsp.stat(src);
-  if (stat.isDirectory()) {
+  // Use lstat to detect symlinks without following them first
+  const lst = await fsp.lstat(src);
+  if (lst.isSymbolicLink()) {
+    // Resolve the symlink target; if it can't be resolved, skip with a warning
+    let target;
+    try {
+      target = await fsp.realpath(src);
+    } catch (e) {
+      console.warn(`⚠️  Skipping broken symlink: ${src}`);
+      return;
+    }
+    // Recursively copy the resolved target into destination
+    await copyRecursive(target, dest);
+    return;
+  }
+  if (lst.isDirectory()) {
     await ensureDir(dest);
     const entries = await fsp.readdir(src, { withFileTypes: true });
     for (const ent of entries) {
@@ -120,7 +90,7 @@ async function copyRecursive(src, dest) {
         await fsp.copyFile(s, d);
       }
     }
-  } else if (stat.isFile()) {
+  } else if (lst.isFile()) {
     await ensureDir(path.dirname(dest));
     await fsp.copyFile(src, dest);
   }
@@ -158,7 +128,7 @@ async function zipDist(distDir) {
 
 async function main() {
   log('header', 'Starting Laravel Deployment Build Process');
-  console.log('==============================================');
+  log(null, '==============================================');
 
   // Preconditions
   if (!(await exists(path.join(projectRoot, 'artisan')))) {
@@ -186,7 +156,7 @@ async function main() {
   // Frontend deps (build is separate)
   run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['ci']);
   log('ok', 'Frontend dependencies installed');
-  console.log("ℹ️  Note: Make sure to run 'npm run build' before running this deployment script");
+  log(null, "ℹ️  Note: Make sure to run 'npm run build' before running this deployment script");
 
   // Step 3: Clear caches
   log(null, '🧹 Step 3: Clearing Laravel caches');
@@ -244,22 +214,24 @@ async function main() {
   log('ok', 'Core Laravel files copied');
 
   // Create public_html and copy public files (including .htaccess)
-  console.log('Creating public_html structure...');
+  log(null, 'Creating public_html structure...');
   const publicHtmlPath = path.join(distPath, 'public_html');
   await ensureDir(publicHtmlPath);
   const publicPath = path.join(projectRoot, 'public');
   if (await exists(publicPath)) {
     // Copy contents of public (excluding dotfiles by default), then copy .htaccess explicitly if present
-    const entries = await fsp.readdir(publicPath, { withFileTypes: true });
+    // Resolve symlinked paths to their real location to avoid issues on some platforms
+    const resolvedPublicPath = await fsp.realpath(publicPath).catch(() => publicPath);
+    const entries = await fsp.readdir(resolvedPublicPath, { withFileTypes: true });
     for (const ent of entries) {
       if (ent.name === '.htaccess') continue; // handled below
-      await copyRecursive(path.join(publicPath, ent.name), path.join(publicHtmlPath, ent.name));
+      await copyRecursive(path.join(resolvedPublicPath, ent.name), path.join(publicHtmlPath, ent.name));
     }
-    if (await exists(path.join(publicPath, '.htaccess'))) {
-      await copyRecursive(path.join(publicPath, '.htaccess'), path.join(publicHtmlPath, '.htaccess'));
-      console.log('✅ .htaccess file copied');
+    if (await exists(path.join(resolvedPublicPath, '.htaccess'))) {
+      await copyRecursive(path.join(resolvedPublicPath, '.htaccess'), path.join(publicHtmlPath, '.htaccess'));
+      log(null, '✅ .htaccess file copied');
     } else {
-      console.log('⚠️  Warning: .htaccess file not found in public directory');
+      log(null, '⚠️  Warning: .htaccess file not found in public directory');
     }
   }
   log('ok', 'Public files prepared for shared hosting');
@@ -277,17 +249,17 @@ async function main() {
   const { zipPath, size } = await zipDist(distPath);
 
   const sizeMB = (size / (1024 * 1024)).toFixed(2) + ' MB';
-  console.log('\n\u001b[32m🎉 Deployment package created successfully!\u001b[0m');
-  console.log('==============================================');
-  console.log(`📦 Package location: ${DIST_DIR}/`);
-  console.log(`📏 Package size: ${sizeMB}`);
-  console.log('');
-  console.log('\u001b[33m📖 Next steps:\u001b[0m');
-  console.log("1. Push the zip file to the FTP");
-  console.log("2. Launch migrations if needed: ./vendor/bin/sail artisan config:clear && ./vendor/bin/sail artisan migrate --env=<environment> && ./vendor/bin/sail artisan config:clear");
-  console.log("3. Run (safely): if [ -f esperluettes.zip ]; then rm -rf app bootstrap config database public resources routes vendor && unzip -o esperluettes.zip; else echo '❌ esperluettes.zip not found, aborting'; fi");
-  console.log('');
-  console.log('\u001b[32mHappy deploying! 🚀\u001b[0m');
+  log(null, '\n\u001b[32m🎉 Deployment package created successfully!\u001b[0m');
+  log(null, '==============================================');
+  log(null, `📦 Package location: ${DIST_DIR}/`);
+  log(null, `📏 Package size: ${sizeMB}`);
+  log(null, '');
+  log(null, '\u001b[33m📖 Next steps:\u001b[0m');
+  log(null, "1. Push the zip file to the FTP");
+  log(null, "2. Launch migrations if needed: ./vendor/bin/sail artisan config:clear && ./vendor/bin/sail artisan migrate --env=<environment> && ./vendor/bin/sail artisan config:clear");
+  log(null, "3. Run (safely): if [ -f esperluettes.zip ]; then rm -rf app bootstrap config database public resources routes vendor && unzip -o esperluettes.zip; else echo '❌ esperluettes.zip not found, aborting'; fi");
+  log(null, '');
+  log(null, '\u001b[32mHappy deploying! 🚀\u001b[0m');
 }
 
 main().catch((err) => {

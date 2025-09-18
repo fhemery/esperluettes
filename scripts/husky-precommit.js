@@ -7,29 +7,17 @@
   - Runs test suite (skip with SKIP_TESTS=1).
 */
 
-import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { spawnSync } from 'child_process';
-import { parse as dotenvParse } from 'dotenv';
 import { runStagedTests } from './launch_staged_tests.js';
+import { makeLog, fileExists, runCmd as runCmdBase, determineRunner } from './utils.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-function log(msg) {
-    process.stdout.write(`[husky] ${msg}\n`);
-}
-
-function fileExists(p) {
-    try { return fs.existsSync(p); } catch { return false; }
-}
-
+const log = makeLog('husky');
 function runCmd(cmd, args, opts = {}) {
-    log(`Running ${cmd} ${args.join(' ')}`);
-    const res = spawnSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32', ...opts });
-    log(`Result of command ${cmd} ${args.join(' ')}: ${res.status}`);
-    return res.status === 0;
+    log(`Running ${cmd} ${(args||[]).join(' ')}`);
+    const ok = runCmdBase(cmd, args, opts);
+    log(`Result of command ${cmd} ${(args||[]).join(' ')}: ${ok ? 0 : 1}`);
+    return ok;
 }
 
 function getAddedFiles() {
@@ -42,30 +30,8 @@ function getAddedFiles() {
 }
 
 function main() {
-    // Determine runner
-    let localRunner = process.env.LOCAL_RUNNER;
-    if (!localRunner) {
-        // Read only from .env without polluting process.env, to avoid breaking Laravel's .env.testing behavior
-        const envFile = path.resolve(__dirname, '../.env');
-        if (fileExists(envFile)) {
-          try {
-            const raw = fs.readFileSync(envFile, 'utf8');
-            const parsed = dotenvParse(raw);
-            localRunner = parsed.LOCAL_RUNNER;
-          } catch (_) {
-            // ignore
-          }
-        }
-    }
-    let runner = (localRunner || '').trim().toLowerCase();
-    if (!runner) {
-        log("LOCAL_RUNNER is not set; defaulting to 'sail'");
-        runner = 'sail';
-    }
-    if (runner !== 'php' && runner !== 'sail') {
-        log(`Invalid LOCAL_RUNNER value '${runner}', defaulting to 'sail'`);
-        runner = 'sail';
-    }
+    // Determine runner (shared logic)
+    let runner = determineRunner();
 
     // Forbidden paths check (unless bypassed)
     const bypassForbidden = process.env.SKIP_FORBIDDEN === '1' || fileExists(path.join('.git', 'allow-new-in-restricted'));
