@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Profile\Models\Profile;
+use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\PublicApi\AuthPublicApi;
 use App\Domains\Auth\PublicApi\Roles;

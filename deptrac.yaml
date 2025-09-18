@@ -163,19 +163,12 @@ deptrac:
     - name: ProfilePublic
       collectors:
         - type: directory
-          value: 'app/Domains/Profile/PublicApi/'
+          value: 'app/Domains/Profile/Public/'
 
     - name: ProfilePrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Profile/PublicApi/
-            - type: directory
-              value: app/Domains/Profile/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Profile/
+        - type: directory
+          value: 'app/Domains/Profile/Private/'
 
     - name: ProfileTests
       collectors:
@@ -345,6 +338,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - ProfilePublic
 
     StaticPagePrivate:
       - Shared

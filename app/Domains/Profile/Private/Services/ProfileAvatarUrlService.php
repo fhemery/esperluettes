@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Profile\Services;
+namespace App\Domains\Profile\Private\Services;
 
 use Illuminate\Support\Facades\Storage;
 

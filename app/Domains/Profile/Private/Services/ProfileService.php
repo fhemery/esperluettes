@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Domains\Profile\Services;
+namespace App\Domains\Profile\Private\Services;
 
-use App\Domains\Profile\Events\ProfileDisplayNameChanged;
-use App\Domains\Profile\Events\AvatarChanged;
-use App\Domains\Profile\Events\BioUpdated;
-use App\Domains\Profile\Models\Profile;
-use App\Domains\Profile\Support\AvatarGenerator;
-use App\Domains\Profile\Services\ProfileCacheService;
+use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;
+use App\Domains\Profile\Public\Events\AvatarChanged;
+use App\Domains\Profile\Public\Events\BioUpdated;
+use App\Domains\Profile\Private\Models\Profile;
+use App\Domains\Profile\Private\Support\AvatarGenerator;
+use App\Domains\Profile\Private\Services\ProfileCacheService;
 use App\Domains\Shared\Support\SimpleSlug;
 use App\Domains\Shared\Services\ImageService;
 use App\Domains\Events\PublicApi\EventBus;

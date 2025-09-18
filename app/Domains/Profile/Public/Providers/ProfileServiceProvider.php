@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Domains\Profile\PublicApi\Providers;
+namespace App\Domains\Profile\Public\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
-use App\Domains\Profile\Listeners\CreateProfileOnUserRegistered;
-use App\Domains\Profile\Listeners\ClearProfileCacheOnEmailVerified;
+use App\Domains\Profile\Private\Listeners\CreateProfileOnUserRegistered;
+use App\Domains\Profile\Private\Listeners\ClearProfileCacheOnEmailVerified;
 use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
-use App\Domains\Profile\PublicApi\ProfilePublicApi;
+use App\Domains\Profile\Private\Api\ProfileApi;
 use App\Domains\Events\PublicApi\EventBus;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Events\EmailVerified;
-use App\Domains\Profile\Events\ProfileDisplayNameChanged;
-use App\Domains\Profile\Events\AvatarChanged;
-use App\Domains\Profile\Events\BioUpdated;
+use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;
+use App\Domains\Profile\Public\Events\AvatarChanged;
+use App\Domains\Profile\Public\Events\BioUpdated;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -24,7 +24,7 @@ class ProfileServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Bind Shared contract to Profile implementation
-        $this->app->singleton(ProfilePublicApiContract::class, ProfilePublicApi::class);
+        $this->app->singleton(ProfilePublicApiContract::class, ProfileApi::class);
     }
 
     /**
@@ -33,18 +33,21 @@ class ProfileServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register domain-specific migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../../Database/Migrations');
+        $this->loadMigrationsFrom(app_path('Domains/Profile/Database/Migrations'));
 
+        // Register domain routes
+        $this->loadRoutesFrom(app_path('Domains/Profile/Private/routes.php'));
+
+        // Register translations
         // Register JSON language files (domain-level)
         $this->loadJsonTranslationsFrom(
-            __DIR__.'/../../Resources/lang'
+            app_path('Domains/Profile/Private/Resources/lang')
         );
-        
         // Register PHP translations (namespaced)
-        $this->loadTranslationsFrom(__DIR__ . '/../../Resources/lang', 'profile');
+        $this->loadTranslationsFrom(app_path('Domains/Profile/Private/Resources/lang'), 'profile');
         
         // Register view namespace for Profile domain
-        View::addNamespace('profile', app_path('Domains/Profile/Views'));
+        View::addNamespace('profile', app_path('Domains/Profile/Private/Resources/views'));
 
         // Ensure Carbon uses the current app locale (for translated month/day names)
         Carbon::setLocale(app()->getLocale());

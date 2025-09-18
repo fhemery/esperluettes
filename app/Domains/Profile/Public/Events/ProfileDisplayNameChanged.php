@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Profile\Events;
+namespace App\Domains\Profile\Public\Events;
 
 use App\Domains\Events\Contracts\DomainEvent;
 

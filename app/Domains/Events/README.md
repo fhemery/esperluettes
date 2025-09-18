@@ -25,7 +25,7 @@ See an example implementation with: `app/Domains/Profile/Events/ProfileDisplayNa
 
 ```php
 use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\Profile\Events\ProfileDisplayNameChanged;
+use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;
 
 public function boot(): void
 {
@@ -37,7 +37,7 @@ public function boot(): void
 
 ```php
 use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\Profile\Events\ProfileDisplayNameChanged;
+use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;
 
 $this->eventBus->emit(new ProfileDisplayNameChanged($userId, $old, $new));
 ```
@@ -69,7 +69,7 @@ See an example implementation with: `app/Domains/Profile/Listeners/CreateProfile
 - Prefer feature tests that exercise real flows, then assert persisted events:
 
 ```php
-$event = latestEventOf('Profile.DisplayNameChanged', \App\Domains\Profile\Events\ProfileDisplayNameChanged::class);
+$event = latestEventOf('Profile.DisplayNameChanged', \App\Domains\Profile\Public\Events\ProfileDisplayNameChanged::class);
 expect($event)->not->toBeNull();
 expect($event->summary())->toContain('→');
 ```

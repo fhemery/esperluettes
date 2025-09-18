@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Profile\Services;
+namespace App\Domains\Profile\Private\Services;
 
-use App\Domains\Profile\Models\Profile;
+use App\Domains\Profile\Private\Models\Profile;
 use Illuminate\Support\Facades\Cache;
 
 class ProfileCacheService

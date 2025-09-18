@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Profile\Events\AvatarChanged;
-use App\Domains\Profile\Events\ProfileDisplayNameChanged;
-use App\Domains\Profile\Events\BioUpdated;
-use App\Domains\Profile\Models\Profile;
-use App\Domains\Profile\PublicApi\ProfilePublicApi;
+use App\Domains\Profile\Public\Events\AvatarChanged;
+use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;
+use App\Domains\Profile\Public\Events\BioUpdated;
+
+use App\Domains\Profile\Private\Api\ProfileApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -54,7 +54,7 @@ describe('Editing profile', function () {
                 ->assertRedirect();
     
             // Assert: profile updated with new display name and new slug
-            $updated = app(ProfilePublicApi::class)->getPublicProfile($user->id);
+            $updated = app(ProfileApi::class)->getPublicProfile($user->id);
             expect($updated->display_name)->toBe('Johnny Bravo');
             expect($updated->slug)->toBe('johnny-bravo');
         });
