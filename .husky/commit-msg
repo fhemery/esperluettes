@@ -1,1 +1,1 @@
-cat "$1" | npx --no commitlint
+npx commitlint --edit "$1"
