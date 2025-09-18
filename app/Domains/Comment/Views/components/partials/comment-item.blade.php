@@ -23,15 +23,19 @@
             <span class="material-symbols-outlined text-[16px] leading-none">edit</span>
           </button>
         @endif
-        <div class="text-xs text-gray-500">
+        <div class="text-xs text-gray-500"
+             x-data="{ lang: document.documentElement.lang || 'en',
+                        created: new Date('{{ $comment->createdAt }}'),
+                        updated: new Date('{{ $comment->updatedAt }}'),
+                        fmt(d, opts){ return new Intl.DateTimeFormat(this.lang, opts).format(d); } }">
           {{ __('comment::comments.posted_at') }}
-          {{ \Carbon\Carbon::parse($comment->createdAt)->translatedFormat('d/m/Y') }}
-		  @if($comment->createdAt !== $comment->updatedAt)
-			<span class="ml-2 text-gray-400">
-				{{ __('comment::comments.updated_at') }}
-        {{ \Carbon\Carbon::parse($comment->updatedAt)->translatedFormat('d/m/Y H:i') }}
-			</span>
-		  @endif
+          <span x-text="fmt(created, { day: '2-digit', month: '2-digit', year: 'numeric' })"></span>
+          <template x-if="updated > created">
+            <span class="ml-2 text-gray-400">
+              {{ __('comment::comments.updated_at') }}
+              <span x-text="fmt(updated, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })"></span>
+            </span>
+          </template>
         </div>
       </div>
 

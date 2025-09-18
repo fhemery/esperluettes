@@ -3,7 +3,6 @@
 namespace App\Domains\Comment\Contracts;
 
 use App\Domains\Shared\Dto\ProfileDto;
-use App\Domains\Auth\PublicApi\Dto\RoleDto;
 use App\Domains\Comment\Models\Comment;
 
 class CommentDto
@@ -35,7 +34,7 @@ class CommentDto
             body: (string) $model->body,
             authorId: (int) $model->author_id,
             authorProfile: $authorProfile,
-            createdAt: (string) $model->created_at,
+            createdAt: $model->created_at?->toISOString() ?? '',
             updatedAt: $model->updated_at?->toISOString(),
             canReply: $canReply,
             canEditOwn: $canEditOwn,
