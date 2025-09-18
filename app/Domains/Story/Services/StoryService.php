@@ -182,6 +182,7 @@ class StoryService
             $twIds = is_array($twIds) ? array_values(array_unique(array_map('intval', $twIds))) : [];
             $story->tw_disclosure = $disclosure;
             $story->triggerWarnings()->sync($twIds);
+            $story->save();
 
             // 4) Seed collaborator row for creator
             DB::table('story_collaborators')->insert([
