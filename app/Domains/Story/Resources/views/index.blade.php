@@ -14,9 +14,19 @@
 <x-app-layout>
     @php($hasFilters = !empty($currentType) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw) || !empty($currentNoTwOnly))
 
+    <div class="flex gap-2 text-4xl text-accent font-extrabold mb-4">
+        <span class="material-symbols-outlined text-4xl">
+            nest_eco_leaf
+        </span>
+        <h2>{{ __('story::index.title') }}</h2>
+    </div>
+
     <!-- Filters Section -->
     <div class="w-full">
-        <x-shared::collapsible title="{{__('story::shared.filters.header')}}" :open="$hasFilters">
+        <x-shared::collapsible :open="$hasFilters">
+            <x-slot name="title">
+                <span>{{__('story::shared.filters.header')}}</span>
+            </x-slot>
             <form method="GET" action="{{ url('/stories') }}" class="flex items-start gap-6 flex-wrap" x-data
                 @submit="if($refs.type && $refs.type.value===''){ $refs.type.removeAttribute('name') }">
                 <div>
@@ -43,6 +53,8 @@
                     <div class="mt-2">
                         <x-search-multi
                             name="audiences[]"
+                            color="accent"
+                            badge="fg"
                             :options="$referentials['audiences'] ?? []"
                             :selected="$currentAud"
                             :placeholder="__('story::shared.audience.placeholder')"
@@ -65,7 +77,8 @@
                             :selected="$currentGen"
                             :placeholder="__('story::shared.genres.placeholder')"
                             :empty-text="__('story::shared.no_results')"
-                            badge="blue" />
+                            badge="accent"
+                            color="accent" />
                     </div>
                 </div>
 
@@ -85,7 +98,8 @@
                             :selected="$currentExTw"
                             :placeholder="__('story::shared.trigger_warnings.placeholder')"
                             :empty-text="__('story::shared.no_results')"
-                            badge="red" />
+                            badge="error"
+                            color="accent" />
                     </div>
                     <div class="mt-4">
                         <label class="inline-flex items-center gap-2 text-sm text-gray-700">

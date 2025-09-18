@@ -22,7 +22,7 @@ export default {
         'bg-red-100', 'border-red-500', 'text-red-700',
         'hover:text-blue-900', 'hover:text-green-900', 'hover:text-red-900',
         // Dynamic classes applied at runtime (editor counter)
-        'text-red-600', 'text-gray-500'
+        'text-red-600', 'text-gray-500',
     ],
 
     theme: {

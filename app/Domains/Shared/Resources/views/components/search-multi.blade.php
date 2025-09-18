@@ -5,8 +5,9 @@
     'placeholder' => 'Search…',
     'emptyText' => 'No results',
     'maxHeight' => '15rem', // dropdown max height
-    'badge' => 'indigo', // badge color: indigo (default), blue, red
+    'badge' => 'accent', // badge color: indigo (default), blue, red
     'valueField' => 'slug', // which field from options to submit/match against (e.g., 'id' or 'slug')
+    'color' => 'accent',
 ])
 
 @php
@@ -28,22 +29,6 @@
     $sel = collect($selected)->map(fn($v) => (string) $v)->filter()->values();
     // Base name without [] (no longer used, we submit only array fields to avoid duplicates)
     $nameBase = preg_replace('/\[\]$/', '', (string) $name);
-
-    // Badge classes based on theme
-    $badgeMap = [
-        'indigo' => 'bg-indigo-50 text-indigo-700 ring-indigo-600/20',
-        'blue'   => 'bg-blue-50 text-blue-700 ring-blue-600/20',
-        'red'    => 'bg-red-100 text-red-800 ring-red-600/20',
-    ];
-    $badgeClasses = $badgeMap[$badge] ?? $badgeMap['indigo'];
-
-    // Remove button color per theme
-    $btnMap = [
-        'indigo' => 'text-indigo-600 hover:text-indigo-800',
-        'blue'   => 'text-blue-600 hover:text-blue-800',
-        'red'    => 'text-red-600 hover:text-red-800',
-    ];
-    $btnClasses = $btnMap[$badge] ?? $btnMap['indigo'];
 @endphp
 
 <div x-data="searchMulti({
@@ -53,35 +38,34 @@
         placeholder: @js($placeholder),
         emptyText: @js($emptyText),
         maxHeight: @js($maxHeight),
+        badge: @js($badge),
     })" class="w-[32rem] max-w-full" @click.outside="open = false" x-init="initiated = true">
     <div class="relative">
         <!-- Selected badges and input -->
         <div
-            class="min-h-10 w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500">
+            class="min-h-10 w-full rounded-md border border-{{$color}} px-2 py-1.5 focus-within:ring-2 focus-within:ring-accent/90">
             <div class="flex flex-wrap items-center gap-1.5">
                 <!-- badges -->
                 <template x-for="s in state.selectedDetailed" :key="s.slug">
-                    <span
-                        class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $badgeClasses }}">
+                    <x-shared::badge :color="$badge" size="xs">
                         <span x-text="s.name"></span>
-                        <button type="button" class="ml-0.5 {{ $btnClasses }}"
+                        <button type="button" class="ml-0.5 surface-{{$badge}} text-on-surface"
                                 @click="remove(s.slug)"
                                 aria-label="Remove">
-                            <span class="material-symbols-outlined text-[16px] leading-none">close</span>
+                            <span class="material-symbols-outlined text-[16px] leading-none text-on-surface">close</span>
                         </button>
-                    </span>
+                    </x-shared::badge>
                 </template>
 
                 <!-- text input -->
                 <input type="text" x-model="state.query" @focus="open = true" @keydown.down.prevent="move(1)"
                        @keydown.up.prevent="move(-1)" @keydown.enter.prevent="chooseHighlighted()"
-                       class="flex-1 min-w-[8rem] border-0 focus:ring-0 text-sm placeholder:text-gray-400"
-                       :placeholder="state.selected.length ? '' : placeholder">
+                       class="flex-1 min-w-[8rem] bg-transparent border-0 focus:ring-0 text-sm placeholder:text-{{$color}}/50"                      :placeholder="state.selected.length ? '' : placeholder">
             </div>
         </div>
 
         <!-- Dropdown -->
-        <div x-cloak x-show="open" class="absolute z-20 mt-1 w-full rounded-md bg-white shadow-lg ring-1 ring-black/5">
+        <div x-cloak x-show="open" class="absolute z-20 mt-1 w-full rounded-md bg-white border border-{{$color}} ring-5 ring-{{$color}}">
             <ul class="max-h-60 overflow-auto py-1" :style="{maxHeight: maxHeight}">
                 <template x-for="(opt, idx) in state.filtered" :key="opt.slug">
                     <li>
@@ -120,7 +104,7 @@
     @push('scripts')
         <script>
     if (!window.searchMulti) {
-        window.searchMulti = function ({name, options, selected, placeholder, emptyText, maxHeight}) {
+        window.searchMulti = function ({name, options, selected, placeholder, emptyText, maxHeight, badge}) {
             return {
                 open: false,
                 placeholder: placeholder,
@@ -152,7 +136,7 @@
             itemClass(idx, slug) {
                 const isHighlighted = this.highlight === idx;
                 const isSelected = this.state.selected.includes(slug);
-                return (isHighlighted ? 'bg-indigo-50 ' : '') + (isSelected ? 'font-semibold text-indigo-700' : 'text-gray-700 hover:bg-gray-50');
+                return (isHighlighted ? `bg-black/10 ` : '') + (isSelected ? `font-semibold text-${badge}` : `text-${badge}`);
             },
             move(delta) {
                 const len = this.state.filtered.length;
