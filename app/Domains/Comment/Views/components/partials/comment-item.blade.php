@@ -28,7 +28,8 @@
           {{ \Carbon\Carbon::parse($comment->createdAt)->translatedFormat('d/m/Y') }}
 		  @if($comment->createdAt !== $comment->updatedAt)
 			<span class="ml-2 text-gray-400">
-				(Dernière édition : {{ \Carbon\Carbon::parse($comment->updatedAt)->translatedFormat('d/m/Y H:i') }})
+				{{ __('comment::comments.updated_at') }}
+        {{ \Carbon\Carbon::parse($comment->updatedAt)->translatedFormat('d/m/Y H:i') }}
 			</span>
 		  @endif
         </div>
