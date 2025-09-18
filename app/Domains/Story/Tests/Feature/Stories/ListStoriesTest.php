@@ -34,26 +34,73 @@ describe('Card display', function () {
         $resp->assertSee('Mystery');
     });
 
-    it('displays trigger warning badges on list cards', function () {
-        // Arrange
-        $author = alice($this);
-        $violence = makeTriggerWarning('Violence');
-        $abuse = makeTriggerWarning('Abuse');
+    describe('Trigger warnings', function () {
 
-        $twStory = publicStory('TW Story', $author->id, [
-            'description' => '<p>Desc</p>',
-            'story_ref_trigger_warning_ids' => [$violence->id, $abuse->id],
-        ]);
-        createPublishedChapter($this, $twStory, $author);
+        it('displays trigger warning badges on list cards', function () {
+            // Arrange
+            $author = alice($this);
+            $violence = makeTriggerWarning('Violence');
+            $abuse = makeTriggerWarning('Abuse');
 
-        // Act
-        $resp = $this->get('/stories');
+            $twStory = publicStory('TW Story', $author->id, [
+                'description' => '<p>Desc</p>',
+                'story_ref_trigger_warning_ids' => [$violence->id, $abuse->id],
+            ]);
+            createPublishedChapter($this, $twStory, $author);
 
-        // Assert: shows both TW names as badges in the list
-        $resp->assertOk();
-        $resp->assertSee('TW Story');
-        $resp->assertSee('Violence');
-        $resp->assertSee('Abuse');
+            // Act
+            $resp = $this->get('/stories');
+
+            // Assert: shows both TW names as badges in the list
+            $resp->assertOk();
+            $resp->assertSee('TW Story');
+            $resp->assertSee('Violence');
+            $resp->assertSee('Abuse');
+        });
+
+        it('shows a green check icon on list cards when tw_disclosure is no_tw', function () {
+            // Arrange
+            $author = alice($this);
+            $clean = publicStory('No TW Story', $author->id, [
+                'description' => '<p>Desc</p>',
+                'story_ref_trigger_warning_ids' => [],
+            ]);
+            // Explicitly set disclosure to no_tw
+            $clean->tw_disclosure = \App\Domains\Story\Models\Story::TW_NO_TW;
+            $clean->saveQuietly();
+            createPublishedChapter($this, $clean, $author);
+
+            // Act
+            $resp = $this->get('/stories');
+
+            // Assert: check icon and tooltip
+            $resp->assertOk();
+            $resp->assertSee('No TW Story');
+            $resp->assertSee('check_circle');
+            $resp->assertSee(trans('story::shared.trigger_warnings.tooltips.no_tw'));
+        });
+
+        it('shows an orange help icon on list cards when tw_disclosure is unspoiled', function () {
+            // Arrange
+            $author = alice($this);
+            $mystery = publicStory('Unspoiled Story', $author->id, [
+                'description' => '<p>Desc</p>',
+                'story_ref_trigger_warning_ids' => [],
+            ]);
+            // Explicitly set disclosure to unspoiled
+            $mystery->tw_disclosure = \App\Domains\Story\Models\Story::TW_UNSPOILED;
+            $mystery->saveQuietly();
+            createPublishedChapter($this, $mystery, $author);
+
+            // Act
+            $resp = $this->get('/stories');
+
+            // Assert: help icon and tooltip (careful: assert the specific TW tooltip text)
+            $resp->assertOk();
+            $resp->assertSee('Unspoiled Story');
+            $resp->assertSee('help');
+            $resp->assertSee(trans('story::shared.trigger_warnings.tooltips.unspoiled'));
+        });
     });
 });
 
@@ -162,6 +209,48 @@ describe('Filtering', function () {
         $resp->assertSee('Clean Story');
     });
 
+    it('filters to only explicit No TW stories when no_tw_only=1', function () {
+        // Arrange
+        $author = alice($this);
+        $violence = makeTriggerWarning('Violence');
+
+        // No TW story
+        $noTw = publicStory('Only No TW', $author->id, [
+            'description' => '<p>Desc</p>',
+            'story_ref_trigger_warning_ids' => [],
+        ]);
+        $noTw->tw_disclosure = \App\Domains\Story\Models\Story::TW_NO_TW;
+        $noTw->saveQuietly();
+        createPublishedChapter($this, $noTw, $author);
+
+        // Listed with TW
+        $listed = publicStory('Listed TW', $author->id, [
+            'description' => '<p>Desc</p>',
+            'story_ref_trigger_warning_ids' => [$violence->id],
+        ]);
+        $listed->tw_disclosure = \App\Domains\Story\Models\Story::TW_LISTED;
+        $listed->saveQuietly();
+        createPublishedChapter($this, $listed, $author);
+
+        // Unspoiled
+        $unspoiled = publicStory('Unspoiled', $author->id, [
+            'description' => '<p>Desc</p>',
+            'story_ref_trigger_warning_ids' => [],
+        ]);
+        $unspoiled->tw_disclosure = \App\Domains\Story\Models\Story::TW_UNSPOILED;
+        $unspoiled->saveQuietly();
+        createPublishedChapter($this, $unspoiled, $author);
+
+        // Act
+        $resp = $this->get('/stories?no_tw_only=1');
+
+        // Assert: only the No TW story is visible
+        $resp->assertOk();
+        $resp->assertSee('Only No TW');
+        $resp->assertDontSee('Listed TW');
+        $resp->assertDontSee('Unspoiled');
+    });
+
     it('filters stories by multiple genre slugs (AND semantics)', function () {
         // Arrange
         $author = alice($this);
@@ -267,7 +356,6 @@ describe('Filtering', function () {
         $resp->assertSee(trans('story::index.filter'));
         $resp->assertSee(trans('story::index.reset_filters'));
     });
-
 });
 
 describe('Story access', function () {

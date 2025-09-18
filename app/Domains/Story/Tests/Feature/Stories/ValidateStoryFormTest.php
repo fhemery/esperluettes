@@ -390,3 +390,41 @@ it('validates story_ref_feedback_id must exist when provided', function () {
     $page->assertOk();
     $page->assertSee('story::validation.feedback.exists');
 });
+
+it('validates tw_disclosure is required', function () {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        // Remove tw_disclosure to simulate missing field
+        'tw_disclosure' => null,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.tw_disclosure.required');
+});
+
+it('validates listed tw_disclosure requires at least one trigger warning', function () {
+    $user = alice($this);
+
+    $payload = validStoryPayload([
+        'tw_disclosure' => Story::TW_LISTED,
+        'story_ref_trigger_warning_ids' => [], // none provided
+    ]);
+
+    $response = $this->actingAs($user)
+        ->from('/stories/create')
+        ->post('/stories', $payload);
+
+    $response->assertRedirect('/stories/create');
+
+    $page = $this->followingRedirects()->actingAs($user)->get('/stories/create');
+    $page->assertOk();
+    $page->assertSee('story::validation.tw_disclosure.listed_requires_tw');
+});
