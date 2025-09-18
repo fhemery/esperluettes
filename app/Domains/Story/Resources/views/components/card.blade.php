@@ -67,13 +67,13 @@
                         <button type="button" aria-label="{{ __('story::shared.trigger_warnings.label') }}"
                             class="pt-2 inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/40"
                             title="{{ __('story::shared.trigger_warnings.tooltips.listed') }}">
-                            <span class="material-symbols-outlined text-[18px] leading-none text-red-600">warning</span>
+                            <span class="material-symbols-outlined text-[18px] leading-none text-error">warning</span>
                         </button>
                     </x-slot>
                     <div class="font-semibold text-gray-900 mb-1">{{ __('story::shared.trigger_warnings.label') }}</div>
                     <div class="flex flex-wrap gap-2 ">
                         @foreach($tws as $tw)
-                        <x-shared::badge color="tertiary" size="xs">{{ $tw }}</x-shared::badge>
+                        <x-shared::badge color="error" size="xs">{{ $tw }}</x-shared::badge>
                         @endforeach
                     </div>
                 </x-shared::popover>
@@ -81,7 +81,7 @@
                 <x-shared::popover placement="top">
                     <x-slot name="trigger">
                         <span class="pt-2 inline-flex items-center justify-center h-5 w-5 rounded-full">
-                            <span class="material-symbols-outlined text-[18px] leading-none text-green-600">check_circle</span>
+                            <span class="material-symbols-outlined text-[18px] leading-none text-success">check_circle</span>
                         </span>
                     </x-slot>
                     <div>{{ __('story::shared.trigger_warnings.tooltips.no_tw') }}</div>
@@ -90,7 +90,7 @@
             <x-shared::popover placement="top">
                     <x-slot name="trigger">
                         <span class="pt-2 inline-flex items-center justify-center h-5 w-5 rounded-full">
-                            <span class="material-symbols-outlined text-[18px] leading-none text-orange-600">help</span>
+                            <span class="material-symbols-outlined text-[18px] leading-none text-warning">help</span>
                         </span>
                     </x-slot>
                     <div>{{ __('story::shared.trigger_warnings.tooltips.unspoiled') }}</div>

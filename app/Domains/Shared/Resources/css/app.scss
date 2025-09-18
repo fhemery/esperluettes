@@ -12,7 +12,19 @@
   --color-tertiary: 99 157 165;   
   --error-background: 255 255 255;
   --error-text: 255 0 0;
-  --dark: 0 0 0; 
+  --dark: 0 0 0;
+  
+  --color-error-fg: 185 28 28;
+  --color-error-bg: 254 226 226;
+
+  --color-info-fg: 29 78 216;
+  --color-info-bg: 219 234 254;
+
+  --color-success-fg: 21 128 61;
+  --color-success-bg: 220 252 231;
+
+  --color-warning-fg: 194 65 12;
+  --color-warning-bg: 255 237 213;
 
   /* Images */
   --home-bg-image: none;
@@ -115,6 +127,34 @@
     --surface-fg: black;
     color-scheme: light;
     background-color: transparent;
+  }
+
+  .surface-error {
+    --surface-bg: var(--color-error-bg);
+    --surface-fg: var(--color-error-fg);
+    color-scheme: light;
+    background-color: rgb(var(--color-error-bg));
+  }
+
+  .surface-info {
+    --surface-bg: var(--color-info-bg);
+    --surface-fg: var(--color-info-fg);
+    color-scheme: light;
+    background-color: rgb(var(--color-info-bg));
+  }
+
+  .surface-success {
+    --surface-bg: var(--color-success-bg);
+    --surface-fg: var(--color-success-fg);
+    color-scheme: light;
+    background-color: rgb(var(--color-success-bg));
+  }
+
+  .surface-warning {
+    --surface-bg: var(--color-warning-bg);
+    --surface-fg: var(--color-warning-fg);
+    color-scheme: light;
+    background-color: rgb(var(--color-warning-bg));
   }
 
   .text-on-surface {

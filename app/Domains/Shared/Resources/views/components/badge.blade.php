@@ -17,17 +17,20 @@
     ];
     $sizeClasses = $sizes[$size] ?? $sizes['sm'];
 
-    // Color variants
-    // Note: surface-* utilities come from app.scss and require .text-on-surface for readable text
+
     $variants = [
-        'surface-primary' => 'surface-primary text-on-surface',
-        'surface-secondary' => 'surface-secondary text-on-surface',
+        'primary' => 'surface-primary text-on-surface',
+        'secondary' => 'surface-secondary text-on-surface',
+        'success' => 'surface-success text-on-surface',
+        'info' => 'surface-info text-on-surface',
+        'warning' => 'surface-warning text-on-surface',
+        'error' => 'surface-error text-on-surface',
         'accent' => 'surface-accent text-on-surface',
         'tertiary' => 'surface-tertiary text-on-surface',
         'neutral' => 'surface-neutral text-on-surface',
     ];
 
-    $colorClasses = $variants[$color] ?? $variants['surface-primary'];
+    $colorClasses = $variants[$color] ?? $variants['primary'];
 @endphp
 
 <span {{ $attributes->merge(['class' => "$base $sizeClasses $colorClasses"]) }}>{{ $slot }}</span>

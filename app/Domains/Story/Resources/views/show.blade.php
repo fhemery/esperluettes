@@ -70,9 +70,10 @@
                             @if(!empty($genres))
                             <span class="inline-flex flex-wrap gap-2">
                                 @foreach($genres as $g)
-                                <span
-                                    class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20"
-                                    title="{{ __('story::shared.genres.label') }}">{{ $g }}</span>
+                                <x-shared::badge
+                                    color="accent"
+                                    size="xs"
+                                    title="{{ __('story::shared.genres.label') }}">{{ $g }}</x-shared::badge>
                                 @endforeach
                             </span>
                             @endif
@@ -80,23 +81,36 @@
                         <div>
                             @php($tws = $viewModel->getTriggerWarningNames())
                             @if(!empty($tws))
-                                <span class="inline-flex flex-wrap gap-2">
-                                    @foreach($tws as $tw)
-                                    <span
-                                        class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 ring-1 ring-inset ring-red-600/20"
-                                        title="{{ __('story::shared.trigger_warnings.label') }}">{{ $tw }}</span>
-                                    @endforeach
-                                </span>
+                            <span class="inline-flex flex-wrap gap-2">
+                                @foreach($tws as $tw)
+                                <x-shared::badge
+                                    color="error"
+                                    size="xs"
+                                    title="{{ __('story::shared.trigger_warnings.label') }}">{{ $tw }}</x-shared::badge>
+                                @endforeach
+                            </span>
                             @elseif($viewModel->isNoTw())
-                                <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-600/20"
-                                      title="{{ __('story::shared.trigger_warnings.tooltips.no_tw') }}">
-                                    {{ __('story::shared.trigger_warnings.no_tw') }}
-                                </span>
+                            <x-shared::popover>
+                                <x-slot name="trigger">
+                                    <x-shared::badge
+                                        color="success"
+                                        size="xs">
+                                        {{ __('story::shared.trigger_warnings.no_tw') }}
+                                    </x-shared::badge>
+                                </x-slot>
+                                <div>{{ __('story::shared.trigger_warnings.tooltips.no_tw') }}</div>
+                            </x-shared::popover>
                             @elseif($viewModel->isUnspoiledTw())
-                                <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 ring-1 ring-inset ring-blue-600/20"
-                                      title="{{ __('story::shared.trigger_warnings.tooltips.unspoiled') }}">
-                                    {{ __('story::shared.trigger_warnings.unspoiled') }}
-                                </span>
+                            <x-shared::popover>
+                                <x-slot name="trigger">
+                                    <x-shared::badge
+                                        color="warning"
+                                        size="xs">
+                                        {{ __('story::shared.trigger_warnings.unspoiled') }}
+                                    </x-shared::badge>
+                                </x-slot>
+                                <div>{{ __('story::shared.trigger_warnings.tooltips.unspoiled') }}</div>
+                            </x-shared::popover>
                             @endif
                         </div>
                     </div>
@@ -108,14 +122,12 @@
                                 icon="visibility"
                                 :value="$viewModel->getReadsLoggedTotal()"
                                 :label="__('story::chapters.reads.label')"
-                                :tooltip="__('story::chapters.reads.tooltip')"
-                            />
+                                :tooltip="__('story::chapters.reads.tooltip')" />
 
                             <x-story::words-metric-badge
                                 class="ml-2"
                                 :nb-words="$viewModel->getWordsTotal()"
-                                :nb-characters="$viewModel->getCharactersTotal()"
-                            />
+                                :nb-characters="$viewModel->getCharactersTotal()" />
                         </div>
                     </div>
 
