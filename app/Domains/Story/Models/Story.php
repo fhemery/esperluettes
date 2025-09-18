@@ -21,7 +21,8 @@ class Story extends Model
         'story_ref_type_id',
         'story_ref_audience_id',
         'story_ref_copyright_id',
-        'story_ref_feedback_id'
+        'story_ref_feedback_id',
+        'tw_disclosure',
     ];
 
     protected $casts = [
@@ -32,6 +33,7 @@ class Story extends Model
         'story_ref_feedback_id' => 'integer',
         'reads_logged_total' => 'integer',
         'last_chapter_published_at' => 'datetime',
+        'tw_disclosure' => 'string',
     ];
 
     public const VIS_PUBLIC = 'public';
@@ -41,6 +43,16 @@ class Story extends Model
     public static function visibilityOptions(): array
     {
         return [self::VIS_PUBLIC, self::VIS_COMMUNITY, self::VIS_PRIVATE];
+    }
+
+    // Trigger Warning disclosure options
+    public const TW_LISTED = 'listed';
+    public const TW_NO_TW = 'no_tw';
+    public const TW_UNSPOILED = 'unspoiled';
+
+    public static function twDisclosureOptions(): array
+    {
+        return [self::TW_LISTED, self::TW_NO_TW, self::TW_UNSPOILED];
     }
 
     public static function generateSlugBase(string $title): string

@@ -26,9 +26,11 @@ class StoryRequest extends FormRequest
             'story_ref_feedback_id' => ['nullable', 'integer', 'exists:story_ref_feedbacks,id'],
             'story_ref_genre_ids' => ['required', 'array', 'min:1', 'max:3'],
             'story_ref_genre_ids.*' => ['integer', 'exists:story_ref_genres,id'],
-            // Optional Trigger Warnings (0..N)
+            // Trigger Warnings (0..N when listed)
             'story_ref_trigger_warning_ids' => ['nullable', 'array'],
             'story_ref_trigger_warning_ids.*' => ['integer', 'exists:story_ref_trigger_warnings,id'],
+            // TW disclosure: listed | no_tw | unspoiled (required)
+            'tw_disclosure' => ['required', 'in:' . implode(',', Story::twDisclosureOptions())],
         ];
     }
 
@@ -48,9 +50,17 @@ class StoryRequest extends FormRequest
             
         }
 
+        // Normalize TWs based on tw_disclosure: if not 'listed', drop any provided TW IDs
+        $twDisclosure = $this->input('tw_disclosure');
+        $twIds = $this->input('story_ref_trigger_warning_ids');
+        if ($twDisclosure !== Story::TW_LISTED) {
+            $twIds = [];
+        }
+
         $this->merge([
             'title' => $title,
             'description' => $description,
+            'story_ref_trigger_warning_ids' => $twIds,
         ]);
     }
 
@@ -100,6 +110,24 @@ class StoryRequest extends FormRequest
             'story_ref_trigger_warning_ids.array' => __('story::validation.trigger_warnings.array'),
             'story_ref_trigger_warning_ids.*.integer' => __('story::validation.trigger_warnings.integer'),
             'story_ref_trigger_warning_ids.*.exists' => __('story::validation.trigger_warnings.exists'),
+
+            'tw_disclosure.required' => __('story::validation.tw_disclosure.required'),
+            'tw_disclosure.in' => __('story::validation.tw_disclosure.in'),
+            'tw_disclosure.listed_requires_tw' => __('story::validation.tw_disclosure.listed_requires_tw'),
         ];
+    }
+
+    protected function withValidator($validator): void
+    {
+        $validator->after(function ($v) {
+            $twIds = $this->input('story_ref_trigger_warning_ids');
+            $twIds = is_array($twIds) ? array_values(array_filter($twIds, fn($x) => $x !== null && $x !== '')) : [];
+            $disclosure = $this->input('tw_disclosure');
+
+            // When 'listed' is selected, at least one TW must be provided
+            if ($disclosure === Story::TW_LISTED && empty($twIds)) {
+                $v->errors()->add('tw_disclosure', __('story::validation.tw_disclosure.listed_requires_tw'));
+            }
+        });
     }
 }

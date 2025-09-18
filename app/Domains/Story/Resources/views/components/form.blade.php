@@ -166,20 +166,42 @@
         </div>
 
         <!-- Trigger warnings -->
-        <div class="col-span-4 md:col-span-3">
-        <div class="flex items-center gap-2">
-            <x-input-label for="story_ref_trigger_warning_ids" :value="__('story::shared.trigger_warnings.label')"/>
-            <x-shared::tooltip type="help" :title="__('story::shared.trigger_warnings.label')" placement="right">
-                {{ __('story::shared.trigger_warnings.help') }}
+        <div class="col-span-4 md:col-span-3"
+             x-data="{ discl: ('{{ old('tw_disclosure', $story?->tw_disclosure ?? '') }}' || '').trim() || 'listed' }">
+            <div class="flex items-center gap-3 flex-wrap">
+                <x-input-label for="tw_disclosure" :value="__('story::shared.trigger_warnings.label')"/>
+                <x-shared::tooltip type="help" :title="__('story::shared.trigger_warnings.label')" placement="right">
+                    <div>
+                        <div class="font-semibold mb-1">{{ __('story::shared.trigger_warnings.label') }}</div>
+                    <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        <li><strong>{{ __('story::shared.trigger_warnings.form_options.listed') }}</strong> — {{ __('story::shared.trigger_warnings.listed_help') }}</li>
+                        <li><strong>{{ __('story::shared.trigger_warnings.form_options.no_tw') }}</strong> — {{ __('story::shared.trigger_warnings.no_tw_help') }}</li>
+                        <li><strong>{{ __('story::shared.trigger_warnings.form_options.unspoiled') }}</strong> — {{ __('story::shared.trigger_warnings.unspoiled_help') }}</li>
+                    </ul>
+                </div>
             </x-shared::tooltip>
+            <div  class="flex items-center gap-2">
+                <select id="tw_disclosure" name="tw_disclosure" x-model="discl"
+                        class="mt-1 block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="listed">{{ __('story::shared.trigger_warnings.form_options.listed') }}</option>
+                    <option value="no_tw">{{ __('story::shared.trigger_warnings.form_options.no_tw') }}</option>
+                    <option value="unspoiled">{{ __('story::shared.trigger_warnings.form_options.unspoiled') }}</option>
+                </select>
+            </div>
         </div>
+
         <div class="mt-2">
-            <x-search-multi name="story_ref_trigger_warning_ids[]" :options="$referentials['trigger_warnings'] ?? []" :selected="$selectedTriggerWarningIds" valueField="id" badge="red" />
+            <div x-show="discl === 'listed'">
+                <x-search-multi name="story_ref_trigger_warning_ids[]" :options="$referentials['trigger_warnings'] ?? []" :selected="$selectedTriggerWarningIds" valueField="id" badge="red" />
+            </div>
         </div>
         <x-input-error :messages="$errors->get('story_ref_trigger_warning_ids')" class="mt-2"/>
+        <x-input-error :messages="$errors->get('tw_disclosure')" class="mt-2"/>
         </div>
     </div>
 </x-shared::collapsible>
+
+ 
 
 <!-- Panel 4: Miscellaneous -->
 <x-shared::collapsible :title="__('story::shared.panels.misc')" :open="true">

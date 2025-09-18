@@ -80,7 +80,10 @@ class StoryController
         if ($this->authApi->hasAnyRole([Roles::USER_CONFIRMED])) {
             $vis[] = Story::VIS_COMMUNITY;
         }
-        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds);
+        // Parse "No TW only" checkbox
+        $noTwOnly = request()->boolean('no_tw_only', false);
+
+        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds, noTwOnly: $noTwOnly);
         $paginator = $this->service->getStories($filter);
 
         // Referentials lookup for display (types, ...)
@@ -102,6 +105,9 @@ class StoryController
         if (!empty($twSlugs)) {
             $appends['exclude_tw'] = $twSlugs;
         }
+        if ($noTwOnly) {
+            $appends['no_tw_only'] = 1;
+        }
 
         $viewModel = new StoryListViewModel($paginator, $items, $appends);
 
@@ -112,6 +118,7 @@ class StoryController
             'currentAudiences' => $audienceSlugs,
             'currentGenres' => $genreSlugs,
             'currentExcludeTw' => $twSlugs,
+            'currentNoTwOnly' => $noTwOnly,
         ]);
     }
 
@@ -269,6 +276,7 @@ class StoryController
                 authors: $authorDtos,
                 genreNames: $gNames,
                 triggerWarningNames: $twNames,
+                twDisclosure: (string) $story->tw_disclosure,
             );
         }
 
@@ -380,6 +388,7 @@ class StoryController
             $statusName,
             $feedbackName,
             $triggerWarningNames,
+            (string) $story->tw_disclosure,
         );
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 

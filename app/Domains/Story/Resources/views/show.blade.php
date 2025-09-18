@@ -80,13 +80,23 @@
                         <div>
                             @php($tws = $viewModel->getTriggerWarningNames())
                             @if(!empty($tws))
-                            <span class="inline-flex flex-wrap gap-2">
-                                @foreach($tws as $tw)
-                                <span
-                                    class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 ring-1 ring-inset ring-red-600/20"
-                                    title="{{ __('story::shared.trigger_warnings.label') }}">{{ $tw }}</span>
-                                @endforeach
-                            </span>
+                                <span class="inline-flex flex-wrap gap-2">
+                                    @foreach($tws as $tw)
+                                    <span
+                                        class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 ring-1 ring-inset ring-red-600/20"
+                                        title="{{ __('story::shared.trigger_warnings.label') }}">{{ $tw }}</span>
+                                    @endforeach
+                                </span>
+                            @elseif($viewModel->isNoTw())
+                                <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-600/20"
+                                      title="{{ __('story::shared.trigger_warnings.tooltips.no_tw') }}">
+                                    {{ __('story::shared.trigger_warnings.no_tw') }}
+                                </span>
+                            @elseif($viewModel->isUnspoiledTw())
+                                <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 ring-1 ring-inset ring-blue-600/20"
+                                      title="{{ __('story::shared.trigger_warnings.tooltips.unspoiled') }}">
+                                    {{ __('story::shared.trigger_warnings.unspoiled') }}
+                                </span>
                             @endif
                         </div>
                     </div>

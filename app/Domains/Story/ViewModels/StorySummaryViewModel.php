@@ -3,6 +3,7 @@
 namespace App\Domains\Story\ViewModels;
 
 use App\Domains\Shared\Dto\ProfileDto;
+use App\Domains\Story\Models\Story;
 
 class StorySummaryViewModel
 {
@@ -15,6 +16,7 @@ class StorySummaryViewModel
     public readonly int $readsLoggedTotal;
     public readonly int $chaptersCount;
     public readonly int $wordsTotal;
+    public readonly string $twDisclosure;
 
     public function __construct(
         public readonly int $id,
@@ -27,6 +29,7 @@ class StorySummaryViewModel
         array $authors,
         array $genreNames = [],
         array $triggerWarningNames = [],
+        string $twDisclosure = Story::TW_UNSPOILED,
     ) {
         /** @var ProfileDto[] $authors */
         $this->authors = $authors;
@@ -35,6 +38,7 @@ class StorySummaryViewModel
         $this->readsLoggedTotal = max(0, (int)$readsLoggedTotal);
         $this->chaptersCount = max(0, (int)$chaptersCount);
         $this->wordsTotal = max(0, (int)$wordsTotal);
+        $this->twDisclosure = (string)$twDisclosure;
     }
 
     public function getTitle(): string
@@ -79,6 +83,11 @@ class StorySummaryViewModel
     public function getTriggerWarningNames(): array
     {
         return $this->triggerWarningNames;
+    }
+
+    public function getTwDisclosure(): string
+    {
+        return $this->twDisclosure;
     }
 
     public function getReadsLoggedTotal(): int

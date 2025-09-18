@@ -249,6 +249,7 @@ describe('Creating a story', function () {
             // Act
             $payload = validStoryPayload([
                 'title' => 'TW Story',
+                'tw_disclosure' => Story::TW_LISTED,
                 'story_ref_trigger_warning_ids' => [$tw1->id, $tw2->id],
             ]);
             $resp = $this->post('/stories', $payload);

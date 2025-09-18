@@ -36,6 +36,10 @@ class StoryFilterAndPagination
          * When false, include stories regardless of chapter presence (used in profile pages for owner).
          */
         public bool $requirePublishedChapter = true,
+        /**
+         * When true, only include stories explicitly marked as having no trigger warnings.
+         */
+        public bool $noTwOnly = false,
     ) {
         // Normalize visibilities: ensure values and not empty
         $this->visibilities = array_values($this->visibilities);
@@ -55,5 +59,8 @@ class StoryFilterAndPagination
 
         // Normalize excluded trigger warning ids
         $this->excludeTriggerWarningIds = array_values(array_unique(array_map('intval', $this->excludeTriggerWarningIds)));
+
+        // Normalize booleans
+        $this->noTwOnly = (bool) $this->noTwOnly;
     }
 }

@@ -12,7 +12,7 @@
 @endpush
 
 <x-app-layout>
-    @php($hasFilters = !empty($currentType) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw))
+    @php($hasFilters = !empty($currentType) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw) || !empty($currentNoTwOnly))
 
     <!-- Filters Section -->
     <div class="w-full">
@@ -86,6 +86,12 @@
                             :placeholder="__('story::shared.trigger_warnings.placeholder')"
                             :empty-text="__('story::shared.no_results')"
                             badge="red" />
+                    </div>
+                    <div class="mt-4">
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="no_tw_only" value="1" {{ !empty($currentNoTwOnly) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                            <span>{{ __('story::index.filters.no_tw_only.help') }}</span>
+                        </label>
                     </div>
                 </div>
 
