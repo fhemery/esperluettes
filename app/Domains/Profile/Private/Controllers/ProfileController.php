@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Domains\Profile\Controllers;
+namespace App\Domains\Profile\Private\Controllers;
 
 use App\Domains\Auth\PublicApi\AuthPublicApi;
-use App\Domains\Profile\Models\Profile;
-use App\Domains\Profile\Requests\UpdateProfileRequest;
-use App\Domains\Profile\Services\ProfileService;
-use App\Domains\Profile\Services\ProfileAvatarUrlService;
+use App\Domains\Profile\Private\Models\Profile;
+use App\Domains\Profile\Private\Requests\UpdateProfileRequest;
+use App\Domains\Profile\Private\Services\ProfileService;
+use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;

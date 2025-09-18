@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Profile\Models\Profile;
+use App\Domains\Profile\Private\Models\Profile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;

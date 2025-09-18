@@ -4,8 +4,7 @@
 // Include auth routes from Auth domain
 require app_path('Domains/Auth/routes.php');
 
-// Include profile routes from Profile domain
-require app_path('Domains/Profile/routes.php');
+// Profile routes are loaded via its ServiceProvider
 
 // Include news routes from News domain
 require app_path('Domains/News/routes.php');

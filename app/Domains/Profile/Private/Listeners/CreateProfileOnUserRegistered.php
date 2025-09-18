@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Domains\Profile\Listeners;
+namespace App\Domains\Profile\Private\Listeners;
 
 use App\Domains\Auth\Events\UserRegistered;
-use App\Domains\Profile\Services\ProfileService;
+use App\Domains\Profile\Private\Services\ProfileService;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
 class CreateProfileOnUserRegistered implements ShouldHandleEventsAfterCommit

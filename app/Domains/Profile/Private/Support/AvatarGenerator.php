@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Profile\Support;
+namespace App\Domains\Profile\Private\Support;
 
 class AvatarGenerator
 {

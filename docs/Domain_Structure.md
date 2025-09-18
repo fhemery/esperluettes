@@ -1,60 +1,55 @@
 # Domain Structure
 
-Each domain in the application follows this structure:
+Each domain in the application follows basically this structure:
 
 ```
 app/
   Domains/
     {DomainName}/                 # e.g., Auth, Admin, Shared, Story
-      Contracts/                  # [Public] Interfaces exposed to other domains
-      Controllers/                # [Private] HTTP controllers
-      Dto/                        # [Public] Data Transfer Objects 
-      Events/                     # [Public] Domain events
-      Listeners/                  # [Private] Event listeners
-      Models/                     # [Private] Eloquent models
-      Notifications/              # [Private] Email/notification classes
-      Policies/                   # [Private] Authorization policies
-      PublicApi/                  # [Private] Implementations of Contracts (facades)
-      Providers/                  # [Private] Service providers
-      Views/                      # [Private] PHP view layer classes (no Blade files here)
-        Components/               # [Private] Class-based Blade components (PHP classes)
-      Repositories/               # [Private] Data access layer
-      Requests/                   # [Private] Form requests and validation
-      Resources/                  # [Private] Frontend assets and Blade templates
-        css/                      # [Private] Domain CSS/SCSS entrypoints and partials
-        js/                       # [Private] Domain JS/TS modules
-        lang/                     # [Private] Domain translation files (JSON/PHP)
-        views/                    # [Private] Blade templates (Windows-safe lowercase)
-          components/             # [Private] Anonymous components (Blade files)
-          layouts/                # [Private] Layouts (Blade files)
-          pages/                  # [Private] Page templates (Blade files)
-      Services/                   # [Private] Business logic services
-      Tests/                      # [Private] Domain-specific tests
+      Database/
+        Migrations/               # Database migrations
+        Seeders/                  # Database seeders
+
+      Private/
+        Api/                        # Implementations of Contracts
+        Controllers/                # HTTP controllers
+        Listeners/                  # Event listeners
+        Models/                     # Eloquent models
+        Notifications/              # Email/notification classes
+        Policies/                   # Authorization policies
+        Providers/                  # Service providers
+        Repositories/               # Data access layer
+        Requests/                   # Form requests and validation
+        Resources/                  # Frontend assets and Blade templates
+          css/                      # Domain CSS/SCSS entrypoints and partials
+          js/                       # Domain JS/TS modules
+          lang/                     # Domain translation files (JSON/PHP)
+          views/                    # Blade templates (Windows-safe lowercase)
+            components/             # Anonymous components (Blade files)
+            layouts/                # Layouts (Blade files)
+            pages/                  # Page templates (Blade files)
+        Services/                   # Business logic services
+        Support/                    # Helper classes and utilities
+        Views/                      # PHP view layer classes (no Blade files here)
+          Components/               # Class-based Blade components (PHP classes)
+        routes.php                  # use web.routes.php and api.routes.php if there are both
+
+      Public/
+        Contracts/                  # Interfaces or classes exposed to other domains
+          Dto/                      # Data Transfer Objects (if any related to contracts)
+        Events/                     # Domain events.
+
+      Tests/                      # Domain-specific tests
         Unit/
         Feature/
-      Support/                    # [Private] Helper classes and utilities
-      routes.php                  # use web.routes.php and api.routes.php if there are both
 ```
 
-## Public VS Private APIs
+To sum up: 
+- Public: exposed to other domains
+- Private: internal to the domain
 
-Public APIs are exposed to other domains via `Contracts` and `DTOs`.
-`Events` are also considered public.
-Private APIs are internal to the domain.
-
-## Shared Domain
-
-The Shared domain contains cross-cutting concerns used by other domains:
-
-```
-Shared/
-  Controllers/     # Base controllers
-  Traits/          # Reusable traits
-  Interfaces/      # Common interfaces
-  Helpers/         # Global helper functions/classes
-  Exceptions/      # Custom exceptions
-  Support/         # Other supporting classes
-```
+Note that the folders might vary based on the domain needs. For example, Shared domains will have mostly public
+elements (for example a Public `Support` folder), and that's ok.
 
 ## Naming Conventions
 

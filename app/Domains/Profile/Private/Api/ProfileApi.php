@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Domains\Profile\PublicApi;
+namespace App\Domains\Profile\Private\Api;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
 use App\Domains\Shared\Dto\ProfileDto;
-use App\Domains\Profile\Services\ProfileService;
-use App\Domains\Profile\Services\ProfileAvatarUrlService;
+use App\Domains\Profile\Private\Services\ProfileService;
+use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
 
-class ProfilePublicApi implements ProfilePublicApiContract
+class ProfileApi implements ProfilePublicApiContract
 {
     public function __construct(
         private readonly ProfileService $profiles,

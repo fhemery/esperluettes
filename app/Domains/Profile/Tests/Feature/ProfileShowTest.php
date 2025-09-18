@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Profile\Models\Profile;
+use App\Domains\Profile\Private\Models\Profile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

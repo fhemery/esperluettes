@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\Events\EmailVerified;
-use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Profile\Models\Profile;
-use App\Domains\Profile\PublicApi\ProfilePublicApi;
+use App\Domains\Profile\Private\Models\Profile;
+use App\Domains\Profile\Private\Api\ProfileApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,7 +12,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 describe('Profile public API', function () {
     it('should return a profile by id', function () {
-        $api = app(ProfilePublicApi::class);
+        $api = app(ProfileApi::class);
         
         $user = alice($this);
         $this->actingAs($user);
@@ -24,7 +23,7 @@ describe('Profile public API', function () {
 
     describe('Cache management', function() {
         it('should use cache when possible', function () {
-            $api = app(ProfilePublicApi::class);
+            $api = app(ProfileApi::class);
             
             $user = alice($this);
             $this->actingAs($user);
@@ -39,7 +38,7 @@ describe('Profile public API', function () {
         });
 
         it('should clear cache when receiving a VerifyEmail event', function () {
-            $api = app(ProfilePublicApi::class);
+            $api = app(ProfileApi::class);
             
             $user = alice($this);
             $this->actingAs($user);
