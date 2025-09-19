@@ -330,6 +330,46 @@ describe('Story details page', function () {
             $response->assertOk();
             $response->assertDontSee('story::chapters.actions.reorder');
         });
+
+        it('shows 0 credits left and disables the Add Chapter button after creating 5 chapters', function () {
+            $author = alice($this);
+            $story = publicStory('Credits Exhaustion', $author->id);
+
+            // Author creates 5 chapters (any status consumes credits)
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C1']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C2']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C3']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C4']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C5']);
+
+            $this->actingAs($author);
+            $resp = $this->get('/stories/' . $story->slug);
+
+            $resp->assertOk();
+            // Expect the UI to show 0 credits left and not link to chapters.create
+            $resp->assertSeeInOrder(['0', __('story::chapters.no_chapter_credits_left')]);
+            $resp->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]));
+        });
+
+        it('does not show credits count to non-authors on the story page', function () {
+            $author = alice($this);
+            $story = publicStory('Foreign Story', $author->id);
+
+            // Create some chapters so author-view would normally show counts for authors
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C1']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C2']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C3']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C4']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'C5']);
+
+            $viewer = bob($this);
+            $this->actingAs($viewer);
+            $resp = $this->get('/stories/' . $story->slug);
+
+            $resp->assertOk();
+            // Non-authors see reader view; ensure no credits text leaks
+            $resp->assertDontSee(__('story::chapters.no_chapter_credits_left'));
+        });
     });
 
     describe('Reading statistics', function () {

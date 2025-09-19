@@ -76,5 +76,5 @@ return [
         'label' => 'Mots',
         'tooltip' => "Nombre de mots de ce chapitre (contenu uniquement).",
     ],
-    'no_chapter_credits_left' => 'Plus de crédits de chapitre disponibles.',
+    'no_chapter_credits_left' => 'Vous devez lire et commenter davantage pour pouvoir publier un nouveau chapitre.',
 ];

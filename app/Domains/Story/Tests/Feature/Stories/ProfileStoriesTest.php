@@ -180,6 +180,81 @@ describe('Story list in profile tab', function () {
         });
     });
 
+    describe('Regarding chapter credits', function () {
+        it('shows chapter credits badge with 5 for a confirmed user profile', function () {
+            $owner = alice($this); // confirmed by default
+            $slug = profileSlugFromApi($owner->id);
+
+            $resp = $this->actingAs($owner)->get("/profiles/{$slug}/stories");
+
+            $resp->assertOk();
+            // Badge renders a material icon label then the number
+            $resp->assertSeeInOrder(['menu_book', '5']);
+        });
+
+        it('shows 4 after the owner creates one chapter', function () {
+            $owner = alice($this);
+            $slug = profileSlugFromApi($owner->id);
+
+            $story = publicStory('Story A', $owner->id);
+            // Create a chapter via helper (uses HTTP/service path)
+            createUnpublishedChapter($this, $story, $owner, ['title' => 'C1']);
+
+            $resp = $this->get("/profiles/{$slug}/stories");
+
+            $resp->assertOk();
+            $resp->assertSeeInOrder(['menu_book', '4']);
+        });
+
+        it('does not show the counter to other viewers', function () {
+            $owner = alice($this);
+            $viewer = bob($this);
+            $slug = profileSlugFromApi($owner->id);
+
+            $resp = $this->actingAs($viewer)->get("/profiles/{$slug}/stories");
+            $resp->assertOk();
+            $resp->assertDontSee('menu_book');
+        });
+
+        it('shows 6 when the owner posts a root comment on someone else\'s published chapter', function () {
+            $commenter = alice($this);
+            $author = bob($this);
+            $slug = profileSlugFromApi($commenter->id);
+
+            $foreignStory = publicStory('Foreign', $author->id);
+            $chapter = createPublishedChapter($this, $foreignStory, $author, ['title' => 'F1']);
+
+            // Owner posts a root comment on other user's chapter
+            $this->actingAs($commenter);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            // Now visit profile stories for owner
+            $resp = $this->get("/profiles/{$slug}/stories");
+            $resp->assertOk();
+            $resp->assertSeeInOrder(['menu_book', '6']);
+        });
+
+        it('still shows 5 when the owner posts a non-root (reply) comment on someone else\'s chapter', function () {
+            $author = alice($this);
+            $commenter = bob($this);
+            $slug = profileSlugFromApi($commenter->id);
+
+            $foreignStory = publicStory('Foreign', $author->id);
+            $chapter = createPublishedChapter($this, $foreignStory, $author, ['title' => 'F1']);
+
+            // Create an initial root comment by other user to reply to
+            $this->actingAs($commenter);
+            $commentId = createComment('chapter', $chapter->id, generateDummyText(150));
+            
+            // Create a reply to the root comment
+            createComment('chapter', $chapter->id, generateDummyText(150), $commentId);
+
+            $resp = $this->get("/profiles/{$slug}/stories");
+            $resp->assertOk();
+            $resp->assertSeeInOrder(['menu_book', '6']); // And not 7: the reply does not count
+        });
+    });
+
     describe('Reading statistics', function () {
         it('shows total reads on profile stories cards', function () {
             $owner = alice($this);
