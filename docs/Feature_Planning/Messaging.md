@@ -36,23 +36,34 @@ Last updated: 2025-09-19
 ---
 
 ## Architecture & Domain Placement
-- New domain: `Message` (singular) under `app/Domains/Message/` following the Domain Oriented Architecture.
+- New domain: `Message` (singular) under `app/Domains/Message/` following the Domain Oriented Architecture with the new Public/Private split (see `docs/Domain_Structure.md`).
   - Controllers should not access the database directly; use Services.
   - Database Migrations must live under `app/Domains/Message/Database/Migrations/`.
   - Use Policies for authorization and middleware for route protection where needed.
 
-### Proposed Directory Structure
+### Proposed Directory Structure (aligned with Public/Private split)
 - `app/Domains/Message/`
-  - `Http/Controllers/` (thin controllers)
-  - `Http/Requests/` (Form Requests validation)
-  - `Models/` (`Message`, `MessageDelivery`)
-  - `Policies/`
-  - `Services/` (`MessageDispatchService`, `UnreadCounterService`)
-  - `Database/Migrations/`
-  - `Database/Factories/` (for tests)
-  - `Resources/views/` (user-facing Blade views)
-  - `Resources/js/` (if Alpine components needed)
-  - `Filament/` (Admin panel resources/forms)
+  - `Database/`
+    - `Migrations/`
+    - `Seeders/`
+  - `Private/`                       (internal to domain)
+    - `Controllers/`                 (HTTP controllers)
+    - `Models/`                      (`Message`, `MessageDelivery`)
+    - `Policies/`
+    - `Requests/`                    (Form Requests validation)
+    - `Resources/`                   (domain assets and Blade)
+      - `views/`                     (Blade templates, components/pages)
+    - `Services/`                    (`MessageDispatchService`, `UnreadCounterService`, etc.)
+    - `Views/`
+      - `Components/`                (PHP class-based components)
+    - `routes.php`                   (or `web.routes.php`/`api.routes.php` if split)
+  - `Public/`                        (exposed to other domains)
+    - `Contracts/`
+      - `Dto/`
+    - `Events/`
+  - `Tests/`
+    - `Unit/`
+    - `Feature/`
 
 ---
 
@@ -124,14 +135,14 @@ Indexes:
 
 ---
 
-## Admin Experience (Filament)
-- Filament Resource for `Message` creation:
+## Admin Experience (Filament in Admin domain)
+- Filament Resource (in `app/Domains/Admin/Private/Filament/...`) for `Message` creation:
   - Fields: Title (required), Content (required, rich text with purifier `admin-content`).
   - Target Selection:
     - "Everyone" toggle
-    - Multi-select roles (e.g., user-confirmed, user)
+    - Multi-select roles (e.g., user-confirmed, user, displaying the descriptions, not the slugs)
     - Multi-select users (async searchable)
-  - On submit: Create `Message`, resolve recipients from selected roles and users (union, de-duplicated), then create `MessageDelivery` per recipient (or all users if Everyone).
+  - On submit: calls `MessageDispatchService` to create the `Message`, resolve recipients (union, de-duplicated), and create `MessageDelivery` rows (or all users if Everyone).
 - Optionally list sent messages and stats (recipient count, read count). Nice-to-have.
 
 ---
