@@ -29,11 +29,6 @@ use App\Domains\Story\Listeners\GrantCreditOnRootCommentPosted;
 
 class StoryServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        // Bindings for Story domain can be added here later
-    }
-
     public function boot(): void
     {
         // Load domain migrations

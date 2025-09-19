@@ -17,6 +17,7 @@ return [
     App\Domains\Comment\PublicApi\Providers\CommentServiceProvider::class,
     App\Domains\Story\Providers\StoryServiceProvider::class,
     App\Domains\StaticPage\Providers\StaticPageServiceProvider::class,
+    App\Domains\Search\Public\Providers\SearchServiceProvider::class,
     
     // Add other domain providers here as they are created
 ];

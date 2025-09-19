@@ -27,4 +27,12 @@ interface ProfilePublicApi
      * [user_id => display_name]. Implementations may apply caching and limits.
      */
     public function searchDisplayNames(string $query, int $limit = 50): array;
+
+    /**
+     * Search public profiles for the global search feature.
+     * Returns an array with keys:
+     *  - items: ProfileSearchResultDto[] (max 25 items)
+     *  - total: int (total matches, uncapped)
+     */
+    public function searchPublicProfiles(string $query, int $limit = 25): array;
 }
