@@ -257,4 +257,29 @@ describe('Creating a chapter', function () {
             expect($event->chapter->charCount)->toBeGreaterThan(0);
         });
     });
+
+    it('rejects chapter creation with 403 when no chapter credits are left (after 5 creations)', function () {
+        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Quota Story']);
+
+        // Consume the 5 initial credits
+        createUnpublishedChapter($this, $story, $user, ['title' => 'C1']);
+        createUnpublishedChapter($this, $story, $user, ['title' => 'C2']);
+        createUnpublishedChapter($this, $story, $user, ['title' => 'C3']);
+        createUnpublishedChapter($this, $story, $user, ['title' => 'C4']);
+        createUnpublishedChapter($this, $story, $user, ['title' => 'C5']);
+
+        // Attempt the 6th should be forbidden (service throws AuthorizationException → 403)
+        $payload = validChapterPayload([
+            'title' => 'C6',
+            'content' => '<p>Some content</p>',
+        ]);
+
+        $resp = $this->post(route('chapters.store', ['storySlug' => $story->slug]), $payload);
+        $resp->assertStatus(403);
+
+        // Ensure DB did not create a 6th chapter
+        expect(\App\Domains\Story\Models\Chapter::query()->count())->toBe(5);
+    });
 });
