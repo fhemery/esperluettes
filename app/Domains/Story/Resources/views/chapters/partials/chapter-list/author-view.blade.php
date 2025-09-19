@@ -1,10 +1,9 @@
 <section class="mt-10"
-         x-data="chapterReorder({
+    x-data="chapterReorder({
             initial: [],
             reorderUrl: @js(route('chapters.reorder', ['storySlug' => $story->slug])),
          })"
-         data-success-msg="{{ __('story::chapters.reorder_success') }}"
->
+    data-success-msg="{{ __('story::chapters.reorder_success') }}">
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-semibold">{{ __('story::chapters.sections.chapters') }}</h2>
         <div class="flex items-center gap-2">
@@ -12,29 +11,47 @@
                 <div class="flex items-center gap-2">
                     @if (!empty($chapters))
                     <button type="button" @click="start()"
-                            class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-gray-700 hover:bg-gray-50"
-                            title="{{ __('story::chapters.actions.reorder') }}">
+                        class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-gray-700 hover:bg-gray-50"
+                        title="{{ __('story::chapters.actions.reorder') }}">
                         <span class="material-symbols-outlined text-[18px] leading-none">swap_vert</span>
                         {{ __('story::chapters.actions.reorder') }}
                     </button>
                     @endif
-                    <a href="{{ route('chapters.create', ['storySlug' => $story->slug]) }}"
-                       class="inline-flex items-center gap-1 px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
-                        <span class="material-symbols-outlined text-[18px] leading-none">add</span>
-                        {{ __('story::chapters.sections.add_chapter') }}
-                    </a>
+                    @php($avail = isset($availableChapterCredits) ? (int)$availableChapterCredits : 0)
+                    <div class="flex items-center gap-2">
+
+                        @if($avail <= 0)
+                            <x-shared::button color="accent" disabled="true">
+                                <span class="material-symbols-outlined text-[18px] leading-none">add</span>
+                                {{ __('story::chapters.sections.add_chapter') }}
+                            </x-shared::button>
+
+                            <x-shared::tooltip icon="info" placement="top" maxWidth="18rem">
+                                <div class="text-sm text-fg">
+                                    {{ __('story::chapters.no_chapter_credits_left') }}
+                                </div>
+                            </x-shared::tooltip>
+                        @else
+                        <a href="{{ route('chapters.create', ['storySlug' => $story->slug]) }}">
+                            <x-shared::button color="accent">
+                                <span class="material-symbols-outlined text-[18px] leading-none">add</span>
+                                {{ __('story::chapters.sections.add_chapter') }}
+                            </x-shared::button>
+                        </a>
+                        @endif
+                    </div>
                 </div>
             </template>
             <template x-if="editing">
                 <div class="flex items-center gap-2">
                     <button type="button" @click="save()" :disabled="saving"
-                            class="inline-flex items-center gap-1 px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
+                        class="inline-flex items-center gap-1 px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
                         <span class="material-symbols-outlined text-[18px] leading-none" x-show="!saving">save</span>
                         <span class="material-symbols-outlined text-[18px] leading-none animate-spin" x-show="saving">progress_activity</span>
                         {{ __('story::chapters.actions.save_order') }}
                     </button>
                     <button type="button" @click="cancel()"
-                            class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-gray-700 hover:bg-gray-50">
+                        class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-gray-700 hover:bg-gray-50">
                         <span class="material-symbols-outlined text-[18px] leading-none">close</span>
                         {{ __('story::chapters.actions.cancel') }}
                     </button>
@@ -45,26 +62,28 @@
 
     @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
     @if (empty($chapters))
-        <p class="text-sm text-gray-600">{{ __('story::chapters.list.empty') }}</p>
+    <p class="text-sm text-gray-600">{{ __('story::chapters.list.empty') }}</p>
     @else
-        <div x-show="!editing">
-            @include('story::chapters.partials.chapter-list.author-list', ['story' => $story, 'chapters' => $chapters])
-        </div>
-        <div x-show="editing">
-            @include('story::chapters.partials.chapter-list.reorder-list', ['story' => $story, 'chapters' => $chapters])
-        </div>
+    <div x-show="!editing">
+        @include('story::chapters.partials.chapter-list.author-list', ['story' => $story, 'chapters' => $chapters])
+    </div>
+    <div x-show="editing">
+        @include('story::chapters.partials.chapter-list.reorder-list', ['story' => $story, 'chapters' => $chapters])
+    </div>
     @endif
 
     <div class="mt-2 text-sm rounded-md px-3 py-2 border"
-         x-show="status"
-         x-text="status"
-         :class="statusType === 'success' ? 'bg-green-50 text-green-700 border-green-200' : (statusType === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-gray-50 text-gray-700 border-gray-200')"
-    ></div>
+        x-show="status"
+        x-text="status"
+        :class="statusType === 'success' ? 'bg-green-50 text-green-700 border-green-200' : (statusType === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-gray-50 text-gray-700 border-gray-200')"></div>
 </section>
 
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('chapterReorder', ({initial, reorderUrl}) => ({
+        Alpine.data('chapterReorder', ({
+            initial,
+            reorderUrl
+        }) => ({
             editing: false,
             saving: false,
             status: '',
@@ -153,8 +172,12 @@
                 this.items.splice(j, 0, moved);
                 this.syncDom();
             },
-            moveUpId(id) { this.moveById(id, -1); },
-            moveDownId(id) { this.moveById(id, 1); },
+            moveUpId(id) {
+                this.moveById(id, -1);
+            },
+            moveDownId(id) {
+                this.moveById(id, 1);
+            },
             async save() {
                 this.saving = true;
                 this.status = '';
@@ -167,7 +190,9 @@
                             'X-CSRF-TOKEN': token,
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({ ordered_ids: this.items.map(i => i.id) }),
+                        body: JSON.stringify({
+                            ordered_ids: this.items.map(i => i.id)
+                        }),
                     });
                     if (!res.ok) {
                         const data = await res.json().catch(() => ({}));
@@ -180,7 +205,10 @@
                     this.editing = false;
                     this.status = this.successMsg;
                     this.statusType = 'success';
-                    setTimeout(() => { this.status = ''; this.statusType = ''; }, 3000);
+                    setTimeout(() => {
+                        this.status = '';
+                        this.statusType = '';
+                    }, 3000);
                 } catch (e) {
                     this.status = (e && e.message) ? e.message : 'Error';
                     this.statusType = 'error';

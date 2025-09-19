@@ -19,6 +19,7 @@ use App\Domains\Story\ViewModels\StorySummaryViewModel;
 use App\Domains\Story\ViewModels\ChapterSummaryViewModel;
 use App\Domains\Story\Services\ReadingProgressService;
 use App\Domains\StoryRef\Services\StoryRefLookupService;
+use App\Domains\Story\Services\ChapterCreditService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -33,7 +34,8 @@ class StoryController
         private readonly ProfilePublicApi          $profileApi,
         private readonly StoryRefLookupService     $lookup,
         private readonly ReadingProgressService    $progress,
-        private readonly ChapterService            $chapters
+        private readonly ChapterService            $chapters,
+        private readonly ChapterCreditService      $credits,
     )
     {
     }
@@ -202,11 +204,26 @@ class StoryController
         $canEdit = $isOwner;
         $canCreateStory = $canEdit && $this->authApi->hasAnyRole([Roles::USER_CONFIRMED]);
 
+        // Compute available chapter credits for this profile user (public info only for confirmed users)
+        $availableCredits = $this->credits->availableForUser($userId);
+        $rolesById = $this->authApi->getRolesByUserIds([$userId]);
+        $roles = $rolesById[$userId] ?? [];
+        $profileIsConfirmed = false;
+        foreach ($roles as $r) {
+            if (isset($r->slug) && (string)$r->slug === (string)Roles::USER_CONFIRMED) {
+                $profileIsConfirmed = true;
+                break;
+            }
+        }
+
         return view('story::partials.profile-stories', [
             'viewModel' => $viewModel,
             'displayAuthors' => false,
             'canEdit' => $canEdit,
             'canCreateStory' => $canCreateStory,
+            'profileUserId' => $userId,
+            'availableChapterCredits' => $availableCredits,
+            'showCredits' => $profileIsConfirmed,
         ]);
     }
 
@@ -390,12 +407,18 @@ class StoryController
             $triggerWarningNames,
             (string) $story->tw_disclosure,
         );
+
+        // Credits state for current user (to drive UI for Add Chapter button)
+        $currentUserId = Auth::id() ? (int) Auth::id() : 0;
+        $availableChapterCredits = $currentUserId ? $this->credits->availableForUser($currentUserId) : 0;
+
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 
         return view('story::show', [
             'viewModel' => $viewModel,
             'metaDescription' => $metaDescription,
-        ]);
+            'availableChapterCredits' => $availableChapterCredits,
+            ]);
     }
 
     public function destroy(string $slug): RedirectResponse

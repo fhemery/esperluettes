@@ -22,6 +22,10 @@ use App\Domains\Story\Events\StoryVisibilityChanged;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use App\Domains\Auth\Events\UserRegistered;
+use App\Domains\Comment\Events\CommentPosted;
+use App\Domains\Story\Listeners\GrantInitialCreditsOnUserRegistered;
+use App\Domains\Story\Listeners\GrantCreditOnRootCommentPosted;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -69,5 +73,11 @@ class StoryServiceProvider extends ServiceProvider
         app(EventBus::class)->registerEvent(ChapterUnpublished::name(), ChapterUnpublished::class);
         app(EventBus::class)->registerEvent(ChapterDeleted::name(), ChapterDeleted::class);
         app(EventBus::class)->registerEvent(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
+
+        // Subscribe to cross-domain events (after-commit listeners)
+        /** @var EventBus $bus */
+        $bus = app(EventBus::class);
+        $bus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);
+        $bus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
     }
 }

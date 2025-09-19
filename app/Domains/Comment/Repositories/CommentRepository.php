@@ -27,12 +27,13 @@ class CommentRepository
     /**
      * Efficiently count root comments for a given target without loading items.
      */
-    public function countByTarget(string $entityType, int $entityId): int
+    public function countByTarget(string $entityType, int $entityId, bool $isRoot=false, ?int $authorId = null): int
     {
         return Comment::query()
             ->where('commentable_type', $entityType)
             ->where('commentable_id', $entityId)
-            ->whereNull('parent_comment_id')
+            ->when($isRoot, fn($q) => $q->whereNull('parent_comment_id'))
+            ->when($authorId, fn($q) => $q->where('author_id', $authorId))
             ->count();
     }
 

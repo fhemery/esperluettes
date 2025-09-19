@@ -14,6 +14,7 @@ use App\Domains\Story\Events\ChapterPublished;
 use App\Domains\Story\Events\ChapterUnpublished;
 use App\Domains\Story\Events\DTO\ChapterSnapshot;
 use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
+use App\Domains\Story\Services\ChapterCreditService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -22,6 +23,7 @@ class ChapterService
     public function __construct(
         private readonly CommentMaintenancePublicApi $comments,
         private readonly EventBus $eventBus,
+        private readonly ChapterCreditService $credits,
     ) {}
 
     public function createChapter(Story $story, ChapterRequest $request, int $userId): Chapter
@@ -31,7 +33,12 @@ class ChapterService
         $contentHtml = (string) $request->input('content');
         $published = (bool)($request->boolean('published', false));
 
-        return DB::transaction(function () use ($story, $title, $authorNoteHtml, $contentHtml, $published) {
+        // Enforce chapter credits: must have at least 1 available to create
+        if ($this->credits->availableForUser($userId) <= 0) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('No chapter credits left. Comment other chapters to earn more.');
+        }
+
+        return DB::transaction(function () use ($story, $title, $authorNoteHtml, $contentHtml, $published, $userId) {
             // compute sparse sort order
             $maxOrder = (int) (Chapter::where('story_id', $story->id)->max('sort_order') ?? 0);
             $sortOrder = $maxOrder + 100;
@@ -72,6 +79,9 @@ class ChapterService
                 storyId: (int) $story->id,
                 chapter: ChapterSnapshot::fromModel($chapter),
             ));
+
+            // Record spend after successful creation
+            $this->credits->spendOne((int)$userId);
 
             return $chapter;
         });

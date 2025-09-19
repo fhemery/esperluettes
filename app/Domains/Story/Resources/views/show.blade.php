@@ -208,7 +208,11 @@
     {{-- Chapters section --}}
     <div class="w-full mb-4">
         @if($viewModel->isAuthor())
-        @include('story::chapters.partials.chapter-list.author-view', ['story' => $viewModel->story, 'chapters' => $viewModel->chapters])
+        @include('story::chapters.partials.chapter-list.author-view', [
+            'story' => $viewModel->story,
+            'chapters' => $viewModel->chapters,
+            'creditsExhausted' => ($creditsExhausted ?? false),
+        ])
         @else
         @include('story::chapters.partials.chapter-list.reader-view', ['story' => $viewModel->story, 'chapters' => $viewModel->chapters])
         @endif

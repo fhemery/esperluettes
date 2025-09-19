@@ -1,7 +1,8 @@
 @props([
     'type' => 'button',
     'color' => 'primary', // primary | accent | tertiary | success | danger | neutral
-    'size' => 'md', // sm | md | lg
+    'size' => 'md', // sm | md | lg,
+    'disabled' => false,
 ])
 
 @php
@@ -27,6 +28,6 @@
     $colorClasses = $variants[$color] ?? $variants['primary'];
 @endphp
 
-<button {{ $attributes->merge(['type' => $type, 'class' => "$base $sizeClasses $colorClasses"]) }}>
+<button {{ $attributes->merge(['type' => $type, 'class' => "$base $sizeClasses $colorClasses", 'disabled' => $disabled]) }}>
     {{ $slot }}
 </button>

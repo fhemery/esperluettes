@@ -39,6 +39,11 @@ class CommentPublicApi
         }
     }
 
+    public function getNbRootComments(string $entityType, int $entityId, ?int $authorId =null): int
+    {
+        return $this->service->countFor($entityType, $entityId, true, $authorId);
+    }
+
     public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): CommentListDto
     {
         $this->checkAccess();
@@ -46,7 +51,7 @@ class CommentPublicApi
 
         // Lazy mode: page <= 0 → return config and total only, no items
         if ($page <= 0) {
-            $total = $this->service->countFor($entityType, $entityId);
+            $total = $this->service->countFor($entityType, $entityId, true);
             return $this->listDtoMapper->make(
                 entityType: $entityType,
                 entityId: $entityId,

@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Story\Services\ChapterCreditService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -497,10 +498,14 @@ describe('Ordering and Pagination', function () {
         $author = alice($this);
 
         // Create 30 public stories, each with a published chapter and set last_chapter_published_at for ordering
+        // We need to increase the chapter counter of the user
+        $chapterCreditService = app(ChapterCreditService::class);
+
         for ($i = 1; $i <= 30; $i++) {
             $story = publicStory(sprintf('Story %02d', $i), $author->id, [
                 'description' => '<p>Desc</p>',
             ]);
+            $chapterCreditService->grantOne($author->id);
             createPublishedChapter($this, $story, $author);
             // Set synthetic ordering based on last_chapter_published_at (newest first should be Story 30)
             $story->last_chapter_published_at = now()->subMinutes(60 - $i);

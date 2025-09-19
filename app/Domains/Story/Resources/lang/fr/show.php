@@ -14,5 +14,6 @@ return [
     'chapter' => [
         'confirm_delete' => 'Oui, supprimer le chapitre',
         'confirm_delete_warning' => 'La suppression du chapitre est définitive.',
+        'no_chapter_credits_left' => 'Aucun crédit de chapitre restant. Commentez sur d\'autres chapitres pour gagner plus.',
     ],
 ];
