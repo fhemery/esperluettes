@@ -67,68 +67,50 @@
                 </div>
             </div>
 
-            @php $tab = $isOwn ? "'stories'" : "'about'"; @endphp
+            @php $initialTab = $isOwn ? 'stories' : 'about'; @endphp
             <!-- Profile Content -->
             <div class="px-6 py-8 w-full">
-                <!-- Main Content -->
-                <div class="lg:col-span-2"
-                     x-data="{
-                            tab: {{ $tab }},
-                            storiesLoaded: false,
-                            loading: false,
-                            async loadStories() {
-                                if (this.storiesLoaded) return;
-                                this.loading = true;
-                                try {
-                                    const res = await fetch('/profiles/{{ $profile->slug }}/stories');
-                                    const html = await res.text();
-                                    this.$refs.stories.innerHTML = html;
-                                    // Initialize Alpine on dynamically injected content
-                                    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-                                        window.Alpine.initTree(this.$refs.stories);
+                <div class="lg:col-span-2">
+                    <x-shared::tabs :tabs="[
+                        ...(Auth::check() ? [[ 'key' => 'about', 'label' => __('profile::show.about') ]] : []),
+                        [ 'key' => 'stories', 'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories') ],
+                    ]" :initial="$initialTab">
+                        <div x-data="{
+                                storiesLoaded: false,
+                                loading: false,
+                                async loadStories() {
+                                    if (this.storiesLoaded) return;
+                                    this.loading = true;
+                                    try {
+                                        const res = await fetch('/profiles/{{ $profile->slug }}/stories');
+                                        const html = await res.text();
+                                        this.$refs.stories.innerHTML = html;
+                                        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                                            window.Alpine.initTree(this.$refs.stories);
+                                        }
+                                        this.storiesLoaded = true;
+                                    } catch (e) {
+                                        this.$refs.stories.innerHTML = '<div class=\'text-sm text-red-600\'>{{ __('profile::show.failed_to_load_stories') }}</div>';
+                                    } finally {
+                                        this.loading = false;
                                     }
-                                    this.storiesLoaded = true;
-                                } catch (e) {
-                                    this.$refs.stories.innerHTML = '<div class=\'text-sm text-red-600\'>{{ __('profile::show.failed_to_load_stories') }}</div>';
-                                } finally {
-                                    this.loading = false;
                                 }
-                            }
-                         }"
-                     x-init="if (tab === 'stories') loadStories()">
-                    <!-- Tabs -->
-                    <div class="border-b border-gray-200 mb-6">
-                        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                            }"
+                            x-init="if (tab === 'stories') loadStories()"
+                            x-effect="if (tab === 'stories') loadStories()"
+                        >
                             @if(Auth::check())
-                                <button type="button"
-                                        @click="tab='about'"
-                                        :class="tab==='about' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                        class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                                    {{ __('profile::show.about') }}
-                                </button>
+                                <div x-show="tab==='about'" x-cloak>
+                                    <x-profile::about-panel :profile="$profile"/>
+                                </div>
                             @endif
-                            <button type="button"
-                                    @click="tab='stories'; loadStories()"
-                                    :class="tab==='stories' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                    class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                                {{ $isOwn ? __('profile::show.my-stories') : __('profile::show.stories') }}
-                            </button>
-                            <!-- Future: stats, comments, etc. -->
-                        </nav>
-                    </div>
 
-                    <!-- About Panel -->
-                    @if(Auth::check())
-                        <div x-show="tab==='about'" x-cloak>
-                            <x-profile::about-panel :profile="$profile"/>
+                            <div x-show="tab==='stories'" x-cloak>
+                                <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
+                                <div x-ref="stories" class="mt-2"></div>
+                            </div>
                         </div>
-                    @endif
-
-                    <!-- Stories Panel -->
-                    <div x-show="tab==='stories'" x-cloak>
-                        <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
-                        <div x-ref="stories" class="mt-2"></div>
-                    </div>
+                    </x-shared::tabs>
                 </div>
             </div>
         </div>
