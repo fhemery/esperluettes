@@ -14,7 +14,7 @@
     <!-- Content -->
     <div class="flex-1">
       <!-- Header: author + date + edit icon (right) -->
-      <div class="flex items-center gap-3">
+	  <div class="flex items-center gap-3">
         <div class="font-semibold text-gray-800">
           <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-gray-600">{{ $comment->authorProfile->display_name ?: '—' }}</a>
         </div>
@@ -23,9 +23,19 @@
             <span class="material-symbols-outlined text-[16px] leading-none">edit</span>
           </button>
         @endif
-        <div class="text-xs text-gray-500">
+        <div class="text-xs text-gray-500"
+             x-data="{ lang: document.documentElement.lang || 'en',
+                        created: new Date('{{ $comment->createdAt }}'),
+                        updated: new Date('{{ $comment->updatedAt }}'),
+                        fmt(d, opts){ return new Intl.DateTimeFormat(this.lang, opts).format(d); } }">
           {{ __('comment::comments.posted_at') }}
-          {{ \Carbon\Carbon::parse($comment->createdAt)->translatedFormat('d/m/Y') }}
+          <span x-text="fmt(created, { day: '2-digit', month: '2-digit', year: 'numeric' })"></span>
+          @if($comment->updatedAt !== $comment->createdAt)
+            <span class="ml-2 text-gray-400">
+              {{ __('comment::comments.updated_at') }}
+              <span x-text="fmt(updated, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })"></span>
+            </span>
+          @endif
         </div>
       </div>
 
