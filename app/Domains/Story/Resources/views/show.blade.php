@@ -117,7 +117,7 @@
 
                     <!-- Total Reads, centered below badges -->
                     <div class="mb-2">
-                        <div class="w-full">
+                        <div class="w-full flex gap-2">
                             <x-shared::metric-badge
                                 icon="visibility"
                                 :value="$viewModel->getReadsLoggedTotal()"
