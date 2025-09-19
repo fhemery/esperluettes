@@ -4,10 +4,10 @@
     'maxHeight' => '20rem',
 ])
 
-<span class="inline-flex items-center align-middle select-none z-10 cursor-pointer">
-    <span class="ml-0 relative cursor-pointer" x-data="popover" @keydown.escape.window="hoverOpen = false; pinned = false; updateOpen()">
-        <span
-            class="inline-flex cursor-pointer"
+<div class="flex items-center align-middle select-none z-10 cursor-pointer">
+    <div class="ml-0 relative cursor-pointer" x-data="popover" @keydown.escape.window="hoverOpen = false; pinned = false; updateOpen()">
+        <div
+            class="flex items-center leading-none cursor-pointer"
             role="button"
             style="cursor: pointer;"
             aria-haspopup="dialog"
@@ -19,7 +19,7 @@
             @click.stop.prevent
             @blur="setTimeout(() => { if (!pinned) { hoverOpen = false; updateOpen() } }, 220)">
             {{ $trigger ?? '' }}
-        </span>
+        </div>
         <template x-teleport="body">
             <div x-cloak x-show="hoverOpen || pinned" x-transition.opacity.duration.100
                  class="fixed z-[9999] p-3 rounded-md shadow-lg bg-white ring-1 ring-black/5 text-sm text-gray-700"
@@ -35,5 +35,5 @@
                 {{ $slot }}
             </div>
         </template>
-    </span>
-</span>
+    </div>
+</div>
