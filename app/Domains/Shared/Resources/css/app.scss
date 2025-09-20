@@ -101,11 +101,20 @@
   }
 
   .surface-primary {
-    --surface-bg: var(--color-bg);
-    --surface-fg: var(--color-fg);
+    --surface-bg: var(--color-primary);
+    --surface-fg: 255 255 255;
     color-scheme: light;
-    background-color: rgb(var(--color-bg));
+    background-color: rgb(var(--color-primary));
     /* Do NOT set text color here; use .text-on-surface opt-in on text elements */
+
+    &:hover {
+      background-color: rgb(var(--color-primary) / 0.9);
+    }
+
+    &.selected, .selected {
+      background-color: rgb(var(--surface-fg));
+      color: rgb(var(--surface-bg));
+    }
   }
 
   .surface-accent {

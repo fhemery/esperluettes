@@ -5,7 +5,7 @@
   <x-shared::tabs :tabs="[
       ['key' => 'stories', 'label' => __('search::results.stories.label') . ' (' . ($stories['total'] ?? 0) . ')'],
       ['key' => 'profiles', 'label' => __('search::results.profiles.label') . ' (' . ($profiles['total'] ?? 0) . ')'],
-    ]" initial="stories">
+    ]" color="primary" initial="stories">
 
     <div x-show="tab==='stories'" x-cloak data-total-stories="{{$stories['total']}}">
       @if(($stories['total'] ?? 0) === 0)

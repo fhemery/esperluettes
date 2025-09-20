@@ -5,6 +5,7 @@
     'initial' => null,
     // Optional extra classes for the nav container
     'navClass' => '',
+    'color' => 'neutral'
 ])
 
 @php
@@ -20,7 +21,7 @@
 
 <div x-data="{ tab: @js($initialKey) }">
     <div class="border-b border-gray-200 mb-4">
-        <nav class="-mb-px flex flex-wrap gap-4 {{ $navClass }}" role="tablist" aria-label="Tabs">
+        <nav class="surface-{{$color}} text-on-surface -mb-px flex flex-wrap gap-4 {{ $navClass }}" role="tablist" aria-label="Tabs">
             @foreach($tabs as $t)
                 @php($key = (string) $t['key'])
                 @php($label = (string) $t['label'])
@@ -45,8 +46,8 @@
                     "
                     class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
                     :class="tab === @js($key)
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 {{ $disabled ? 'opacity-50 cursor-not-allowed' : '' }}'"
+                        ? 'selected'
+                        : 'border-transparent hover:border-gray-300 {{ $disabled ? 'opacity-50 cursor-not-allowed' : '' }}'"
                 >
                     {{ $label }}
                 </button>
