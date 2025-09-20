@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Domains\News\Observers;
+namespace App\Domains\News\Private\Observers;
 
-use App\Domains\News\Models\News;
+use App\Domains\News\Private\Models\News;
 use App\Domains\Shared\Services\ImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\News\Events\NewsUpdated;
-use App\Domains\News\Events\NewsDeleted;
+use App\Domains\News\Public\Events\NewsUpdated;
+use App\Domains\News\Public\Events\NewsDeleted;
 
 class NewsObserver
 {

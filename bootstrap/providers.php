@@ -8,7 +8,7 @@ return [
     
     // Domain-specific providers
     App\Domains\Admin\Providers\AdminServiceProvider::class,
-    App\Domains\News\Providers\NewsServiceProvider::class,
+    App\Domains\News\Public\Providers\NewsServiceProvider::class,
     App\Domains\Home\Providers\HomeServiceProvider::class,
     App\Domains\Dashboard\Providers\DashboardServiceProvider::class,
     App\Domains\Auth\Providers\AuthServiceProvider::class,

@@ -31,7 +31,7 @@ class ProfileController extends Controller
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
 
-        return view('profile::show', compact('profile', 'isOwn'));
+        return view('profile::pages.show', compact('profile', 'isOwn'));
     }
 
     /**
@@ -54,7 +54,7 @@ class ProfileController extends Controller
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
 
-        return view('profile::edit', compact('profile', 'user'));
+        return view('profile::pages.edit', compact('profile', 'user'));
     }
 
     /**

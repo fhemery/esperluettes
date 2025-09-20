@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\News\Models;
+namespace App\Domains\News\Private\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

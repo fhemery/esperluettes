@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\News\PublicApi\Dto;
+namespace App\Domains\News\Public\Api\Dto;
 
 class NewsCarouselItemDto
 {

@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\News\Controllers\NewsController;
+use App\Domains\News\Private\Controllers\NewsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');

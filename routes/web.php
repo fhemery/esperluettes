@@ -7,7 +7,7 @@ require app_path('Domains/Auth/routes.php');
 // Profile routes are loaded via its ServiceProvider
 
 // Include news routes from News domain
-require app_path('Domains/News/routes.php');
+// (moved) News routes are loaded via App\Domains\News\Public\Providers\NewsServiceProvider
 
 // Include home routes from Home domain
 require app_path('Domains/Home/routes.php');

@@ -1,8 +1,8 @@
 <?php
 
-use App\Domains\News\Models\News;
-use App\Domains\News\Services\NewsService;
-use App\Domains\News\Events\NewsUnpublished;
+use App\Domains\News\Private\Models\News;
+use App\Domains\News\Private\Services\NewsService;
+use App\Domains\News\Public\Events\NewsUnpublished;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

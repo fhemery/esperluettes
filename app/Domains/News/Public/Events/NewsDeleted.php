@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\News\Events;
+namespace App\Domains\News\Public\Events;
 
 use App\Domains\Events\Contracts\DomainEvent;
 

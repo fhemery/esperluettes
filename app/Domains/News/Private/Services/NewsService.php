@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Domains\News\Services;
+namespace App\Domains\News\Private\Services;
 
-use App\Domains\News\Models\News;
+use App\Domains\News\Private\Models\News;
 use App\Domains\Shared\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Mews\Purifier\Facades\Purifier;
 use Illuminate\Support\Facades\Cache;
 use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\News\Events\NewsPublished;
-use App\Domains\News\Events\NewsUnpublished;
+use App\Domains\News\Public\Events\NewsPublished;
+use App\Domains\News\Public\Events\NewsUnpublished;
 
 class NewsService
 {

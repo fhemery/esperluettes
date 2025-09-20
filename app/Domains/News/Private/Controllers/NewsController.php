@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Domains\News\Controllers;
+namespace App\Domains\News\Private\Controllers;
 
 use App\Domains\Auth\PublicApi\AuthPublicApi;
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\News\Models\News;
-use App\Domains\News\Services\NewsService;
+use App\Domains\News\Private\Models\News;
+use App\Domains\News\Private\Services\NewsService;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -27,7 +27,7 @@ class NewsController extends BaseController
 
         $pinned = $this->newsService->getPinnedForCarousel();
 
-        return view('news::index', [
+        return view('news::pages.index', [
             'news' => $news,
             'pinned' => $pinned,
         ]);
@@ -60,7 +60,7 @@ class NewsController extends BaseController
             }
         }
 
-        return view('news::show', [
+        return view('news::pages.show', [
             'news' => $news,
         ]);
     }

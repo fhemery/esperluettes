@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Domains\News\Events;
+namespace App\Domains\News\Public\Events;
 
 use App\Domains\Events\Contracts\DomainEvent;
 
-class NewsPublished implements DomainEvent
+class NewsUnpublished implements DomainEvent
 {
     public function __construct(
         public readonly int $newsId,
         public readonly string $slug,
         public readonly string $title,
-        public readonly ?string $publishedAt,
     ) {}
 
-    public static function name(): string { return 'News.Published'; }
+    public static function name(): string { return 'News.Unpublished'; }
 
     public static function version(): int { return 1; }
 
@@ -23,13 +22,12 @@ class NewsPublished implements DomainEvent
             'newsId' => $this->newsId,
             'slug' => $this->slug,
             'title' => $this->title,
-            'publishedAt' => $this->publishedAt,
         ];
     }
 
     public function summary(): string
     {
-        return trans('news::events.published.summary', [
+        return trans('news::events.unpublished.summary', [
             'id' => $this->newsId,
             'title' => $this->title,
         ]);
@@ -41,7 +39,6 @@ class NewsPublished implements DomainEvent
             newsId: (int) ($payload['newsId'] ?? 0),
             slug: (string) ($payload['slug'] ?? ''),
             title: (string) ($payload['title'] ?? ''),
-            publishedAt: isset($payload['publishedAt']) ? (string) $payload['publishedAt'] : null,
         );
     }
 }

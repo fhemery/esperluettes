@@ -144,19 +144,12 @@ deptrac:
     - name: NewsPublic
       collectors:
         - type: directory
-          value: 'app/Domains/News/PublicApi/'
+          value: 'app/Domains/News/Public/'
 
     - name: NewsPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/News/PublicApi/
-            - type: directory
-              value: app/Domains/News/Tests/
-          must:
-            - type: directory
-              value: app/Domains/News/
+        - type: directory
+          value: app/Domains/News/Private/
 
     - name: NewsTests
       collectors:
@@ -337,6 +330,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - NewsPublic
 
     ProfilePrivate:
       - Shared

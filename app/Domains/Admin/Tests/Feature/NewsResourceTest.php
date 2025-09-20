@@ -2,7 +2,7 @@
 
 use App\Domains\Admin\Filament\Resources\News\NewsResource\Pages\CreateNews;
 use App\Domains\Admin\Filament\Resources\News\NewsResource\Pages\EditNews;
-use App\Domains\News\Models\News;
+use App\Domains\News\Private\Models\News;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;

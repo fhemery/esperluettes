@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Domains\News\PublicApi;
+namespace App\Domains\News\Public\Api;
 
-use App\Domains\News\Services\NewsService;
-use App\Domains\News\PublicApi\Dto\NewsCarouselItemDto;
+use App\Domains\News\Private\Services\NewsService;
+use App\Domains\News\Public\Api\Dto\NewsCarouselItemDto;
 
 class NewsPublicApi
 {
