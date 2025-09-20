@@ -7,7 +7,7 @@ use App\Domains\Shared\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Mews\Purifier\Facades\Purifier;
 use Illuminate\Support\Facades\Cache;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUnpublished;
 

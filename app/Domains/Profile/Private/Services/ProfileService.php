@@ -10,7 +10,7 @@ use App\Domains\Profile\Private\Support\AvatarGenerator;
 use App\Domains\Profile\Private\Services\ProfileCacheService;
 use App\Domains\Shared\Support\SimpleSlug;
 use App\Domains\Shared\Services\ImageService;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;

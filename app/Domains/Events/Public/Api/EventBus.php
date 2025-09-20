@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Domains\Events\PublicApi;
+namespace App\Domains\Events\Public\Api;
 
-use App\Domains\Events\Contracts\DomainEvent;
-use App\Domains\Events\Services\DomainEventFactory;
-use App\Domains\Events\Services\EventService;
+use App\Domains\Events\Public\Contracts\DomainEvent;
+use App\Domains\Events\Private\Services\DomainEventFactory;
+use App\Domains\Events\Private\Services\EventService;
 use Illuminate\Support\Facades\Event as LaravelEvent;
 
 class EventBus

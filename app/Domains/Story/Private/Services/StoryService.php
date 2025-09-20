@@ -8,7 +8,7 @@ use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Shared\Support\SlugWithId;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Story\Public\Events\StoryCreated;
 use App\Domains\Story\Public\Events\DTO\StorySnapshot;
 use App\Domains\Story\Public\Events\StoryUpdated;

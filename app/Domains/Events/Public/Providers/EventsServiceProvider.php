@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Domains\Events\Providers;
+namespace App\Domains\Events\Public\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\Events\PublicApi\EventPublicApi;
-use App\Domains\Events\Services\DomainEventFactory;
-use App\Domains\Events\Services\EventService;
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Events\Public\Api\EventPublicApi;
+use App\Domains\Events\Private\Services\DomainEventFactory;
+use App\Domains\Events\Private\Services\EventService;
 
 class EventsServiceProvider extends ServiceProvider
 {
@@ -29,7 +29,7 @@ class EventsServiceProvider extends ServiceProvider
             );
         });
         // Register domain-specific migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(app_path('Domains/Events/Database/Migrations'));
     }
 
     public function boot(): void

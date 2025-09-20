@@ -91,23 +91,12 @@ deptrac:
     - name: EventsPublic
       collectors:
         - type: directory
-          value: app/Domains/Events/PublicApi/
-        - type: directory
-          value: app/Domains/Events/Contracts/
+          value: app/Domains/Events/Public/
         
     - name: EventsPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Events/PublicApi/
-            - type: directory
-              value: app/Domains/Events/Contracts/
-            - type: directory
-              value: app/Domains/Events/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Events/
+        - type: directory
+          value: app/Domains/Events/Private/
 
     - name: EventsTests
       collectors:

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Events\Contracts;
+namespace App\Domains\Events\Public\Contracts;
 
 /**
  * Marker interface: when an EventDTO implements this, the EventBus will persist

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Story\Public\Events;
 
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 
 class StoryVisibilityChanged implements DomainEvent
 {

@@ -4,7 +4,7 @@ return [
     // Shared services
     App\Domains\Shared\Providers\SharedServiceProvider::class,
     // Events domain
-    App\Domains\Events\Providers\EventsServiceProvider::class,
+    App\Domains\Events\Public\Providers\EventsServiceProvider::class,
     
     // Domain-specific providers
     App\Domains\Admin\Providers\AdminServiceProvider::class,

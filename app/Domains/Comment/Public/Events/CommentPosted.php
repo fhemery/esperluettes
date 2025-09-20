@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Comment\Public\Events;
 
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 use App\Domains\Comment\Public\Events\DTO\CommentSnapshot;
 
 class CommentPosted implements DomainEvent

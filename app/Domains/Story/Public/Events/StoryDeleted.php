@@ -4,7 +4,7 @@ namespace App\Domains\Story\Public\Events;
 
 use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
 use App\Domains\Story\Public\Events\DTO\StorySnapshot;
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 
 class StoryDeleted implements DomainEvent
 {

@@ -12,7 +12,7 @@ describe('Search results partial', function () {
     it('should return empty arrays for less than 2 characters', function () {
         $resp = $this->get('/search/partial?q=a');
         $resp->assertOk();
-        $resp->assertSee('(0)');
+        $resp->assertSee(__('search::results.empty.label'));
     });
 
     describe('Regarding stories', function () {

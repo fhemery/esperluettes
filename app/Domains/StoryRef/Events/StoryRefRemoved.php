@@ -2,7 +2,7 @@
 
 namespace App\Domains\StoryRef\Events;
 
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 
 class StoryRefRemoved implements DomainEvent
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Domains\Events\Services;
+namespace App\Domains\Events\Private\Services;
 
-use App\Domains\Events\Contracts\AuditableEvent;
-use App\Domains\Events\Contracts\DomainEvent;
-use App\Domains\Events\Models\StoredDomainEvent;
+use App\Domains\Events\Public\Contracts\AuditableEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
+use App\Domains\Events\Private\Models\StoredDomainEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

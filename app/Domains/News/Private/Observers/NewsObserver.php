@@ -6,7 +6,7 @@ use App\Domains\News\Private\Models\News;
 use App\Domains\Shared\Services\ImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\News\Public\Events\NewsUpdated;
 use App\Domains\News\Public\Events\NewsDeleted;
 

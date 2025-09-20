@@ -4,7 +4,7 @@ namespace App\Domains\Auth\Controllers;
 
 use App\Domains\Shared\Controllers\Controller;
 use App\Domains\Auth\Requests\LoginRequest;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Events\UserLoggedIn;
 use App\Domains\Auth\Events\UserLoggedOut;
 use Illuminate\Http\RedirectResponse;

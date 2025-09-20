@@ -4,7 +4,7 @@ namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Services\RoleCacheService;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Events\UserRoleGranted;
 use App\Domains\Auth\Events\UserRoleRevoked;
 use Illuminate\Support\Facades\Auth as AuthFacade;

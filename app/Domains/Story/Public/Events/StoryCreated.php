@@ -2,7 +2,7 @@
 
 namespace App\Domains\Story\Public\Events;
 
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 use App\Domains\Story\Public\Events\DTO\StorySnapshot;
 
 class StoryCreated implements DomainEvent

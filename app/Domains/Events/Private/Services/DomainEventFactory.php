@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Events\Services;
+namespace App\Domains\Events\Private\Services;
 
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 
 class DomainEventFactory
 {

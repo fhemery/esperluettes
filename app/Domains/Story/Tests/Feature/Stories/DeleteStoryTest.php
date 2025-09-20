@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Domains\Story\Public\Events\StoryDeleted;
-use App\Domains\Events\PublicApi\EventPublicApi;
+use App\Domains\Events\Public\Api\EventPublicApi;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\Auth\PublicApi\Roles;

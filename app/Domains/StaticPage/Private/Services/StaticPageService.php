@@ -7,7 +7,7 @@ use App\Domains\Shared\Services\ImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\UploadedFile;
 use Mews\Purifier\Facades\Purifier;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\StaticPage\Public\Events\StaticPagePublished;
 use App\Domains\StaticPage\Public\Events\StaticPageUnpublished;
 

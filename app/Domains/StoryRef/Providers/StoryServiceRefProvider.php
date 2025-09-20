@@ -3,7 +3,7 @@
 namespace App\Domains\StoryRef\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\StoryRef\Events\StoryRefAdded;
 use App\Domains\StoryRef\Events\StoryRefUpdated;
 use App\Domains\StoryRef\Events\StoryRefRemoved;

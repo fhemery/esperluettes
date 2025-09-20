@@ -9,7 +9,7 @@ use App\Domains\Story\Private\Observers\ChapterObserver;
 use App\Domains\Story\Private\Policies\StoryPolicy;
 use App\Domains\Story\Private\Policies\ChapterPolicy;
 use App\Domains\Story\Private\Services\ChapterCommentPolicy;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Story\Public\Events\StoryCreated;
 use App\Domains\Story\Public\Events\StoryUpdated;
 use App\Domains\Story\Public\Events\StoryDeleted;

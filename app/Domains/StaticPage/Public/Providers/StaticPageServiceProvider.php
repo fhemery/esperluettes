@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Domains\StaticPage\Private\Models\StaticPage;
 use App\Domains\StaticPage\Private\Observers\StaticPageObserver;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\StaticPage\Public\Events\StaticPagePublished;
 use App\Domains\StaticPage\Public\Events\StaticPageUnpublished;
 use App\Domains\StaticPage\Public\Events\StaticPageUpdated;

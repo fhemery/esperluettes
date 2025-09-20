@@ -2,7 +2,7 @@
 
 namespace App\Domains\News\Public\Events;
 
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 
 class NewsUnpublished implements DomainEvent
 {

@@ -3,7 +3,7 @@
 namespace App\Domains\Story\Private\Services;
 
 use Illuminate\Support\Facades\DB;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 
 class ChapterCreditService
 {

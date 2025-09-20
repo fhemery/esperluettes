@@ -7,7 +7,7 @@ use App\Domains\Comment\Private\Repositories\CommentRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Domains\Comment\Private\Models\Comment;
 use App\Domains\Comment\Private\Support\CommentBodySanitizer;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Comment\Public\Events\DTO\CommentSnapshot;
 use App\Domains\Comment\Public\Events\CommentEdited;

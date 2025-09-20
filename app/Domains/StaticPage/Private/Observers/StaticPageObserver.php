@@ -4,7 +4,7 @@ namespace App\Domains\StaticPage\Private\Observers;
 
 use App\Domains\StaticPage\Private\Models\StaticPage;
 use App\Domains\StaticPage\Private\Services\StaticPageService;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\StaticPage\Public\Events\StaticPageUpdated;
 use App\Domains\StaticPage\Public\Events\StaticPageDeleted;
 

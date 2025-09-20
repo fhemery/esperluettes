@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Events\Contracts;
+namespace App\Domains\Events\Public\Contracts;
 
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 
 class StoredDomainEventDto
 {

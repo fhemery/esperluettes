@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Events\Contracts;
+namespace App\Domains\Events\Public\Contracts;
 
 /**
  * Base contract for emitted domain events.

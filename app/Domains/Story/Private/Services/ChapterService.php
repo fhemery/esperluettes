@@ -7,7 +7,7 @@ use App\Domains\Shared\Support\SparseReorder;
 use App\Domains\Story\Private\Http\Requests\ChapterRequest;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Story\Public\Events\ChapterCreated;
 use App\Domains\Story\Public\Events\ChapterUpdated;
 use App\Domains\Story\Public\Events\ChapterPublished;

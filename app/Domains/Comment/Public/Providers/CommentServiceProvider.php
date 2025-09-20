@@ -8,7 +8,7 @@ use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Comment\Private\Repositories\CommentRepository;
 use App\Domains\Comment\Private\View\Components\CommentList;
 use Illuminate\Support\Facades\Blade;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Comment\Public\Events\CommentEdited;
 

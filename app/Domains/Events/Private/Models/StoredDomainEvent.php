@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Events\Models;
+namespace App\Domains\Events\Private\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
