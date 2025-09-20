@@ -15,7 +15,7 @@ return [
     App\Domains\Profile\Public\Providers\ProfileServiceProvider::class,
     App\Domains\StoryRef\Providers\StoryServiceRefProvider::class,
     App\Domains\Comment\Public\Providers\CommentServiceProvider::class,
-    App\Domains\Story\Providers\StoryServiceProvider::class,
+    App\Domains\Story\Public\Providers\StoryServiceProvider::class,
     App\Domains\Search\Public\Providers\SearchServiceProvider::class,
     
     // Add other domain providers here as they are created

@@ -1,7 +1,7 @@
 <?php
 
-use App\Domains\Story\Models\Chapter;
-use App\Domains\Story\Models\Story;
+use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Models\Story;
 use App\Domains\StoryRef\Models\StoryRefType;
 use App\Domains\StoryRef\Models\StoryRefAudience;
 use App\Domains\StoryRef\Models\StoryRefCopyright;

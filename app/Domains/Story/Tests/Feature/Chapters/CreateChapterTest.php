@@ -1,8 +1,8 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Story\Events\ChapterCreated;
-use App\Domains\Story\Models\Chapter;
+use App\Domains\Story\Public\Events\ChapterCreated;
+use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -280,6 +280,6 @@ describe('Creating a chapter', function () {
         $resp->assertStatus(403);
 
         // Ensure DB did not create a 6th chapter
-        expect(\App\Domains\Story\Models\Chapter::query()->count())->toBe(5);
+        expect(\App\Domains\Story\Private\Models\Chapter::query()->count())->toBe(5);
     });
 });

@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Story\Models\Story;
+use App\Domains\Story\Private\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

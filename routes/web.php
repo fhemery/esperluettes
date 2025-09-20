@@ -13,7 +13,6 @@ require app_path('Domains/Auth/routes.php');
 
 // Dashboard routes are loaded via App\Domains\Dashboard\Public\Providers\DashboardServiceProvider
 
-// Include story routes from Story domain
-require app_path('Domains/Story/routes.php');
+// Story routes are loaded via App\Domains\Story\Public\Providers\StoryServiceProvider
 
 // StaticPage routes are loaded via App\Domains\StaticPage\Public\Providers\StaticPageServiceProvider

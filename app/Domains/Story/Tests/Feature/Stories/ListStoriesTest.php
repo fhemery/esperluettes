@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Story\Services\ChapterCreditService;
+use App\Domains\Story\Private\Services\ChapterCreditService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -67,7 +67,7 @@ describe('Card display', function () {
                 'story_ref_trigger_warning_ids' => [],
             ]);
             // Explicitly set disclosure to no_tw
-            $clean->tw_disclosure = \App\Domains\Story\Models\Story::TW_NO_TW;
+            $clean->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_NO_TW;
             $clean->saveQuietly();
             createPublishedChapter($this, $clean, $author);
 
@@ -89,7 +89,7 @@ describe('Card display', function () {
                 'story_ref_trigger_warning_ids' => [],
             ]);
             // Explicitly set disclosure to unspoiled
-            $mystery->tw_disclosure = \App\Domains\Story\Models\Story::TW_UNSPOILED;
+            $mystery->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_UNSPOILED;
             $mystery->saveQuietly();
             createPublishedChapter($this, $mystery, $author);
 
@@ -220,7 +220,7 @@ describe('Filtering', function () {
             'description' => '<p>Desc</p>',
             'story_ref_trigger_warning_ids' => [],
         ]);
-        $noTw->tw_disclosure = \App\Domains\Story\Models\Story::TW_NO_TW;
+        $noTw->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_NO_TW;
         $noTw->saveQuietly();
         createPublishedChapter($this, $noTw, $author);
 
@@ -229,7 +229,7 @@ describe('Filtering', function () {
             'description' => '<p>Desc</p>',
             'story_ref_trigger_warning_ids' => [$violence->id],
         ]);
-        $listed->tw_disclosure = \App\Domains\Story\Models\Story::TW_LISTED;
+        $listed->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_LISTED;
         $listed->saveQuietly();
         createPublishedChapter($this, $listed, $author);
 
@@ -238,7 +238,7 @@ describe('Filtering', function () {
             'description' => '<p>Desc</p>',
             'story_ref_trigger_warning_ids' => [],
         ]);
-        $unspoiled->tw_disclosure = \App\Domains\Story\Models\Story::TW_UNSPOILED;
+        $unspoiled->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_UNSPOILED;
         $unspoiled->saveQuietly();
         createPublishedChapter($this, $unspoiled, $author);
 

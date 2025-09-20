@@ -2,7 +2,7 @@
 
 namespace App\Domains\Story\Private\Services;
 
-use App\Domains\Story\Models\Story;
+use App\Domains\Story\Private\Models\Story;
 use App\Domains\Auth\PublicApi\AuthPublicApi;
 use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Support\Facades\Auth;
