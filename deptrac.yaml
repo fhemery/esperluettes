@@ -77,15 +77,15 @@ deptrac:
           value: 'app/Domains/Comment/Tests/'
 
     # Dashboard Domain
+    - name: DashboardPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Dashboard/Public/'
+
     - name: DashboardPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Dashboard/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Dashboard/
+        - type: directory
+          value: app/Domains/Dashboard/Private/
 
     # Events domains
     - name: EventsPublic
@@ -224,9 +224,17 @@ deptrac:
       - CommentPrivate
       - EventsPublic
 
+    DashboardPublic:
+      - Shared
+      - DashboardPrivate
+
     EventsPublic:
       - Shared
       - EventsPrivate
+
+    HomePublic:
+      - Shared
+      - HomePrivate
 
     NewsPublic:
       - Shared
@@ -254,10 +262,6 @@ deptrac:
     StoryRef:
       - Shared
       - EventsPublic
-
-    HomePublic:
-      - Shared
-      - HomePrivate
 
     # ###################################################
     # Private domains - can access Shared + other domain Public APIs + events

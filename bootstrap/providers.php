@@ -10,7 +10,7 @@ return [
     App\Domains\Admin\Providers\AdminServiceProvider::class,
     App\Domains\News\Public\Providers\NewsServiceProvider::class,
     App\Domains\Home\Public\Providers\HomeServiceProvider::class,
-    App\Domains\Dashboard\Providers\DashboardServiceProvider::class,
+    App\Domains\Dashboard\Public\Providers\DashboardServiceProvider::class,
     App\Domains\Auth\Providers\AuthServiceProvider::class,
     App\Domains\Profile\Public\Providers\ProfileServiceProvider::class,
     App\Domains\StoryRef\Providers\StoryServiceRefProvider::class,

@@ -11,8 +11,7 @@ require app_path('Domains/Auth/routes.php');
 
 // Home routes are loaded via App\Domains\Home\Public\Providers\HomeServiceProvider
 
-// Include dashboard routes from Dashboard domain
-require app_path('Domains/Dashboard/routes.php');
+// Dashboard routes are loaded via App\Domains\Dashboard\Public\Providers\DashboardServiceProvider
 
 // Include story routes from Story domain
 require app_path('Domains/Story/routes.php');
