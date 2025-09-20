@@ -176,19 +176,12 @@ deptrac:
     - name: StaticPagePublic
       collectors:
         - type: directory
-          value: 'app/Domains/StaticPage/PublicApi/'
+          value: 'app/Domains/StaticPage/Public/'
 
     - name: StaticPagePrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/StaticPage/PublicApi/
-            - type: directory
-              value: app/Domains/StaticPage/Tests/
-          must:
-            - type: directory
-              value: app/Domains/StaticPage/
+        - type: directory
+          value: app/Domains/StaticPage/Private/
 
     - name: StaticPageTests
       collectors:
@@ -342,6 +335,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - StaticPagePublic
 
     StoryPrivate:
       - Shared

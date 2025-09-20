@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\StaticPage\Events;
+namespace App\Domains\StaticPage\Public\Events;
 
 use App\Domains\Events\Contracts\DomainEvent;
 

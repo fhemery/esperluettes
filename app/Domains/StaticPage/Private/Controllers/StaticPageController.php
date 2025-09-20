@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Domains\StaticPage\Controllers;
+namespace App\Domains\StaticPage\Private\Controllers;
 
-use App\Domains\StaticPage\Models\StaticPage;
-use App\Domains\StaticPage\Services\StaticPageService;
+use App\Domains\StaticPage\Private\Models\StaticPage;
+use App\Domains\StaticPage\Private\Services\StaticPageService;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -37,7 +37,7 @@ class StaticPageController extends BaseController
             }
         }
 
-        return view('static::show', [
+        return view('static::pages.show', [
             'page' => $page,
         ]);
     }

@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\StaticPage\StaticPageResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\StaticPage\StaticPageResource;
-use App\Domains\StaticPage\Services\StaticPageService;
+use App\Domains\StaticPage\Private\Services\StaticPageService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 

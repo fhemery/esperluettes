@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Domains\StaticPage\Services;
+namespace App\Domains\StaticPage\Private\Services;
 
-use App\Domains\StaticPage\Models\StaticPage;
+use App\Domains\StaticPage\Private\Models\StaticPage;
 use App\Domains\Shared\Services\ImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\UploadedFile;
 use Mews\Purifier\Facades\Purifier;
 use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\StaticPage\Events\StaticPagePublished;
-use App\Domains\StaticPage\Events\StaticPageUnpublished;
+use App\Domains\StaticPage\Public\Events\StaticPagePublished;
+use App\Domains\StaticPage\Public\Events\StaticPageUnpublished;
 
 class StaticPageService
 {

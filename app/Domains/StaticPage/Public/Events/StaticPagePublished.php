@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Domains\StaticPage\Events;
+namespace App\Domains\StaticPage\Public\Events;
 
 use App\Domains\Events\Contracts\DomainEvent;
 
-class StaticPageDeleted implements DomainEvent
+class StaticPagePublished implements DomainEvent
 {
     public function __construct(
         public readonly int $pageId,
         public readonly string $slug,
         public readonly string $title,
+        public readonly ?string $publishedAt,
     ) {}
 
-    public static function name(): string { return 'StaticPage.Deleted'; }
+    public static function name(): string { return 'StaticPage.Published'; }
 
     public static function version(): int { return 1; }
 
@@ -22,12 +23,13 @@ class StaticPageDeleted implements DomainEvent
             'pageId' => $this->pageId,
             'slug' => $this->slug,
             'title' => $this->title,
+            'publishedAt' => $this->publishedAt,
         ];
     }
 
     public function summary(): string
     {
-        return trans('static::events.deleted.summary', [
+        return trans('static::events.published.summary', [
             'id' => $this->pageId,
             'title' => $this->title,
         ]);
@@ -39,6 +41,7 @@ class StaticPageDeleted implements DomainEvent
             pageId: (int) ($payload['pageId'] ?? 0),
             slug: (string) ($payload['slug'] ?? ''),
             title: (string) ($payload['title'] ?? ''),
+            publishedAt: isset($payload['publishedAt']) ? (string) $payload['publishedAt'] : null,
         );
     }
 }

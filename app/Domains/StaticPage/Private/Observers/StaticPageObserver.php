@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Domains\StaticPage\Observers;
+namespace App\Domains\StaticPage\Private\Observers;
 
-use App\Domains\StaticPage\Models\StaticPage;
-use App\Domains\StaticPage\Services\StaticPageService;
+use App\Domains\StaticPage\Private\Models\StaticPage;
+use App\Domains\StaticPage\Private\Services\StaticPageService;
 use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\StaticPage\Events\StaticPageUpdated;
-use App\Domains\StaticPage\Events\StaticPageDeleted;
+use App\Domains\StaticPage\Public\Events\StaticPageUpdated;
+use App\Domains\StaticPage\Public\Events\StaticPageDeleted;
 
 class StaticPageObserver
 {

@@ -16,8 +16,10 @@ return [
     App\Domains\StoryRef\Providers\StoryServiceRefProvider::class,
     App\Domains\Comment\PublicApi\Providers\CommentServiceProvider::class,
     App\Domains\Story\Providers\StoryServiceProvider::class,
-    App\Domains\StaticPage\Providers\StaticPageServiceProvider::class,
     App\Domains\Search\Public\Providers\SearchServiceProvider::class,
     
     // Add other domain providers here as they are created
+
+    // This one should be put last, because it declares catch-all routes
+    App\Domains\StaticPage\Public\Providers\StaticPageServiceProvider::class,
 ];

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\StaticPage\Models;
+namespace App\Domains\StaticPage\Private\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

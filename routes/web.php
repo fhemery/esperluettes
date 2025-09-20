@@ -21,5 +21,4 @@ require app_path('Domains/Story/routes.php');
 // Include comment routes from Comment domain
 require app_path('Domains/Comment/routes.php');
 
-// Include static page routes from StaticPage domain (must be last due to catch-all)
-require app_path('Domains/StaticPage/routes.php');
+// StaticPage routes are loaded via App\Domains\StaticPage\Public\Providers\StaticPageServiceProvider
