@@ -1,7 +1,10 @@
 <div class="search-results" x-data="{storyPage: {{$storiesPage}}, profilesPage: {{$profilesPage}}, perPage: {{$perPage}}, storyTotal: {{$stories['total'] ?? 0}}, profileTotal: {{$profiles['total'] ?? 0}}}">
   @if(($stories['total'] ?? 0) === 0 && ($profiles['total'] ?? 0) === 0)
-    <div class="py-4 text-sm text-neutral-600">{{ __('search::results.empty') }}</div>
-  @endif
+    <div class="py-4 text-md text-neutral text-center">{{ __('search::results.empty.label') }}</div>
+
+    <div class="py-4 text-xs text-neutral text-center">{{ __('search::results.empty.help') }}</div>
+
+  @else
   <x-shared::tabs :tabs="[
       ['key' => 'stories', 'label' => __('search::results.stories.label') . ' (' . ($stories['total'] ?? 0) . ')'],
       ['key' => 'profiles', 'label' => __('search::results.profiles.label') . ' (' . ($profiles['total'] ?? 0) . ')'],
@@ -35,6 +38,7 @@
           >
             <span class="material-symbols-outlined">chevron_left</span>
           </x-shared::button>
+          <div class="text-xs">{{ __('search::results.page.label') }}</div>
           <x-shared::button
             type="button"
             x-on:click="storyPage = Math.min(5, storyPage + 1)"
@@ -74,6 +78,7 @@
           >
             <span class="material-symbols-outlined">chevron_left</span>
           </x-shared::button>
+          <div class="text-xs">{{ __('search::results.page.label') }}</div>
           <x-shared::button
             type="button"
             x-on:click="profilesPage = Math.min(5, profilesPage + 1)"
@@ -87,4 +92,5 @@
     </div>
 
   </x-shared::tabs>
+  @endif
 </div>

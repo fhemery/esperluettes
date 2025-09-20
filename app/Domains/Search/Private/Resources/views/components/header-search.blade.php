@@ -19,7 +19,8 @@
             </svg>
         </template>
     </div>
-    <div x-show="open" x-transition @mousedown.away="close()" class="absolute left-0 mt-2 w-full z-50" role="dialog" aria-live="polite">
+    <div x-show="open" x-transition @mousedown.away="close()" 
+        class="absolute left-0 mt-2 w-[80vw] z-50" role="dialog" aria-live="polite">
         <div class="rounded-md shadow-lg border bg-white text-black overflow-hidden w-[90vw] sm:w-[36rem] md:w-[44rem] lg:w-[52rem]" x-ref="dropdown">
             <template x-if="html" >
                 <div x-html="html"></div>

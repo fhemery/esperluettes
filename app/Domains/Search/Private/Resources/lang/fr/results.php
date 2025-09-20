@@ -12,7 +12,10 @@ return [
     'page' => [
         'prev' => 'Précédent',
         'next' => 'Suivant',
-        'label' => 'Page',
+        'label' => '(25 résultats maximum)',
     ],
-    'empty' => 'Aucun résultat',
+    'empty' => [
+        'label' => 'Aucun résultat',
+        'help' => 'Essayez une autre recherche, ou tapez 5 caractères pour chercher dans les descriptions des histoires',
+    ],
 ];
