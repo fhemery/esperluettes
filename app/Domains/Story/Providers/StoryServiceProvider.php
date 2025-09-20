@@ -2,7 +2,7 @@
 
 namespace App\Domains\Story\Providers;
 
-use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Story\Models\Story;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Observers\ChapterObserver;
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Auth\Events\UserRegistered;
-use App\Domains\Comment\Events\CommentPosted;
+use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Listeners\GrantCreditOnRootCommentPosted;
 

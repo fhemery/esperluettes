@@ -13,7 +13,7 @@ use App\Domains\Story\Events\ChapterUpdated;
 use App\Domains\Story\Events\ChapterPublished;
 use App\Domains\Story\Events\ChapterUnpublished;
 use App\Domains\Story\Events\DTO\ChapterSnapshot;
-use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
+use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Story\Services\ChapterCreditService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

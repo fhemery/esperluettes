@@ -2,10 +2,10 @@
 
 namespace App\Domains\Story\Services;
 
-use App\Domains\Comment\Contracts\CommentDto;
-use App\Domains\Comment\Contracts\CommentPolicy;
-use App\Domains\Comment\Contracts\CommentToCreateDto;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\CommentDto;
+use App\Domains\Comment\Public\Api\Contracts\CommentPolicy;
+use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
 
 class ChapterCommentPolicy implements CommentPolicy
 {

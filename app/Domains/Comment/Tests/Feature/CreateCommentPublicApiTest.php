@@ -1,9 +1,9 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
-use App\Domains\Comment\Contracts\CommentToCreateDto;
-use App\Domains\Comment\Contracts\DefaultCommentPolicy;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
+use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;

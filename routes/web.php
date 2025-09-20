@@ -18,7 +18,4 @@ require app_path('Domains/Dashboard/routes.php');
 // Include story routes from Story domain
 require app_path('Domains/Story/routes.php');
 
-// Include comment routes from Comment domain
-require app_path('Domains/Comment/routes.php');
-
 // StaticPage routes are loaded via App\Domains\StaticPage\Public\Providers\StaticPageServiceProvider

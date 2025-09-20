@@ -64,27 +64,12 @@ deptrac:
     - name: CommentPublic
       collectors:
         - type: directory
-          value: 'app/Domains/Comment/PublicApi/'
-        - type: directory
-          value: 'app/Domains/Comment/Contracts/'
-        - type: directory
-          value: 'app/Domains/Comment/Events/'
+          value: 'app/Domains/Comment/Public/'
 
     - name: CommentPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Comment/PublicApi/
-            - type: directory
-              value: app/Domains/Comment/Contracts/
-            - type: directory
-              value: 'app/Domains/Comment/Events/'
-            - type: directory
-              value: app/Domains/Comment/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Comment/
+        - type: directory
+          value: app/Domains/Comment/Private/
 
     - name: CommentTests
       collectors:

@@ -14,7 +14,7 @@ return [
     App\Domains\Auth\Providers\AuthServiceProvider::class,
     App\Domains\Profile\Public\Providers\ProfileServiceProvider::class,
     App\Domains\StoryRef\Providers\StoryServiceRefProvider::class,
-    App\Domains\Comment\PublicApi\Providers\CommentServiceProvider::class,
+    App\Domains\Comment\Public\Providers\CommentServiceProvider::class,
     App\Domains\Story\Providers\StoryServiceProvider::class,
     App\Domains\Search\Public\Providers\SearchServiceProvider::class,
     

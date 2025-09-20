@@ -2,8 +2,8 @@
 
 namespace App\Domains\Story\Listeners;
 
-use App\Domains\Comment\Events\CommentPosted;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
+use App\Domains\Comment\Public\Events\CommentPosted;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Story\Models\Chapter;
 use App\Domains\Story\Services\ChapterService;
 use App\Domains\Story\Services\ChapterCreditService;

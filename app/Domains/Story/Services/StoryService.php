@@ -14,7 +14,7 @@ use App\Domains\Story\Events\DTO\StorySnapshot;
 use App\Domains\Story\Events\StoryUpdated;
 use App\Domains\Story\Events\StoryDeleted;
 use App\Domains\Story\Events\DTO\ChapterSnapshot;
-use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
+use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Story\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;

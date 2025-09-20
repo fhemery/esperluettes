@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Domains\Comment\PublicApi\CommentMaintenancePublicApi;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
-use App\Domains\Comment\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

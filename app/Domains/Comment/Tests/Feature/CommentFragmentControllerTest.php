@@ -1,10 +1,10 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Comment\Contracts\CommentDto;
-use App\Domains\Comment\Contracts\DefaultCommentPolicy;
-use App\Domains\Comment\Models\Comment;
-use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
+use App\Domains\Comment\Public\Api\Contracts\CommentDto;
+use App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy;
+use App\Domains\Comment\Private\Models\Comment;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

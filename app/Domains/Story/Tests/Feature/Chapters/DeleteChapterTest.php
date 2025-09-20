@@ -4,9 +4,8 @@ use App\Domains\Story\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
-use App\Domains\Comment\Contracts\CommentToCreateDto;
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\Story\Events\ChapterDeleted;
 
 uses(TestCase::class, RefreshDatabase::class);
