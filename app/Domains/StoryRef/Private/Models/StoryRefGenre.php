@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Domains\StoryRef\Models;
+namespace App\Domains\StoryRef\Private\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Domains\StoryRef\Models\Concerns\HasSlugAndOrder;
+use App\Domains\StoryRef\Private\Models\Concerns\HasSlugAndOrder;
 
-class StoryRefCopyright extends Model
+class StoryRefGenre extends Model
 {
-    protected $table = 'story_ref_copyrights';
+    protected $table = 'story_ref_genres';
     public const HAS_ORDER = true;
 
     use HasSlugAndOrder;

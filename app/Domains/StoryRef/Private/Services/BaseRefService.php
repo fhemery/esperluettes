@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Domains\StoryRef\Services;
+namespace App\Domains\StoryRef\Private\Services;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use App\Domains\Events\Public\Api\EventBus;
-use App\Domains\StoryRef\Events\StoryRefAdded;
-use App\Domains\StoryRef\Events\StoryRefUpdated;
-use App\Domains\StoryRef\Events\StoryRefRemoved;
+use App\Domains\StoryRef\Public\Events\StoryRefAdded;
+use App\Domains\StoryRef\Public\Events\StoryRefUpdated;
+use App\Domains\StoryRef\Public\Events\StoryRefRemoved;
 
 abstract class BaseRefService
 {

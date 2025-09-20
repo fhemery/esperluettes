@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Admin\Filament\Resources\StoryRef\TypeResource\Pages\ListTypes;
-use App\Domains\StoryRef\Models\StoryRefType;
+use App\Domains\StoryRef\Private\Models\StoryRefType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;

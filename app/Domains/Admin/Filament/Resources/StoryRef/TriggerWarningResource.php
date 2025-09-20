@@ -2,7 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\StoryRef;
 
-use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
+use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;

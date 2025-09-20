@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Domains\StoryRef\Models;
+namespace App\Domains\StoryRef\Private\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Domains\StoryRef\Models\Concerns\HasSlugAndOrder;
+use App\Domains\StoryRef\Private\Models\Concerns\HasSlugAndOrder;
 
 class StoryRefTriggerWarning extends Model
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\StoryRef\Services;
+namespace App\Domains\StoryRef\Private\Services;
 
-use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
+use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 
 class TriggerWarningService extends BaseRefService
 {

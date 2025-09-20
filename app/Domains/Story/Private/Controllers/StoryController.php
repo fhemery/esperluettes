@@ -18,7 +18,7 @@ use App\Domains\Story\Private\ViewModels\StoryShowViewModel;
 use App\Domains\Story\Private\ViewModels\StorySummaryViewModel;
 use App\Domains\Story\Private\ViewModels\ChapterSummaryViewModel;
 use App\Domains\Story\Private\Services\ReadingProgressService;
-use App\Domains\StoryRef\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;

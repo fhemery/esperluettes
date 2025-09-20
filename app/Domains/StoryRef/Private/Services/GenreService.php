@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\StoryRef\Services;
+namespace App\Domains\StoryRef\Private\Services;
 
-use App\Domains\StoryRef\Models\StoryRefGenre;
+use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 
 class GenreService extends BaseRefService
 {

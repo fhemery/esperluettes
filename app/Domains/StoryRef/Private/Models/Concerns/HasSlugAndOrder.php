@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\StoryRef\Models\Concerns;
+namespace App\Domains\StoryRef\Private\Models\Concerns;
 
 use Illuminate\Support\Str;
 

@@ -4,7 +4,7 @@ namespace App\Domains\Story\Private\Controllers;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use App\Domains\StoryRef\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 
 class StoryCreateController
 {

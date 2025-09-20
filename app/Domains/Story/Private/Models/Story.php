@@ -2,8 +2,8 @@
 
 namespace App\Domains\Story\Private\Models;
 
-use App\Domains\StoryRef\Models\StoryRefGenre;
-use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
+use App\Domains\StoryRef\Private\Models\StoryRefGenre;
+use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;

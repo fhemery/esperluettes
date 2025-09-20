@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Domains\StoryRef\Events;
+namespace App\Domains\StoryRef\Public\Events;
 
 use App\Domains\Events\Public\Contracts\DomainEvent;
 
-class StoryRefRemoved implements DomainEvent
+class StoryRefAdded implements DomainEvent
 {
     public function __construct(
         public readonly string $refKind,
@@ -13,7 +13,7 @@ class StoryRefRemoved implements DomainEvent
         public readonly string $refName,
     ) {}
 
-    public static function name(): string { return 'StoryRef.Removed'; }
+    public static function name(): string { return 'StoryRef.Added'; }
 
     public static function version(): int { return 1; }
 
@@ -29,7 +29,7 @@ class StoryRefRemoved implements DomainEvent
 
     public function summary(): string
     {
-        return trans('story_ref::events.removed.summary', [
+        return trans('story_ref::events.added.summary', [
             'kind' => $this->refKind,
             'slug' => $this->refSlug,
             'id' => $this->refId,

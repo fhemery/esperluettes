@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\StoryRef\Services;
+namespace App\Domains\StoryRef\Private\Services;
 
-use App\Domains\StoryRef\Models\StoryRefAudience;
+use App\Domains\StoryRef\Private\Models\StoryRefAudience;
 
 class AudienceService extends BaseRefService
 {

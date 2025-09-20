@@ -1,23 +1,19 @@
 <?php
 
-namespace App\Domains\StoryRef\Events;
+namespace App\Domains\StoryRef\Public\Events;
 
 use App\Domains\Events\Public\Contracts\DomainEvent;
 
-class StoryRefUpdated implements DomainEvent
+class StoryRefRemoved implements DomainEvent
 {
-    /**
-     * @param array<int, string> $changedFields
-     */
     public function __construct(
         public readonly string $refKind,
         public readonly int $refId,
         public readonly string $refSlug,
         public readonly string $refName,
-        public readonly array $changedFields,
     ) {}
 
-    public static function name(): string { return 'StoryRef.Updated'; }
+    public static function name(): string { return 'StoryRef.Removed'; }
 
     public static function version(): int { return 1; }
 
@@ -28,18 +24,16 @@ class StoryRefUpdated implements DomainEvent
             'refId' => $this->refId,
             'refSlug' => $this->refSlug,
             'refName' => $this->refName,
-            'changedFields' => $this->changedFields,
         ];
     }
 
     public function summary(): string
     {
-        return trans('story_ref::events.updated.summary', [
+        return trans('story_ref::events.removed.summary', [
             'kind' => $this->refKind,
             'slug' => $this->refSlug,
             'id' => $this->refId,
             'name' => $this->refName,
-            'fields' => implode(',', $this->changedFields),
         ]);
     }
 
@@ -50,7 +44,6 @@ class StoryRefUpdated implements DomainEvent
             refId: (int) ($payload['refId'] ?? 0),
             refSlug: (string) ($payload['refSlug'] ?? ''),
             refName: (string) ($payload['refName'] ?? ''),
-            changedFields: array_values((array) ($payload['changedFields'] ?? [])),
         );
     }
 }

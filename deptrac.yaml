@@ -185,12 +185,20 @@ deptrac:
         - type: directory
           value: 'app/Domains/Story/Tests/'
 
-    # StoryRef Domain
-    # The StoryRef Domain is a very dumb one. As such, we do not create public or private APIs for it.
-    - name: StoryRef
+    - name: StoryRefPublic
       collectors:
         - type: directory
-          value: app/Domains/StoryRef/
+          value: app/Domains/StoryRef/Public/
+
+    - name: StoryRefPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/StoryRef/Private/
+
+    - name: StoryRefTests
+      collectors:
+        - type: directory
+          value: app/Domains/StoryRef/Tests/
 
   ruleset:
     # Shared contracts and DTOs - accessible by all domains
@@ -245,12 +253,14 @@ deptrac:
       - CommentPublic
       - Shared
       - StoryPrivate
-      - StoryRef
+      - StoryRefPublic
+      - StoryRefPrivate
       - EventsPublic
 
-    StoryRef:
+    StoryRefPublic:
       - Shared
       - EventsPublic
+      - StoryRefPrivate
 
     # ###################################################
     # Private domains - can access Shared + other domain Public APIs + events
@@ -271,7 +281,8 @@ deptrac:
       - StaticPagePrivate
       - StoryPublic
       - StoryPrivate
-      - StoryRef
+      - StoryRefPublic
+      - StoryRefPrivate
       - DashboardPrivate
       - HomePrivate
       - EventsPublic
@@ -324,8 +335,13 @@ deptrac:
       - AuthPublic
       - CommentPublic
       - ProfilePublic
-      - StoryRef
+      - StoryRefPrivate
       - EventsPublic
+
+    StoryRefPrivate:
+      - Shared
+      - EventsPublic
+      - StoryRefPublic
 
     # ###################################################
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
@@ -375,7 +391,8 @@ deptrac:
       - StoryPublic
       - AuthPublic
       - ProfilePublic
-      - StoryRef
+      - StoryRefPublic
+      - StoryRefPrivate
 
     AdminTests:
       - Shared
@@ -386,4 +403,5 @@ deptrac:
       - ProfilePublic
       - StaticPagePublic
       - StoryPublic
-      - StoryRef
+      - StoryRefPublic
+      - StoryRefPrivate

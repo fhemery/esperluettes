@@ -13,7 +13,7 @@ return [
     App\Domains\Dashboard\Public\Providers\DashboardServiceProvider::class,
     App\Domains\Auth\Providers\AuthServiceProvider::class,
     App\Domains\Profile\Public\Providers\ProfileServiceProvider::class,
-    App\Domains\StoryRef\Providers\StoryServiceRefProvider::class,
+    App\Domains\StoryRef\Public\Providers\StoryServiceRefProvider::class,
     App\Domains\Comment\Public\Providers\CommentServiceProvider::class,
     App\Domains\Story\Public\Providers\StoryServiceProvider::class,
     App\Domains\Search\Public\Providers\SearchServiceProvider::class,
