@@ -115,15 +115,15 @@ deptrac:
           value: app/Domains/Events/Tests/
 
     # Home Domain
+    - name: HomePublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Home/Public/'
+
     - name: HomePrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Home/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Home/
+        - type: directory
+          value: app/Domains/Home/Private/
 
     # News Domain
     - name: NewsPublic
@@ -254,6 +254,10 @@ deptrac:
     StoryRef:
       - Shared
       - EventsPublic
+
+    HomePublic:
+      - Shared
+      - HomePrivate
 
     # ###################################################
     # Private domains - can access Shared + other domain Public APIs + events

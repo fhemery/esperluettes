@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Domains\Home\Controllers;
+declare(strict_types=1);
+
+namespace App\Domains\Home\Private\Controllers;
 
 use App\Domains\Shared\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +16,6 @@ class HomeController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return view('home::index');
+        return view('home::pages.index');
     }
 }

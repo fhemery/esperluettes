@@ -2,7 +2,7 @@
 
 return [
     'join-us' => 'Rejoins-nous',
-     'welcome-message' => '<p>Salut à toi qui arrives en ce lieu.</p>
+    'welcome-message' => '<p>Salut à toi qui arrives en ce lieu.</p>
 
 <p>Ici commence notre havre : un jardin luxuriant où pousse la flore de notre imagination.</p>
 

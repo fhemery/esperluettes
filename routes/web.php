@@ -9,8 +9,7 @@ require app_path('Domains/Auth/routes.php');
 // Include news routes from News domain
 // (moved) News routes are loaded via App\Domains\News\Public\Providers\NewsServiceProvider
 
-// Include home routes from Home domain
-require app_path('Domains/Home/routes.php');
+// Home routes are loaded via App\Domains\Home\Public\Providers\HomeServiceProvider
 
 // Include dashboard routes from Dashboard domain
 require app_path('Domains/Dashboard/routes.php');
