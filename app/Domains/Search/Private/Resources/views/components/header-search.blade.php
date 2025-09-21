@@ -1,6 +1,8 @@
-<div x-data="globalSearch()" x-init="init()" class="relative hidden md:block w-full max-w-md" @keydown.escape.window="close()">
+<div x-data="globalSearch()" x-init="init()" class="relative w-full max-w-md" @keydown.escape.window="close()">
     <div class="flex items-center gap-2">
-        <i class="material-symbols-outlined text-accent text-2xl">search</i>
+        <button type="button" @click="isMobile ? openFromIcon() : null" class="md:pointer-events-none">
+            <i class="material-symbols-outlined text-accent text-2xl">search</i>
+        </button>
         <input
             x-model.debounce.300ms="q"
             @focus="maybeOpen()"
@@ -8,7 +10,7 @@
             @keydown.arrow-up.prevent="highlightPrev()"
             @keydown.enter.prevent="activateHighlighted()"
             type="search"
-            class="bg-transparent border-b border-fg/40 focus:border-fg outline-none w-full placeholder-fg/60"
+            class="hidden md:block bg-transparent border-b border-fg/40 focus:border-fg outline-none w-full placeholder-fg/60"
             placeholder="{{ __('search::header.label') }}"
             aria-label="{{ __('search::header.label') }}"
         />
@@ -19,10 +21,25 @@
             </svg>
         </template>
     </div>
-    <div x-show="open" x-transition @mousedown.away="close()" 
-        class="absolute left-0 mt-2 w-[80vw] z-50" role="dialog" aria-live="polite">
-        <div class="rounded-md shadow-lg border bg-white text-black overflow-hidden w-[90vw] sm:w-[36rem] md:w-[44rem] lg:w-[52rem]" x-ref="dropdown">
-            <template x-if="html" >
+
+    <!-- Fixed popup below the header (64px) with responsive widths -->
+    <div x-show="open" x-transition role="dialog" aria-live="polite" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[80vw] md:w-[96vw]">
+        <div class="rounded-md shadow-lg border bg-white text-black overflow-hidden" x-ref="dropdown" @click.outside="close()">
+            <!-- Mobile-only input inside popup -->
+            <div class="p-3 border-b md:hidden">
+                <input
+                    x-model.debounce.300ms="q"
+                    @keydown.arrow-down.prevent="highlightNext()"
+                    @keydown.arrow-up.prevent="highlightPrev()"
+                    @keydown.enter.prevent="activateHighlighted()"
+                    type="search"
+                    class="w-full bg-transparent border-b border-fg/40 focus:border-fg outline-none placeholder-fg/60"
+                    placeholder="{{ __('search::header.label') }}"
+                    aria-label="{{ __('search::header.label') }}"
+                    x-ref="mobileInput"
+                />
+            </div>
+            <template x-if="html">
                 <div x-html="html"></div>
             </template>
         </div>
@@ -35,7 +52,12 @@
                 loading: false,
                 html: '',
                 highlightedIndex: -1,
+                isMobile: false,
                 init() {
+                    const mq = window.matchMedia('(max-width: 767px)');
+                    const setMobile = () => { this.isMobile = mq.matches; };
+                    setMobile();
+                    mq.addEventListener ? mq.addEventListener('change', setMobile) : mq.addListener(setMobile);
                     this.$watch('q', (value) => {
                         const q = (value || '').trim();
                         if (q.length < 2) { this.html=''; this.open=false; return; }
@@ -43,6 +65,12 @@
                     });
                 },
                 maybeOpen() { if (this.html) this.open = true; },
+                openFromIcon() {
+                    this.open = true;
+                    this.$nextTick(() => { this.$refs.mobileInput && this.$refs.mobileInput.focus(); });
+                    const q = (this.q || '').trim();
+                    if (q.length >= 2) { this.fetchResults(q); }
+                },
                 close() { this.open = false; this.highlightedIndex=-1; },
                 async fetchResults(q) {
                     this.loading = true;

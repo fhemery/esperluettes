@@ -1,4 +1,6 @@
-<div class="search-results" x-data="{storyPage: {{$storiesPage}}, profilesPage: {{$profilesPage}}, perPage: {{$perPage}}, storyTotal: {{$stories['total'] ?? 0}}, profileTotal: {{$profiles['total'] ?? 0}}}">
+<div class="search-results" 
+  x-data="{storyPage: {{$storiesPage}}, profilesPage: {{$profilesPage}}, perPage: {{$perPage}}, storyTotal: {{$stories['total'] ?? 0}}, profileTotal: {{$profiles['total'] ?? 0}}}"
+  >
   @if(($stories['total'] ?? 0) === 0 && ($profiles['total'] ?? 0) === 0)
     <div class="py-4 text-md text-neutral text-center">{{ __('search::results.empty.label') }}</div>
 
