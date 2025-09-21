@@ -1,5 +1,5 @@
 <div x-data="globalSearch()" x-init="init()" class="relative w-full max-w-md" @keydown.escape.window="close()">
-    <div class="flex items-center gap-2">
+    <div class="flex gap-2 justify-end md:justify-start">
         <button type="button" @click="isMobile ? openFromIcon() : null" class="md:pointer-events-none">
             <i class="material-symbols-outlined text-accent text-2xl">search</i>
         </button>

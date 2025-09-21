@@ -14,7 +14,7 @@
 
     <div x-show="tab==='stories'" x-cloak data-total-stories="{{$stories['total']}}">
       @if(($stories['total'] ?? 0) === 0)
-        <div class="py-3 text-sm text-neutral-600">{{ __('search::results.stories.empty') }}</div>
+        <div class="py-3 text-sm text-neutral-600 text-center">{{ __('search::results.stories.empty') }}</div>
       @else
         <ul role="listbox" class="mt-2 space-y-2">
           @foreach($stories['items'] as $idx => $s)
@@ -55,7 +55,7 @@
 
     <div x-show="tab==='profiles'" x-cloak data-total-profiles="{{$profiles['total']}}">
       @if(($profiles['total'] ?? 0) === 0)
-        <div class="py-3 text-sm text-neutral-600">{{ __('search::results.profiles.empty') }}</div>
+        <div class="py-3 text-sm text-neutral-600 text-center">{{ __('search::results.profiles.empty') }}</div>
       @else
         <ul role="listbox" class="mt-2 space-y-2">
           @foreach($profiles['items'] as $idx => $p)

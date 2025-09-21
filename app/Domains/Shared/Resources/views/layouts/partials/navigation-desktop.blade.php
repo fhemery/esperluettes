@@ -1,12 +1,12 @@
 <!-- Navigation Links -->
-<div class="flex flex-1 justify-between items-center gap-4 grow-1" id="desktop-nav">
+<div class="flex flex-1 justify-between items-center gap-4 grow-1">
 
-    <div class="ml-8">
+    <div class="pl-2 md:pl-8 flex-1">
         <!-- Global Search -->
         <x-search::components.header-search />
     </div>
 
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4" id="desktop-nav-links">
         <!-- Links -->
         <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex uppercase">
             <x-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
@@ -27,7 +27,7 @@
         </div>
 
         <!-- Profile with drawer -->
-        <div class="hidden sm:flex sm:items-center sm:ms-6 shrink-0">
+        <div class="flex items-center md:pl-6 shrink-0">
             <button
                 @click="$dispatch('drawer-open-profile')"
                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -36,10 +36,12 @@
                 @endif
             </button>
         </div>
-    
+
+
+    </div>
 
     <!-- Desktop-only Profile Drawer -->
-    <x-shared::drawer name="profile" class="hidden sm:block">
+    <x-shared::drawer name="profile">
         <x-slot:header>
             <div class="flex items-center gap-2">
                 @if(isset($currentProfile) && $currentProfile)
@@ -53,30 +55,46 @@
                 @endif
             </div>
         </x-slot:header>
+        <div id="desktop-nav-drawer">
 
-        <div class="mt-1 space-y-1">
-            @if (Auth::user()->hasVerifiedEmail())
-            <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
-                {{ __('shared::navigation.profile') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('account.edit')" :active="request()->routeIs('account.edit')">
-                {{ __('shared::navigation.account') }}
-            </x-responsive-nav-link>
-            @else
-            <x-responsive-nav-link :href="route('verification.notice')" :active="request()->routeIs('verification.notice')">
-                {{ __('shared::navigation.verify-email') }}
-            </x-responsive-nav-link>
-            @endif
-
-            <!-- Authentication -->
-            <form method="POST" action="{{ route('logout') }}" class="pt-2">
-                @csrf
-                <x-responsive-nav-link :href="route('logout')"
-                    onclick="event.preventDefault(); this.closest('form').submit();">
-                    {{ __('shared::navigation.logout') }}
+            <div class="block sm:hidden pt-2 space-y-1 pb-4 border-b-2 border-accent">
+                <x-responsive-nav-link :href="route('news.index')" :active="request()->routeIs('news.index')">
+                    {{ __('shared::navigation.news') }}
                 </x-responsive-nav-link>
-            </form>
+                <x-responsive-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
+                    {{ __('shared::navigation.stories') }}
+                </x-responsive-nav-link>
+                @if(Auth::user()->isAdmin())
+                <x-responsive-nav-link :href="route('filament.admin.pages.dashboard')"
+                    :active="request()->routeIs('filament.admin.*')">
+                    {{ __('shared::navigation.admin') }}
+                </x-responsive-nav-link>
+                @endif
+            </div>
+
+            <div class="space-y-1 mt-2">
+                @if (Auth::user()->hasVerifiedEmail())
+                <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
+                    {{ __('shared::navigation.profile') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('account.edit')" :active="request()->routeIs('account.edit')">
+                    {{ __('shared::navigation.account') }}
+                </x-responsive-nav-link>
+                @else
+                <x-responsive-nav-link :href="route('verification.notice')" :active="request()->routeIs('verification.notice')">
+                    {{ __('shared::navigation.verify-email') }}
+                </x-responsive-nav-link>
+                @endif
+
+                <!-- Authentication -->
+                <form method="POST" action="{{ route('logout') }}" class="pt-2">
+                    @csrf
+                    <x-responsive-nav-link :href="route('logout')"
+                        onclick="event.preventDefault(); this.closest('form').submit();">
+                        {{ __('shared::navigation.logout') }}
+                    </x-responsive-nav-link>
+                </form>
+            </div>
         </div>
     </x-shared::drawer>
-    </div>
 </div>
