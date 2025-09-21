@@ -1,6 +1,6 @@
 <nav class="bg-bg text-fg">
     <div class="max-w-7xl mx-auto px-1 sm:px-4 lg:px-6">
-        <div class="h-16 flex justify-between">
+        <div class="h-16 flex gap-1 justify-between items-center">
             <div class="flex items-center shrink-0">
                 <a href="{{ route('home') }}" class="hidden md:block">
                     <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-14" id="header-logo">
@@ -10,7 +10,12 @@
                 </a>
             </div>
 
-            <div class="flex-1 flex items-center justify-center sm:justify-end gap-2 sm:gap-4 md:gap-8 sm:px-4 md:px-8">
+            <div class="md:pl-8 flex-1">
+                <!-- Global Search -->
+                <x-search::components.header-search />
+            </div>
+
+            <div class="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 md:gap-4 sm:px-4 md:px-8">
                 <x-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')" class="uppercase h-full">
                     {{ __('shared::navigation.stories') }}
                 </x-nav-link>
@@ -22,7 +27,7 @@
             @unless (request()->routeIs('login'))
             <div class="h-full flex items-center justify-center">
                 <a href="{{ route('login') }}">
-                    <x-shared::button color="accent">{{ __('shared::navigation.login') }}</x-shared::button>
+                    <x-shared::button size="sm" color="accent">{{ __('shared::navigation.login') }}</x-shared::button>
                 </a>
             </div>
             @endunless
