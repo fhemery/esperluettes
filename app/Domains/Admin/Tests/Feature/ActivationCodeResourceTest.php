@@ -2,8 +2,8 @@
 
 use App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource;
 use App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource\Pages\CreateActivationCode;
-use App\Domains\Auth\Models\User;
-use App\Domains\Auth\Services\ActivationCodeService;
+use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Private\Services\ActivationCodeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;

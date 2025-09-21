@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Public\Api\Contracts\CommentDto;
 use App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy;
 use App\Domains\Comment\Private\Models\Comment;

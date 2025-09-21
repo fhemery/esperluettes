@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Route;
 use App\Domains\Story\Private\Controllers\StoryCreateController;
 use App\Domains\Story\Private\Controllers\StoryController;

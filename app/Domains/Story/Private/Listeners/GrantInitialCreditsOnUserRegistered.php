@@ -2,7 +2,7 @@
 
 namespace App\Domains\Story\Private\Listeners;
 
-use App\Domains\Auth\Events\UserRegistered;
+use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;

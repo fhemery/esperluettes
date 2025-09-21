@@ -1,7 +1,7 @@
 <?php
 
-use App\Domains\Auth\Events\PasswordResetRequested;
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Events\PasswordResetRequested;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -11,7 +11,7 @@ return [
     App\Domains\News\Public\Providers\NewsServiceProvider::class,
     App\Domains\Home\Public\Providers\HomeServiceProvider::class,
     App\Domains\Dashboard\Public\Providers\DashboardServiceProvider::class,
-    App\Domains\Auth\Providers\AuthServiceProvider::class,
+    App\Domains\Auth\Public\Providers\AuthServiceProvider::class,
     App\Domains\Profile\Public\Providers\ProfileServiceProvider::class,
     App\Domains\StoryRef\Public\Providers\StoryServiceRefProvider::class,
     App\Domains\Comment\Public\Providers\CommentServiceProvider::class,

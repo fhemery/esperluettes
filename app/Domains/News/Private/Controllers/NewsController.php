@@ -2,8 +2,8 @@
 
 namespace App\Domains\News\Private\Controllers;
 
-use App\Domains\Auth\PublicApi\AuthPublicApi;
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\News\Private\Models\News;
 use App\Domains\News\Private\Services\NewsService;
 use Illuminate\Routing\Controller as BaseController;

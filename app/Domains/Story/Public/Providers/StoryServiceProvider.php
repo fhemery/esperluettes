@@ -22,7 +22,7 @@ use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use App\Domains\Auth\Events\UserRegistered;
+use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;

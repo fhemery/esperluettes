@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Public\Api\Contracts\CommentListDto;
 use App\Domains\Comment\Private\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;

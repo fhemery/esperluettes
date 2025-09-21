@@ -3,8 +3,8 @@
 namespace App\Domains\Story\Private\Services;
 
 use App\Domains\Story\Private\Models\Story;
-use App\Domains\Auth\PublicApi\AuthPublicApi;
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Auth;
 
 class StorySearchService

@@ -2,7 +2,7 @@
 
 namespace App\Domains\Profile\Private\Controllers;
 
-use App\Domains\Auth\PublicApi\AuthPublicApi;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Profile\Private\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Private\Services\ProfileService;

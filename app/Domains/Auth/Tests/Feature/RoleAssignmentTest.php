@@ -1,10 +1,10 @@
 <?php
 
-use App\Domains\Auth\Events\UserRoleGranted;
-use App\Domains\Auth\Events\UserRoleRevoked;
-use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Auth\Services\RoleService;
-use App\Domains\Auth\Models\User;
+use App\Domains\Auth\Public\Events\UserRoleGranted;
+use App\Domains\Auth\Public\Events\UserRoleRevoked;
+use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Private\Services\RoleService;
+use App\Domains\Auth\Private\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

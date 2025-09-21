@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource;
-use App\Domains\Auth\Services\ActivationCodeService;
+use App\Domains\Auth\Private\Services\ActivationCodeService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +16,7 @@ class CreateActivationCode extends CreateRecord
         $activationCodeService = app(ActivationCodeService::class);
         
         $sponsorUser = $data['sponsor_user_id'] 
-            ? \App\Domains\Auth\Models\User::findOrFail($data['sponsor_user_id'])
+            ? \App\Domains\Auth\Private\Models\User::findOrFail($data['sponsor_user_id'])
             : null;
         
         return $activationCodeService->generateCode(

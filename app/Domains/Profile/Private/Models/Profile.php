@@ -33,7 +33,7 @@ class Profile extends Model
     /**
      * Transient roles attached at runtime (not persisted).
      *
-     * @var array<int, \App\Domains\Auth\PublicApi\Dto\RoleDto>
+     * @var array<int, \App\Domains\Auth\Public\Api\Dto\RoleDto>
      */
     public array $roles = [];
 

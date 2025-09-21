@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;

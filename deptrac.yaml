@@ -37,18 +37,16 @@ deptrac:
     - name: AuthPublic
       collectors:
         - type: directory
-          value: 'app/Domains/Auth/PublicApi/'
+          value: 'app/Domains/Auth/Public/Api/'
         - type: directory
-          value: 'app/Domains/Auth/Events/'
+          value: 'app/Domains/Auth/Public/Events/'
 
     - name: AuthPrivate
       collectors:
         - type: bool
           must_not:
             - type: directory
-              value: app/Domains/Auth/PublicApi/
-            - type: directory
-              value: app/Domains/Auth/Events/
+              value: app/Domains/Auth/Public/
             - type: directory
               value: app/Domains/Auth/Tests/
           must:

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Models\User;
+use App\Domains\Auth\Private\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;

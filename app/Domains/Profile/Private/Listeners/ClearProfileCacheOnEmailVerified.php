@@ -2,7 +2,7 @@
 
 namespace App\Domains\Profile\Private\Listeners;
 
-use App\Domains\Auth\Events\EmailVerified;
+use App\Domains\Auth\Public\Events\EmailVerified;
 use App\Domains\Profile\Private\Services\ProfileCacheService;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 

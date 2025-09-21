@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Support\WordCounter;
 use App\Domains\Story\Public\Events\StoryCreated;
 use App\Domains\Story\Private\Models\Story;

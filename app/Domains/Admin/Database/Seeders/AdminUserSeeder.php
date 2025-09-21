@@ -2,8 +2,8 @@
 
 namespace App\Domains\Admin\Database\Seeders;
 
-use App\Domains\Auth\Models\User;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Private\Models\Role;
 use App\Domains\Profile\Private\Models\Profile;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;

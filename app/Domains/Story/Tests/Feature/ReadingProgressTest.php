@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\ReadingProgress;
 use Illuminate\Foundation\Testing\RefreshDatabase;

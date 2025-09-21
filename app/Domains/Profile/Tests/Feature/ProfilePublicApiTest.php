@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Events\EmailVerified;
+use App\Domains\Auth\Public\Events\EmailVerified;
 use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Profile\Private\Api\ProfileApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;

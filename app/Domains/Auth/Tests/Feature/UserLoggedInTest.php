@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\Events\UserLoggedIn;
+use App\Domains\Auth\Public\Events\UserLoggedIn;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

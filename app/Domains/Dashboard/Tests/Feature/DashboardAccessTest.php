@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\Models\User;
+use App\Domains\Auth\Private\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

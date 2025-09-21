@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Profile\Private\Models\Profile;
-use App\Domains\Auth\Events\UserRegistered;
+use App\Domains\Auth\Public\Events\UserRegistered;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;

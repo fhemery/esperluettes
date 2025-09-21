@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\Auth;
 
 use App\Domains\Admin\Filament\Resources\Auth\RoleResource\Pages;
-use App\Domains\Auth\Models\Role;
+use App\Domains\Auth\Private\Models\Role;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;

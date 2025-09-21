@@ -3,11 +3,11 @@
 namespace App\Domains\Admin\Filament\Resources\Auth;
 
 use App\Domains\Admin\Filament\Resources\Auth\UserResource\Pages;
-use App\Domains\Auth\Models\User;
-use App\Domains\Auth\Models\Role;
-use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Auth\Services\RoleService;
-use App\Domains\Auth\Services\UserActivationService;
+use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Private\Models\Role;
+use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Private\Services\RoleService;
+use App\Domains\Auth\Private\Services\UserActivationService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;

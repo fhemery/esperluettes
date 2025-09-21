@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\Events\PasswordChanged;
+use App\Domains\Auth\Public\Events\PasswordChanged;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

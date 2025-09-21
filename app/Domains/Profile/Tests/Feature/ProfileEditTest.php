@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Profile\Public\Events\AvatarChanged;
 use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;
 use App\Domains\Profile\Public\Events\BioUpdated;

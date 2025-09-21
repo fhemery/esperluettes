@@ -1,7 +1,7 @@
 <?php
 
-use App\Domains\Auth\Models\User;
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;

@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\Auth;
 
 use App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource\Pages;
-use App\Domains\Auth\Models\ActivationCode;
+use App\Domains\Auth\Private\Models\ActivationCode;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;

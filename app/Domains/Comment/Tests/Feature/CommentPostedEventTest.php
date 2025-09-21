@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Comment\Public\Api\CommentPublicApi;

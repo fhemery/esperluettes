@@ -1,7 +1,7 @@
 <?php
 
-use App\Domains\Auth\Events\UserDeleted;
-use App\Domains\Auth\Models\User;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Auth\Private\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

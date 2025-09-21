@@ -2,9 +2,9 @@
 
 namespace App\Domains\Auth\Database\Seeders;
 
-use App\Domains\Auth\Models\Role;
-use App\Domains\Auth\Models\User;
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Private\Models\Role;
+use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

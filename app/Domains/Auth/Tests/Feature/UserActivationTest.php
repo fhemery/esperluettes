@@ -1,9 +1,9 @@
 <?php
 
-use App\Domains\Auth\Events\UserDeactivated;
-use App\Domains\Auth\Events\UserReactivated;
-use App\Domains\Auth\Services\UserActivationService;
-use App\Domains\Auth\Models\User;
+use App\Domains\Auth\Public\Events\UserDeactivated;
+use App\Domains\Auth\Public\Events\UserReactivated;
+use App\Domains\Auth\Private\Services\UserActivationService;
+use App\Domains\Auth\Private\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\Events\UserLoggedOut;
+use App\Domains\Auth\Public\Events\UserLoggedOut;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

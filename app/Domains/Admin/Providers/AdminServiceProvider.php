@@ -4,7 +4,7 @@ namespace App\Domains\Admin\Providers;
 
 use App\Domains\Admin\Http\Middleware\InjectFilamentUserName;
 use Illuminate\Auth\Middleware\Authenticate;
-use App\Domains\Auth\Middleware\CheckRole;
+use App\Domains\Auth\Public\Middleware\CheckRole;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;

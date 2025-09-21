@@ -2,8 +2,8 @@
 
 namespace App\Domains\Story\Private\Controllers;
 
-use App\Domains\Auth\PublicApi\AuthPublicApi;
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Shared\Support\Seo;

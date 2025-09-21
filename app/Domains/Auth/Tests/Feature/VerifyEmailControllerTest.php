@@ -1,11 +1,11 @@
 <?php
 
-use App\Domains\Auth\Events\EmailVerified;
-use App\Domains\Auth\Events\UserRoleGranted;
-use App\Domains\Auth\Events\UserRoleRevoked;
-use App\Domains\Auth\Models\ActivationCode;
-use App\Domains\Auth\Models\User;
-use App\Domains\Auth\PublicApi\Roles;
+use App\Domains\Auth\Public\Events\EmailVerified;
+use App\Domains\Auth\Public\Events\UserRoleGranted;
+use App\Domains\Auth\Public\Events\UserRoleRevoked;
+use App\Domains\Auth\Private\Models\ActivationCode;
+use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
