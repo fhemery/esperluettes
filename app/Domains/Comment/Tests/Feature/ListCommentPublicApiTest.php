@@ -1,8 +1,8 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Comment\Contracts\CommentListDto;
-use App\Domains\Comment\Models\Comment;
+use App\Domains\Comment\Public\Api\Contracts\CommentListDto;
+use App\Domains\Comment\Private\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\UnauthorizedException;
 use Tests\TestCase;

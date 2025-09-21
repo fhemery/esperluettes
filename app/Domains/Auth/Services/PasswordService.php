@@ -4,7 +4,7 @@ namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\Events\PasswordChanged;
 use App\Domains\Auth\Models\User;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 

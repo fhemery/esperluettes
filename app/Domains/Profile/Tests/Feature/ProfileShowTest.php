@@ -101,14 +101,14 @@ describe('tab selection', function () {
         $bob = bob($this);
 
         $this->actingAs($bob)->get("/profile/alice")
-            ->assertSee("tab: 'about'");
+            ->assertSee("tab: 'about'", false);
     });
 
     it('should select the "Stories" tab by default if user is current user', function () {
         $user = alice($this);
 
         $this->actingAs($user)->get('/profile')
-            ->assertSee("tab: 'stories'");
+            ->assertSee("tab: 'stories'", false);
     });
 });
 

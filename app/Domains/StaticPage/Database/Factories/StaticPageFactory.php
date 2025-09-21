@@ -2,7 +2,7 @@
 
 namespace App\Domains\StaticPage\Database\Factories;
 
-use App\Domains\StaticPage\Models\StaticPage;
+use App\Domains\StaticPage\Private\Models\StaticPage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

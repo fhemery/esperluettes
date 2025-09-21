@@ -64,27 +64,12 @@ deptrac:
     - name: CommentPublic
       collectors:
         - type: directory
-          value: 'app/Domains/Comment/PublicApi/'
-        - type: directory
-          value: 'app/Domains/Comment/Contracts/'
-        - type: directory
-          value: 'app/Domains/Comment/Events/'
+          value: 'app/Domains/Comment/Public/'
 
     - name: CommentPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Comment/PublicApi/
-            - type: directory
-              value: app/Domains/Comment/Contracts/
-            - type: directory
-              value: 'app/Domains/Comment/Events/'
-            - type: directory
-              value: app/Domains/Comment/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Comment/
+        - type: directory
+          value: app/Domains/Comment/Private/
 
     - name: CommentTests
       collectors:
@@ -92,37 +77,26 @@ deptrac:
           value: 'app/Domains/Comment/Tests/'
 
     # Dashboard Domain
+    - name: DashboardPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Dashboard/Public/'
+
     - name: DashboardPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Dashboard/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Dashboard/
+        - type: directory
+          value: app/Domains/Dashboard/Private/
 
     # Events domains
     - name: EventsPublic
       collectors:
         - type: directory
-          value: app/Domains/Events/PublicApi/
-        - type: directory
-          value: app/Domains/Events/Contracts/
+          value: app/Domains/Events/Public/
         
     - name: EventsPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Events/PublicApi/
-            - type: directory
-              value: app/Domains/Events/Contracts/
-            - type: directory
-              value: app/Domains/Events/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Events/
+        - type: directory
+          value: app/Domains/Events/Private/
 
     - name: EventsTests
       collectors:
@@ -130,33 +104,26 @@ deptrac:
           value: app/Domains/Events/Tests/
 
     # Home Domain
+    - name: HomePublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Home/Public/'
+
     - name: HomePrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Home/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Home/
+        - type: directory
+          value: app/Domains/Home/Private/
 
     # News Domain
     - name: NewsPublic
       collectors:
         - type: directory
-          value: 'app/Domains/News/PublicApi/'
+          value: 'app/Domains/News/Public/'
 
     - name: NewsPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/News/PublicApi/
-            - type: directory
-              value: app/Domains/News/Tests/
-          must:
-            - type: directory
-              value: app/Domains/News/
+        - type: directory
+          value: app/Domains/News/Private/
 
     - name: NewsTests
       collectors:
@@ -183,19 +150,12 @@ deptrac:
     - name: StaticPagePublic
       collectors:
         - type: directory
-          value: 'app/Domains/StaticPage/PublicApi/'
+          value: 'app/Domains/StaticPage/Public/'
 
     - name: StaticPagePrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/StaticPage/PublicApi/
-            - type: directory
-              value: app/Domains/StaticPage/Tests/
-          must:
-            - type: directory
-              value: app/Domains/StaticPage/
+        - type: directory
+          value: app/Domains/StaticPage/Private/
 
     - name: StaticPageTests
       collectors:
@@ -225,12 +185,20 @@ deptrac:
         - type: directory
           value: 'app/Domains/Story/Tests/'
 
-    # StoryRef Domain
-    # The StoryRef Domain is a very dumb one. As such, we do not create public or private APIs for it.
-    - name: StoryRef
+    - name: StoryRefPublic
       collectors:
         - type: directory
-          value: app/Domains/StoryRef/
+          value: app/Domains/StoryRef/Public/
+
+    - name: StoryRefPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/StoryRef/Private/
+
+    - name: StoryRefTests
+      collectors:
+        - type: directory
+          value: app/Domains/StoryRef/Tests/
 
   ruleset:
     # Shared contracts and DTOs - accessible by all domains
@@ -253,9 +221,17 @@ deptrac:
       - CommentPrivate
       - EventsPublic
 
+    DashboardPublic:
+      - Shared
+      - DashboardPrivate
+
     EventsPublic:
       - Shared
       - EventsPrivate
+
+    HomePublic:
+      - Shared
+      - HomePrivate
 
     NewsPublic:
       - Shared
@@ -277,12 +253,14 @@ deptrac:
       - CommentPublic
       - Shared
       - StoryPrivate
-      - StoryRef
+      - StoryRefPublic
+      - StoryRefPrivate
       - EventsPublic
 
-    StoryRef:
+    StoryRefPublic:
       - Shared
       - EventsPublic
+      - StoryRefPrivate
 
     # ###################################################
     # Private domains - can access Shared + other domain Public APIs + events
@@ -303,7 +281,8 @@ deptrac:
       - StaticPagePrivate
       - StoryPublic
       - StoryPrivate
-      - StoryRef
+      - StoryRefPublic
+      - StoryRefPrivate
       - DashboardPrivate
       - HomePrivate
       - EventsPublic
@@ -337,6 +316,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - NewsPublic
 
     ProfilePrivate:
       - Shared
@@ -348,14 +328,20 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - StaticPagePublic
 
     StoryPrivate:
       - Shared
       - AuthPublic
       - CommentPublic
       - ProfilePublic
-      - StoryRef
+      - StoryRefPrivate
       - EventsPublic
+
+    StoryRefPrivate:
+      - Shared
+      - EventsPublic
+      - StoryRefPublic
 
     # ###################################################
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
@@ -405,7 +391,8 @@ deptrac:
       - StoryPublic
       - AuthPublic
       - ProfilePublic
-      - StoryRef
+      - StoryRefPublic
+      - StoryRefPrivate
 
     AdminTests:
       - Shared
@@ -416,4 +403,5 @@ deptrac:
       - ProfilePublic
       - StaticPagePublic
       - StoryPublic
-      - StoryRef
+      - StoryRefPublic
+      - StoryRefPrivate

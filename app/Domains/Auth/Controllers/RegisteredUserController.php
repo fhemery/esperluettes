@@ -7,7 +7,7 @@ use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Services\ActivationCodeService;
 use App\Domains\Auth\Requests\RegisterRequest;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;

@@ -3,7 +3,7 @@
 namespace App\Domains\Auth\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Events\EmailVerified;
 use App\Domains\Auth\Events\PasswordChanged;

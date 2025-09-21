@@ -1,8 +1,8 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Story\Models\Chapter;
-use App\Domains\Story\Models\ReadingProgress;
+use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Models\ReadingProgress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;

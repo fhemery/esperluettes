@@ -1,7 +1,6 @@
 <?php
 
-use App\Domains\News\Models\News;
-use App\Domains\Auth\Models\User;
+use App\Domains\News\Private\Models\News;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

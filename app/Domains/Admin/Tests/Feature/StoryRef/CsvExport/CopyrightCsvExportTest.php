@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Admin\Filament\Resources\StoryRef\CopyrightResource\Pages\ListCopyrights;
-use App\Domains\StoryRef\Models\StoryRefCopyright;
+use App\Domains\StoryRef\Private\Models\StoryRefCopyright;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;

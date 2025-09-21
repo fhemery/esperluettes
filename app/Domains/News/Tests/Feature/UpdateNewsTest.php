@@ -1,7 +1,7 @@
 <?php
 
-use App\Domains\News\Models\News;
-use App\Domains\News\Events\NewsUpdated;
+use App\Domains\News\Private\Models\News;
+use App\Domains\News\Public\Events\NewsUpdated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

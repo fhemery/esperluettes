@@ -1,13 +1,12 @@
 <?php
 
-use App\Domains\Story\Models\Chapter;
+use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
-use App\Domains\Comment\Contracts\CommentToCreateDto;
-use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Story\Events\ChapterDeleted;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
+use App\Domains\Story\Public\Events\ChapterDeleted;
 
 uses(TestCase::class, RefreshDatabase::class);
 

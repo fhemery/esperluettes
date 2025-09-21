@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Admin\Filament\Resources\StoryRef\StatusResource\Pages\ListStatuses;
-use App\Domains\StoryRef\Models\StoryRefStatus;
+use App\Domains\StoryRef\Private\Models\StoryRefStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;

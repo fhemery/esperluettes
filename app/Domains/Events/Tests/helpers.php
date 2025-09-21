@@ -1,10 +1,10 @@
 <?php
 // Events domain test helpers
 
-use App\Domains\Events\Contracts\DomainEvent;
-use App\Domains\Events\Contracts\StoredDomainEventDto;
-use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\Events\PublicApi\EventPublicApi;
+use App\Domains\Events\Public\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\StoredDomainEventDto;
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Events\Public\Api\EventPublicApi;
 
 /**
  * Retrieve the most recent stored event by name and ensure its DomainEvent instance matches the given class.

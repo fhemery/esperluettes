@@ -4,7 +4,7 @@ use App\Domains\Auth\PublicApi\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Domains\Story\Models\Chapter;
+use App\Domains\Story\Private\Models\Chapter;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -163,7 +163,7 @@ describe('Story details page', function () {
                 'story_ref_trigger_warning_ids' => [$violence->id, $abuse->id],
             ]);
             // Ensure disclosure is listed
-            $story->tw_disclosure = \App\Domains\Story\Models\Story::TW_LISTED;
+            $story->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_LISTED;
             $story->saveQuietly();
 
             Auth::logout();
@@ -183,7 +183,7 @@ describe('Story details page', function () {
                     'description' => '<p>Desc</p>',
                     'story_ref_trigger_warning_ids' => [],
                 ]);
-                $story->tw_disclosure = \App\Domains\Story\Models\Story::TW_NO_TW;
+                $story->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_NO_TW;
                 $story->saveQuietly();
         
                 Auth::logout();
@@ -200,7 +200,7 @@ describe('Story details page', function () {
                     'description' => '<p>Desc</p>',
                     'story_ref_trigger_warning_ids' => [],
                 ]);
-                $story->tw_disclosure = \App\Domains\Story\Models\Story::TW_UNSPOILED;
+                $story->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_UNSPOILED;
                 $story->saveQuietly();
         
                 Auth::logout();

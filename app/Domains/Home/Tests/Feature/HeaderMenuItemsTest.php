@@ -8,11 +8,11 @@ use PHPUnit\Framework\Assert;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-function extractFirstDivById(string $html, string $id): string
+function extractDivById(string $html, string $id): string
 {
-    $start = strpos($html, $id);
+    $marker = 'id="' . $id . '"';
+    $start = strpos($html, $marker);
     expect($start)->not()->toBeFalse("Start marker not found: {$id}");
-    // Find the beginning of the div tag that contains this class fragment
     $divOpen = strrpos(substr($html, 0, $start), '<div');
     expect($divOpen)->not()->toBeFalse('Enclosing div not found');
 
@@ -20,103 +20,92 @@ function extractFirstDivById(string $html, string $id): string
     $depth = 0;
     $len = strlen($html);
     for ($i = $offset; $i < $len; $i++) {
-        if (substr($html, $i, 4) === '<div') {
-            $depth++;
-            $i += 3; // skip 'div'
-            continue;
-        }
-        if (substr($html, $i, 6) === '</div>') {
-            $depth--;
-            if ($depth === 0) {
-                // include closing tag
-                $end = $i + 6;
-                return substr($html, $offset, $end - $offset);
-            }
-            $i += 5; // skip '/div>'
+        if (substr($html, $i, 4) === '<div') { $depth++; $i += 3; continue; }
+        if (substr($html, $i, 6) === '</div>') { $depth--; if ($depth === 0) { $end = $i + 6; return substr($html, $offset, $end - $offset); } $i += 5; }
+    }
+    \PHPUnit\Framework\Assert::fail('Closing </div> not found for section');
+}
+
+function extractHrefs(string $html): array
+{
+    $hrefs = [];
+    if (preg_match_all('/<a\s[^>]*href=("|\')(.*?)(\1)/i', $html, $m)) {
+        foreach ($m[2] as $href) {
+            $hrefs[] = html_entity_decode($href);
         }
     }
-    Assert::fail('Closing </div> not found for section');
+    // Deduplicate
+    return array_values(array_unique($hrefs));
 }
 
-function countClickables(string $html): int
+function createUserForScenario($test, string $scenario)
 {
-    $anchors = preg_match_all('/<a\s[^>]*href=/i', $html) ?: 0;
-    return $anchors;
+    return match ($scenario) {
+        'unverified' => alice($test, [], false),
+        'verified' => alice($test),
+        'admins' => admin($test),
+        default => alice($test),
+    };
 }
 
-function extractClickables(string $html): array
-{
-    $items = [];
-    if (preg_match_all('/<a\s[^>]*href=(\"|\')(.*?)(\1)[^>]*>(.*?)<\/a>/is', $html, $m, PREG_SET_ORDER)) {
-        foreach ($m as $match) {
-            $href = html_entity_decode(trim($match[2]));
-            // Strip tags inside link, collapse whitespace
-            $text = trim(preg_replace('/\s+/', ' ', strip_tags($match[4])));
-            $items[] = '[a] ' . $text . ' => ' . $href;
-        }
+it("desktop links are present in the drawer for :scenario", function (string $scenario) {
+    $user = createUserForScenario($this, $scenario);
+    $this->actingAs($user);
+
+    $routeName = $scenario === 'unverified' ? 'verification.notice' : 'dashboard';
+
+    $html = $this->get(route($routeName))
+        ->assertOk()
+        ->getContent();
+
+    // Sections
+    $desktopLinksSection = extractDivById($html, 'desktop-nav-links');
+    $drawerSection = extractDivById($html, 'desktop-nav-drawer');
+
+    $desktopHrefs = extractHrefs($desktopLinksSection);
+    $drawerHrefs = extractHrefs($drawerSection);
+
+    // Assert every desktop link exists in the drawer
+    $missing = array_values(array_diff($desktopHrefs, $drawerHrefs));
+    if (!empty($missing)) {
+        $msg = "Drawer is missing some desktop links ({$scenario}).\n" .
+            "Missing:\n- " . implode("\n- ", $missing) . "\n" .
+            "Desktop hrefs:\n- " . implode("\n- ", $desktopHrefs) . "\n" .
+            "Drawer hrefs:\n- " . implode("\n- ", $drawerHrefs);
+        \PHPUnit\Framework\Assert::fail($msg);
     }
-    return $items;
-}
 
-function assertSameClickableCountOrDiff(string $desktopHtml, string $responsiveHtml, string $scenario): void
-{
-    $dc = countClickables($desktopHtml);
-    $rc = countClickables($responsiveHtml);
-    if ($dc !== $rc) {
-        $d = extractClickables($desktopHtml);
-        $r = extractClickables($responsiveHtml);
-        $msg = "Menu clickable count (links + buttons) differs for {$scenario}.\n" .
-            "Desktop ({$dc}) vs Responsive ({$rc})\n" .
-            "Desktop items:\n- " . implode("\n- ", $d) . "\n" .
-            "Responsive items:\n- " . implode("\n- ", $r);
+    expect(true)->toBeTrue();
+})->with([
+    'unverified',
+    'verified',
+    'admins',
+]);
+
+it('verified: drawer contains profile, account and logout links', function () {
+    $user = alice($this); // verified user
+    $this->actingAs($user);
+
+    $html = $this->get(route('dashboard'))
+        ->assertOk()
+        ->getContent();
+
+    $drawerSection = extractDivById($html, 'desktop-nav-drawer');
+    $hrefs = extractHrefs($drawerSection);
+
+    $expected = [
+        route('profile.show.own'),
+        route('account.edit'),
+        route('logout'),
+    ];
+
+    $missing = array_values(array_diff($expected, $hrefs));
+    if (!empty($missing)) {
+        $msg = "Verified drawer missing required links.\n" .
+            "Missing:\n- " . implode("\n- ", $missing) . "\n" .
+            "Drawer hrefs:\n- " . implode("\n- ", $hrefs);
         Assert::fail($msg);
     }
-    expect($dc)->toBe($rc);
-}
 
-it('unverified: desktop and responsive header have same number of top-level links', function () {
-    $user = alice($this, [], false); // unverified
-    $this->actingAs($user);
-
-    $html = $this->get(route('verification.notice'))
-        ->assertOk()
-        ->getContent();
-
-    // Desktop: left-side main nav links
-    $desktopSection = extractFirstDivById($html, 'desktop-nav');
-
-    // Responsive: authenticated responsive top links
-    $responsiveSection = extractFirstDivById($html, 'mobile-nav');
-
-    assertSameClickableCountOrDiff($desktopSection, $responsiveSection, 'unverified');
-});
-
-it('verified: desktop and responsive header have same number of top-level links', function () {
-    $user = alice($this); // verified
-    $this->actingAs($user);
-
-    $html = $this->get(route('dashboard'))
-        ->assertOk()
-        ->getContent();
-
-    $desktopSection = extractFirstDivById($html, 'desktop-nav');
-
-    $responsiveSection = extractFirstDivById($html, 'mobile-nav');
-
-    assertSameClickableCountOrDiff($desktopSection, $responsiveSection, 'verified');
-});
-
-it('admins: desktop and responsive header have same number of top-level links', function () {
-    $user = admin($this);
-    $this->actingAs($user);
-
-    $html = $this->get(route('dashboard'))
-        ->assertOk()
-        ->getContent();
-
-    $desktopSection = extractFirstDivById($html, 'desktop-nav');
-
-    $responsiveSection = extractFirstDivById($html, 'mobile-nav');
-
-    assertSameClickableCountOrDiff($desktopSection, $responsiveSection, 'admins');
+    expect(true)->toBeTrue();
 });

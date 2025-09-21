@@ -2,7 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\StoryRef;
 
-use App\Domains\StoryRef\Models\StoryRefStatus;
+use App\Domains\StoryRef\Private\Models\StoryRefStatus;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;

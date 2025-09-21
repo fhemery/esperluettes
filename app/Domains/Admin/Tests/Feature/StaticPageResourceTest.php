@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Admin\Filament\Resources\StaticPage\StaticPageResource\Pages\CreateStaticPage;
-use App\Domains\StaticPage\Models\StaticPage;
+use App\Domains\StaticPage\Private\Models\StaticPage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;

@@ -1,9 +1,9 @@
 <?php
 
-use App\Domains\Comment\Contracts\CommentDto;
-use App\Domains\Comment\Contracts\CommentListDto;
-use App\Domains\Comment\Contracts\CommentToCreateDto;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\CommentDto;
+use App\Domains\Comment\Public\Api\Contracts\CommentListDto;
+use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
 
 /**
  * @param int $authorId

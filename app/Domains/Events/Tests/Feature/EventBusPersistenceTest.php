@@ -1,9 +1,9 @@
 <?php
 
-use App\Domains\Events\Contracts\DomainEvent;
-use App\Domains\Events\Contracts\AuditableEvent;
-use App\Domains\Events\PublicApi\EventBus;
-use App\Domains\Events\PublicApi\EventPublicApi;
+use App\Domains\Events\Public\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\AuditableEvent;
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Events\Public\Api\EventPublicApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

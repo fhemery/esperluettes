@@ -7,19 +7,12 @@ require app_path('Domains/Auth/routes.php');
 // Profile routes are loaded via its ServiceProvider
 
 // Include news routes from News domain
-require app_path('Domains/News/routes.php');
+// (moved) News routes are loaded via App\Domains\News\Public\Providers\NewsServiceProvider
 
-// Include home routes from Home domain
-require app_path('Domains/Home/routes.php');
+// Home routes are loaded via App\Domains\Home\Public\Providers\HomeServiceProvider
 
-// Include dashboard routes from Dashboard domain
-require app_path('Domains/Dashboard/routes.php');
+// Dashboard routes are loaded via App\Domains\Dashboard\Public\Providers\DashboardServiceProvider
 
-// Include story routes from Story domain
-require app_path('Domains/Story/routes.php');
+// Story routes are loaded via App\Domains\Story\Public\Providers\StoryServiceProvider
 
-// Include comment routes from Comment domain
-require app_path('Domains/Comment/routes.php');
-
-// Include static page routes from StaticPage domain (must be last due to catch-all)
-require app_path('Domains/StaticPage/routes.php');
+// StaticPage routes are loaded via App\Domains\StaticPage\Public\Providers\StaticPageServiceProvider

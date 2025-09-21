@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\News\NewsResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\News\NewsResource;
-use App\Domains\News\Services\NewsService;
+use App\Domains\News\Private\Services\NewsService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 

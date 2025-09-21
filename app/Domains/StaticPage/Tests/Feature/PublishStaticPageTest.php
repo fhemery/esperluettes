@@ -1,8 +1,8 @@
 <?php
 
-use App\Domains\StaticPage\Models\StaticPage;
-use App\Domains\StaticPage\Services\StaticPageService;
-use App\Domains\StaticPage\Events\StaticPagePublished;
+use App\Domains\StaticPage\Private\Models\StaticPage;
+use App\Domains\StaticPage\Private\Services\StaticPageService;
+use App\Domains\StaticPage\Public\Events\StaticPagePublished;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

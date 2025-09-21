@@ -2,7 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\News;
 
-use App\Domains\News\Models\News;
+use App\Domains\News\Private\Models\News;
 use App\Domains\Admin\Filament\Resources\News\PinnedNewsResource\Pages\ReorderPinnedNews;
 use Filament\Tables;
 use Filament\Tables\Table;

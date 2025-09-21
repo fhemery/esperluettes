@@ -1,8 +1,8 @@
 <?php
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Comment\Contracts\DefaultCommentPolicy;
-use App\Domains\Comment\PublicApi\CommentPolicyRegistry;
+use App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;

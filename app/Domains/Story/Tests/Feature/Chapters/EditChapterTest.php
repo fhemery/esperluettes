@@ -1,10 +1,10 @@
 <?php
 
-use App\Domains\Story\Events\ChapterPublished;
-use App\Domains\Story\Events\ChapterUnpublished;
-use App\Domains\Story\Events\ChapterUpdated;
+use App\Domains\Story\Public\Events\ChapterPublished;
+use App\Domains\Story\Public\Events\ChapterUnpublished;
+use App\Domains\Story\Public\Events\ChapterUpdated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Domains\Story\Models\Chapter;
+use App\Domains\Story\Private\Models\Chapter;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);

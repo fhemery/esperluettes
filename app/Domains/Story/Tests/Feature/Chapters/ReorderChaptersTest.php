@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Domains\Story\Models\Chapter;
+use App\Domains\Story\Private\Models\Chapter;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);

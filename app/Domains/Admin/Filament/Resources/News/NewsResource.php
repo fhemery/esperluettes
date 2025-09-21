@@ -2,8 +2,8 @@
 
 namespace App\Domains\Admin\Filament\Resources\News;
 
-use App\Domains\News\Models\News;
-use App\Domains\News\Services\NewsService;
+use App\Domains\News\Private\Models\News;
+use App\Domains\News\Private\Services\NewsService;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Filament\Forms;
 use Filament\Forms\Form;

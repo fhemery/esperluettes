@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Comment\Contracts\CommentToCreateDto;
-use App\Domains\Comment\Events\CommentPosted;
-use App\Domains\Comment\PublicApi\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
+use App\Domains\Comment\Public\Events\CommentPosted;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\Support\WordCounter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

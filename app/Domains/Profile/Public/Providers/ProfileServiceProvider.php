@@ -9,7 +9,7 @@ use App\Domains\Profile\Private\Listeners\CreateProfileOnUserRegistered;
 use App\Domains\Profile\Private\Listeners\ClearProfileCacheOnEmailVerified;
 use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
 use App\Domains\Profile\Private\Api\ProfileApi;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Events\UserRegistered;
 use App\Domains\Auth\Events\EmailVerified;
 use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;

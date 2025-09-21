@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Admin\Filament\Resources\StoryRef\GenreResource\Pages\ListGenres;
-use App\Domains\StoryRef\Models\StoryRefGenre;
+use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;

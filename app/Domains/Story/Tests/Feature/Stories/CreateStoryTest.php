@@ -2,8 +2,8 @@
 
 use App\Domains\Auth\PublicApi\Roles;
 use App\Domains\Shared\Support\WordCounter;
-use App\Domains\Story\Events\StoryCreated;
-use App\Domains\Story\Models\Story;
+use App\Domains\Story\Public\Events\StoryCreated;
+use App\Domains\Story\Private\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -204,7 +204,7 @@ describe('Creating a story', function () {
             $resp = $this->post('/stories', $payload);
             $resp->assertRedirect();
 
-            $story = \App\Domains\Story\Models\Story::query()->firstOrFail();
+            $story = \App\Domains\Story\Private\Models\Story::query()->firstOrFail();
             $show = $this->get('/stories/' . $story->slug);
 
             // Assert
@@ -256,7 +256,7 @@ describe('Creating a story', function () {
             $resp->assertRedirect();
 
             // Assert persistence
-            $story = \App\Domains\Story\Models\Story::query()->firstOrFail();
+            $story = \App\Domains\Story\Private\Models\Story::query()->firstOrFail();
             $ids = $story->triggerWarnings()->pluck('story_ref_trigger_warnings.id')->sort()->values()->all();
             expect($ids)->toBe([$tw1->id, $tw2->id]);
 

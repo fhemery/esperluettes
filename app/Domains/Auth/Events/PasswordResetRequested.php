@@ -2,8 +2,8 @@
 
 namespace App\Domains\Auth\Events;
 
-use App\Domains\Events\Contracts\AuditableEvent;
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\AuditableEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 
 class PasswordResetRequested implements DomainEvent, AuditableEvent
 {

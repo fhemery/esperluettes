@@ -2,7 +2,7 @@
 
 namespace App\Domains\Profile\Public\Events;
 
-use App\Domains\Events\Contracts\DomainEvent;
+use App\Domains\Events\Public\Contracts\DomainEvent;
 
 class AvatarChanged implements DomainEvent
 {

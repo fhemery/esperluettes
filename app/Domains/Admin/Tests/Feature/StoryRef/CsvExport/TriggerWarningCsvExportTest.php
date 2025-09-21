@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Admin\Filament\Resources\StoryRef\TriggerWarningResource\Pages\ListTriggerWarnings;
-use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
+use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;

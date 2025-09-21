@@ -3,8 +3,8 @@
 namespace App\Domains\Admin\Filament\Resources\Shared;
 
 use App\Domains\Admin\Filament\Resources\Shared\DomainEventResource\Pages;
-use App\Domains\Events\Models\StoredDomainEvent;
-use App\Domains\Events\Services\DomainEventFactory;
+use App\Domains\Events\Private\Models\StoredDomainEvent;
+use App\Domains\Events\Private\Services\DomainEventFactory;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Filament\Resources\Resource;
 use Filament\Tables;

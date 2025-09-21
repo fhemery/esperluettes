@@ -1,9 +1,9 @@
 <?php
 
-use App\Domains\StoryRef\Services\TypeService;
-use App\Domains\StoryRef\Events\StoryRefAdded;
-use App\Domains\StoryRef\Events\StoryRefUpdated;
-use App\Domains\StoryRef\Events\StoryRefRemoved;
+use App\Domains\StoryRef\Private\Services\TypeService;
+use App\Domains\StoryRef\Public\Events\StoryRefAdded;
+use App\Domains\StoryRef\Public\Events\StoryRefUpdated;
+use App\Domains\StoryRef\Public\Events\StoryRefRemoved;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Admin\Filament\Resources\StoryRef\FeedbackResource\Pages\ListFeedbacks;
-use App\Domains\StoryRef\Models\StoryRefFeedback;
+use App\Domains\StoryRef\Private\Models\StoryRefFeedback;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;

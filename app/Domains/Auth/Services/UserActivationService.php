@@ -3,7 +3,7 @@
 namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\Models\User;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Events\UserDeactivated;
 use App\Domains\Auth\Events\UserReactivated;
 use Illuminate\Support\Facades\DB;

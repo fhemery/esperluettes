@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
 use App\Domains\Auth\Models\ActivationCode;
 use App\Domains\Auth\PublicApi\Roles;
-use App\Domains\Events\PublicApi\EventBus;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Events\EmailVerified as EmailVerifiedEvent;
 use App\Domains\Auth\Services\RoleCacheService;
 use App\Domains\Auth\Services\RoleService;

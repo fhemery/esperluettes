@@ -3,20 +3,20 @@
 namespace App\Domains\StoryRef\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Domains\StoryRef\Services\GenreService;
-use App\Domains\StoryRef\Services\AudienceService;
-use App\Domains\StoryRef\Services\TypeService;
-use App\Domains\StoryRef\Services\StatusService;
-use App\Domains\StoryRef\Services\CopyrightService;
-use App\Domains\StoryRef\Services\TriggerWarningService;
-use App\Domains\StoryRef\Services\FeedbackService;
-use App\Domains\StoryRef\Models\StoryRefGenre;
-use App\Domains\StoryRef\Models\StoryRefAudience;
-use App\Domains\StoryRef\Models\StoryRefType;
-use App\Domains\StoryRef\Models\StoryRefStatus;
-use App\Domains\StoryRef\Models\StoryRefCopyright;
-use App\Domains\StoryRef\Models\StoryRefTriggerWarning;
-use App\Domains\StoryRef\Models\StoryRefFeedback;
+use App\Domains\StoryRef\Private\Services\GenreService;
+use App\Domains\StoryRef\Private\Services\AudienceService;
+use App\Domains\StoryRef\Private\Services\TypeService;
+use App\Domains\StoryRef\Private\Services\StatusService;
+use App\Domains\StoryRef\Private\Services\CopyrightService;
+use App\Domains\StoryRef\Private\Services\TriggerWarningService;
+use App\Domains\StoryRef\Private\Services\FeedbackService;
+use App\Domains\StoryRef\Private\Models\StoryRefGenre;
+use App\Domains\StoryRef\Private\Models\StoryRefAudience;
+use App\Domains\StoryRef\Private\Models\StoryRefType;
+use App\Domains\StoryRef\Private\Models\StoryRefStatus;
+use App\Domains\StoryRef\Private\Models\StoryRefCopyright;
+use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
+use App\Domains\StoryRef\Private\Models\StoryRefFeedback;
 
 class StoryRefSeeder extends Seeder
 {

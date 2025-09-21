@@ -3,8 +3,8 @@
 namespace App\Domains\Admin\Filament\Resources\StaticPage;
 
 use App\Domains\Shared\Support\HtmlLinkUtils;
-use App\Domains\StaticPage\Models\StaticPage;
-use App\Domains\StaticPage\Services\StaticPageService;
+use App\Domains\StaticPage\Private\Models\StaticPage;
+use App\Domains\StaticPage\Private\Services\StaticPageService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;

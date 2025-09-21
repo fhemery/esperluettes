@@ -1,7 +1,7 @@
 <?php
 
-use App\Domains\StaticPage\Models\StaticPage;
-use App\Domains\StaticPage\Events\StaticPageDeleted;
+use App\Domains\StaticPage\Private\Models\StaticPage;
+use App\Domains\StaticPage\Public\Events\StaticPageDeleted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
