@@ -22,8 +22,7 @@
         </template>
     </div>
 
-    <!-- Fixed popup below the header (64px) with responsive widths -->
-    <div x-show="open" x-transition role="dialog" aria-live="polite" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[80vw] md:w-[96vw]">
+    <div x-show="open" x-transition role="dialog" aria-live="polite" class="max-w-4xl fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[80vw] md:w-[96vw]">
         <div class="rounded-md shadow-lg border bg-white text-black overflow-hidden" x-ref="dropdown" @click.outside="close()">
             <!-- Mobile-only input inside popup -->
             <div class="p-3 border-b md:hidden">
