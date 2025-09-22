@@ -2,8 +2,8 @@
 @if (!empty($chapters))
 <ul class="divide-y divide-gray-200 rounded-md border border-gray-200 bg-white">
     @foreach($chapters as $ch)
-    <li class="p-3 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
+    <li class="p-3 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 flex-1 min-w-0">
             @auth
             <button type="button"
                 class="read-toggle inline-flex items-center justify-center rounded-full w-6 h-6"
@@ -17,22 +17,25 @@
                 <span class="material-symbols-outlined text-[20px] leading-none {{ $ch->isRead ? 'text-green-700' : 'text-gray-300' }}">check_circle</span>
             </button>
             @endauth
-            <a href="{{ $ch->url }}" class="text-indigo-700 hover:text-indigo-900 font-medium">
+            <a href="{{ $ch->url }}" class="flex-1 truncate text-indigo-700 hover:text-indigo-900 font-medium">
                 {{ $ch->title }}
             </a>
         </div>
-        <div class="flex items-center gap-3">
-            <x-shared::metric-badge
-                icon="visibility"
-                :value="$ch->readsLogged"
-                :label="__('story::chapters.reads.label')"
-                :tooltip="__('story::chapters.reads.tooltip')"
-            />
-
-            <x-story::words-metric-badge
-                :nb-words="$ch->wordCount"
-                :nb-characters="$ch->characterCount"
-            />
+        <div class="flex items-center gap-2">
+            <div class="min-w-[60px] flex flex-start">
+                <x-shared::metric-badge
+                    icon="visibility"
+                    :value="$ch->readsLogged"
+                    :label="__('story::chapters.reads.label')"
+                    :tooltip="__('story::chapters.reads.tooltip')"
+                />
+            </div>
+            <div class="min-w-[60px] flex flex-start">
+                <x-story::words-metric-badge
+                    :nb-words="$ch->wordCount"
+                    :nb-characters="$ch->characterCount"
+                />
+            </div>
         </div>
     </li>
     @endforeach
