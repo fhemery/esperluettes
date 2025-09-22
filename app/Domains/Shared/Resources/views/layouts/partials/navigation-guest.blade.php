@@ -3,10 +3,10 @@
         <div class="h-16 flex gap-1 justify-between items-center">
             <div class="flex items-center shrink-0">
                 <a href="{{ route('home') }}" class="hidden md:block">
-                    <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-14" id="header-logo">
+                    <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-12 sm:h-14" id="header-logo">
                 </a>
                 <a href="{{ route('home') }}" class="block md:hidden">
-                    <img src="{{ asset('images/themes/autumn/logo.png') }}" alt="{{config('app.name')}}" class="h-14" id="header-logo">
+                    <img src="{{ asset('images/themes/autumn/logo.png') }}" alt="{{config('app.name')}}" class="h-12 sm:h-14" id="header-logo">
                 </a>
             </div>
 
