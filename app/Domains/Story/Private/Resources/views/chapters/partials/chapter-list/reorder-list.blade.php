@@ -13,7 +13,7 @@
                 class="bg-white"
             >
                 <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-[18px] leading-none text-gray-400 cursor-grab" title="Drag">
+                    <span class="material-symbols-outlined text-[18px] leading-none text-gray-400 cursor-grab [@media(pointer:coarse)]:hidden" title="Drag">
                         drag_indicator
                     </span>
                     <span class="font-medium text-gray-700">
