@@ -52,11 +52,11 @@ return [
         'draft' => 'Brouillon',
     ],
     'actions' => [
+        'cancel' => 'Annuler',
         'edit' => 'Éditer le chapitre',
         'delete' => 'Supprimer le chapitre',
         'reorder' => 'Réorganiser',
         'save_order' => "Enregistrer l'ordre",
-        'cancel' => 'Annuler',
         'move_up' => 'Monter',
         'move_down' => 'Descendre',
         'mark_as_read' => 'Marquer comme lu',

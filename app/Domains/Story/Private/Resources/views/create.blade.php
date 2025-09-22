@@ -15,9 +15,12 @@
 
                     <div class="text-sm">{{ __('story::create.hint')}}</div>
 
-                    <div class="mt-6 flex justify-center">
+                    <div class="mt-6 flex justify-center gap-12">
                         <x-shared::button color="accent" type="submit">
-                            {{ __('story::create.actions.continue') }}
+                            {{ __('story::create.actions.create') }}
+                        </x-shared::button>
+                        <x-shared::button color="neutral" type="button" onclick="history.back()">
+                            {{ __('story::create.actions.cancel') }}
                         </x-shared::button>
                     </div>
                 </form>

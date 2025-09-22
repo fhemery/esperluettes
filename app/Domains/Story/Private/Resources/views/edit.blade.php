@@ -14,9 +14,12 @@
 
                     <x-story::form :story="$story" :referentials="$referentials" />
 
-                    <div class="mt-6 flex justify-center">
+                    <div class="mt-6 flex justify-center gap-12">
                         <x-shared::button color="accent" type="submit">
                             {{ __('story::edit.actions.save') }}
+                        </x-shared::button>
+                        <x-shared::button color="neutral" type="button" onclick="window.history.back()">
+                            {{ __('story::edit.actions.cancel') }}
                         </x-shared::button>
                     </div>
                 </form>

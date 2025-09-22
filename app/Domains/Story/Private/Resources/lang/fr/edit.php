@@ -3,6 +3,7 @@
 return [
     'actions' => [
         'save' => 'Enregistrer',
+        'cancel' => 'Annuler',
     ],
 
     // Flash/status messages
