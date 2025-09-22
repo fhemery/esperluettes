@@ -54,7 +54,7 @@
             </div>
 
 
-            <div class="flex gap-6">
+            <div class="flex gap-4 sm:gap-6 flex-col sm:flex-row items-center sm:items-start">
                 <div class="shrink-0" aria-hidden="true">
                     <div
                         class="w-[150px] h-[200px] rounded-lg border-4 border-[#ACE1AF] flex items-center justify-center bg-white">
@@ -62,9 +62,9 @@
                             class="text-[90px] leading-none font-serif text-[#ACE1AF] select-none">&amp;</span>
                     </div>
                 </div>
-                <div class="max-w-none flex flex-col">
+                <div class="flex flex-col items-center sm:items-start">
                     <!-- Two-column badges (Genres / Trigger Warnings) above summary -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm justify-items-center sm:justify-items-start">
                         <div>
                             @php($genres = $viewModel->getGenreNames())
                             @if(!empty($genres))
@@ -132,7 +132,6 @@
                     </div>
 
                     <article class="prose flex-1 overflow-hidden">
-                        <h2>{{ __('story::shared.description.label') }}</h2>
                         @if(!$viewModel->hasDescription())
                         <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>
                         @else

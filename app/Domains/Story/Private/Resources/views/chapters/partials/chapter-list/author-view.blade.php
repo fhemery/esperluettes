@@ -10,12 +10,10 @@
             <template x-if="!editing">
                 <div class="flex items-center gap-2">
                     @if (!empty($chapters))
-                    <button type="button" @click="start()"
-                        class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-gray-700 hover:bg-gray-50"
-                        title="{{ __('story::chapters.actions.reorder') }}">
+                    <x-shared::button color="neutral" @click="start()">
                         <span class="material-symbols-outlined text-[18px] leading-none">swap_vert</span>
                         {{ __('story::chapters.actions.reorder') }}
-                    </button>
+                    </x-shared::button>
                     @endif
                     @php($avail = isset($availableChapterCredits) ? (int)$availableChapterCredits : 0)
                     <div class="flex items-center gap-2">
