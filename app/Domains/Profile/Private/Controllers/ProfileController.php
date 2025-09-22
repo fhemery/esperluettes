@@ -70,8 +70,8 @@ class ProfileController extends Controller
             $this->profileService->updateProfileWithPicture($user->id, $data, $file, $remove);
 
             return redirect()
-                ->route('profile.edit')
-                ->with('success', __('Profile updated successfully!'));
+                ->route('profile.show.own')
+                ->with('success', __('profile::edit.updated'));
         } catch (\InvalidArgumentException $e) {
             return redirect()
                 ->back()
