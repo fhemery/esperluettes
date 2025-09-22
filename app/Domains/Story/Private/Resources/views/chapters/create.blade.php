@@ -12,9 +12,9 @@
 
                         @include('story::chapters.partials.form')
 
-                        <div class="mt-8 flex justify-end gap-3">
-                            <a href="{{ url('/stories/'.$story->slug) }}" class="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-50">{{ __('story::chapters.form.cancel') }}</a>
-                            <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">{{ __('story::chapters.form.submit') }}</button>
+                        <div class="mt-8 flex justify-end gap-12">
+                            <x-shared::button color="accent" type="submit">{{ __('story::chapters.form.submit') }}</x-shared::button>
+                            <x-shared::button color="neutral" type="button" onclick="window.history.back()">{{ __('story::chapters.form.cancel') }}</x-shared::button>
                         </div>
                     </form>
                 </div>

@@ -47,11 +47,12 @@ describe('Editing profile', function () {
             ]);
     
             // Act: authenticated + verified user updates display name
-            $this->actingAs($user)
+            $response = $this->actingAs($user)
                 ->put('/profile', [
                     'display_name' => 'Johnny Bravo',
-                ])
-                ->assertRedirect();
+                ]);
+            $response->assertRedirect('/profile');
+            $response->assertSessionHas('success', __('profile::edit.updated'));
     
             // Assert: profile updated with new display name and new slug
             $updated = app(ProfileApi::class)->getPublicProfile($user->id);
@@ -106,8 +107,9 @@ describe('Editing profile', function () {
                     'display_name' => 'Same Name',
                 ]);
 
-            // Assert: success redirect, no validation errors, name unchanged
-            $response->assertRedirect('/profile/edit');
+            // Assert: success redirect to own profile, translated flash message, no validation errors, name unchanged
+            $response->assertRedirect('/profile');
+            $response->assertSessionHas('success', __('profile::edit.updated'));
             $response->assertSessionHasNoErrors();
         });
     });
@@ -148,7 +150,7 @@ describe('Editing profile', function () {
             $response = $this->from('/profile/edit')->put('/profile', [
                 'profile_picture' => $file,
             ]);
-            $response->assertRedirect('/profile/edit');
+            $response->assertRedirect('/profile');
     
             /** @var AvatarChanged $event */
             $event = latestEventOf(AvatarChanged::name(), AvatarChanged::class);
@@ -163,13 +165,13 @@ describe('Editing profile', function () {
     
             // First upload to ensure there is an avatar to remove
             $file = UploadedFile::fake()->image('avatar.jpg', 300, 300);
-            $this->put('/profile', ['profile_picture' => $file])->assertRedirect('/profile/edit');
+            $this->put('/profile', ['profile_picture' => $file])->assertRedirect('/profile');
     
             // Then remove
             $response = $this->from('/profile/edit')->put('/profile', [
                 'remove_profile_picture' => true,
             ]);
-            $response->assertRedirect('/profile/edit');
+            $response->assertRedirect('/profile');
     
             /** @var AvatarChanged $event */
             $event = latestEventOf(AvatarChanged::name(), AvatarChanged::class);
@@ -186,7 +188,7 @@ describe('Editing profile', function () {
             $response = $this->from('/profile/edit')->put('/profile', [
                 'description' => '<b>Hello</b> world',
             ]);
-            $response->assertRedirect('/profile/edit');
+            $response->assertRedirect('/profile');
 
             /** @var BioUpdated $event */
             $event = latestEventOf(BioUpdated::name(), BioUpdated::class);
@@ -206,7 +208,7 @@ describe('Editing profile', function () {
                 'instagram_url' => 'https://instagram.com/someone',
                 'youtube_url' => 'youtu.be/abc123',
             ]);
-            $response->assertRedirect('/profile/edit');
+            $response->assertRedirect('/profile');
 
             /** @var BioUpdated $event */
             $event = latestEventOf(BioUpdated::name(), BioUpdated::class);

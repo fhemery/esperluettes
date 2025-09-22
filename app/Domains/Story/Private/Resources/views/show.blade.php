@@ -14,15 +14,15 @@
 <x-app-layout>
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-gray-900">
-            <div class="flex items-start justify-between mb-2">
-                <div class="flex items-center">
+            <div class="flex items-center justify-between mb-2 gap-4">
+                <div class="flex items-center gap-2">
                     <h1 class="font-semibold text-2xl text-gray-900 leading-tight mr-2">
                         {{ $viewModel->getTitle() }}
                     </h1>
                     <x-story::story-visibility-badge :visibility="$viewModel->getVisibility()" />
                 </div>
                 @if($viewModel->isAuthor())
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <a href="{{ url('/stories/'.$viewModel->getSlug().'/edit') }}"
                         class="text-indigo-600 hover:text-indigo-800"
                         aria-label="{{ __('story::show.edit') }}"
@@ -54,7 +54,7 @@
             </div>
 
 
-            <div class="flex gap-6">
+            <div class="flex gap-4 sm:gap-6 flex-col sm:flex-row items-center sm:items-start">
                 <div class="shrink-0" aria-hidden="true">
                     <div
                         class="w-[150px] h-[200px] rounded-lg border-4 border-[#ACE1AF] flex items-center justify-center bg-white">
@@ -62,9 +62,9 @@
                             class="text-[90px] leading-none font-serif text-[#ACE1AF] select-none">&amp;</span>
                     </div>
                 </div>
-                <div class="max-w-none flex flex-col">
+                <div class="flex flex-col items-center sm:items-start">
                     <!-- Two-column badges (Genres / Trigger Warnings) above summary -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm justify-items-center sm:justify-items-start">
                         <div>
                             @php($genres = $viewModel->getGenreNames())
                             @if(!empty($genres))
@@ -132,7 +132,6 @@
                     </div>
 
                     <article class="prose flex-1 overflow-hidden">
-                        <h2>{{ __('story::shared.description.label') }}</h2>
                         @if(!$viewModel->hasDescription())
                         <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>
                         @else

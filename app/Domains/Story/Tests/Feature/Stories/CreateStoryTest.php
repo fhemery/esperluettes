@@ -72,7 +72,7 @@ describe('Creating a story', function () {
             $response->assertSee('story::shared.type.label');
             $response->assertSee('story::shared.type.placeholder');
             $response->assertSee('story::shared.type.help');
-            $response->assertSee('story::create.actions.continue');
+            $response->assertSee('story::create.actions.create');
         });
 
         it('shows story audience details to authenticated user', function () {

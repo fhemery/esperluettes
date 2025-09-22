@@ -59,7 +59,7 @@
                     mq.addEventListener ? mq.addEventListener('change', setMobile) : mq.addListener(setMobile);
                     this.$watch('q', (value) => {
                         const q = (value || '').trim();
-                        if (q.length < 2) { this.html=''; this.open=false; return; }
+                        if (q.length < 2) { return; }
                         this.fetchResults(q);
                     });
                 },
