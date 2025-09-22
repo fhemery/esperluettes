@@ -28,9 +28,9 @@
 
             <!-- Flash Messages -->
             @if (session('status') || session('success') || session('error') || $errors->any())
-                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 10000)" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 10000)" class="max-w-7xl mx-auto px-2 sm:px-6 sm:py-6 py-2">
                     @if (session('status'))
-                        <div class="flex items-center justify-between mb-4 p-4 rounded surface-info border-l-4 border-info-fg text-on-surface">
+                        <div class="flex items-center justify-between p-4 rounded surface-info border-l-4 border-info-fg text-on-surface">
                             <p>{{ session('status') }}</p>
                             <button @click="show = false" class="text-fg hover:text-fg/90">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,7 +41,7 @@
                     @endif
                     
                     @if (session('success'))
-                        <div class="flex items-center justify-between mb-4 p-4 rounded surface-success border-l-4 border-success-fg text-on-surface">
+                        <div class="flex items-center justify-between p-4 rounded surface-success border-l-4 border-success-fg text-on-surface">
                             <p>{{ session('success') }}</p>
                             <button @click="show = false" class="text-fg hover:text-fg/90">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +52,7 @@
                     @endif
                     
                     @if (session('error'))
-                        <div class="flex items-center justify-between mb-4 p-4 rounded surface-error border-l-4 border-error-fg text-on-surface">
+                        <div class="flex items-center justify-between p-4 rounded surface-error border-l-4 border-error-fg text-on-surface">
                             <p>{{ session('error') }}</p>
                             <button @click="show = false" class="text-fg hover:text-fg/90">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +63,7 @@
                     @endif
                     
                     @if ($errors->any())
-                        <div class="flex flex-col mb-4 p-4 rounded surface-error border-l-4 border-error-fg text-on-surface">
+                        <div class="flex flex-col p-4 rounded surface-error border-l-4 border-error-fg text-on-surface">
                             <div class="flex justify-between items-center mb-2">
                                 <p class="font-medium">{{ __('Whoops! Something went wrong.') }}</p>
                                 <button @click="show = false" class="text-fg hover:text-fg/90">
@@ -83,8 +83,8 @@
             @endif
 
             <!-- Page Content -->
-            <main class="flex-1 flex flex-col w-full py-4 sm:py-8 {{ $class }}">
-                <div class="max-w-7xl w-full mx-auto sm:px-6 lg:px-8">
+            <main class="flex-1 flex flex-col w-full {{ $class }}">
+                <div class="max-w-7xl w-full mx-auto sm:px-6 lg:px-8 py-8 lg:py-12">
                     {{ $slot }}
                 </div>
             </main>

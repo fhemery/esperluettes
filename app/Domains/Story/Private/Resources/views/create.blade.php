@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="bg-transparent">
-        <div class="p-6 text-gray-900">
+        <div class="text-gray-900">
             <div class="max-w-3xl mx-auto">
                 <form action="{{ route('stories.store') }}" method="POST" novalidate>
                     @csrf
