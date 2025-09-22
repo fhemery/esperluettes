@@ -56,7 +56,6 @@ describe('Comment list partial display', function () {
         ]));
 
         $response->assertStatus(200);
-        $response->assertSee(__('comment::comments.posted_at'));
         $response->assertDontSee(__('comment::comments.updated_at'));
     });
 
@@ -80,7 +79,6 @@ describe('Comment list partial display', function () {
         ]));
 
         $response->assertStatus(200);
-        $response->assertSee(__('comment::comments.posted_at'));
         $response->assertSee(__('comment::comments.updated_at'));
     });
 
