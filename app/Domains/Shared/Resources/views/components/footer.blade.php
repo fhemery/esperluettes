@@ -10,24 +10,24 @@
             <div class="col-span-3 sm:col-span-1">
                 <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">{{ __('shared::footer.title_garden') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_team') }}</a></li>
-                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_rules') }}</a></li>
+                    <li><a href="{{ __('shared::footer.link_team.url') }}" class="hover:text-primary">{{ __('shared::footer.link_team.label') }}</a></li>
+                    <li><a href="{{ __('shared::footer.link_rules.url') }}" class="hover:text-primary">{{ __('shared::footer.link_rules.label') }}</a></li>
                 </ul>
             </div>
 
             <div class="col-span-3 sm:col-span-1">
                 <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">{{ __('shared::footer.title_learn_more') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_faq') }}</a></li>
-                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_contact') }}</a></li>
+                    <li><a href="{{ __('shared::footer.link_faq.url') }}" class="hover:text-primary">{{ __('shared::footer.link_faq.label') }}</a></li>
+                    <li><a href="{{ __('shared::footer.link_contact.url') }}" class="hover:text-primary">{{ __('shared::footer.link_contact.label') }}</a></li>
                 </ul>
             </div>
 
             <div class="col-span-3 sm:col-span-1">
                 <h3 class="text-sm font-semibold tracking-wide text-primary mb-3">{{ __('shared::footer.title_legal') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_legal_notice') }}</a></li>
-                    <li><a href="#" class="hover:text-primary">{{ __('shared::footer.link_association') }}</a></li>
+                    <li><a href="{{ __('shared::footer.link_legal_notice.url') }}" class="hover:text-primary">{{ __('shared::footer.link_legal_notice.label') }}</a></li>
+                    <li><a href="{{ __('shared::footer.link_association.url') }}" class="hover:text-primary">{{ __('shared::footer.link_association.label') }}</a></li>
                 </ul>
             </div>
         </div>
