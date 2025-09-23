@@ -31,7 +31,7 @@
                 @submit="if($refs.type && $refs.type.value===''){ $refs.type.removeAttribute('name') }">
                 <div>
                     <label for="type"
-                        class="block text-sm font-medium text-gray-700">{{ __('story::index.filters.type.label') }}</label>
+                        class="flex gap-2 text-sm font-medium text-gray-700">{{ __('story::index.filters.type.label') }}</label>
                     <select id="type" name="type" x-ref="type"
                         class="mt-4 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">{{ __('story::index.filters.type.placeholder') }}</option>
@@ -44,7 +44,7 @@
 
                 <div>
                     <label
-                        class="block text-sm font-medium text-gray-700">{{ __('story::index.filters.audiences.label') }}
+                        class="flex gap-2 text-sm font-medium text-gray-700">{{ __('story::index.filters.audiences.label') }}
                         <x-shared::tooltip type="help" placement="right">
                             {{ __('story::index.filters.audiences.help') }}
                         </x-shared::tooltip>
@@ -64,7 +64,7 @@
 
                 <div>
                     <label
-                        class="block text-sm font-medium text-gray-700">{{ __('story::index.filters.genres.label') }}
+                        class="flex gap-2 text-sm font-medium text-gray-700">{{ __('story::index.filters.genres.label') }}
                         <x-shared::tooltip type="help" placement="right">
                             {{ __('story::index.filters.genres.help') }}
                         </x-shared::tooltip>
@@ -84,7 +84,7 @@
 
                 <div>
                     <label
-                        class="block text-sm font-medium text-gray-700">
+                        class="flex gap-2 text-sm font-medium text-gray-700">
                         {{ __('story::index.filters.trigger_warnings.label') }}
                         <x-shared::tooltip type="help" placement="right">
                             {{ __('story::index.filters.trigger_warnings.help') }}                            
@@ -92,13 +92,11 @@
                     </label>
                     @php($currentExTw = collect($currentExcludeTw ?? []))
                     <div class="mt-2">
-                        <x-search-multi
+                        <x-shared::searchable-multi-select
                             name="exclude_tw[]"
                             :options="$referentials['trigger_warnings'] ?? []"
                             :selected="$currentExTw"
-                            :placeholder="__('story::shared.trigger_warnings.placeholder')"
                             :empty-text="__('story::shared.no_results')"
-                            badge="error"
                             color="accent" />
                     </div>
                     <div class="mt-4">
