@@ -27,94 +27,99 @@
             <x-slot name="title">
                 <span>{{__('story::shared.filters.header')}}</span>
             </x-slot>
-            <form method="GET" action="{{ url('/stories') }}" class="flex items-start gap-6 flex-wrap" x-data
+            <form method="GET" action="{{ url('/stories') }}" x-data
                 @submit="if($refs.type && $refs.type.value===''){ $refs.type.removeAttribute('name') }">
-                <div>
-                    <label for="type"
-                        class="block text-sm font-medium text-gray-700">{{ __('story::index.filters.type.label') }}</label>
-                    <select id="type" name="type" x-ref="type"
-                        class="mt-4 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">{{ __('story::index.filters.type.placeholder') }}</option>
-                        @foreach(($referentials['types'] ?? collect()) as $t)
-                        <option
-                            value="{{ $t['slug'] }}" {{ (isset($currentType) && $currentType === $t['slug']) ? 'selected' : '' }}>{{ $t['name'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
 
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700">{{ __('story::index.filters.audiences.label') }}
-                        <x-shared::tooltip type="help" placement="right">
-                            {{ __('story::index.filters.audiences.help') }}
-                        </x-shared::tooltip>
-                    </label>
-                    @php($currentAud = collect($currentAudiences ?? []))
-                    <div class="mt-2">
-                        <x-search-multi
-                            name="audiences[]"
-                            color="accent"
-                            badge="fg"
-                            :options="$referentials['audiences'] ?? []"
-                            :selected="$currentAud"
-                            :placeholder="__('story::shared.audience.placeholder')"
-                            :empty-text="__('story::shared.no_results')" />
-                    </div>
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700">{{ __('story::index.filters.genres.label') }}
-                        <x-shared::tooltip type="help" placement="right">
-                            {{ __('story::index.filters.genres.help') }}
-                        </x-shared::tooltip>
-                    </label>
-                    @php($currentGen = collect($currentGenres ?? []))
-                    <div class="mt-2">
-                        <x-search-multi
-                            name="genres[]"
-                            :options="$referentials['genres'] ?? []"
-                            :selected="$currentGen"
-                            :placeholder="__('story::shared.genres.placeholder')"
-                            :empty-text="__('story::shared.no_results')"
-                            badge="accent"
-                            color="accent" />
-                    </div>
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700">
-                        {{ __('story::index.filters.trigger_warnings.label') }}
-                        <x-shared::tooltip type="help" placement="right">
-                            {{ __('story::index.filters.trigger_warnings.help') }}                            
-                        </x-shared::tooltip>
-                    </label>
-                    @php($currentExTw = collect($currentExcludeTw ?? []))
-                    <div class="mt-2">
-                        <x-search-multi
-                            name="exclude_tw[]"
-                            :options="$referentials['trigger_warnings'] ?? []"
-                            :selected="$currentExTw"
-                            :placeholder="__('story::shared.trigger_warnings.placeholder')"
-                            :empty-text="__('story::shared.no_results')"
-                            badge="error"
-                            color="accent" />
-                    </div>
-                    <div class="mt-4">
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
-                            <input type="checkbox" name="no_tw_only" value="1" {{ !empty($currentNoTwOnly) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
-                            <span>{{ __('story::index.filters.no_tw_only.help') }}</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 items-start">
+                    <!-- Genres -->
+                    <div>
+                        <label
+                            class="flex gap-2 text-sm font-medium text-fg">{{ __('story::index.filters.genres.label') }}
+                            <x-shared::tooltip type="help" placement="right">
+                                {{ __('story::index.filters.genres.help') }}
+                            </x-shared::tooltip>
                         </label>
+                        @php($currentGen = collect($currentGenres ?? []))
+                        <div class="mt-2">
+                            <x-shared::searchable-multi-select
+                                name="genres[]"
+                                :options="$referentials['genres'] ?? []"
+                                :selected="$currentGen"
+                                :empty-text="__('story::shared.no_results')"
+                                :placeholder="__('story::index.filters.genres.placeholder')"
+                                color="accent" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="pt-6">
-                    <x-shared::button color="accent" type="submit">{{ __('story::index.filter') }}</x-shared::button>
-                    @if($hasFilters)
-                    <a href="{{ url('/stories') }}"
-                        class="ml-3 text-sm text-gray-600 hover:text-gray-900">{{ __('story::index.reset_filters') }}</a>
-                    @endif
+                    <!-- Type -->
+                    <div>
+                        <label for="type"
+                            class="flex gap-2 text-sm font-medium text-fg">{{ __('story::index.filters.type.label') }}</label>
+                        <select id="type" name="type" x-ref="type"
+                            class="mt-2 block w-full border-accent shadow-sm focus:border-accent focus:ring-accent bg-transparent">
+                            <option value="">{{ __('story::index.filters.type.placeholder') }}</option>
+                            @foreach(($referentials['types'] ?? collect()) as $t)
+                            <option
+                                value="{{ $t['slug'] }}" {{ (isset($currentType) && $currentType === $t['slug']) ? 'selected' : '' }}>{{ $t['name'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Audiences -->
+                    <div>
+                        <label
+                            class="flex gap-2 text-sm font-medium text-fg">{{ __('story::index.filters.audiences.label') }}
+                            <x-shared::tooltip type="help" placement="right">
+                                {{ __('story::index.filters.audiences.help') }}
+                            </x-shared::tooltip>
+                        </label>
+                        @php($currentAud = collect($currentAudiences ?? []))
+                        <div class="mt-2">
+                            <x-shared::searchable-multi-select
+                                name="audiences[]"
+                                :options="$referentials['audiences'] ?? []"
+                                :selected="$currentAud"
+                                :empty-text="__('story::shared.no_results')"
+                                :placeholder="__('story::index.filters.audiences.placeholder')"
+                                color="accent" />
+                        </div>
+                    </div>
+
+                    <!-- Trigger warnings -->
+                    <div>
+                        <label
+                            class="flex gap-2 text-sm font-medium text-fg">
+                            {{ __('story::index.filters.trigger_warnings.label') }}
+                            <x-shared::tooltip type="help" placement="right">
+                                {{ __('story::index.filters.trigger_warnings.help') }}
+                            </x-shared::tooltip>
+                        </label>
+                        @php($currentExTw = collect($currentExcludeTw ?? []))
+                        <div class="mt-2">
+                            <x-shared::searchable-multi-select
+                                name="exclude_tw[]"
+                                :options="$referentials['trigger_warnings'] ?? []"
+                                :selected="$currentExTw"
+                                :empty-text="__('story::shared.no_results')"
+                                :placeholder="__('story::index.filters.trigger_warnings.placeholder')"
+                                color="accent" />
+                        </div>
+                        <div class="mt-4">
+                            <label class="inline-flex flex-wrap items-center gap-2 text-sm text-fg">
+                                <input type="checkbox" name="no_tw_only" value="1" {{ !empty($currentNoTwOnly) ? 'checked' : '' }} class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
+                                <span>{{ __('story::index.filters.no_tw_only.label') }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Actions row spanning all columns -->
+                    <div class="col-span-full flex gap-2 items-center justify-center">
+                        <x-shared::button color="accent" type="submit">{{ __('story::index.filter') }}</x-shared::button>
+                        <a href="{{ url('/stories') }}"
+                            class="ml-3 text-sm text-gray-600 hover:text-gray-900">
+                            <x-shared::button color="neutral" type="button">{{ __('story::index.reset_filters') }}</x-shared::button>
+                        </a>
+                    </div>
                 </div>
             </form>
         </x-shared::collapsible>
@@ -122,10 +127,10 @@
 
     <!-- Results Section -->
     <div class="w-full mt-4">
-        <div class="overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
+        <div class="overflow-hidden sm:rounded-lg">
+            <div class="p-2 sm:p-4 text-fg">
                 @if ($viewModel->isEmpty())
-                <div class="text-center text-gray-600 py-16">
+                <div class="text-center text-fg py-16">
                     {{ __('story::index.empty') }}
                 </div>
                 @else
