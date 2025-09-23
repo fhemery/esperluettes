@@ -6,7 +6,6 @@
         "build": "vite build",
         "dev": "vite",
         "build-and-deploy:full": "npm run build && node scripts/deploy-full.js",
-        "build-and-deploy:app-only": "./deploy-app-only.sh",
         "prepare": "husky",
         "dep:check": "./vendor/bin/sail composer deptrac",
         "husky:precommit": "node scripts/husky-precommit.js",
