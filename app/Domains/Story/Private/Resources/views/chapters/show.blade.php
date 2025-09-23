@@ -47,7 +47,7 @@
                 </div>
                 <div class="text-sm text-gray-600">{{ $vm->story->title }}</div>
 
-                <div class="mt-2 mb-6 text-sm text-gray-700">
+                <div class="flex items-center gap-2 mt-2 mb-6 text-sm text-gray-700">
                     <x-shared::metric-badge
                         icon="visibility"
                         :value="$vm->readsLogged"
