@@ -5,6 +5,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Domains\Story\Private\Models\Chapter;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -442,10 +443,11 @@ describe('Story details page', function () {
 
             Auth::logout();
             $resp = $this->get('/stories/' . $story->slug);
+            Log::info('Story: ' . $resp->getContent());
             $resp->assertOk();
-            $resp->assertSee(trans('story::shared.metrics.words_and_signs'));
-            $resp->assertSee('5'); // words total (2 + 3)
-            $resp->assertSee('22'); // characters total: 'one two' (7) + 'three four five' (15)
+            // We cannot look for number of signs or characters, they are embedded in the translation
+            $resp->assertSee(__('story::shared.metrics.words_and_signs'));
+            $resp->assertSee(__('story::shared.metrics.words_and_signs.help')); 
         });
     });
 

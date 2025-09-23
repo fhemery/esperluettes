@@ -13,11 +13,11 @@
             aria-haspopup="dialog"
             :aria-expanded="(hoverOpen || pinned) ? 'true' : 'false'"
             x-ref="trigger"
-            @mouseenter="hoverTrigger = true; hoverOpen = true; updateOpen()"
-            @mouseleave="hoverTrigger = false; closeWithDelay()"
-            @mousedown.stop.prevent="pinned = !pinned; if (pinned) { hoverOpen = true } updateOpen()"
+            @mouseenter="onTriggerEnter()"
+            @mouseleave="onTriggerLeave()"
+            @mousedown.stop.prevent="onTriggerMouseDown()"
             @click.stop.prevent
-            @blur="setTimeout(() => { if (!pinned) { hoverOpen = false; updateOpen() } }, 220)">
+            @blur="onTriggerBlur()">
             {{ $trigger ?? '' }}
         </div>
         <template x-teleport="body">
