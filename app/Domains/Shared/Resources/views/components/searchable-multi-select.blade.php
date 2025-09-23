@@ -2,7 +2,7 @@
     'name', // input name, e.g., "genres[]"
     'options' => [], // array items: {slug,name} or any with valueField + name/label/text
     'selected' => [], // array of selected values (strings)
-    'placeholderKey' => 'shared::components.searchable_multi_select.selected_count', // trans_choice key
+    'placeholder' => '', // default placeholder to show when none selected
     'emptyText' => 'No results',
     'maxHeight' => '15rem', // dropdown max height
     'valueField' => 'slug', // which field from options to submit/match against (e.g., 'id' or 'slug')
@@ -26,14 +26,7 @@
         })
         ->values();
     $sel = collect($selected)->map(fn($v) => (string) $v)->filter()->values();
-
-    // Precompute pluralization samples using trans_choice
-    // We keep :count token in the many form to replace client-side with the live count
-    $phSamples = [
-        'zero' => trans_choice($placeholderKey, 0, ['count' => ':count']),
-        'one' => trans_choice($placeholderKey, 1, ['count' => ':count']),
-        'many' => trans_choice($placeholderKey, 2, ['count' => ':count']),
-    ];
+    // No pluralization logic anymore; placeholder is a plain string used when none are selected
 @endphp
 
 <div x-data="searchableMultiSelect({
@@ -42,12 +35,12 @@
         selected: @js($sel),
         emptyText: @js($emptyText),
         maxHeight: @js($maxHeight),
-        placeholderSamples: @js($phSamples),
+        placeholder: @js($placeholder),
         color: @js($color),
     })" class="max-w-full" @click.outside="open = false" x-init="initiated = true">
     <div class="relative">
-        <!-- Input only (no badges) -->
-        <div class="min-h-10 w-full rounded-md border border-{{$color}} px-2 py-1.5 focus-within:ring-2 focus-within:ring-{{$color}}/90">
+        <!-- Input -->
+        <div class="min-h-8 w-full rounded-md border border-{{$color}} px-2 py-0.5 focus-within:ring-2 focus-within:ring-{{$color}}/90">
             <div class="flex items-center gap-1.5">
                 <input type="text" x-model="state.query" @focus="open = true" @keydown.down.prevent="move(1)"
                        @keydown.up.prevent="move(-1)" @keydown.enter.prevent="chooseHighlighted()"
@@ -98,13 +91,17 @@
     @push('scripts')
         <script>
             if (!window.searchableMultiSelect) {
-                window.searchableMultiSelect = function ({name, options, selected, emptyText, maxHeight, placeholderSamples, color}) {
+                window.searchableMultiSelect = function ({name, options, selected, emptyText, maxHeight, placeholder, color}) {
                     return {
                         open: false,
                         emptyText: emptyText,
                         maxHeight: maxHeight,
                         highlight: -1,
                         initiated: false,
+                        optionMap: options.reduce((acc, option) => {
+                            acc[option.slug] = option;
+                            return acc;
+                        }, {}),
                         state: {
                             query: '',
                             options: options,
@@ -152,8 +149,24 @@
                         },
                         countPlaceholder() {
                             const n = this.state.selected.length;
-                            const sample = (n === 0) ? placeholderSamples.zero : (n === 1 ? placeholderSamples.one : placeholderSamples.many);
-                            return sample.replace(':count', n);
+                            if (n === 0) return (placeholder ?? '');
+
+                            const firstSlug = this.state.selected[0];
+                            const firstOption = firstSlug ? this.optionMap[firstSlug] : null;
+                            const firstLabel = firstOption && firstOption.name ? firstOption.name : null;
+
+                            if (n === 1) {
+                                if (firstLabel) {
+                                    return firstLabel;
+                                }
+                                return '';
+                            }
+
+                            if (firstLabel) {
+                                const remaining = n - 1;
+                                return `${firstLabel} (+${remaining})`;
+                            }
+                            return '';
                         },
                     }
                 }
