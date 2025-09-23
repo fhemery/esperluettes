@@ -23,6 +23,9 @@ export default function registerTooltip(Alpine) {
     hoverPanel: false,
     hoverTrigger: false,
     pinned: false,
+    // Unique instance id & timers
+    id: null,
+    openTimer: null,
     styleObj: {},
     trigger: null,
     placement: 'right',
@@ -36,6 +39,21 @@ export default function registerTooltip(Alpine) {
       this.placement = placement || 'right';
       this.maxWidth = maxWidth || '20rem';
       this.maxHeight = maxHeight || '20rem';
+      // Assign a unique ID per instance
+      window.__popoverId = (window.__popoverId || 0) + 1;
+      this.id = window.__popoverId;
+      // Listen for other popovers requesting exclusivity and close this one
+      if (!this._boundExclusiveListener) {
+        this._boundExclusiveListener = (e) => {
+          const otherId = e?.detail?.id;
+          if (otherId && otherId !== this.id) {
+            this.hoverOpen = false;
+            this.pinned = false;
+            this.updateOpen();
+          }
+        };
+        window.addEventListener('popover:requestOpen', this._boundExclusiveListener);
+      }
       this.$nextTick(() => {
         this.compute();
         window.addEventListener('resize', this.compute.bind(this));
@@ -75,6 +93,50 @@ export default function registerTooltip(Alpine) {
           this.updateOpen();
         }
       }, 220);
+    },
+    ensureExclusive() {
+      // Ask others to close when this instance opens
+      try {
+        window.dispatchEvent(new CustomEvent('popover:requestOpen', { detail: { id: this.id } }));
+      } catch (_) { /* no-op */ }
+    },
+    onTriggerEnter() {
+      this.hoverTrigger = true;
+      if (this.openTimer) clearTimeout(this.openTimer);
+      this.openTimer = setTimeout(() => {
+        this.hoverOpen = true;
+        this.updateOpen();
+        this.ensureExclusive();
+      }, 250);
+    },
+    onTriggerLeave() {
+      this.hoverTrigger = false;
+      if (this.openTimer) {
+        clearTimeout(this.openTimer);
+        this.openTimer = null;
+      }
+      this.closeWithDelay();
+    },
+    onTriggerMouseDown() {
+      // Toggle pinned; opening should be exclusive
+      this.pinned = !this.pinned;
+      if (this.pinned) {
+        // If a debounce is pending, cancel it and open immediately
+        if (this.openTimer) {
+          clearTimeout(this.openTimer);
+          this.openTimer = null;
+        }
+        this.hoverOpen = true;
+        this.updateOpen();
+        this.ensureExclusive();
+      } else {
+        // If unpinned and not hovered, close with delay
+        if (!this.hoverTrigger && !this.hoverPanel) this.closeWithDelay();
+        this.updateOpen();
+      }
+    },
+    onTriggerBlur() {
+      setTimeout(() => { if (!this.pinned) { this.hoverOpen = false; this.updateOpen(); } }, 220);
     },
     updateOpen() {
       this.open = (this.hoverOpen || this.hoverPanel || this.hoverTrigger || this.pinned);
