@@ -20,7 +20,7 @@ return [
         ],
         'genres' => [
             'label' => 'Genres',
-            'help' => 'Inclure les histoires possédant tous les gens indiqués',
+            'help' => 'Inclure les histoires possédant tous les genres indiqués',
             'placeholder' => '— Tous —'
         ],
         'type' => [

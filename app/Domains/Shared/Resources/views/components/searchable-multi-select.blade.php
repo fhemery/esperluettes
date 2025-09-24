@@ -40,11 +40,11 @@
     })" class="max-w-full" @click.outside="open = false" x-init="initiated = true">
     <div class="relative">
         <!-- Input -->
-        <div class="min-h-8 w-full rounded-md border border-{{$color}} px-2 py-0.5 focus-within:ring-2 focus-within:ring-{{$color}}/90">
+        <div class="min-h-8 w-full rounded-md border border-{{$color}} px-2 focus-within:ring-2 focus-within:ring-{{$color}}/90">
             <div class="flex items-center gap-1.5">
                 <input type="text" x-model="state.query" @focus="open = true" @keydown.down.prevent="move(1)"
                        @keydown.up.prevent="move(-1)" @keydown.enter.prevent="chooseHighlighted()"
-                       class="flex-1 min-w-[8rem] bg-transparent border-0 focus:ring-0 text-sm placeholder-accent"
+                       class="flex-1 min-w-[8rem] bg-transparent border-0 focus:ring-0 text placeholder-accent"
                        :placeholder="state.query.length ? '' : countPlaceholder()">
             </div>
         </div>
