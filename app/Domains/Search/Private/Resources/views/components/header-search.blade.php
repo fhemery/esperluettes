@@ -1,7 +1,7 @@
 <div x-data="globalSearch()" x-init="init()" class="relative w-full max-w-md" @keydown.escape.window="close()">
-    <div class="flex gap-2 justify-end md:justify-start">
+    <div class="flex justify-end md:justify-start md:border-b md:border-fg max-w-[20rem]">
         <button type="button" @click="isMobile ? openFromIcon() : null" class="md:pointer-events-none">
-            <i class="material-symbols-outlined text-accent text-2xl">search</i>
+            <i class="material-symbols-outlined text-3xl font-extralight">search</i>
         </button>
         <input
             x-model.debounce.300ms="q"
@@ -10,7 +10,7 @@
             @keydown.arrow-up.prevent="highlightPrev()"
             @keydown.enter.prevent="activateHighlighted()"
             type="search"
-            class="hidden md:block bg-transparent border-b border-fg/40 focus:border-fg outline-none w-full placeholder-fg/60"
+            class="hidden md:block bg-transparent border-transparent outline-none w-full placeholder-fg focus:ring-1 focus:ring-accent/50 focus:border-transparent"
             placeholder="{{ __('search::header.label') }}"
             aria-label="{{ __('search::header.label') }}"
         />
@@ -32,7 +32,7 @@
                     @keydown.arrow-up.prevent="highlightPrev()"
                     @keydown.enter.prevent="activateHighlighted()"
                     type="search"
-                    class="w-full bg-transparent border-b border-fg/40 focus:border-fg outline-none placeholder-fg/60"
+                    class="w-full bg-transparent border-b border-fg/40 focus:border-fg outline-none placeholder-fg focus:ring-1 focus:ring-fg/10"
                     placeholder="{{ __('search::header.label') }}"
                     aria-label="{{ __('search::header.label') }}"
                     x-ref="mobileInput"
