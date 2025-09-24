@@ -43,9 +43,6 @@ class StoryServiceProvider extends ServiceProvider
         // Register anonymous components, both unprefixed and prefixed (<x-story::...>)
         Blade::anonymousComponentPath(app_path('Domains/Story/Private/Resources/views/components'), 'story');
 
-        // Register class-based components under the 'story' prefix
-        Blade::componentNamespace('App\\Domains\\Story\\Private\\View\\Components', 'story');
-
         // Load PHP translations for the Story domain under 'story::'
         $this->loadTranslationsFrom(app_path('Domains/Story/Private/Resources/lang'), 'story');
 

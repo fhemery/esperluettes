@@ -23,7 +23,11 @@
 
     <div class="pb-1 pt-2 flex-1 flex flex-col">
         @if(!empty($genres))
-            <x-story::genre-badges :genres="$genres" placement="right" color="accent" />
+            <x-shared::badge-overflow>
+                @foreach($genres as $g)
+                    <x-shared::badge color="accent" size="xs">{{ $g }}</x-shared::badge>
+                @endforeach
+            </x-shared::badge-overflow>
         @endif
 
         {{-- Title + summary tooltip icon --}}
