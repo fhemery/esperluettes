@@ -15,7 +15,7 @@
                 <x-search::components.header-search />
             </div>
 
-            <div class="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 md:gap-4 sm:px-4 md:px-8">
+            <div class="flex h-full justify-center sm:justify-end gap-1 sm:gap-2 md:gap-4 sm:px-4 md:px-8">
                 <x-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')" class="uppercase h-full">
                     {{ __('shared::navigation.stories') }}
                 </x-nav-link>

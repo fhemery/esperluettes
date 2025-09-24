@@ -17,7 +17,7 @@
                     <x-search::components.header-search />
                 </div>
 
-                <div class="flex items-center gap-8" id="desktop-nav-links">
+                <div class="flex gap-8 h-full" id="desktop-nav-links">
                     <!-- Links -->
                     <div class="hidden sm:flex sm:gap-8 uppercase">
                         <x-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
