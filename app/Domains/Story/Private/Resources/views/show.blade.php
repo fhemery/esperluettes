@@ -13,18 +13,13 @@
 
 <x-app-layout>
     <div class="overflow-hidden surface-read text-on-surface">
-        <div class="p-4 grid items-start gap-2 sm: gap-4 grid-cols-[300px_auto_auto] grid-rows-[auto_1fr_auto]">
-            <!-- Image -->
-            <div
-                class="row-span-2 col-span-1 w-[300px] flex flex-col gap-2 items-center justify-center">
-                <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $viewModel->getTitle() }}" class="w-full h-full object-cover">
-                <div class="flex items-center">
-                    <x-story::story-visibility-display :visibility="$viewModel->getVisibility()" />
-                </div>
-            </div>
+        <div class="p-2 md:p-4 grid items-start gap-2 md:gap-4 
+            grid-cols-[150px_1fr]
+            md:grid-cols-[150px_2fr_3fr] md:grid-rows-[auto_auto_1fr_auto]
+            lg:grid-cols-[300px_2fr_3fr]">
 
             <!-- Title -->
-            <div class="col-span-2 flex items-center justify-between">
+            <div class="col-span-2 md:col-start-2 md:col-end-4 flex items-center justify-between">
                 <h1 class="font-semibold text-2xl leading-tight mr-2">
                     {{ $viewModel->getTitle() }}
                 </h1>
@@ -48,8 +43,22 @@
                 @endif
             </div>
 
-            <!-- Author, genres, triggers, status, feedback... -->
-            <div class="col-span-1 row-span-1 flex flex-col flex-start gap-2 h-full">
+            <!-- Image -->
+            <div
+                class="col-span-1 row-span-2 col-start-1 row-start-2
+                    md:col-span-1 md:col-start-1 md:row-span-3 md:row-start-2 
+                    flex flex-col gap-2 items-center justify-center">
+                <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $viewModel->getTitle() }}" class="w-[150px] h-[200px] md:w-full md:h-full object-cover">
+                <div class="flex items-center">
+                    <x-story::story-visibility-display :visibility="$viewModel->getVisibility()" />
+                </div>
+            </div>
+
+
+
+            <!-- Author, genres -->
+            <div class="col-span-1 col-start-2 row-start-2 row-span-1 
+                md:col-start-2 md:col-span-1md:row-span-1 flex flex-col flex-start gap-2 h-full">
                 <div class="flex-1 flex flex-col gap-2">
                     <!-- Authors -->
                     <div>
@@ -73,24 +82,30 @@
                         @endif
                     </div>
 
-                    <!-- Trigger warnings -->
-                    <div class="flex flex-col gap-2">
-                        <div class="font-semibold text-lg flex items-center gap-2">
-                            <span class="material-symbols-outlined">warning</span>
-                            {{ __('story::shared.trigger_warnings.label') }}
-                        </div>
-                        @php($tws = $viewModel->getTriggerWarningNames())
-                        @if(!empty($tws))
-                        <span class="inline-flex flex-wrap gap-2">
-                            @foreach($tws as $tw)
-                            <x-shared::badge
-                                color="primary"
-                                size="md"
-                                title="{{ __('story::shared.trigger_warnings.label') }}">{{ $tw }}</x-shared::badge>
-                            @endforeach
-                        </span>
-                        @endif
+                </div>
+
+            </div>
+
+            <!-- triggers, status, feedback... -->
+            <div class="col-span-2 col-start-1 row-start-4 row-span-1 
+                md:col-start-2 md:col-span-1 md:row-span-1 flex flex-col justify-between gap-2 h-full">
+                <!-- Trigger warnings -->
+                <div class="flex flex-col gap-2">
+                    <div class="font-semibold text-lg flex items-center gap-2">
+                        <span class="material-symbols-outlined">warning</span>
+                        {{ __('story::shared.trigger_warnings.label') }}
                     </div>
+                    @php($tws = $viewModel->getTriggerWarningNames())
+                    @if(!empty($tws))
+                    <span class="inline-flex flex-wrap gap-2">
+                        @foreach($tws as $tw)
+                        <x-shared::badge
+                            color="primary"
+                            size="md"
+                            title="{{ __('story::shared.trigger_warnings.label') }}">{{ $tw }}</x-shared::badge>
+                        @endforeach
+                    </span>
+                    @endif
                 </div>
 
                 <!-- Other badges -->
@@ -171,18 +186,28 @@
             </div>
 
             <!-- Summary -->
-            <div class="row-span-2 p-4 bg-bg">
-                <article class="p-2 prose flex-1 overflow-hidden bg-[#fffafd]">
-                    @if(!$viewModel->hasDescription())
-                    <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>
-                    @else
-                    {!! $viewModel->getDescription() !!}
+            <div class="col-span-2 flex flex-col flex-start h-full gap-2
+                md:col-start-3 md:col-span-1 md:row-span-3 md:row-start-2">
+                <div class="p-4 bg-bg flex-1">
+                    <article class="p-2 prose flex-1 overflow-hidden surface-read text-on-surface h-full">
+                        @if(!$viewModel->hasDescription())
+                        <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>
+                        @else
+                        {!! $viewModel->getDescription() !!}
+                        @endif
+                    </article>
+                </div>
+                <div class="text-right">
+                    @if($viewModel->story->last_chapter_published_at)
+                    {{ __('story::show.last_update', ['date' => $viewModel->story->last_chapter_published_at->format('d/m/Y')]) }}
                     @endif
-                </article>
+                </div>
             </div>
 
             <!-- Stats -->
-            <div class="col-span-2 border-t border-fg pt-2 w-full flex items-center justify-center gap-4">
+            <div class="col-start-2 col-span-1 row-start-3 row-span-1
+                md:col-span-2 md:col-start-1 md:row-start-4 md:row-span-1
+                md:border-t border-fg pt-2 w-full flex items-center justify-center gap-1 md:gap-4">
                 <x-shared::metric-badge
                     icon="visibility"
                     size="md"
