@@ -93,20 +93,15 @@
                 this.successMsg = this.$root?.dataset?.successMsg || 'Saved';
                 // Build items from the server-rendered readonly list to avoid embedding JSON in HTML
                 if (!this.items || this.items.length === 0) {
-                    const ul = this.$refs.readonlyList;
-                    if (ul) {
-                        const lis = Array.from(ul.querySelectorAll('li[data-id]'));
-                        this.items = lis.map(li => {
-                            const d = li.dataset;
+                    const list = this.$refs.readonlyList;
+                    if (list) {
+                        const divs = Array.from(list.querySelectorAll('div[data-id]'));
+                        this.items = divs.map(div => {
+                            const d = div.dataset;
                             return {
                                 id: parseInt(d.id),
                                 title: d.title || '',
-                                slug: d.slug || '',
-                                url: d.url || '#',
                                 isDraft: d.isDraft === '1' || d.isDraft === 'true',
-                                readsLogged: parseInt(d.readsLogged || '0'),
-                                editUrl: d.editUrl || '#',
-                                deleteUrl: d.deleteUrl || '#',
                             };
                         });
                         // Set initial snapshot for cancel()
@@ -159,7 +154,6 @@
                 };
                 // Sync both the editable list and the read-only list
                 sync(this.$refs.list);
-                sync(this.$refs.readonlyList);
             },
             moveById(id, delta) {
                 if (!this.editing) return;
@@ -197,16 +191,7 @@
                         throw new Error(data.message || 'Failed to reorder');
                     }
                     await res.json();
-                    initial = this.items.slice();
-                    // Ensure both lists reflect the new order immediately
-                    this.syncDom();
-                    this.editing = false;
-                    this.status = this.successMsg;
-                    this.statusType = 'success';
-                    setTimeout(() => {
-                        this.status = '';
-                        this.statusType = '';
-                    }, 3000);
+                    window.location.reload();
                 } catch (e) {
                     this.status = (e && e.message) ? e.message : 'Error';
                     this.statusType = 'error';

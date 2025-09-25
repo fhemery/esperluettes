@@ -1,7 +1,10 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
 <div class="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-2" x-ref="readonlyList">
     @foreach($chapters as $ch)
-    <div class="flex items-center gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface">
+    <div class="flex items-center gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface"
+            data-id="{{ $ch->id }}"
+            data-title="{{ $ch->title }}"
+            data-is-draft="{{ $ch->isDraft ? '1' : '0' }}">
         <a href="{{ route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}" class="flex-1 truncate text-indigo-700 hover:text-indigo-900 font-medium">{{ $ch->title }}</a>
         @if($ch->isDraft)
         <x-shared::popover placement="top">
