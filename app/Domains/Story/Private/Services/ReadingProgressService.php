@@ -36,8 +36,7 @@ class ReadingProgressService
                 'read_at' => now(),
             ]);
 
-            $chapter->increment('reads_logged_count');
-            // Also increment story total denormalized counter
+            $chapter->increment('reads_logged_count');      
             $story->increment('reads_logged_total');
         });
     }

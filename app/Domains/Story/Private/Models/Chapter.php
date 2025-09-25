@@ -29,6 +29,7 @@ class Chapter extends Model implements Sortable
         'sort_order' => 'integer',
         'reads_logged_count' => 'integer',
         'first_published_at' => 'datetime',
+        'last_edited_at' => 'datetime',
         'word_count' => 'integer',
         'character_count' => 'integer',
     ];

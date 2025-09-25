@@ -390,6 +390,7 @@ class StoryController
                 wordCount: (int)($c->word_count ?? 0),
                 characterCount: (int)($c->character_count ?? 0),
                 url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
+                updatedAt: $c->last_edited_at,
             );
         }
 
