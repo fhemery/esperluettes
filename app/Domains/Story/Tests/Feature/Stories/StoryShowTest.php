@@ -16,12 +16,13 @@ beforeEach(function () {
 
 describe('Story details page', function () {
 
-    it('shows public story details with title, description, authors and creation date', function () {
+    it('shows public story details with title, description, authors and last chapter update', function () {
         // Arrange: author and public story
         $author = alice($this);
         $story = publicStory('Public Story', $author->id, [
             'description' => '<p>Some description</p>',
         ]);
+        $chapter = createPublishedChapter($this, $story, $author);
 
         // Act
         $response = $this->get('/stories/' . $story->slug);
@@ -32,8 +33,7 @@ describe('Story details page', function () {
         $response->assertSee('Some description');
         $response->assertSee($author->name);
 
-        // Date shown in Y-m-d for non-fr locale in tests
-        $response->assertSee($story->created_at->format('Y-m-d'));
+        $response->assertSee($chapter->last_edited_at->format('Y-m-d'));
     });
 
     it('returns 404 for private story to non-author', function () {
