@@ -92,7 +92,7 @@ Phase 3 requires completion of Phase 1 (US-001 through US-008) and Phase 2 (US-0
 - **i18n**:
   - Use Story domain translations:
     - `story::chapters.list.empty`
-    - `story::chapters.list.draft` (value: “Brouillon”)
+    - `story::chapters.list.not_published` (value: “Brouillon”)
 
 - **Accessibility**:
   - Render as a semantic list (`<ul>/<li>`), links with descriptive text, and accessible chip markup.
@@ -398,7 +398,7 @@ everything.**
     - `id: int`
     - `title: string`
     - `slug: string` (slug-with-id)
-    - `isDraft: bool` (derived from status)
+    - `isPublished: bool` (derived from status)
     - `url: string` (prebuilt route to `chapters.show`)
   - Optional helpers: `ariaLabel()` for accessibility.
 

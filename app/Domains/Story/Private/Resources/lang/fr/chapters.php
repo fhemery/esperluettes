@@ -49,7 +49,7 @@ return [
 
     'list' => [
         'empty' => 'Aucun chapitre disponible pour le moment.',
-        'draft' => 'Brouillon',
+        'not_published' => 'Non publié',
     ],
     'actions' => [
         'cancel' => 'Annuler',

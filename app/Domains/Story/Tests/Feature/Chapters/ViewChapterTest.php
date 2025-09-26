@@ -137,7 +137,7 @@ it('shows a draft badge on unpublished chapter', function () {
     // Author view
     $resp = $this->actingAs($author)->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
     $resp->assertOk();
-    $resp->assertSee(trans('story::chapters.list.draft'));
+    $resp->assertSee(trans('story::chapters.list.not_published'));
 });
 
 it('shows an edit link next to chapter title for authors only', function () {

@@ -283,7 +283,7 @@ describe('Story details page', function () {
             $response->assertSee('Chapter 1 - Published');
             $response->assertDontSee('Chapter 2 - Draft');
             // No draft chip
-            $response->assertDontSee(trans('story::chapters.list.draft'));
+            $response->assertDontSee(trans('story::chapters.list.not_published'));
         });
 
         it('shows all chapters with draft chip to the author', function () {
@@ -300,7 +300,7 @@ describe('Story details page', function () {
             $response->assertSee('P Chap');
             $response->assertSee('D Chap');
             // Draft chip visible
-            $response->assertSee(trans('story::chapters.list.draft'));
+            $response->assertSee(trans('story::chapters.list.not_published'));
         });
 
         it('appends newly created chapter at the end of the list', function () {

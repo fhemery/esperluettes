@@ -3,7 +3,7 @@
     return [
         'id' => (int) $c->id,
         'title' => $c->title,
-        'isDraft' => (bool) $c->isDraft,
+        'isPublished' => (bool) $c->isPublished,
     ];
 })->values())
 @if (!empty($chapters))
@@ -24,7 +24,7 @@
                             drag_indicator
                         </span>
                         <span class="font-medium text-gray-700" x-text="it.title"></span>
-                        <span x-show="it.isDraft" class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-300" aria-label="{{ __('story::chapters.list.draft') }}">{{ __('story::chapters.list.draft') }}</span>
+                        <span x-show="!it.isPublished" class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-300" aria-label="{{ __('story::chapters.list.not_published') }}">{{ __('story::chapters.list.not_published') }}</span>
                     </div>
                     <div class="flex items-center gap-1">
                         <button type="button"

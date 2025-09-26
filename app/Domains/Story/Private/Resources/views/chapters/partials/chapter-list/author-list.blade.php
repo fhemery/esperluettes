@@ -5,12 +5,12 @@
         <div class="flex items-center gap-2">
             <a href="{{ route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}" 
                 class="flex-1 truncate text-fg hover:text-fg/80 font-semibold">{{ $ch->title }}</a>
-            @if($ch->isDraft)
+            @if(!$ch->isPublished)
             <x-shared::popover placement="top">
                 <x-slot name="trigger">
-                    <span class="material-symbols-outlined text-[18px] leading-none shrink-0">draft</span>
+                    <span class="material-symbols-outlined text-[18px] leading-none shrink-0">visibility_off</span>
                 </x-slot>
-                <p>{{ __('story::chapters.list.draft') }}</p>
+                <p>{{ __('story::chapters.list.not_published') }}</p>
             </x-shared::popover>
             @endif
         </div>

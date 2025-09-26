@@ -21,7 +21,7 @@
                         {{ $vm->chapter->title }}
                         @if($vm->chapter->status !== \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED)
                         <span class="inline-flex items-center rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 border border-yellow-200">
-                            {{ trans('story::chapters.list.draft') }}
+                            {{ trans('story::chapters.list.not_published') }}
                         </span>
                         @endif
                     </h1>

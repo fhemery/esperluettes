@@ -384,7 +384,7 @@ class StoryController
                 id: (int)$c->id,
                 title: (string)$c->title,
                 slug: (string)$c->slug,
-                isDraft: (string)$c->status !== \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED,
+                isPublished: (string)$c->status === \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED,
                 isRead: in_array((int)$c->id, $readIds, true),
                 readsLogged: (int)($c->reads_logged_count ?? 0),
                 wordCount: (int)($c->word_count ?? 0),
