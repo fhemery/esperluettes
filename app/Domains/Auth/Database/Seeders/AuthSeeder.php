@@ -20,6 +20,7 @@ class AuthSeeder extends Seeder
             ['name' => 'admin', 'slug' => 'admin', 'description' => 'Administrator role'],
             ['name' => Roles::USER, 'slug' => Roles::USER, 'description' => 'Unconfirmed user role'],
             ['name' => Roles::USER_CONFIRMED, 'slug' => Roles::USER_CONFIRMED, 'description' => 'Confirmed user role'],
+            ['name' => 'Tech Admin', 'slug' => Roles::TECH_ADMIN, 'description' => 'Technical administrator role'],
         ];
 
         foreach ($roles as $data) {
@@ -82,3 +83,4 @@ class AuthSeeder extends Seeder
             });
     }
 }
+

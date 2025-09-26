@@ -1,5 +1,4 @@
-<?php
-
+<?php  
 namespace App\Domains\Admin\Providers;
 
 use App\Domains\Admin\Http\Middleware\InjectFilamentUserName;
@@ -7,7 +6,6 @@ use Illuminate\Auth\Middleware\Authenticate;
 use App\Domains\Auth\Public\Middleware\CheckRole;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -33,6 +31,9 @@ class AdminServiceProvider extends PanelProvider
         // PHP translations (namespaced)
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'admin');
 
+        // Views for Filament pages within this domain
+        $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'admin');
+
         // Override Filament's logout endpoint to redirect to app logout
         Route::middleware(['web'])
             ->prefix('admin')
@@ -41,8 +42,6 @@ class AdminServiceProvider extends PanelProvider
                     ->name('filament.admin.auth.logout');
             });
     }
-
-    
 
     public function panel(Panel $panel): Panel
     {
@@ -83,7 +82,8 @@ class AdminServiceProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                CheckRole::class . ':admin',
+                CheckRole::class . ':admin,tech-admin',
             ]);
     }
 }
+
