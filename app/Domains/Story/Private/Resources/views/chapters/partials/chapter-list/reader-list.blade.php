@@ -28,7 +28,7 @@
             {{ $ch->title }}
         </a>
 
-        <div class="sm:hidden flex flex-start gap-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+        <div class="sm:hidden flex flex-start gap-4" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
             <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
             <x-story::words-metric-badge
                 size="xs"

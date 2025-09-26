@@ -16,7 +16,7 @@
         </div>
 
         <!-- Updated at, and badges for mobile -->
-        <div class="flex sm:hidden flex-start gap-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+        <div class="flex sm:hidden flex-start gap-4" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
             <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
             <x-shared::metric-badge
                 icon="visibility"
