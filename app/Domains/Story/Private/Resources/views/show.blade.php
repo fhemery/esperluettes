@@ -233,7 +233,7 @@
             </div>
 
             <!-- Stats -->
-            <div class="col-start-2 col-span-1 row-start-4 row-span-1
+            <div class="col-start-2 col-span-1 row-start-3 row-span-1
                 sm:col-start-2 sm:col-span-1 sm:row-start-4 sm:row-span-1
                 lg:col-start-1 lg:col-span-2 lg:row-start-4 lg:row-span-1
                 lg:border-t border-fg pt-2 w-full flex items-center flex-start gap-1 md:gap-4">
