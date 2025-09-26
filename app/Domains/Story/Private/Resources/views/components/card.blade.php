@@ -21,7 +21,7 @@
         </a>
     </div>
 
-    <div class="pb-1 pt-2 flex-1 flex flex-col">
+    <div class="pb-1 pt-2 flex-1 flex flex-col gap-1">
         @if(!empty($genres))
             <x-shared::badge-overflow>
                 @foreach($genres as $g)
