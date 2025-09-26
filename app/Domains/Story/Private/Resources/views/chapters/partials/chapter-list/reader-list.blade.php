@@ -14,7 +14,7 @@
             data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}"
             aria-label="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}"
             title="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}">
-            <span class="material-symbols-outlined text-[30px] leading-none {{ $ch->isRead ? 'text-primary' : 'text-gray-300' }}">check_circle</span>
+            <span class="material-symbols-outlined text-[30px] leading-none {{ $ch->isRead ? 'text-success' : 'text-gray-300' }}">check_circle</span>
         </button>
     </div>
     @else
@@ -90,10 +90,10 @@
             icon.textContent = 'check_circle';
             // Apply colors via style to avoid JIT/class issues
             if (isRead) {
-                icon.classList.add('text-primary');
+                icon.classList.add('text-success');
                 icon.classList.remove('text-gray-300');
             } else {
-                icon.classList.remove('text-primary');
+                icon.classList.remove('text-success');
                 icon.classList.add('text-gray-300');
             }
             btn.setAttribute('data-read', isRead ? '1' : '0');
