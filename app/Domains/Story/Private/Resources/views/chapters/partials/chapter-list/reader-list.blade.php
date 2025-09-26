@@ -1,11 +1,12 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
 @if (!empty($chapters))
-<div class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-2">
+<div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_auto] gap-2">
     @foreach($chapters as $ch)
-    <div class="col-span-1 surface-read text-on-surface p-2">
-        @auth
+    <!-- Read toggle, only for logged users -->
+    @auth
+    <div class="col-span-1 surface-read text-on-surface p-2 flex items-center h-full">
         <button type="button"
-            class="read-toggle inline-flex items-center justify-center rounded-full w-6 h-6"
+            class="read-toggle inline-flex items-center justify-center rounded-full w-10 h-10"
             data-story-slug="{{ $story->slug }}"
             data-chapter-slug="{{ $ch->slug }}"
             data-read="{{ $ch->isRead ? '1' : '0' }}"
@@ -13,19 +14,50 @@
             data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}"
             aria-label="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}"
             title="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}">
-            <span class="material-symbols-outlined text-[20px] leading-none {{ $ch->isRead ? 'text-primary' : 'text-gray-300' }}">check_circle</span>
+            <span class="material-symbols-outlined text-[30px] leading-none {{ $ch->isRead ? 'text-primary' : 'text-gray-300' }}">check_circle</span>
         </button>
-        @endauth
     </div>
-    <div class="col-span-1 surface-read text-on-surface p-2">
-        <a href="{{ $ch->url }}" class="flex-1 truncate text-indigo-700 hover:text-indigo-900 font-medium py-2">
+    @else
+    <div></div>
+    @endauth
+
+    <!-- Chapter title -->
+    <!-- On mobile, also add updated at, words count, and reads count -->
+    <div class="flex flex-col col-span-1 surface-read text-on-surface p-2 min-w-0">
+        <a href="{{ $ch->url }}" class="flex-1 truncate text-fg hover:text-fg/80 font-semibold py-2">
             {{ $ch->title }}
         </a>
+
+        <div class="sm:hidden flex flex-start gap-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+            <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
+            <x-story::words-metric-badge
+                size="xs"
+                :nb-words="$ch->wordCount"
+                :nb-characters="$ch->characterCount" />
+            <x-shared::metric-badge
+                icon="visibility"
+                :value="$ch->readsLogged"
+                size="xs"
+                :label="__('story::chapters.reads.label')"
+                :tooltip="__('story::chapters.reads.tooltip')" />
+        </div>
     </div>
-    <div class="col-span-1 surface-read text-on-surface p-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+
+    <!-- Updated at -->
+    <div class="hidden sm:flex items-center h-full col-span-1 surface-read text-on-surface p-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
         <span x-text="DateUtils.formatDate(updated)"></span>
     </div>
-    <div class="col-span-1 surface-read text-on-surface p-2">
+
+    <!-- Words count -->
+    <div class="hidden sm:flex items-center h-full col-span-1 surface-read text-on-surface p-2 flex justify-center">
+        <x-story::words-metric-badge
+            size="sm"
+            :nb-words="$ch->wordCount"
+            :nb-characters="$ch->characterCount" />
+    </div>
+
+    <!-- Reads count -->
+    <div class="hidden sm:flex items-center h-full col-span-1 surface-read text-on-surface p-2">
         <x-shared::metric-badge
             icon="visibility"
             :value="$ch->readsLogged"
@@ -33,12 +65,7 @@
             :label="__('story::chapters.reads.label')"
             :tooltip="__('story::chapters.reads.tooltip')" />
     </div>
-    <div class="col-span-1 surface-read text-on-surface p-2 flex justify-center">
-        <x-story::words-metric-badge
-            size="sm"
-            :nb-words="$ch->wordCount"
-            :nb-characters="$ch->characterCount" />
-    </div>
+
     @endforeach
     @else
     <p class="text-sm text-gray-600">{{ __('story::chapters.list.empty') }}</p>

@@ -1,24 +1,42 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
-<div class="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-2" x-ref="readonlyList">
+<div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto_auto] gap-2" x-ref="readonlyList">
     @foreach($chapters as $ch)
-    <div class="flex items-center gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface"
+    <div class="flex flex-col gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface"
             data-id="{{ $ch->id }}"
             data-title="{{ $ch->title }}"
             data-is-draft="{{ $ch->isDraft ? '1' : '0' }}">
-        <a href="{{ route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}" class="flex-1 truncate text-indigo-700 hover:text-indigo-900 font-medium">{{ $ch->title }}</a>
-        @if($ch->isDraft)
-        <x-shared::popover placement="top">
-            <x-slot name="trigger">
-                <span class="material-symbols-outlined text-[18px] leading-none shrink-0">draft</span>
-            </x-slot>
-            <p>{{ __('story::chapters.list.draft') }}</p>
-        </x-shared::popover>
-        @endif
+        <div class="flex items-center gap-2">
+            <a href="{{ route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}" 
+                class="flex-1 truncate text-fg hover:text-fg/80 font-semibold">{{ $ch->title }}</a>
+            @if($ch->isDraft)
+            <x-shared::popover placement="top">
+                <x-slot name="trigger">
+                    <span class="material-symbols-outlined text-[18px] leading-none shrink-0">draft</span>
+                </x-slot>
+                <p>{{ __('story::chapters.list.draft') }}</p>
+            </x-shared::popover>
+            @endif
+        </div>
+
+        <!-- Updated at, and badges for mobile -->
+        <div class="flex sm:hidden flex-start gap-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+            <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
+            <x-shared::metric-badge
+                icon="visibility"
+                :value="$ch->readsLogged"
+                size="xs"
+                :label="__('story::chapters.reads.label')"
+                :tooltip="__('story::chapters.reads.tooltip')" />
+            <x-story::words-metric-badge
+                size="xs"
+                :nb-words="$ch->wordCount"
+                :nb-characters="$ch->characterCount" />
+        </div>
     </div>
-    <div class="col-span-1 surface-read text-on-surface p-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+    <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
         <span x-text="DateUtils.formatDate(updated)"></span>
     </div>
-    <div class="col-span-1 surface-read text-on-surface p-2">
+    <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2">
         <x-shared::metric-badge
             icon="visibility"
             :value="$ch->readsLogged"
@@ -26,13 +44,13 @@
             :label="__('story::chapters.reads.label')"
             :tooltip="__('story::chapters.reads.tooltip')" />
     </div>
-    <div class="col-span-1 surface-read text-on-surface p-2 flex justify-center">
+    <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2 flex justify-center">
         <x-story::words-metric-badge
             size="sm"
             :nb-words="$ch->wordCount"
             :nb-characters="$ch->characterCount" />
     </div>
-    <div class="col-span-1 surface-read text-on-surface p-2 flex justify-center gap-2">
+    <div class="h-full flex items-center justify-center gap-2 col-span-1 surface-read text-on-surface p-2 ">
         <a href="{{ route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}"
             class="inline-flex items-center text-gray-500 hover:text-gray-700"
             title="{{ __('story::chapters.actions.edit') }}"
