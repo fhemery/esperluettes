@@ -28,12 +28,12 @@
 >
   @foreach($options as $value => $meta)
     <div
-      class="relative w-9 h-9 flex items-center justify-center rounded-full"
+      class="relative w-6 h-6 flex items-center justify-center rounded-full"
       title="{{ $meta['label'] }}"
     >
       @if($visibility === $value)
         <span
-          class="absolute inset-0 rounded-full"
+          class="absolute inset-0 rounded-full -m-1"
           style="background-color: rgb(var(--color-success-bg));"
           aria-hidden="true"
         ></span>

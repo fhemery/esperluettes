@@ -1,10 +1,7 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
-<div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto_auto] gap-2" x-ref="readonlyList">
+<div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto_auto] gap-2">
     @foreach($chapters as $ch)
-    <div class="flex flex-col gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface"
-            data-id="{{ $ch->id }}"
-            data-title="{{ $ch->title }}"
-            data-is-draft="{{ $ch->isDraft ? '1' : '0' }}">
+    <div class="flex flex-col gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface">
         <div class="flex items-center gap-2">
             <a href="{{ route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}" 
                 class="flex-1 truncate text-fg hover:text-fg/80 font-semibold">{{ $ch->title }}</a>
@@ -44,7 +41,7 @@
             :label="__('story::chapters.reads.label')"
             :tooltip="__('story::chapters.reads.tooltip')" />
     </div>
-    <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2 flex justify-center">
+    <div class="hidden sm:flex items-center justify-center col-span-1 surface-read text-on-surface p-2">
         <x-story::words-metric-badge
             size="sm"
             :nb-words="$ch->wordCount"
