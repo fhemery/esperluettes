@@ -15,19 +15,18 @@
     <div class="overflow-hidden surface-read text-on-surface">
         <div class="p-2 md:p-4 grid items-start gap-2 md:gap-4 
             grid-cols-[150px_1fr]
-            lg:grid-rows-[auto_auto_1fr_auto]
+            lg:grid-rows-[auto_auto_auto_1fr_auto]
             lg:grid-cols-[300px_1fr_2fr]">
 
             <!-- Title -->
-            <div class="col-span-2 lg:col-start-2 lg:col-end-4 flex items-center justify-between">
-                <h1 class="font-semibold text-2xl leading-tight mr-2">
+            <div class="col-span-2 lg:col-start-1 lg:col-end-4 flex items-center justify-between">
+                <h1 class="font-semibold text-4xl leading-tight mr-2">
                     {{ $viewModel->getTitle() }}
                 </h1>
 
                 @if($viewModel->isAuthor())
                 <div class="flex items-center gap-2">
                     <a href="{{ url('/stories/'.$viewModel->getSlug().'/edit') }}"
-                        class="text-indigo-600 hover:text-indigo-800"
                         aria-label="{{ __('story::show.edit') }}"
                         title="{{ __('story::show.edit') }}">
                         <span class="material-symbols-outlined text-accent/80 hover:text-accent">edit</span>
@@ -46,7 +45,6 @@
             <!-- Image -->
             <div
                 class="col-start-1 col-span-1 row-start-2 row-span-3
-                    lg:row-span-2
                     flex flex-col gap-2 items-center justify-center">
                 <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $viewModel->getTitle() }}" class="w-[150px] h-[200px] md:w-full md:h-full object-cover">
                 <div class="flex items-center">
@@ -84,15 +82,32 @@
 
             </div>
 
+             <!-- Stats -->
+             <div class="col-start-2 col-span-1 row-start-3 row-span-1
+                border-y border-fg
+                pt-2 pb-2 w-full flex items-center flex-start gap-1 md:gap-4">
+                <x-shared::metric-badge
+                    icon="visibility"
+                    size="md"
+                    :value="$viewModel->getReadsLoggedTotal()"
+                    :label="__('story::chapters.reads.label')"
+                    :tooltip="__('story::chapters.reads.tooltip')" />
+
+                <x-story::words-metric-badge
+                    size="md"
+                    :nb-words="$viewModel->getWordsTotal()"
+                    :nb-characters="$viewModel->getCharactersTotal()" />
+            </div>
+
             <!-- triggers, status, feedback... -->
             <div class="col-start-1 col-span-2 row-start-5 row-span-1 
-                sm:col-start-2 sm:col-span-1 sm:row-start-3 sm:row-span-1
-                lg:col-start-2 lg:col-span-1 lg:row-start-3 lg:row-span-1 flex flex-col justify-between gap-2 h-full">
+                sm:col-start-2 sm:col-span-1 sm:row-start-4 sm:row-span-1
+                flex flex-col justify-between gap-2 h-full">
                 <!-- Trigger warnings -->
                 <div class="flex flex-col gap-2">
-                    <div class="font-semibold text-lg flex items-center gap-2">
-                        <span class="material-symbols-outlined">warning</span>
-                        {{ __('story::shared.trigger_warnings.label') }}
+                    <div class="font-semibold text-lg leading-5">
+                        <span class="material-symbols-outlined translate-y-1">warning</span>
+                        <span>{{ __('story::show.trigger_warnings.label') }}</span>
                     </div>
                     @switch($viewModel->twDisclosure)
                     @case('no_tw')
@@ -217,7 +232,7 @@
             <div class="col-span-2 flex flex-col flex-start h-full gap-2
                 lg:col-start-3 lg:col-span-1 lg:row-span-3 lg:row-start-2">
                 <div class="p-4 bg-bg flex-1">
-                    <article class="p-2 prose flex-1 overflow-hidden surface-read text-on-surface h-full">
+                    <article class="p-4 prose flex-1 overflow-hidden surface-read text-on-surface h-full">
                         @if(!$viewModel->hasDescription())
                         <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>
                         @else
@@ -225,30 +240,16 @@
                         @endif
                     </article>
                 </div>
-                @if($viewModel->story->last_chapter_published_at)
-                <div class="text-right" x-data="{ date: new Date('{{ $viewModel->story->last_chapter_published_at }}') }">
+               
+            </div>
+
+            @if($viewModel->story->last_chapter_published_at)
+                <div class="col-span-2 flex justify-end h-full gap-2
+                lg:col-start-3 lg:col-span-1 lg:row-span-1 lg:row-start-5
+                " x-data="{ date: new Date('{{ $viewModel->story->last_chapter_published_at }}') }">
                     {{ __('story::show.last_update') }} <span x-text="DateUtils.formatDate(date)"></span>
                 </div>
                 @endif
-            </div>
-
-            <!-- Stats -->
-            <div class="col-start-2 col-span-1 row-start-3 row-span-1
-                sm:col-start-2 sm:col-span-1 sm:row-start-4 sm:row-span-1
-                lg:col-start-1 lg:col-span-2 lg:row-start-4 lg:row-span-1
-                lg:border-t border-fg pt-2 w-full flex items-center flex-start gap-1 md:gap-4">
-                <x-shared::metric-badge
-                    icon="visibility"
-                    size="md"
-                    :value="$viewModel->getReadsLoggedTotal()"
-                    :label="__('story::chapters.reads.label')"
-                    :tooltip="__('story::chapters.reads.tooltip')" />
-
-                <x-story::words-metric-badge
-                    size="md"
-                    :nb-words="$viewModel->getWordsTotal()"
-                    :nb-characters="$viewModel->getCharactersTotal()" />
-            </div>
         </div>
 
     </div>
