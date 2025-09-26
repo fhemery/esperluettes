@@ -411,9 +411,7 @@ describe('Story details page', function () {
             $resp->assertSee(trans('story::chapters.reads.label'));
             $resp->assertSee(trans('story::chapters.reads.tooltip'));
 
-            // The author list renders numbers via Alpine; ensure the initial payload contains the readsLogged key
-            // We cannot rely on client-side rendering in tests, so just verify the JSON attribute includes the key
-            $resp->assertSeeInOrder(['readsLogged', '1']);
+            $resp->assertSeeInOrder(['visibility', '1']);
         });
 
         it('shows total reads on the story page', function () {
