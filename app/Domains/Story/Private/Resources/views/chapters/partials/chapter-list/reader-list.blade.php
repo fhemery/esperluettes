@@ -1,48 +1,76 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
 @if (!empty($chapters))
-<ul class="divide-y divide-gray-200 rounded-md border border-gray-200 bg-white">
+<div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_auto] gap-2">
     @foreach($chapters as $ch)
-    <li class="p-3 flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2 flex-1 min-w-0">
-            @auth
-            <button type="button"
-                class="read-toggle inline-flex items-center justify-center rounded-full w-6 h-6"
-                data-story-slug="{{ $story->slug }}"
-                data-chapter-slug="{{ $ch->slug }}"
-                data-read="{{ $ch->isRead ? '1' : '0' }}"
-                data-label-read="{{ __('story::chapters.actions.marked_read') }}"
-                data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}"
-                aria-label="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}"
-                title="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}">
-                <span class="material-symbols-outlined text-[20px] leading-none {{ $ch->isRead ? 'text-green-700' : 'text-gray-300' }}">check_circle</span>
-            </button>
-            @endauth
-            <a href="{{ $ch->url }}" class="flex-1 truncate text-indigo-700 hover:text-indigo-900 font-medium">
-                {{ $ch->title }}
-            </a>
+    <!-- Read toggle, only for logged users -->
+    @auth
+    <div class="col-span-1 surface-read text-on-surface p-2 flex items-center h-full">
+        <button type="button"
+            class="read-toggle inline-flex items-center justify-center rounded-full w-10 h-10"
+            data-story-slug="{{ $story->slug }}"
+            data-chapter-slug="{{ $ch->slug }}"
+            data-read="{{ $ch->isRead ? '1' : '0' }}"
+            data-label-read="{{ __('story::chapters.actions.marked_read') }}"
+            data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}"
+            aria-label="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}"
+            title="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}">
+            <span class="material-symbols-outlined text-[30px] leading-none {{ $ch->isRead ? 'text-success' : 'text-gray-300' }}">check_circle</span>
+        </button>
+    </div>
+    @else
+    <div></div>
+    @endauth
+
+    <!-- Chapter title -->
+    <!-- On mobile, also add updated at, words count, and reads count -->
+    <div class="flex flex-col col-span-1 surface-read text-on-surface p-2 min-w-0">
+        <a href="{{ $ch->url }}" class="flex-1 truncate text-fg hover:text-fg/80 font-semibold py-2">
+            {{ $ch->title }}
+        </a>
+
+        <div class="sm:hidden flex flex-start gap-4" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+            <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
+            <x-story::words-metric-badge
+                size="xs"
+                :nb-words="$ch->wordCount"
+                :nb-characters="$ch->characterCount" />
+            <x-shared::metric-badge
+                icon="visibility"
+                :value="$ch->readsLogged"
+                size="xs"
+                :label="__('story::chapters.reads.label')"
+                :tooltip="__('story::chapters.reads.tooltip')" />
         </div>
-        <div class="flex items-center gap-2">
-            <div class="min-w-[60px] flex flex-start">
-                <x-shared::metric-badge
-                    icon="visibility"
-                    :value="$ch->readsLogged"
-                    :label="__('story::chapters.reads.label')"
-                    :tooltip="__('story::chapters.reads.tooltip')"
-                />
-            </div>
-            <div class="min-w-[60px] flex flex-start">
-                <x-story::words-metric-badge
-                    :nb-words="$ch->wordCount"
-                    :nb-characters="$ch->characterCount"
-                />
-            </div>
-        </div>
-    </li>
+    </div>
+
+    <!-- Updated at -->
+    <div class="hidden sm:flex items-center h-full col-span-1 surface-read text-on-surface p-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+        <span x-text="DateUtils.formatDate(updated)"></span>
+    </div>
+
+    <!-- Words count -->
+    <div class="hidden sm:flex items-center h-full col-span-1 surface-read text-on-surface p-2 flex justify-center">
+        <x-story::words-metric-badge
+            size="sm"
+            :nb-words="$ch->wordCount"
+            :nb-characters="$ch->characterCount" />
+    </div>
+
+    <!-- Reads count -->
+    <div class="hidden sm:flex items-center h-full col-span-1 surface-read text-on-surface p-2">
+        <x-shared::metric-badge
+            icon="visibility"
+            :value="$ch->readsLogged"
+            size="sm"
+            :label="__('story::chapters.reads.label')"
+            :tooltip="__('story::chapters.reads.tooltip')" />
+    </div>
+
     @endforeach
-</ul>
-@else
-<p class="text-sm text-gray-600">{{ __('story::chapters.list.empty') }}</p>
-@endif
+    @else
+    <p class="text-sm text-gray-600">{{ __('story::chapters.list.empty') }}</p>
+    @endif
+</div>
 
 @once
 @push('scripts')
@@ -62,10 +90,10 @@
             icon.textContent = 'check_circle';
             // Apply colors via style to avoid JIT/class issues
             if (isRead) {
-                icon.classList.add('text-green-700');
+                icon.classList.add('text-success');
                 icon.classList.remove('text-gray-300');
             } else {
-                icon.classList.remove('text-green-700');
+                icon.classList.remove('text-success');
                 icon.classList.add('text-gray-300');
             }
             btn.setAttribute('data-read', isRead ? '1' : '0');

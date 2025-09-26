@@ -22,15 +22,13 @@
       </button>
       @endif
       <div class="text-xs text-gray-500"
-        x-data="{ lang: document.documentElement.lang || 'en',
-                        created: new Date('{{ $comment->createdAt }}'),
-                        updated: new Date('{{ $comment->updatedAt }}'),
-                        fmt(d, opts){ return new Intl.DateTimeFormat(this.lang, opts).format(d); } }">
-        <span x-text="fmt(created, { day: '2-digit', month: '2-digit', year: 'numeric' })"></span>
+        x-data="{ created: new Date('{{ $comment->createdAt }}'),
+                   updated: new Date('{{ $comment->updatedAt }}') }">
+        <span x-text="DateUtils.formatDate(created)"></span>
         @if($comment->updatedAt !== $comment->createdAt)
         <span class="ml-2 text-gray-400">
           {{ __('comment::comments.updated_at') }}
-          <span x-text="fmt(updated, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })"></span>
+          <span x-text="DateUtils.formatDateTime(updated)"></span>
         </span>
         @endif
       </div>

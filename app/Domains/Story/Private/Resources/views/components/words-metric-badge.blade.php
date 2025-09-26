@@ -1,4 +1,4 @@
-@props(['nbWords' => 0, 'nbCharacters' => 0])
+@props(['nbWords' => 0, 'nbCharacters' => 0, 'size' => 'xs'])
 
 @php($label = __('story::shared.metrics.words_and_signs.label', [
     'nbWords' => \App\Domains\Shared\Support\NumberFormatter::compact($nbWords),
@@ -11,4 +11,5 @@
     :value="$nbWords"
     :label="$label"
     :tooltip="__('story::shared.metrics.words_and_signs.help')"
+    :size="$size"
 />

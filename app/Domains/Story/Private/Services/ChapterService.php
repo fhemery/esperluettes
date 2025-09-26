@@ -63,6 +63,8 @@ class ChapterService
                 $chapter->first_published_at = now();
             }
 
+            // Any authoring action counts as an edit
+            $chapter->last_edited_at = now();
             $chapter->save();
 
             // update slug with -id suffix and ensure global uniqueness
@@ -145,6 +147,8 @@ class ChapterService
             $slugBase = Str::slug($title);
             $chapter->slug = SlugWithId::build($slugBase, $chapter->id);
 
+            // Mark content as edited for display purposes
+            $chapter->last_edited_at = now();
             $chapter->save();
 
             // Update story.last_chapter_published_at only if this request performed the first publish
@@ -194,7 +198,7 @@ class ChapterService
         $isAuthor = $story->isAuthor($viewerId);
 
         return $story->chapters()
-            ->select(['id','title','slug','status','sort_order','reads_logged_count','word_count','character_count'])
+            ->select(['id','title','slug','status','sort_order','reads_logged_count','word_count','character_count','last_edited_at'])
             ->when(!$isAuthor, fn($q) => $q->where('status', Chapter::STATUS_PUBLISHED))
             ->orderBy('sort_order','asc')
             ->get();

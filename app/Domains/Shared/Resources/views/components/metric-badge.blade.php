@@ -3,6 +3,7 @@
     'value' => 0,
     'label' => '',
     'tooltip' => '',
+    'size' => 'xs',
 ])
 
 @php
@@ -13,11 +14,8 @@
 
 <x-shared::popover placement="top" maxWidth="16rem">
     <x-slot name="trigger">
-        <x-shared::badge color="neutral" size="xs">
-            <div class="flex items-center gap-1">
-                <span class="material-symbols-outlined text-[16px] leading-none">{{ $icon }}</span>
-                <span>{{ $displayValue }}</span>
-            </div>
+        <x-shared::badge color="neutral" :size="$size" :icon="$icon">
+            {{ $displayValue }}
         </x-shared::badge>
     </x-slot>
     @if($label !== '')

@@ -26,6 +26,9 @@
   --color-warning-fg: 194 65 12;
   --color-warning-bg: 255 237 213;
 
+  --color-read-bg: 255 253 251;
+  --color-read-fg: 0 0 0;
+
   /* Images */
   --home-bg-image: none;
   --home-bg-size: auto;
@@ -103,6 +106,7 @@
   .surface-primary {
     --surface-bg: var(--color-primary);
     --surface-fg: 255 255 255;
+    --surface-border: var(--color-primary);
     color-scheme: light;
     background-color: rgb(var(--color-primary));
     /* Do NOT set text color here; use .text-on-surface opt-in on text elements */
@@ -120,6 +124,7 @@
   .surface-accent {
     --surface-bg: var(--color-accent);
     --surface-fg: 255 255 255;
+    --surface-border: var(--color-accent);
     color-scheme: light;
     background-color: rgb(var(--color-accent));
   }
@@ -127,13 +132,15 @@
   .surface-tertiary {
     --surface-bg: var(--color-tertiary);
     --surface-fg: 255 255 255;
+    --surface-border: var(--color-tertiary);
     color-scheme: light;
     background-color: rgb(var(--color-tertiary));
   }
 
   .surface-neutral {
     --surface-bg: transparent;
-    --surface-fg: black;
+    --surface-fg: var(--color-fg);
+    --surface-border: var(--color-fg);
     color-scheme: light;
     background-color: transparent;
   }
@@ -141,6 +148,7 @@
   .surface-error {
     --surface-bg: var(--color-error-bg);
     --surface-fg: var(--color-error-fg);
+    --surface-border: var(--color-error-bg);
     color-scheme: light;
     background-color: rgb(var(--color-error-bg));
   }
@@ -148,6 +156,7 @@
   .surface-info {
     --surface-bg: var(--color-info-bg);
     --surface-fg: var(--color-info-fg);
+    --surface-border: var(--color-info-bg);
     color-scheme: light;
     background-color: rgb(var(--color-info-bg));
   }
@@ -155,6 +164,7 @@
   .surface-success {
     --surface-bg: var(--color-success-bg);
     --surface-fg: var(--color-success-fg);
+    --surface-border: var(--color-success-bg);
     color-scheme: light;
     background-color: rgb(var(--color-success-bg));
   }
@@ -162,12 +172,25 @@
   .surface-warning {
     --surface-bg: var(--color-warning-bg);
     --surface-fg: var(--color-warning-fg);
+    --surface-border: var(--color-warning-bg);
     color-scheme: light;
     background-color: rgb(var(--color-warning-bg));
   }
 
+  .surface-read {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-read-fg);
+    --surface-border: transparent;
+    color-scheme: light;
+    background-color: rgb(var(--color-read-bg));
+  }
+
   .text-on-surface {
     color: rgb(var(--surface-fg));
+  }
+
+  .border-surface {
+    border: 1px solid rgb(var(--surface-border));
   }
 
   .error-on-surface {

@@ -14,6 +14,7 @@ class ChapterSummaryViewModel
         public readonly int $wordCount,
         public readonly int $characterCount,
         public readonly string $url,
+        public readonly \DateTimeInterface $updatedAt,
     ) {
     }
 }
