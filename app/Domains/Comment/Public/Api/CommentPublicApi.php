@@ -38,6 +38,27 @@ class CommentPublicApi
         }
     }
 
+    
+
+    /**
+     * Bulk: for each target, determine if there exists at least one root comment without a reply
+     * from any of the provided author ids.
+     * @return array<int,bool> [entityId => hasUnreplied]
+     */
+    public function getHasUnrepliedRootsByAuthorsForTargets(string $entityType, array $entityIds, array $authorIds): array
+    {
+        return $this->service->hasUnrepliedRootsByAuthors($entityType, $entityIds, $authorIds);
+    }
+
+    /**
+     * Bulk: get root comment counts for the given targets.
+     * @return array<int,int> [entityId => count]
+     */
+    public function getRootCountsForTargets(string $entityType, array $entityIds): array
+    {
+        return $this->service->countRootsByTargets($entityType, $entityIds);
+    }
+    
     public function getNbRootComments(string $entityType, int $entityId, ?int $authorId =null): int
     {
         return $this->service->countFor($entityType, $entityId, true, $authorId);

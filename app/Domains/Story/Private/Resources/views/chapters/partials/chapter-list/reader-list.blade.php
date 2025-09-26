@@ -1,6 +1,6 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
 @if (!empty($chapters))
-<div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_auto] gap-2">
+<div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_auto_auto] gap-2">
     @foreach($chapters as $ch)
     <!-- Read toggle, only for logged users -->
     @auth
@@ -35,6 +35,12 @@
                 :nb-words="$ch->wordCount"
                 :nb-characters="$ch->characterCount" />
             <x-shared::metric-badge
+                icon="comment"
+                :value="$ch->commentCount"
+                size="xs"
+                :label="__('story::chapters.comments.label')"
+                :tooltip="__('story::chapters.comments.tooltip')" />
+            <x-shared::metric-badge
                 icon="visibility"
                 :value="$ch->readsLogged"
                 size="xs"
@@ -54,6 +60,16 @@
             size="sm"
             :nb-words="$ch->wordCount"
             :nb-characters="$ch->characterCount" />
+    </div>
+
+    <!-- Comments count -->
+    <div class="hidden sm:flex items-center h-full col-span-1 surface-read text-on-surface p-2">
+        <x-shared::metric-badge
+            icon="comment"
+            :value="$ch->commentCount"
+            size="sm"
+            :label="__('story::chapters.comments.label')"
+            :tooltip="__('story::chapters.comments.tooltip')" />
     </div>
 
     <!-- Reads count -->

@@ -13,6 +13,8 @@ class ChapterSummaryViewModel
         public readonly int $readsLogged,
         public readonly int $wordCount,
         public readonly int $characterCount,
+        public readonly int $commentCount,
+        public readonly bool $hasUnrepliedByAuthors,
         public readonly string $url,
         public readonly \DateTimeInterface $updatedAt,
     ) {

@@ -20,6 +20,7 @@ use App\Domains\Story\Private\ViewModels\ChapterSummaryViewModel;
 use App\Domains\Story\Private\Services\ReadingProgressService;
 use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use App\Domains\Story\Private\Services\ChapterCreditService;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
 use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -36,6 +37,7 @@ class StoryController
         private readonly ReadingProgressService    $progress,
         private readonly ChapterService            $chapters,
         private readonly ChapterCreditService      $credits,
+        private readonly CommentPublicApi          $comments,
     )
     {
     }
@@ -307,8 +309,10 @@ class StoryController
         // Fetch all the data we need from DB
         $story = $this->service->getStory($slug, $opts);
         $chapterRows = $this->chapters->getChapters($story, Auth::id());
+        $authorUserIds = $story->authors->pluck('user_id')->all();
+        $isAuthor = in_array(Auth::id(), $authorUserIds, true);
         $readIds = [];
-        if (Auth::check()) {
+        if (Auth::check() && !$isAuthor) {
             $readIds = $this->progress->getReadChapterIdsForUserInStory((int)Auth::id(), (int)$story->id);
         }
 
@@ -326,7 +330,7 @@ class StoryController
         }
 
         // Fetch authors' public profiles and build ViewModel
-        $authorUserIds = $story->authors->pluck('user_id')->all();
+        
         $authors = empty($authorUserIds)
             ? []
             : array_values($this->profileApi->getPublicProfiles($authorUserIds));
@@ -378,10 +382,17 @@ class StoryController
             }
         }
 
+        // Build chapter metrics from Comment domain in bulk
+        $chapterIds = [];
+        foreach ($chapterRows as $cRow) { $chapterIds[] = (int)$cRow->id; }
+        $rootCounts = $this->comments->getRootCountsForTargets('chapter', $chapterIds);
+        $hasUnreplied = $isAuthor ? $this->comments->getHasUnrepliedRootsByAuthorsForTargets('chapter', $chapterIds, $authorUserIds) : [] ;
+
         $chapters = [];
         foreach ($chapterRows as $c) {
+            $cid = (int)$c->id;
             $chapters[] = new ChapterSummaryViewModel(
-                id: (int)$c->id,
+                id: $cid,
                 title: (string)$c->title,
                 slug: (string)$c->slug,
                 isPublished: (string)$c->status === \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED,
@@ -389,6 +400,8 @@ class StoryController
                 readsLogged: (int)($c->reads_logged_count ?? 0),
                 wordCount: (int)($c->word_count ?? 0),
                 characterCount: (int)($c->character_count ?? 0),
+                commentCount: (int)($rootCounts[$cid] ?? 0),
+                hasUnrepliedByAuthors: (bool)($hasUnreplied[$cid] ?? false),
                 url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
                 updatedAt: $c->last_edited_at,
             );

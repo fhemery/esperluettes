@@ -38,6 +38,25 @@ class CommentService
     }
 
     /**
+     * Bulk counts of root comments per target id.
+     * @return array<int,int> [entityId => count]
+     */
+    public function countRootsByTargets(string $entityType, array $entityIds): array
+    {
+        return $this->repository->countRootsByTargets($entityType, $entityIds);
+    }
+
+    /**
+     * For each target, determines if there exists at least one root comment without a reply
+     * from any of the provided $authorIds.
+     * @return array<int,bool> [entityId => hasUnreplied]
+     */
+    public function hasUnrepliedRootsByAuthors(string $entityType, array $entityIds, array $authorIds): array
+    {
+        return $this->repository->hasUnrepliedRootsByAuthors($entityType, $entityIds, $authorIds);
+    }
+
+    /**
      * Create a root comment (no parent). No policy checks for now.
      */
     public function postComment(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment

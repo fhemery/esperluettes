@@ -1,5 +1,5 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
-<div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto_auto] gap-2">
+<div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto_auto_auto] gap-2">
     @foreach($chapters as $ch)
     <div class="flex flex-col gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface">
         <div class="flex items-center gap-2">
@@ -19,6 +19,13 @@
         <div class="flex sm:hidden flex-start gap-4" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
             <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
             <x-shared::metric-badge
+                icon="comment"
+                :value="$ch->commentCount"
+                size="xs"
+                :label="__('story::chapters.comments.label')"
+                :tooltip="__('story::chapters.comments.tooltip')"
+                :color="$ch->hasUnrepliedByAuthors ? 'accent' : 'neutral'" />
+            <x-shared::metric-badge
                 icon="visibility"
                 :value="$ch->readsLogged"
                 size="xs"
@@ -32,6 +39,15 @@
     </div>
     <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
         <span x-text="DateUtils.formatDate(updated)"></span>
+    </div>
+    <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2">
+        <x-shared::metric-badge
+            icon="comment"
+            :value="$ch->commentCount"
+            size="sm"
+            :label="__('story::chapters.comments.label')"
+            :tooltip="__('story::chapters.comments.tooltip')"
+            :color="$ch->hasUnrepliedByAuthors ? 'accent' : 'neutral'" />
     </div>
     <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2">
         <x-shared::metric-badge
