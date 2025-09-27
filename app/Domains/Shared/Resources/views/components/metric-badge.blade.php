@@ -4,6 +4,8 @@
     'label' => '',
     'tooltip' => '',
     'size' => 'xs',
+    'color' => 'neutral',
+    'outline' => false,
 ])
 
 @php
@@ -14,7 +16,7 @@
 
 <x-shared::popover placement="top" maxWidth="16rem">
     <x-slot name="trigger">
-        <x-shared::badge color="neutral" :size="$size" :icon="$icon">
+        <x-shared::badge :color="$color" :size="$size" :icon="$icon" :outline="$outline">
             {{ $displayValue }}
         </x-shared::badge>
     </x-slot>

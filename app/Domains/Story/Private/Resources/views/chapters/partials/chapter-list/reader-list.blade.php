@@ -1,6 +1,6 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
 @if (!empty($chapters))
-<div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_auto] gap-2">
+<div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_auto_auto] gap-2">
     @foreach($chapters as $ch)
     <!-- Read toggle, only for logged users -->
     @auth
@@ -28,12 +28,18 @@
             {{ $ch->title }}
         </a>
 
-        <div class="sm:hidden flex flex-start gap-4" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+        <div class="sm:hidden flex flex-start gap-3" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
             <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
             <x-story::words-metric-badge
                 size="xs"
                 :nb-words="$ch->wordCount"
                 :nb-characters="$ch->characterCount" />
+            <x-shared::metric-badge
+                icon="comment"
+                :value="$ch->commentCount"
+                size="xs"
+                :label="__('story::chapters.comments.label')"
+                />
             <x-shared::metric-badge
                 icon="visibility"
                 :value="$ch->readsLogged"
@@ -54,6 +60,16 @@
             size="sm"
             :nb-words="$ch->wordCount"
             :nb-characters="$ch->characterCount" />
+    </div>
+
+    <!-- Comments count -->
+    <div class="hidden sm:flex items-center h-full col-span-1 surface-read text-on-surface p-2">
+        <x-shared::metric-badge
+            icon="comment"
+            :value="$ch->commentCount"
+            size="sm"
+            :label="__('story::chapters.comments.label')"
+            />
     </div>
 
     <!-- Reads count -->

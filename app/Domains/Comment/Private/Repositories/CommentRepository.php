@@ -4,6 +4,7 @@ namespace App\Domains\Comment\Private\Repositories;
 
 use App\Domains\Comment\Private\Models\Comment;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class CommentRepository
 {
@@ -24,17 +25,73 @@ class CommentRepository
         return $query->paginate(perPage: $perPage, page: $page);
     }
 
+
+    /**
+     * Bulk: determine for each target if there exists at least one root comment that has no
+     * replies authored by any user in $authorIds. Returns [entityId => bool].
+     */
+    public function hasUnrepliedRootsByAuthors(string $entityType, array $entityIds, array $authorIds): array
+    {
+        if (empty($entityIds) || empty($authorIds)) {
+            // If no authors, then every root is unreplied-by-authors; we only care if there exists at least one root.
+            // Fall back to: has any root comments at all.
+            if (empty($entityIds)) {
+                return [];
+            }
+            $counts = Comment::query()
+                ->selectRaw('commentable_id as id, COUNT(*) as cnt')
+                ->where('commentable_type', $entityType)
+                ->whereNull('parent_comment_id')
+                ->whereIn('commentable_id', $entityIds)
+                ->groupBy('commentable_id')
+                ->get();
+            $out = [];
+            foreach ($counts as $r) {
+                $out[(int)$r->id] = ((int)$r->cnt) > 0;
+            }
+            return $out;
+        }
+
+        // Strategy: left join replies from authors onto roots; roots with no such replies are candidates.
+        // Use the query builder to avoid model global scopes interfering with aliases.
+        $rows = DB::table('comments as roots')
+            ->leftJoin('comments as replies', function ($join) use ($authorIds) {
+                $join->on('replies.parent_comment_id', '=', 'roots.id')
+                    ->whereIn('replies.author_id', $authorIds);
+            })
+            ->where('roots.commentable_type', $entityType)
+            ->whereNull('roots.parent_comment_id')
+            ->whereIn('roots.commentable_id', $entityIds)
+            ->groupBy('roots.commentable_id')
+            ->selectRaw('roots.commentable_id as id, COUNT(CASE WHEN replies.id IS NULL THEN 1 END) as unmatched_roots')
+            ->get();
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[(int)$r->id] = ((int)$r->unmatched_roots) > 0;
+        }
+        return $out;
+    }
+
     /**
      * Efficiently count root comments for a given target without loading items.
      */
-    public function countByTarget(string $entityType, int $entityId, bool $isRoot=false, ?int $authorId = null): int
+    public function countByTarget(string $entityType, array $entityIds, bool $isRoot=false, ?int $authorId = null): array
     {
-        return Comment::query()
+        $rows = Comment::query()
             ->where('commentable_type', $entityType)
-            ->where('commentable_id', $entityId)
+            ->whereIn('commentable_id', $entityIds)
             ->when($isRoot, fn($q) => $q->whereNull('parent_comment_id'))
             ->when($authorId, fn($q) => $q->where('author_id', $authorId))
-            ->count();
+            ->groupBy('commentable_id')
+            ->selectRaw('commentable_id as id, COUNT(*) as cnt')
+            ->get();
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[(int)$r->id] = (int)$r->cnt;
+        }
+        return $out;  
     }
 
     public function create(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment

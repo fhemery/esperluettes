@@ -5,6 +5,7 @@
     // Size of the badge: sm | md
     'size' => 'sm',
     'icon' => false,
+    'outline' => false,
 ])
 
 @php
@@ -32,6 +33,10 @@
     ];
 
     $colorClasses = $variants[$color] ?? $variants['primary'];
+    if ($outline) {
+        // Use a custom modifier class to avoid clashing with Tailwind's `outline` utility
+        $colorClasses = $colorClasses. ' is-outline';
+    }
 @endphp
 
 <span {{ $attributes->merge(['class' => "$base $sizeClasses $colorClasses" . ($icon ? ' gap-1' : '')]) }}>

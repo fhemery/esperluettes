@@ -38,9 +38,31 @@ class CommentPublicApi
         }
     }
 
+    
+
+    /**
+     * Bulk: for each target, determine if there exists at least one root comment without a reply
+     * from any of the provided author ids.
+     * @return array<int,bool> [entityId => hasUnreplied]
+     */
+    public function hasUnrepliedRootComments(string $entityType, array $entityIds, array $authorIds): array
+    {
+        return $this->service->hasUnrepliedRootsByAuthors($entityType, $entityIds, $authorIds);
+    }
+
+    /**
+     * Bulk: get root comment counts for the given targets.
+     * @return array<int,int> [entityId => count]
+     */
+    public function getNbRootCommentsFor(string $entityType, array $entityIds): array
+    {
+        return $this->service->countFor($entityType, $entityIds, true);
+    }
+    
     public function getNbRootComments(string $entityType, int $entityId, ?int $authorId =null): int
     {
-        return $this->service->countFor($entityType, $entityId, true, $authorId);
+        $counts = $this->service->countFor($entityType, [$entityId], true, $authorId);
+        return $counts[$entityId] ?? 0;
     }
 
     public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): CommentListDto
@@ -50,13 +72,13 @@ class CommentPublicApi
 
         // Lazy mode: page <= 0 → return config and total only, no items
         if ($page <= 0) {
-            $total = $this->service->countFor($entityType, $entityId, true);
+            $total = $this->service->countFor($entityType, [$entityId], true);
             return $this->listDtoMapper->make(
                 entityType: $entityType,
                 entityId: $entityId,
                 page: 0,
                 perPage: $perPage,
-                total: $total,
+                total: $total[$entityId] ?? 0,
                 items: [],
                 config: new CommentUiConfigDto(
                     minRootCommentLength: $this->policies->getRootCommentMinLength($entityType),

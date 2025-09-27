@@ -32,9 +32,19 @@ class CommentService
     /**
      * Count total root comments for a given target.
      */
-    public function countFor(string $entityType, int $entityId, bool $isRoot=false, ?int $authorId = null): int
+    public function countFor(string $entityType, array $entityIds, bool $isRoot=false, ?int $authorId = null): array
     {
-        return $this->repository->countByTarget($entityType, $entityId, $isRoot, $authorId);
+        return $this->repository->countByTarget($entityType, $entityIds, $isRoot, $authorId);
+    }
+
+    /**
+     * For each target, determines if there exists at least one root comment without a reply
+     * from any of the provided $authorIds.
+     * @return array<int,bool> [entityId => hasUnreplied]
+     */
+    public function hasUnrepliedRootsByAuthors(string $entityType, array $entityIds, array $authorIds): array
+    {
+        return $this->repository->hasUnrepliedRootsByAuthors($entityType, $entityIds, $authorIds);
     }
 
     /**
