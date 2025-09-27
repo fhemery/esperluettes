@@ -32,18 +32,9 @@ class CommentService
     /**
      * Count total root comments for a given target.
      */
-    public function countFor(string $entityType, int $entityId, bool $isRoot=false, ?int $authorId = null): int
+    public function countFor(string $entityType, array $entityIds, bool $isRoot=false, ?int $authorId = null): array
     {
-        return $this->repository->countByTarget($entityType, $entityId, $isRoot, $authorId);
-    }
-
-    /**
-     * Bulk counts of root comments per target id.
-     * @return array<int,int> [entityId => count]
-     */
-    public function countRootsByTargets(string $entityType, array $entityIds): array
-    {
-        return $this->repository->countRootsByTargets($entityType, $entityIds);
+        return $this->repository->countByTarget($entityType, $entityIds, $isRoot, $authorId);
     }
 
     /**

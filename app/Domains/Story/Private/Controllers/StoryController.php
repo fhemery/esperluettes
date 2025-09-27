@@ -385,7 +385,7 @@ class StoryController
         // Build chapter metrics from Comment domain in bulk
         $chapterIds = [];
         foreach ($chapterRows as $cRow) { $chapterIds[] = (int)$cRow->id; }
-        $rootCounts = $this->comments->getRootCountsForTargets('chapter', $chapterIds);
+        $rootCounts = $this->comments->getNbRootCommentsFor('chapter', $chapterIds);
         $hasUnreplied = $isAuthor ? $this->comments->getHasUnrepliedRootsByAuthorsForTargets('chapter', $chapterIds, $authorUserIds) : [] ;
 
         $chapters = [];

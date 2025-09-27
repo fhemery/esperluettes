@@ -54,14 +54,15 @@ class CommentPublicApi
      * Bulk: get root comment counts for the given targets.
      * @return array<int,int> [entityId => count]
      */
-    public function getRootCountsForTargets(string $entityType, array $entityIds): array
+    public function getNbRootCommentsFor(string $entityType, array $entityIds): array
     {
-        return $this->service->countRootsByTargets($entityType, $entityIds);
+        return $this->service->countFor($entityType, $entityIds, true);
     }
     
     public function getNbRootComments(string $entityType, int $entityId, ?int $authorId =null): int
     {
-        return $this->service->countFor($entityType, $entityId, true, $authorId);
+        $counts = $this->service->countFor($entityType, [$entityId], true, $authorId);
+        return $counts[$entityId] ?? 0;
     }
 
     public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): CommentListDto

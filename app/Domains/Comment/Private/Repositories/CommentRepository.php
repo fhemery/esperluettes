@@ -25,30 +25,6 @@ class CommentRepository
         return $query->paginate(perPage: $perPage, page: $page);
     }
 
-    /**
-     * Bulk: get root comment counts grouped by target id for the given entity type and ids.
-     * Returns an associative array [entityId => count].
-     */
-    public function countRootsByTargets(string $entityType, array $entityIds): array
-    {
-        if (empty($entityIds)) {
-            return [];
-        }
-
-        $rows = Comment::query()
-            ->selectRaw('commentable_id as id, COUNT(*) as cnt')
-            ->where('commentable_type', $entityType)
-            ->whereNull('parent_comment_id')
-            ->whereIn('commentable_id', $entityIds)
-            ->groupBy('commentable_id')
-            ->get();
-
-        $out = [];
-        foreach ($rows as $r) {
-            $out[(int)$r->id] = (int)$r->cnt;
-        }
-        return $out;
-    }
 
     /**
      * Bulk: determine for each target if there exists at least one root comment that has no
@@ -100,14 +76,21 @@ class CommentRepository
     /**
      * Efficiently count root comments for a given target without loading items.
      */
-    public function countByTarget(string $entityType, int $entityId, bool $isRoot=false, ?int $authorId = null): int
+    public function countByTarget(string $entityType, array $entityIds, bool $isRoot=false, ?int $authorId = null): array
     {
-        return Comment::query()
+        $rows = Comment::query()
             ->where('commentable_type', $entityType)
-            ->where('commentable_id', $entityId)
+            ->whereIn('commentable_id', $entityIds)
             ->when($isRoot, fn($q) => $q->whereNull('parent_comment_id'))
             ->when($authorId, fn($q) => $q->where('author_id', $authorId))
-            ->count();
+            ->groupBy('commentable_id')
+            ->selectRaw('commentable_id as id, COUNT(*) as cnt')
+            ->get();
+
+        foreach ($rows as $r) {
+            $out[(int)$r->id] = (int)$r->cnt;
+        }
+        return $out;  
     }
 
     public function create(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment
