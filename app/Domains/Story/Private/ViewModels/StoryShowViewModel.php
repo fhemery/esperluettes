@@ -5,6 +5,7 @@ namespace App\Domains\Story\Private\ViewModels;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Shared\Dto\ProfileDto;
 use App\Domains\Story\Private\ViewModels\ChapterSummaryViewModel;
+use App\Domains\Shared\ViewModels\RefViewModel;
 
 class StoryShowViewModel
 {
@@ -13,11 +14,11 @@ class StoryShowViewModel
     public readonly array $authors;
     /** @var array<int, ChapterSummaryViewModel> */
     public readonly array $chapters;
-    public readonly string $typeName;
-    public readonly string $audienceName;
-    public readonly string $copyrightName;
-    public readonly ?string $statusName;
-    public readonly ?string $feedbackName;
+    public readonly RefViewModel $type;
+    public readonly RefViewModel $audience;
+    public readonly RefViewModel $copyright;
+    public readonly ?RefViewModel $status;
+    public readonly ?RefViewModel $feedback;
     /** @var array<int,string> */
     public readonly array $genreNames;
     /** @var array<int,string> */
@@ -29,12 +30,12 @@ class StoryShowViewModel
         ?int $currentUserId,
         array $authors,
         array $chapters,
-        string $typeName,
-        string $audienceName,
-        string $copyrightName,
+        RefViewModel $type,
+        RefViewModel $audience,
+        RefViewModel $copyright,
         array $genreNames = [],
-        ?string $statusName = null,
-        ?string $feedbackName = null,
+        ?RefViewModel $status = null,
+        ?RefViewModel $feedback = null,
         array $triggerWarningNames = [],
         string $twDisclosure = Story::TW_UNSPOILED,
     ) {
@@ -44,12 +45,12 @@ class StoryShowViewModel
         /** @var array<int, ChapterSummaryViewModel> $chapters */
         $this->chapters = $chapters;
         $this->currentUserId = $currentUserId;
-        $this->typeName = (string)$typeName;
-        $this->audienceName = (string)$audienceName;
-        $this->copyrightName = (string)$copyrightName;
+        $this->type = $type;
+        $this->audience = $audience;
+        $this->copyright = $copyright;
         $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
-        $this->statusName = $statusName;
-        $this->feedbackName = $feedbackName;
+        $this->status = $status;
+        $this->feedback = $feedback;
         $this->triggerWarningNames = array_values(array_filter(array_map('strval', $triggerWarningNames)));
         $this->twDisclosure = (string)$twDisclosure;
     }
@@ -109,45 +110,28 @@ class StoryShowViewModel
         return collect($this->authors)->pluck('user_id')->contains($this->currentUserId);
     }
 
-    /**
-     * Get story type display name
-     */
-    public function getTypeName(): string
-    {
-        return $this->typeName;
-    }
+    // Accessors for referentials
+    public function getType(): RefViewModel { return $this->type; }
+    public function getAudience(): RefViewModel { return $this->audience; }
+    public function getCopyright(): RefViewModel { return $this->copyright; }
+    public function getStatus(): ?RefViewModel { return $this->status; }
+    public function getFeedback(): ?RefViewModel { return $this->feedback; }
 
-    /**
-     * Get story audience display name
-     */
-    public function getAudienceName(): string
-    {
-        return $this->audienceName;
-    }
+    // Backward-compatible name getters
+    public function getTypeName(): string { return $this->type->getName(); }
+    public function getAudienceName(): string { return $this->audience->getName(); }
+    public function getCopyrightName(): string { return $this->copyright->getName(); }
+    public function getStatusName(): ?string { return $this->status?->getName(); }
+    public function getFeedbackName(): ?string { return $this->feedback?->getName(); }
 
-    /**
-     * Get story copyright display name
-     */
-    public function getCopyrightName(): string
-    {
-        return $this->copyrightName;
-    }
+    // Description getters for popovers
+    public function getTypeDescription(): ?string { return $this->type->getDescription(); }
+    public function getAudienceDescription(): ?string { return $this->audience->getDescription(); }
+    public function getCopyrightDescription(): ?string { return $this->copyright->getDescription(); }
+    public function getStatusDescription(): ?string { return $this->status?->getDescription(); }
+    public function getFeedbackDescription(): ?string { return $this->feedback?->getDescription(); }
 
-    /**
-     * Get story status display name
-     */
-    public function getStatusName(): ?string
-    {
-        return $this->statusName;
-    }
-
-    /**
-     * Get story feedback display name
-     */
-    public function getFeedbackName(): ?string
-    {
-        return $this->feedbackName;
-    }
+    
 
     /**
      * Get genre names for display

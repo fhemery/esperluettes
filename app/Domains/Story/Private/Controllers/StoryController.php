@@ -10,17 +10,18 @@ use App\Domains\Shared\Support\Seo;
 use App\Domains\Story\Private\Http\Requests\StoryRequest;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Services\StoryService;
-use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\ViewModels\StoryListViewModel;
 use App\Domains\Story\Private\ViewModels\StoryShowViewModel;
 use App\Domains\Story\Private\ViewModels\StorySummaryViewModel;
 use App\Domains\Story\Private\ViewModels\ChapterSummaryViewModel;
-use App\Domains\Story\Private\Services\ReadingProgressService;
 use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Shared\ViewModels\RefViewModel;
+use App\Domains\Story\Private\Services\ChapterService;
+use App\Domains\Story\Private\Services\ReadingProgressService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -339,26 +340,36 @@ class StoryController
         $typesById = $this->lookup->getTypes()->keyBy('id');
         $typeArr = $typesById->get($story->story_ref_type_id);
         $typeName = (string) (is_array($typeArr) ? ($typeArr['name'] ?? '') : '');
+        $typeDesc = is_array($typeArr) ? ($typeArr['description'] ?? null) : null;
+        $typeVm = new RefViewModel($typeName, $typeDesc);
 
         // Resolve audience name for display
         $audiencesById = $this->lookup->getAudiences()->keyBy('id');
         $audArr = $audiencesById->get($story->story_ref_audience_id);
         $audienceName = (string) (is_array($audArr) ? ($audArr['name'] ?? '') : '');
+        $audienceDesc = is_array($audArr) ? ($audArr['description'] ?? null) : null;
+        $audienceVm = new RefViewModel($audienceName, $audienceDesc);
 
         // Resolve copyright name for display
         $copyrightsById = $this->lookup->getCopyrights()->keyBy('id');
         $crArr = $copyrightsById->get($story->story_ref_copyright_id);
         $copyrightName = (string) (is_array($crArr) ? ($crArr['name'] ?? '') : '');
+        $copyrightDesc = is_array($crArr) ? ($crArr['description'] ?? null) : null;
+        $copyrightVm = new RefViewModel($copyrightName, $copyrightDesc);
 
         // Resolve status name for display
         $statusesById = $this->lookup->getStatuses()->keyBy('id');
         $stArr = $statusesById->get($story->story_ref_status_id);
         $statusName = is_array($stArr) ? ($stArr['name'] ?? null) : null;
+        $statusDesc = is_array($stArr) ? ($stArr['description'] ?? null) : null;
+        $statusVm = $statusName !== null ? new RefViewModel((string)$statusName, $statusDesc) : null;
 
         // Resolve feedback name for display
         $feedbacksById = $this->lookup->getFeedbacks()->keyBy('id');
         $fbArr = $feedbacksById->get($story->story_ref_feedback_id);
         $feedbackName = is_array($fbArr) ? ($fbArr['name'] ?? null) : null;
+        $feedbackDesc = is_array($fbArr) ? ($fbArr['description'] ?? null) : null;
+        $feedbackVm = $feedbackName !== null ? new RefViewModel((string)$feedbackName, $feedbackDesc) : null;
 
         // Collect genre names using lookup service (service only loads IDs)
         $genreIds = $story->genres?->pluck('id')->filter()->values()->all() ?? [];
@@ -412,12 +423,12 @@ class StoryController
             Auth::id(),
             $authors,
             $chapters,
-            $typeName,
-            $audienceName,
-            $copyrightName,
+            $typeVm,
+            $audienceVm,
+            $copyrightVm,
             $genreNames,
-            $statusName,
-            $feedbackName,
+            $statusVm,
+            $feedbackVm,
             $triggerWarningNames,
             (string) $story->tw_disclosure,
         );

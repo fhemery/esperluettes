@@ -148,11 +148,12 @@ function defaultCopyright(): StoryRefCopyright
         'is_active' => true]);
 }
 
-function makeCopyright(string $name): StoryRefCopyright
+function makeCopyright(string $name, string $description = ''): StoryRefCopyright
 {
     return app(CopyrightService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
+        'description' => $description,
         'is_active' => true,
     ]);
 }

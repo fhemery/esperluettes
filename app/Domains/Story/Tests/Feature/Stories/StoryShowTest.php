@@ -127,17 +127,18 @@ describe('Story details page', function () {
         $response->assertSee('Teens');
     });
 
-    it('shows the copyright when available', function () {
+    it('shows the copyright when available with its description', function () {
         $author = alice($this);
-        $cr = makeCopyright('Public Domain');
+        $cr = makeCopyright('Public Domain', 'Public domain description');
         $story = publicStory('Copyrighted Story', $author->id, [
             'story_ref_copyright_id' => $cr->id,
         ]);
 
         $response = $this->get('/stories/' . $story->slug);
         $response->assertOk();
-        $response->assertSee(trans('story::shared.copyright.label'));
         $response->assertSee('Public Domain');
+        $response->assertSee('Public domain description');
+        $response->assertDontSee(trans('story::shared.copyright.label'));
     });
 
     it('shows the feedback when available', function () {

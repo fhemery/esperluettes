@@ -21,7 +21,7 @@ class StoryRefCache
     ) {}
 
     /**
-     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     * @return Collection<int, array{id:int,slug:string,name:string,description:?string,is_active:bool,order:int|null}>
      */
     public function types(): Collection
     {
@@ -43,6 +43,7 @@ class StoryRefCache
                         'id' => (int) $m->id,
                         'slug' => (string) $m->slug,
                         'name' => (string) $m->name,
+                        'description' => isset($m->description) ? (string) $m->description : null,
                         'is_active' => (bool) ($m->is_active ?? true),
                         'order' => isset($m->order) ? (int) $m->order : null,
                     ]);
@@ -67,7 +68,7 @@ class StoryRefCache
     }
 
     /**
-     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     * @return Collection<int, array{id:int,slug:string,name:string,description:?string,is_active:bool,order:int|null}>
      */
     public function audiences(): Collection
     {
@@ -87,6 +88,7 @@ class StoryRefCache
                         'id' => (int) $m->id,
                         'slug' => (string) $m->slug,
                         'name' => (string) $m->name,
+                        'description' => isset($m->description) ? (string) $m->description : null,
                         'is_active' => (bool) ($m->is_active ?? true),
                         'order' => isset($m->order) ? (int) $m->order : null,
                     ]);
@@ -131,7 +133,7 @@ class StoryRefCache
     }
 
     /**
-     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     * @return Collection<int, array{id:int,slug:string,name:string,description:?string,is_active:bool,order:int|null}>
      */
     public function copyrights(): Collection
     {
@@ -151,6 +153,7 @@ class StoryRefCache
                         'id' => (int) $m->id,
                         'slug' => (string) $m->slug,
                         'name' => (string) $m->name,
+                        'description' => isset($m->description) ? (string) $m->description : null,
                         'is_active' => (bool) ($m->is_active ?? true),
                         'order' => isset($m->order) ? (int) $m->order : null,
                     ]);
@@ -174,7 +177,7 @@ class StoryRefCache
     }
 
     /**
-     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     * @return Collection<int, array{id:int,slug:string,name:string,description:?string,is_active:bool,order:int|null}>
      */
     public function genres(): Collection
     {
@@ -238,7 +241,7 @@ class StoryRefCache
     }
 
     /**
-     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     * @return Collection<int, array{id:int,slug:string,name:string,description:?string,is_active:bool,order:int|null}>
      */
     public function statuses(): Collection
     {
@@ -258,6 +261,7 @@ class StoryRefCache
                         'id' => (int) $m->id,
                         'slug' => (string) $m->slug,
                         'name' => (string) $m->name,
+                        'description' => isset($m->description) ? (string) $m->description : null,
                         'is_active' => (bool) ($m->is_active ?? true),
                         'order' => isset($m->order) ? (int) $m->order : null,
                     ]);
@@ -281,7 +285,7 @@ class StoryRefCache
     }
 
     /**
-     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     * @return Collection<int, array{id:int,slug:string,name:string,description:?string,is_active:bool,order:int|null}>
      */
     public function feedbacks(): Collection
     {
@@ -301,6 +305,7 @@ class StoryRefCache
                         'id' => (int) $m->id,
                         'slug' => (string) $m->slug,
                         'name' => (string) $m->name,
+                        'description' => isset($m->description) ? (string) $m->description : null,
                         'is_active' => (bool) ($m->is_active ?? true),
                         'order' => isset($m->order) ? (int) $m->order : null,
                     ]);
@@ -324,7 +329,7 @@ class StoryRefCache
     }
 
     /**
-     * @return Collection<int, array{id:int,slug:string,name:string,is_active:bool,order:int|null}>
+     * @return Collection<int, array{id:int,slug:string,name:string,description:?string,is_active:bool,order:int|null}>
      */
     public function triggerWarnings(): Collection
     {
@@ -344,6 +349,7 @@ class StoryRefCache
                         'id' => (int) $m->id,
                         'slug' => (string) $m->slug,
                         'name' => (string) $m->name,
+                        'description' => isset($m->description) ? (string) $m->description : null,
                         'is_active' => (bool) ($m->is_active ?? true),
                         'order' => isset($m->order) ? (int) $m->order : null,
                     ]);

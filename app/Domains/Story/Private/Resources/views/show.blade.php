@@ -160,12 +160,11 @@
                                 <x-shared::badge
                                     color="neutral"
                                     size="sm"
-                                    title="{{ __('story::shared.type.label') }}"
                                     icon="category">
                                     {{ $viewModel->getTypeName() }}
                                 </x-shared::badge>
                             </x-slot>
-                            <div>{{ __('story::shared.type.label') }}</div>
+                            <div>{{ $viewModel->getTypeDescription() ?? __('story::shared.type.label') }}</div>
                         </x-shared::popover>
                         @endif
                         @if($viewModel->getAudienceName())
@@ -174,12 +173,11 @@
                                 <x-shared::badge
                                     color="neutral"
                                     size="sm"
-                                    title="{{ __('story::shared.audience.label') }}"
                                     icon="group">
                                     {{ $viewModel->getAudienceName() }}
                                 </x-shared::badge>
                             </x-slot>
-                            <div>{{ __('story::shared.audience.label') }}</div>
+                            <div>{{ $viewModel->getAudienceDescription() ?? __('story::shared.audience.label') }}</div>
                         </x-shared::popover>
                         @endif
                         @if($viewModel->getCopyrightName())
@@ -188,12 +186,11 @@
                                 <x-shared::badge
                                     color="neutral"
                                     size="sm"
-                                    title="{{ __('story::shared.copyright.label') }}"
                                     icon="copyright">
                                     {{ $viewModel->getCopyrightName() }}
                                 </x-shared::badge>
                             </x-slot>
-                            <div>{{ __('story::shared.copyright.label') }}</div>
+                            <div>{{ $viewModel->getCopyrightDescription() ?? __('story::shared.copyright.label') }}</div>
                         </x-shared::popover>
                         @endif
                         @if($viewModel->getStatusName())
@@ -202,12 +199,11 @@
                                 <x-shared::badge
                                     color="neutral"
                                     size="sm"
-                                    title="{{ __('story::shared.status.label') }}"
                                     icon="edit_note">
                                     {{ $viewModel->getStatusName() }}
                                 </x-shared::badge>
                             </x-slot>
-                            <div>{{ __('story::shared.status.label') }}</div>
+                            <div>{{ $viewModel->getStatusDescription() ?? __('story::shared.status.label') }}</div>
                         </x-shared::popover>
                         @endif
                         @if($viewModel->getFeedbackName())
@@ -216,12 +212,11 @@
                                 <x-shared::badge
                                     color="neutral"
                                     size="sm"
-                                    title="{{ __('story::shared.feedback.label') }}"
                                     icon="forum">
                                     {{ $viewModel->getFeedbackName() }}
                                 </x-shared::badge>
                             </x-slot>
-                            <div>{{ __('story::shared.feedback.label') }}</div>
+                            <div>{{ $viewModel->getFeedbackDescription() ?? __('story::shared.feedback.label') }}</div>
                         </x-shared::popover>
                         @endif
                     </span>
