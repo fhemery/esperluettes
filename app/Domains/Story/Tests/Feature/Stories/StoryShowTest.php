@@ -153,7 +153,7 @@ describe('Story details page', function () {
         $response->assertSee('Open to feedback');
     });
 
-    describe('trigger warnings', function(){
+    describe('trigger warnings', function () {
         it('shows trigger warning badges when disclosure is listed', function () {
             $author = alice($this);
             $violence = makeTriggerWarning('Violence');
@@ -186,7 +186,7 @@ describe('Story details page', function () {
                 ]);
                 $story->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_NO_TW;
                 $story->saveQuietly();
-        
+
                 Auth::logout();
                 $resp = $this->get('/stories/' . $story->slug);
                 $resp->assertOk();
@@ -194,7 +194,7 @@ describe('Story details page', function () {
                 $resp->assertSee(trans('story::shared.trigger_warnings.no_tw'));
                 $resp->assertSee(trans('story::shared.trigger_warnings.tooltips.no_tw'));
             });
-        
+
             it('shows an Unspoiled badge on the story page when tw_disclosure is unspoiled and no TWs are listed', function () {
                 $author = alice($this);
                 $story = publicStory('Unspoiled Show', $author->id, [
@@ -203,7 +203,7 @@ describe('Story details page', function () {
                 ]);
                 $story->tw_disclosure = \App\Domains\Story\Private\Models\Story::TW_UNSPOILED;
                 $story->saveQuietly();
-        
+
                 Auth::logout();
                 $resp = $this->get('/stories/' . $story->slug);
                 $resp->assertOk();
@@ -211,7 +211,7 @@ describe('Story details page', function () {
                 $resp->assertSee(trans('story::shared.trigger_warnings.unspoiled'));
                 $resp->assertSee(trans('story::shared.trigger_warnings.tooltips.unspoiled'));
             });
-        }); 
+        });
     });
 
     describe('chapters', function () {
@@ -371,6 +371,63 @@ describe('Story details page', function () {
             // Non-authors see reader view; ensure no credits text leaks
             $resp->assertDontSee(__('story::chapters.no_chapter_credits_left'));
         });
+
+        describe('Chapter comments tooltip', function () {
+            it('shows comments count on chapter list for readers', function () {
+                $author = alice($this);
+                $story = publicStory('Comments Story', $author->id);
+                $chapter = createPublishedChapter($this, $story, $author, ['title' => 'First Chapter']);
+
+                $reader1 = bob($this);
+                $this->actingAs($reader1);
+                createComment('chapter', $chapter->id, generateDummyText(150));
+
+                $resp = $this->get('/stories/' . $story->slug);
+                $resp->assertOk();
+
+                $resp->assertSee(trans('story::chapters.comments.label'));
+                assertHasIconBadge($this, 'comment', '1', $resp->getContent());
+            });
+
+            it('shows comments count on chapter list for authors, with no pending replies', function() {
+                $author = alice($this);
+                $reader = bob($this);
+                $story = publicStory('Comments Story', $author->id);
+                $chapter = createPublishedChapter($this, $story, $author, ['title' => 'First Chapter']);
+
+                $this->actingAs($reader);
+                $commentId = createComment('chapter', $chapter->id, generateDummyText(150));
+
+                $this->actingAs($author);
+                createComment('chapter', $chapter->id, generateDummyText(150), $commentId);
+
+                $resp = $this->get('/stories/' . $story->slug);
+                $resp->assertOk();
+
+                $resp->assertSee(trans('story::chapters.comments.label'));
+                assertHasIconBadge($this, 'comment', '1', $resp->getContent());
+                $resp->assertDontSee(__('story::chapters.comments.tooltip_unreplied'));
+            });
+
+            it('shows comments count on chapter list for authors, with pending replies', function() {
+                $author = alice($this);
+                $reader = bob($this);
+                $story = publicStory('Comments Story', $author->id);
+                $chapter = createPublishedChapter($this, $story, $author, ['title' => 'First Chapter']);
+
+                $this->actingAs($reader);
+                createComment('chapter', $chapter->id, generateDummyText(150));
+
+                $this->actingAs($author);
+
+                $resp = $this->get('/stories/' . $story->slug);
+                $resp->assertOk();
+
+                $resp->assertSee(trans('story::chapters.comments.label'));
+                assertHasIconBadge($this, 'comment', '1', $resp->getContent());
+                $resp->assertSee(__('story::chapters.comments.tooltip_unreplied'));
+            });
+        });
     });
 
     describe('Reading statistics', function () {
@@ -445,7 +502,7 @@ describe('Story details page', function () {
             $resp->assertOk();
             // We cannot look for number of signs or characters, they are embedded in the translation
             $resp->assertSee(__('story::shared.metrics.words_and_signs'));
-            $resp->assertSee(__('story::shared.metrics.words_and_signs.help')); 
+            $resp->assertSee(__('story::shared.metrics.words_and_signs.help'));
         });
     });
 

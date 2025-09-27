@@ -87,6 +87,7 @@ class CommentRepository
             ->selectRaw('commentable_id as id, COUNT(*) as cnt')
             ->get();
 
+        $out = [];
         foreach ($rows as $r) {
             $out[(int)$r->id] = (int)$r->cnt;
         }
