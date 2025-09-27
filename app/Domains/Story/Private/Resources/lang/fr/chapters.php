@@ -79,6 +79,6 @@ return [
     'no_chapter_credits_left' => 'Vous devez lire et commenter davantage pour pouvoir publier un nouveau chapitre.',
     'comments' => [
         'label' => 'Commentaires',
-        'tooltip' => 'Nombre de commentaires',
+        'tooltip_unreplied' => 'Vous avez des commentaires non répondus.',
     ],
 ];

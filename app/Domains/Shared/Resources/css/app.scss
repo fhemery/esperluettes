@@ -119,6 +119,13 @@
       background-color: rgb(var(--surface-fg));
       color: rgb(var(--surface-bg));
     }
+
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-primary);
+      --surface-border: var(--color-primary);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .surface-accent {
@@ -127,6 +134,13 @@
     --surface-border: var(--color-accent);
     color-scheme: light;
     background-color: rgb(var(--color-accent));
+
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-accent);
+      --surface-border: var(--color-accent);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .surface-tertiary {
@@ -135,6 +149,13 @@
     --surface-border: var(--color-tertiary);
     color-scheme: light;
     background-color: rgb(var(--color-tertiary));
+
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-tertiary);
+      --surface-border: var(--color-tertiary);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .surface-neutral {
@@ -143,6 +164,14 @@
     --surface-border: var(--color-fg);
     color-scheme: light;
     background-color: transparent;
+
+    // This badge, as neutral as it is, it already an outline one
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-fg);
+      --surface-border: var(--color-fg);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .surface-error {
@@ -151,6 +180,13 @@
     --surface-border: var(--color-error-bg);
     color-scheme: light;
     background-color: rgb(var(--color-error-bg));
+
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-error-bg);
+      --surface-border: var(--color-error-bg);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .surface-info {
@@ -159,6 +195,13 @@
     --surface-border: var(--color-info-bg);
     color-scheme: light;
     background-color: rgb(var(--color-info-bg));
+
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-info-bg);
+      --surface-border: var(--color-info-bg);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .surface-success {
@@ -167,6 +210,13 @@
     --surface-border: var(--color-success-bg);
     color-scheme: light;
     background-color: rgb(var(--color-success-bg));
+
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-success-bg);
+      --surface-border: var(--color-success-bg);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .surface-warning {
@@ -175,6 +225,13 @@
     --surface-border: var(--color-warning-bg);
     color-scheme: light;
     background-color: rgb(var(--color-warning-bg));
+
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-warning-bg);
+      --surface-border: var(--color-warning-bg);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .surface-read {
@@ -183,6 +240,13 @@
     --surface-border: transparent;
     color-scheme: light;
     background-color: rgb(var(--color-read-bg));
+
+    &.is-outline {
+      --surface-bg: var(--color-read-bg);
+      --surface-fg: var(--color-read-fg);
+      --surface-border: var(--color-read-bg);
+      background-color: rgb(var(--color-read-bg));
+    }
   }
 
   .text-on-surface {

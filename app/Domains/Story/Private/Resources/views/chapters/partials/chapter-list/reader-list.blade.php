@@ -28,7 +28,7 @@
             {{ $ch->title }}
         </a>
 
-        <div class="sm:hidden flex flex-start gap-4" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+        <div class="sm:hidden flex flex-start gap-3" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
             <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
             <x-story::words-metric-badge
                 size="xs"
@@ -39,7 +39,7 @@
                 :value="$ch->commentCount"
                 size="xs"
                 :label="__('story::chapters.comments.label')"
-                :tooltip="__('story::chapters.comments.tooltip')" />
+                />
             <x-shared::metric-badge
                 icon="visibility"
                 :value="$ch->readsLogged"
@@ -69,7 +69,7 @@
             :value="$ch->commentCount"
             size="sm"
             :label="__('story::chapters.comments.label')"
-            :tooltip="__('story::chapters.comments.tooltip')" />
+            />
     </div>
 
     <!-- Reads count -->

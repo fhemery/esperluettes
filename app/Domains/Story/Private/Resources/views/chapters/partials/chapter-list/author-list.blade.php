@@ -16,38 +16,30 @@
         </div>
 
         <!-- Updated at, and badges for mobile -->
-        <div class="flex sm:hidden flex-start gap-4" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
+        <div class="flex sm:hidden flex-start gap-3" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
             <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>
+            <x-story::words-metric-badge
+                size="xs"
+                :nb-words="$ch->wordCount"
+                :nb-characters="$ch->characterCount" />
             <x-shared::metric-badge
                 icon="comment"
                 :value="$ch->commentCount"
                 size="xs"
                 :label="__('story::chapters.comments.label')"
-                :tooltip="__('story::chapters.comments.tooltip')"
-                :color="$ch->hasUnrepliedByAuthors ? 'accent' : 'neutral'" />
+                :tooltip="$ch->hasUnrepliedByAuthors ? __('story::chapters.comments.tooltip_unreplied') : ''"
+                :color="$ch->hasUnrepliedByAuthors ? 'accent' : 'neutral'"
+                :outline="$ch->hasUnrepliedByAuthors" />
             <x-shared::metric-badge
                 icon="visibility"
                 :value="$ch->readsLogged"
                 size="xs"
                 :label="__('story::chapters.reads.label')"
                 :tooltip="__('story::chapters.reads.tooltip')" />
-            <x-story::words-metric-badge
-                size="xs"
-                :nb-words="$ch->wordCount"
-                :nb-characters="$ch->characterCount" />
         </div>
     </div>
     <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
         <span x-text="DateUtils.formatDate(updated)"></span>
-    </div>
-    <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2">
-        <x-shared::metric-badge
-            icon="comment"
-            :value="$ch->commentCount"
-            size="sm"
-            :label="__('story::chapters.comments.label')"
-            :tooltip="__('story::chapters.comments.tooltip')"
-            :color="$ch->hasUnrepliedByAuthors ? 'accent' : 'neutral'" />
     </div>
     <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2">
         <x-shared::metric-badge
@@ -56,6 +48,16 @@
             size="sm"
             :label="__('story::chapters.reads.label')"
             :tooltip="__('story::chapters.reads.tooltip')" />
+    </div>
+    <div class="hidden sm:block col-span-1 surface-read text-on-surface p-2">
+        <x-shared::metric-badge
+            icon="comment"
+            :value="$ch->commentCount"
+            size="sm"
+            :label="__('story::chapters.comments.label')"
+            :tooltip="$ch->hasUnrepliedByAuthors ? __('story::chapters.comments.tooltip_unreplied') : ''"
+            :color="$ch->hasUnrepliedByAuthors ? 'accent' : 'neutral'"
+            :outline="$ch->hasUnrepliedByAuthors" />
     </div>
     <div class="hidden sm:flex items-center justify-center col-span-1 surface-read text-on-surface p-2">
         <x-story::words-metric-badge
