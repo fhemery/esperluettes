@@ -65,14 +65,15 @@
 
                     <!-- Genres -->
                     <div>
-                        @php($genres = $viewModel->getGenreNames())
+                        @php($genres = $viewModel->getGenreRefs())
                         @if(!empty($genres))
                         <span class="inline-flex flex-wrap gap-2">
                             @foreach($genres as $g)
-                            <x-shared::badge
-                                color="accent"
-                                size="md"
-                                title="{{ __('story::shared.genres.label') }}">{{ $g }}</x-shared::badge>
+                                <x-story::ref-badge
+                                    :name="$g->getName()"
+                                    :description="$g->getDescription()"
+                                    color="accent"
+                                    size="md" />
                             @endforeach
                         </span>
                         @endif
@@ -137,14 +138,15 @@
                     </x-shared::popover>
                     @break
                     @default
-                    @php($tws = $viewModel->getTriggerWarningNames())
+                    @php($tws = $viewModel->getTriggerWarningRefs())
                     @if(!empty($tws))
                     <span class="inline-flex flex-wrap gap-2">
                         @foreach($tws as $tw)
-                        <x-shared::badge
-                            color="primary"
-                            size="md"
-                            title="{{ __('story::shared.trigger_warnings.label') }}">{{ $tw }}</x-shared::badge>
+                            <x-story::ref-badge
+                                :name="$tw->getName()"
+                                :description="$tw->getDescription()"
+                                color="primary"
+                                size="md" />
                         @endforeach
                     </span>
                     @endif
@@ -155,69 +157,44 @@
                 <div class="text-sm text-gray-700">
                     <span class="inline-flex flex-wrap gap-2">
                         @if($viewModel->getTypeName())
-                        <x-shared::popover placement="top">
-                            <x-slot name="trigger">
-                                <x-shared::badge
-                                    color="neutral"
-                                    size="sm"
-                                    icon="category">
-                                    {{ $viewModel->getTypeName() }}
-                                </x-shared::badge>
-                            </x-slot>
-                            <div>{{ $viewModel->getTypeDescription() ?? __('story::shared.type.label') }}</div>
-                        </x-shared::popover>
+                            <x-story::ref-badge
+                                name="{{ $viewModel->getTypeName() }}"
+                                description="{{ $viewModel->getTypeDescription() }}"
+                                color="neutral"
+                                size="sm"
+                                icon="category" />
                         @endif
                         @if($viewModel->getAudienceName())
-                        <x-shared::popover placement="top">
-                            <x-slot name="trigger">
-                                <x-shared::badge
-                                    color="neutral"
-                                    size="sm"
-                                    icon="group">
-                                    {{ $viewModel->getAudienceName() }}
-                                </x-shared::badge>
-                            </x-slot>
-                            <div>{{ $viewModel->getAudienceDescription() ?? __('story::shared.audience.label') }}</div>
-                        </x-shared::popover>
+                            <x-story::ref-badge
+                                name="{{ $viewModel->getAudienceName() }}"
+                                description="{{ $viewModel->getAudienceDescription() }}"
+                                color="neutral"
+                                size="sm"
+                                icon="group" />
                         @endif
                         @if($viewModel->getCopyrightName())
-                        <x-shared::popover placement="top">
-                            <x-slot name="trigger">
-                                <x-shared::badge
-                                    color="neutral"
-                                    size="sm"
-                                    icon="copyright">
-                                    {{ $viewModel->getCopyrightName() }}
-                                </x-shared::badge>
-                            </x-slot>
-                            <div>{{ $viewModel->getCopyrightDescription() ?? __('story::shared.copyright.label') }}</div>
-                        </x-shared::popover>
+                            <x-story::ref-badge
+                                name="{{ $viewModel->getCopyrightName() }}"
+                                description="{{ $viewModel->getCopyrightDescription() }}"
+                                color="neutral"
+                                size="sm"
+                                icon="copyright" />
                         @endif
                         @if($viewModel->getStatusName())
-                        <x-shared::popover placement="top">
-                            <x-slot name="trigger">
-                                <x-shared::badge
-                                    color="neutral"
-                                    size="sm"
-                                    icon="edit_note">
-                                    {{ $viewModel->getStatusName() }}
-                                </x-shared::badge>
-                            </x-slot>
-                            <div>{{ $viewModel->getStatusDescription() ?? __('story::shared.status.label') }}</div>
-                        </x-shared::popover>
+                            <x-story::ref-badge
+                                name="{{ $viewModel->getStatusName() }}"
+                                description="{{ $viewModel->getStatusDescription() }}"
+                                color="neutral"
+                                size="sm"
+                                icon="edit_note" />
                         @endif
                         @if($viewModel->getFeedbackName())
-                        <x-shared::popover placement="top">
-                            <x-slot name="trigger">
-                                <x-shared::badge
-                                    color="neutral"
-                                    size="sm"
-                                    icon="forum">
-                                    {{ $viewModel->getFeedbackName() }}
-                                </x-shared::badge>
-                            </x-slot>
-                            <div>{{ $viewModel->getFeedbackDescription() ?? __('story::shared.feedback.label') }}</div>
-                        </x-shared::popover>
+                            <x-story::ref-badge
+                                name="{{ $viewModel->getFeedbackName() }}"
+                                description="{{ $viewModel->getFeedbackDescription() }}"
+                                color="neutral"
+                                size="sm"
+                                icon="forum" />
                         @endif
                     </span>
                 </div>

@@ -371,25 +371,29 @@ class StoryController
         $feedbackDesc = is_array($fbArr) ? ($fbArr['description'] ?? null) : null;
         $feedbackVm = $feedbackName !== null ? new RefViewModel((string)$feedbackName, $feedbackDesc) : null;
 
-        // Collect genre names using lookup service (service only loads IDs)
+        // Collect genres as RefViewModel using lookup service (service only loads IDs)
         $genreIds = $story->genres?->pluck('id')->filter()->values()->all() ?? [];
         $genresById = $this->lookup->getGenres()->keyBy('id');
-        $genreNames = [];
+        $genreRefs = [];
         foreach ($genreIds as $gid) {
             $row = $genresById->get($gid);
             if (is_array($row) && isset($row['name'])) {
-                $genreNames[] = (string)$row['name'];
+                $gName = (string)$row['name'];
+                $gDesc = $row['description'] ?? null;
+                $genreRefs[] = new RefViewModel($gName, is_string($gDesc) ? $gDesc : null);
             }
         }
 
-        // Collect trigger warning names for display
+        // Collect trigger warnings as RefViewModel for display
         $twIds = $story->triggerWarnings?->pluck('id')->filter()->values()->all() ?? [];
         $twById = $this->lookup->getTriggerWarnings()->keyBy('id');
-        $triggerWarningNames = [];
+        $triggerWarningRefs = [];
         foreach ($twIds as $tid) {
             $row = $twById->get($tid);
             if (is_array($row) && isset($row['name'])) {
-                $triggerWarningNames[] = (string)$row['name'];
+                $twName = (string)$row['name'];
+                $twDesc = $row['description'] ?? null;
+                $triggerWarningRefs[] = new RefViewModel($twName, is_string($twDesc) ? $twDesc : null);
             }
         }
 
@@ -426,10 +430,10 @@ class StoryController
             $typeVm,
             $audienceVm,
             $copyrightVm,
-            $genreNames,
+            $genreRefs,
             $statusVm,
             $feedbackVm,
-            $triggerWarningNames,
+            $triggerWarningRefs,
             (string) $story->tw_disclosure,
         );
 

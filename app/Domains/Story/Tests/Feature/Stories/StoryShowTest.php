@@ -110,7 +110,6 @@ describe('Story details page', function () {
         ]);
         $response = $this->get('/stories/' . $story->slug);
         $response->assertOk();
-        $response->assertSee(trans('story::shared.type.label'));
         $response->assertSee('Short Story');
     });
 
@@ -123,7 +122,6 @@ describe('Story details page', function () {
 
         $response = $this->get('/stories/' . $story->slug);
         $response->assertOk();
-        $response->assertSee(trans('story::shared.audience.label'));
         $response->assertSee('Teens');
     });
 
@@ -150,14 +148,13 @@ describe('Story details page', function () {
 
         $response = $this->get('/stories/' . $story->slug);
         $response->assertOk();
-        $response->assertSee(trans('story::shared.feedback.label'));
         $response->assertSee('Open to feedback');
     });
 
     describe('trigger warnings', function () {
         it('shows trigger warning badges when disclosure is listed', function () {
             $author = alice($this);
-            $violence = makeTriggerWarning('Violence');
+            $violence = makeTriggerWarning('Violence', 'Violence description');
             $abuse = makeTriggerWarning('Abuse');
 
             $story = publicStory('Listed TW Show', $author->id, [
@@ -171,11 +168,9 @@ describe('Story details page', function () {
             Auth::logout();
             $resp = $this->get('/stories/' . $story->slug);
             $resp->assertOk();
-            // Badge labels should show both TW names
             $resp->assertSee('Violence');
+            $resp->assertSee('Violence description');
             $resp->assertSee('Abuse');
-            // And the section carries the TW label tooltip reference
-            $resp->assertSee(trans('story::shared.trigger_warnings.label'));
         });
 
         describe('Trigger warnings disclosure badges', function () {

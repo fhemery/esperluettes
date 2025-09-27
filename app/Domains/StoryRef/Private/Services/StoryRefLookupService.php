@@ -130,6 +130,7 @@ class StoryRefLookupService
             'id' => $t['id'],
             'slug' => $t['slug'],
             'name' => $t['name'],
+            'description' => $t['description'],
             'order' => $t['order'],
         ]);
     }

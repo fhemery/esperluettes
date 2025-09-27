@@ -211,7 +211,6 @@ describe('Editing story', function () {
             // Show page reflects new genres
             $show = $this->get('/stories/' . $story->slug);
             $show->assertOk();
-            $show->assertSee(trans('story::shared.genres.label'));
             $show->assertSee('Sci-Fi');
             $show->assertSee('Mystery');
         });
@@ -234,7 +233,6 @@ describe('Editing story', function () {
             expect($story->story_ref_status_id)->toBe($status->id);
             $this->get('/stories/' . $story->slug)
                 ->assertOk()
-                ->assertSee(trans('story::shared.status.label'))
                 ->assertSee($status->name);
         });
 
@@ -266,7 +264,6 @@ describe('Editing story', function () {
             // Show page displays new TWs
             $show = $this->get('/stories/' . $story->slug);
             $show->assertOk();
-            $show->assertSee(trans('story::shared.trigger_warnings.label'));
             $show->assertSee('Drogues');
             $show->assertSee('Suicide');
         });
@@ -291,7 +288,6 @@ describe('Editing story', function () {
             expect($story->story_ref_feedback_id)->toBe($fb->id);
             $this->get('/stories/' . $story->slug)
                 ->assertOk()
-                ->assertSee(trans('story::shared.feedback.label'))
                 ->assertSee($fb->name);
 
             // Then clear feedback by sending null

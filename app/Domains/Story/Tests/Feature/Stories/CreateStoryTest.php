@@ -180,11 +180,7 @@ describe('Creating a story', function () {
             $show->assertSee('My First Story');
             $show->assertSee('story::shared.visibility.options.public');
             $show->assertSee('story::show.edit');
-            // Type label and name displayed
-            $show->assertSee(trans('story::shared.type.label'));
             $show->assertSee(defaultStoryType()->name);
-            // Genres label and at least default genre displayed
-            $show->assertSee(trans('story::shared.genres.label'));
             $show->assertSee(defaultGenre()->name);
         });
 
@@ -209,7 +205,6 @@ describe('Creating a story', function () {
 
             // Assert
             $show->assertOk();
-            $show->assertSee(trans('story::shared.genres.label'));
             $show->assertSee('Fantasy');
             $show->assertSee('Romance');
         });
@@ -234,7 +229,6 @@ describe('Creating a story', function () {
 
             $show = $this->get('/stories/' . $story->slug);
             $show->assertOk();
-            $show->assertSee(trans('story::shared.status.label'));
             $show->assertSee($status->name);
         });
 
@@ -263,7 +257,6 @@ describe('Creating a story', function () {
             // Assert display on show page
             $show = $this->get('/stories/' . $story->slug);
             $show->assertOk();
-            $show->assertSee(trans('story::shared.trigger_warnings.label'));
             $show->assertSee('Violence');
             $show->assertSee('Langage vulgaire');
         });
@@ -289,7 +282,6 @@ describe('Creating a story', function () {
             // Assert display on show page
             $show = $this->get('/stories/' . $story->slug);
             $show->assertOk();
-            $show->assertSee(trans('story::shared.feedback.label'));
             $show->assertSee($feedback->name);
         });
     });

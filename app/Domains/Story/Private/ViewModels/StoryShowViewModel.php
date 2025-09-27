@@ -19,10 +19,10 @@ class StoryShowViewModel
     public readonly RefViewModel $copyright;
     public readonly ?RefViewModel $status;
     public readonly ?RefViewModel $feedback;
-    /** @var array<int,string> */
-    public readonly array $genreNames;
-    /** @var array<int,string> */
-    public readonly array $triggerWarningNames;
+    /** @var array<int,RefViewModel> */
+    public readonly array $genreRefs;
+    /** @var array<int,RefViewModel> */
+    public readonly array $triggerWarningRefs;
     public readonly string $twDisclosure;
 
     public function __construct(
@@ -33,10 +33,10 @@ class StoryShowViewModel
         RefViewModel $type,
         RefViewModel $audience,
         RefViewModel $copyright,
-        array $genreNames = [],
+        array $genreRefs = [],
         ?RefViewModel $status = null,
         ?RefViewModel $feedback = null,
-        array $triggerWarningNames = [],
+        array $triggerWarningRefs = [],
         string $twDisclosure = Story::TW_UNSPOILED,
     ) {
         $this->story = $story;
@@ -48,10 +48,11 @@ class StoryShowViewModel
         $this->type = $type;
         $this->audience = $audience;
         $this->copyright = $copyright;
-        $this->genreNames = array_values(array_filter(array_map('strval', $genreNames)));
+        // Ensure arrays contain only RefViewModel instances
+        $this->genreRefs = array_values(array_filter($genreRefs, fn($v) => $v instanceof RefViewModel));
         $this->status = $status;
         $this->feedback = $feedback;
-        $this->triggerWarningNames = array_values(array_filter(array_map('strval', $triggerWarningNames)));
+        $this->triggerWarningRefs = array_values(array_filter($triggerWarningRefs, fn($v) => $v instanceof RefViewModel));
         $this->twDisclosure = (string)$twDisclosure;
     }
 
@@ -139,7 +140,7 @@ class StoryShowViewModel
      */
     public function getGenreNames(): array
     {
-        return $this->genreNames;
+        return array_map(fn(RefViewModel $r) => $r->getName(), $this->genreRefs);
     }
 
     /**
@@ -148,7 +149,23 @@ class StoryShowViewModel
      */
     public function getTriggerWarningNames(): array
     {
-        return $this->triggerWarningNames;
+        return array_map(fn(RefViewModel $r) => $r->getName(), $this->triggerWarningRefs);
+    }
+
+    /**
+     * @return array<int,RefViewModel>
+     */
+    public function getGenreRefs(): array
+    {
+        return $this->genreRefs;
+    }
+
+    /**
+     * @return array<int,RefViewModel>
+     */
+    public function getTriggerWarningRefs(): array
+    {
+        return $this->triggerWarningRefs;
     }
 
     public function getTwDisclosure(): string
@@ -158,7 +175,7 @@ class StoryShowViewModel
 
     public function hasListedTriggerWarnings(): bool
     {
-        return !empty($this->triggerWarningNames);
+        return !empty($this->triggerWarningRefs);
     }
 
     public function isNoTw(): bool

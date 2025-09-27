@@ -203,11 +203,12 @@ function defaultTriggerWarning(): StoryRefTriggerWarning
     ]);
 }
 
-function makeTriggerWarning(string $name): StoryRefTriggerWarning
+function makeTriggerWarning(string $name, string $description = ''): StoryRefTriggerWarning
 {
     return app(TriggerWarningService::class)->create([
         'name' => $name,
         'slug' => Str::slug($name),
+        'description' => $description,
         'is_active' => true,
     ]);
 }

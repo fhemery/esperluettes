@@ -197,6 +197,7 @@ class StoryRefCache
                         'id' => (int) $m->id,
                         'slug' => (string) $m->slug,
                         'name' => (string) $m->name,
+                        'description' => isset($m->description) ? (string) $m->description : null,
                         'is_active' => (bool) ($m->is_active ?? true),
                         'order' => isset($m->order) ? (int) $m->order : null,
                     ]);
