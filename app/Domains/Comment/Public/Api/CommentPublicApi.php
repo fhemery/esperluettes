@@ -72,13 +72,13 @@ class CommentPublicApi
 
         // Lazy mode: page <= 0 → return config and total only, no items
         if ($page <= 0) {
-            $total = $this->service->countFor($entityType, $entityId, true);
+            $total = $this->service->countFor($entityType, [$entityId], true);
             return $this->listDtoMapper->make(
                 entityType: $entityType,
                 entityId: $entityId,
                 page: 0,
                 perPage: $perPage,
-                total: $total,
+                total: $total[$entityId] ?? 0,
                 items: [],
                 config: new CommentUiConfigDto(
                     minRootCommentLength: $this->policies->getRootCommentMinLength($entityType),
