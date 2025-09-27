@@ -38,7 +38,7 @@ it('detects roots without replies from story authors', function () {
     $this->actingAs($alice);
     createComment($entityType, $chapter2, 'author reply to r3', $r3);
 
-    $flags = $api->getHasUnrepliedRootsByAuthorsForTargets($entityType, [$chapter1, $chapter2], $authorIds);
+    $flags = $api->hasUnrepliedRootComments($entityType, [$chapter1, $chapter2], $authorIds);
 
     expect($flags[$chapter1] ?? false)->toBeTrue()
         ->and($flags[$chapter2] ?? true)->toBeFalse();

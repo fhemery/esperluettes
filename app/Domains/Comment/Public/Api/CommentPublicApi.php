@@ -45,7 +45,7 @@ class CommentPublicApi
      * from any of the provided author ids.
      * @return array<int,bool> [entityId => hasUnreplied]
      */
-    public function getHasUnrepliedRootsByAuthorsForTargets(string $entityType, array $entityIds, array $authorIds): array
+    public function hasUnrepliedRootComments(string $entityType, array $entityIds, array $authorIds): array
     {
         return $this->service->hasUnrepliedRootsByAuthors($entityType, $entityIds, $authorIds);
     }

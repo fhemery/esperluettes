@@ -386,7 +386,7 @@ class StoryController
         $chapterIds = [];
         foreach ($chapterRows as $cRow) { $chapterIds[] = (int)$cRow->id; }
         $rootCounts = $this->comments->getNbRootCommentsFor('chapter', $chapterIds);
-        $hasUnreplied = $isAuthor ? $this->comments->getHasUnrepliedRootsByAuthorsForTargets('chapter', $chapterIds, $authorUserIds) : [] ;
+        $hasUnreplied = $isAuthor ? $this->comments->hasUnrepliedRootComments('chapter', $chapterIds, $authorUserIds) : [] ;
 
         $chapters = [];
         foreach ($chapterRows as $c) {
