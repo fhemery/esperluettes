@@ -85,7 +85,7 @@
                 <x-shared::popover placement="top">
                     <x-slot name="trigger">
                         <span class="inline-flex items-center justify-center h-5 w-5 rounded-full">
-                            <span class="translate-y-0.5material-symbols-outlined text-[18px] leading-none text-success">check_circle</span>
+                            <span class="translate-y-0.5 material-symbols-outlined text-[18px] leading-none text-success">check_circle</span>
                         </span>
                     </x-slot>
                     <div>{{ __('story::shared.trigger_warnings.tooltips.no_tw') }}</div>

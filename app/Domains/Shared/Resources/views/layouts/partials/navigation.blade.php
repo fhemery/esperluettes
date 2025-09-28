@@ -26,14 +26,16 @@
                         <x-nav-link :href="route('news.index')" :active="request()->routeIs('news.index')">
                             {{ __('shared::navigation.news') }}
                         </x-nav-link>
-
-                        @if (Auth::user() && Auth::user()->hasVerifiedEmail())
-                        @if (Auth::user()->isAdmin())
+                        @if (Auth::user() && Auth::user()->isConfirmed())
+                        <x-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
+                            {{ __('shared::navigation.my-stories') }}
+                        </x-nav-link>
+                        @endif
+                        @if (Auth::user() && Auth::user()->isAdmin())
                         <x-nav-link :href="route('filament.admin.pages.dashboard')"
                             :active="request()->routeIs('filament.admin.*')">
                             {{ __('shared::navigation.admin') }}
                         </x-nav-link>
-                        @endif
                         @endif
                     </div>
 
@@ -76,6 +78,11 @@
                 <x-responsive-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
                     {{ __('shared::navigation.stories') }}
                 </x-responsive-nav-link>
+                @if (Auth::user() && Auth::user()->isConfirmed())
+                <x-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
+                    {{ __('shared::navigation.my-stories') }}
+                </x-nav-link>
+                @endif
                 @if(Auth::user()->isAdmin())
                 <x-responsive-nav-link :href="route('filament.admin.pages.dashboard')"
                     :active="request()->routeIs('filament.admin.*')">
