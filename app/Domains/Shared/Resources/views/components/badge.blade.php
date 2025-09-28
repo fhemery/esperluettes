@@ -13,8 +13,8 @@
 
     // Size map
     $sizes = [
-        'xs' => 'py-0.5 px-1.5 text-xs font-bold',
-        'sm' => 'py-1 px-2 text-sm font-bold',
+        'xs' => 'py-1 px-1.5 text-xs font-bold',
+        'sm' => 'py-[6px] px-2 text-sm font-bold',
         'md' => 'py-1.5 px-4 text-md font-bold',
     ];
     $sizeClasses = $sizes[$size] ?? $sizes['sm'];
