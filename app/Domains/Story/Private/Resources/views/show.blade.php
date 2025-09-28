@@ -204,7 +204,7 @@
             <div class="col-span-2 flex flex-col flex-start h-full gap-2
                 lg:col-start-3 lg:col-span-1 lg:row-span-3 lg:row-start-2">
                 <div class="p-4 bg-bg flex-1">
-                    <article class="p-4 prose flex-1 overflow-hidden surface-read text-on-surface h-full">
+                <article class="min-w-0 w-full p-4 prose flex-1 surface-read text-on-surface overflow-x-hidden [overflow-wrap:anywhere] h-full">
                         @if(!$viewModel->hasDescription())
                         <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>
                         @else
