@@ -26,7 +26,6 @@
         })
         ->values();
     $sel = collect($selected)->map(fn($v) => (string) $v)->filter()->values();
-    // No pluralization logic anymore; placeholder is a plain string used when none are selected
 @endphp
 
 <div x-data="searchableMultiSelect({
@@ -45,6 +44,7 @@
                 <input type="text" x-model="state.query" @focus="open = true" @keydown.down.prevent="move(1)"
                        @keydown.up.prevent="move(-1)" @keydown.enter.prevent="chooseHighlighted()"
                        class="flex-1 min-w-[8rem] bg-transparent border-0 focus:ring-0 text placeholder-accent"
+                       :class="state.selected.length ? 'placeholder:font-semibold' : ''"
                        :placeholder="state.query.length ? '' : countPlaceholder()">
             </div>
         </div>
