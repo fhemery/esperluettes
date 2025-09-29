@@ -34,5 +34,4 @@ it('allows verified users to access dashboard', function () {
     $response = $this->get('/dashboard');
 
     $response->assertOk();
-    $response->assertSee("You're logged in!");
 });

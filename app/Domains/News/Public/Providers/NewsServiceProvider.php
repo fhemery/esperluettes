@@ -4,6 +4,7 @@ namespace App\Domains\News\Public\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Blade;
 use App\Domains\News\Private\Models\News;
 use App\Domains\News\Private\Observers\NewsObserver;
 use App\Domains\Events\Public\Api\EventBus;
@@ -21,6 +22,9 @@ class NewsServiceProvider extends ServiceProvider
 
         // Register view namespace for the News domain (Private resources)
         View::addNamespace('news', app_path('Domains/News/Private/Resources/views'));
+
+        // Register Blade component namespace for News domain
+        Blade::componentNamespace('App\\Domains\\News\\Private\\View\\Components', 'news');
 
         // Load migrations
         $this->loadMigrationsFrom(app_path('Domains/News/Database/migrations'));

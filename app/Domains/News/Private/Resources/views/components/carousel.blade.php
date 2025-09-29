@@ -1,7 +1,13 @@
+@php
+    $size = $size ?? null;
+    $compact = $size === 'compact';
+    $items = $items ?? collect();
+@endphp
+@if(($items instanceof \Illuminate\Support\Collection ? $items->count() : count($items)) > 0)
 <div
     x-data="{
         index: 0,
-        count: {{ count($items) }},
+        count: {{ ($items instanceof \Illuminate\Support\Collection ? $items->count() : count($items)) }},
         timer: null,
         start() {
             if (this.count < 2) return;
@@ -31,7 +37,7 @@
         go(i) { this.index = i; },
     }"
     x-init="init()"
-    class="relative mb-8"
+    class="relative"
     @mouseenter="stop()"
     @mouseleave="start()"
     role="region"
@@ -55,21 +61,41 @@
                             $path = pathinfo($item->header_image_path ?? '', PATHINFO_DIRNAME);
                             $name = pathinfo($item->header_image_path ?? '', PATHINFO_FILENAME);
                         @endphp
-                        <picture>
-                            <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
-                            <img
-                                class="w-full h-56 md:h-72 object-cover"
-                                src="{{ $base }}"
-                                srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
-                                sizes="(max-width: 640px) 100vw, 800px"
-                                alt="{{ $item->title }}"
-                                loading="eager"
-                            >
-                        </picture>
-                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
-                            <h3 class="text-xl font-semibold">{{ $item->title }}</h3>
-                            <p class="opacity-90 line-clamp-2">{{ $item->summary }}</p>
-                        </div>
+                        @if($compact)
+                            <div class="relative w-full overflow-hidden" style="padding-bottom:10%">
+                                <picture>
+                                    <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
+                                    <img
+                                        class="absolute inset-0 w-full h-full object-cover"
+                                        src="{{ $base }}"
+                                        srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
+                                        sizes="(max-width: 640px) 100vw, 800px"
+                                        alt="{{ $item->title }}"
+                                        loading="eager"
+                                    >
+                                </picture>
+                                <div class="absolute inset-x-0 bottom-0 left-[4rem] bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+                                    <h3 class="text-xl font-semibold">{{ $item->title }}</h3>
+                                    <p class="opacity-90 line-clamp-2">{{ $item->summary }}</p>
+                                </div>
+                            </div>
+                        @else
+                            <picture>
+                                <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
+                                <img
+                                    class="w-full h-56 md:h-72 object-cover"
+                                    src="{{ $base }}"
+                                    srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
+                                    sizes="(max-width: 640px) 100vw, 800px"
+                                    alt="{{ $item->title }}"
+                                    loading="eager"
+                                >
+                            </picture>
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+                                <h3 class="text-xl font-semibold">{{ $item->title }}</h3>
+                                <p class="opacity-90 line-clamp-2">{{ $item->summary }}</p>
+                            </div>
+                        @endif
                     </a>
                 </li>
             @endforeach
@@ -93,3 +119,4 @@
         @endforeach
     </div>
 </div>
+@endif
