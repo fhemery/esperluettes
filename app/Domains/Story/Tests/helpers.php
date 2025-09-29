@@ -117,7 +117,8 @@ function defaultStoryType(): StoryRefType
     return StoryRefType::firstOrCreate([
         'name' => 'Default type',
         'slug' => 'default-type',
-        'is_active' => true]);
+        'is_active' => true
+    ]);
 }
 
 function defaultAudience(): StoryRefAudience
@@ -125,7 +126,8 @@ function defaultAudience(): StoryRefAudience
     return StoryRefAudience::firstOrCreate([
         'name' => 'DefaultAudience',
         'slug' => 'default-audience',
-        'is_active' => true]);
+        'is_active' => true
+    ]);
 }
 
 /**
@@ -145,7 +147,8 @@ function defaultCopyright(): StoryRefCopyright
     return StoryRefCopyright::firstOrCreate([
         'name' => 'DefaultCopyright',
         'slug' => 'default-copyright',
-        'is_active' => true]);
+        'is_active' => true
+    ]);
 }
 
 function makeCopyright(string $name, string $description = ''): StoryRefCopyright
@@ -284,4 +287,14 @@ function markAsUnread($test, Chapter $chapter)
         'storySlug' => $chapter->story->slug,
         'chapterSlug' => $chapter->slug,
     ]));
+}
+
+function setUserCredits(int $userId, int $credits): void
+{
+    DB::table('story_chapter_credits')
+        ->where('user_id', $userId)
+        ->update([
+            'credits_gained' => $credits,
+            'updated_at' => now(),
+        ]);
 }
