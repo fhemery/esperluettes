@@ -24,6 +24,7 @@ use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 
 class StoryService
 {
@@ -269,5 +270,17 @@ class StoryService
         }
 
         return null;
+    }
+
+    /**
+     * Random discover stories for the dashboard/component.
+     * Excludes stories authored by the user and respects visibility rules.
+     *
+     * @param array<string> $visibilities Visibilities to include (e.g. [Story::VIS_PUBLIC, Story::VIS_COMMUNITY])
+     * @return array<Story>
+     */
+    public function getRandomStories(int $userId, int $nbStories = 7, array $visibilities = [Story::VIS_PUBLIC]): array
+    {
+        return $this->storiesRepository->getRandomStories($userId, $nbStories, $visibilities);
     }
 }

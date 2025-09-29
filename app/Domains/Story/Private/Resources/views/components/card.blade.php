@@ -52,7 +52,6 @@
         </div>
         @endif
     </div>
-    </a>
 
     {{-- Bottom meta row: chapters and words + TW icon/tooltip --}}
     <div class="pb-1 border-b border-gray-700">

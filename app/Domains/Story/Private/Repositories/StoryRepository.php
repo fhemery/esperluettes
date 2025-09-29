@@ -165,4 +165,26 @@ final class StoryRepository
 
         return $query;
     }
+
+    /**
+     * Fetch random stories for discovery, excluding stories authored by the given viewer.
+     * Respects visibility: public/community; includes private only if the viewer is a collaborator.
+     * Eager-loads fields suitable for card display.
+     * 
+     * @return array<Story>
+     */
+    public function getRandomStories(int $viewerId, int $nbStories = 7, array $visibilities = [Story::VIS_PUBLIC]): array
+    {
+        $query = $this->selectFields(GetStoryOptions::ForCardDisplay());
+
+        // Exclude stories authored by the viewer
+        $query->whereDoesntHave('authors', function ($q) use ($viewerId) {
+            $q->where('user_id', $viewerId);
+        });
+
+        // Visibility: allow public and community only
+        $query->whereIn('visibility', $visibilities);
+
+        return $query->inRandomOrder()->limit($nbStories)->get()->all();
+    }
 }

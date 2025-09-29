@@ -43,14 +43,14 @@ The Dashboard aggregates personalized widgets for a logged-in user. It reuses co
    - Empty section hosting an image for now. Use `public/images/errors/404.png` as a placeholder.
    - Alt text: "Débrouissage en cours" and show the same text as a caption below the image.
 
-   - Data: 8 random stories.
+   - Data: 8 random stories + one placeholder to see more (button redirecting to the library)
    - Layout: horizontally scrollable list that adapts visible slides by breakpoint: 1 / 2 / 4 visible cards on small / medium / large screens respectively. With 8 fetched stories, that yields 8 / 4 / 2 pages.
    - Component: generic card-list to be reused with other card sources (lives likely under `Shared`).
    - Cards rendered via `app/Domains/Story/Private/Resources/views/components/card.blade.php`.
     - Interactions:
       - Desktop: visible left/right sizable arrows around the list container (not on the cards) to scroll pages.
       - Mobile: slide/drag gesture support.
-      - Visible slides: 1 / 2 / 4 depending on device ratio (8 / 4 / 2 pages respectively).
+      - Visible slides: 1 / 2 / 3 / 4 depending on device ratio (9 / 5 / 3 / 3 pages respectively with additional placeholder).
       - Header action: "Tout voir" link that redirects to the library (route name: `stories.index`; see `app/Domains/Story/Private/Resources/lang/fr/index.php`).
       - Footer CTA: translated button below the list — "Want more ? Go explore library" → links to `route('stories.index')`.
    - Data constraints: exclude stories authored by the current user from the random set. If fewer than 8 remain, fill the remainder with "fake cards" that show a "Discover more" action linking to `route('stories.index')`.
