@@ -28,6 +28,16 @@ it('displays news carousel on dashboard when pinned items exist', function () {
     $response->assertSee('aria-roledescription="carousel"', false);
 });
 
+it('shows Discover section on dashboard', function () {
+    $user = alice($this);
+    $this->actingAs($user);
+
+    $response = $this->get('/dashboard');
+    $response->assertOk();
+
+    $response->assertSee(__('story::discover.title'));
+});
+
 it('does not display news carousel on dashboard when no pinned items exist', function () {
     $user = alice($this);
 

@@ -182,6 +182,11 @@ final class StoryRepository
             $q->where('user_id', $viewerId);
         });
 
+        // Must have at least one PUBLISHED chapter
+        $query->whereHas('chapters', function ($q) {
+            $q->where('status', Chapter::STATUS_PUBLISHED);
+        });
+
         // Visibility: allow public and community only
         $query->whereIn('visibility', $visibilities);
 
