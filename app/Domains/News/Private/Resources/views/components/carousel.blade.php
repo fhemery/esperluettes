@@ -44,7 +44,7 @@
     aria-roledescription="carousel"
     aria-label="{{ __('news::public.carousel.region_label') }}"
 >
-    <div class="overflow-hidden rounded-lg">
+    <div class="overflow-hidden">
         <ul
             class="flex transition-transform duration-500 ease-out"
             :style="`width: ${count * 100}%; transform: translateX(-${(index * 100) / count}%);`"

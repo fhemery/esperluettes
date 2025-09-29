@@ -69,4 +69,5 @@ class StoryPublicApi
             'total' => $total,
         ];
     }
+
 }

@@ -2,12 +2,14 @@
 
 namespace App\Domains\Story\Private\Services;
 
+use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Private\Http\Requests\StoryRequest;
-use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Models\ReadingProgress;
+use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use App\Domains\Story\Private\Support\GetStoryOptions;
-use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Story\Public\Events\StoryCreated;
 use App\Domains\Story\Public\Events\DTO\StorySnapshot;
@@ -15,15 +17,21 @@ use App\Domains\Story\Public\Events\StoryUpdated;
 use App\Domains\Story\Public\Events\StoryDeleted;
 use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
+use App\Domains\Story\Private\Models\StoryWithNextChapter;
+use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class StoryService
 {
     public function __construct(
         private EventBus $eventBus,
         private CommentMaintenancePublicApi $comments,
+        private ProfilePublicApi $profileApi,
+        private ChapterService $chapters,
     ) {
     }
 
@@ -335,5 +343,82 @@ class StoryService
         return Story::query()->with('authors')->whereHas('authors', function ($q) use ($userId) {
             $q->where('user_id', $userId);
         })->count();
+    }
+
+    private function getStorySummaryById(int $storyId): ?Story {
+        $query = Story::query()
+            ->with(['authors', 'collaborators', 'genres:id', 'triggerWarnings:id']);
+
+        // Aggregate metrics for each story (avoid N+1):
+        // - published_chapters_count: count of published chapters
+        // - published_words_total: sum of word_count across published chapters
+        $query->withCount([
+            'chapters as published_chapters_count' => function ($q) {
+                $q->where('status', Chapter::STATUS_PUBLISHED);
+            },
+        ])->withSum([
+            'chapters as published_words_total' => function ($q) {
+                $q->where('status', Chapter::STATUS_PUBLISHED);
+            },
+        ], 'word_count');
+
+        return $query->find($storyId);
+    }
+
+    public function getStoryByLatestAddedChapter(int $userId): ?Story
+    {
+        $latestChapter = Chapter::query()->with('story')->whereHas('story', function ($q) use ($userId) {
+            $q->whereHas('authors', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        })->orderByDesc('last_edited_at')->first();
+
+        if (!$latestChapter) {
+            return null;
+        }
+
+        return $this->getStorySummaryById($latestChapter?->story_id);
+    }
+
+    public function getKeepReadingContextForUser(int $userId): ?StoryWithNextChapter
+    {
+        $progressItems = ReadingProgress::query()
+            ->where('user_id', $userId)
+            ->orderByDesc('updated_at')
+            ->orderByDesc('read_at')
+            ->take(10)
+            ->get();
+
+        if ($progressItems->isEmpty()) {
+            return null;
+        }
+
+        $user = Auth::user();
+
+        foreach ($progressItems as $progress) {
+            $story = $this->getStorySummaryById((int) $progress->story_id);
+            if (!$story) {
+                continue;
+            }
+
+            if ($user && !Gate::forUser($user)->allows('view', $story)) {
+                continue;
+            }
+
+            $chapters = $story->chapters()->orderBy('sort_order')->get();
+            $index = $chapters->pluck('id')->search((int) $progress->chapter_id, true);
+
+            if ($index === false) {
+                continue;
+            }
+
+            $nextChapter = $chapters->slice($index + 1, 1)->first() ?: null;
+            if (!$nextChapter) {
+                continue;
+            }
+            return new StoryWithNextChapter($story, $nextChapter);
+        }
+
+        return null;
     }
 }

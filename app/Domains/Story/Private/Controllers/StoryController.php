@@ -14,7 +14,6 @@ use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\ViewModels\StoryListViewModel;
 use App\Domains\Story\Private\ViewModels\StoryShowViewModel;
-use App\Domains\Story\Private\ViewModels\StorySummaryViewModel;
 use App\Domains\Story\Private\ViewModels\ChapterSummaryViewModel;
 use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use App\Domains\Story\Private\Services\ChapterCreditService;
@@ -22,8 +21,8 @@ use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\ViewModels\RefViewModel;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\ReadingProgressService;
+use App\Domains\Story\Private\Services\StoryViewModelBuilder;
 use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +38,7 @@ class StoryController
         private readonly ChapterService            $chapters,
         private readonly ChapterCreditService      $credits,
         private readonly CommentPublicApi          $comments,
+        private readonly StoryViewModelBuilder     $vmBuilder,
     )
     {
     }
@@ -94,7 +94,7 @@ class StoryController
         // Referentials lookup for display (types, ...)
         $referentials = $this->lookup->getStoryReferentials();
 
-        $items = $this->buildStorySummaryItems($paginator);
+        $items = $this->vmBuilder->buildStorySummaryItems($paginator->items());
 
         $appends = [];
         if ($typeSlug) {
@@ -200,7 +200,7 @@ class StoryController
         $paginator = $this->service->getStories($filter, Auth::id());
 
         // Build items using shared helper (with authors, genres, TW, and preloaded aggregates)
-        $items = $this->buildStorySummaryItems($paginator);
+        $items = $this->vmBuilder->buildStorySummaryItems($paginator->items());
 
         $viewModel = new StoryListViewModel($paginator, $items);
 
@@ -230,78 +230,7 @@ class StoryController
         ]);
     }
 
-    /**
-     * Build StorySummaryViewModel items with authors, genres, trigger warnings,
-     * and preloaded aggregates from the paginator. Reusable by index and profile listings.
-     */
-    private function buildStorySummaryItems(LengthAwarePaginator $paginator): array
-    {
-        // Collect all author user IDs from the page
-        $authorIds = $paginator->getCollection()
-            ->flatMap(fn($s) => $s->authors->pluck('user_id'))
-            ->unique()
-            ->values()
-            ->all();
-
-        $profilesById = empty($authorIds)
-            ? []
-            : $this->profileApi->getPublicProfiles($authorIds); // [userId => ProfileDto]
-
-        $items = [];
-        $genresById = $this->lookup->getGenres()->keyBy('id');
-        $twById = $this->lookup->getTriggerWarnings()->keyBy('id');
-
-        foreach ($paginator->getCollection() as $story) {
-            // Map authors to public profile DTOs
-            $authorDtos = [];
-            foreach ($story->authors as $author) {
-                $dto = $profilesById[$author->user_id] ?? null;
-                if ($dto) {
-                    $authorDtos[] = $dto;
-                }
-            }
-
-            // Map genre IDs to names for badges
-            $gNames = [];
-            $ids = $story->genres?->pluck('id')->all() ?? [];
-            foreach ($ids as $gid) {
-                $row = $genresById->get($gid);
-                if (is_array($row) && isset($row['name'])) {
-                    $gNames[] = (string)$row['name'];
-                }
-            }
-
-            // Map trigger warning IDs to names for badges
-            $twNames = [];
-            $tids = $story->triggerWarnings?->pluck('id')->all() ?? [];
-            foreach ($tids as $tid) {
-                $row = $twById->get($tid);
-                if (is_array($row) && isset($row['name'])) {
-                    $twNames[] = (string)$row['name'];
-                }
-            }
-
-            // Use preloaded aggregates to avoid N+1
-            $chaptersCount = (int) ($story->published_chapters_count ?? 0);
-            $wordsTotal = (int) ($story->published_words_total ?? 0);
-
-            $items[] = new StorySummaryViewModel(
-                id: $story->id,
-                title: $story->title,
-                slug: $story->slug,
-                description: $story->description,
-                readsLoggedTotal: (int)($story->reads_logged_total ?? 0),
-                chaptersCount: $chaptersCount,
-                wordsTotal: $wordsTotal,
-                authors: $authorDtos,
-                genreNames: $gNames,
-                triggerWarningNames: $twNames,
-                twDisclosure: (string) $story->tw_disclosure,
-            );
-        }
-
-        return $items;
-    }
+    
 
     public function show(string $slug): View|\Illuminate\Http\RedirectResponse
     {

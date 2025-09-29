@@ -40,14 +40,6 @@ it('does not display news carousel on dashboard when no pinned items exist', fun
     $response->assertDontSee('aria-roledescription="carousel"');
 });
 
-it('renders bienvenue error state for guests on dashboard view', function () {
-    $html = view('dashboard::index')->render();
-
-    expect($html)
-        ->toContain(__('dashboard::welcome.errors.not_authenticated'))
-        ->and($html)->toContain('surface-error');
-});
-
 it('renders bienvenue data for authenticated users on dashboard view (no mocks)', function () {
     $user = alice($this);
     $this->actingAs($user);

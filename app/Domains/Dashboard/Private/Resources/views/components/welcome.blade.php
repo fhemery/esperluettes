@@ -1,7 +1,7 @@
 @props(['error' => null])
 
 @if($error)
-    <div class="surface-error text-on-surface border-surface border rounded-md p-4 w-full">
+    <div class="surface-error text-on-surface border-surface border p-4 w-full">
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -14,7 +14,7 @@
         </div>
     </div>
 @else
-    <div class="flex flex-col gap-4 surface-read text-on-surface rounded-lg shadow-sm border p-6 w-full">
+    <div class="flex flex-col gap-4 surface-read text-on-surface shadow-sm border p-6 w-full">
         <h2 class="text-xl font-semibold text-center">
             {{ __('dashboard::welcome.welcome_message') }} <span class="text-accent">{{$displayName}}</span>
         </h2>

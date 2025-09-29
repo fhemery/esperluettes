@@ -39,6 +39,10 @@ class StoryServiceProvider extends ServiceProvider
 
         // Register views under the 'story' namespace from Private resources
         $this->loadViewsFrom(app_path('Domains/Story/Private/Resources/views'), 'story');
+
+        // Register PHP components
+        Blade::componentNamespace('App\\Domains\\Story\\Private\\View\\Components', 'story');
+        
         
         // Register anonymous components, both unprefixed and prefixed (<x-story::...>)
         Blade::anonymousComponentPath(app_path('Domains/Story/Private/Resources/views/components'), 'story');
