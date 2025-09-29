@@ -5,7 +5,7 @@
             <x-news::carousel size="compact" />
             <!-- Add the ribbon -->
             <div class="h-10 bg-[url('/images/themes/autumn/top-ribbon.png')] bg-repeat-x">
-                
+
             </div>
         </div>
 
@@ -25,17 +25,20 @@
         </div>
 
         <!-- Placeholder side image -->
-        <div class="col-span-1 sm:col-span-2 flex flex-col gap-2 items-center justify-center">
-            <img src="{{ asset('images/errors/not-ready.png') }}" alt="Débrouissage en cours" class="max-w-full h-auto">
-            <p class="text-sm text-muted">Débrouissage en cours</p>
+        <div class="col-span-1 sm:col-span-2 flex flex-col gap-2 items-center justify-center p-4 surface-read text-on-surface">
+            <h3 class="text-xl font-semibold flex flex-start gap-2 text-tertiary self-start">
+                <span class="material-symbols-outlined">
+                    group
+                </span>
+                {{ __('dashboard::index.placeholder_title') }}
+            </h3>
+            <img src="{{ asset('images/errors/not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto">
+            <p class="text-sm text-muted">{{ __('dashboard::index.placeholder_text') }}</p>
         </div>
 
         <!-- Discover random stories -->
         <div class="col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
             <x-story::random-stories-component />
         </div>
-
-        
-
     </div>
 </x-app-layout>

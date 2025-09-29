@@ -62,7 +62,7 @@
                             $name = pathinfo($item->header_image_path ?? '', PATHINFO_FILENAME);
                         @endphp
                         @if($compact)
-                            <div class="relative w-full overflow-hidden" style="padding-bottom:10%">
+                            <div class="relative w-full overflow-hidden min-h-[128px]" style="padding-bottom:10%">
                                 <picture>
                                     <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
                                     <img
@@ -74,7 +74,7 @@
                                         loading="eager"
                                     >
                                 </picture>
-                                <div class="absolute inset-x-0 bottom-0 left-[4rem] bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+                                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pl-16 text-white">
                                     <h3 class="text-xl font-semibold">{{ $item->title }}</h3>
                                     <p class="opacity-90 line-clamp-2">{{ $item->summary }}</p>
                                 </div>

@@ -20,7 +20,7 @@
             @endforeach
 
             {{-- Placeholder CTA as last slide --}}
-            <div class="shrink-0 w-[230px] h-[356px] flex flex-col items-center justify-center gap-4">
+            <div class="shrink-0 w-[230px] h-[356px] flex flex-col items-center justify-center gap-32">
                 <div class="w-full text-center">
                     {{__('story::discover.placeholder_label') }}
                 </div>
