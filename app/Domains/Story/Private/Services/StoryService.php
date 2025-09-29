@@ -18,6 +18,7 @@ use App\Domains\Story\Public\Events\StoryDeleted;
 use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Story\Private\Models\StoryWithNextChapter;
+use App\Domains\Story\Private\Repositories\StoryRepository;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -32,6 +33,7 @@ class StoryService
         private CommentMaintenancePublicApi $comments,
         private ProfilePublicApi $profileApi,
         private ChapterService $chapters,
+        private StoryRepository $storiesRepository,
     ) {
     }
 
@@ -214,36 +216,12 @@ class StoryService
      * Fetch a story by slug (or slug-with-id).
      * Eager-loading is controlled via GetStoryOptions to keep payload lean.
      */
-    public function getStory(string $slug, ?GetStoryOptions $options = null): Story
+    public function getStory(string $slug, ?GetStoryOptions $options = null): ?Story
     {
-        $opts = $options ?? new GetStoryOptions();
+        $opts = $options ?? GetStoryOptions::Full();
         $id = SlugWithId::extractId($slug);
 
-        $query = Story::query();
-
-        $with = [];
-        if ($opts->includeAuthors) {
-            $with[] = 'authors';
-        }
-        if ($opts->includeGenreIds) {
-            $with[] = 'genres:id';
-        }
-        if ($opts->includeTriggerWarningIds) {
-            $with[] = 'triggerWarnings:id';
-        }
-        if ($opts->includeChapters) {
-            $with['chapters'] = function ($q) {
-                $q->orderBy('sort_order', 'asc')
-                  ->select(['id', 'story_id', 'title', 'slug', 'status', 'sort_order']);
-            };
-        }
-        if (!empty($with)) {
-            $query->with($with);
-        }
-
-        return $id
-            ? $query->findOrFail($id)
-            : $query->where('slug', $slug)->firstOrFail();
+        return $this->storiesRepository->getStorySummaryById($id, $opts);
     }
 
     /**
@@ -345,25 +323,7 @@ class StoryService
         })->count();
     }
 
-    private function getStorySummaryById(int $storyId): ?Story {
-        $query = Story::query()
-            ->with(['authors', 'collaborators', 'genres:id', 'triggerWarnings:id']);
-
-        // Aggregate metrics for each story (avoid N+1):
-        // - published_chapters_count: count of published chapters
-        // - published_words_total: sum of word_count across published chapters
-        $query->withCount([
-            'chapters as published_chapters_count' => function ($q) {
-                $q->where('status', Chapter::STATUS_PUBLISHED);
-            },
-        ])->withSum([
-            'chapters as published_words_total' => function ($q) {
-                $q->where('status', Chapter::STATUS_PUBLISHED);
-            },
-        ], 'word_count');
-
-        return $query->find($storyId);
-    }
+    
 
     public function getStoryByLatestAddedChapter(int $userId): ?Story
     {
@@ -377,7 +337,7 @@ class StoryService
             return null;
         }
 
-        return $this->getStorySummaryById($latestChapter?->story_id);
+        return $this->storiesRepository->getStorySummaryById($latestChapter?->story_id, GetStoryOptions::ForCardDisplay());
     }
 
     public function getKeepReadingContextForUser(int $userId): ?StoryWithNextChapter
@@ -396,7 +356,7 @@ class StoryService
         $user = Auth::user();
 
         foreach ($progressItems as $progress) {
-            $story = $this->getStorySummaryById((int) $progress->story_id);
+            $story = $this->storiesRepository->getStorySummaryById((int) $progress->story_id, GetStoryOptions::ForCardDisplay());
             if (!$story) {
                 continue;
             }

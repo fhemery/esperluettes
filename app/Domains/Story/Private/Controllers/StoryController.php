@@ -238,6 +238,9 @@ class StoryController
         
         // Fetch all the data we need from DB
         $story = $this->service->getStory($slug, $opts);
+        if (!$story) {
+            abort(404);
+        }
         $chapterRows = $this->chapters->getChapters($story, Auth::id());
         $authorUserIds = $story->authors->pluck('user_id')->all();
         $isAuthor = in_array(Auth::id(), $authorUserIds, true);

@@ -4,20 +4,38 @@ namespace App\Domains\Story\Private\Support;
 
 class GetStoryOptions
 {
-    public bool $includeAuthors = false;
-    public bool $includeGenreIds = false;
-    public bool $includeTriggerWarningIds = false;
-    public bool $includeChapters = false;
-
     public function __construct(
-        bool $includeAuthors = false,
-        bool $includeGenreIds = false,
-        bool $includeTriggerWarningIds = false,
-        bool $includeChapters = false,
+        readonly bool $includeAuthors = false,
+        readonly bool $includeGenreIds = false,
+        readonly bool $includeTriggerWarningIds = false,
+        readonly bool $includeChapters = false,
+        readonly bool $includeWordCount = false,
+        readonly bool $includePublishedChaptersCount = false,
     ) {
-        $this->includeAuthors = $includeAuthors;
-        $this->includeGenreIds = $includeGenreIds;
-        $this->includeTriggerWarningIds = $includeTriggerWarningIds;
-        $this->includeChapters = $includeChapters;
+
+    }
+
+    public static function ForCardDisplay(): self
+    {
+        return new self(
+            includeAuthors: true,
+            includeGenreIds: true,
+            includeTriggerWarningIds: true,
+            includeChapters: false,
+            includeWordCount: true,
+            includePublishedChaptersCount: true,
+        );
+    }
+
+    public static function Full(): self
+    {
+        return new self(
+            includeAuthors: true,
+            includeGenreIds: true,
+            includeTriggerWarningIds: true,
+            includeChapters: true,
+            includeWordCount: true,
+            includePublishedChaptersCount: true,
+        );
     }
 }
