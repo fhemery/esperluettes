@@ -19,6 +19,7 @@ use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\ViewModels\RefViewModel;
+use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\ReadingProgressService;
 use App\Domains\Story\Private\Services\StoryViewModelBuilder;
@@ -232,20 +233,13 @@ class StoryController
 
     public function show(string $slug): View|\Illuminate\Http\RedirectResponse
     {
-        $opts = new GetStoryOptions(includeAuthors: true, includeGenreIds: true, includeTriggerWarningIds: true);
-        
         // Fetch all the data we need from DB
-        $story = $this->service->getStory($slug, $opts);
+        $story = $this->service->getStory($slug, GetStoryOptions::Full());
         if (!$story) {
             abort(404);
         }
-        $chapterRows = $this->chapters->getChapters($story, Auth::id());
         $authorUserIds = $story->authors->pluck('user_id')->all();
         $isAuthor = in_array(Auth::id(), $authorUserIds, true);
-        $readIds = [];
-        if (Auth::check() && !$isAuthor) {
-            $readIds = $this->progress->getReadChapterIdsForUserInStory((int)Auth::id(), (int)$story->id);
-        }
 
         // 301 redirect to canonical slug when base differs but id matches
         if (!SlugWithId::isCanonical($slug, $story->slug)) {
@@ -329,19 +323,22 @@ class StoryController
 
         // Build chapter metrics from Comment domain in bulk
         $chapterIds = [];
-        foreach ($chapterRows as $cRow) { $chapterIds[] = (int)$cRow->id; }
+        foreach ($story->chapters as $cRow) { $chapterIds[] = (int)$cRow->id; }
         $rootCounts = $this->comments->getNbRootCommentsFor('chapter', $chapterIds);
         $hasUnreplied = $isAuthor ? $this->comments->hasUnrepliedRootComments('chapter', $chapterIds, $authorUserIds) : [] ;
 
         $chapters = [];
-        foreach ($chapterRows as $c) {
+        foreach ($story->chapters as $c) {
+            if (!$isAuthor && $c->status !== Chapter::STATUS_PUBLISHED) {
+                continue;
+            }
             $cid = (int)$c->id;
             $chapters[] = new ChapterSummaryViewModel(
                 id: $cid,
                 title: (string)$c->title,
                 slug: (string)$c->slug,
-                isPublished: (string)$c->status === \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED,
-                isRead: in_array((int)$c->id, $readIds, true),
+                isPublished: (string)$c->status === Chapter::STATUS_PUBLISHED,
+                isRead: $c->getIsRead(),
                 readsLogged: (int)($c->reads_logged_count ?? 0),
                 wordCount: (int)($c->word_count ?? 0),
                 characterCount: (int)($c->character_count ?? 0),
