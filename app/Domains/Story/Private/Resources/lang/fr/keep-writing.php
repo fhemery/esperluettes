@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Continuer d\'écrire',
+    'title' => 'Continuer à écrire',
     'empty' => 'Aucune histoire à poursuivre pour le moment.',
     'cannot_write' => 'Vous n\'avez pas encore le droit de créer des histoires.',
     'go_to_stories' => 'Voir les histoires',

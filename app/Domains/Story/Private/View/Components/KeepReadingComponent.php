@@ -13,7 +13,6 @@ class KeepReadingComponent extends Component
 {
     public ?StorySummaryViewModel $story = null;
     public ?string $nextChapterUrl = null;
-    public bool $isComplete = false;
     public bool $hasStory = false;
     public ?string $error = null;
 
@@ -39,12 +38,10 @@ class KeepReadingComponent extends Component
             if ($storyWithChapter) {
                 $this->story = $this->builder->buildStorySummaryItem($storyWithChapter->story);
                 $this->nextChapterUrl = route('chapters.show', ['chapterSlug' => $storyWithChapter->nextChapter->slug, 'storySlug' => $storyWithChapter->story->slug]);
-                $this->isComplete = $storyWithChapter->nextChapter === null;
             }
         } catch (\Throwable $e) {
             $this->story = null;
             $this->nextChapterUrl = null;
-            $this->isComplete = false;
             $this->hasStory = false;
             $this->error = __('story::keep-reading.errors.unavailable');
         }
@@ -55,7 +52,6 @@ class KeepReadingComponent extends Component
         return view('story::components.keep-reading', [
             'story' => $this->story,
             'nextChapterUrl' => $this->nextChapterUrl,
-            'isComplete' => $this->isComplete,
             'hasStory' => $this->hasStory,
             'error' => $this->error,
         ]);

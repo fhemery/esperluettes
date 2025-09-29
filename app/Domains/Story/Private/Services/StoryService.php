@@ -24,7 +24,6 @@ use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 
 class StoryService
 {
@@ -34,8 +33,7 @@ class StoryService
         private ProfilePublicApi $profileApi,
         private ChapterService $chapters,
         private StoryRepository $storiesRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Generic listing with optional filters.
@@ -124,7 +122,7 @@ class StoryService
         $opts = $options ?? GetStoryOptions::Full();
         $id = SlugWithId::extractId($slug);
 
-        return $this->storiesRepository->getStorySummaryById($id, $opts);
+        return $this->storiesRepository->getStoryById($id, Auth::id(), $opts);
     }
 
     /**
@@ -226,7 +224,7 @@ class StoryService
         })->count();
     }
 
-    
+
 
     public function getStoryByLatestAddedChapter(int $userId): ?Story
     {
@@ -240,46 +238,34 @@ class StoryService
             return null;
         }
 
-        return $this->storiesRepository->getStorySummaryById($latestChapter?->story_id, GetStoryOptions::ForCardDisplay());
+        return $this->storiesRepository->getStoryById($latestChapter?->story_id, Auth::id(), GetStoryOptions::ForCardDisplay());
     }
 
     public function getKeepReadingContextForUser(int $userId): ?StoryWithNextChapter
     {
-        $progressItems = ReadingProgress::query()
+        // Get distinct story IDs ordered by latest activity (updated_at/read_at) to avoid duplicates
+        $storyIds = ReadingProgress::query()
             ->where('user_id', $userId)
-            ->orderByDesc('updated_at')
-            ->orderByDesc('read_at')
-            ->take(10)
-            ->get();
+            ->selectRaw('story_id, MAX(read_at) as max_read_at')
+            ->groupBy('story_id')
+            ->orderByDesc('max_read_at')
+            ->limit(4)
+            ->pluck('story_id');
 
-        if ($progressItems->isEmpty()) {
+        if ($storyIds->isEmpty()) {
             return null;
         }
 
-        $user = Auth::user();
+        foreach ($storyIds as $sid) {
+            $story = $this->storiesRepository->getStoryById((int) $sid, Auth::id(), GetStoryOptions::Full());
 
-        foreach ($progressItems as $progress) {
-            $story = $this->storiesRepository->getStorySummaryById((int) $progress->story_id, GetStoryOptions::ForCardDisplay());
-            if (!$story) {
-                continue;
+            foreach ($story->chapters as $chapter) {
+                if ($chapter->status === Chapter::STATUS_PUBLISHED) {
+                    if (!$chapter->getIsRead()) {
+                        return new StoryWithNextChapter($story, $chapter);
+                    }
+                }
             }
-
-            if ($user && !Gate::forUser($user)->allows('view', $story)) {
-                continue;
-            }
-
-            $chapters = $story->chapters()->orderBy('sort_order')->get();
-            $index = $chapters->pluck('id')->search((int) $progress->chapter_id, true);
-
-            if ($index === false) {
-                continue;
-            }
-
-            $nextChapter = $chapters->slice($index + 1, 1)->first() ?: null;
-            if (!$nextChapter) {
-                continue;
-            }
-            return new StoryWithNextChapter($story, $nextChapter);
         }
 
         return null;

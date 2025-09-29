@@ -11,6 +11,7 @@ class GetStoryOptions
         readonly bool $includeChapters = false,
         readonly bool $includeWordCount = false,
         readonly bool $includePublishedChaptersCount = false,
+        readonly bool $includeReadingProgress = false,
     ) {
 
     }
@@ -24,6 +25,7 @@ class GetStoryOptions
             includeChapters: false,
             includeWordCount: true,
             includePublishedChaptersCount: true,
+            includeReadingProgress: false,
         );
     }
 
@@ -36,6 +38,7 @@ class GetStoryOptions
             includeChapters: true,
             includeWordCount: true,
             includePublishedChaptersCount: true,
+            includeReadingProgress: true,
         );
     }
 }

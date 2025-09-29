@@ -13,16 +13,15 @@
         </x-shared::button>
     </a>
     @else
-    <div class="mt-3">
-        <x-story::card :item="$story" :display-authors="false" />
 
-        <div class="mt-4 flex gap-2">
-            <a href="{{ $nextChapterUrl }}" >
-                <x-shared::button color="accent">
-                    {{ __('story::keep-reading.continue') }}
-                </x-shared::button>
-            </a>
-        </div>
+    <x-story::card :item="$story" :display-authors="false" />
+
+    <div class="mt-4 flex gap-2">
+        <a href="{{ $nextChapterUrl }}">
+            <x-shared::button color="accent">
+                {{ __('story::keep-reading.continue') }}
+            </x-shared::button>
+        </a>
     </div>
     @endif
 </div>

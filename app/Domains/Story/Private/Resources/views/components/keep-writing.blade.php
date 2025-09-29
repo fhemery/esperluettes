@@ -31,6 +31,13 @@
                 {{ __('story::keep-writing.new_chapter') }}
             </x-shared::button>
         </a>
+        @if(!$hasCreditsLeft)
+        <x-shared::tooltip icon="info" placement="top" maxWidth="18rem">
+                                <div class="text-sm text-fg">
+                                    {{ __('story::chapters.no_chapter_credits_left') }}
+                                </div>
+                            </x-shared::tooltip>
+        @endif
     </div>
     @endif
 </div>

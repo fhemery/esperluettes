@@ -29,17 +29,81 @@ describe('KeepReadingComponent', function () {
         expect($html)->not->toContain('Empty Progress Story');
     });
 
-    it('shows story card when progress exists on a public story', function () {
+    it('shows finished messages when no story has a chapter remaining (even with unpublished chapters)', function() {
         $author = alice($this);
-        $story = publicStory('Reading Story', $author->id);
+        $story = publicStory('Finished Story', $author->id);
+        $chapter1 = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+        $chapter2 = createPublishedChapter($this, $story, $author, ['title' => 'C2']);
+        createUnpublishedChapter($this, $story, $author, ['title' => 'C3']);
+
+        $reader = bob($this);
+        $this->actingAs($reader);
+
+        // Mark first chapter as read -> component should propose next
+        markAsRead($this, $chapter1)->assertNoContent();
+        markAsRead($this, $chapter2)->assertNoContent();
+        // Adjust reading timestamps
+        ReadingProgress::query()->where('user_id', $reader->id)->where('chapter_id', $chapter1->id)->update([
+            'read_at' => now()->subDays(1),
+            'updated_at' => now()->subDays(1),
+        ]);
+
+
+        $html = Blade::render('<x-story::keep-reading-component />');
+        expect($html)->toContain(__('story::keep-reading.empty'));
+    });
+
+    it('should show the previous story if the current one is all read', function () {
+        $author = alice($this);
+        $story = publicStory('Reading Story 1', $author->id);
         $c1 = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
         $c2 = createPublishedChapter($this, $story, $author, ['title' => 'C2']);
+
+        $story2 = publicStory('Reading Story 2', $author->id);
+        $c3 = createPublishedChapter($this, $story2, $author, ['title' => 'C1']);
 
         $reader = bob($this);
         $this->actingAs($reader);
 
         // Mark first chapter as read -> component should propose next
         markAsRead($this, $c1)->assertNoContent();
+        markAsRead($this, $c3)->assertNoContent();
+        // Adjust timestamps
+        ReadingProgress::query()->where('user_id', $reader->id)->where('chapter_id', $c1->id)->update([
+            'read_at' => now()->subDays(1),
+            'updated_at' => now()->subDays(1),
+        ]);
+
+        // Story 2 is all read, and though it is less recent, story 1 should be proposed.
+        $html = Blade::render('<x-story::keep-reading-component />');
+        expect($html)
+            ->toContain('Reading Story 1')
+            ->toContain('/stories/' . $story->slug)
+            ->toContain($c2->slug);
+    });
+    
+
+    it('shows story card when progress exists on a public story', function () {
+        $author = alice($this);
+        $story = publicStory('Reading Story', $author->id);
+        $c1 = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+        $c2 = createPublishedChapter($this, $story, $author, ['title' => 'C2']);
+
+        $story2 = publicStory('Least recently read', $author->id);
+        $c3 = createPublishedChapter($this, $story2, $author, ['title' => 'C1']);
+
+        $reader = bob($this);
+        $this->actingAs($reader);
+
+        // Mark first chapter as read -> component should propose next
+        markAsRead($this, $c1)->assertNoContent();
+        markAsRead($this, $c3)->assertNoContent();
+
+        // Adjust timestamps
+        ReadingProgress::query()->where('user_id', $reader->id)->where('chapter_id', $c3->id)->update([
+            'read_at' => now()->subDays(1),
+            'updated_at' => now()->subDays(1),
+        ]);
 
         $html = Blade::render('<x-story::keep-reading-component />');
         expect($html)

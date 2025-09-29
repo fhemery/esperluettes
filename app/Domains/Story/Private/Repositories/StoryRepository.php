@@ -8,10 +8,11 @@ use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 final class StoryRepository
 {
-    public function getStorySummaryById(int $storyId, GetStoryOptions $options = new GetStoryOptions()): ?Story
+    public function getStoryById(int $storyId, ?int $viewerId = null, GetStoryOptions $options = new GetStoryOptions()): ?Story
     {
         $query = $this->selectFields($options);
 
@@ -35,7 +36,23 @@ final class StoryRepository
             ->when($options->includeAuthors, fn($q) => $q->with('authors'))
             ->when($options->includeGenreIds, fn($q) => $q->with('genres:id'))
             ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings:id'))
-            ->when($options->includeChapters, fn($q) => $q->with('chapters'));
+            ->when($options->includeChapters && !$options->includeReadingProgress, fn($q) => $q->with('chapters'))
+            ->when($options->includeChapters && $options->includeReadingProgress, function ($q) {
+                $userId = Auth::id();
+                $q->with(['chapters' => function ($chapters) use ($userId) {
+                    // Add an is_read count (0/1) per chapter for the current user
+                    $chapters->withCount([
+                        'readingProgress as is_read' => function ($rp) use ($userId) {
+                            if ($userId) {
+                                $rp->where('user_id', $userId);
+                            } else {
+                                // Guest: no rows -> count = 0
+                                $rp->whereRaw('1 = 0');
+                            }
+                        }
+                    ]);
+                }]);
+            });
 
         // Aggregate metrics for each story (avoid N+1):
         // - published_chapters_count: count of published chapters
