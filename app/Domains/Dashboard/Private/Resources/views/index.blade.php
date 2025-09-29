@@ -26,7 +26,7 @@
 
         <!-- Placeholder side image -->
         <div class="col-span-1 sm:col-span-2 flex flex-col items-center justify-center">
-            <img src="{{ asset('images/errors/404.png') }}" alt="Débrouissage en cours" class="max-w-full h-auto">
+            <img src="{{ asset('images/errors/not-ready.png') }}" alt="Débrouissage en cours" class="max-w-full h-auto">
             <p class="mt-2 text-sm text-muted">Débrouissage en cours</p>
         </div>
 
