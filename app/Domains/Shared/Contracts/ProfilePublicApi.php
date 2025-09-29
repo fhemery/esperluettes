@@ -3,9 +3,15 @@
 namespace App\Domains\Shared\Contracts;
 
 use App\Domains\Shared\Dto\ProfileDto;
+use App\Domains\Shared\Dto\FullProfileDto;
 
 interface ProfilePublicApi
 {
+    /**
+     * Get the full profile for a given user with fields needed across modules.
+     */
+    public function getFullProfile(int $userId): ?FullProfileDto;
+
     /**
      * Get a public profile DTO for a given user ID.
      */

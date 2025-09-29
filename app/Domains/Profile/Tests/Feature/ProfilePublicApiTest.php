@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Public\Events\EmailVerified;
 use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Profile\Private\Api\ProfileApi;
@@ -19,6 +20,26 @@ describe('Profile public API', function () {
 
         $profile = $api->getPublicProfile($user->id);
         expect($profile->user_id)->toBe($user->id);
+    });
+
+    it('should return a full profile with expected fields', function () {
+        $api = app(ProfileApi::class);
+
+        $user = alice($this);
+        $this->actingAs($user);
+
+        $full = $api->getFullProfile($user->id);
+
+        expect($full)->not()->toBeNull();
+        expect($full->userId)->toBe($user->id);
+        expect($full->displayName)->toBeString();
+        expect($full->slug)->toBeString();
+        expect($full->avatarUrl)->toBeString();
+        expect($full->joinDateIso)->toBeString()->and($full->joinDateIso)->not()->toBe('');
+        expect($full->roles)->toBeArray();
+
+        $userConfirmedRole = array_filter($full->roles, fn ($role) => $role->slug === Roles::USER_CONFIRMED);
+        expect($userConfirmedRole)->not()->toBeEmpty();
     });
 
     describe('Cache management', function() {

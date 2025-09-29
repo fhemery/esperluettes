@@ -329,4 +329,11 @@ class StoryService
             $this->eventBus->emit(new StoryDeleted($before, $chapterSnaps));
         });
     }
+
+    public function countAuthoredStories(int $userId): int
+    {
+        return Story::query()->with('authors')->whereHas('authors', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->count();
+    }
 }

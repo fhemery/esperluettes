@@ -11,7 +11,7 @@ Implement widgets top-to-bottom so the page grows incrementally:
 
 ---
 
-## 1) News Carousel (compact 10:1)
+## [Done] 1) News Carousel (compact 10:1)
 
 - **User Story**: As a user, I see the homepage News carousel at the top of my dashboard in a compact height so I can notice new announcements without it taking too much space.
 - **Acceptance Criteria**:

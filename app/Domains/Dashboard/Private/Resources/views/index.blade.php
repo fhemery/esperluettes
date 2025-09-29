@@ -9,6 +9,10 @@
             </div>
         </div>
 
+        <!-- Bienvenue panel -->
+        <div class="col-span-1 md:col-span-3">
+            <x-dashboard::welcome-component />
+        </div>
 
     </div>
 </x-app-layout>

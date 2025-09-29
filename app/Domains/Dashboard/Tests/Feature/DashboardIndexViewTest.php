@@ -39,3 +39,29 @@ it('does not display news carousel on dashboard when no pinned items exist', fun
     $response->assertDontSee('carousel');
     $response->assertDontSee('aria-roledescription="carousel"');
 });
+
+it('renders bienvenue error state for guests on dashboard view', function () {
+    $html = view('dashboard::index')->render();
+
+    expect($html)
+        ->toContain(__('dashboard::welcome.errors.not_authenticated'))
+        ->and($html)->toContain('surface-error');
+});
+
+it('renders bienvenue data for authenticated users on dashboard view (no mocks)', function () {
+    $user = alice($this);
+    $this->actingAs($user);
+
+    $response = $this->get('/dashboard');
+    $response->assertOk();
+
+    $content = $response->getContent();
+
+    // Should render the welcome card and generic labels (via translations)
+    expect($content)
+        ->toContain('surface-read')
+        ->and($content)->toContain(__('dashboard::welcome.welcome_message'))
+        ->and($content)->toContain(__('dashboard::welcome.member_since'))
+        ->and($content)->toContain(__('dashboard::welcome.role_label'))
+        ->and($content)->toContain(__('dashboard::welcome.activity_summary'));
+});

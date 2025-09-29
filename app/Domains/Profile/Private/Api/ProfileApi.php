@@ -4,17 +4,51 @@ namespace App\Domains\Profile\Private\Api;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi as ProfilePublicApiContract;
 use App\Domains\Shared\Dto\ProfileDto;
+use App\Domains\Shared\Dto\FullProfileDto;
 use App\Domains\Shared\Dto\ProfileSearchResultDto;
 use App\Domains\Profile\Private\Services\ProfileService;
 use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
 
 class ProfileApi implements ProfilePublicApiContract
 {
     public function __construct(
         private readonly ProfileService $profiles,
         private readonly ProfileAvatarUrlService $avatars,
+        private readonly AuthPublicApi $authApi,
     )
     {
+    }
+
+    public function getFullProfile(int $userId): ?FullProfileDto
+    {
+        $userId = (int) $userId;
+
+        // Fetch profile and user
+        $profiles = $this->profiles->getProfilesByUserIds([$userId]);
+        $profile = $profiles[$userId] ?? null;
+
+        if (!$profile) {
+            return null;
+        }
+
+        // Avatar URL from existing service
+        $avatarUrl = $this->avatars->publicUrl($profile->profile_picture_path, $userId);
+
+        // Join date in ISO for frontend DateUtils
+        $joinIso = optional($profile->created_at)?->toISOString() ?? '';
+
+        // Localized role label (FR)
+        $roles = $this->authApi->getRolesByUserIds([$profile->user_id])[$profile->user_id] ?? [];
+
+        return new FullProfileDto(
+            userId: (int) $userId,
+            displayName: (string) ($profile->display_name ?? ''),
+            slug: (string) ($profile->slug ?? ''),
+            avatarUrl: $avatarUrl,
+            joinDateIso: $joinIso,
+            roles: $roles,
+        );
     }
 
     public function getPublicProfile(int $userId): ?ProfileDto

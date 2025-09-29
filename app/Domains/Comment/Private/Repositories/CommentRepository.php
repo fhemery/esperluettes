@@ -94,6 +94,16 @@ class CommentRepository
         return $out;  
     }
 
+    public function countByTargetAndAuthor(string $entityType, int $authorId, bool $isRoot=false): int
+    {
+        return Comment::query()
+            ->where('commentable_type', $entityType)
+            ->where('author_id', $authorId)
+            ->when($isRoot, fn($q) => $q->whereNull('parent_comment_id'))
+            ->groupBy('commentable_id')
+            ->count();
+    }
+
     public function create(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment
     {
         return Comment::query()->create([

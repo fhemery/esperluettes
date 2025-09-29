@@ -38,6 +38,14 @@ class CommentService
     }
 
     /**
+     * Count total root comments for a given target.
+     */
+    public function countForAuthor(string $entityType,int $authorId, bool $isRoot=false, ): int
+    {
+        return $this->repository->countByTargetAndAuthor($entityType, $authorId, $isRoot);
+    }
+
+    /**
      * For each target, determines if there exists at least one root comment without a reply
      * from any of the provided $authorIds.
      * @return array<int,bool> [entityId => hasUnreplied]
