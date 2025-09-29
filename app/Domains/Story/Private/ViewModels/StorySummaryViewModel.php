@@ -41,6 +41,23 @@ class StorySummaryViewModel
         $this->twDisclosure = (string)$twDisclosure;
     }
 
+    public static function fromStory(Story $story, array $genresRef, array $triggerWarningRef): self
+    {
+        return new self(
+            $story->id,
+            $story->title,
+            $story->slug,
+            $story->description,
+            $story->reads_logged_total,
+            $story->chapters_count,
+            $story->words_total,
+            $story->authors,
+            $story->genre_names,
+            $story->trigger_warning_names,
+            $story->twDisclosure,
+        );
+    }
+
     public function getTitle(): string
     {
         return $this->title;

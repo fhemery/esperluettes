@@ -15,7 +15,7 @@ class AuthPublicApi
 
     /**
      * @param array<int,int> $userIds
-     * @return array<int,array<int,RoleDto>>
+     * @return array<int,array<RoleDto>>
      */
     public function getRolesByUserIds(array $userIds): array
     {

@@ -83,4 +83,24 @@ describe('CommentPublicApi: Count', function () {
             expect($count)->toBe(2);
         });
     });
+
+    describe('countRootCommentsByUser', function () {
+        it('returns correct comment counts per target', function () {
+            /** @var CommentPublicApi $api */
+            $api = app(CommentPublicApi::class);
+
+            $alice = alice($this);
+            $this->actingAs($alice);
+
+            $entityType = 'default';
+            $commentId = createComment($entityType, 1, generateDummyText(10));
+            createComment($entityType, 1, generateDummyText(10));
+            createComment($entityType, 1, generateDummyText(10), $commentId); // This is a reply
+
+            createComment($entityType, 2, generateDummyText(10)); // This comment is on other entity
+
+            $count = $api->countRootCommentsByUser($entityType, $alice->id);
+            expect($count)->toBe(2);
+        });
+    });
 });

@@ -4,6 +4,8 @@ namespace App\Domains\Story\Private\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Domains\Story\Private\Models\ReadingProgress;
 use App\Domains\Shared\Contracts\Sortable;
 
 class Chapter extends Model implements Sortable
@@ -52,8 +54,21 @@ class Chapter extends Model implements Sortable
         return $this->slug; // stored with id suffix
     }
 
+    /**
+     * Reading progress entries for this chapter.
+     */
+    public function readingProgress(): HasMany
+    {
+        return $this->hasMany(ReadingProgress::class, 'chapter_id');
+    }
+
+   
+
     // Sortable contract
     public function getId(): int { return (int)$this->id; }
     public function getSortOrder(): int { return (int)$this->sort_order; }
     public function setSortOrder(int $order): void { $this->sort_order = $order; }
+    public function getIsRead(): bool {
+        return ($this->is_read ?? 0) > 0;
+    }
 }

@@ -65,6 +65,12 @@ class CommentPublicApi
         return $counts[$entityId] ?? 0;
     }
 
+    public function countRootCommentsByUser(string $entityType, int $userId): int
+    {
+        return $this->service->countForAuthor($entityType, $userId, true);
+    }
+    
+
     public function getFor(string $entityType, int $entityId, int $page = 1, int $perPage = 20): CommentListDto
     {
         $this->checkAccess();

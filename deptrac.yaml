@@ -164,19 +164,12 @@ deptrac:
     - name: StoryPublic
       collectors:
         - type: directory
-          value: 'app/Domains/Story/PublicApi/'
+          value: 'app/Domains/Story/Public/'
 
     - name: StoryPrivate
       collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Story/PublicApi/
-            - type: directory
-              value: app/Domains/Story/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Story/
+        - type: directory
+          value: 'app/Domains/Story/Private/'
 
     - name: StoryTests
       collectors:
@@ -254,6 +247,7 @@ deptrac:
       - StoryRefPublic
       - StoryRefPrivate
       - EventsPublic
+      - AuthPublic
 
     StoryRefPublic:
       - Shared
@@ -281,7 +275,6 @@ deptrac:
       - StoryPrivate
       - StoryRefPublic
       - StoryRefPrivate
-      - DashboardPrivate
       - HomePrivate
       - EventsPublic
       - EventsPrivate
@@ -300,6 +293,9 @@ deptrac:
     DashboardPrivate:
       - Shared
       - AuthPublic
+      - ProfilePublic
+      - StoryPublic
+      - CommentPublic
 
     EventsPrivate:
       - Shared
@@ -335,6 +331,7 @@ deptrac:
       - ProfilePublic
       - StoryRefPrivate
       - EventsPublic
+      - StoryPublic
 
     StoryRefPrivate:
       - Shared

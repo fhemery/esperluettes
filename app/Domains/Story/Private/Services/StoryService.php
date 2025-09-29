@@ -2,12 +2,14 @@
 
 namespace App\Domains\Story\Private\Services;
 
+use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Private\Http\Requests\StoryRequest;
-use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Models\ReadingProgress;
+use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use App\Domains\Story\Private\Support\GetStoryOptions;
-use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Story\Public\Events\StoryCreated;
 use App\Domains\Story\Public\Events\DTO\StorySnapshot;
@@ -15,17 +17,24 @@ use App\Domains\Story\Public\Events\StoryUpdated;
 use App\Domains\Story\Public\Events\StoryDeleted;
 use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
+use App\Domains\Story\Private\Models\StoryWithNextChapter;
+use App\Domains\Story\Private\Repositories\StoryRepository;
+use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 
 class StoryService
 {
     public function __construct(
         private EventBus $eventBus,
         private CommentMaintenancePublicApi $comments,
-    ) {
-    }
+        private ProfilePublicApi $profileApi,
+        private ChapterService $chapters,
+        private StoryRepository $storiesRepository,
+    ) {}
 
     /**
      * Generic listing with optional filters.
@@ -35,104 +44,7 @@ class StoryService
      */
     public function getStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
     {
-        $query = Story::query()
-            ->with(['authors', 'collaborators', 'genres:id', 'triggerWarnings:id']);
-
-        // Aggregate metrics for each story (avoid N+1):
-        // - published_chapters_count: count of published chapters
-        // - published_words_total: sum of word_count across published chapters
-        $query->withCount([
-            'chapters as published_chapters_count' => function ($q) {
-                $q->where('status', Chapter::STATUS_PUBLISHED);
-            },
-        ])->withSum([
-            'chapters as published_words_total' => function ($q) {
-                $q->where('status', Chapter::STATUS_PUBLISHED);
-            },
-        ], 'word_count');
-
-        // Only require a published chapter for general listings; profile owner views can include drafts/no chapters
-        if ($filter->requirePublishedChapter) {
-            $query->whereNotNull('last_chapter_published_at');
-        }
-
-        // Order: newest publication first, then creation date; NULL last_chapter_published_at naturally sorts last on DESC
-        $query->orderByDesc('last_chapter_published_at')
-              ->orderByDesc('created_at');
-
-        // Filter by author user ID (prefer authorId, fallback to userId for BC)
-        $authorId = $filter->authorId;
-        if ($authorId !== null) {
-            $query->whereHas('authors', function ($q) use ($authorId) {
-                $q->where('user_id', $authorId);
-            });
-        }
-
-        // Filter by Type if provided
-        if ($filter->typeId !== null) {
-            $query->where('story_ref_type_id', $filter->typeId);
-        }
-
-        // Filter by Audience if provided (multi-select)
-        if (!empty($filter->audienceIds)) {
-            $query->whereIn('story_ref_audience_id', $filter->audienceIds);
-        }
-
-        // Filter by Genres (AND semantics: story must have all selected genre IDs)
-        if (!empty($filter->genreIds)) {
-            foreach ($filter->genreIds as $gid) {
-                $query->whereHas('genres', function ($q) use ($gid) {
-                    $q->where('story_ref_genres.id', $gid);
-                });
-            }
-        }
-
-        // Exclude stories that have ANY of the selected trigger warnings (OR semantics)
-        if (!empty($filter->excludeTriggerWarningIds)) {
-            $ids = $filter->excludeTriggerWarningIds;
-            $query->whereDoesntHave('triggerWarnings', function ($q) use ($ids) {
-                $q->whereIn('story_ref_trigger_warnings.id', $ids);
-            });
-        }
-
-        // Filter only explicit No-TW stories if requested
-        if ($filter->noTwOnly === true) {
-            $query->where('tw_disclosure', Story::TW_NO_TW);
-        }
-
-        // Visibilities already normalized in DTO
-        $visibilities = $filter->visibilities;
-
-        $pubCom = array_values(array_intersect($visibilities, [Story::VIS_PUBLIC, Story::VIS_COMMUNITY]));
-        $includePrivate = in_array(Story::VIS_PRIVATE, $visibilities, true);
-
-        $query->where(function ($w) use ($pubCom, $includePrivate, $viewerId) {
-            $addedAny = false;
-
-            if (!empty($pubCom)) {
-                $w->whereIn('visibility', $pubCom);
-                $addedAny = true;
-            }
-
-            if ($includePrivate && $viewerId !== null) {
-                if ($addedAny) {
-                    $w->orWhere(function ($q) use ($viewerId) {
-                        $q->where('visibility', Story::VIS_PRIVATE)
-                          ->whereHas('collaborators', function ($c) use ($viewerId) {
-                              $c->where('user_id', $viewerId);
-                          });
-                    });
-                } else {
-                    $w->where('visibility', Story::VIS_PRIVATE)
-                      ->whereHas('collaborators', function ($c) use ($viewerId) {
-                          $c->where('user_id', $viewerId);
-                      });
-                }
-            }
-        });
-
-        /** @var LengthAwarePaginator $stories */
-        return $query->paginate($filter->perPage, ['*'], 'page', $filter->page);
+        return $this->storiesRepository->searchStoriesForCardDisplay($filter, $viewerId);
     }
 
     public function createStory(StoryRequest $request, int $userId): Story
@@ -206,36 +118,12 @@ class StoryService
      * Fetch a story by slug (or slug-with-id).
      * Eager-loading is controlled via GetStoryOptions to keep payload lean.
      */
-    public function getStory(string $slug, ?GetStoryOptions $options = null): Story
+    public function getStory(string $slug, ?GetStoryOptions $options = null): ?Story
     {
-        $opts = $options ?? new GetStoryOptions();
+        $opts = $options ?? GetStoryOptions::Full();
         $id = SlugWithId::extractId($slug);
 
-        $query = Story::query();
-
-        $with = [];
-        if ($opts->includeAuthors) {
-            $with[] = 'authors';
-        }
-        if ($opts->includeGenreIds) {
-            $with[] = 'genres:id';
-        }
-        if ($opts->includeTriggerWarningIds) {
-            $with[] = 'triggerWarnings:id';
-        }
-        if ($opts->includeChapters) {
-            $with['chapters'] = function ($q) {
-                $q->orderBy('sort_order', 'asc')
-                  ->select(['id', 'story_id', 'title', 'slug', 'status', 'sort_order']);
-            };
-        }
-        if (!empty($with)) {
-            $query->with($with);
-        }
-
-        return $id
-            ? $query->findOrFail($id)
-            : $query->where('slug', $slug)->firstOrFail();
+        return $this->storiesRepository->getStoryById($id, Auth::id(), $opts);
     }
 
     /**
@@ -328,5 +216,71 @@ class StoryService
             // Emit deletion event
             $this->eventBus->emit(new StoryDeleted($before, $chapterSnaps));
         });
+    }
+
+    public function countAuthoredStories(int $userId): int
+    {
+        return Story::query()->with('authors')->whereHas('authors', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->count();
+    }
+
+
+
+    public function getStoryByLatestAddedChapter(int $userId): ?Story
+    {
+        $latestChapter = Chapter::query()->with('story')->whereHas('story', function ($q) use ($userId) {
+            $q->whereHas('authors', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        })->orderByDesc('last_edited_at')->first();
+
+        if (!$latestChapter) {
+            return null;
+        }
+
+        return $this->storiesRepository->getStoryById($latestChapter?->story_id, Auth::id(), GetStoryOptions::ForCardDisplay());
+    }
+
+    public function getKeepReadingContextForUser(int $userId): ?StoryWithNextChapter
+    {
+        // Get distinct story IDs ordered by latest activity (updated_at/read_at) to avoid duplicates
+        $storyIds = ReadingProgress::query()
+            ->where('user_id', $userId)
+            ->selectRaw('story_id, MAX(read_at) as max_read_at')
+            ->groupBy('story_id')
+            ->orderByDesc('max_read_at')
+            ->limit(4)
+            ->pluck('story_id');
+
+        if ($storyIds->isEmpty()) {
+            return null;
+        }
+
+        foreach ($storyIds as $sid) {
+            $story = $this->storiesRepository->getStoryById((int) $sid, Auth::id(), GetStoryOptions::Full());
+
+            foreach ($story->chapters as $chapter) {
+                if ($chapter->status === Chapter::STATUS_PUBLISHED) {
+                    if (!$chapter->getIsRead()) {
+                        return new StoryWithNextChapter($story, $chapter);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Random discover stories for the dashboard/component.
+     * Excludes stories authored by the user and respects visibility rules.
+     *
+     * @param array<string> $visibilities Visibilities to include (e.g. [Story::VIS_PUBLIC, Story::VIS_COMMUNITY])
+     * @return array<Story>
+     */
+    public function getRandomStories(int $userId, int $nbStories = 7, array $visibilities = [Story::VIS_PUBLIC]): array
+    {
+        return $this->storiesRepository->getRandomStories($userId, $nbStories, $visibilities);
     }
 }

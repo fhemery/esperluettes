@@ -5,13 +5,20 @@ namespace App\Domains\Story\Public\Api;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\StorySearchResultDto;
 use App\Domains\Story\Private\Services\StorySearchService;
+use App\Domains\Story\Private\Services\StoryService;
 
 class StoryPublicApi
 {
     public function __construct(
         private readonly ProfilePublicApi $profiles,
-        private readonly StorySearchService $search
+        private readonly StorySearchService $search,
+        private readonly StoryService $storyService
     ) {
+    }
+
+    public function countAuthoredStories(int $userId): int
+    {
+        return $this->storyService->countAuthoredStories($userId);
     }
 
     public function searchStories(string $query, ?int $viewerUserId = null, int $limit = 25): array
@@ -62,4 +69,5 @@ class StoryPublicApi
             'total' => $total,
         ];
     }
+
 }
