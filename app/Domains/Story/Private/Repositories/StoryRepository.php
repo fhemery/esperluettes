@@ -5,10 +5,31 @@ namespace App\Domains\Story\Private\Repositories;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Support\GetStoryOptions;
+use App\Domains\Story\Private\Support\StoryFilterAndPagination;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 final class StoryRepository
 {
     public function getStorySummaryById(int $storyId, GetStoryOptions $options = new GetStoryOptions()): ?Story
+    {
+        $query = $this->selectFields($options);
+
+        return $query->find($storyId);
+    }
+
+    /**
+     * Return a paginator of stories for card display with filters applied.
+     */
+    public function searchStoriesForCardDisplay(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
+    {
+        $query = $this->buildCardListingQuery($filter, $viewerId);
+        /** @var LengthAwarePaginator $paginator */
+        $paginator = $query->paginate($filter->perPage, ['*'], 'page', $filter->page);
+        return $paginator;
+    }
+
+    private function selectFields(GetStoryOptions $options): Builder
     {
         $query = Story::query()
             ->when($options->includeAuthors, fn($q) => $q->with('authors'))
@@ -34,6 +55,97 @@ final class StoryRepository
             ], 'word_count');
         }
 
-        return $query->find($storyId);
+        return $query;
+    }
+
+    /**
+     * Build the base query used for listing story cards with filters applied.
+     * This centralizes eager-loading and aggregations so card displays stay consistent.
+     */
+    private function buildCardListingQuery(StoryFilterAndPagination $filter, ?int $viewerId = null): Builder
+    {
+        $query = $this->selectFields(GetStoryOptions::ForCardDisplay());
+
+        // Only require a published chapter for general listings; profile owner views can include drafts/no chapters
+        if ($filter->requirePublishedChapter) {
+            $query->whereNotNull('last_chapter_published_at');
+        }
+
+        // Order: newest publication first, then creation date; NULL last_chapter_published_at naturally sorts last on DESC
+        $query->orderByDesc('last_chapter_published_at')
+            ->orderByDesc('created_at');
+
+        // Filter by author user ID (prefer authorId)
+        $authorId = $filter->authorId;
+        if ($authorId !== null) {
+            $query->whereHas('authors', function ($q) use ($authorId) {
+                $q->where('user_id', $authorId);
+            });
+        }
+
+        // Filter by Type if provided
+        if ($filter->typeId !== null) {
+            $query->where('story_ref_type_id', $filter->typeId);
+        }
+
+        // Filter by Audience if provided (multi-select)
+        if (!empty($filter->audienceIds)) {
+            $query->whereIn('story_ref_audience_id', $filter->audienceIds);
+        }
+
+        // Filter by Genres (AND semantics: story must have all selected genre IDs)
+        if (!empty($filter->genreIds)) {
+            foreach ($filter->genreIds as $gid) {
+                $query->whereHas('genres', function ($q) use ($gid) {
+                    $q->where('story_ref_genres.id', $gid);
+                });
+            }
+        }
+
+        // Exclude stories that have ANY of the selected trigger warnings (OR semantics)
+        if (!empty($filter->excludeTriggerWarningIds)) {
+            $ids = $filter->excludeTriggerWarningIds;
+            $query->whereDoesntHave('triggerWarnings', function ($q) use ($ids) {
+                $q->whereIn('story_ref_trigger_warnings.id', $ids);
+            });
+        }
+
+        // Filter only explicit No-TW stories if requested
+        if ($filter->noTwOnly === true) {
+            $query->where('tw_disclosure', Story::TW_NO_TW);
+        }
+
+        // Visibilities already normalized in DTO
+        $visibilities = $filter->visibilities;
+
+        $pubCom = array_values(array_intersect($visibilities, [Story::VIS_PUBLIC, Story::VIS_COMMUNITY]));
+        $includePrivate = in_array(Story::VIS_PRIVATE, $visibilities, true);
+
+        $query->where(function ($w) use ($pubCom, $includePrivate, $viewerId) {
+            $addedAny = false;
+
+            if (!empty($pubCom)) {
+                $w->whereIn('visibility', $pubCom);
+                $addedAny = true;
+            }
+
+            if ($includePrivate && $viewerId !== null) {
+                if ($addedAny) {
+                    $w->orWhere(function ($q) use ($viewerId) {
+                        $q->where('visibility', Story::VIS_PRIVATE)
+                            ->whereHas('collaborators', function ($c) use ($viewerId) {
+                                $c->where('user_id', $viewerId);
+                            });
+                    });
+                } else {
+                    $w->where('visibility', Story::VIS_PRIVATE)
+                        ->whereHas('collaborators', function ($c) use ($viewerId) {
+                            $c->where('user_id', $viewerId);
+                        });
+                }
+            }
+        });
+
+        return $query;
     }
 }

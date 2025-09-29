@@ -230,8 +230,6 @@ class StoryController
         ]);
     }
 
-    
-
     public function show(string $slug): View|\Illuminate\Http\RedirectResponse
     {
         $opts = new GetStoryOptions(includeAuthors: true, includeGenreIds: true, includeTriggerWarningIds: true);
