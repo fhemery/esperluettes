@@ -57,3 +57,29 @@ it('renders bienvenue data for authenticated users on dashboard view (no mocks)'
         ->and($content)->toContain(__('dashboard::welcome.role_label'))
         ->and($content)->toContain(__('dashboard::welcome.activity_summary'));
 });
+
+it('renders Keep Reading widget with empty state on dashboard', function () {
+    $user = alice($this);
+    $this->actingAs($user);
+
+    $response = $this->get('/dashboard');
+    $response->assertOk();
+
+    $content = $response->getContent();
+    expect($content)
+        ->toContain(__('story::keep-reading.title'))
+        ->and($content)->toContain(__('story::keep-reading.empty'));
+});
+
+it('renders Keep Writing widget with empty state on dashboard', function () {
+    $user = alice($this);
+    $this->actingAs($user);
+
+    $response = $this->get('/dashboard');
+    $response->assertOk();
+
+    $content = $response->getContent();
+    expect($content)
+        ->toContain(__('story::keep-writing.title'))
+        ->and($content)->toContain(__('story::keep-writing.empty'));
+});
