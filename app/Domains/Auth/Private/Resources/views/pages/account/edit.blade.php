@@ -1,6 +1,6 @@
 <x-app-layout>
-    <div class="max-w-xl">
-        <div class="my-2 p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+    <div class="mx-auto max-w-xl flex flex-col gap-4">
+        <div class="my-2 p-4 sm:p-8 surface-read text-on-surface">
             @include('auth::account.partials.update-account-information-form')
         </div>
 

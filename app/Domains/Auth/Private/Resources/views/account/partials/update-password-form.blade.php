@@ -1,34 +1,38 @@
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
+<section class="flex flex-col gap-4">
+    <header class="flex flex-col gap-2">
+        <h2 class="text-xl font-semibold text-accent flex gap-2 items-center">
+            <span class="material-symbols-outlined">
+                lock
+            </span>
+
             {{ __('auth::account.password.update_title') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p>
             {{ __('auth::account.password.update_help') }}
         </p>
     </header>
 
-    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('password.update') }}" class="flex flex-col gap-2">
         @csrf
         @method('put')
 
-        <div>
+        <div class="flex flex-col gap-2">
             <x-input-label for="update_password_current_password" :value="__('auth::account.password.current')" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
-            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+            <x-text-input id="update_password_current_password" name="current_password" type="password" class="block w-full" autocomplete="current-password" />
+            <x-input-error :messages="$errors->updatePassword->get('current_password')" />
         </div>
 
-        <div>
+        <div class="flex flex-col gap-2">
             <x-input-label for="update_password_password" :value="__('auth::account.password.new')" />
-            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+            <x-text-input id="update_password_password" name="password" type="password" class="block w-full" autocomplete="new-password" />
+            <x-input-error :messages="$errors->updatePassword->get('password')" />
         </div>
 
-        <div>
+        <div class="flex flex-col gap-2">
             <x-input-label for="update_password_password_confirmation" :value="__('auth::account.password.confirm')" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="block w-full" autocomplete="new-password" />
+            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" />
         </div>
 
         <div class="flex items-center gap-4">

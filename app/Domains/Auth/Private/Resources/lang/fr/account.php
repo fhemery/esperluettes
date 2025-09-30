@@ -10,6 +10,7 @@ return [
         'unverified' => "Votre adresse e‑mail n'est pas vérifiée.",
         'resend' => "Cliquez ici pour renvoyer l'e‑mail de vérification.",
         'link_sent' => "Un nouveau lien de vérification a été envoyé à votre adresse e‑mail.",
+        'saved' => 'Votre compte a été mis à jour !',
     ],
 
     'password' => [

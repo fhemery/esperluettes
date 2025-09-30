@@ -1,10 +1,14 @@
 <section class="space-y-6">
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
+    <header class="flex flex-col gap-2">
+        <h2 class="text-xl font-semibold text-accent flex gap-2 items-center">
+            <span class="material-symbols-outlined">
+                delete
+            </span>
+
             {{ __('auth::account.delete.title') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p >
             {{ __('auth::account.delete.description') }}
         </p>
     </header>
@@ -15,19 +19,19 @@
     >{{ __('auth::account.delete.title') }}</x-danger-button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('account.destroy') }}" class="p-6">
+        <form method="post" action="{{ route('account.destroy') }}" class="p-6 flex flex-col gap-4">
             @csrf
             @method('delete')
 
-            <h2 class="text-lg font-medium text-gray-900">
+            <h2 class="text-lg font-medium text-accent">
                 {{ __('auth::account.delete.confirm_title') }}
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="mt-1 text-sm">
                 {{ __('auth::account.delete.confirm_description') }}
             </p>
 
-            <div class="mt-6">
+            <div class="flex flex-col gap-2">
                 <x-input-label for="password" value="{{ __('auth::account.password.current') }}" class="sr-only" />
 
                 <x-text-input
@@ -41,12 +45,12 @@
                 <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
             </div>
 
-            <div class="mt-6 flex justify-end">
+            <div class="flex justify-end gap-4">
                 <x-secondary-button x-on:click="$dispatch('close')">
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-danger-button class="ms-3">
+                <x-danger-button>
                     {{ __('auth::account.delete.submit') }}
                 </x-danger-button>
             </div>
