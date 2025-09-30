@@ -8,4 +8,9 @@ use Filament\Resources\Pages\EditRecord;
 class EditStatus extends EditRecord
 {
     protected static string $resource = StatusResource::class;
+
+    protected function afterSave(): void
+    {
+        app(StoryRefLookupService::class)->clearCache();
+    }
 }

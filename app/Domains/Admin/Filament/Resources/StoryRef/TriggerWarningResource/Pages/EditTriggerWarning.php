@@ -8,4 +8,9 @@ use Filament\Resources\Pages\EditRecord;
 class EditTriggerWarning extends EditRecord
 {
     protected static string $resource = TriggerWarningResource::class;
+
+    protected function afterSave(): void
+    {
+        app(StoryRefLookupService::class)->clearCache();
+    }
 }

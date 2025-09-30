@@ -13,4 +13,6 @@ class CreateCopyright extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    
 }

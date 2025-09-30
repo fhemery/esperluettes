@@ -386,4 +386,15 @@ class StoryRefCache
     {
         $this->cache->forget('storyref:trigger_warnings:active-ordered');
     }
+	
+	public function clearAll(): void
+	{
+		$this->clearTypes();
+		$this->clearAudiences();
+		$this->clearCopyrights();
+		$this->clearGenres();
+		$this->clearStatuses();
+		$this->clearFeedbacks();
+		$this->clearTriggerWarnings();
+	}
 }
