@@ -19,14 +19,14 @@
                 <div class="flex items-start justify-between mb-2">
                     <h1 class="font-semibold text-2xl flex items-center gap-2">
                         {{ $vm->chapter->title }}
-                        @if($vm->chapter->status !== \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED)
+                        @if(!$vm->chapter->isPublished)
                         <span class="inline-flex items-center rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 border border-yellow-200">
                             {{ trans('story::chapters.list.not_published') }}
                         </span>
                         @endif
                     </h1>
 
-                    @if(auth()->check() && $vm->story->isAuthor((int)auth()->id()))
+                    @if($vm->isAuthor)
                     <div class="flex items-center gap-3">
                         <a href="{{ route('chapters.edit', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}"
                             class="text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1"
@@ -89,7 +89,7 @@
                             @endif
                         </div>
                         <div class="text-sm text-gray-500">
-                            @if($vm->chapter->status === \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED && !$vm->isAuthor)
+                            @if($vm->chapter->isPublished && !$vm->isAuthor)
                             @auth
                             <button
                                 type="button"
@@ -202,7 +202,7 @@
     </script>
     @endpush
 
-    @if(auth()->check() && $vm->story->isAuthor((int)auth()->id()))
+    @if($vm->isAuthor)
     <x-shared::confirm-modal
         name="confirm-delete-chapter"
         :title="__('story::chapters.actions.delete')"
