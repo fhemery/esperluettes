@@ -16,6 +16,8 @@
  * Max width: any CSS size (e.g. '20rem', '280px'). Actual panel shrinks to content.
  * Max height: any CSS size (e.g. '20rem'). Panel scrolls vertically when content exceeds it.
  */
+import { v4 as uuidv4 } from 'uuid';
+
 export default function registerTooltip(Alpine) {
   Alpine.data('popover', () => ({
     open: false, // derived
@@ -30,30 +32,28 @@ export default function registerTooltip(Alpine) {
     trigger: null,
     placement: 'right',
     maxWidth: '20rem',
-    maxHeight: '20rem',
     margin: 8,
     panelH: 0,
     panelW: 0,
-    init(trigger, placement, maxWidth, maxHeight) {
-      this.trigger = trigger;
-      this.placement = placement || 'right';
-      this.maxWidth = maxWidth || '20rem';
-      this.maxHeight = maxHeight || '20rem';
-      // Assign a unique ID per instance
-      window.__popoverId = (window.__popoverId || 0) + 1;
-      this.id = window.__popoverId;
-      // Listen for other popovers requesting exclusivity and close this one
-      if (!this._boundExclusiveListener) {
-        this._boundExclusiveListener = (e) => {
-          const otherId = e?.detail?.id;
+    // Mount at the Alpine root (non-teleported) so every instance listens immediately
+    mountRoot() {
+      if (!this.id) this.id = uuidv4();
+      if (!this._boundStoreWatcher) {
+        this._boundStoreWatcher = this.$watch('$store.popover.openId', (otherId) => {
+          // Close when another instance becomes the active opener
           if (otherId && otherId !== this.id) {
             this.hoverOpen = false;
             this.pinned = false;
             this.updateOpen();
           }
-        };
-        window.addEventListener('popover:requestOpen', this._boundExclusiveListener);
+        });
       }
+    },
+    init(trigger, placement, maxWidth, maxHeight) {
+      this.trigger = trigger;
+      this.placement = placement || 'right';
+      this.maxWidth = maxWidth || '20rem';
+      this.maxHeight = maxHeight || '20rem';
       this.$nextTick(() => {
         this.compute();
         window.addEventListener('resize', this.compute.bind(this));
@@ -95,10 +95,8 @@ export default function registerTooltip(Alpine) {
       }, 220);
     },
     ensureExclusive() {
-      // Ask others to close when this instance opens
-      try {
-        window.dispatchEvent(new CustomEvent('popover:requestOpen', { detail: { id: this.id } }));
-      } catch (_) { /* no-op */ }
+      // Mark this instance as the only open one via global store
+      this.$store.popover.openId = this.id;
     },
     onTriggerEnter() {
       this.hoverTrigger = true;
