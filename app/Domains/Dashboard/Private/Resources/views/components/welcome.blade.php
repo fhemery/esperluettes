@@ -28,10 +28,18 @@
             </p>
 
             <p>
-                {!! __('dashboard::welcome.activity_summary', [
-                    'stories' => '<span class="text-accent font-semibold">'.$storiesCount.'</span>',
-                    'comments' => '<span class="text-accent font-semibold">'.$commentsCount.'</span>'
-                ]) !!}
+            {!! __('dashboard::welcome.activity_summary', [
+                'stories' => trans_choice(
+                    'dashboard::welcome.stories_count',
+                    $storiesCount,
+                    ['count' => '<span class="text-accent font-semibold">'.$storiesCount.'</span>']
+                ),
+                'comments' => trans_choice(
+                    'dashboard::welcome.comments_count',
+                    $commentsCount,
+                    ['count' => '<span class="text-accent font-semibold">'.$commentsCount.'</span>']
+                ),
+            ]) !!}
             </p>
         </div>
     </div>
