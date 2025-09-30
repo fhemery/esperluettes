@@ -13,9 +13,13 @@
         @php
             $seasonalBackground = filter_var($attributes->get('seasonal-background', false), FILTER_VALIDATE_BOOLEAN);
             $class = $seasonalBackground ? 'bg-seasonal' : '';
+            $displayRibbon = filter_var($attributes->get('display-ribbon', false), FILTER_VALIDATE_BOOLEAN);
         @endphp
         <div class="min-h-screen bg-bg text-fg h-full flex flex-col">
             @include('shared::layouts.partials.navigation')
+            @if ($displayRibbon)
+                <div class="w-full h-10 bg-[url('/images/themes/autumn/top-ribbon.png')] bg-repeat-x"></div>
+            @endif
 
             <!-- Page Heading -->
             @isset($header)
