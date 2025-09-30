@@ -79,9 +79,9 @@
                     {{ __('shared::navigation.stories') }}
                 </x-responsive-nav-link>
                 @if (Auth::user() && Auth::user()->isConfirmed())
-                <x-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
+                <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
                     {{ __('shared::navigation.my-stories') }}
-                </x-nav-link>
+                </x-responsive-nav-link>
                 @endif
                 @if(Auth::user()->isAdmin())
                 <x-responsive-nav-link :href="route('filament.admin.pages.dashboard')"
