@@ -5,7 +5,7 @@
 ])
 
 <div class="flex items-center align-middle select-none z-10 cursor-pointer">
-    <div class="ml-0 relative cursor-pointer" x-data="popover" @keydown.escape.window="hoverOpen = false; pinned = false; updateOpen()">
+    <div class="ml-0 relative cursor-pointer" x-data="popover" x-init="mountRoot()" @keydown.escape.window="hoverOpen = false; pinned = false; updateOpen()">
         <div
             class="flex items-center leading-none cursor-pointer"
             role="button"

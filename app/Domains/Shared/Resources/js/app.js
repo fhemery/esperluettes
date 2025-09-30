@@ -11,6 +11,8 @@ window.DateUtils = DateUtils;
 window.BadgeOverflow = BadgeOverflow;
 
 // Register UI components
+// Global store for popover exclusivity (single-open behavior)
+Alpine.store('popover', { openId: null });
 registerTooltip(Alpine);
 
 Alpine.start();
