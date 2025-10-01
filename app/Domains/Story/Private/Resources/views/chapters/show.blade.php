@@ -67,7 +67,7 @@
 
                 @if(!empty($vm->chapter->authorNote))
                 <aside class="flex flex-col gap-4">
-                    <div class="prose rich-content">
+                    <div class="prose rich-content text-xl">
                         <p class="text-accent">{{ __('story::chapters.author_note') }}</p>
                         <!-- This always contains a <p> tag, so it will go to the line anyway -->
                         {!! $vm->chapter->authorNote !!}
@@ -80,7 +80,7 @@
                 </aside>
                 @endif
 
-                <article class="prose rich-content max-w-none [text-indent:2rem]">
+                <article class="prose rich-content max-w-none [text-indent:2rem] text-xl">
                     {!! $vm->chapter->content !!}
                 </article>
 
