@@ -100,22 +100,29 @@
                     <div class="text-sm">
                         @if($vm->chapter->isPublished && !$vm->isAuthor)
                         @auth
-                        <x-shared::button
-                            type="button"
-                            id="markReadToggle"
-                            :color="$vm->isReadByMe ? 'success' : 'tertiary'"
-                            data-read="{{ $vm->isReadByMe ? '1' : '0' }}"
-                            data-url-read="{{ route('chapters.read.mark', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}"
-                            data-url-unread="{{ route('chapters.read.unmark', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}"
-                            data-label-read="{{ __('story::chapters.actions.marked_read') }}"
-                            data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}">
-                            <span class="material-symbols-outlined text-[18px] leading-none" id="markReadIcon">
-                                {{ $vm->isReadByMe ? 'check_circle' : 'radio_button_unchecked' }}
-                            </span>
-                            <span id="markReadLabel">
-                                {{ $vm->isReadByMe ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}
-                            </span>
-                        </x-shared::button>
+                        <div
+                            x-data="markRead({
+                                isRead: {{ $vm->isReadByMe ? 'true' : 'false' }},
+                                urlRead: '{{ route('chapters.read.mark', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}',
+                                urlUnread: '{{ route('chapters.read.unmark', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}',
+                                labelRead: '{{ __('story::chapters.actions.marked_read') }}',
+                                labelUnread: '{{ __('story::chapters.actions.mark_as_read') }}',
+                                csrf: '{{ csrf_token() }}',
+                            })"
+                        >
+                            <x-shared::button x-show="!read" type="button" color="accent" x-on:click="toggle()">
+                                <div class="flex items-center gap-2">
+                                    <span x-text="labelUnread"></span>
+                                </div>
+                            </x-shared::button>
+
+                            <x-shared::button x-show="read" type="button" color="success" x-on:click="toggle()">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined leading-none">check_circle</span>
+                                    <span x-text="labelRead"></span>
+                                </div>
+                            </x-shared::button>
+                        </div>
                         @endauth
                         @endif
                     </div>
@@ -135,7 +142,7 @@
             </div>
 
             <!-- Comments -->
-            <div class="mt-12">
+            <div class="mt-12 surface-read text-on-surface p-2 lg:p-6">
                 <x-comment-list entity-type="chapter" entity-id="{{ $vm->chapter->id }}" page="0" perPage="5" />
             </div>
         </div>
@@ -144,66 +151,31 @@
 
     @push('scripts')
     <script>
-        (function() {
-            let inFlight = false; // simple in-flight guard during network requests
-
-            function getCsrf() {
-                return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            }
-
-            function setStateClasses(btn, read) {
-                const toBlue = ['bg-blue-600', 'hover:bg-blue-700', 'border-blue-600'];
-                const toGreen = ['bg-green-600', 'hover:bg-green-700', 'border-green-600'];
-                const neutralText = 'text-white';
-                btn.classList.remove(...toBlue, ...toGreen);
-                btn.classList.add(neutralText);
-                btn.classList.add(...(read ? toGreen : toBlue));
-            }
-
-            async function toggleLoggedRead(toggleBtn) {
-                if (inFlight) return;
-                inFlight = true;
-                toggleBtn.disabled = true;
-
-                const csrf = getCsrf();
-                const isRead = toggleBtn.getAttribute('data-read') === '1';
-                const url = isRead ? toggleBtn.getAttribute('data-url-unread') : toggleBtn.getAttribute('data-url-read');
-                const method = isRead ? 'DELETE' : 'POST';
-
-                const icon = document.getElementById('markReadIcon');
-                const label = document.getElementById('markReadLabel');
-                const labelRead = toggleBtn.getAttribute('data-label-read') || 'Read';
-                const labelUnread = toggleBtn.getAttribute('data-label-unread') || 'Mark as read';
-
+    function markRead({ isRead, urlRead, urlUnread, labelRead, labelUnread, csrf }) {
+        return {
+            read: isRead,
+            labelRead,
+            labelUnread,
+            _busy: false,
+            async toggle() {
+                if (this._busy) return;
+                this._busy = true;
+                const makeRead = !this.read;
+                const url = makeRead ? urlRead : urlUnread;
+                const method = makeRead ? 'POST' : 'DELETE';
                 try {
                     const res = await fetch(url, {
                         method,
-                        headers: {
-                            'X-CSRF-TOKEN': csrf,
-                            'Accept': 'text/plain',
-                        },
+                        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'text/plain' },
                     });
                     if (res.status === 204) {
-                        const nowRead = !isRead;
-                        icon.textContent = nowRead ? 'check_circle' : 'radio_button_unchecked';
-                        label.textContent = nowRead ? labelRead : labelUnread;
-                        toggleBtn.setAttribute('data-read', nowRead ? '1' : '0');
-                        setStateClasses(toggleBtn, nowRead);
+                        this.read = makeRead;
                     }
-                } catch {}
-                toggleBtn.disabled = false;
-                inFlight = false;
+                } catch (e) {}
+                this._busy = false;
             }
-
-            function bindLoggedToggle() {
-                const toggleBtn = document.getElementById('markReadToggle');
-                if (!toggleBtn) return;
-                toggleBtn.addEventListener('click', () => toggleLoggedRead(toggleBtn));
-            }
-
-            // init
-            bindLoggedToggle();
-        })();
+        }
+    }
     </script>
     @endpush
 
