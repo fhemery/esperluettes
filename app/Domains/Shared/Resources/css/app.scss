@@ -34,6 +34,40 @@
   --home-bg-size: auto;
 }
 
+/* Self-hosted Aptos font faces (scoped via .rich-content) */
+@font-face {
+  font-family: "Aptos";
+  src: url('/fonts/aptos/Aptos.woff2') format('woff2'),
+       url('/fonts/aptos/Aptos.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Aptos";
+  src: url('/fonts/aptos/Aptos-Italic.woff2') format('woff2'),
+       url('/fonts/aptos/Aptos-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Aptos";
+  src: url('/fonts/aptos/Aptos-Bold.woff2') format('woff2'),
+       url('/fonts/aptos/Aptos-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Aptos";
+  src: url('/fonts/aptos/Aptos-Bold-Italic.woff2') format('woff2'),
+       url('/fonts/aptos/Aptos-Bold-Italic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root[data-season="autumn"] {
   --color-bg: 247 234 223;        // Blanc cassé
   --color-primary: 201 129 41;    // Brun
@@ -46,7 +80,11 @@
 
 /* Rich content defaults (for sanitized HTML display) */
 .rich-content {
-  line-height: 2;
+  font-family: "Aptos", Manrope, system-ui, sans-serif;
+  /* Avoid synthetic styles when a face is missing */
+  font-synthesis-weight: none;
+  font-synthesis-style: none;
+  line-height: 1.8;
   text-align: justify;
 }
 .rich-content ul {

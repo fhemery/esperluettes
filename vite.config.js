@@ -21,6 +21,10 @@ export default defineConfig(({ mode }) => {
                               target: appUrl,
                               changeOrigin: true,
                           },
+                          '/fonts': {
+                              target: appUrl,
+                              changeOrigin: true,
+                          },
                       },
                   }
                 : {}),
