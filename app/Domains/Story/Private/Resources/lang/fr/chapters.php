@@ -6,8 +6,7 @@ return [
     'deleted_success' => 'Chapitre supprimé avec succès.',
 
     'back_to_story' => 'Retour à l\'histoire',
-    'author_note' => 'Note de l\'auteur',
-
+    
     'create' => [
         'title' => 'Nouveau chapitre',
         'heading' => 'Ajouter un chapitre à ":story"',

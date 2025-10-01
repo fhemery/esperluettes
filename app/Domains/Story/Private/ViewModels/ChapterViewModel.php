@@ -83,10 +83,12 @@ class ChapterStoryViewModel {
 
 class ChapterViewModel
 {
+    /** @var array<ProfileDto> $authors */
     public function __construct(
         public readonly ChapterStoryViewModel $story,
         public readonly CurrentChapterViewModel $chapter,
         public readonly bool $isAuthor,
+        public readonly array $authors,
         public readonly ?ShortChapterViewModel $prevChapter,
         public readonly ?ShortChapterViewModel $nextChapter,
         public readonly bool $isReadByMe,
@@ -97,7 +99,7 @@ class ChapterViewModel
     ) {
     }
 
-    public static function from(Story $story, Chapter $chapter, bool $isAuthor, bool $isReadByMe = false): self
+    public static function from(Story $story, Chapter $chapter, bool $isAuthor, bool $isReadByMe = false, array $authors): self
     {
         // Chapters should be eager-loaded and ordered by sort_order
         /** @var Collection<int, Chapter> $chapters */
@@ -125,6 +127,7 @@ class ChapterViewModel
             story: ChapterStoryViewModel::from($story, $chapters->all()),
             chapter: CurrentChapterViewModel::from($chapter),
             isAuthor: $isAuthor,
+            authors: $authors,
             prevChapter: $prevChapter ? ShortChapterViewModel::from($prevChapter) : null,
             nextChapter: $nextChapter ? ShortChapterViewModel::from($nextChapter) : null,
             isReadByMe: $isReadByMe,

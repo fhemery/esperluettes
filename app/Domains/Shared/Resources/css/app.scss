@@ -46,7 +46,8 @@
 
 /* Rich content defaults (for sanitized HTML display) */
 .rich-content {
-  line-height: 1.6;
+  line-height: 2;
+  text-align: justify;
 }
 .rich-content ul {
   list-style: disc;
@@ -61,6 +62,15 @@
 .rich-content li {
   margin: 0.25rem 0;
 }
+
+.rich-content p {
+  padding-bottom: .75rem;
+
+  &:last-of-type {
+    padding-bottom: 0;
+  }
+}
+
 
 /* Quill alignment classes on read-only pages (no .ql-editor wrapper) */
 .ql-align-left { text-align: left; }
