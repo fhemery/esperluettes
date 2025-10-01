@@ -1,4 +1,4 @@
-<li class="sm:p-4 mb-4 sm:mb-12">
+<li class="sm:p-4 mb-4">
   @php($config = $config ?? null)
   <div class="grid grid-cols-2 gap-2 grid-cols-[auto_1fr]">
     <!-- Avatar -->
@@ -74,7 +74,7 @@
         @php($isChild = $isChild ?? false)
         @php($hasChildren = !empty($comment->children))
         @if($comment->canReply && (((!$isChild && !$hasChildren) || ($isLastChild??false))))
-        <button type="button" class="hover:text-gray-700" data-action="reply" data-comment-id="{{ $isChild ? $parentCommentId : $comment->id }}">{{ __('comment::comments.actions.reply') }}</button>
+        <x-shared::button color="tertiary" size="xs" outline="true" data-action="reply" data-comment-id="{{ $isChild ? $parentCommentId : $comment->id }}">{{ __('comment::comments.actions.reply') }}</x-shared::button>
         @endif
       </div>
 
@@ -105,7 +105,7 @@
           <div class="text-sm text-red-600">{{ $message }}</div>
           @enderror
           <div class="mt-2 flex gap-2">
-            <x-shared::button type="submit" color="accent" x-bind:disabled="!editorValid">{{ __('comment::comments.actions.submit') }}</x-shared::button>
+            <x-shared::button type="submit" color="accent" x-bind:disabled="!editorValid">{{ __('comment::comments.actions.reply') }}</x-shared::button>
             <x-shared::button color="neutral" data-action="cancel-reply" data-comment-id="{{ $comment->id }}">{{ __('comment::comments.actions.cancel') }}</x-shared::button>
           </div>
         </form>
@@ -114,7 +114,7 @@
 
       <!-- Children -->
       @if(!empty($comment->children))
-      <ul class="mt-6 border-l ml-2 sm:ml-6 pl-2 sm:pl-2">
+      <ul class="mt-6 border-l-2 border-accent ml-2 sm:ml-6 pl-2 sm:pl-2">
         @foreach($comment->children as $child)
         @include('comment::components.partials.comment-item', ['comment' => $child, 'isChild' => true, 'isLastChild' => $loop->last, 'parentCommentId' => $comment->id, 'config' => $config])
         @endforeach

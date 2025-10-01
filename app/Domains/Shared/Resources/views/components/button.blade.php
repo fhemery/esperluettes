@@ -1,8 +1,9 @@
 @props([
     'type' => 'button',
     'color' => 'primary', // primary | accent | tertiary | success | danger | neutral
-    'size' => 'md', // sm | md | lg,
+    'size' => 'md', // xs | sm | md | lg,
     'disabled' => false,
+    'outline' => false,
 ])
 
 @php
@@ -10,6 +11,7 @@
 
     // Size map
     $sizes = [
+        'xs' => 'px-2 py-1 text-xs',
         'sm' => 'px-3 py-1.5 text-sm',
         'md' => 'px-4 py-2 text-sm',
         'lg' => 'px-5 py-2.5 text-base',
@@ -18,14 +20,18 @@
 
     // Color variants (explicit class strings so Tailwind JIT picks them up)
     $variants = [
-        'primary' => 'bg-primary text-white hover:bg-primary/90 focus:ring-primary/40',
-        'accent' => 'bg-accent text-white hover:bg-accent/90 focus:ring-accent/40',
-        'tertiary' => 'bg-tertiary text-white hover:bg-tertiary/90 focus:ring-tertiary/40',
-        'success' => 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500/40',
-        'danger' => 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500/40',
-        'neutral' => 'bg-white text-black hover:bg-gray-100 hover:text-gray-700 focus:ring-gray-500/40',
+        'primary' => 'surface-primary text-on-surface border-surface hover:border-surface/90 focus:ring-primary/40',
+        'accent' => 'surface-accent text-on-surface border-surface hover:border-surface/90 focus:ring-accent/40',
+        'tertiary' => 'surface-tertiary text-on-surface border-surface hover:border-surface/90 focus:ring-tertiary/40',
+        'success' => 'surface-success text-on-surface border-surface hover:border-surface/90 focus:ring-green-500/40',
+        'danger' => 'surface-danger text-on-surface border-surface hover:border-surface/90 focus:ring-red-500/40',
+        'neutral' => 'surface-neutral text-on-surface border-surface hover:border-surface/90 focus:ring-gray-500/40',
     ];
     $colorClasses = $variants[$color] ?? $variants['primary'];
+    if ($outline) {
+        // Use a custom modifier class to avoid clashing with Tailwind's `outline` utility
+        $colorClasses = $colorClasses. ' is-outline';
+    }
 @endphp
 
 <button {{ $attributes->merge(['type' => $type, 'class' => "$base $sizeClasses $colorClasses", 'disabled' => $disabled]) }}>
