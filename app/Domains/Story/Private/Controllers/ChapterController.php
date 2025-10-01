@@ -2,6 +2,7 @@
 
 namespace App\Domains\Story\Private\Controllers;
 
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Private\Http\Requests\ChapterRequest;
 use App\Domains\Story\Private\Http\Requests\ReorderChaptersRequest;
@@ -23,6 +24,7 @@ class ChapterController
         private ChapterService $service,
         private StoryService $storyService,
         private ReadingProgressService $readingProgress,
+        private ProfilePublicApi $profileApi
     ) {
     }
 
@@ -96,7 +98,7 @@ class ChapterController
     public function show(Request $request, string $storySlug, string $chapterSlug): View|RedirectResponse
     {
         // Load story with ordered chapters (minimal fields) for navigation computation
-        $opts = new GetStoryOptions(includeChapters: true);
+        $opts = new GetStoryOptions(includeChapters: true, includeAuthors: true);
         $story = $this->storyService->getStory($storySlug, $opts);
         // Load full chapter content separately
         $chapterId = SlugWithId::extractId($chapterSlug);
@@ -126,7 +128,13 @@ class ChapterController
         }
 
         // Build ViewModel
-        $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe);
+        /** @var array<ProfileDto> $authors */
+        $authors = $this->profileApi->getPublicProfiles($story->authors->pluck('user_id')->toArray());
+        $auth = [];
+        foreach ($authors as $author) {
+            $auth[] = $author;
+        }
+        $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe, $auth);
 
         return view('story::chapters.show', [
             'vm' => $vm,

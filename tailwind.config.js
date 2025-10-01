@@ -43,6 +43,7 @@ export default {
                 info: 'rgb(var(--color-info-fg) / <alpha-value>)',
                 success: 'rgb(var(--color-success-fg) / <alpha-value>)',
                 warning: 'rgb(var(--color-warning-fg) / <alpha-value>)',
+                read: 'rgb(var(--color-read-bg) / <alpha-value>)',
             },
         },
     },

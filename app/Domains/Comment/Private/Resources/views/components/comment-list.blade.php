@@ -18,7 +18,7 @@
       }
     </style>
   @endpush
-  <h2 id="comments" class="scroll-mt-24">{{ __('comment::comments.list.title') }}</h2>
+  <h2 id="comments" class="text-accent text-xl font-semibold scroll-mt-24">{{ __('comment::comments.list.title') }}</h2>
   @if($error === 'not_allowed')
     <div class="p-3 rounded border border-yellow-300 bg-yellow-50 text-yellow-900 text-sm flex items-center justify-between gap-4">
       <div>{{ __('comment::comments.errors.members_only') }}</div>
