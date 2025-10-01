@@ -97,7 +97,7 @@
                             <div class="text-read text-6xl {{ $vm->prevChapter ? 'bg-tertiary hover:bg-tertiary/80' : 'bg-tertiary/30' }} rounded-full w-10 h-10 flex items-center justify-center leading-none ">
                                 <span class="transform -translate-y-[4px]">&lt;</span>
                             </div>
-                            <div class="max-w-[120px]">{{ __('story::chapters.navigation.previous') }}</div>
+                            <div class="max-w-[120px] hidden sm:block">{{ __('story::chapters.navigation.previous') }}</div>
                         </a>
                     </div>
                     <div class="text-sm">
@@ -133,7 +133,7 @@
                         <a href="{{ $vm->nextChapter ? route('chapters.show', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->nextChapter->slug]) : 'javascript:void(0);' }}"
                             class="flex gap-4 items-center text-xl font-bold {{ $nextButtonClass }}"
                             aria-label="{{ __('story::chapters.navigation.next') }}">
-                            <div class="text-right max-w-[120px]">{{ __('story::chapters.navigation.next') }}</div>
+                            <div class="text-right max-w-[120px] hidden sm:block">{{ __('story::chapters.navigation.next') }}</div>
                             <div class="text-read text-6xl {{ $vm->nextChapter ? 'bg-tertiary hover:bg-tertiary/80' : 'bg-tertiary/30' }} rounded-full w-10 h-10 flex items-center justify-center leading-none ">
                                 <span class="transform -translate-y-[4px]">&gt;</span>
                             </div>
