@@ -96,6 +96,80 @@
             @include('shared::components.footer')
         </div>
         @stack('scripts')
+        <script>
+            (function () {
+                const heartbeatIntervalMs = 5 * 60 * 1000; // 5 minutes
+
+                function heartbeat() {
+                    fetch("{{ route('session.heartbeat') }}", {
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    }).catch(() => {});
+                }
+
+                function updateClientCsrf(token) {
+                    // Update meta tag
+                    const meta = document.querySelector('meta[name="csrf-token"]');
+                    if (meta) meta.setAttribute('content', token);
+
+                    // Update hidden inputs named _token
+                    document.querySelectorAll('input[name="_token"]').forEach(el => {
+                        el.value = token;
+                    });
+
+                    // Update axios default header if axios is present
+                    if (window.axios && window.axios.defaults && window.axios.defaults.headers) {
+                        window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+                    }
+                }
+
+                // Prevent duplicate refreshes when multiple events fire together
+                let csrfRefreshing = false;
+                let lastCsrfRefreshAt = 0;
+                const csrfCooldownMs = 1500; // 1.5s coalescing window
+
+                async function refreshCsrf() {
+                    const now = Date.now();
+                    if (csrfRefreshing || (now - lastCsrfRefreshAt) < csrfCooldownMs) {
+                        return;
+                    }
+                    csrfRefreshing = true;
+                    try {
+                        const res = await fetch("{{ route('session.csrf') }}", {
+                            credentials: 'same-origin',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        if (data && data.token) updateClientCsrf(data.token);
+                    } catch (_) { /* ignore */ }
+                    finally {
+                        csrfRefreshing = false;
+                        lastCsrfRefreshAt = Date.now();
+                    }
+                }
+
+                // Start heartbeat after load and at interval
+                window.addEventListener('load', () => {
+                    heartbeat();
+                    setInterval(heartbeat, heartbeatIntervalMs);
+                });
+
+                // Refresh CSRF whenever the tab becomes active or page is shown from bfcache
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) refreshCsrf();
+                }, { passive: true });
+
+                window.addEventListener('focus', () => {
+                    refreshCsrf();
+                }, { passive: true });
+
+                // Also refresh when network returns
+                window.addEventListener('online', () => {
+                    refreshCsrf();
+                }, { passive: true });
+            })();
+        </script>
         
     </body>
 </html>

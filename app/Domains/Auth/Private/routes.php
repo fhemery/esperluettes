@@ -14,8 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->group(function () {
 
-
-
+    
     Route::middleware('guest')->group(function () {
         Route::get('register', [RegisteredUserController::class, 'create'])
             ->name('register');
@@ -48,6 +47,18 @@ Route::middleware('web')->group(function () {
     });
 
     Route::middleware('auth')->group(function () {
+        // Lightweight heartbeat to keep the session alive and reduce CSRF timeouts.
+        Route::get('/session/heartbeat', function () {
+            return response()->noContent();
+        })->middleware(['throttle:120,1'])->name('session.heartbeat');
+
+        // CSRF token refresh endpoint for clients to check all pages have same CSRF token
+        Route::get('/auth/csrf-token', function () {
+            // Return the current CSRF token for this session without forcing regeneration
+            return response()->json(['token' => csrf_token()]);
+        })->middleware(['throttle:120,1'])->name('session.csrf');
+
+
         Route::get('verify-email', EmailVerificationPromptController::class)
             ->name('verification.notice');
 
