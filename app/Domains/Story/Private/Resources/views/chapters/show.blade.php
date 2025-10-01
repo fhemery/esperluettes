@@ -19,14 +19,17 @@
                     <h1 class="font-semibold text-3xl flex items-center gap-2 uppercase text-accent text-center">
                         {{ $vm->chapter->title }}
                         @if(!$vm->chapter->isPublished)
-                        <span class="inline-flex items-center rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 border border-yellow-200">
-                            {{ trans('story::chapters.list.not_published') }}
-                        </span>
+                        <x-shared::popover placement="top">
+                            <x-slot name="trigger">
+                                <span class="material-symbols-outlined text-warning leading-none shrink-0">visibility_off</span>
+                            </x-slot>
+                            <p>{{ __('story::chapters.list.not_published') }}</p>
+                        </x-shared::popover>
                         @endif
-
                     </h1>
 
-                    <div class="flex items-center gap-2 text-sm text-gray-700">
+                    <div class="flex items-center gap-2 text-sm">
+                        
                         <x-shared::metric-badge
                             icon="visibility"
                             :value="$vm->readsLogged"
@@ -57,7 +60,7 @@
                     </div>
                     @else
                     <div>
-                        {{__('story::chapter.by')}} <x-profile::inline-names :profiles="$vm->authors" />
+                        {{__('story::chapters.by')}} <x-profile::inline-names :profiles="$vm->authors" />
                     </div>
                     @endif
                 </div>
@@ -65,7 +68,7 @@
                 @if(!empty($vm->chapter->authorNote))
                 <aside class="flex flex-col gap-4">
                     <div class="prose rich-content">
-                        <p class="text-accent">{{ __('story::chapter.author_note') }}</p>
+                        <p class="text-accent">{{ __('story::chapters.author_note') }}</p>
                         <!-- This always contains a <p> tag, so it will go to the line anyway -->
                         {!! $vm->chapter->authorNote !!}
                     </div>
@@ -108,8 +111,7 @@
                                 labelRead: '{{ __('story::chapters.actions.marked_read') }}',
                                 labelUnread: '{{ __('story::chapters.actions.mark_as_read') }}',
                                 csrf: '{{ csrf_token() }}',
-                            })"
-                        >
+                            })">
                             <x-shared::button x-show="!read" type="button" color="accent" x-on:click="toggle()">
                                 <div class="flex items-center gap-2">
                                     <span x-text="labelUnread"></span>
@@ -151,31 +153,41 @@
 
     @push('scripts')
     <script>
-    function markRead({ isRead, urlRead, urlUnread, labelRead, labelUnread, csrf }) {
-        return {
-            read: isRead,
+        function markRead({
+            isRead,
+            urlRead,
+            urlUnread,
             labelRead,
             labelUnread,
-            _busy: false,
-            async toggle() {
-                if (this._busy) return;
-                this._busy = true;
-                const makeRead = !this.read;
-                const url = makeRead ? urlRead : urlUnread;
-                const method = makeRead ? 'POST' : 'DELETE';
-                try {
-                    const res = await fetch(url, {
-                        method,
-                        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'text/plain' },
-                    });
-                    if (res.status === 204) {
-                        this.read = makeRead;
-                    }
-                } catch (e) {}
-                this._busy = false;
+            csrf
+        }) {
+            return {
+                read: isRead,
+                labelRead,
+                labelUnread,
+                _busy: false,
+                async toggle() {
+                    if (this._busy) return;
+                    this._busy = true;
+                    const makeRead = !this.read;
+                    const url = makeRead ? urlRead : urlUnread;
+                    const method = makeRead ? 'POST' : 'DELETE';
+                    try {
+                        const res = await fetch(url, {
+                            method,
+                            headers: {
+                                'X-CSRF-TOKEN': csrf,
+                                'Accept': 'text/plain'
+                            },
+                        });
+                        if (res.status === 204) {
+                            this.read = makeRead;
+                        }
+                    } catch (e) {}
+                    this._busy = false;
+                }
             }
         }
-    }
     </script>
     @endpush
 

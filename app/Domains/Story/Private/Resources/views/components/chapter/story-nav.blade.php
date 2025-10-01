@@ -4,7 +4,7 @@
 ])
 
 <div class="flex flex-col items-center gap-2">
-    <div class="font-semibold text-xl text-accent"> {{ __('story::chapter.story.you_are_reading')}} </div>
+    <div class="font-semibold text-xl text-accent"> {{ __('story::chapters.story.you_are_reading')}} </div>
     <!-- Cover -->
     <div>
         <img src="{{ $story->cover_url ?? asset('images/story/default-cover.svg') }}" alt="{{ $story->title }}" class="w-[230px] object-cover">
