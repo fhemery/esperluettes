@@ -88,7 +88,7 @@
 
             <!-- Page Content -->
             <main class="flex-1 flex flex-col w-full {{ $class }}">
-                <div class="max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-8 lg:py-12">
+                <div class="max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-8 lg:py-12 flex-1 flex flex-col">
                     {{ $slot }}
                 </div>
             </main>

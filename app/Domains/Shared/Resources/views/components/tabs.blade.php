@@ -19,8 +19,8 @@
     $initialKey = $initial ?? ($tabs->first()['key'] ?? '');
 @endphp
 
-<div x-data="{ tab: @js($initialKey) }">
-    <div class="border-b border-gray-200 mb-4">
+<div x-data="{ tab: @js($initialKey) }" class="border-{{ $color }} border flex-1 w-full">
+    <div>
         <nav class="surface-{{$color}} text-on-surface -mb-px flex flex-wrap gap-4 {{ $navClass }}" role="tablist" aria-label="Tabs">
             @foreach($tabs as $t)
                 @php($key = (string) $t['key'])
@@ -55,7 +55,7 @@
         </nav>
     </div>
 
-    <div>
+    <div class="p-2">
         {{ $slot }}
     </div>
 </div>

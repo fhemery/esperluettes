@@ -1,30 +1,29 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+    <div class="max-w-4xl w-full mx-auto flex-1 text-fg overflow-hidden flex flex-col gap-4">
+        <h2 class="font-semibold text-xl text-accent">
             {{ __('story::create.title') }}
         </h2>
-    </x-slot>
 
-    <div class="bg-transparent">
-        <div class="text-gray-900">
-            <div class="max-w-3xl mx-auto">
-                <form action="{{ route('stories.store') }}" method="POST" novalidate>
-                    @csrf
+        <div class="bg-transparent flex-1 flex flex-col gap-4">
+            <form action="{{ route('stories.store') }}" method="POST" novalidate
+                class="flex-1 flex flex-col gap-4">
+                @csrf
 
-                    <x-story::form :referentials="$referentials" />
+                <x-story::form :referentials="$referentials" />
 
-                    <div class="text-sm">{{ __('story::create.hint')}}</div>
+                <div class="text-sm flex items-center gap-2">
+                    <span class="material-symbols-outlined">info</span>
+                    {{ __('story::create.hint')}}
+                </div>
 
-                    <div class="mt-6 flex justify-center gap-12">
-                        <x-shared::button color="accent" type="submit">
-                            {{ __('story::create.actions.create') }}
-                        </x-shared::button>
-                        <x-shared::button color="neutral" type="button" onclick="history.back()">
-                            {{ __('story::create.actions.cancel') }}
-                        </x-shared::button>
-                    </div>
-                </form>
-            </div>
+                <div class="flex justify-center gap-4">
+                    <x-shared::button color="neutral" type="button" onclick="history.back()">
+                        {{ __('story::create.actions.cancel') }}
+                    </x-shared::button>
+                    <x-shared::button color="accent" type="submit">
+                        {{ __('story::create.actions.create') }}
+                    </x-shared::button>
+                </div>
+            </form>
         </div>
-    </div>
 </x-app-layout>
