@@ -235,4 +235,9 @@ class StoryRefLookupService
         }
         return $this->cache->feedbackIdBySlug($slug);
     }
+	
+	public function clearCache(): void
+	{
+		$this->cache->clearAll();
+	}
 }

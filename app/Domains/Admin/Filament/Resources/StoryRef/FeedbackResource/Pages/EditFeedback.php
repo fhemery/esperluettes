@@ -8,4 +8,9 @@ use Filament\Resources\Pages\EditRecord;
 class EditFeedback extends EditRecord
 {
     protected static string $resource = FeedbackResource::class;
+
+    protected function afterSave(): void
+    {
+        app(StoryRefLookupService::class)->clearCache();
+    }
 }

@@ -12,5 +12,10 @@ class CreateTriggerWarning extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }   
+
+    protected function afterCreate(): void
+    {
+        app(StoryRefLookupService::class)->clearCache();
     }
 }
