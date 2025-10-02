@@ -1,6 +1,6 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
 @if (!empty($chapters))
-<div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_auto_auto] gap-2">
+<div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_auto_auto] gap-1">
     @foreach($chapters as $ch)
     <!-- Read toggle, only for logged users -->
     @auth

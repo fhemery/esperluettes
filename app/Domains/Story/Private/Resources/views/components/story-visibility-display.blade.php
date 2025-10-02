@@ -22,7 +22,7 @@
 <x-shared::popover placement="top">
 <x-slot name="trigger">
 <div
-  class="inline-flex items-center gap-1 rounded-full bg-gray-400/80 border border-black/40 px-1.5 py-1 shadow-inner select-none"
+  class="inline-flex items-center gap-1 rounded-full px-1.5 py-1 shadow-inner select-none"
   role="img"
   aria-label="{{ __('story::shared.visibility.label') }}: {{ $options[$visibility]['label'] ?? $visibility }}"
 >
@@ -33,8 +33,7 @@
     >
       @if($visibility === $value)
         <span
-          class="absolute inset-0 rounded-full -m-1"
-          style="background-color: rgb(var(--color-success-bg));"
+          class="absolute inset-0 rounded-full -m-1 bg-success/50"
           aria-hidden="true"
         ></span>
       @endif
