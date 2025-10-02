@@ -2,7 +2,7 @@
 /** @var array<\App\Domains\Story\Private\ViewModels\StorySummaryViewModel> $vms */
     @endphp
 
-    <div class="flex flex-col gap-2 min-w-0 surface-read text-on-surface p-4">
+    <div class="flex flex-col gap-4 min-w-0 surface-read text-on-surface p-4 pb-6">
         <div class="flex items-center justify-between text-accent">
 
             <h3 class="text-xl font-semibold flex items-center gap-2">
