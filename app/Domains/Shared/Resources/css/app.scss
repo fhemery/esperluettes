@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 /* Design tokens as CSS variables (RGB triplets for alpha support) */
-:root {
+:root{
   /* Base colors */
   --color-bg: 255 255 255;        
   --color-fg: 17 24 39;           
@@ -32,6 +34,11 @@
   /* Images */
   --home-bg-image: none;
   --home-bg-size: auto;
+}
+
+html {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
 }
 
 /* Self-hosted Aptos font faces (scoped via .rich-content) */
