@@ -16,11 +16,14 @@ export default {
         './app/Domains/**/Resources/js/**/*.vue',
     ],
     safelist: [
-        'bg-blue-100', 'border-blue-500', 'text-blue-700',
-        'bg-green-100', 'border-green-500', 'text-green-700',
-        'bg-red-100', 'border-red-500', 'text-red-700',
-        'hover:text-blue-900', 'hover:text-green-900', 'hover:text-red-900',
-        'border-accent'
+        'border-accent', 'bg-accent', 'text-accent', 'hover:text-accent', 'hover:bg-accent', 'hover:border-accent',
+        'border-primary', 'bg-primary', 'text-primary', 'hover:text-primary', 'hover:bg-primary', 'hover:border-primary',
+        'border-secondary', 'bg-secondary', 'text-secondary', 'hover:text-secondary', 'hover:bg-secondary', 'hover:border-secondary',
+        'border-tertiary', 'bg-tertiary', 'text-tertiary', 'hover:text-tertiary', 'hover:bg-tertiary', 'hover:border-tertiary',
+        'border-error', 'bg-error', 'text-error', 'hover:text-error', 'hover:bg-error', 'hover:border-error',
+        'border-info', 'bg-info', 'text-info', 'hover:text-info', 'hover:bg-info', 'hover:border-info',
+        'border-success', 'bg-success', 'text-success', 'hover:text-success', 'hover:bg-success', 'hover:border-success',
+        'border-warning', 'bg-warning', 'text-warning', 'hover:text-warning', 'hover:bg-warning', 'hover:border-warning',
     ],
 
     theme: {

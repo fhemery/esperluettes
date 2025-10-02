@@ -117,6 +117,7 @@
                     :options="$referentials['genres'] ?? []"
                     :selected="$selectedGenreIds"
                     valueField="id"
+                    descriptionField="description"
                     color="accent" />
             </div>
             <x-input-error :messages="$errors->get('story_ref_genre_ids')" class="mt-2" />
@@ -209,6 +210,7 @@
                         :options="$referentials['trigger_warnings'] ?? []"
                         :selected="$selectedTriggerWarningIds"
                         valueField="id"
+                        descriptionField="description"
                         placeholder="{{ __('story::shared.trigger_warnings.placeholder') }}"
                         color="accent" />
                 </div>

@@ -6,23 +6,26 @@
     'emptyText' => 'No results',
     'maxHeight' => '15rem', // dropdown max height
     'valueField' => 'slug', // which field from options to submit/match against (e.g., 'id' or 'slug')
+    'descriptionField' => 'description', // which field contains the help description
     'color' => 'accent',
 ])
 
 @php
-    // Normalize options to a simple array of [slug, name]
+    // Normalize options to a simple array of [slug, name, description]
     $opts = collect($options)
-        ->map(function ($o) use ($valueField) {
+        ->map(function ($o) use ($valueField, $descriptionField) {
             if (is_array($o)) {
                 $val = $o[$valueField] ?? ($o['slug'] ?? ($o['value'] ?? ($o['id'] ?? '')));
                 $label = $o['name'] ?? ($o['label'] ?? ($o['text'] ?? ''));
+                $desc = $o[$descriptionField] ?? ($o['description'] ?? '');
                 return [
                     'slug' => (string) $val,
                     'name' => (string) $label,
+                    'description' => (string) $desc,
                 ];
             }
             // If user passed single value, use it for both
-            return ['slug' => (string) $o, 'name' => (string) $o];
+            return ['slug' => (string) $o, 'name' => (string) $o, 'description' => ''];
         })
         ->values();
     $sel = collect($selected)->map(fn($v) => (string) $v)->filter()->values();
@@ -57,9 +60,17 @@
                         <button type="button" @mousedown.prevent="toggle(opt.slug)" @mouseenter="highlight = idx"
                                 :class="itemClass(idx, opt.slug)" class="w-full text-left px-3 py-2 text-sm flex items-center gap-2">
                             <!-- Checkmark square -->
-                            <span class="inline-block h-3.5 w-3.5 rounded-[2px] border border-{{$color}}"
-                                  :class="state.selected.includes(opt.slug) ? 'bg-{{$color}}' : 'bg-transparent'"></span>
+                            <span class="inline-block h-3.5 w-3.5 rounded-[2px] border"
+                                  :class="checkboxClass(opt.slug)"></span>
                             <span x-text="opt.name" class="flex-1"></span>
+                            <!-- Tooltip for options with descriptions -->
+                            <template x-if="opt.description">
+                                <div class="flex-shrink-0" @mousedown.stop>
+                                    <x-shared::tooltip type="help" placement="top">
+                                        <span x-text="opt.description"></span>
+                                    </x-shared::tooltip>
+                                </div>
+                            </template>
                         </button>
                     </li>
                 </template>
@@ -126,6 +137,10 @@
                             const isSelected = this.state.selected.includes(slug);
                             const base = isHighlighted ? 'bg-black/10 ' : '';
                             return base + (isSelected ? 'font-semibold text-' + color : 'text-' + color);
+                        },
+                        checkboxClass(slug) {
+                            const isSelected = this.state.selected.includes(slug);
+                            return `border-${color} ${isSelected ? 'bg-' + color : 'bg-transparent'}`;
                         },
                         move(delta) {
                             const len = this.state.filtered.length;
