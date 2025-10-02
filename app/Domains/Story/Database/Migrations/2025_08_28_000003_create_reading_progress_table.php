@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('story_reading_progress', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->unsignedBigInteger('user_id');
             // Denormalized `story_id` for performance and simpler queries.
             // Although `chapter_id` implies the story via chapters.story_id, we keep story_id here to:
             // - support fast lookups like "progress by story" and "stories a user is reading" without a join

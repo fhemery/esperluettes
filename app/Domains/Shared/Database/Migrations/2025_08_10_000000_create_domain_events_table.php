@@ -18,9 +18,6 @@ return new class extends Migration {
             $table->json('meta')->nullable();
             $table->timestamp('occurred_at')->useCurrent()->index();
             $table->timestamps();
-
-            // optional FK without constraint to avoid cross-domain coupling issues
-            // $table->foreign('triggered_by_user_id')->references('id')->on('users')->nullOnDelete();
         });
     }
 

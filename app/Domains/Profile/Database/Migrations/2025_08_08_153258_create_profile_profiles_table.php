@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('profile_profiles', function (Blueprint $table) {
-            $table->foreignId('user_id')->primary()->constrained('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id')->primary();
             $table->string('profile_picture_path')->nullable();
             $table->string('facebook_url')->nullable();
             $table->string('x_url')->nullable();

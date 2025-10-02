@@ -9,7 +9,8 @@ return new class extends Migration {
     {
         Schema::create('stories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('created_by_user_id')->constrained('users');
+            $table->unsignedBigInteger('created_by_user_id');
+            $table->index('created_by_user_id', 'idx_stories_created_by_user_id');
             $table->string('title');
             $table->string('slug')->unique();
             $table->longText('description');

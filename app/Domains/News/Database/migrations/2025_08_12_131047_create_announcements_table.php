@@ -23,7 +23,8 @@ return new class extends Migration
             $table->string('status'); // draft | published
             $table->string('meta_description')->nullable();
             $table->timestamp('published_at')->nullable()->index();
-            $table->foreignId('created_by')->constrained('users');
+            $table->unsignedBigInteger('created_by');
+            $table->index('created_by', 'idx_ann_created_by');
             $table->timestamps();
 
             // Additional helpful indexes

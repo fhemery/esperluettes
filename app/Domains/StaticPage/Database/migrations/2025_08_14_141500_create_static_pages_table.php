@@ -18,7 +18,8 @@ return new class extends Migration {
             $table->string('meta_description')->nullable();
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
-            $table->foreignId('created_by')->constrained('users');
+            $table->unsignedBigInteger('created_by');
+            $table->index('created_by', 'idx_static_pages_created_by');
         });
     }
 

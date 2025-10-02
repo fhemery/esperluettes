@@ -9,9 +9,11 @@ return new class extends Migration {
     {
         Schema::create('story_collaborators', function (Blueprint $table) {
             $table->foreignId('story_id')->constrained('stories')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->unsignedBigInteger('user_id');
+            $table->index('user_id', 'idx_story_collab_user_id');
             $table->string('role', 32)->index(); // 'author' for now
-            $table->foreignId('invited_by_user_id')->constrained('users');
+            $table->unsignedBigInteger('invited_by_user_id');
+            $table->index('invited_by_user_id', 'idx_story_collab_invited_by_user_id');
             $table->timestamp('invited_at');
             $table->timestamp('accepted_at')->nullable();
 
