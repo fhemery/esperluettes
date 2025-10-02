@@ -7,8 +7,8 @@
 ## Overview
 
 This document describes the Esperluettes website API that the Discord bot integrates with. The API enables:
-- User authentication and Discord account linking
-- Role synchronization between website and Discord server
+- User authentication via one-time codes
+- Discord account linking and role synchronization
 - Activity notification delivery to Discord users
 
 ## Architecture
@@ -19,12 +19,15 @@ This document describes the Esperluettes website API that the Discord bot integr
 - **Polling Interval**: 1 minute for notifications
 - **Authentication**: API key via Bearer token
 
+### Connection Model
+- **User-initiated**: Users visit their profile page to get a one-time connection code
+- **Synchronous**: Connection happens immediately when bot calls API with code
+- **Bot-initiated disconnect**: Users disconnect via `/disconnect` command in Discord
+
 ### Notification System
-The bot consumes a unified notification queue containing:
-- **Bot-targeted notifications**: System events (`bot.user_connected`, `bot.user_disconnected`)
+The bot polls for pending notifications containing:
 - **User-targeted notifications**: Activity feed events (comments, mentions, follows, etc.)
 
-The bot distinguishes notification types via the `type` field and handles accordingly.
 
 ## Authentication
 
@@ -53,89 +56,87 @@ curl -X GET "https://esperluettes.com/api/discord/notifications/pending" \
 
 ### 1. User Connection Workflow
 
-**Trigger**: User types `/connect` command in Discord
+**Trigger**: User types `/connect <code>` command in Discord
 
 **Steps**:
 
-1. **Bot initiates auth flow**
+1. **User visits profile page**
+   - User must be logged in to website
+   - Website generates and displays one-time code (e.g., `1258ac67`)
+   - Code valid for 5 minutes
+   - Website shows command: `/connect 1258ac67`
+
+2. **User types command in Discord**
    ```
-   POST /api/discord/auth/init
+   /connect 1258ac67
    ```
 
-2. **Website returns temporary token and URL**
-   - Token valid for 5 minutes
-   - URL for user to visit
-3. **Bot sends URL to user via Discord (DM Or whatever seems suitable)**
-   - User opens URL in browser
-   - User logs in (if not already)
-   - User authorizes Discord connection
-
-4. **Website queues bot notification**
-   - Type: `bot.user_connected`
-   - Contains user roles
-
-5. **Bot polls notification endpoint**
+3. **Bot calls connection endpoint**
    ```
-   GET /api/discord/notifications/pending
+   POST /api/discord/auth/connect
    ```
-   - Receives connection notification (within 1 minute)
+   - Sends code, Discord ID, and Discord username
+   - Website validates code and associates Discord account
+   - Website returns user roles **immediately** (synchronous)
 
-6. **Bot assigns Discord roles**
-   - Extracts roles from notification data
+4. **Bot assigns Discord roles**
+   - Extracts roles from response
    - Maps to Discord server roles
    - Assigns roles to user
-
-7. **Bot marks notification as sent**
-   ```
-   POST /api/discord/notifications/mark-sent
-   ```
+   - Sends confirmation message to user
 
 **Flow Diagram**:
 ```
-User → /connect → Bot → POST /auth/init → Website
+User → Profile page (logged in) → Website generates code
                   ↓
-         Send URL to user (DM/message)
+         User copies: /connect 1258ac67
                   ↓
-              User → Website (authorize)
+    User → Discord → /connect 1258ac67 → Bot
                   ↓
-            Website → Queue bot.user_connected notification
+    Bot → POST /api/discord/auth/connect (with code)
                   ↓
-            Bot ← GET /notifications/pending (within 1 min)
+    Website validates & returns roles immediately
                   ↓
-         Bot assigns Discord roles based on notification data
-                  ↓
-            POST /notifications/mark-sent
+         Bot assigns Discord roles
 ```
 
 ### 2. User Disconnection Workflow
 
-**Trigger**: User clicks "Disconnect" on website settings page
+**Trigger**: User types `/disconnect` command in Discord
 
 **Steps**:
 
-1. **Website queues bot notification**
-   - Type: `bot.user_disconnected`
+1. **User types command in Discord**
+   ```
+   /disconnect
+   ```
+
+2. **Bot calls disconnection endpoint**
+   ```
+   DELETE /api/discord/users/{discordId}
+   ```
    - Website removes Discord ID ↔ User ID mapping
+   - Website returns success response **immediately** (synchronous)
 
-2. **Bot polls notification endpoint**
-   ```
-   GET /api/discord/notifications/pending
-   ```
-   - Receives disconnection notification (within 1 minute)
+3. **Bot removes Discord roles**
+   - Bot decides which roles to remove
+   - Bot removes roles from user
+   - User stops receiving notifications
+   - Sends confirmation message to user
 
-3. **Bot handles Discord role removal**
-   - Bot decides when/how to remove roles
-   - Bot stops sending notifications to user
-
-4. **Bot marks notification as sent**
-   ```
-   POST /api/discord/notifications/mark-sent
-   ```
-
+**Flow Diagram**:
+```
+User → Discord → /disconnect → Bot
+                  ↓
+    Bot → DELETE /api/discord/users/{discordId}
+                  ↓
+    Website removes association & returns success
+                  ↓
+         Bot removes Discord roles
+```
 ### 3. Activity Notification Workflow
 
 **Trigger**: Activity event occurs on website (comment, mention, etc.)
-
 **Steps**:
 
 1. **Website queues user notification**
@@ -160,37 +161,39 @@ User → /connect → Bot → POST /auth/init → Website
 
 ## API Endpoints
 
-### POST /api/discord/auth/init
+### POST /api/discord/auth/connect
 
-Initialize user connection flow.
+Connect a Discord account using a one-time code from the website.
 
 **Authentication**: Required (API key)
 
 **Request Body**:
 ```json
 {
+  "code": "1258ac67",
   "discordId": "123456789012345678",
   "discordUsername": "Username#1234"
 }
 ```
 
 **Request Fields**:
+- `code` (string, required): One-time connection code from user's profile page
 - `discordId` (string, required): Discord user ID (17-19 digit numeric string)
 - `discordUsername` (string, required): Discord username with discriminator
 
 **Success Response** (200 OK):
 ```json
 {
-  "token": "a1b2c3d4e5f6g7h8i9j0",
-  "expiresAt": "2025-10-02T11:20:00Z",
-  "url": "https://esperluettes.com/discord/connect/a1b2c3d4e5f6g7h8i9j0"
+  "success": true,
+  "userId": 456,
+  "roles": ["user", "author", "moderator"]
 }
 ```
 
 **Response Fields**:
-- `token` (string): Unique token for user authorization flow (64 characters max)
-- `expiresAt` (string): ISO 8601 timestamp when token expires (5 minutes)
-- `url` (string): URL for user to visit and authorize connection
+- `success` (boolean): Always true on success
+- `userId` (integer): Website user ID
+- `roles` (array): User's current website roles
 
 **Error Responses**:
 
@@ -205,9 +208,22 @@ Initialize user connection flow.
 {
   "error": "Validation failed",
   "errors": {
+    "code": ["The code field is required."],
     "discordId": ["The discordId field is required."],
     "discordUsername": ["The discordUsername field is required."]
   }
+}
+
+// 404 Not Found - Invalid or expired code
+{
+  "error": "Not found",
+  "message": "Invalid or expired connection code"
+}
+
+// 409 Conflict - User already connected or Discord ID in use
+{
+  "error": "Conflict",
+  "message": "Discord account already connected to another user"
 }
 
 // 429 Too Many Requests - Rate limit exceeded
@@ -217,14 +233,15 @@ Initialize user connection flow.
 }
 ```
 
-**Rate Limit**: 50 requests/minute per IP
+**Rate Limit**: 100 requests/minute per IP
 
 **Example**:
 ```bash
-curl -X POST "https://esperluettes.com/api/discord/auth/init" \
+curl -X POST "https://esperluettes.com/api/discord/auth/connect" \
   -H "Authorization: Bearer sk_abc123xyz789" \
   -H "Content-Type: application/json" \
   -d '{
+    "code": "1258ac67",
     "discordId": "123456789012345678",
     "discordUsername": "CoolUser#1234"
   }'
@@ -234,7 +251,7 @@ curl -X POST "https://esperluettes.com/api/discord/auth/init" \
 
 ### GET /api/discord/notifications/pending
 
-Fetch all pending notifications (bot-targeted and user-targeted).
+Fetch all pending user activity notifications.
 
 **Authentication**: Required (API key)
 
@@ -249,43 +266,32 @@ Fetch all pending notifications (bot-targeted and user-targeted).
     {
       "id": 123,
       "discordId": "123456789012345678",
-      "type": "bot.user_connected",
+      "type": "comment",
       "data": {
-        "userId": 456,
-        "discordUsername": "CoolUser#1234",
-        "roles": ["user", "author"],
-        "connectedAt": "2025-10-02T11:05:00Z"
+        "message": "JohnDoe commented on your story \"Epic Adventure\"",
+        "url": "https://esperluettes.com/stories/epic-adventure/chapters/1#comment-42",
+        "actor": "JohnDoe",
+        "target": "Epic Adventure - Chapter 1"
       },
       "createdAt": "2025-10-02T11:05:00Z"
     },
     {
       "id": 124,
       "discordId": "987654321098765432",
-      "type": "comment",
+      "type": "mention",
       "data": {
-        "message": "JohnDoe commented on your story \"Epic Adventure\"",
-        "url": "https://esperluettes.com/stories/epic-adventure/chapters/1#comment-42",
-        "actor": "JohnDoe",
-        "target": "Epic Adventure"
+        "message": "AliceWrites mentioned you in a comment",
+        "url": "https://esperluettes.com/stories/mystery-novel/chapters/3#comment-89",
+        "actor": "AliceWrites",
+        "target": "Mystery Novel - Chapter 3"
       },
       "createdAt": "2025-10-02T11:06:30Z"
-    },
-    {
-      "id": 125,
-      "discordId": "555666777888999000",
-      "type": "bot.user_disconnected",
-      "data": {
-        "userId": 789,
-        "discordUsername": "OldUser#5678",
-        "disconnectedAt": "2025-10-02T11:07:15Z"
-      },
-      "createdAt": "2025-10-02T11:07:15Z"
     }
   ],
   "pagination": {
     "currentPage": 1,
     "perPage": 100,
-    "total": 3,
+    "total": 2,
     "lastPage": 1,
     "hasMore": false
   }
@@ -448,7 +454,7 @@ curl -X GET "https://esperluettes.com/api/discord/users/123456789012345678/roles
 
 ### DELETE /api/discord/users/{discord_id}
 
-Bot-initiated disconnection (optional, rarely used).
+Disconnect a Discord account from the website.
 
 **Authentication**: Required (API key)
 
@@ -479,11 +485,9 @@ Bot-initiated disconnection (optional, rarely used).
 }
 ```
 
-**Rate Limit**: No specific limit (rare operation)
+**Rate Limit**: 100 requests/minute per IP
 
-**Use Case**: If bot needs to forcefully disconnect a user (e.g., user banned from Discord server)
-
-**Note**: Website-initiated disconnections are communicated via `bot.user_disconnected` notification
+**Use Case**: Called when user types `/disconnect` command in Discord
 
 **Example**:
 ```bash
@@ -494,83 +498,9 @@ curl -X DELETE "https://esperluettes.com/api/discord/users/123456789012345678" \
 
 ## Notification Types
 
-### Bot-Targeted Notifications
+All notifications are user-targeted activity feed events sent as Discord DMs.
 
-#### bot.user_connected
-
-Sent when a user successfully connects their Discord account.
-
-**Type**: `bot.user_connected`
-
-**Data Structure**:
-```json
-{
-  "id": 123,
-  "discordId": "123456789012345678",
-  "type": "bot.user_connected",
-  "data": {
-    "userId": 456,
-    "discordUsername": "CoolUser#1234",
-    "roles": ["user", "author", "moderator"],
-    "connectedAt": "2025-10-02T11:05:00Z"
-  },
-  "createdAt": "2025-10-02T11:05:00Z"
-}
-```
-
-**Data Fields**:
-- `userId` (integer): Website user ID
-- `discordUsername` (string): Discord username with discriminator
-- `roles` (array): User's current website roles
-- `connectedAt` (string): ISO 8601 timestamp of connection
-
-**Bot Action**:
-1. Map website roles to Discord server roles
-2. Assign Discord roles to user
-3. Optionally send welcome DM to user
-4. Mark notification as sent
-
----
-
-#### bot.user_disconnected
-
-Sent when a user disconnects their Discord account from website.
-
-**Type**: `bot.user_disconnected`
-
-**Data Structure**:
-```json
-{
-  "id": 124,
-  "discordId": "123456789012345678",
-  "type": "bot.user_disconnected",
-  "data": {
-    "userId": 456,
-    "discordUsername": "CoolUser#1234",
-    "disconnectedAt": "2025-10-02T11:10:00Z"
-  },
-  "createdAt": "2025-10-02T11:10:00Z"
-}
-```
-
-**Data Fields**:
-- `userId` (integer): Website user ID
-- `discordUsername` (string): Discord username with discriminator
-- `disconnectedAt` (string): ISO 8601 timestamp of disconnection
-
-**Bot Action**:
-1. Remove Discord server roles from user (based on bot's logic)
-2. Stop sending activity notifications to user
-3. Optionally send goodbye DM
-4. Mark notification as sent
-
-**Note**: Bot decides role removal timing/strategy
-
----
-
-### User-Targeted Notifications
-
-User-targeted notifications are activity feed events sent as Discord DMs.
+**Note**: Connection and disconnection are **synchronous operations** and do not generate notifications. The bot receives role information immediately when calling the connect endpoint.
 
 **Common Structure**:
 ```json
@@ -703,11 +633,11 @@ Attempt 5: Wait 16 seconds
 
 | Endpoint | Limit | Per |
 |----------|-------|-----|
-| `POST /api/discord/auth/init` | 50 requests | Minute (per IP) |
+| `POST /api/discord/auth/connect` | 100 requests | Minute (per IP) |
 | `GET /api/discord/notifications/pending` | 120 requests | Hour (1/minute) |
 | `POST /api/discord/notifications/mark-sent` | 120 requests | Hour |
 | `GET /api/discord/users/{discordId}/roles` | 300 requests | Hour |
-| `DELETE /api/discord/users/{discordId}` | No specific limit | - |
+| `DELETE /api/discord/users/{discordId}` | 100 requests | Minute (per IP) |
 
 **Rate Limit Headers** (included in responses):
 ```

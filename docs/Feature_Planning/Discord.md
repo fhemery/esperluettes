@@ -19,10 +19,11 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 ## Key Decisions
 
 ### Authentication & Connection
-- **Connection Type**: Ephemeral token flow (5-minute validity) for initial connection, then permanent Discord ID ↔ User ID mapping
+- **Connection Type**: Website generates one-time codes displayed on user profile; user enters code in Discord bot command
 - **Bot Authentication**: API key stored in environment variables
 - **User Limit**: One Discord account per website user
-- **Disconnection**: Users can disconnect from website UI; this stops notifications immediately
+- **Connection Flow**: Synchronous (bot calls API with code, gets roles immediately)
+- **Disconnection**: User initiates via Discord `/disconnect` command; bot calls API to disconnect
 - **Connection Privacy**: Discord connection status is private information
 - **Audit Logging**: Connection/disconnection events are logged for investigation
 
@@ -31,12 +32,11 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 - **Website Role**: Website only returns user's current roles; bot handles Discord role assignment
 
 ### Notifications
-- **Types**: Bot-targeted (connect/disconnect) + User-targeted (activity feed events)
+- **Types**: User-targeted activity feed events only 
 - **User Control**: Granular control via dedicated settings page (implementation details TBD)
 - **Polling**: Bot polls every 1 minute for all pending notifications
 - **Rate Limiting**: None on website side (bot handles delivery limits)
-- **Delivery**: Bot fetches all notifications, handles bot-targeted ones directly, dispatches user-targeted ones as DMs
-- **Unified Queue**: Single notification queue handles both bot and user notifications
+- **Delivery**: Bot fetches all notifications and dispatches as DMs to users
 
 ### Request Logging
 - Bot API requests logged for investigation purposes
@@ -48,27 +48,24 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 **User Story**: As a Discord user, I want to link my Discord account to my website account so that my Discord roles reflect my website permissions.
 
 **Flow**:
-1. User types `/connect` command in Discord
-2. Bot initiates auth flow: `POST /api/discord/auth/init` with API key
-3. Website returns temporary token (5-min validity) and connection URL
-4. Bot sends URL to user via Discord DM
-5. User opens URL in browser
-6. Website authenticates user (or shows "already logged in" page)
-7. User authorizes Discord connection
-8. Website stores Discord ID ↔ User ID mapping
-9. Website queues a **bot-targeted notification** (type: `bot.user_connected`)
-10. Bot polls `GET /api/discord/notifications/pending` and receives connection notification
-11. Bot extracts user roles from notification data
-12. Bot assigns corresponding Discord server roles (mapping handled by bot)
+1. User visits their profile page on website (must be logged in)
+2. Website generates a one-time connection code (e.g., `1258ac67`) valid for 5 minutes
+3. Website displays command for user to copy: `/connect 1258ac67`
+4. User types `/connect 1258ac67` in Discord
+5. Bot calls `POST /api/discord/auth/connect` with `{ code: "1258ac67", discordId: "123456789", discordUsername: "User#1234" }`
+6. Website validates code, associates Discord ID with user account
+7. Website returns user roles immediately: `{ success: true, userId: 123, roles: ["user", "author"] }`
+8. Bot assigns corresponding Discord server roles (mapping handled by bot)
+9. Website logs connection event for audit
 
 **Disconnection Flow**:
-1. User clicks "Disconnect Discord" button on website settings page
-2. Website queues a **bot-targeted notification** (type: `bot.user_disconnected`)
+1. User types `/disconnect` command in Discord
+2. Bot calls `DELETE /api/discord/users/{discordId}`
 3. Website removes Discord ID ↔ User ID mapping
-4. Website fires disconnection event (logged)
-5. User stops receiving user-targeted Discord notifications immediately
-6. Bot polls and receives disconnection notification
-7. Bot handles Discord role removal based on its own logic
+4. Website returns success response
+5. Website logs disconnection event for audit
+6. Bot removes Discord server roles based on its own logic
+7. User stops receiving Discord notifications immediately
 
 ### Feature #2: Activity Feed Notifications
 
@@ -84,13 +81,7 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 7. Bot calls `POST /api/discord/notifications/mark-sent` with notification IDs
 8. Website marks notifications as sent
 
-**Notification Types**:
-
-**Bot-Targeted Notifications** (system events for bot):
-- `bot.user_connected` - User successfully connected their Discord account
-- `bot.user_disconnected` - User disconnected their Discord account
-
-**User-Targeted Notifications** (sent as DMs to users - implementation details TBD):
+**Notification Types** (all user-targeted, sent as DMs - implementation details TBD):
 - New comment on user's story/chapter
 - New reply to user's comment
 - Someone mentioned user
@@ -118,36 +109,36 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 - Bot stores same key in its configuration
 
 **User Connection Flow**:
-1. Bot calls `POST /api/discord/auth/init` with Discord user data
+1. User visits profile page on website (must be authenticated)
+2. Website generates one-time code (e.g., `1258ac67`) valid for 5 minutes
+3. Website displays command for user: `/connect 1258ac67`
+4. User types command in Discord
+5. Bot calls `POST /api/discord/auth/connect`
    - Headers: `Authorization: Bearer {API_KEY}`
-   - Body: `{ discord_id: "123456789", discord_username: "User#1234" }`
-2. Website generates unique token (5-minute expiration)
-3. Website returns: `{ token: "abc123", expires_at: "2025-10-02T11:15:00Z", url: "https://esperluettes.com/discord/connect/abc123" }`
-4. Bot sends URL to user via Discord DM
-5. User visits URL, authenticates (if needed), authorizes connection
-6. Website stores Discord ID ↔ User ID mapping permanently (until disconnect)
-7. Bot polls `GET /api/discord/auth/status/{token}` every 2-3 seconds
-8. Once connected, API returns: `{ status: "connected", user_id: 123, roles: ["user", "author", "moderator"] }`
-9. Bot assigns Discord roles based on website roles (mapping handled by bot)
+   - Body: `{ code: "1258ac67", discordId: "123456789", discordUsername: "User#1234" }`
+6. Website validates code and associates Discord ID with user
+7. Website returns roles immediately: `{ success: true, userId: 123, roles: ["user", "author"] }`
+8. Bot assigns Discord roles based on website roles (mapping handled by bot)
 
-**Token Cleanup**:
-- Expired tokens (>5 minutes) are automatically deleted
-- Used tokens are marked as consumed but kept for audit trail
+**Code Cleanup**:
+- Expired codes (>5 minutes) are automatically deleted whenever we generate a new one
+- Used codes are marked as consumed but kept for audit trail
 
 ### API Endpoints (Website provides)
 
 #### Authentication Endpoints
 
-**POST /api/discord/auth/init**
+**POST /api/discord/auth/connect**
 - **Auth**: API key required
-- **Request**: `{ discordId: string, discordUsername: string }`
-- **Response**: `{ token: string, expiresAt: datetime, url: string }`
-- **Purpose**: Initialize connection flow, generate temporary token and URL for user
+- **Request**: `{ code: string, discordId: string, discordUsername: string }`
+- **Response**: `{ success: true, userId: int, roles: string[] }`
+- **Purpose**: Connect Discord account using one-time code from website profile
+- **Note**: Returns roles immediately (synchronous)
 
 **DELETE /api/discord/users/{discordId}**
 - **Auth**: API key required
 - **Response**: `{ success: true, message: "Discord account disconnected" }`
-- **Purpose**: Bot-initiated disconnection (if needed)
+- **Purpose**: Disconnect user (initiated by user via bot `/disconnect` command)
 
 #### Role Sync Endpoints
 
@@ -173,38 +164,7 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 
 **Notification Object Structure**:
 
-**Bot-Targeted Notification (user connected)**:
-```json
-{
-  "id": 123,
-  "discordId": "123456789",
-  "type": "bot.user_connected",
-  "data": {
-    "userId": 456,
-    "discordUsername": "User#1234",
-    "roles": ["user", "author"],
-    "connectedAt": "2025-10-02T11:05:00Z"
-  },
-  "createdAt": "2025-10-02T11:05:00Z"
-}
-```
-
-**Bot-Targeted Notification (user disconnected)**:
-```json
-{
-  "id": 124,
-  "discordId": "123456789",
-  "type": "bot.user_disconnected",
-  "data": {
-    "userId": 456,
-    "discordUsername": "User#1234",
-    "disconnectedAt": "2025-10-02T11:10:00Z"
-  },
-  "createdAt": "2025-10-02T11:10:00Z"
-}
-```
-
-**User-Targeted Notification (activity)**:
+All notifications are user-targeted activity events:
 ```json
 {
   "id": 125,
@@ -233,26 +193,22 @@ CREATE TABLE discord_users (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
     INDEX idx_discord_id (discord_id)
 );
 ```
 
-#### `discord_auth_tokens` table
+#### `discord_connection_codes` table
 ```sql
-CREATE TABLE discord_auth_tokens (
-    token VARCHAR(64) NOT NULL PRIMARY KEY,
-    discord_id VARCHAR(255) NOT NULL,
-    discord_username VARCHAR(255) NOT NULL,
-    user_id BIGINT UNSIGNED NULL,
-    status ENUM('pending', 'connected', 'expired') DEFAULT 'pending',
+CREATE TABLE discord_connection_codes (
+    code VARCHAR(16) NOT NULL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     
-    INDEX idx_token (token),
-    INDEX idx_status (status),
+    INDEX idx_user_id (user_id),
     INDEX idx_expires_at (expires_at)
 );
 ```
@@ -487,9 +443,9 @@ CREATE TABLE discord_notification_preferences (
 
 ## API Rate Limits (Proposed)
 
-- `POST /api/discord/auth/init`: 50 requests/minute per IP
+- `POST /api/discord/auth/connect`: 100 requests/minute per IP
 - `GET /api/discord/notifications/pending`: 120 requests/hour (1 per minute)
 - `POST /api/discord/notifications/mark-sent`: 120 requests/hour
 - `GET /api/discord/users/{discordId}/roles`: 300 requests/hour
-- `DELETE /api/discord/users/{discordId}`: No specific limit (rare operation)
+- `DELETE /api/discord/users/{discordId}`: 100 requests/minute per IP
 
