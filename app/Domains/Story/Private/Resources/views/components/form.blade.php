@@ -187,7 +187,7 @@
         <div class="col-span-4 flex flex-col gap-2"
             x-data="{ discl: @js($twDisclosureOld) }"
             @selection-changed="discl = $event.detail.value">
-            <div class="flex gap-2 w-full">
+            <div class="flex flex-col sm:flex-row gap-2 w-full">
                 <div class="flex items-center gap-2">
                     <x-input-label for="tw_disclosure" :value="__('story::shared.trigger_warnings.label')" />
                     <x-shared::tooltip type="help" :title="__('story::shared.trigger_warnings.label')" placement="right">

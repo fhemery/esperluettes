@@ -1,7 +1,7 @@
 @section('title', __('story::chapters.create.title') . ' – ' . config('app.name'))
 
 <x-app-layout>
-    <div class="max-w-4xl mx-auto w-full p-2 sm:p-4 overflow-hidden flex flex-col gap-4">
+    <div class="max-w-4xl mx-auto w-full p-2 sm:p-4 overflow-hidden flex flex-col gap-4 surface-read text-on-surface">
         <h1 class="font-semibold text-2xl text-accent">{{ __('story::chapters.create.heading', ['story' => $story->title]) }}</h1>
 
         <form method="POST" action="{{ route('chapters.store', ['storySlug' => $story->slug]) }}"
