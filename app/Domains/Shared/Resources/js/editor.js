@@ -131,7 +131,7 @@ export function initQuillEditor(id) {
       if (unitEl) {
         const singular = unitEl.getAttribute('data-singular') || 'character';
         const plural = unitEl.getAttribute('data-plural') || 'characters';
-        unitEl.textContent = (count === 1) ? singular : plural;
+        unitEl.textContent = (count <= 1) ? singular : plural;
       }
       const overMax = max !== null && count > max;
       const underMin = min !== null && count < min;

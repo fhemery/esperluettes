@@ -15,14 +15,12 @@ export default {
         './app/Domains/**/Resources/js/**/*.js',
         './app/Domains/**/Resources/js/**/*.vue',
     ],
-
     safelist: [
         'bg-blue-100', 'border-blue-500', 'text-blue-700',
         'bg-green-100', 'border-green-500', 'text-green-700',
         'bg-red-100', 'border-red-500', 'text-red-700',
         'hover:text-blue-900', 'hover:text-green-900', 'hover:text-red-900',
-        // Dynamic classes applied at runtime (editor counter)
-        'text-red-600', 'text-gray-500',
+        'border-accent'
     ],
 
     theme: {
@@ -36,9 +34,9 @@ export default {
                 bg: 'rgb(var(--color-bg) / <alpha-value>)',
                 fg: 'rgb(var(--color-fg) / <alpha-value>)',
                 primary: 'rgb(var(--color-primary) / <alpha-value>)',
+                secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
                 accent: 'rgb(var(--color-accent) / <alpha-value>)',
                 tertiary: 'rgb(var(--color-tertiary) / <alpha-value>)',
-                dark: 'rgb(var(--dark) / <alpha-value>)',
                 error: 'rgb(var(--color-error-fg) / <alpha-value>)',
                 info: 'rgb(var(--color-info-fg) / <alpha-value>)',
                 success: 'rgb(var(--color-success-fg) / <alpha-value>)',

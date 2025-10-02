@@ -70,10 +70,10 @@
 
 :root[data-season="autumn"] {
   --color-bg: 247 234 223;        // Blanc cassé
-  --color-primary: 201 129 41;    // Brun
+  --color-primary: 201 129 41;    // Yellow
+  --color-secondary: 65 37 10;    // Brown
   --color-accent: 164 52 92;      // Fuschia
   --color-tertiary: 99 157 165;   // Bleu / vert
-  --dark: 65 37 10; 
   /* Public web root is /, so image path should not include /public */
   --home-bg-image: url('/images/themes/autumn/background.png');
 }
@@ -115,19 +115,35 @@
 .ql-align-center { text-align: center; }
 .ql-align-right { text-align: right; }
 .ql-align-justify { text-align: justify; }
+.ql-editor { 
+  font-size: 1rem; 
+  line-height: 1.8;
+
+  & p {
+    padding-bottom: .75rem;
+    
+
+    &:last-of-type {
+      padding-bottom: 0;
+    }
+  }
+
+  &.ql-blank::before {
+    font-style: normal;
+  }
+}
+.ql-indent {
+  p {
+    text-indent: 2rem;
+  }
+
+  & .ql-toolbar {
+    text-indent: none; 
+  }
+}
 
 [x-cloak] { display: none !important; }
 
-/* Component layer: semantic, reusable patterns */
-@layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-md bg-primary text-white px-4 py-2 font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-
-  .btn-accent {
-    @apply inline-flex items-center justify-center rounded-md bg-accent text-white px-4 py-2 font-medium hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-}
 
 /* Utility layer: one-off helpers, escape hatches */
 @layer utilities {
@@ -141,13 +157,13 @@
   /* Surface system: season-agnostic light/dark panels */
   .surface-secondary {
     /* Set surface background/foreground tokens for children */
-    --surface-bg: var(--dark);
+    --surface-bg: var(--color-secondary);
     --surface-fg: 255 255 255;
     --surface-error-bg: 218 59 57; 
     /* Hint to browser for built-in UI (inputs, etc.) */
     color-scheme: dark;
     /* Apply colors */
-    background-color: rgb(var(--dark) / 0.9);
+    background-color: rgb(var(--color-secondary) / 0.9);
     /* Do NOT set text color here; use .text-on-surface opt-in on text elements */
   }
 

@@ -1,6 +1,7 @@
 @props([
     'type' => 'button',
     'color' => 'primary', // primary | accent | tertiary | success | danger | neutral
+    'icon' => null,
     'size' => 'md', // xs | sm | md | lg,
     'disabled' => false,
     'outline' => false,
@@ -35,5 +36,8 @@
 @endphp
 
 <button {{ $attributes->merge(['type' => $type, 'class' => "$base $sizeClasses $colorClasses", 'disabled' => $disabled]) }}>
+    @if ($icon)
+        <span class="material-symbols-outlined">{{ $icon }}</span>
+    @endif
     {{ $slot }}
 </button>
