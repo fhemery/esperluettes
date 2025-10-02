@@ -7,13 +7,13 @@
         @if($canCreateStory)
         <x-shared::popover placement="bottom" maxWidth="18rem">
             <x-slot name="trigger">
-                <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-300">
+                <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-fg ring-1 ring-inset ring-gray-300">
                     <span class="material-symbols-outlined text-[16px] leading-none">menu_book</span>
                     <span>{{ (int)($availableChapterCredits ?? 0) }}</span>
                 </span>
             </x-slot>
-            <div class="text-sm text-gray-800">
-                {{ __('story::profile.available-chapter-credits') }}
+            <div class="text-sm text-fg">
+                {{ trans_choice('story::profile.available-chapter-credits', (int)($availableChapterCredits ?? 0), ['count' => (int)($availableChapterCredits ?? 0)]) }}
             </div>
         </x-shared::popover>
 
