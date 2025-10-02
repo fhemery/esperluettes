@@ -14,5 +14,8 @@ class CreateCopyright extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
-    
+    protected function afterCreate(): void
+    {
+        app(StoryRefLookupService::class)->clearCache();
+    }
 }
