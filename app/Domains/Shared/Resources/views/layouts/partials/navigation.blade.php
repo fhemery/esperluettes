@@ -41,6 +41,10 @@
 
                 </div>
             </div>
+            
+            <!-- Messages Icon -->
+            <x-message::message-icon-component />
+            
             <!-- Profile with drawer -->
             <div class="flex items-center shrink-0">
                 <button

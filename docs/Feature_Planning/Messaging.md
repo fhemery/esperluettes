@@ -1,12 +1,11 @@
-# Messaging Domain - Feature Planning (v1 and v2)
+# Messaging Domain - Feature Planning
 
-Status: Draft (v1 scope updated per decisions 2025-09-19)
+Status: Ready for Implementation (updated 2025-10-02)
 Owner: TBD
-Last updated: 2025-09-19
+Last updated: 2025-10-02
 
 ## Purpose
-- v1: Allow admins to send messages to users. Users can read, see unread counts, mark as read (by opening), and delete their messages.
-- v2: Allow users to send messages to friends (requires networking/friendship system). Admins keep the ability to broadcast to everyone.
+Allow admins to send messages to individual users, multiple users by role selection, or broadcast to everyone. All users can read messages, see unread counts, mark as read (by opening), and delete their messages.
 
 ## Glossary
 - Message: An item with `title`, `content` (rich text), and metadata, delivered to one or more users.
@@ -14,20 +13,21 @@ Last updated: 2025-09-19
 - Broadcast: A message sent to a large set of users, including “everyone”.
 
 ## Scope
-### v1 Scope
-- Admin UI to compose a message (title + rich text content with purifier profile: `admin-content`).
-- Admin selects target recipients: one, many, by role, or all users (“everyone”).
-- Users see a mail icon in topbar with a badge showing unread count.
-- Users have a list page showing messages with unread styling (e.g., bold + red dot).
-- Clicking a message navigates to `GET /messages/{delivery}`, reloads the page, shows the list and the selected message, and marks it as read.
-- Users can delete messages (per-recipient delete), without removing it for others.
-
-### v2 Scope (depends on Networking/Friendship)
-- Users can compose and send messages to friends only.
-- Admins still can target “everyone” and any subset of users.
-- Possibly support replies, threads, or conversations (TBD based on UX); for now, stick to single-message sends.
+### Core Features
+- Web UI for admins to compose messages (title + rich text content with purifier profile: `strict`).
+- Admin can target:
+  - A specific user (through a searchable file on profile display_names)
+  - A role
+  - Everyone
+- Logged users see a mail icon in topbar (visible only if they have messages OR can send messages i.e., admins).
+- Unread badge shows count on topbar icon (hidden when count=0).
+- Messages list page showing all messages with unread styling (bold + red dot).
+- Clicking a message navigates to `GET /messages/{delivery}`, reloads page showing list + selected message, marks as read.
+- Logged users can delete their message deliveries (hard delete, per-recipient). Does not affect other recipients.
+- Users can reply to the recipient, that will be the only one able to see the reply (apart from the person who sent it)
 
 ## Out of Scope (for now)
+- Users can compose and send messages to friends only => No Networking/Friendship domain ready yet
 - Real-time push (WebSockets) for counts; initial version can use polling or simple page load updates.
 - Attachments and images in messages.
 - Message reactions, threading, or replies (unless defined later).
@@ -71,17 +71,17 @@ Last updated: 2025-09-19
 - Model: `Message`
   - id (bigint)
   - title (string, max 150; indexed for search)
-  - content (text; max 1000 chars; purified using `admin-content` profile)
-  - sent_by_id (foreign key -> users.id; for admins)
-  - visibility_scope (enum/string) [values: `targeted`, `everyone`]
-  - sent_at (datetime, nullable until dispatched)
+  - content (text; max 1000 chars; purified using `strict` profile)
+  - sent_by_id (foreign key -> users.id)
+  - sent_at (datetime)
+  - reply_to_id (foreign key -> messages.id)
   - timestamps
-  - soft deletes (optional; likely yes for audit)
+  - soft deletes (optional; likely yes for moderation)
 
 - Model: `MessageDelivery` (per-recipient state)
   - id (bigint)
   - message_id (fk -> messages.id, indexed)
-  - user_id (fk -> users.id, indexed)
+  - user_id
   - is_read (boolean, default false)
   - read_at (datetime, nullable)
   - timestamps
@@ -93,22 +93,22 @@ Notes:
   2) Lazy materialization on first read coupled with a global marker. For simplicity and unread counts correctness, start with eager creation (1) and optimize later if needed.
 
 Indexes:
-- `messages.title`
 - `message_deliveries.user_id, message_deliveries.is_read (composite)` for unread queries
-- Foreign key constraints on all fks
+- Foreign key constraints on all fks internal to the domain (e.g. not sent_by_id, not user_id)
 
 ---
 
 ## Validation & Security
-- Admin message content uses existing Purifier profile `admin-content` (same as News). Confirm the profile key in `config/purifier.php`.
-- Use Form Requests for admin message creation and user deletion actions.
+- Message content uses existing Purifier profile `strict` (same as for Stories).
+- Use Form Requests for message creation and user deletion actions.
 - Authorization:
   - v1: Only admins (role/permission) can create messages.
   - Users can only view/delete their own deliveries.
+  - Users can reply to the message
 - CSRF protection for forms; ensure authorization policy coverage.
  - Validation constraints:
    - `title`: required, string, max:150
-   - `content`: required, string, max:1000 (stored as TEXT), purified with `admin-content`
+   - `content`: required, string, max:1000 (stored as TEXT), purified with `strict` profile
 
 ---
 
@@ -132,18 +132,6 @@ Indexes:
 ### Delete
 - Users can delete a message delivery:
   - Permanent delete of the delivery record for that user (hard delete). Does not affect other recipients.
-
----
-
-## Admin Experience (Filament in Admin domain)
-- Filament Resource (in `app/Domains/Admin/Private/Filament/...`) for `Message` creation:
-  - Fields: Title (required), Content (required, rich text with purifier `admin-content`).
-  - Target Selection:
-    - "Everyone" toggle
-    - Multi-select roles (e.g., user-confirmed, user, displaying the descriptions, not the slugs)
-    - Multi-select users (async searchable)
-  - On submit: calls `MessageDispatchService` to create the `Message`, resolve recipients (union, de-duplicated), and create `MessageDelivery` rows (or all users if Everyone).
-- Optionally list sent messages and stats (recipient count, read count). Nice-to-have.
 
 ---
 
@@ -204,22 +192,9 @@ Indexes:
 ---
 
 ## Integration Points
-- Purifier config: reuse `admin-content` profile already used for News.
-- Topbar integration: add unread counter in a shared layout/view (likely in Shared domain views/components). Keep Alpine.js simple per our Frontend Guidelines.
- - Notifications: no additional user notifications in v1 beyond the topbar badge.
-
----
-
-## Open Questions for Clarification
-1) Friendship dependency for v2: expected API from the Networking domain (approach like `FriendshipService::areFriends($a, $b)` is acceptable; exact API TBD).
-
----
-
-## v2 Preview (Friend Messaging)
-- Authorization: only to friends (based on Networking domain).
-- UI: compose form for regular users, recipient selector limited to friends.
-- Data model: reuse `Message` + `MessageDelivery` (sender can be any user), possibly add `sent_by_id` not-null for all messages in v2; keep for admins in v1.
-- Optional enhancements: conversations/threads, replies, read receipts per recipient, attachments. No rate limiting planned for v2.
+- Purifier config: use `strict` profile for all message content.
+- Topbar integration: add unread counter in a shared layout/view (likely in Shared domain views/components). Keep Alpine.js simple per our Frontend Guidelines. Icon visible for: users with any messages OR admins (even with 0 messages). Badge shows count only when > 0.
+- Notifications: no additional user notifications in v1 beyond the topbar badge.
 
 ---
 

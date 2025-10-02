@@ -61,4 +61,82 @@ describe('AuthPublicApi', function () {
         });
     });
 
+    describe('getUserIdsByRoles', function () {
+        it('should return user IDs for users with specified roles', function () {
+            $alice = alice($this, roles: [Roles::USER]);
+            $bob = bob($this, roles: [Roles::USER_CONFIRMED]);
+            $adminUser = admin($this);
+            
+            $api = app(AuthPublicApi::class);
+            
+            // Get users with USER role
+            $userIds = $api->getUserIdsByRoles([Roles::USER]);
+            expect($userIds)->toContain($alice->id);
+            expect($userIds)->not->toContain($bob->id);
+            
+            // Get users with USER_CONFIRMED role
+            $confirmedIds = $api->getUserIdsByRoles([Roles::USER_CONFIRMED]);
+            expect($confirmedIds)->toContain($bob->id);
+            expect($confirmedIds)->not->toContain($alice->id);
+            
+            // Get users with admin role
+            $adminIds = $api->getUserIdsByRoles(['admin']);
+            expect($adminIds)->toContain($adminUser->id);
+        });
+        
+        it('should return user IDs for multiple roles', function () {
+            $alice = alice($this, roles: [Roles::USER]);
+            $bob = bob($this, roles: [Roles::USER_CONFIRMED]);
+            
+            $api = app(AuthPublicApi::class);
+            
+            $userIds = $api->getUserIdsByRoles([Roles::USER, Roles::USER_CONFIRMED]);
+            expect($userIds)->toContain($alice->id);
+            expect($userIds)->toContain($bob->id);
+        });
+        
+        it('should only return active users by default', function () {
+            $alice = alice($this, roles: [Roles::USER]);
+            $alice->deactivate();
+            
+            $api = app(AuthPublicApi::class);
+            
+            $userIds = $api->getUserIdsByRoles([Roles::USER]);
+            expect($userIds)->not->toContain($alice->id);
+        });
+        
+        it('should return inactive users when activeOnly is false', function () {
+            $alice = alice($this, roles: [Roles::USER]);
+            $alice->deactivate();
+            
+            $api = app(AuthPublicApi::class);
+            
+            $userIds = $api->getUserIdsByRoles([Roles::USER], activeOnly: false);
+            expect($userIds)->toContain($alice->id);
+        });
+        
+        it('should return empty array for empty role slugs', function () {
+            $api = app(AuthPublicApi::class);
+            
+            $userIds = $api->getUserIdsByRoles([]);
+            expect($userIds)->toBe([]);
+        });
+    });
+
+    describe('getAllActiveUserIds', function () {
+        it('should return all active user IDs', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $inactive = carol($this);
+            $inactive->deactivate();
+            
+            $api = app(AuthPublicApi::class);
+            
+            $userIds = $api->getAllActiveUserIds();
+            expect($userIds)->toContain($alice->id);
+            expect($userIds)->toContain($bob->id);
+            expect($userIds)->not->toContain($inactive->id);
+        });
+    });
+
 });

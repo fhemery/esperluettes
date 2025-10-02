@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Messages',
+    'no_messages' => 'Aucun message',
+    'select_message' => 'Sélectionnez un message',
+    'delete' => 'Supprimer',
+    'deleted' => 'Message supprimé',
+    'from' => 'De',
+    'to' => 'À',
+    'sent_at' => 'Envoyé le',
+    'unread' => 'Non lu',
+    'mark_as_read' => 'Marquer comme lu',
+    'reply' => 'Répondre',
+    'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer ce message ?',
+    'compose' => 'Composer',
+    'compose_title' => 'Composer un message',
+    'message_title' => 'Titre',
+    'message_content' => 'Contenu',
+    'recipients' => 'Destinataires',
+    'select_users' => 'Sélectionner des utilisateurs',
+    'select_roles' => 'Sélectionner des rôles',
+    'send_to_everyone' => 'Envoyer à tout le monde',
+    'send' => 'Envoyer',
+    'sent' => 'Message envoyé avec succès',
+    'no_recipients' => 'Veuillez sélectionner au moins un destinataire',
+    'search_users' => 'Rechercher des utilisateurs...',
+];
