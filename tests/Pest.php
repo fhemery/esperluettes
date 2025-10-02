@@ -11,6 +11,7 @@ require_once __DIR__ . '/../app/Domains/Story/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Comment/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Admin/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Events/Tests/helpers.php';
+require_once __DIR__ . '/../app/Domains/Message/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Shared/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Discord/Tests/helpers.php';
 

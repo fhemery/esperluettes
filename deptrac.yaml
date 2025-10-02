@@ -112,6 +112,22 @@ deptrac:
         - type: directory
           value: app/Domains/Home/Private/
 
+    # Message Domain
+    - name: MessagePublic
+      collectors:
+        - type: directory
+          value: app/Domains/Message/Public/
+
+    - name: MessagePrivate
+      collectors:
+        - type: directory
+          value: app/Domains/Message/Private/
+
+    - name: MessageTests
+      collectors:
+        - type: directory
+          value: app/Domains/Message/Tests/
+
     # News Domain
     - name: NewsPublic
       collectors:
@@ -224,6 +240,11 @@ deptrac:
       - Shared
       - HomePrivate
 
+    MessagePublic:
+      - Shared
+      - MessagePrivate
+      - EventsPublic
+
     NewsPublic:
       - AuthPublic
       - Shared
@@ -309,6 +330,12 @@ deptrac:
       - AuthPublic
       - NewsPublic
 
+    MessagePrivate:
+      - Shared
+      - AuthPublic
+      - MessagePublic
+      - EventsPublic
+
     NewsPrivate:
       - Shared
       - AuthPublic
@@ -359,6 +386,11 @@ deptrac:
       - TestHelpers
       - EventsPrivate
       - EventsPublic
+
+    MessageTests:
+      - TestHelpers
+      - MessagePrivate
+      - MessagePublic
 
     NewsTests:
       - Shared
