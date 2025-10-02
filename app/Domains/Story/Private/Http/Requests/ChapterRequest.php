@@ -16,9 +16,9 @@ class ChapterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required_trimmed', 'string', 'max:255'],
-            'author_note' => ['nullable', 'string', 'maxstripped:1000'],
-            'content' => ['required', 'string'],
+            'title' => ['required_trimmed', 'max:255'],
+            'author_note' => ['nullable', 'maxstripped:1000'],
+            'content' => ['required'],
             'published' => ['nullable', 'boolean'],
         ];
     }
@@ -46,8 +46,9 @@ class ChapterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required_trimmed' => __('story::validation.title.required'),
-            'author_note.maxstripped' => __('story::validation.author_note_too_long'),
+            'title.required_trimmed' => __('story::validation.chapter.title.required'),
+            'author_note.maxstripped' => __('story::validation.chapter.author_note_too_long'),
+            'content.required' => __('story::validation.chapter.content.required'),
         ];
     }
 }

@@ -68,5 +68,13 @@ return [
     ],
 
     // Chapters
-    'author_note_too_long' => 'La note de l\'auteur dépasse la limite de 1000 caractères.',
+    'chapter' => [
+        'title' => [
+            'required' => 'Le titre est requis.',
+        ],
+        'author_note_too_long' => 'La note de l\'auteur dépasse la limite de 1000 caractères.',
+        'content' => [
+            'required' => 'Le contenu est requis.',
+        ],
+    ],
 ];
