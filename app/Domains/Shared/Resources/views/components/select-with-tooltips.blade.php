@@ -48,9 +48,9 @@
     
     <!-- Display Button -->
     <button type="button" @click="open = !open" 
-            class="w-full text-left px-3 py-2 rounded-md border border-{{$color}} hover:border-{{$color}}/80 focus:outline-none focus:ring-2 focus:ring-{{$color}}/50 flex items-center justify-between">
+            class="w-full flex items-center gap-2 justify-between text-left px-3 py-2 rounded-md border border-{{$color}} hover:border-{{$color}}/80 focus:outline-none focus:ring-2 focus:ring-{{$color}}/50 flex items-center justify-between">
         <span x-text="selectedLabel || @js($placeholder)" 
-              :class="selectedLabel ? 'text-fg' : 'text-fg/70'"></span>
+              :class="selectedLabel ? 'text-{{$color}} font-semibold' : 'text-{{$color}}/70'" class="flex-1 truncate"></span>
         <span class="material-symbols-outlined text-{{$color}} transition-transform" 
               :class="open ? 'rotate-180' : ''">expand_more</span>
     </button>
@@ -68,7 +68,7 @@
             <template x-for="(opt, idx) in options" :key="opt.value">
                 <li>
                     <button type="button" 
-                            @click="selectOption(opt.value)"
+                            @click="toggleOption(opt.value)"
                             @mouseenter="hoveredIndex = idx"
                             @mouseleave="hoveredIndex = -1"
                             :class="opt.value === state.selected ? 'bg-{{$color}}/10 font-semibold text-{{$color}}' : 'text-gray-700 hover:bg-gray-100'"
@@ -123,13 +123,13 @@
                             const opt = this.options.find(o => o.value === this.state.selected);
                             return opt ? opt.label : '';
                         },
-                        selectOption(value) {
-                            this.state.selected = value;
+                        toggleOption(value) {
+                            this.state.selected = this.state.selected === value ? '' : value;
                             this.open = false;
                             // Dispatch custom event for parent components to listen to
                             this.$nextTick(() => {
                                 this.$el.dispatchEvent(new CustomEvent('selection-changed', {
-                                    detail: { value: value },
+                                    detail: { value: this.state.selected },
                                     bubbles: true
                                 }));
                             });

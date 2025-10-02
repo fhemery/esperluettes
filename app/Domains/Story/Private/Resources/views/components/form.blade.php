@@ -13,7 +13,7 @@
 ['value' => 'community', 'label' => __('story::shared.visibility.options.community'), 'description' => __('story::shared.visibility.help.community')],
 ['value' => 'private', 'label' => __('story::shared.visibility.options.private'), 'description' => __('story::shared.visibility.help.private')],
 ])
-@php($twDisclosureOld = old('tw_disclosure', $story?->tw_disclosure ?? 'listed'))
+@php($twDisclosureOld = old('tw_disclosure', $story?->tw_disclosure ?? ''))
 @php($twDisclosureOptions = [
 ['value' => 'listed', 'label' => __('story::shared.trigger_warnings.form_options.listed'), 'description' => __('story::shared.trigger_warnings.listed_help')],
 ['value' => 'no_tw', 'label' => __('story::shared.trigger_warnings.form_options.no_tw'), 'description' => __('story::shared.trigger_warnings.no_tw_help')],
@@ -189,7 +189,7 @@
             @selection-changed="discl = $event.detail.value">
             <div class="flex flex-col sm:flex-row gap-2 w-full">
                 <div class="flex items-center gap-2">
-                    <x-input-label for="tw_disclosure" :value="__('story::shared.trigger_warnings.label')" />
+                    <x-input-label for="tw_disclosure" :required="true" :value="__('story::shared.trigger_warnings.label')" />
                     <x-shared::tooltip type="help" :title="__('story::shared.trigger_warnings.label')" placement="right">
                         {{ __('story::shared.trigger_warnings.help') }}
                     </x-shared::tooltip>
@@ -202,6 +202,7 @@
                         valueField="value"
                         labelField="label"
                         descriptionField="description"
+                        placeholder="{{ __('story::shared.trigger_warnings.tw_disclosure_placeholder') }}"
                         color="accent" />
                 </div>
                 <div x-show="discl === 'listed'" class="flex-1">

@@ -76,6 +76,7 @@ return [
             'no_tw' => 'Aucun',
             'unspoiled' => 'Non dévoilés',
         ],
+        'tw_disclosure_placeholder' => 'Avertissements ?',
     ],
     'genres' => [
         'label' => 'Genres',

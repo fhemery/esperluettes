@@ -52,17 +52,18 @@
                     </div>
 
                     <!-- Type -->
-                    <div>
+                    <div class="flex flex-col gap-2">
                         <label for="type"
                             class="flex gap-2 text-sm font-medium text-fg">{{ __('story::index.filters.type.label') }}</label>
-                        <select id="type" name="type" x-ref="type"
-                            class="mt-2 block w-full border-accent shadow-sm focus:border-accent focus:ring-accent bg-transparent">
-                            <option value="">{{ __('story::index.filters.type.placeholder') }}</option>
-                            @foreach(($referentials['types'] ?? collect()) as $t)
-                            <option
-                                value="{{ $t['slug'] }}" {{ (isset($currentType) && $currentType === $t['slug']) ? 'selected' : '' }}>{{ $t['name'] }}</option>
-                            @endforeach
-                        </select>
+                        <x-shared::select-with-tooltips
+                            name="type"
+                            :options="$referentials['types'] ?? []"
+                            :selected="$currentType ?? ''"
+                            :placeholder="__('story::index.filters.type.placeholder')"
+                            valueField="slug"
+                            labelField="name"
+                            descriptionField="description"
+                            color="accent" />
                     </div>
 
                     <!-- Audiences -->
