@@ -21,6 +21,13 @@
                 <div class="w-full h-10 bg-[url('/images/themes/autumn/top-ribbon.png')] bg-repeat-x"></div>
             @endif
 
+            {{-- Breadcrumbs --}}
+            <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-4">
+                @if(!empty($breadcrumbs))
+                    <x-shared::breadcrumbs :items="$breadcrumbs" />
+                @endif
+            </div>
+
             <!-- Page Heading -->
             @isset($header)
                 <header class="shadow">
