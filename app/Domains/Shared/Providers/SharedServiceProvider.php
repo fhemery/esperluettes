@@ -3,11 +3,11 @@
 namespace App\Domains\Shared\Providers;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\Contracts\BreadcrumbRegistry;
 use App\Domains\Shared\Views\Layouts\AppLayout;
 use App\Domains\Shared\Validation\CustomValidators;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,6 +16,7 @@ class SharedServiceProvider extends ServiceProvider
     public function register()
     {
         // Register any bindings or services
+        $this->app->singleton(BreadcrumbRegistry::class, BreadcrumbRegistry::class);
     }
 
     public function boot(): void
@@ -72,6 +73,13 @@ class SharedServiceProvider extends ServiceProvider
             $view->with('currentProfile', $dto);
         });
 
+        // Share breadcrumbs with layouts
+        View::composer(['shared::layouts.app', 'shared::layouts.guest'], function ($view) {
+            /** @var BreadcrumbRegistry $registry */
+            $registry = app(BreadcrumbRegistry::class);
+            $view->with('breadcrumbs', $registry->generateForRequest(request()));
+        });
+
         // Safety guard: never run tests against a non-SQLite database
         if (app()->environment('testing') && config('database.default') !== 'sqlite') {
             throw new \RuntimeException('Tests must use sqlite. Clear config cache before running tests.');
@@ -84,6 +92,8 @@ class SharedServiceProvider extends ServiceProvider
 
         // Register custom validators in a dedicated place
         $this->registerValidators();
+
+        // Domain-specific breadcrumb builders are registered in their own ServiceProviders.
     }
 
     private function registerValidators(): void
