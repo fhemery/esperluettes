@@ -4,11 +4,17 @@ namespace App\Domains\Discord\Private\Services;
 
 use App\Domains\Discord\Private\Models\DiscordConnectionCode;
 use App\Domains\Discord\Private\Models\DiscordUser;
+use App\Domains\Discord\Public\Events\DiscordConnected;
+use App\Domains\Discord\Public\Events\DiscordDisconnected;
+use App\Domains\Events\Public\Api\EventBus;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 class DiscordAuthService
 {
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {}
     /**
      * Generate and persist a one-time connection code, returning the code string.
      */
@@ -91,10 +97,15 @@ class DiscordAuthService
             return ['success' => false, 'reason' => 'discord_id_taken'];
         }
 
+        $isNewLink = !$current && !$existing;
         DiscordUser::query()->updateOrCreate(
             ['discord_user_id' => $discordId],
             ['user_id' => $userId, 'discord_username' => $discordUsername]
         );
+
+        if ($isNewLink) {
+            $this->eventBus->emit(new DiscordConnected($userId, $discordId));
+        }
 
         return ['success' => true];
     }
@@ -114,8 +125,16 @@ class DiscordAuthService
      */
     public function unlinkDiscordUserByDiscordId(string $discordId): bool
     {
-        return (bool) DiscordUser::query()
+        $record = DiscordUser::query()->where('discord_user_id', $discordId)->first();
+        if (!$record) {
+            return false;
+        }
+        $deleted = (bool) DiscordUser::query()
             ->where('discord_user_id', $discordId)
             ->delete();
+        if ($deleted) {
+            $this->eventBus->emit(new DiscordDisconnected((int) $record->user_id, $discordId));
+        }
+        return $deleted;
     }
 }

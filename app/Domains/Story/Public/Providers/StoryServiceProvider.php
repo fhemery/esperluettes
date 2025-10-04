@@ -63,20 +63,19 @@ class StoryServiceProvider extends ServiceProvider
         $registry->register('chapter', $policy);
 
         // Register Story domain events mapping
-        app(EventBus::class)->registerEvent(StoryCreated::name(), StoryCreated::class);
-        app(EventBus::class)->registerEvent(StoryUpdated::name(), StoryUpdated::class);
-        app(EventBus::class)->registerEvent(StoryDeleted::name(), StoryDeleted::class);
-        app(EventBus::class)->registerEvent(ChapterCreated::name(), ChapterCreated::class);
-        app(EventBus::class)->registerEvent(ChapterUpdated::name(), ChapterUpdated::class);
-        app(EventBus::class)->registerEvent(ChapterPublished::name(), ChapterPublished::class);
-        app(EventBus::class)->registerEvent(ChapterUnpublished::name(), ChapterUnpublished::class);
-        app(EventBus::class)->registerEvent(ChapterDeleted::name(), ChapterDeleted::class);
-        app(EventBus::class)->registerEvent(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(StoryCreated::name(), StoryCreated::class);
+        $eventBus->registerEvent(StoryUpdated::name(), StoryUpdated::class);
+        $eventBus->registerEvent(StoryDeleted::name(), StoryDeleted::class);
+        $eventBus->registerEvent(ChapterCreated::name(), ChapterCreated::class);
+        $eventBus->registerEvent(ChapterUpdated::name(), ChapterUpdated::class);
+        $eventBus->registerEvent(ChapterPublished::name(), ChapterPublished::class);
+        $eventBus->registerEvent(ChapterUnpublished::name(), ChapterUnpublished::class);
+        $eventBus->registerEvent(ChapterDeleted::name(), ChapterDeleted::class);
+        $eventBus->registerEvent(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
 
         // Subscribe to cross-domain events (after-commit listeners)
-        /** @var EventBus $bus */
-        $bus = app(EventBus::class);
-        $bus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);
-        $bus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
+        $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);
+        $eventBus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
     }
 }

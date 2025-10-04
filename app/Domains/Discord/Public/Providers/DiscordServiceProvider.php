@@ -2,6 +2,9 @@
 
 namespace App\Domains\Discord\Public\Providers;
 
+use App\Domains\Discord\Public\Events\DiscordConnected;
+use App\Domains\Discord\Public\Events\DiscordDisconnected;
+use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +29,11 @@ class DiscordServiceProvider extends ServiceProvider
 
         // Web routes
         $this->loadRoutesFrom(app_path('Domains/Discord/Private/web.routes.php'));
+
+        // Events
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(DiscordConnected::name(), DiscordConnected::class);
+        $eventBus->registerEvent(DiscordDisconnected::name(), DiscordDisconnected::class);
 
         // Middleware alias
         /** @var Router $router */
