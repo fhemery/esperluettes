@@ -22,9 +22,11 @@ describe('DiscordComponent', function () {
         expect($html)
             ->toContain('data-discord-state="disconnected"')
             ->toContain('link')
-            // Pop-up markup for link instructions
-            ->toContain('data-dialog="discord-link"')
-            ->toContain('data-action="open-link"');
+            // Trigger uses shared modal via Alpine method
+            ->toContain('data-action="open-link"')
+            ->toContain('x-on:click="openLinkAndGenerate()"')
+            // Modal name is present via shared modal component
+            ->toContain('discord-link');
     });
 
     it('renders Discord username and an unlink icon when user is linked', function () {
@@ -40,11 +42,43 @@ describe('DiscordComponent', function () {
         $html = Blade::render('<x-discord::discord-component />');
 
         expect($html)
-            ->toContain('data-discord-state="connected"')
             ->toContain('DisplayName')
             ->toContain('link_off') // Google Material Symbols name for unlink icon
-            // Pop-up markup for unlink confirmation
-            ->toContain('data-dialog="discord-unlink"')
-            ->toContain('data-action="open-unlink"');
+            // Trigger for unlink modal
+            ->toContain('openUnlink')
+            // Modal name is present via shared modal component
+            ->toContain('discord-unlink');
+    });
+
+    it('does not render when DISCORD_RESTRICTED_ACCESS_USER_IDS is set and user is not allowed', function () {
+        // Arrange env restriction to another id
+        putenv('DISCORD_RESTRICTED_ACCESS_USER_IDS=9999,8888');
+
+        $viewer = alice($this);
+        $this->actingAs($viewer);
+
+        $html = Blade::render('<x-discord::discord-component />');
+
+        expect(trim($html))->toBe('');
+    });
+
+    it('renders when DISCORD_RESTRICTED_ACCESS_USER_IDS includes the current user id', function () {
+        $viewer = alice($this);
+        $this->actingAs($viewer);
+        putenv('DISCORD_RESTRICTED_ACCESS_USER_IDS=' . $viewer->id . ',9999');
+
+        $html = Blade::render('<x-discord::discord-component />');
+
+        expect($html)
+            ->toContain('data-discord-state=');
+    });
+
+    it('renders when DISCORD_RESTRICTED_ACCESS_USER_IDS is empty', function () {
+        putenv('DISCORD_RESTRICTED_ACCESS_USER_IDS=');
+        $viewer = alice($this);
+        $this->actingAs($viewer);
+
+        $html = Blade::render('<x-discord::discord-component />');
+        expect($html)->toContain('data-discord-state=');
     });
 });
