@@ -98,4 +98,13 @@ class DiscordAuthService
 
         return ['success' => true];
     }
+
+    /**
+     * Return the website user id mapped to the given discord user id, or null if none.
+     */
+    public function getUserIdByDiscordId(string $discordId): ?int
+    {
+        $record = DiscordUser::query()->where('discord_user_id', $discordId)->first();
+        return $record ? (int) $record->user_id : null;
+    }
 }

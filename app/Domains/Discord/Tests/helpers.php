@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
@@ -12,7 +11,6 @@ function discordConnectPayload(string $code = 'deadbeef'): array
 {
     return [
         'code' => $code,
-        // 18-digit numeric Discord ID within the 17-19 range
         'discordId' => '123456789012345678',
         'discordUsername' => 'DisplayName',
     ];
@@ -50,3 +48,12 @@ function discordConnectWithCode($test, string $code, array $overrides = [], arra
     return discordConnect($test, $payload, $headers);
 }
 
+function discordGetUser($test, string $discordId, array $headers = [])
+{
+    $defaultHeaders = [
+        'Authorization' => 'Bearer __test_api_key__',
+        'Accept' => 'application/json',
+    ];
+    return $test->getJson('/api/discord/users/' . $discordId, array_replace($defaultHeaders, $headers));
+}
+        

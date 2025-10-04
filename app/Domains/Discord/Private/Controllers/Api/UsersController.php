@@ -4,15 +4,15 @@ namespace App\Domains\Discord\Private\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Discord\Private\Requests\DiscordConnectRequest;
 use App\Domains\Discord\Private\Services\DiscordAuthService;
-use App\Domains\Auth\Public\Api\AuthPublicApi;
 
-class AuthController extends BaseController
+class UsersController extends BaseController
 {
     public function __construct(
-        private readonly DiscordAuthService $authService,
         private readonly AuthPublicApi $authApi,
+        private readonly DiscordAuthService $authService,
     ) {}
 
     public function connect(DiscordConnectRequest $request): JsonResponse
@@ -53,6 +53,25 @@ class AuthController extends BaseController
             'success' => true,
             'userId' => (int) $userId,
             'roles' => $roles,
+        ]);
+    }
+
+    public function show(string $discordId): JsonResponse
+    {
+        $userId = $this->authService->getUserIdByDiscordId($discordId);
+        if ($userId === null) {
+            return response()->json([
+                'error' => 'Not Found',
+                'message' => 'Discord user not found',
+            ], 404);
+        }
+        $rolesByUser = $this->authApi->getRolesByUserIds([$userId]);
+        $roleDtos = $rolesByUser[$userId] ?? [];
+        $roles = array_values(array_map(fn($dto) => $dto->slug, $roleDtos));
+
+        return response()->json([
+            'userId' => $userId,
+            'roles'  => $roles,
         ]);
     }
 }

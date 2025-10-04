@@ -52,7 +52,7 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 2. Website generates a one-time connection code (e.g., `1258ac67`) valid for 5 minutes
 3. Website displays command for user to copy: `/connect 1258ac67`
 4. User types `/connect 1258ac67` in Discord
-5. Bot calls `POST /api/discord/auth/connect` with `{ code: "1258ac67", discordId: "123456789", discordUsername: "DisplayName" }` (discordUsername is the discriminator-less display name)
+5. Bot calls `POST /api/discord/users` with `{ code: "1258ac67", discordId: "123456789", discordUsername: "DisplayName" }` (discordUsername is the discriminator-less display name)
 7. Website returns user roles immediately: `{ success: true, userId: 123, roles: ["user", "author"] }`
 8. Bot assigns corresponding Discord server roles (mapping handled by bot)
 9. Website emits auditable/domain events for connection
@@ -111,7 +111,7 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 2. Website generates one-time code (e.g., `1258ac67`) valid for 5 minutes
 3. Website displays command for user: `/connect 1258ac67`
 4. User types command in Discord
-5. Bot calls `POST /api/discord/auth/connect`
+5. Bot calls `POST /api/discord/users`
    - Headers: `Authorization: Bearer {API_KEY}`
    - Body: `{ code: "1258ac67", discordId: "123456789", discordUsername: "User#1234" }`
 6. Website validates code and associates Discord ID with user
@@ -126,7 +126,7 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 
 #### Authentication Endpoints
 
-**POST /api/discord/auth/connect**
+**POST /api/discord/users**
 - **Auth**: API key required
 - **Request**: `{ code: string, discordId: string, discordUsername: string }`
 - **Response**: `{ success: true, userId: int, roles: string[] }`
@@ -140,10 +140,10 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 
 #### Role Sync Endpoints
 
-**GET /api/discord/users/{discordId}/roles**
+**GET /api/discord/users/{discordId}**
 - **Auth**: API key required
-- **Response**: `{ userId: int, discordId: string, roles: string[], lastUpdated: datetime }`
-- **Purpose**: Get current roles for connected Discord user
+- **Response**: `{ userId: int, roles: string[] }`
+- **Purpose**: Get current roles for connected Discord user (may include more fields later)
 
 #### Notification Endpoints
 
@@ -413,10 +413,10 @@ CREATE TABLE discord_notification_preferences (
 
 ## API Rate Limits (Proposed)
 
-- `POST /api/discord/auth/connect`: 100 requests/minute per IP
+- `POST /api/discord/users`: 100 requests/minute per IP
 - `GET /api/discord/notifications/pending`: 120 requests/hour (1 per minute)
 - `POST /api/discord/notifications/mark-sent`: 120 requests/hour
-- `GET /api/discord/users/{discordId}/roles`: 300 requests/hour
+- `GET /api/discord/users/{discordId}`: 300 requests/hour
 - `DELETE /api/discord/users/{discordId}`: 100 requests/minute per IP
 
 ## UI Component (Profile Integration)
