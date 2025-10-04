@@ -74,4 +74,17 @@ class UsersController extends BaseController
             'roles'  => $roles,
         ]);
     }
+
+    public function destroy(string $discordId): JsonResponse
+    {
+        $deleted = $this->authService->unlinkDiscordUserByDiscordId($discordId);
+        if (!$deleted) {
+            return response()->json([
+                'error' => 'Not Found',
+                'message' => 'Discord user not found',
+            ], 404);
+        }
+
+        return response()->json(null, 204); // 204
+    }
 }

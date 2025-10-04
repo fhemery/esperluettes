@@ -56,4 +56,16 @@ function discordGetUser($test, string $discordId, array $headers = [])
     ];
     return $test->getJson('/api/discord/users/' . $discordId, array_replace($defaultHeaders, $headers));
 }
+
+/**
+ * DELETE /api/discord/users/{discordId} with default API headers
+ */
+function discordDeleteUser($test, string $discordId, array $headers = [])
+{
+    $defaultHeaders = [
+        'Authorization' => 'Bearer __test_api_key__',
+        'Accept' => 'application/json',
+    ];
+    return $test->deleteJson('/api/discord/users/' . $discordId, [], array_replace($defaultHeaders, $headers));
+}
         

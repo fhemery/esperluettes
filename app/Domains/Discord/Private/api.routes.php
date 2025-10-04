@@ -13,4 +13,8 @@ Route::prefix('api/discord')
         Route::get('/users/{discordId}', [UsersController::class, 'show'])
             ->middleware('throttle:300,1')
             ->name('discord.api.users.show');
+
+        Route::delete('/users/{discordId}', [UsersController::class, 'destroy'])
+            ->middleware('throttle:100,1')
+            ->name('discord.api.users.destroy');
     });

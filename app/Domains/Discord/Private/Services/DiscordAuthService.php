@@ -107,4 +107,15 @@ class DiscordAuthService
         $record = DiscordUser::query()->where('discord_user_id', $discordId)->first();
         return $record ? (int) $record->user_id : null;
     }
+
+    /**
+     * Unlink a Discord user mapping by its discord user id.
+     * Returns true if a mapping existed and was deleted, false otherwise.
+     */
+    public function unlinkDiscordUserByDiscordId(string $discordId): bool
+    {
+        return (bool) DiscordUser::query()
+            ->where('discord_user_id', $discordId)
+            ->delete();
+    }
 }
