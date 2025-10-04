@@ -21,11 +21,11 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 ### Authentication & Connection
 - **Connection Type**: Website generates one-time codes displayed on user profile; user enters code in Discord bot command
 - **Bot Authentication**: API key stored in environment variables
-- **User Limit**: One Discord account per website user
+- **User Limit**: One Discord account per website user (and one website user per Discord account)
 - **Connection Flow**: Synchronous (bot calls API with code, gets roles immediately)
-- **Disconnection**: User initiates via Discord `/disconnect` command; bot calls API to disconnect
+- **Disconnection**: User initiates via Discord `/disconnect` command; bot calls API to disconnect (synchronous)
 - **Connection Privacy**: Discord connection status is private information
-- **Audit Logging**: Connection/disconnection events are logged for investigation
+- **Auditability**: Connection/disconnection emit application events (see Events) rather than being stored in a dedicated logs table
 
 ### Role Synchronization
 - **Role Mapping**: Handled entirely by bot (not website's responsibility)
@@ -52,25 +52,23 @@ Integration of a Discord bot (written in TypeScript/JavaScript) with the Esperlu
 2. Website generates a one-time connection code (e.g., `1258ac67`) valid for 5 minutes
 3. Website displays command for user to copy: `/connect 1258ac67`
 4. User types `/connect 1258ac67` in Discord
-5. Bot calls `POST /api/discord/auth/connect` with `{ code: "1258ac67", discordId: "123456789", discordUsername: "User#1234" }`
-6. Website validates code, associates Discord ID with user account
+5. Bot calls `POST /api/discord/auth/connect` with `{ code: "1258ac67", discordId: "123456789", discordUsername: "DisplayName" }` (discordUsername is the discriminator-less display name)
 7. Website returns user roles immediately: `{ success: true, userId: 123, roles: ["user", "author"] }`
 8. Bot assigns corresponding Discord server roles (mapping handled by bot)
-9. Website logs connection event for audit
+9. Website emits auditable/domain events for connection
 
 **Disconnection Flow**:
 1. User types `/disconnect` command in Discord
 2. Bot calls `DELETE /api/discord/users/{discordId}`
-3. Website removes Discord ID ↔ User ID mapping
+3. Website removes Discord ID ↔ User ID mapping and clears any pending notifications for this user
 4. Website returns success response
-5. Website logs disconnection event for audit
+5. Website emits auditable/domain events for disconnection
 6. Bot removes Discord server roles based on its own logic
 7. User stops receiving Discord notifications immediately
 
 ### Feature #2: Activity Feed Notifications
 
 **User Story**: As a user, I want to receive Discord DMs for activity feed updates so I stay informed without checking the website.
-
 **Flow**:
 1. User registers bot as contact on Discord
 2. User configures Discord notification preferences in website settings page
@@ -223,29 +221,15 @@ CREATE TABLE discord_notifications (
     sent_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL,
     
-    FOREIGN KEY (discord_user_id) REFERENCES discord_users(id) ON DELETE CASCADE,
+    FOREIGN KEY (discord_user_id) REFERENCES discord_users(discord_user_id) ON DELETE CASCADE,
     INDEX idx_discord_user_sent (discord_user_id, sent_at),
     INDEX idx_sent_at (sent_at),
     INDEX idx_type (type)
 );
 ```
 
-#### `discord_connection_logs` table
-```sql
-CREATE TABLE discord_connection_logs (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT UNSIGNED NULL,
-    discord_id VARCHAR(255) NOT NULL,
-    action ENUM('connected', 'disconnected') NOT NULL,
-    ip_address VARCHAR(45) NULL,
-    user_agent TEXT NULL,
-    created_at TIMESTAMP NOT NULL,
-    
-    INDEX idx_user_id (user_id),
-    INDEX idx_discord_id (discord_id),
-    INDEX idx_action (action)
-);
-```
+#### Auditability (Events)
+Connection/disconnection are auditable via application events, not a dedicated logs table. See Events section below.
 
 ### Website Components Needed
 
@@ -267,18 +251,16 @@ CREATE TABLE discord_connection_logs (
 
 **Models** (`app/Domains/Discord/Models/`):
 - `DiscordUser` - Discord ↔ User mapping
-- `DiscordAuthToken` - Temporary auth tokens
+- `DiscordAuthToken` - Temporary auth tokens (table name: `discord_connection_codes`)
 - `DiscordNotification` - Notification queue
-- `DiscordConnectionLog` - Audit trail
 
 **Middleware** (`app/Domains/Discord/Middleware/`):
 - `DiscordApiAuth` - Validate API key
 
 **Migrations** (`app/Domains/Discord/Database/Migrations/`):
 - `create_discord_users_table`
-- `create_discord_auth_tokens_table`
+- `create_discord_connection_codes_table` (temporary auth codes)
 - `create_discord_notifications_table`
-- `create_discord_connection_logs_table`
 
 **Views** (`app/Domains/Discord/Resources/views/`):
 - `connect.blade.php` - User authorization page
@@ -286,11 +268,10 @@ CREATE TABLE discord_connection_logs (
 - `settings/notifications.blade.php` - Notification preferences
 
 **Events** (`app/Domains/Discord/Events/`):
-- `DiscordConnected` - Fired when user connects
-- `DiscordDisconnected` - Fired when user disconnects
+- `DiscordConnected` - Fired when user connects (implements `AuditableEvent` and `DomainEvent` from `app/Domains/Events/Public/Contracts/`)
+- `DiscordDisconnected` - Fired when user disconnects (implements `AuditableEvent` and `DomainEvent`)
 
 **Listeners** (`app/Domains/Discord/Listeners/`):
-- `LogDiscordConnection` - Log connection events
 - Various activity listeners to queue notifications
 
 ### Bot → Website Communication Pattern
@@ -298,7 +279,7 @@ CREATE TABLE discord_connection_logs (
 **Confirmed Pattern**: Database-backed polling
 
 **How it works**:
-1. **Bot polls** website API every 1 minute
+1. **Bot polls** website API every 1 minute (notifications only)
 2. **Bot initiates** all HTTP requests (website never contacts bot)
 3. **Website maintains** notification queue in MySQL database
 4. **Bot authenticates** every request with API key
@@ -308,8 +289,8 @@ CREATE TABLE discord_connection_logs (
 
 **Polling Schedule**:
 - **Notifications**: Every 1 minute → `GET /api/discord/notifications/pending`
-- **Role Sync**: On-demand when user roles change (bot doesn't poll for this)
-- **Auth Status**: Every 2-3 seconds during active connection flow only
+- **Role Sync**: On-demand (bot requests roles as needed)
+- **Auth**: Connect/Disconnect are synchronous calls; no notifications are generated for these actions
 
 ## Role Mapping
 
@@ -368,8 +349,8 @@ CREATE TABLE discord_connection_logs (
 - Log connections for security/debugging
 - Include Discord data in user data export requests
 
-**Audit Logging**:
-- Log all connection/disconnection events with IP and user agent
+**Auditability**:
+- Emit `DiscordConnected`/`DiscordDisconnected` domain/auditable events with relevant context (user id, discord id)
 - Log bot API requests (consider middleware logging)
 - Track notification delivery status
 
@@ -410,19 +391,8 @@ CREATE TABLE discord_notification_preferences (
 
 ## Architectural Decisions Made
 
-### Bot-Targeted Notifications
-**Decision**: Connect/disconnect events communicated via notification system.
-- Website queues `bot.user_connected` notification when user authorizes connection
-- Website queues `bot.user_disconnected` notification when user disconnects
-- Bot polls same notification endpoint for both bot-targeted and user-targeted notifications
-- Bot distinguishes by `type` field and handles accordingly
-- Discord role management (including removal on disconnect) is bot's responsibility
-
-**Benefits**:
-- Unified polling endpoint
-- Consistent notification delivery mechanism
-- Decouples website from Discord role management
-- Bot can implement its own role removal logic/timing
+### Synchronous Connect/Disconnect
+**Decision**: Connect and disconnect are synchronous API operations. No notifications are queued for these actions. Application emits auditable/domain events instead.
 
 ## Next Steps
 
@@ -431,13 +401,13 @@ CREATE TABLE discord_notification_preferences (
 3. **Create user stories**: Break down implementation into manageable tasks
 4. **Design UI**: Settings pages for connection and notification preferences
 5. **Implementation**: 
-   - Database migrations
+   - Database migrations (no connection logs table; use events)
    - Models and relationships
    - Services and business logic
    - API controllers and routes
    - Middleware for authentication
    - Settings pages (views + controllers)
-   - Event/listener infrastructure
+   - Event/listener infrastructure (emit `AuditableEvent` + `DomainEvent` for connect/disconnect)
 7. **Testing**: Unit tests for services, feature tests for API endpoints
 8. **Bot development**: Separate repository/project
 
@@ -448,4 +418,27 @@ CREATE TABLE discord_notification_preferences (
 - `POST /api/discord/notifications/mark-sent`: 120 requests/hour
 - `GET /api/discord/users/{discordId}/roles`: 300 requests/hour
 - `DELETE /api/discord/users/{discordId}`: 100 requests/minute per IP
+
+## UI Component (Profile Integration)
+
+- **Goal**: Keep Profile decoupled from Discord domain. Provide a reusable component that encapsulates display and interaction.
+- **Class-based Component**: `app/Domains/Discord/Private/Views/Components/DiscordComponent.php`
+  - Renders Discord status (disconnected: grey icon; connected: blue icon with user id and a small disconnect icon)
+  - Opens a popover/modal with instructions
+  - Triggers code generation via AJAX (Alpine) when user initiates connect flow
+  - When connected, shows the disconnect command/instructions
+- **Blade (anonymous) view**: `app/Domains/Discord/Private/Resources/views/components/discord-component.blade.php`
+- **Notes**:
+  - Component fetches all required Discord-related data/logic internally (Profile stays dumb)
+  - Uses synchronous API connect/disconnect flows
+
+## BDD Test Plan (First Scenarios)
+
+- **Location**: `app/Domains/Discord/Tests/Feature/Api/AuthConnectAuthTest.php`
+- **Scenario 1**: POST `/api/discord/auth/connect` without `Authorization` header → returns 401 JSON `{ error: "Unauthorized", message: "Invalid API key" }`
+- **Scenario 2**: POST with invalid API key → returns 401
+- (Later) **Scenario 3**: POST with valid API key but invalid payload → 400 with validation errors
+- (Later) **Scenario 4**: Happy path connect → 200 with `{ success: true, userId, roles: [...] }`
+
+Use Laravel throttle middleware according to proposed limits for these endpoints.
 

@@ -161,9 +161,9 @@ User → Discord → /disconnect → Bot
 
 ## API Endpoints
 
-### POST /api/discord/auth/connect
+### POST /api/discord/users
 
-Connect a Discord account using a one-time code from the website.
+Create a Discord user link using a one-time code generated on the website.
 
 **Authentication**: Required (API key)
 
@@ -172,14 +172,14 @@ Connect a Discord account using a one-time code from the website.
 {
   "code": "1258ac67",
   "discordId": "123456789012345678",
-  "discordUsername": "Username#1234"
+  "discordUsername": "DisplayName"
 }
 ```
 
 **Request Fields**:
 - `code` (string, required): One-time connection code from user's profile page
 - `discordId` (string, required): Discord user ID (17-19 digit numeric string)
-- `discordUsername` (string, required): Discord username with discriminator
+- `discordUsername` (string, required): Discord display name (no discriminator)
 
 **Success Response** (200 OK):
 ```json
@@ -243,7 +243,7 @@ curl -X POST "https://esperluettes.com/api/discord/auth/connect" \
   -d '{
     "code": "1258ac67",
     "discordId": "123456789012345678",
-    "discordUsername": "CoolUser#1234"
+    "discordUsername": "CoolUser"
   }'
 ```
 
@@ -398,9 +398,9 @@ curl -X POST "https://esperluettes.com/api/discord/notifications/mark-sent" \
 
 ---
 
-### GET /api/discord/users/{discord_id}/roles
+### GET /api/discord/users/{discord_id}
 
-Get current roles for a connected Discord user.
+Get current roles for a connected Discord user. Might contain more information later on
 
 **Authentication**: Required (API key)
 
@@ -454,7 +454,7 @@ curl -X GET "https://esperluettes.com/api/discord/users/123456789012345678/roles
 
 ### DELETE /api/discord/users/{discord_id}
 
-Disconnect a Discord account from the website.
+Disconnect a Discord account from the website. Also clears any pending Discord notifications for this user.
 
 **Authentication**: Required (API key)
 
