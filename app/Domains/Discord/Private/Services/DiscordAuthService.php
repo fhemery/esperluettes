@@ -120,6 +120,14 @@ class DiscordAuthService
     }
 
     /**
+     * Return the DiscordUser row for a given website user id, or null if not linked.
+     */
+    public function getDiscordByUserId(int $userId): ?DiscordUser
+    {
+        return DiscordUser::query()->where('user_id', $userId)->first();
+    }
+
+    /**
      * Unlink a Discord user mapping by its discord user id.
      * Returns true if a mapping existed and was deleted, false otherwise.
      */

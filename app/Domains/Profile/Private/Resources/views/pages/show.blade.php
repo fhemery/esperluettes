@@ -36,6 +36,7 @@
                                         {{ __('profile::show.copied') }}
                                     </div>
                                 </div>
+                                <x-discord::discord-component />
                             @endif
                         </div>
                         @if(!empty($profile->roles))
