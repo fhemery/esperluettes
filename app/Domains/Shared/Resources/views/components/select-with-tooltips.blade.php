@@ -44,10 +44,10 @@
         maxHeight: @js($maxHeight),
         placeholder: @js($placeholder),
         color: @js($color),
-    })" class="relative w-full" @click.outside="open = false">
+    })" class="relative w-full" @click.outside="open = false" @keydown.escape.window="open = false">
     
     <!-- Display Button -->
-    <button type="button" @click="open = !open" 
+    <button type="button" x-ref="button" @click="open = !open; if (open) { $nextTick(() => updatePosition()) }" 
             class="w-full flex items-center gap-2 justify-between text-left px-3 py-2 rounded-md border border-{{$color}} hover:border-{{$color}}/80 focus:outline-none focus:ring-2 focus:ring-{{$color}}/50 flex items-center justify-between">
         <span x-text="selectedLabel || @js($placeholder)" 
               :class="selectedLabel ? 'text-{{$color}} font-semibold' : 'text-{{$color}}/70'" class="flex-1 truncate"></span>
@@ -56,17 +56,20 @@
     </button>
 
     <!-- Dropdown -->
-    <div x-cloak x-show="open" 
+    <template x-teleport="body">
+    <div x-cloak x-show="open" @click.outside="open = false"
          x-transition:enter="transition ease-out duration-100"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100"
          x-transition:leave="transition ease-in duration-75"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         class="absolute z-30 mt-1 w-full rounded-md bg-white border border-{{$color}} shadow-lg">
-        <ul class="overflow-auto py-1" :style="{maxHeight: maxHeight}">
+         x-ref="dropdown"
+         :style="dropdownStyle"
+         class="fixed z-[100] mt-1 rounded-md bg-white border border-{{$color}} shadow-lg">
+        <ul class="overflow-auto py-1" :style="{maxHeight: maxHeight, width: dropdownWidth}">
             <template x-for="(opt, idx) in options" :key="opt.value">
-                <li>
+                <li class="mr-2">
                     <button type="button" 
                             @click="toggleOption(opt.value)"
                             @mouseenter="hoveredIndex = idx"
@@ -97,6 +100,7 @@
             </template>
         </ul>
     </div>
+    </template>
 
     <!-- Hidden input -->
     <input type="hidden" :name="name" :value="state.selected" {{ $required ? 'required' : '' }}>
@@ -116,12 +120,39 @@
                         color: color,
                         options: options,
                         hoveredIndex: -1,
+                        dropdownStyle: { left: '0px', top: '0px', width: '0px' },
+                        dropdownWidth: '0px',
                         state: {
                             selected: selected ?? '',
+                        },
+                        init() {
+                            // Keep dropdown positioned on resize/scroll
+                            const handler = () => this.open && this.updatePosition();
+                            this._resizeHandler = handler;
+                            window.addEventListener('resize', handler);
+                            window.addEventListener('scroll', handler, true);
+                            this.$watch('open', (val) => { if (val) this.$nextTick(() => this.updatePosition()); });
+                        },
+                        destroy() {
+                            window.removeEventListener('resize', this._resizeHandler);
+                            window.removeEventListener('scroll', this._resizeHandler, true);
                         },
                         get selectedLabel() {
                             const opt = this.options.find(o => o.value === this.state.selected);
                             return opt ? opt.label : '';
+                        },
+                        updatePosition() {
+                            const btn = this.$refs.button;
+                            if (!btn) return;
+                            const rect = btn.getBoundingClientRect();
+                            const gap = 4; // small gap under the trigger
+                            this.dropdownStyle = {
+                                position: 'fixed',
+                                left: `${Math.round(rect.left)}px`,
+                                top: `${Math.round(rect.bottom + gap)}px`,
+                                width: `${Math.round(rect.width)}px`,
+                            };
+                            this.dropdownWidth = `${Math.round(rect.width)}px`;
                         },
                         toggleOption(value) {
                             this.state.selected = this.state.selected === value ? '' : value;
