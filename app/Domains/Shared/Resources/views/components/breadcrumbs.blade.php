@@ -1,4 +1,4 @@
-<nav class="text-sm text-fg/70" aria-label="Breadcrumb">
+<nav class="text-sm text-fg/70" aria-label="{{ __('shared::breadcrumbs.breadcrumb') }}">
   <ol class="flex items-center gap-2">
     @foreach($items as $index => $item)
       @if($index > 0)

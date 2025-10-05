@@ -27,6 +27,7 @@ use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
 use App\Domains\Shared\Contracts\BreadcrumbRegistry;
+use App\Domains\Shared\Dto\BreadcrumbTrailDto;
 use App\Domains\Shared\Support\BreadcrumbTrail;
 
 class StoryServiceProvider extends ServiceProvider
@@ -84,7 +85,7 @@ class StoryServiceProvider extends ServiceProvider
         $bc = app(BreadcrumbRegistry::class);
 
         // Story show: Home/Dashboard > Story
-        $bc->for('stories.show', function (BreadcrumbTrail $trail, array $params) {
+        $bc->for('stories.show', function (BreadcrumbTrailDto $trail, array $params) {
             $slug = $params['slug'] ?? null;
             $story = $slug ? Story::query()->where('slug', $slug)->first() : null;
             $label = $story?->title ?? ($slug ?? 'Story');
@@ -92,7 +93,7 @@ class StoryServiceProvider extends ServiceProvider
         });
 
         // Chapter show: Home/Dashboard > Story > Chapter
-        $bc->for('chapters.show', function (BreadcrumbTrail $trail, array $params) {
+        $bc->for('chapters.show', function (BreadcrumbTrailDto $trail, array $params) {
             $storySlug = $params['storySlug'] ?? null;
             $chapterSlug = $params['chapterSlug'] ?? null;
 

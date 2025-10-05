@@ -2,7 +2,7 @@
 
 namespace App\Domains\Shared\Contracts;
 
-use App\Domains\Shared\Support\BreadcrumbTrail;
+use App\Domains\Shared\Dto\BreadcrumbTrailDto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,7 +27,7 @@ class BreadcrumbRegistry
      */
     public function generateForRequest(Request $request): array
     {
-        $trail = new BreadcrumbTrail();
+        $trail = new BreadcrumbTrailDto();
 
         // Root crumb: Home for guests, Dashboard for authenticated users
         if (Auth::check()) {

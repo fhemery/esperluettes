@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Domains\Shared\Support;
+namespace App\Domains\Shared\Dto;
 
-class BreadcrumbTrail
+class BreadcrumbTrailDto
 {
-    /** @var array<int,Breadcrumb> */
+    /** @var array<int,BreadcrumbDto> */
     private array $items = [];
 
     public function push(string $label, ?string $url = null, bool $active = false, ?string $icon = null): self
     {
-        $this->items[] = new Breadcrumb($label, $url, $active, $icon);
+        $this->items[] = new BreadcrumbDto($label, $url, $active, $icon);
         return $this;
     }
 
@@ -24,7 +24,7 @@ class BreadcrumbTrail
     }
 
     /**
-     * @return array<int,Breadcrumb>
+     * @return array<int,BreadcrumbDto>
      */
     public function all(): array
     {

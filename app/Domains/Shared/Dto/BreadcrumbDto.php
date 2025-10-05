@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Shared\Support;
+namespace App\Domains\Shared\Dto;
 
-class Breadcrumb
+class BreadcrumbDto
 {
     public string $label;
     public ?string $url;

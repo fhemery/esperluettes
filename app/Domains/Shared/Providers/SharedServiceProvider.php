@@ -16,7 +16,7 @@ class SharedServiceProvider extends ServiceProvider
     public function register()
     {
         // Register any bindings or services
-        $this->app->singleton(BreadcrumbRegistry::class, BreadcrumbRegistry::class);
+        $this->app->singleton(BreadcrumbRegistry::class);
     }
 
     public function boot(): void
@@ -71,13 +71,6 @@ class SharedServiceProvider extends ServiceProvider
                 $dto = $api->getPublicProfile(Auth::id());
             }
             $view->with('currentProfile', $dto);
-        });
-
-        // Share breadcrumbs with layouts
-        View::composer(['shared::layouts.app', 'shared::layouts.guest'], function ($view) {
-            /** @var BreadcrumbRegistry $registry */
-            $registry = app(BreadcrumbRegistry::class);
-            $view->with('breadcrumbs', $registry->generateForRequest(request()));
         });
 
         // Safety guard: never run tests against a non-SQLite database
