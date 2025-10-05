@@ -85,7 +85,7 @@
     <x-shared::confirm-modal
         name="confirm-delete-chapter-{{ $ch->id }}"
         :title="__('story::chapters.actions.delete')"
-        :body="__('story::show.chapter.confirm_delete_warning')"
+        :body="__('story::chapters.confirm_delete_warning', ['chapterTitle' => $ch->title])"
         :cancel="__('story::show.cancel')"
         :confirm="__('story::show.chapter.confirm_delete')"
         :action="route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug])"
