@@ -11,7 +11,7 @@
 <meta name="twitter:image" content="{{ asset('images/story/default-cover.svg') }}">
 @endpush
 
-<x-app-layout>
+<x-app-layout :page="$page">
     <div class="overflow-hidden surface-read text-on-surface">
         <div class="p-2 md:p-4 grid items-start gap-2 md:gap-4 
             grid-cols-[150px_1fr]

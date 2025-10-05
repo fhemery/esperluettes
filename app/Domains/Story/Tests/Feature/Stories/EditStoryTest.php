@@ -400,4 +400,34 @@ describe('Editing story', function () {
             });
         });
     });
+
+    describe('Breadcrumbs', function () {
+        it('shows Home/Dashboard icon > story link > edit label on edit page', function () {
+            $author = alice($this);
+            $this->actingAs($author);
+            $story = publicStory('Edit Crumbs Story', $author->id);
+
+            $resp = $this->get('/stories/' . $story->slug . '/edit');
+            $resp->assertOk();
+
+            $items = breadcrumb_items($resp);
+            // Expect at least 3 items: root, story, edit
+            expect(count($items))->toBeGreaterThanOrEqual(3);
+
+            $storyUrl = route('stories.show', ['slug' => $story->slug]);
+
+            // Find story crumb (clickable)
+            $storyCrumb = null;
+            foreach ($items as $it) {
+                if (($it['href'] ?? null) === $storyUrl) { $storyCrumb = $it; break; }
+            }
+            $this->assertNotNull($storyCrumb, 'Story breadcrumb with expected URL not found');
+            $this->assertStringContainsString($story->title, $storyCrumb['text'] ?? '');
+
+            // Last crumb should be the Edit label, non-clickable
+            $last = $items[count($items) - 1];
+            $this->assertNull($last['href'], 'Edit breadcrumb should be non-clickable');
+            $this->assertSame(__('story::edit.breadcrumb'), $last['text']);
+        });
+    });
 });

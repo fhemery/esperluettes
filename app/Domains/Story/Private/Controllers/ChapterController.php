@@ -3,6 +3,8 @@
 namespace App\Domains\Story\Private\Controllers;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
+use App\Domains\Shared\ViewModels\PageViewModel;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Private\Http\Requests\ChapterRequest;
 use App\Domains\Story\Private\Http\Requests\ReorderChaptersRequest;
@@ -136,8 +138,18 @@ class ChapterController
         }
         $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe, $auth);
 
+        // Build PageViewModel
+        $trail = BreadcrumbViewModel::FromHome($user !== null);
+        $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
+        $trail->push($chapter->title, null, true);
+
+        $page = PageViewModel::make()
+            ->withTitle($chapter->title)
+            ->withBreadcrumbs($trail);
+
         return view('story::chapters.show', [
             'vm' => $vm,
+            'page' => $page,
         ]);
     }
 
@@ -153,9 +165,20 @@ class ChapterController
             abort(404);
         }
 
+        // Build PageViewModel with breadcrumbs
+        $trail = BreadcrumbViewModel::FromHome($request->user() !== null);
+        $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
+        $trail->push($chapter->title, route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+        $trail->push(__('story::chapters.edit.breadcrumb'), null, true);
+
+        $page = PageViewModel::make()
+            ->withTitle($chapter->title)
+            ->withBreadcrumbs($trail);
+
         return view('story::chapters.edit', [
             'story' => $story,
             'chapter' => $chapter,
+            'page' => $page,
         ]);
     }
 

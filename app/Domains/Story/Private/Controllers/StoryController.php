@@ -5,8 +5,10 @@ namespace App\Domains\Story\Private\Controllers;
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Shared\Support\Seo;
+use App\Domains\Shared\ViewModels\PageViewModel;
 use App\Domains\Story\Private\Http\Requests\StoryRequest;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Services\StoryService;
@@ -148,9 +150,19 @@ class StoryController
         }
 
         $referentials = $this->lookup->getStoryReferentials();
+        // Build PageViewModel with breadcrumbs: Home/Dashboard > Story (link) > Edit (active)
+        $trail = BreadcrumbViewModel::FromHome(Auth::check());
+        $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
+        $trail->push(trans('story::edit.breadcrumb'), null, true);
+
+        $page = PageViewModel::make()
+            ->withTitle($story->title)
+            ->withBreadcrumbs($trail);
+
         return view('story::edit', [
             'story' => $story,
             'referentials' => $referentials,
+            'page' => $page,
         ]);
     }
 
@@ -370,11 +382,20 @@ class StoryController
 
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 
+        // Build PageViewModel (root with icon, then active story)
+        $trail = BreadcrumbViewModel::FromHome(Auth::check());
+        $trail->push($viewModel->getTitle(), null, true);
+
+        $page = PageViewModel::make()
+            ->withTitle($viewModel->getTitle())
+            ->withBreadcrumbs($trail);
+
         return view('story::show', [
             'viewModel' => $viewModel,
             'metaDescription' => $metaDescription,
             'availableChapterCredits' => $availableChapterCredits,
-            ]);
+            'page' => $page,
+        ]);
     }
 
     public function destroy(string $slug): RedirectResponse

@@ -6,10 +6,13 @@ use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\News\Private\Models\News;
 use App\Domains\News\Private\Services\NewsService;
+use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
+use App\Domains\Shared\ViewModels\PageViewModel;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class NewsController extends BaseController
 {
@@ -27,9 +30,18 @@ class NewsController extends BaseController
 
         $pinned = $this->newsService->getPinnedForCarousel();
 
+        // Page breadcrumbs: Home/Dashboard > "Actualités" (active)
+        $trail = BreadcrumbViewModel::FromHome(Auth::check());
+        $trail->push(__("news::public.index.title"), null, true);
+
+        $page = PageViewModel::make()
+            ->withTitle(__("news::public.index.title"))
+            ->withBreadcrumbs($trail);
+
         return view('news::pages.index', [
             'news' => $news,
             'pinned' => $pinned,
+            'page' => $page,
         ]);
     }
 
@@ -60,8 +72,18 @@ class NewsController extends BaseController
             }
         }
 
+        // Page breadcrumbs: Home/Dashboard > "Actualités" (link) > News title (active)
+        $trail = BreadcrumbViewModel::FromHome(Auth::check());
+        $trail->push(__("news::public.index.title"), route('news.index'));
+        $trail->push($news->title, null, true);
+
+        $page = PageViewModel::make()
+            ->withTitle($news->title)
+            ->withBreadcrumbs($trail);
+
         return view('news::pages.show', [
             'news' => $news,
+            'page' => $page,
         ]);
     }
 }

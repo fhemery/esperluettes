@@ -79,6 +79,15 @@ namespace {
         });
     }
 
+    // Retrieve elements
+    if (! TestResponse::hasMacro('getElements')) {
+        TestResponse::macro('getElements', function (string $selector) {
+            /** @var TestResponse $this */
+            [$nodes] = __tr_query_nodes($this, $selector);
+            return $nodes;
+        });
+    }
+
     // Attribute equals
     if (! TestResponse::hasMacro('assertHasAttribute')) {
         TestResponse::macro('assertHasAttribute', function (string $selector, string $attribute, ?string $expected = null) {

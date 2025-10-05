@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :page="$page">
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-semibold mb-6">{{ __('news::public.index.title') }}</h1>
 

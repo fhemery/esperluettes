@@ -418,4 +418,36 @@ describe('Chapter display', function () {
             $resp->assertDontSee('name="description"', false);
         });
     });
+
+    describe('Breadcrumbs', function (){
+
+        it('displays breadcrumbs with story link clickable and chapter non-clickable', function () {
+            $author = alice($this);
+            $story = publicStory('Breadcrumb Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Breadcrumb Chapter']);
+
+            $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+            $resp->assertOk();
+
+            $items = breadcrumb_items($resp);
+            $storyUrl = route('stories.show', ['slug' => $story->slug]);
+
+            // Find story crumb
+            $storyCrumb = null;
+            foreach ($items as $it) {
+                if ($it['href'] === $storyUrl) {
+                    $storyCrumb = $it;
+                    break;
+                }
+            }
+
+            $this->assertNotNull($storyCrumb, 'Story breadcrumb with expected URL not found');
+            $this->assertStringContainsString($story->title, $storyCrumb['text'] ?? '');
+
+            // Chapter should be the last item and non-clickable
+            $last = $items[count($items) - 1];
+            $this->assertNull($last['href'], 'Chapter breadcrumb should be non-clickable');
+            $this->assertStringContainsString($chapter->title, $last['text']);
+        });
+    });
 });

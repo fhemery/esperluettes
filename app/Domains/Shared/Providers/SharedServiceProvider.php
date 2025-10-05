@@ -7,7 +7,6 @@ use App\Domains\Shared\Views\Layouts\AppLayout;
 use App\Domains\Shared\Validation\CustomValidators;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,7 +14,6 @@ class SharedServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        // Register any bindings or services
     }
 
     public function boot(): void
@@ -84,6 +82,8 @@ class SharedServiceProvider extends ServiceProvider
 
         // Register custom validators in a dedicated place
         $this->registerValidators();
+
+        // Domain-specific breadcrumb builders are registered in their own ServiceProviders.
     }
 
     private function registerValidators(): void

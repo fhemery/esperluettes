@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :page="$page">
     <div class="container mx-auto px-4 py-8">
         <article>
             <header class="mb-6" style="max-width:800px; margin-left:auto; margin-right:auto;">

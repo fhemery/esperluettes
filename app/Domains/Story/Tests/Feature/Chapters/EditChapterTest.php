@@ -241,4 +241,36 @@ describe('Editing a chapter', function () {
             expect($event->chapter->status)->toBe(Chapter::STATUS_NOT_PUBLISHED);
         });
     });
+
+    describe('Breadcrumbs', function () {
+        it('shows Home/Dashboard > story link > chapter link > edit label on edit page', function () {
+            $author = alice($this);
+            $story = publicStory('BC Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'BC Chapter']);
+
+            $this->actingAs($author);
+            $resp = $this->get(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+            $resp->assertOk();
+
+            $items = breadcrumb_items($resp);
+            expect(count($items))->toBeGreaterThanOrEqual(4);
+
+            $storyUrl = route('stories.show', ['slug' => $story->slug]);
+            $chapterUrl = route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]);
+
+            // Story crumb (clickable)
+            $foundStory = false; $foundChapter = false;
+            foreach ($items as $it) {
+                if (($it['href'] ?? null) === $storyUrl) { $foundStory = true; }
+                if (($it['href'] ?? null) === $chapterUrl) { $foundChapter = true; }
+            }
+            $this->assertTrue($foundStory, 'Story breadcrumb link not found');
+            $this->assertTrue($foundChapter, 'Chapter breadcrumb link not found');
+
+            // Last crumb should be the Edit label, non-clickable
+            $last = $items[count($items) - 1];
+            $this->assertNull($last['href'], 'Edit breadcrumb should be non-clickable');
+            $this->assertSame(__('story::chapters.edit.breadcrumb'), $last['text']);
+        });
+    });
 });
