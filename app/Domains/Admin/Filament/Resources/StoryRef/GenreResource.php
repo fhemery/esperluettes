@@ -3,6 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\StoryRef;
 
 use App\Domains\StoryRef\Private\Models\StoryRefGenre;
+use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -68,10 +69,12 @@ class GenreResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->iconButton()->label(''),
-                Tables\Actions\DeleteAction::make()->iconButton()->label(''),
+                Tables\Actions\DeleteAction::make()->iconButton()->label('')
+                    ->after(fn() => app(StoryRefLookupService::class)->clearCache()),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                    ->after(fn() => app(StoryRefLookupService::class)->clearCache()),
             ])
             ->defaultSort('order');
     }
