@@ -15,6 +15,7 @@ return [
     'edit' => [
         'title' => 'Modifier : :title',
         'heading' => 'Modifier un chapitre de ":story"',
+        'breadcrumb' => 'Modifier le chapitre',
     ],
 
     'form' => [

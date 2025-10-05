@@ -165,9 +165,20 @@ class ChapterController
             abort(404);
         }
 
+        // Build PageViewModel with breadcrumbs
+        $trail = BreadcrumbViewModel::FromHome($request->user() !== null);
+        $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
+        $trail->push($chapter->title, route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+        $trail->push(__('story::chapters.edit.breadcrumb'), null, true);
+
+        $page = PageViewModel::make()
+            ->withTitle($chapter->title)
+            ->withBreadcrumbs($trail);
+
         return view('story::chapters.edit', [
             'story' => $story,
             'chapter' => $chapter,
+            'page' => $page,
         ]);
     }
 

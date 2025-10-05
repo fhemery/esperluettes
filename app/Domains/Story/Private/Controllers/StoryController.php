@@ -150,9 +150,19 @@ class StoryController
         }
 
         $referentials = $this->lookup->getStoryReferentials();
+        // Build PageViewModel with breadcrumbs: Home/Dashboard > Story (link) > Edit (active)
+        $trail = BreadcrumbViewModel::FromHome(Auth::check());
+        $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
+        $trail->push(trans('story::edit.breadcrumb'), null, true);
+
+        $page = PageViewModel::make()
+            ->withTitle($story->title)
+            ->withBreadcrumbs($trail);
+
         return view('story::edit', [
             'story' => $story,
             'referentials' => $referentials,
+            'page' => $page,
         ]);
     }
 
