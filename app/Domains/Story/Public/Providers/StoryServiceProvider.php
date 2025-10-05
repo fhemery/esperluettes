@@ -82,7 +82,13 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
 
         // Register Story-domain breadcrumb builders
+        $this->definedBreadcrumbs();
+    }
+
+    private function definedBreadcrumbs()
+    {
         $bc = app(BreadcrumbRegistry::class);
+
 
         // Story show: Home/Dashboard > Story
         $bc->for('stories.show', function (BreadcrumbTrailDto $trail, array $params) {

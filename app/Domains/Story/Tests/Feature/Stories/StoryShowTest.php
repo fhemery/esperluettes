@@ -522,4 +522,31 @@ describe('Story details page', function () {
             $resp->assertSee(trans('story::shared.metrics.words_and_signs'));
         });
     });
+
+    describe('Breadcrumbs', function () {
+        it('displays breadcrumbs with story as the active non-clickable crumb on story page', function () {
+            $author = alice($this);
+            $story = publicStory('Breadcrumb Story Show', $author->id);
+
+            Auth::logout();
+            $resp = $this->get(route('stories.show', ['slug' => $story->slug]));
+            $resp->assertOk();
+
+            // Extract breadcrumb items via shared helper
+            $items = breadcrumb_items($resp);
+            // Expect exactly root + story
+            expect(count($items))->toBeGreaterThanOrEqual(2);
+
+            // Last crumb should be the story title and non-clickable
+            $last = $items[count($items) - 1];
+            expect($last['href'])->toBeNull();
+            expect($last['text'])->toContain($story->title);
+
+            // Ensure there is no clickable link to the current story within breadcrumbs
+            $storyUrl = route('stories.show', ['slug' => $story->slug]);
+            foreach ($items as $it) {
+                expect($it['href'])->not()->toEqual($storyUrl);
+            }
+        });
+    });
 });

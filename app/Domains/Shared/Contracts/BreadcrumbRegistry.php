@@ -29,11 +29,12 @@ class BreadcrumbRegistry
     {
         $trail = new BreadcrumbTrailDto();
 
-        // Root crumb: Home for guests, Dashboard for authenticated users
+        // Root crumb: Home for guests, Dashboard for authenticated users (with home icon)
+        // Display only the icon, no text
         if (Auth::check()) {
-            $trail->push(__('Dashboard'), route('dashboard'));
+            $trail->push('', route('dashboard'), false, 'home');
         } else {
-            $trail->push(__('Home'), route('home'));
+            $trail->push('', route('home'), false, 'home');
         }
 
         $route = $request->route();

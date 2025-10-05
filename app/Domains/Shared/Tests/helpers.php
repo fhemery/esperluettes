@@ -30,3 +30,39 @@ function assertHasIconBadge(TestCase $t, string $badgeIcon, string $badgeText, s
     );
     return $t;
 }
+
+// -------------------------------------------------------------------------
+// Breadcrumb test helpers
+// -------------------------------------------------------------------------
+
+/**
+ * Parse the response and return an array of breadcrumb items.
+ * Each item: [ 'text' => string, 'href' => ?string ]
+ * Skips separator items ('/').
+ *
+ * @return array<int,array{text:string,href:?string}>
+ */
+function breadcrumb_items(TestResponse $response): array
+{
+    $response->assertElementExists("nav[data-test-id='breadcrumbs']");
+    $liNodes = $response->getElements("nav[data-test-id='breadcrumbs'] li");
+    foreach ($liNodes as $li) {
+        $text = trim(preg_replace('/\s+/', ' ', $li->textContent ?? ''));
+        // Skip separator-only li
+        if ($text === '/') continue;
+
+        $a = null;
+        foreach ($li->childNodes as $child) {
+            if ($child instanceof \DOMElement && strtolower($child->tagName) === 'a') {
+                $a = $child; break;
+            }
+        }
+
+        $href = $a?->getAttribute('href') ?: null;
+        $items[] = [
+            'text' => $text,
+            'href' => $href ?: null,
+        ];
+    }
+    return $items;
+}

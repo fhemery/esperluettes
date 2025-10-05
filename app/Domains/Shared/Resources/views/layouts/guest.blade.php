@@ -22,7 +22,7 @@
 
         <!-- Page Content (guest) -->
         <main class="flex-1 flex flex-col w-full {{ $mainClass }}">
-            <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 lg:py-12 flex flex-col gap-4">
+            <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-4 pb-6 lg:pb-8 flex flex-col gap-4">
                 <x-shared::breadcrumbs-component />
                 <div class="flex-1">
                     {{ $slot }}

@@ -26,7 +26,7 @@ describe('breadcrumbs display', function () {
             ->assertDontSee('aria-label="Breadcrumb"');
     });
 
-    it('should render when not empty on guest layout', function () {
+    it('should render when not empty on guest layout with a home icon', function () {
         $registry = app(BreadcrumbRegistry::class);
         $registry->for('home', function (BreadcrumbTrailDto $trail) {
             $trail->push('Section');
@@ -35,10 +35,12 @@ describe('breadcrumbs display', function () {
         $this->get(route('home'))
             ->assertOk()
             ->assertSee(__("shared::breadcrumbs.breadcrumb"))
+            ->assertSee('material-symbols-outlined', false)
+            ->assertSee('>home<', false)
             ->assertSee('Section');
     });
 
-    it('should render when not empty on logged layout', function () {
+    it('should render when not empty on logged layout with a home icon', function () {
         $user = alice($this);
         $this->actingAs($user);
 
@@ -50,6 +52,9 @@ describe('breadcrumbs display', function () {
         $this->get(route('dashboard'))
             ->assertOk()
             ->assertSee(__('shared::breadcrumbs.breadcrumb'))
+            ->assertSee('material-symbols-outlined', false)
+            ->assertSee('>home<', false)
             ->assertSee('Section');
     });
+
 });
