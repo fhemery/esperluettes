@@ -3,7 +3,6 @@
 namespace App\Domains\Shared\Providers;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi;
-use App\Domains\Shared\Contracts\BreadcrumbRegistry;
 use App\Domains\Shared\Views\Layouts\AppLayout;
 use App\Domains\Shared\Validation\CustomValidators;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +14,6 @@ class SharedServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        // Register any bindings or services
-        $this->app->singleton(BreadcrumbRegistry::class);
     }
 
     public function boot(): void

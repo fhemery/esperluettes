@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Shared\Dto;
+namespace App\Domains\Shared\ViewModels;
 
-class BreadcrumbDto
+class BreadcrumbPartViewModel
 {
     public string $label;
     public ?string $url;

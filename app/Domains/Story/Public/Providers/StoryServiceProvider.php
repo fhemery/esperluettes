@@ -26,9 +26,6 @@ use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
-use App\Domains\Shared\Contracts\BreadcrumbRegistry;
-use App\Domains\Shared\Dto\BreadcrumbTrailDto;
-use App\Domains\Shared\Support\BreadcrumbTrail;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -81,36 +78,5 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);
         $eventBus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
 
-        // Register Story-domain breadcrumb builders
-        $this->definedBreadcrumbs();
-    }
-
-    private function definedBreadcrumbs()
-    {
-        $bc = app(BreadcrumbRegistry::class);
-
-
-        // Story show: Home/Dashboard > Story
-        $bc->for('stories.show', function (BreadcrumbTrailDto $trail, array $params) {
-            $slug = $params['slug'] ?? null;
-            $story = $slug ? Story::query()->where('slug', $slug)->first() : null;
-            $label = $story?->title ?? ($slug ?? 'Story');
-            $trail->push($label, null, true);
-        });
-
-        // Chapter show: Home/Dashboard > Story > Chapter
-        $bc->for('chapters.show', function (BreadcrumbTrailDto $trail, array $params) {
-            $storySlug = $params['storySlug'] ?? null;
-            $chapterSlug = $params['chapterSlug'] ?? null;
-
-            $story = $storySlug ? Story::query()->where('slug', $storySlug)->first() : null;
-            $chapter = $chapterSlug ? Chapter::query()->where('slug', $chapterSlug)->first() : null;
-
-            $storyLabel = $story?->title ?? ($storySlug ?? 'Story');
-            $chapterLabel = $chapter?->title ?? ($chapterSlug ?? 'Chapter');
-
-            $trail->push($storyLabel, route('stories.show', ['slug' => $story?->slug ?? $storySlug]));
-            $trail->push($chapterLabel, null, true);
-        });
     }
 }

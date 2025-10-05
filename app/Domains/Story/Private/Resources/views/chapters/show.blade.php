@@ -8,7 +8,7 @@
 <meta name="twitter:image" content="{{ $vm->seo->coverImage }}">
 @endpush
 
-<x-app-layout :display-ribbon="true">
+<x-app-layout :display-ribbon="true" :page="$page">
     <div class="w-full grid md:grid-cols-[230px_1fr] lg:grid-cols-[230px_1fr_230px] gap-4">
         <aside class="hidden md:block">
             <x-story::chapter.story-nav :story="$vm->story" :current-chapter-slug="$vm->chapter->slug" />
