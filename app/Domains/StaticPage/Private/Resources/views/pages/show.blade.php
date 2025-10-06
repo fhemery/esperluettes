@@ -1,17 +1,17 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-8">
+    <div class="max-w-xl mx-auto">
         <article>
-            <header class="mb-6 md:mb-10" style="max-width:800px; margin-left:auto; margin-right:auto;">
+            <header class="mb-6 md:mb-10">
                 <x-shared::title>{{ $page->title }}</x-shared::title>
                 @if($page->published_at)
-                    <p class="text-gray-500 text-sm">{{ $page->published_at->format('Y-m-d') }}</p>
+                    <p class="text-fg/80 text-sm">{{ $page->published_at->format('Y-m-d') }}</p>
                 @endif
             </header>
 
             @if($page->status === 'draft')
-                <div class="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-4 py-2 rounded max-w-[800px] mx-auto">
+                <x-shared::badge color="warning">
                     {{ __('static::public.draft_preview') }}
-                </div>
+                </x-shared::badge>
             @endif
 
             @if($page->header_image_path)
@@ -23,8 +23,7 @@
                     <picture>
                         <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
                         <img
-                            class="max-w-full h-auto rounded mx-auto"
-                            style="max-width:800px;"
+                            class="max-w-full h-auto mx-auto"
                             src="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }}"
                             srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
                             sizes="(max-width: 640px) 100vw, 800px"

@@ -1,5 +1,5 @@
-<x-app-layout>
-    <div class="max-w-4xl w-full mx-auto flex-1 overflow-hidden flex flex-col gap-4 surface-read text-on-surface p-2 sm:p-4">
+<x-app-layout size="md">
+    <div class="w-full flex-1 overflow-hidden flex flex-col gap-4 surface-read text-on-surface p-2 sm:p-4">
         <x-shared::title>{{ __('story::create.title') }}</x-shared::title>
 
         <form action="{{ route('stories.store') }}" method="POST" novalidate

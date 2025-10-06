@@ -11,6 +11,7 @@ class AppLayout extends Component
 {
     public function __construct(
         public readonly ?PageViewModel $page = null,
+        public readonly string $size = 'lg'     // 'sm' | 'md' | 'lg'
     ) {}
 
     /**
@@ -23,12 +24,14 @@ class AppLayout extends Component
             // Logged-in users get the full application chrome
             return view('shared::layouts.app', [
                 'page' => $this->page,
+                'size' => $this->size
             ]);
         }
 
         // Guests get a minimal layout without the application navigation
         return view('shared::layouts.guest', [
             'page' => $this->page,
+            'size' => $this->size
         ]);
     }
 }

@@ -1,7 +1,7 @@
 @section('title', __('story::chapters.create.title') . ' – ' . config('app.name'))
 
-<x-app-layout>
-    <div class="max-w-4xl mx-auto w-full p-2 sm:p-4 overflow-hidden flex flex-col gap-4 surface-read text-on-surface">
+<x-app-layout size="md">
+    <div class="w-full p-2 sm:p-4 overflow-hidden flex flex-col gap-4 surface-read text-on-surface">
         <x-shared::title>{{ __('story::chapters.create.heading', ['story' => $story->title]) }}</x-shared::title>
 
         <form method="POST" action="{{ route('chapters.store', ['storySlug' => $story->slug]) }}"

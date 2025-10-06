@@ -23,15 +23,6 @@
         <div class="w-full h-10 bg-[url('/images/themes/autumn/top-ribbon.png')] bg-repeat-x"></div>
         @endif
 
-        <!-- Page Heading -->
-        @isset($header)
-        <header class="shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
-            </div>
-        </header>
-        @endisset
-
         <!-- Flash Messages -->
         @if (session('status') || session('success') || session('error') || $errors->any())
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 10000)" class="max-w-7xl mx-auto px-2 sm:px-6 sm:py-6 py-2">
@@ -89,8 +80,9 @@
         @endif
 
         <!-- Page Content -->
+        @php($cssSize = ($size==='sm') ? 'max-w-2xl' : (($size==='md') ? 'max-w-4xl' : 'max-w-7xl'))
         <main class="flex-1 flex flex-col w-full {{ $class }}">
-            <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-4 pb-6 lg:pb-8 flex flex-col gap-4">
+            <div class="w-full {{ $cssSize }} mx-auto px-2 sm:px-6 lg:px-8 pt-4 pb-6 lg:pb-8 flex flex-col gap-4">
                 @if (isset($page) && $page->breadcrumbs)
                 <x-shared::breadcrumbs-component :breadcrumbs="$page->breadcrumbs" />
                 @else
