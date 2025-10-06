@@ -461,13 +461,7 @@ Disconnect a Discord account from the website. Also clears any pending Discord n
 **URL Parameters**:
 - `discordId` (string, required): Discord user ID to disconnect
 
-**Success Response** (200 OK):
-```json
-{
-  "success": true,
-  "message": "Discord account disconnected"
-}
-```
+**Success Response** (204 No Content):
 
 **Error Responses**:
 
