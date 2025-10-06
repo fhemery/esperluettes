@@ -59,7 +59,7 @@
         <div class="text-sm text-red-600">{{ $message }}</div>
       @enderror
       <div>
-        <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded disabled:opacity-50" :disabled="!editorValid">{{ __('comment::comments.form.submit') }}</button>
+        <x-shared::button type="submit" x-bind:disabled="!editorValid" color="accent">{{ __('comment::comments.form.submit') }}</x-shared::button>
       </div>
     </form>
     @endif
