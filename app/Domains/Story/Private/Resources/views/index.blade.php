@@ -3,6 +3,7 @@
 <meta name="description" content="{{ __("story::seo.index.description") }}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{ __("story::seo.index.title") }}">
+<meta property="og:description" content="{{ __("story::seo.index.description") }}">
 <meta property="og:image" content="{{ asset('images/story/default-cover.svg') }}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ __("story::seo.index.title") }}">
