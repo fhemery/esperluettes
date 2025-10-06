@@ -1,6 +1,6 @@
 <x-app-layout :page="$page">
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-semibold text-accent mb-6">{{ __('news::public.index.title') }}</h1>
+        <x-shared::title icon="news">{{ __('news::public.index.title') }}</x-shared::title>
 
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             @forelse($news as $news)

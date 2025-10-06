@@ -20,9 +20,7 @@
 
             <!-- Title -->
             <div class="col-span-2 lg:col-start-1 lg:col-end-4 flex items-center justify-between">
-                <h1 class="font-semibold text-4xl leading-tight mr-2">
-                    {{ $viewModel->getTitle() }}
-                </h1>
+                <x-shared::title>{{ $viewModel->getTitle() }}</x-shared::title>
 
                 @if($viewModel->isAuthor())
                 <div class="flex items-center gap-2">

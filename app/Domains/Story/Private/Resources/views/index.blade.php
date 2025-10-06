@@ -3,24 +3,18 @@
 <meta name="description" content="{{ __("story::seo.index.description") }}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{ __("story::seo.index.title") }}">
-<meta property="og:description" content="{{ __("story::seo.index.description") }}">
 <meta property="og:image" content="{{ asset('images/story/default-cover.svg') }}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ __("story::seo.index.title") }}">
 <meta name="twitter:description" content="{{ __("story::seo.index.description") }}">
 <meta name="twitter:image" content="{{ asset('images/story/default-cover.svg') }}">
-@endpush
-
-<x-app-layout>
-    @php($hasFilters = !empty($currentType) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw) || !empty($currentNoTwOnly))
-
-    <div class="flex gap-2 text-4xl text-accent font-extrabold mb-4">
-        <span class="material-symbols-outlined text-4xl">
-            nest_eco_leaf
-        </span>
-        <h2>{{ __('story::index.title') }}</h2>
-    </div>
-
+  @endpush
+  
+  <x-app-layout>
+      @php($hasFilters = !empty($currentType) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw) || !empty($currentNoTwOnly))
+    
+    <x-shared::title icon="nest_eco_leaf">{{ __('story::index.title') }}</x-shared::title>
+    
     <!-- Filters Section -->
     <div class="w-full">
         <x-shared::collapsible :open="$hasFilters">

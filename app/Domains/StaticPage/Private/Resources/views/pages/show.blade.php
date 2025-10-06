@@ -2,7 +2,7 @@
     <div class="container mx-auto px-4 py-8">
         <article>
             <header class="mb-6 md:mb-10" style="max-width:800px; margin-left:auto; margin-right:auto;">
-                <h1 class="text-3xl text-accent font-bold mb-2">{{ $page->title }}</h1>
+                <x-shared::title>{{ $page->title }}</x-shared::title>
                 @if($page->published_at)
                     <p class="text-gray-500 text-sm">{{ $page->published_at->format('Y-m-d') }}</p>
                 @endif

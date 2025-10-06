@@ -5,7 +5,7 @@
             <!-- Header -->
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-gray-900">{{ __('Edit Profile') }}</h1>
+                    <x-shared::title>{{ __('Edit Profile') }}</x-shared::title>
                     <a href="{{ route('profile.show.own') }}"
                         class="text-gray-600 hover:text-gray-900 transition-colors duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

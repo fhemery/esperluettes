@@ -1,7 +1,7 @@
 <x-app-layout :page="$page">
     <article>
         <header class="mb-6 md:mb-10" style="max-width:800px; margin-left:auto; margin-right:auto;">
-            <h1 class="text-3xl text-accent font-bold mb-2">{{ $news->title }}</h1>
+            <x-shared::title>{{ $news->title }}</x-shared::title>
             @if($news->published_at)
             <p class="text-gray-500 text-sm">{{ $news->published_at->format('Y-m-d') }}</p>
             @endif

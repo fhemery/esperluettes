@@ -16,8 +16,8 @@
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-4 surface-read text-on-surface p-2 sm:p-8">
                 <div class="flex flex-col items-center gap-2 max-w-[730px]">
-                    <h1 class="font-semibold text-3xl flex items-center gap-2 uppercase text-accent text-center">
-                        {{ $vm->chapter->title }}
+                    <div class="flex items-center gap-2">
+                        <x-shared::title class="text-center uppercase">{{ $vm->chapter->title }}</x-shared::title>
                         @if(!$vm->chapter->isPublished)
                         <x-shared::popover placement="top">
                             <x-slot name="trigger">
@@ -26,10 +26,10 @@
                             <p>{{ __('story::chapters.list.not_published') }}</p>
                         </x-shared::popover>
                         @endif
-                    </h1>
+                    </div>
 
                     <div class="flex items-center gap-2 text-sm">
-                        
+
                         <x-shared::metric-badge
                             icon="visibility"
                             :value="$vm->readsLogged"
