@@ -105,7 +105,7 @@
                 <!-- Trigger warnings -->
                 <div class="flex flex-col gap-2">
                     <div class="font-semibold text-md leading-5">
-                        <span class="material-symbols-outlined translate-y-1">warning</span>
+                        <span class="material-symbols-outlined translate-y-1 text-primary">warning</span>
                         <span>{{ __('story::show.trigger_warnings.label') }}</span>
                     </div>
                     @switch($viewModel->twDisclosure)
