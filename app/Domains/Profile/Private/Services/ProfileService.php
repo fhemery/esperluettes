@@ -9,11 +9,11 @@ use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Profile\Private\Support\AvatarGenerator;
 use App\Domains\Profile\Private\Services\ProfileCacheService;
 use App\Domains\Shared\Support\SimpleSlug;
+use Illuminate\Support\Facades\Storage;
 use App\Domains\Shared\Services\ImageService;
 use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileService
 {
@@ -364,4 +364,29 @@ class ProfileService
         return $currentUserId === $profile_user_id;
     }
 
+    /**
+     * Delete the user's profile and related assets/cache.
+     * - Deletes custom profile picture if present
+     * - Deletes the default generated SVG avatar if present
+     * - Deletes the profile row
+     * - Clears the profile cache
+     */
+    public function deleteProfileByUserId(int $userId): void
+    {
+        $profile = Profile::where('user_id', $userId)->first();
+
+        if ($profile) {
+            if (!empty($profile->profile_picture_path)) {
+                Storage::disk('public')->delete($profile->profile_picture_path);
+            }
+            $defaultAvatarPath = 'profile_pictures/' . $userId . '.svg';
+            Storage::disk('public')->delete($defaultAvatarPath);
+            $profile->delete();
+        } else {
+            $defaultAvatarPath = 'profile_pictures/' . $userId . '.svg';
+            Storage::disk('public')->delete($defaultAvatarPath);
+        }
+
+        $this->cache->forgetByUserId($userId);
+    }
 }

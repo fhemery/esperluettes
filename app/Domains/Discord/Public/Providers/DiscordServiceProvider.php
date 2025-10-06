@@ -4,6 +4,8 @@ namespace App\Domains\Discord\Public\Providers;
 
 use App\Domains\Discord\Public\Events\DiscordConnected;
 use App\Domains\Discord\Public\Events\DiscordDisconnected;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Discord\Private\Listeners\RemoveDiscordAssociationsOnUserDeleted;
 use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
@@ -35,6 +37,8 @@ class DiscordServiceProvider extends ServiceProvider
         $eventBus = app(EventBus::class);
         $eventBus->registerEvent(DiscordConnected::name(), DiscordConnected::class);
         $eventBus->registerEvent(DiscordDisconnected::name(), DiscordDisconnected::class);
+        // Subscribe to Auth.UserDeleted to remove Discord links
+        $eventBus->subscribe(UserDeleted::name(), [RemoveDiscordAssociationsOnUserDeleted::class, 'handle']);
 
         // Blade components namespace
         Blade::componentNamespace('App\\Domains\\Discord\\Private\\Views\\Components', 'discord');

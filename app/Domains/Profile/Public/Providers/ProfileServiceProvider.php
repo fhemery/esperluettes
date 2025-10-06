@@ -15,6 +15,8 @@ use App\Domains\Auth\Public\Events\EmailVerified;
 use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;
 use App\Domains\Profile\Public\Events\AvatarChanged;
 use App\Domains\Profile\Public\Events\BioUpdated;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Profile\Private\Listeners\RemoveProfileOnUserDeleted;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -57,6 +59,8 @@ class ProfileServiceProvider extends ServiceProvider
         // Subscribe to domain event via EventBus
         $eventBus->subscribe(UserRegistered::name(), [CreateProfileOnUserRegistered::class, 'handle']);
         $eventBus->subscribe(EmailVerified::name(), [ClearProfileCacheOnEmailVerified::class, 'handle']);
+        // Clean up profile on user deletion
+        $eventBus->subscribe(UserDeleted::name(), [RemoveProfileOnUserDeleted::class, 'handle']);
 
         // Register Profile domain events mapping
         $eventBus->registerEvent(ProfileDisplayNameChanged::name(), ProfileDisplayNameChanged::class);

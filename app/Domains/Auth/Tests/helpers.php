@@ -2,7 +2,9 @@
 
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Public\Events\UserDeleted;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -94,4 +96,20 @@ function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVer
 
 
     return $user;
+}
+
+/**
+ * Delete a user in tests
+ */
+function deleteUser(TestCase $t, User $user, string $password = 'secret-password'): void
+{
+    // Perform the real flow through the controller so domain events and guards apply
+    $user->refresh();
+    $t->actingAs($user);
+
+    $response = $t->delete(route('account.destroy'), [
+        'password' => $password,
+    ]);
+
+    $response->assertRedirect('/');
 }

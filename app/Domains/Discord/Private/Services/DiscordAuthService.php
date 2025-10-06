@@ -145,4 +145,9 @@ class DiscordAuthService
         }
         return $deleted;
     }
+
+    public function deleteUserId(int $userId): void
+    {
+        DiscordUser::query()->where('user_id', $userId)->delete();
+    }
 }
