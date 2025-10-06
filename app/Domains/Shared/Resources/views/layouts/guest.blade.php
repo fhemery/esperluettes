@@ -21,6 +21,7 @@
         @endphp
 
         <!-- Page Content (guest) -->
+         @php($cssSize = ($size==='sm') ? 'max-w-2xl' : (($size==='md') ? 'max-w-4xl' : 'max-w-7xl'))
         <main class="flex-1 flex flex-col w-full {{ $mainClass }}">
             <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-4 pb-6 lg:pb-8 flex flex-col gap-4">
                 @if (isset($page) && $page->breadcrumbs)
@@ -28,7 +29,7 @@
                 @else
                     <x-shared::breadcrumbs-component />
                 @endif
-                <div class="flex-1">
+                <div class="w-full flex-1 {{ $cssSize }} mx-auto">
                     {{ $slot }}
                 </div>
             </div>

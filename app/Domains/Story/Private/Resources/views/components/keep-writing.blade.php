@@ -16,7 +16,7 @@
             </x-shared::button>
         </a>
     @elseif(!$vm)
-    <p>{{ __('story::keep-writing.empty') }}</p>
+    <p class="text-center">{{ __('story::keep-writing.empty') }}</p>
     <a href="{{ route('stories.create') }}">
         <x-shared::button color="accent">
             {{ __('story::keep-writing.new_story') }}

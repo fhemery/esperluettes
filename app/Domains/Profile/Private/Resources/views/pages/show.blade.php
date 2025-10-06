@@ -15,7 +15,7 @@
                     <!-- User Info -->
                     <div class="flex-1">
                         <div class="flex items-center gap-3">
-                            <h1 class="text-3xl font-bold text-white">{{ $profile->display_name }}</h1>
+                            <x-shared::title>{{ $profile->display_name }}</x-shared::title>
                             @if($isOwn)
                                 <div x-data="{ url: '{{ route('profile.show', $profile) }}', copied: false }"
                                      class="relative">

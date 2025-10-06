@@ -185,8 +185,7 @@
 
         <!-- Trigger warnings -->
         <div class="col-span-4 flex flex-col gap-2"
-            x-data="{ discl: @js($twDisclosureOld) }"
-            @selection-changed="discl = $event.detail.value">
+            x-data="{ discl: @js($twDisclosureOld) }">
             <div class="flex flex-col sm:flex-row gap-2 w-full">
                 <div class="flex items-center gap-2">
                     <x-input-label for="tw_disclosure" :required="true" :value="__('story::shared.trigger_warnings.label')" />
@@ -203,9 +202,11 @@
                         labelField="label"
                         descriptionField="description"
                         placeholder="{{ __('story::shared.trigger_warnings.tw_disclosure_placeholder') }}"
-                        color="accent" />
+                        color="accent"
+                        @selection-changed.window="if ($event.detail?.name === 'tw_disclosure') discl = $event.detail.value"
+                    />
                 </div>
-                <div x-show="discl === 'listed'" class="flex-1">
+                <div x-cloak x-show="discl === 'listed'" class="flex-1">
                     <x-shared::searchable-multi-select
                         name="story_ref_trigger_warning_ids[]"
                         :options="$referentials['trigger_warnings'] ?? []"

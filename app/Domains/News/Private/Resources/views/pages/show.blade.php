@@ -1,20 +1,20 @@
-<x-app-layout :page="$page">
-    <article>
-        <header class="mb-6 md:mb-10" style="max-width:800px; margin-left:auto; margin-right:auto;">
-            <h1 class="text-3xl text-accent font-bold mb-2">{{ $news->title }}</h1>
+<x-app-layout :page="$page" size="sm">
+    <article class="w-full">
+        <header class="mb-6 md:mb-10">
+            <x-shared::title>{{ $news->title }}</x-shared::title>
             @if($news->published_at)
-            <p class="text-gray-500 text-sm">{{ $news->published_at->format('Y-m-d') }}</p>
+            <p class="text-fg/80 text-sm">{{ $news->published_at->format('Y-m-d') }}</p>
             @endif
         </header>
 
         @if($news->status === 'draft')
-        <div class="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-4 py-2 rounded max-w-[800px] mx-auto">
+        <x-shared::badge color="warning">
             {{ __('news::public.draft_preview') }}
-        </div>
+        </x-shared::badge>
         @endif
 
         @if($news->header_image_path)
-        <figure class="mb-6" style="max-width:800px; margin-left:auto; margin-right:auto;">
+        <figure class="mb-6 w-full">
             @php
             $path = pathinfo($news->header_image_path ?? '', PATHINFO_DIRNAME);
             $name = pathinfo($news->header_image_path ?? '', PATHINFO_FILENAME);
@@ -22,8 +22,7 @@
             <picture>
                 <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
                 <img
-                    class="w-full h-auto rounded"
-                    style="max-width:800px;"
+                    class="w-full h-auto"
                     src="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }}"
                     srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
                     sizes="(max-width: 640px) calc(100vw - 2rem), 800px"

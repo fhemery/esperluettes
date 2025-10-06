@@ -30,10 +30,10 @@
                     <span>…</span>
                 </template>
                 <template x-if="!loading && code">
-                    <span>/connect <span class="font-semibold" x-text="code"></span></span>
+                    <span>/connect code:<span class="font-semibold" x-text="code"></span></span>
                 </template>
                 <template x-if="!loading && !code">
-                    <span>/connect ________</span>
+                    <span>/connect code:________</span>
                 </template>
             </div>
             <p class="text-sm">{{ __('discord::components.discord-component.connect_hint') }}</p>

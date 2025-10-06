@@ -20,9 +20,7 @@
 
             <!-- Title -->
             <div class="col-span-2 lg:col-start-1 lg:col-end-4 flex items-center justify-between">
-                <h1 class="font-semibold text-4xl leading-tight mr-2">
-                    {{ $viewModel->getTitle() }}
-                </h1>
+                <x-shared::title>{{ $viewModel->getTitle() }}</x-shared::title>
 
                 @if($viewModel->isAuthor())
                 <div class="flex items-center gap-2">
@@ -107,7 +105,7 @@
                 <!-- Trigger warnings -->
                 <div class="flex flex-col gap-2">
                     <div class="font-semibold text-md leading-5">
-                        <span class="material-symbols-outlined translate-y-1">warning</span>
+                        <span class="material-symbols-outlined translate-y-1 text-primary">warning</span>
                         <span>{{ __('story::show.trigger_warnings.label') }}</span>
                     </div>
                     @switch($viewModel->twDisclosure)

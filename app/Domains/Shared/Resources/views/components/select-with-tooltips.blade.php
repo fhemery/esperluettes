@@ -44,7 +44,10 @@
         maxHeight: @js($maxHeight),
         placeholder: @js($placeholder),
         color: @js($color),
-    })" class="relative w-full" @click.outside="open = false" @keydown.escape.window="open = false">
+    })"
+    {{ $attributes->merge(['class' => 'relative w-full']) }}
+    @click.outside="open = false"
+    @keydown.escape.window="open = false">
     
     <!-- Display Button -->
     <button type="button" x-ref="button" @click="open = !open; if (open) { $nextTick(() => updatePosition()) }" 
@@ -160,7 +163,7 @@
                             // Dispatch custom event for parent components to listen to
                             this.$nextTick(() => {
                                 this.$el.dispatchEvent(new CustomEvent('selection-changed', {
-                                    detail: { value: this.state.selected },
+                                    detail: { name: this.name, value: this.state.selected },
                                     bubbles: true
                                 }));
                             });

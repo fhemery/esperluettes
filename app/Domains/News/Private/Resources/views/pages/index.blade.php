@@ -1,12 +1,12 @@
 <x-app-layout :page="$page">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-semibold text-accent mb-6">{{ __('news::public.index.title') }}</h1>
+    <div class="w-full flex flex-col gap-6">
+        <x-shared::title icon="news">{{ __('news::public.index.title') }}</x-shared::title>
 
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             @forelse($news as $news)
-                <article class="border rounded-lg overflow-hidden shadow-sm bg-white">
+                <article class="overflow-hidden surface-read text-on-surface flex flex-col">
                     @if($news->header_image_path)
-                        <a href="{{ route('news.show', $news->slug) }}">
+                        <a href="{{ route('news.show', $news->slug) }}" class="w-full">
                             @php
                                 $path = pathinfo($news->header_image_path ?? '', PATHINFO_DIRNAME);
                                 $name = pathinfo($news->header_image_path ?? '', PATHINFO_FILENAME);
@@ -23,14 +23,16 @@
                                 >
                             </picture>
                         </a>
+                    @else
+                    <div></div>
                     @endif
-                    <div class="p-4">
-                        <h2 class="text-xl font-bold mb-2">
+                    <div class="p-4 flex-1 flex flex-col gap-4">
+                        <h2 class="text-xl font-bold text-accent">
                             <a href="{{ route('news.show', $news->slug) }}" class="hover:underline">
                                 {{ $news->title }}
                             </a>
                         </h2>
-                        <p class="text-gray-600 mb-4">{{ $news->summary }}</p>
+                        <p class="text-gray-600 flex-1">{{ $news->summary }}</p>
                         <a class="text-primary-600 hover:underline" href="{{ route('news.show', $news->slug) }}">
                             {{ __('news::public.index.read_more') }}
                         </a>
