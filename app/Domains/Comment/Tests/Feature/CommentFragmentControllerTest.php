@@ -102,6 +102,31 @@ describe('Comment list partial display', function () {
         $response->assertSeeInOrder(['<a href="' . route('profile.show', ['profile' => 'alice']), 'Hello'], false);
     });
 
+    it('renders default avatar and translated name when author is unknown', function () {
+        $entityType = 'default';
+        $entityId = 123;
+
+        $user = alice($this);
+        $this->actingAs($user);
+
+        // Create a comment normally, then simulate an unknown author by nulling author_id
+        $commentId = createComment($entityType, $entityId, 'Anonymous says hello');
+        Comment::query()->where('id', $commentId)->update(['author_id' => null]);
+
+        $response = $this->get(route('comments.fragments', [
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
+            'page' => 1,
+            'per_page' => 2,
+        ]));
+
+        $response->assertStatus(200);
+        // Default avatar image should be used
+        $response->assertSee('images/default-avatar.svg', false);
+        // Default translated name should be displayed
+        $response->assertSee(__('comment::comments.unknown_user'));
+    });
+
     it('renders child comments HTML for the first page', function () {
         $entityType = 'default';
         $entityId = 123;

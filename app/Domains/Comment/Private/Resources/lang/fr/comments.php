@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'unknown_user' => 'Esperluette disparue',
     'form' => [
         'body' => [
             'placeholder' => 'Écrire un commentaire…',

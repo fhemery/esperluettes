@@ -1,20 +1,31 @@
 <li class="sm:p-4 mb-4">
-  @php($config = $config ?? null)
+  @php
+  $config = $config ?? null;
+  $isUnknown = is_null($comment->authorId);
+  $displayName = $isUnknown
+    ? __('comment::comments.unknown_user')
+    : ($comment->authorProfile->display_name ?: '—');
+  $avatar = $comment->authorProfile->avatar_url ?? '';
+  @endphp
+
   <div class="grid grid-cols-2 gap-2 grid-cols-[auto_1fr]">
     <!-- Avatar -->
     <div class="shrink-0">
-      @php($avatar = $comment->authorProfile->avatar_url ?? '')
       @if($avatar)
-      <img src="{{ $avatar }}" data-fallback="{{ asset('images/default-avatar.svg') }}" onerror="this.src=this.dataset.fallback;this.onerror=null;" alt="{{ $comment->authorProfile->display_name ?? 'User' }}" class="h-8 w-8 sm:h-12 sm:w-12 rounded-full object-cover" />
+      <img src="{{ $avatar }}" data-fallback="{{ asset('images/default-avatar.svg') }}" onerror="this.src=this.dataset.fallback;this.onerror=null;" alt="{{ $displayName }}" class="h-8 w-8 sm:h-12 sm:w-12 rounded-full object-cover" />
       @else
-      <img src="{{ asset('images/default-avatar.svg') }}" alt="{{ $comment->authorProfile->display_name ?? 'User' }}" class="h-6 w-6 sm:h-12 sm:w-12 rounded-full object-cover" />
+      <img src="{{ asset('images/default-avatar.svg') }}" alt="{{ $displayName }}" class="h-6 w-6 sm:h-12 sm:w-12 rounded-full object-cover" />
       @endif
     </div>
 
     <!-- Header: author + date + edit icon (right) -->
     <div class="flex items-center gap-2 grow">
       <div class="font-semibold text-gray-800">
-        <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-gray-600">{{ $comment->authorProfile->display_name ?: '—' }}</a>
+        @if($isUnknown || empty($comment->authorProfile->slug))
+        <span>{{ $displayName }}</span>
+        @else
+        <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-gray-600">{{ $displayName }}</a>
+        @endif
       </div>
       @if($comment->canEditOwn && Auth::check() && Auth::id() === $comment->authorId)
       <button type="button" class="text-gray-400 hover:text-gray-600" data-action="edit" data-comment-id="{{ $comment->id }}" title="{{ __('comment::comments.actions.edit') }}" aria-label="{{ __('comment::comments.actions.edit') }}">

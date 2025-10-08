@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Blade;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Comment\Public\Events\CommentEdited;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Comment\Private\Listeners\RemoveAuthorOnUserDeleted;
 
 class CommentServiceProvider extends ServiceProvider
 {
@@ -48,5 +50,7 @@ class CommentServiceProvider extends ServiceProvider
         $eventBus = app(EventBus::class);
         $eventBus->registerEvent(CommentPosted::name(), CommentPosted::class);
         $eventBus->registerEvent(CommentEdited::name(), CommentEdited::class);
+        // Subscribe to Auth.UserDeleted to nullify comment authors
+        $eventBus->subscribe(UserDeleted::name(), [RemoveAuthorOnUserDeleted::class, 'handle']);
     }
 }

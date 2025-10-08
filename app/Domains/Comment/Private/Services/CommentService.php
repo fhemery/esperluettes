@@ -112,4 +112,13 @@ class CommentService
 
         return $updated;
     }
+
+    /**
+     * Nullify author_id for all comments authored by the given user.
+     * Returns affected rows count.
+     */
+    public function nullifyAuthor(int $userId): int
+    {
+        return $this->repository->nullifyAuthor($userId);
+    }
 }

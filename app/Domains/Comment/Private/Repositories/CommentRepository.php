@@ -155,4 +155,15 @@ class CommentRepository
             ->where('commentable_id', $entityId)
             ->forceDelete();
     }
+
+    /**
+     * Set author_id to null for all comments authored by the given user.
+     * Returns affected rows count.
+     */
+    public function nullifyAuthor(int $userId): int
+    {
+        return Comment::query()
+            ->where('author_id', $userId)
+            ->update(['author_id' => null]);
+    }
 }
