@@ -94,4 +94,15 @@ class StaticPageService
             ->pluck('id', 'slug')
             ->toArray();
     }
+
+    /**
+     * Nullify created_by for all static pages authored by the given user.
+     * Returns affected rows count.
+     */
+    public function nullifyCreator(int $userId): int
+    {
+        return StaticPage::query()
+            ->where('created_by', $userId)
+            ->update(['created_by' => null]);
+    }
 }

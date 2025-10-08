@@ -236,6 +236,7 @@ deptrac:
       - EventsPublic
 
     StaticPagePublic:
+      - AuthPublic
       - Shared
       - StaticPagePrivate
       - EventsPublic

@@ -11,6 +11,8 @@ use App\Domains\StaticPage\Public\Events\StaticPagePublished;
 use App\Domains\StaticPage\Public\Events\StaticPageUnpublished;
 use App\Domains\StaticPage\Public\Events\StaticPageUpdated;
 use App\Domains\StaticPage\Public\Events\StaticPageDeleted;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\StaticPage\Private\Listeners\RemoveCreatorOnUserDeleted;
 
 class StaticPageServiceProvider extends ServiceProvider
 {
@@ -37,5 +39,7 @@ class StaticPageServiceProvider extends ServiceProvider
         $eventBus->registerEvent(StaticPageUnpublished::name(), StaticPageUnpublished::class);
         $eventBus->registerEvent(StaticPageUpdated::name(), StaticPageUpdated::class);
         $eventBus->registerEvent(StaticPageDeleted::name(), StaticPageDeleted::class);
+        // Subscribe to user deletion to nullify creator id
+        $eventBus->subscribe(UserDeleted::name(), [RemoveCreatorOnUserDeleted::class, 'handle']);
     }
 }
