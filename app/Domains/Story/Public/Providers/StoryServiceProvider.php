@@ -23,9 +23,12 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Auth\Public\Events\UserRegistered;
+use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
+use App\Domains\Story\Private\Listeners\RemoveStoriesOnUserDeleted;
+use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -77,6 +80,8 @@ class StoryServiceProvider extends ServiceProvider
         // Subscribe to cross-domain events (after-commit listeners)
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);
         $eventBus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
+        $eventBus->subscribe(UserDeleted::class, [app(RemoveStoriesOnUserDeleted::class), 'handle']);
+        $eventBus->subscribe(UserDeleted::class, [app(RemoveChapterCreditsOnUserDeleted::class), 'handle']);
 
     }
 }

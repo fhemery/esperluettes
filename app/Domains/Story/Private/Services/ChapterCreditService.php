@@ -66,4 +66,12 @@ class ChapterCreditService
             ->where('user_id', $userId)
             ->update(['credits_spent' => DB::raw('credits_spent + 1')]);
     }
+
+    /**
+     * Remove the chapter credits row for a user (used on account deletion cleanup).
+     */
+    public function deleteRow(int $userId): void
+    {
+        DB::table('story_chapter_credits')->where('user_id', $userId)->delete();
+    }
 }

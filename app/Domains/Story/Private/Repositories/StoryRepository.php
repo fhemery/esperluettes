@@ -8,6 +8,7 @@ use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 final class StoryRepository
@@ -73,6 +74,20 @@ final class StoryRepository
         }
 
         return $query;
+    }
+
+    /**
+     * Return all stories authored by the given user (appears in authors relation).
+     *
+     * @return Collection<int, Story>
+     */
+    public function findByAuthor(int $userId): Collection
+    {
+        return Story::query()
+            ->whereHas('authors', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->get();
     }
 
     /**
