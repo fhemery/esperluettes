@@ -225,6 +225,7 @@ deptrac:
       - HomePrivate
 
     NewsPublic:
+      - AuthPublic
       - Shared
       - NewsPrivate
       - EventsPublic
@@ -294,6 +295,7 @@ deptrac:
     DashboardPrivate:
       - Shared
       - AuthPublic
+      - NewsPublic
       - ProfilePublic
       - StoryPublic
       - CommentPublic

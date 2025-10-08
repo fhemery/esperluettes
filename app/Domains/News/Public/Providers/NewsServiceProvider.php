@@ -12,6 +12,8 @@ use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUpdated;
 use App\Domains\News\Public\Events\NewsDeleted;
 use App\Domains\News\Public\Events\NewsUnpublished;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\News\Private\Listeners\RemoveCreatorOnUserDeleted;
 
 class NewsServiceProvider extends ServiceProvider
 {
@@ -41,5 +43,8 @@ class NewsServiceProvider extends ServiceProvider
         $eventBus->registerEvent(NewsUpdated::name(), NewsUpdated::class);
         $eventBus->registerEvent(NewsDeleted::name(), NewsDeleted::class);
         $eventBus->registerEvent(NewsUnpublished::name(), NewsUnpublished::class);
+        
+        // Subscribe to user deletion to nullify creator id on news
+        $eventBus->subscribe(UserDeleted::name(), [RemoveCreatorOnUserDeleted::class, 'handle']);
     }
 }

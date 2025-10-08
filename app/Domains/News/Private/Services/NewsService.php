@@ -114,4 +114,15 @@ class NewsService
                 ->get();
         });
     }
+
+    /**
+     * Nullify created_by for all news authored by the given user.
+     * Returns affected rows count.
+     */
+    public function nullifyCreator(int $userId): int
+    {
+        return News::query()
+            ->where('created_by', $userId)
+            ->update(['created_by' => null]);
+    }
 }
