@@ -225,8 +225,6 @@ class StoryService
         })->count();
     }
 
-
-
     public function getStoryByLatestAddedChapter(int $userId): ?Story
     {
         $latestChapter = Chapter::query()->with('story')->whereHas('story', function ($q) use ($userId) {
@@ -282,5 +280,19 @@ class StoryService
     public function getRandomStories(int $userId, int $nbStories = 7, array $visibilities = [Story::VIS_PUBLIC]): array
     {
         return $this->storiesRepository->getRandomStories($userId, $nbStories, $visibilities);
+    }
+
+    /**
+     * Delete all stories authored by the given user, including chapters and their comments.
+     * A story qualifies if the user appears in its authors (even if there are other authors).
+     */
+    public function deleteStoriesByAuthor(int $userId): void
+    {
+        // Fetch stories where the user is among the authors
+        $stories = $this->storiesRepository->findByAuthor($userId);
+
+        foreach ($stories as $story) {
+            $this->deleteStory($story);
+        }
     }
 }
