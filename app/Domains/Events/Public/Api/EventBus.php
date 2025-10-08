@@ -14,6 +14,13 @@ class EventBus
         private readonly EventService $eventService,
     ) {}
 
+    /**
+     * Map of logical event name => list of listeners awaiting registration
+     * when the event class is not yet known at subscription time.
+     * @var array<string, array<int, callable|array>>
+     */
+    private array $pendingSubscriptions = [];
+
     public function emit(DomainEvent $event): void
     {
         // Persist then dispatch. Non-critical timing (after-commit) is currently controlled by listeners
@@ -34,14 +41,38 @@ class EventBus
     public function subscribe(string|array $eventNames, callable|array $listener): void
     {
         foreach ((array) $eventNames as $name) {
-            $resolved = $this->factory->resolve($name) ?? $name; // allow either logical name or FQCN
-            LaravelEvent::listen($resolved, $listener);
+            $resolved = $this->factory->resolve($name);
+            if ($resolved) {
+                // We know the concrete class, attach immediately
+                LaravelEvent::listen($resolved, $listener);
+                continue;
+            }
+
+            // If $name is already a FQCN (class exists), listen directly
+            if (is_string($name) && class_exists($name)) {
+                LaravelEvent::listen($name, $listener);
+                continue;
+            }
+
+            // Otherwise, queue the listener until the event gets registered
+            $key = (string) $name;
+            $this->pendingSubscriptions[$key] = $this->pendingSubscriptions[$key] ?? [];
+            $this->pendingSubscriptions[$key][] = $listener;
         }
     }
 
     public function registerEvent(string $name, string $dtoClass): void
     {
         $this->factory->register($name, $dtoClass);
+
+        // Flush any pending subscriptions for this logical name now that we know its class
+        $resolved = $this->factory->resolve($name) ?? $name;
+        if (isset($this->pendingSubscriptions[$name])) {
+            foreach ($this->pendingSubscriptions[$name] as $listener) {
+                LaravelEvent::listen($resolved, $listener);
+            }
+            unset($this->pendingSubscriptions[$name]);
+        }
     }
 
     public function resolveDomainEventClass(string $name): ?string
