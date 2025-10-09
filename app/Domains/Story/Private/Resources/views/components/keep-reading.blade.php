@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-4 items-center justify-between surface-read text-on-surface p-4 h-full">
-    <h3 class="flex items-center self-start gap-2 text-accent font-semibold text-xl">
+    <h3 class="flex items-center self-center gap-2 text-accent font-semibold text-xl">
         <span class="material-symbols-outlined">
             book_ribbon
         </span>{{ __('story::keep-reading.title') }}
