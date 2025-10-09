@@ -5,7 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "build-and-deploy:full": "npm run build && node scripts/deploy-full.js",
+        "package": "node scripts/package.js",
         "prepare": "husky",
         "dep:check": "./vendor/bin/sail composer deptrac",
         "husky:precommit": "node scripts/husky-precommit.js",

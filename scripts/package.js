@@ -5,7 +5,7 @@
  - Otherwise uses ./vendor/bin/sail for composer and artisan commands
 */
 
-import fs from 'fs';
+import fs, { copyFile } from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 import readline from 'readline';
@@ -19,8 +19,8 @@ const projectRoot = path.resolve(__dirname, '..');
 
 const DIST_DIR = 'dist';
 const TARGETS = [
-  { label: 'test', envFile: '.env.test' },
-  { label: 'prod', envFile: '.env.production' },
+  { label: 'test', envFile: '.env.test', robotsFile: 'robots.test.txt' },
+  { label: 'prod', envFile: '.env.production', robotsFile: 'robots.production.txt' },
 ];
 const VERSION_FILE = 'version.json';
 
@@ -96,6 +96,7 @@ function runner() {
       composer: (args) => runHere('composer', args, { shell: process.platform === 'win32' }),
       artisan: (args) => runHere('php', ['artisan', ...args], { shell: process.platform === 'win32' }),
       composerIn: (relativeDir, args) => runHere('composer', [...args, `--working-dir=${path.join(projectRoot, relativeDir)}`], { shell: process.platform === 'win32' }),
+      npm: (args) => runHere('npm', args, { shell: process.platform === 'win32' }),
     };
   }
   const sailPath = path.join(projectRoot, 'vendor', 'bin', 'sail');
@@ -112,6 +113,7 @@ function runner() {
     composer: (args) => sailRunner(['composer', ...args]),
     artisan: (args) => sailRunner(['artisan', ...args]),
     composerIn: (relativeDir, args) => sailRunner(['composer', ...args, `--working-dir=${toContainerPath(relativeDir)}`]),
+    npm: (args) => runHere(['npm', ...args]),
   };
 }
 
@@ -268,7 +270,7 @@ async function determineVersionNumber(){
   }
   log(null, `Selected version: ${sanitizedVersion}`);
 
-  return {commitSha, sanitizedVersion};
+  return {commitSha, sanitizedVersion, version, manualTag, tagExistsOnHead};
 }
 
 async function cleanDist() {
@@ -283,6 +285,7 @@ async function cleanDist() {
 async function copyToDist() {
   const toCopyDirs = ['app', 'bootstrap', 'config', 'public', 'resources', 'routes', 'storage'];
 
+  // Copy all above folders to dist/base
   const baseRelative = path.join(DIST_DIR, 'base');
   const basePath = path.join(projectRoot, baseRelative);
   await ensureDir(basePath);
@@ -291,6 +294,8 @@ async function copyToDist() {
     await copyRecursive(path.join(projectRoot, d), path.join(basePath, d));
   }
 
+  // In storage, remove app/public entries, 
+  // because these are local images of files that we do not want to send
   const storagePublicBase = path.join(basePath, 'storage', 'app', 'public');
   if (await exists(storagePublicBase)) {
     const entries = await fsp.readdir(storagePublicBase);
@@ -299,77 +304,26 @@ async function copyToDist() {
     }
   }
 
+  // Copy a few remaining files
   await copyRecursive(path.join(projectRoot, 'artisan'), path.join(basePath, 'artisan'));
   await copyRecursive(path.join(projectRoot, 'composer.json'), path.join(basePath, 'composer.json'));
+  await copyRecursive(path.join(projectRoot, '.env'), path.join(basePath, '.env'));
   if (await exists(path.join(projectRoot, 'composer.lock'))) {
     await copyRecursive(path.join(projectRoot, 'composer.lock'), path.join(basePath, 'composer.lock'));
   }
+
+  return baseRelative;
 }
 
-async function main() {
-  log('header', 'Starting Laravel Deployment Build Process');
-  log(null, '==============================================');
-  const r = runner();
+async function setupPermissions(distSourcePath) {
+  await chmodRecursive(path.join(distSourcePath, 'storage'), 0o644, 0o755);
+  await chmodRecursive(path.join(distSourcePath, 'bootstrap', 'cache'), 0o644, 0o755);
+  try { await fsp.chmod(path.join(distSourcePath, 'storage'), 0o755); } catch {}
+  try { await fsp.chmod(path.join(distSourcePath, 'bootstrap', 'cache'), 0o755); } catch {}
 
-  await checkAtRootDirectory();
-  const {commitSha, sanitizedVersion} = await determineVersionNumber();
+}
 
-
-  // Step 1: Clean previous build output
-  log(null, '📦 Step 1: Cleaning previous build artifacts');
-  await cleanDist();
-
-  // Step 2: copy everything that's needed in base
-  log(null, '📦 Step 2: Copying base files');
-  await copyToDist();
-
-
-  // Step 2: Dependencies
-  log(null, '🔧 Step 2: Installing/updating dependencies');
-  
-  r.composer(['install', '--optimize-autoloader', '--no-interaction']);
-  log('ok', 'Composer dependencies installed');
-
-  run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['ci']);
-  log('ok', 'Frontend dependencies installed');
-  log(null, "ℹ️  Note: Make sure to run 'npm run build' before running this deployment script");
-
-  // Step 3: Ensure caches are clear before environment packaging
-  log(null, '🧹 Step 3: Clearing Laravel caches');
-  r.artisan(['optimize:clear']);
-  log('ok', 'Laravel caches cleared');
-
-  log(null, '🏗️  Step 4: Building base payload once');
-  const toCopyDirs = ['app', 'bootstrap', 'config', 'public', 'resources', 'routes', 'storage'];
-
-  const baseRelative = path.join(DIST_DIR, 'base');
-  const basePath = path.join(projectRoot, baseRelative);
-  if (await exists(basePath)) {
-    await rimraf(basePath);
-  }
-  await ensureDir(basePath);
-
-  for (const d of toCopyDirs) {
-    await copyRecursive(path.join(projectRoot, d), path.join(basePath, d));
-  }
-
-  const storagePublicBase = path.join(basePath, 'storage', 'app', 'public');
-  if (await exists(storagePublicBase)) {
-    const entries = await fsp.readdir(storagePublicBase);
-    for (const name of entries) {
-      await rimraf(path.join(storagePublicBase, name));
-    }
-  }
-
-  await copyRecursive(path.join(projectRoot, 'artisan'), path.join(basePath, 'artisan'));
-  await copyRecursive(path.join(projectRoot, 'composer.json'), path.join(basePath, 'composer.json'));
-  if (await exists(path.join(projectRoot, 'composer.lock'))) {
-    await copyRecursive(path.join(projectRoot, 'composer.lock'), path.join(basePath, 'composer.lock'));
-  }
-
-  const composerArgs = ['install', '--optimize-autoloader', '--no-dev', '--no-interaction'];
-  r.composerIn(baseRelative, composerArgs);
-
+async function setupPublicHtmlDir(basePath) {
   const publicHtmlBasePath = path.join(basePath, 'public_html');
   await ensureDir(publicHtmlBasePath);
   const publicPath = path.join(projectRoot, 'public');
@@ -387,29 +341,11 @@ async function main() {
       log(null, '⚠️  Warning: .htaccess file not found in public directory');
     }
   }
+}
 
-  await chmodRecursive(path.join(basePath, 'storage'), 0o644, 0o755);
-  await chmodRecursive(path.join(basePath, 'bootstrap', 'cache'), 0o644, 0o755);
-  try { await fsp.chmod(path.join(basePath, 'storage'), 0o755); } catch {}
-  try { await fsp.chmod(path.join(basePath, 'bootstrap', 'cache'), 0o755); } catch {}
-
-  log('ok', 'Base payload prepared');
-
-  // Step 4: Package environments
-  for (const target of TARGETS) {
-    log(null, `📁 Step 5 (${target.label}): Packaging environment`);
-
-    const payloadRelative = path.join(DIST_DIR, `payload-${target.label}`);
-    const payloadPath = path.join(projectRoot, payloadRelative);
-
-    if (await exists(payloadPath)) {
-      await rimraf(payloadPath);
-    }
-    await ensureDir(payloadPath);
-
-    await copyRecursive(basePath, payloadPath);
-
-    await fsp.copyFile(path.join(projectRoot, target.envFile), path.join(payloadPath, '.env'));
+async function packageForEnv(target, distSourcePath, version, sanitizedVersion, commitSha) {
+  await fsp.copyFile(path.join(projectRoot, target.envFile), path.join(distSourcePath, '.env'));
+  await fsp.copyFile(path.join(projectRoot, target.robotsFile), path.join(distSourcePath, 'robots.txt'));
 
     const metadata = {
       version,
@@ -419,34 +355,16 @@ async function main() {
       environment: target.label,
       envFile: target.envFile,
     };
-    await fsp.writeFile(path.join(payloadPath, VERSION_FILE), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
-
-    await chmodRecursive(path.join(payloadPath, 'storage'), 0o644, 0o755);
-    await chmodRecursive(path.join(payloadPath, 'bootstrap', 'cache'), 0o644, 0o755);
-    try { await fsp.chmod(path.join(payloadPath, 'storage'), 0o755); } catch {}
-    try { await fsp.chmod(path.join(payloadPath, 'bootstrap', 'cache'), 0o755); } catch {}
+    await fsp.writeFile(path.join(distSourcePath, VERSION_FILE), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
 
     const zipName = `esperluettes-${target.label}-${sanitizedVersion}.zip`;
-    const { zipPath, size } = await zipDist(payloadPath, zipName);
+    const { zipPath, size } = await zipDist(distSourcePath, zipName);
     const sizeMB = (size / (1024 * 1024)).toFixed(2) + ' MB';
 
-    log(null, `Generated ${zipPath} (${sizeMB}MB)`);
-    await rimraf(payloadPath);
-  }
+    log(null, `Generated ${zipPath} (${sizeMB})`);
+}
 
-  log(null, '\n\u001b[32m🎉 Deployment packages created successfully!\u001b[0m');
-  log(null, '==============================================');
- 
-  log(null, '');
-  log(null, `Version: ${version}`);
-  log(null, `Commit: ${commitSha}`);
-  log(null, `Built at: ${new Date().toISOString()}`);
-  log(null, '');
-  log(null, '\u001b[33m📖 Next steps:\u001b[0m');
-  log(null, '1. Upload the desired zip to the server');
-  log(null, "2. Run migrations if needed: ./vendor/bin/sail artisan migrate --env=<environment>");
-  log(null, "3. After deploy: php artisan optimize:clear (on the server)");
-  log(null, '');
+async function tagGit(manualTag, tagExistsOnHead) {
   if (manualTag) {
     if (tagExistsOnHead) {
       log(null, `Tag '${manualTag}' already exists on this commit; skipping creation.`);
@@ -467,6 +385,62 @@ async function main() {
     }
     log(null, '');
   }
+}
+
+async function main() {
+  log('header', 'Starting Laravel Deployment Build Process');
+  log(null, '==============================================');
+  const r = runner();
+
+  await checkAtRootDirectory();
+  const {commitSha, sanitizedVersion, version, manualTag, tagExistsOnHead} = await determineVersionNumber();
+
+
+  log(null, '📦 Step 1: Cleaning previous build artifacts');
+  await cleanDist();
+
+  log(null, '🧹 Step 2: Clearing Laravel caches to avoid copying them to other envs');
+  r.artisan(['optimize:clear']);
+
+  log(null, '📦 Step 3: Copying base files into dist');
+  const distSourcePath = await copyToDist();
+
+  log(null, '🏗️ Step 4: Rebuilding front and sending it to dist as well');
+  r.npm(['run', 'build']);
+
+  log(null, '📦 Step 5: installing vendor folder and optimizing')
+  const composerArgs = ['install', '--optimize-autoloader', '--no-dev', '--no-interaction'];
+  r.composerIn(distSourcePath, composerArgs);
+
+  log(null, '📦 Step 6: Putting all public files into public_html')
+  await setupPublicHtmlDir(distSourcePath);
+
+  log(null, 'Step 7: tuning permissions');
+  await setupPermissions(distSourcePath);
+  
+  for (const target of TARGETS) {
+    log(null, `📁 Step 8 (${target.label}): Packaging environment`);
+
+    await packageForEnv(target, distSourcePath, version, sanitizedVersion, commitSha);
+  }
+
+  log(null, 'Step 9: Tagging git');
+  await tagGit(manualTag, tagExistsOnHead);
+
+  log(null, '\n\u001b[32m🎉 Deployment packages created successfully!\u001b[0m');
+  log(null, '==============================================');
+ 
+  log(null, '');
+  log(null, `Version: ${version}`);
+  log(null, `Commit: ${commitSha}`);
+  log(null, `Built at: ${new Date().toISOString()}`);
+  log(null, '');
+  log(null, '\u001b[33m📖 Next steps:\u001b[0m');
+  log(null, '1. Upload the desired zip to the server');
+  log(null, "2. Run migrations if needed: ./vendor/bin/sail artisan migrate --env=<environment>");
+  log(null, "3. After deploy: php artisan optimize:clear (on the server)");
+  log(null, '');
+ 
   log(null, '\u001b[32mHappy deploying! 🚀\u001b[0m');
 }
 
