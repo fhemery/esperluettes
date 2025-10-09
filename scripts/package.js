@@ -20,7 +20,7 @@ const projectRoot = path.resolve(__dirname, '..');
 const DIST_DIR = 'dist';
 const TARGETS = [
   { label: 'test', envFile: '.env.test', robotsFile: 'robots.test.txt' },
-  { label: 'prod', envFile: '.env.production', robotsFile: 'robots.production.txt' },
+  { label: 'production', envFile: '.env.production', robotsFile: 'robots.production.txt' },
 ];
 const VERSION_FILE = 'version.json';
 
