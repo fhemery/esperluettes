@@ -15,18 +15,18 @@
         </div>
 
         <!-- Keep writing -->
-        <div class="col-span-1">
-            <x-story::keep-writing-component />
+        <div class="col-span-1 flex flex-col h-full">
+            <x-story::keep-writing-component class="flex-1" />
         </div>
 
         <!-- Keep reading -->
-        <div class="col-span-1">
-            <x-story::keep-reading-component />
+        <div class="col-span-1 flex flex-col h-full">
+            <x-story::keep-reading-component class="flex-1" />
         </div>
 
         <!-- Placeholder side image -->
-        <div class="col-span-1 sm:col-span-2 flex flex-col gap-2 items-center justify-center p-4 surface-read text-on-surface">
-            <h3 class="text-xl font-semibold flex flex-start gap-2 text-tertiary self-start">
+        <div class="col-span-1 sm:col-span-2 flex flex-col h-full gap-2 items-center justify-start p-4 surface-read text-on-surface">
+            <h3 class="text-xl font-semibold flex items-center gap-2 text-tertiary self-center">
                 <span class="material-symbols-outlined">
                     group
                 </span>
@@ -35,6 +35,7 @@
             <img src="{{ asset('images/errors/not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto">
             <p class="text-sm text-muted">{{ __('dashboard::index.placeholder_text') }}</p>
         </div>
+
 
         <!-- Discover random stories -->
         <div class="col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">
