@@ -113,7 +113,7 @@ function runner() {
     composer: (args) => sailRunner(['composer', ...args]),
     artisan: (args) => sailRunner(['artisan', ...args]),
     composerIn: (relativeDir, args) => sailRunner(['composer', ...args, `--working-dir=${toContainerPath(relativeDir)}`]),
-    npm: (args) => runHere(['npm', ...args]),
+    npm: (args) => runHere('npm', [...args]),
   };
 }
 
@@ -297,7 +297,11 @@ async function copyToDist() {
   // We don't want to copy storage, because it includes either public files
   // or files that are internal to the application
   // However we want to ensure a storage dir exist to set permissions if need be
-  await ensureDir(path.join(basePath, 'storage'));
+  await ensureDir(path.join(basePath, 'storage', 'framework', 'cache'));
+  await ensureDir(path.join(basePath, 'storage', 'framework', 'sessions'));
+  await ensureDir(path.join(basePath, 'storage', 'framework', 'views'));
+  await ensureDir(path.join(basePath, 'storage', 'app', 'private'));
+  await ensureDir(path.join(basePath, 'storage', 'logs'));
   
   // Copy a few remaining files
   await copyRecursive(path.join(projectRoot, 'artisan'), path.join(basePath, 'artisan'));
