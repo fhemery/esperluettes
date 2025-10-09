@@ -75,8 +75,8 @@
                                     >
                                 </picture>
                                 <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pl-16 text-white">
-                                    <h3 class="text-2xl font-semibold">{{ $item->title }}</h3>
-                                    <p class="text-lg opacity-90 line-clamp-2">{{ $item->summary }}</p>
+                                    <h3 class="text-3xl font-semibold">{{ $item->title }}</h3>
+                                    <p class="text-2xl opacity-90 line-clamp-2">{{ $item->summary }}</p>
                                 </div>
                             </div>
                         @else
@@ -92,8 +92,8 @@
                                 >
                             </picture>
                             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
-                                <h3 class="text-xl font-semibold">{{ $item->title }}</h3>
-                                <p class="opacity-90 line-clamp-2">{{ $item->summary }}</p>
+                                <h3 class="text-3xl font-semibold">{{ $item->title }}</h3>
+                                <p class="text-2xl opacity-90 line-clamp-2">{{ $item->summary }}</p>
                             </div>
                         @endif
                     </a>

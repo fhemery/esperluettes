@@ -1,5 +1,5 @@
 <div class="flex flex-col justify-between gap-4 items-center surface-read text-on-surface p-4 h-full">
-    <h3 class="flex items-center self-start gap-2 text-accent font-semibold text-xl">
+    <h3 class="flex items-center self-center gap-2 text-accent font-semibold text-xl">
         <span class="material-symbols-outlined">
             stylus_fountain_pen
         </span> 
