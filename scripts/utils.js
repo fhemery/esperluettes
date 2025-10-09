@@ -62,6 +62,31 @@ export function run(cmd, args, options = {}) {
   if (res.status !== 0) throw new Error(`Command failed: ${joined}`);
 }
 
+// Runner that captures stdout (throws on failure)
+export function runCapture(cmd, args, options = {}) {
+  const isWin = process.platform === 'win32';
+  const joined = [cmd, ...(args || [])].join(' ');
+  const baseOpts = {
+    cwd: options.cwd,
+    shell: false,
+    encoding: 'utf8',
+    stdio: ['inherit', 'pipe', 'inherit'],
+    ...options,
+  };
+
+  let res = spawnSync(cmd, args || [], baseOpts);
+
+  if ((res.error || res.status !== 0) && isWin) {
+    const cmdline = [cmd, ...((args || []).map(a => /\s/.test(a) ? `"${a}"` : a))].join(' ');
+    res = spawnSync(cmdline, { ...baseOpts, shell: true });
+  }
+
+  if (res.error) throw res.error;
+  if (res.status !== 0) throw new Error(`Command failed: ${joined}`);
+
+  return (res.stdout || '').trim();
+}
+
 // Simple runner that returns boolean success
 export function runCmd(cmd, args, opts = {}) {
   const res = spawnSync(cmd, args || [], { stdio: 'inherit', shell: process.platform === 'win32', ...opts });

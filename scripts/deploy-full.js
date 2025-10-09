@@ -8,21 +8,86 @@
 import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
+import readline from 'readline';
 import { fileURLToPath } from 'url';
 import archiver from 'archiver';
-import { makeLog, run, determineRunner } from './utils.js';
+import { makeLog, run, determineRunner, runCapture } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 
 const DIST_DIR = 'dist';
-const ENV_FILE = '.env.test';
+const TARGETS = [
+  { label: 'test', envFile: '.env.test' },
+  { label: 'prod', envFile: '.env.production' },
+];
+const VERSION_FILE = 'version.json';
 
 const log = makeLog('deploy');
 
 // Wrapper to ensure cwd defaults to projectRoot for our run calls
 function runHere(cmd, args, options = {}) { return run(cmd, args, { cwd: projectRoot, ...options }); }
+
+function ask(question) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => rl.question(question, (answer) => {
+    rl.close();
+    resolve(answer.trim());
+  }));
+}
+
+async function autoVersion() {
+  const attempts = [
+    ['git', ['describe', '--tags', '--always', '--dirty']],
+    ['git', ['rev-parse', '--short', 'HEAD']],
+  ];
+  for (const [cmd, args] of attempts) {
+    try {
+      const out = runCapture(cmd, args, { cwd: projectRoot });
+      if (out) return out;
+    } catch {}
+  }
+  return `build-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+}
+
+function getCommitSha(ref = 'HEAD') {
+  try {
+    const out = runCapture('git', ['rev-parse', ref], { cwd: projectRoot });
+    if (out) return out;
+  } catch {}
+  return null;
+}
+
+function sanitizeForFilename(value) {
+  return value.replace(/[^a-zA-Z0-9._-]+/g, '-');
+}
+
+function shortSha(sha) {
+  return sha ? sha.slice(0, 7) : 'unknown';
+}
+
+function showRecentCommits(limit = 10) {
+  try {
+    const history = runCapture('git', ['log', `-n${limit}`, '--oneline'], { cwd: projectRoot });
+    if (history) {
+      log(null, 'Recent commits:');
+      log.raw(history.split('\n').map((line) => `  ${line}`).join('\n'));
+    }
+  } catch {
+    log.warn('Unable to read git history (is this a git repository?).');
+  }
+}
+
+function getLatestTag() {
+  try {
+    const tag = runCapture('git', ['describe', '--tags', '--abbrev=0'], { cwd: projectRoot });
+    if (tag) {
+      return tag;
+    }
+  } catch {}
+  return null;
+}
 
 function runner() {
   const chosen = determineRunner();
@@ -30,10 +95,11 @@ function runner() {
     return {
       composer: (args) => runHere('composer', args, { shell: process.platform === 'win32' }),
       artisan: (args) => runHere('php', ['artisan', ...args], { shell: process.platform === 'win32' }),
-      composerInDist: (args) => runHere('composer', [...args, `--working-dir=${path.join(projectRoot, DIST_DIR)}`], { shell: process.platform === 'win32' }),
+      composerIn: (relativeDir, args) => runHere('composer', [...args, `--working-dir=${path.join(projectRoot, relativeDir)}`], { shell: process.platform === 'win32' }),
     };
   }
   const sailPath = path.join(projectRoot, 'vendor', 'bin', 'sail');
+  const toContainerPath = (relativeDir) => `/var/www/html/${relativeDir.split(path.sep).join('/')}`;
   // On Windows, sail is a bash script; execute via bash if available
   const sailRunner = (subArgs) => {
     if (process.platform === 'win32') {
@@ -45,8 +111,7 @@ function runner() {
   return {
     composer: (args) => sailRunner(['composer', ...args]),
     artisan: (args) => sailRunner(['artisan', ...args]),
-    // Inside Sail, the app path is /var/www/html; dist will be available there
-    composerInDist: (args) => sailRunner(['composer', ...args, '--working-dir=/var/www/html/dist']),
+    composerIn: (relativeDir, args) => sailRunner(['composer', ...args, `--working-dir=${toContainerPath(relativeDir)}`]),
   };
 }
 
@@ -60,6 +125,34 @@ async function rimraf(target) {
 
 async function ensureDir(d) {
   await fsp.mkdir(d, { recursive: true });
+}
+
+async function withEnvFile(envFile, callback) {
+  const envPath = path.join(projectRoot, '.env');
+  const backupPath = `${envPath}.deploy-backup`;
+  const sourcePath = path.join(projectRoot, envFile);
+
+  if (!(await exists(sourcePath))) {
+    throw new Error(`${envFile} not found. Please create it before deployment.`);
+  }
+
+  const hadEnv = await exists(envPath);
+  if (hadEnv) {
+    await fsp.copyFile(envPath, backupPath);
+  }
+
+  await fsp.copyFile(sourcePath, envPath);
+
+  try {
+    await callback();
+  } finally {
+    if (hadEnv) {
+      await fsp.copyFile(backupPath, envPath);
+      await fsp.rm(backupPath, { force: true });
+    } else {
+      await fsp.rm(envPath, { force: true });
+    }
+  }
 }
 
 async function copyRecursive(src, dest) {
@@ -110,155 +203,270 @@ async function chmodRecursive(root, modeFile, modeDir) {
   }
 }
 
-async function zipDist(distDir) {
-  const zipPath = path.join(distDir, 'esperluettes.zip');
+async function zipDist(sourceDir, zipName) {
+  const outputDir = path.join(projectRoot, DIST_DIR);
+  await ensureDir(outputDir);
+  const zipPath = path.join(outputDir, zipName);
+  try {
+    await fsp.rm(zipPath, { force: true });
+  } catch {}
   await new Promise((resolve, reject) => {
     const output = fs.createWriteStream(zipPath);
     const archive = archiver('zip', { zlib: { level: 9 } });
     output.on('close', resolve);
     archive.on('error', reject);
     archive.pipe(output);
-    // Add contents of dist excluding the zip itself
-    archive.glob('**/*', { cwd: distDir, dot: true, ignore: ['esperluettes.zip'] });
+    const ensureNames = ['.env', VERSION_FILE];
+    archive.glob('**/*', { cwd: sourceDir, dot: true, ignore: [zipName, ...ensureNames] });
+    for (const name of ensureNames) {
+      const abs = path.join(sourceDir, name);
+      if (fs.existsSync(abs)) {
+        archive.file(abs, { name });
+      }
+    }
     archive.finalize();
   });
   const { size } = await fsp.stat(zipPath);
   return { zipPath, size };
 }
 
-async function main() {
-  log('header', 'Starting Laravel Deployment Build Process');
-  log(null, '==============================================');
-
+async function checkAtRootDirectory() {
   // Preconditions
   if (!(await exists(path.join(projectRoot, 'artisan')))) {
     throw new Error('Not in a Laravel project directory');
   }
-  if (!(await exists(path.join(projectRoot, ENV_FILE)))) {
-    throw new Error(`${ENV_FILE} not found. Please create it before deployment.`);
-  }
+}
 
-  // Step 1: Clean previous build
-  log(null, '📦 Step 1: Cleaning previous build');
-  const distPath = path.join(projectRoot, DIST_DIR);
-  if (await exists(distPath)) {
-    await rimraf(distPath);
+async function determineVersionNumber(){
+  showRecentCommits();
+  const latestTag = getLatestTag();
+  if (latestTag) {
+    log(null, `Latest tag: ${latestTag}`);
+  } else {
+    log(null, 'Latest tag: (none found)');
+  }
+  const manualTag = await ask('Enter a deployment version/tag (leave blank to auto-generate): ');
+  const version = manualTag || await autoVersion();
+  const sanitizedVersion = sanitizeForFilename(version);
+  const headShaRaw = getCommitSha();
+  const commitSha = headShaRaw || 'unknown';
+  let tagExistsOnHead = false;
+
+  if (manualTag) {
+    const existingTagSha = getCommitSha(manualTag);
+    if (existingTagSha) {
+      if (!headShaRaw) {
+        log.warn(`Tag '${manualTag}' already exists but current commit SHA could not be determined.`);
+        tagExistsOnHead = true;
+      } else if (existingTagSha !== headShaRaw) {
+        throw new Error(`Tag '${manualTag}' already exists on ${shortSha(existingTagSha)}, but current commit is ${shortSha(headShaRaw)}. Aborting.`);
+      } else {
+        log(null, `Tag '${manualTag}' already exists on the current commit (${shortSha(headShaRaw)}).`);
+        tagExistsOnHead = true;
+      }
+    }
+  }
+  log(null, `Selected version: ${sanitizedVersion}`);
+
+  return {commitSha, sanitizedVersion};
+}
+
+async function cleanDist() {
+  const distRootPath = path.join(projectRoot, DIST_DIR);
+  if (await exists(distRootPath)) {
+    await rimraf(distRootPath);
     log('ok', 'Removed existing dist directory');
   }
+  await ensureDir(distRootPath);
+}
+
+async function copyToDist() {
+  const toCopyDirs = ['app', 'bootstrap', 'config', 'public', 'resources', 'routes', 'storage'];
+
+  const baseRelative = path.join(DIST_DIR, 'base');
+  const basePath = path.join(projectRoot, baseRelative);
+  await ensureDir(basePath);
+
+  for (const d of toCopyDirs) {
+    await copyRecursive(path.join(projectRoot, d), path.join(basePath, d));
+  }
+
+  const storagePublicBase = path.join(basePath, 'storage', 'app', 'public');
+  if (await exists(storagePublicBase)) {
+    const entries = await fsp.readdir(storagePublicBase);
+    for (const name of entries) {
+      await rimraf(path.join(storagePublicBase, name));
+    }
+  }
+
+  await copyRecursive(path.join(projectRoot, 'artisan'), path.join(basePath, 'artisan'));
+  await copyRecursive(path.join(projectRoot, 'composer.json'), path.join(basePath, 'composer.json'));
+  if (await exists(path.join(projectRoot, 'composer.lock'))) {
+    await copyRecursive(path.join(projectRoot, 'composer.lock'), path.join(basePath, 'composer.lock'));
+  }
+}
+
+async function main() {
+  log('header', 'Starting Laravel Deployment Build Process');
+  log(null, '==============================================');
+  const r = runner();
+
+  await checkAtRootDirectory();
+  const {commitSha, sanitizedVersion} = await determineVersionNumber();
+
+
+  // Step 1: Clean previous build output
+  log(null, '📦 Step 1: Cleaning previous build artifacts');
+  await cleanDist();
+
+  // Step 2: copy everything that's needed in base
+  log(null, '📦 Step 2: Copying base files');
+  await copyToDist();
+
 
   // Step 2: Dependencies
   log(null, '🔧 Step 2: Installing/updating dependencies');
-  const r = runner();
-  // PHP deps (production optimize in workspace)
+  
   r.composer(['install', '--optimize-autoloader', '--no-interaction']);
   log('ok', 'Composer dependencies installed');
 
-  // Frontend deps (build is separate)
   run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['ci']);
   log('ok', 'Frontend dependencies installed');
   log(null, "ℹ️  Note: Make sure to run 'npm run build' before running this deployment script");
 
-  // Step 3: Clear caches
+  // Step 3: Ensure caches are clear before environment packaging
   log(null, '🧹 Step 3: Clearing Laravel caches');
-  r.artisan(['config:clear']);
-  r.artisan(['cache:clear']);
-  r.artisan(['route:clear']);
-  r.artisan(['view:clear']);
+  r.artisan(['optimize:clear']);
   log('ok', 'Laravel caches cleared');
 
-  // Step 4: Optimize for production
-  log(null, '⚡ Step 4: Optimizing Laravel for production');
-  // Copy production environment (temp)
-  await fsp.copyFile(path.join(projectRoot, ENV_FILE), path.join(projectRoot, '.env.temp'));
-  r.artisan(['config:cache']);
-  r.artisan(['route:cache']);
-  r.artisan(['view:cache']);
-  r.artisan(['optimize']);
-  // Restore original .env (mirror original script behavior)
-  if (await exists(path.join(projectRoot, '.env.backup'))) {
-    await fsp.rename(path.join(projectRoot, '.env.backup'), path.join(projectRoot, '.env'));
-  } else if (await exists(path.join(projectRoot, '.env.temp'))) {
-    await fsp.rm(path.join(projectRoot, '.env.temp'), { force: true });
-  }
-  log('ok', 'Laravel optimized for production');
-
-  // Step 5: Create distribution package
-  log(null, '📁 Step 5: Creating distribution package');
-  await ensureDir(distPath);
-
-  // Copy essential Laravel files and directories
+  log(null, '🏗️  Step 4: Building base payload once');
   const toCopyDirs = ['app', 'bootstrap', 'config', 'public', 'resources', 'routes', 'storage'];
+
+  const baseRelative = path.join(DIST_DIR, 'base');
+  const basePath = path.join(projectRoot, baseRelative);
+  if (await exists(basePath)) {
+    await rimraf(basePath);
+  }
+  await ensureDir(basePath);
+
   for (const d of toCopyDirs) {
-    await copyRecursive(path.join(projectRoot, d), path.join(distPath, d));
+    await copyRecursive(path.join(projectRoot, d), path.join(basePath, d));
   }
 
-  // Remove dist/storage/app/public/*
-  const storagePublic = path.join(distPath, 'storage', 'app', 'public');
-  if (await exists(storagePublic)) {
-    const entries = await fsp.readdir(storagePublic);
+  const storagePublicBase = path.join(basePath, 'storage', 'app', 'public');
+  if (await exists(storagePublicBase)) {
+    const entries = await fsp.readdir(storagePublicBase);
     for (const name of entries) {
-      await rimraf(path.join(storagePublic, name));
+      await rimraf(path.join(storagePublicBase, name));
     }
   }
 
-  // Copy root files
-  await copyRecursive(path.join(projectRoot, 'artisan'), path.join(distPath, 'artisan'));
-  await copyRecursive(path.join(projectRoot, 'composer.json'), path.join(distPath, 'composer.json'));
+  await copyRecursive(path.join(projectRoot, 'artisan'), path.join(basePath, 'artisan'));
+  await copyRecursive(path.join(projectRoot, 'composer.json'), path.join(basePath, 'composer.json'));
   if (await exists(path.join(projectRoot, 'composer.lock'))) {
-    await copyRecursive(path.join(projectRoot, 'composer.lock'), path.join(distPath, 'composer.lock'));
+    await copyRecursive(path.join(projectRoot, 'composer.lock'), path.join(basePath, 'composer.lock'));
   }
-  await copyRecursive(path.join(projectRoot, ENV_FILE), path.join(distPath, '.env'));
 
-  // Install prod deps in dist (no-dev)
-  r.composerInDist(['install', '--optimize-autoloader', '--no-dev', '--no-interaction']);
-  log('ok', 'Core Laravel files copied');
+  const composerArgs = ['install', '--optimize-autoloader', '--no-dev', '--no-interaction'];
+  r.composerIn(baseRelative, composerArgs);
 
-  // Create public_html and copy public files (including .htaccess)
-  log(null, 'Creating public_html structure...');
-  const publicHtmlPath = path.join(distPath, 'public_html');
-  await ensureDir(publicHtmlPath);
+  const publicHtmlBasePath = path.join(basePath, 'public_html');
+  await ensureDir(publicHtmlBasePath);
   const publicPath = path.join(projectRoot, 'public');
   if (await exists(publicPath)) {
-    // Copy contents of public (excluding dotfiles by default), then copy .htaccess explicitly if present
-    // Resolve symlinked paths to their real location to avoid issues on some platforms
     const resolvedPublicPath = await fsp.realpath(publicPath).catch(() => publicPath);
     const entries = await fsp.readdir(resolvedPublicPath, { withFileTypes: true });
     for (const ent of entries) {
-      if (ent.name === '.htaccess') continue; // handled below
-      await copyRecursive(path.join(resolvedPublicPath, ent.name), path.join(publicHtmlPath, ent.name));
+      if (ent.name === '.htaccess') continue;
+      await copyRecursive(path.join(resolvedPublicPath, ent.name), path.join(publicHtmlBasePath, ent.name));
     }
     if (await exists(path.join(resolvedPublicPath, '.htaccess'))) {
-      await copyRecursive(path.join(resolvedPublicPath, '.htaccess'), path.join(publicHtmlPath, '.htaccess'));
+      await copyRecursive(path.join(resolvedPublicPath, '.htaccess'), path.join(publicHtmlBasePath, '.htaccess'));
       log(null, '✅ .htaccess file copied');
     } else {
       log(null, '⚠️  Warning: .htaccess file not found in public directory');
     }
   }
-  log('ok', 'Public files prepared for shared hosting');
 
-  // Step 6: Permissions
-  log(null, '🔒 Step 6: Setting proper permissions');
-  await chmodRecursive(path.join(distPath, 'storage'), 0o644, 0o755);
-  await chmodRecursive(path.join(distPath, 'bootstrap', 'cache'), 0o644, 0o755);
-  try { await fsp.chmod(path.join(distPath, 'storage'), 0o755); } catch {}
-  try { await fsp.chmod(path.join(distPath, 'bootstrap', 'cache'), 0o755); } catch {}
-  log('ok', 'Permissions set');
+  await chmodRecursive(path.join(basePath, 'storage'), 0o644, 0o755);
+  await chmodRecursive(path.join(basePath, 'bootstrap', 'cache'), 0o644, 0o755);
+  try { await fsp.chmod(path.join(basePath, 'storage'), 0o755); } catch {}
+  try { await fsp.chmod(path.join(basePath, 'bootstrap', 'cache'), 0o755); } catch {}
 
-  // Step 7: Zip
-  log(null, '📝 Step 7: Creating zip file');
-  const { zipPath, size } = await zipDist(distPath);
+  log('ok', 'Base payload prepared');
 
-  const sizeMB = (size / (1024 * 1024)).toFixed(2) + ' MB';
-  log(null, '\n\u001b[32m🎉 Deployment package created successfully!\u001b[0m');
+  // Step 4: Package environments
+  for (const target of TARGETS) {
+    log(null, `📁 Step 5 (${target.label}): Packaging environment`);
+
+    const payloadRelative = path.join(DIST_DIR, `payload-${target.label}`);
+    const payloadPath = path.join(projectRoot, payloadRelative);
+
+    if (await exists(payloadPath)) {
+      await rimraf(payloadPath);
+    }
+    await ensureDir(payloadPath);
+
+    await copyRecursive(basePath, payloadPath);
+
+    await fsp.copyFile(path.join(projectRoot, target.envFile), path.join(payloadPath, '.env'));
+
+    const metadata = {
+      version,
+      sanitizedVersion,
+      commitSha,
+      builtAt: new Date().toISOString(),
+      environment: target.label,
+      envFile: target.envFile,
+    };
+    await fsp.writeFile(path.join(payloadPath, VERSION_FILE), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
+
+    await chmodRecursive(path.join(payloadPath, 'storage'), 0o644, 0o755);
+    await chmodRecursive(path.join(payloadPath, 'bootstrap', 'cache'), 0o644, 0o755);
+    try { await fsp.chmod(path.join(payloadPath, 'storage'), 0o755); } catch {}
+    try { await fsp.chmod(path.join(payloadPath, 'bootstrap', 'cache'), 0o755); } catch {}
+
+    const zipName = `esperluettes-${target.label}-${sanitizedVersion}.zip`;
+    const { zipPath, size } = await zipDist(payloadPath, zipName);
+    const sizeMB = (size / (1024 * 1024)).toFixed(2) + ' MB';
+
+    log(null, `Generated ${zipPath} (${sizeMB}MB)`);
+    await rimraf(payloadPath);
+  }
+
+  log(null, '\n\u001b[32m🎉 Deployment packages created successfully!\u001b[0m');
   log(null, '==============================================');
-  log(null, `📦 Package location: ${DIST_DIR}/`);
-  log(null, `📏 Package size: ${sizeMB}`);
+ 
+  log(null, '');
+  log(null, `Version: ${version}`);
+  log(null, `Commit: ${commitSha}`);
+  log(null, `Built at: ${new Date().toISOString()}`);
   log(null, '');
   log(null, '\u001b[33m📖 Next steps:\u001b[0m');
-  log(null, "1. Push the zip file to the FTP");
-  log(null, "2. Launch migrations if needed: ./vendor/bin/sail artisan config:clear && ./vendor/bin/sail artisan migrate --env=<environment> && ./vendor/bin/sail artisan config:clear");
-  log(null, "3. Run (safely): if [ -f esperluettes.zip ]; then rm -rf app bootstrap config database public resources routes vendor && unzip -o esperluettes.zip; else echo '❌ esperluettes.zip not found, aborting'; fi");
+  log(null, '1. Upload the desired zip to the server');
+  log(null, "2. Run migrations if needed: ./vendor/bin/sail artisan migrate --env=<environment>");
+  log(null, "3. After deploy: php artisan optimize:clear (on the server)");
   log(null, '');
+  if (manualTag) {
+    if (tagExistsOnHead) {
+      log(null, `Tag '${manualTag}' already exists on this commit; skipping creation.`);
+    } else {
+      log(null, `Tagging current commit with '${manualTag}'...`);
+      try {
+        runHere('git', ['tag', manualTag]);
+        log('ok', `Created tag '${manualTag}'.`);
+        try {
+          runHere('git', ['push', 'origin', manualTag]);
+          log('ok', `Pushed tag '${manualTag}' to origin.`);
+        } catch (pushErr) {
+          log.warn(`Failed to push tag '${manualTag}' to origin: ${pushErr.message}`);
+        }
+      } catch (tagErr) {
+        log.warn(`Failed to create git tag '${manualTag}': ${tagErr.message}`);
+      }
+    }
+    log(null, '');
+  }
   log(null, '\u001b[32mHappy deploying! 🚀\u001b[0m');
 }
 
