@@ -283,7 +283,7 @@ async function cleanDist() {
 }
 
 async function copyToDist() {
-  const toCopyDirs = ['app', 'bootstrap', 'config', 'public', 'resources', 'routes', 'storage'];
+  const toCopyDirs = ['app', 'bootstrap', 'config', 'public', 'resources', 'routes'];
 
   // Copy all above folders to dist/base
   const baseRelative = path.join(DIST_DIR, 'base');
@@ -294,16 +294,11 @@ async function copyToDist() {
     await copyRecursive(path.join(projectRoot, d), path.join(basePath, d));
   }
 
-  // In storage, remove app/public entries, 
-  // because these are local images of files that we do not want to send
-  const storagePublicBase = path.join(basePath, 'storage', 'app', 'public');
-  if (await exists(storagePublicBase)) {
-    const entries = await fsp.readdir(storagePublicBase);
-    for (const name of entries) {
-      await rimraf(path.join(storagePublicBase, name));
-    }
-  }
-
+  // We don't want to copy storage, because it includes either public files
+  // or files that are internal to the application
+  // However we want to ensure a storage dir exist to set permissions if need be
+  await ensureDir(path.join(basePath, 'storage'));
+  
   // Copy a few remaining files
   await copyRecursive(path.join(projectRoot, 'artisan'), path.join(basePath, 'artisan'));
   await copyRecursive(path.join(projectRoot, 'composer.json'), path.join(basePath, 'composer.json'));
@@ -332,6 +327,7 @@ async function setupPublicHtmlDir(basePath) {
     const entries = await fsp.readdir(resolvedPublicPath, { withFileTypes: true });
     for (const ent of entries) {
       if (ent.name === '.htaccess') continue;
+      if (ent.name === 'storage') continue;
       await copyRecursive(path.join(resolvedPublicPath, ent.name), path.join(publicHtmlBasePath, ent.name));
     }
     if (await exists(path.join(resolvedPublicPath, '.htaccess'))) {

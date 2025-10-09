@@ -26,12 +26,10 @@ Please read our [Contributing Guide](CONTRIBUTING.md) for the workflow, Conventi
 
 To prepare the files, just launch
 
-> npm run build-and-deploy:full
+> npm run package
 
-You should then get a dist/ folder than you can send to your FTP server.
+And choose a version number of let the app auto-generate one.
 
-If you only made changes to the app folder (no new dependency), you can run:
+You should get two zip files in the `dist` folder, one for test, one for production.
 
-> npm run build-and-deploy:app-only
-
-Then you should take the content of the **sync** folder
+Note: on first deployment, you should create a symlink between `public_html/storage` and `storage/app/public` folder.
