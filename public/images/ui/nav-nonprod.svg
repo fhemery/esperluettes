@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="64" viewBox="0 0 320 64">
+  <defs>
+    <style>
+      .label {
+        font-family: "Manrope", "Aptos", "Segoe UI", sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        fill: rgba(30, 64, 175, 0.5);
+        letter-spacing: 8px;
+      }
+    </style>
+  </defs>
+  <rect width="320" height="64" fill="none" />
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="label">TEST</text>
+</svg>

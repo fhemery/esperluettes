@@ -36,6 +36,14 @@
   --home-bg-size: auto;
 }
 
+.nonprod-nav {
+  background-color: rgb(var(--color-bg));
+  background-image: url('/images/ui/nav-nonprod.svg');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: auto 64px;
+}
+
 html {
   scrollbar-gutter: stable;
   scrollbar-width: thin;

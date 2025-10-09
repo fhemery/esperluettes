@@ -1,5 +1,6 @@
 <!-- The $currentProfile variable is injected by the SharedServiceProvider -->
-<nav x-data>
+@php($additionalClass = !app()->environment('production') ? 'nonprod-nav' : '')
+<nav x-data class="{{ $additionalClass }}">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-1 sm:px-4 lg:px-6">
         <div class="flex justify-between h-16 gap-4 sm:gap-8">

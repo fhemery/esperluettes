@@ -1,4 +1,5 @@
-<nav class="bg-bg text-fg">
+@php($additionalClass = !app()->environment('production') ? 'nonprod-nav' : '')
+<nav class="bg-bg text-fg {{ $additionalClass }}">
     <div class="max-w-7xl mx-auto px-1 sm:px-4 lg:px-6">
         <div class="h-16 flex gap-1 justify-between items-center">
             <div class="flex items-center shrink-0">
