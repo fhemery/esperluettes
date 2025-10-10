@@ -10,6 +10,7 @@ use App\Domains\Auth\Private\Controllers\PasswordResetLinkController;
 use App\Domains\Auth\Private\Controllers\RegisteredUserController;
 use App\Domains\Auth\Private\Controllers\VerifyEmailController;
 use App\Domains\Auth\Private\Controllers\UserAccountController;
+use App\Domains\Auth\Private\Controllers\RoleLookupController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->group(function () {
@@ -84,5 +85,13 @@ Route::middleware('web')->group(function () {
         Route::get('/account', [UserAccountController::class, 'edit'])->name('account.edit');
         Route::patch('/account', [UserAccountController::class, 'update'])->name('account.update');
         Route::delete('/account', [UserAccountController::class, 'destroy'])->name('account.destroy');
+
+        // Roles lookup endpoints
+        Route::get('/auth/roles/lookup', [RoleLookupController::class, 'search'])
+            ->middleware(['throttle:60,1'])
+            ->name('auth.roles.lookup');
+        Route::get('/auth/roles/by-slugs', [RoleLookupController::class, 'bySlugs'])
+            ->middleware(['throttle:60,1'])
+            ->name('auth.roles.by_slugs');
     });
 });
