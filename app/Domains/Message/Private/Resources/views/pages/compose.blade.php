@@ -11,6 +11,19 @@
             <form method="POST" action="{{ route('messages.store') }}" class="bg-white rounded-lg shadow-sm border p-6">
                 @csrf
 
+                {{-- Recipients --}}
+                <div class="mb-6">
+                    <x-input-label :value="__('message::messages.recipients')" />
+                    <x-input-error :messages="$errors->get('recipients')" class="mt-2" />
+                    
+                    <div class="mt-3 space-y-4">
+                       <x-profile::profile-and-role-picker
+                            :initialUserIds="old('target_users', [])"
+                            :initialRoleSlugs="old('target_roles', [])"
+                        />
+                    </div>
+                </div>
+
                 {{-- Title --}}
                 <div class="mb-6">
                     <x-input-label for="title" :value="__('message::messages.message_title')" />
@@ -37,16 +50,6 @@
                         class="mt-1"
                     />
                     <x-input-error :messages="$errors->get('content')" class="mt-2" />
-                </div>
-
-                {{-- Recipients --}}
-                <div class="mb-6">
-                    <x-input-label :value="__('message::messages.recipients')" />
-                    <x-input-error :messages="$errors->get('recipients')" class="mt-2" />
-                    
-                    <div class="mt-3 space-y-4">
-                       <!-- TODO: Write this part properly -->
-                    </div>
                 </div>
 
                 {{-- Submit --}}
