@@ -1,4 +1,4 @@
-<div class="flex flex-col justify-between gap-4 items-center surface-read text-on-surface p-4 h-full">
+<div class="flex flex-col items-center justify-between gap-4 surface-read text-on-surface p-4 h-full w-full max-w-[400px] mx-auto">
     <h3 class="flex items-center self-center gap-2 text-accent font-semibold text-xl">
         <span class="material-symbols-outlined">
             stylus_fountain_pen
@@ -23,9 +23,9 @@
         </x-shared::button>
     </a>
     @else
-    <x-story::card :item="$vm" :display-authors="false" />
+    <x-story::card class="w-full max-w-md" :item="$vm" :display-authors="false" />
 
-    <div class="flex justify-center items-center gap-2 w-full ">
+    <div class="flex justify-center items-center gap-2 w-full mt-4">
         <a href="{{ route('chapters.create', ['storySlug' => $vm->getSlug()]) }}">
             <x-shared::button color="accent" :disabled="!$hasCreditsLeft">
                 {{ __('story::keep-writing.new_chapter') }}
