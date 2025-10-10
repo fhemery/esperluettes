@@ -20,4 +20,8 @@ rm -rf app bootstrap config database public resources routes vendor
 
 unzip -o "$zip_file"
 
+archive_dir="_archive"
+mkdir -p "$archive_dir"
+mv "$zip_file" "$archive_dir/"
+
 echo "✅ Deployment complete."

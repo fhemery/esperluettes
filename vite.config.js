@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
 
     return {
         server: {
+            watch: {
+                ignored: ['dist/**'],
+            },
             // Only enable proxy during development
             ...(mode === 'development'
                 ? {
