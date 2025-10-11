@@ -28,4 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->view('shared::errors.419', [], 419);
             }
         });
+
+        // Fallback: for any other exception, show our 500 page when debug is disabled
+        $exceptions->render(function (Throwable $e, $request) {
+            if (!config('app.debug')) {
+                return response()->view('shared::errors.500', [], 500);
+            }
+        });
     })->create();
