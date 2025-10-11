@@ -39,6 +39,11 @@ class SystemMaintenance extends Page
         return __('admin::pages.system_maintenance.nav_label');
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin::pages.groups.tech');
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         /** @var \App\Domains\Auth\Private\Models\User|null $user */

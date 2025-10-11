@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'groups' => [
+        'tech' => 'Tech',
+    ],
     'system_maintenance' => [
         'nav_label' => 'Admin site tech.',
         'title' => 'Maintenance du système',
@@ -12,5 +15,13 @@ return [
         'notifications' => [
             'cache_cleared' => 'Caches vidés',
         ],
+    ],
+    'view_logs' => [
+        'nav_label' => 'Journaux (logs)',
+        'title' => 'Consultation des journaux',
+        'description' => 'Sélectionnez un fichier de logs ci-dessous. Affiche les 1000 dernières lignes par défaut. Utilisez « Télécharger » pour récupérer l’intégralité du fichier.',
+        'select_file' => 'Fichier de logs',
+        'refresh' => 'Rafraîchir',
+        'download' => 'Télécharger',
     ],
 ];
