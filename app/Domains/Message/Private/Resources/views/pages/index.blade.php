@@ -1,15 +1,17 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-8">
+    <div class="flex-1 flex flex-col gap-6 h-full">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-semibold">{{ __('message::messages.title') }}</h1>
+            <x-shared::title icon="mail">{{ __('message::messages.title') }}</x-shared::title>
             @if(Auth::user()->isAdmin())
-                <a href="{{ route('messages.compose') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    {{ __('message::messages.compose') }}
+                <a href="{{ route('messages.compose') }}">
+                    <x-shared::button color="accent">
+                        {{ __('message::messages.compose') }}
+                    </x-shared::button>
                 </a>
             @endif
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- Messages List --}}
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow-sm border">
