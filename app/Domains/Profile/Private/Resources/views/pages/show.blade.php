@@ -3,7 +3,7 @@
     <div class="overflow-hidden">
         <!-- Profile Header -->
         <div class="bg-profile-seasonal sm:bg-profile-seasonal-big px-8 py-6">
-            <div class="flex items-center space-x-6">
+            <div class="flex items-center gap-4">
                 <!-- Profile Picture -->
                 <div class="flex-shrink-0">
                     <x-shared::avatar :src="$profile->profile_picture_path"
@@ -12,12 +12,20 @@
                 </div>
 
                 <!-- User Info -->
-                <div class="flex-1">
-                    <div class="flex items-center gap-3">
+                <div class="flex-1 flex flex-col flex-start gap-2">
+                    <div class="flex items-center">
                         <x-shared::title class="text-2xl sm:text-4xl text-secondary">{{ $profile->display_name }}</x-shared::title>
                     </div>
+
                     @if($isOwn)
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 items-center">
+                        <a href="{{ route('profile.edit') }}">
+                            <x-shared::badge color="accent">
+                                <span class="material-symbols-outlined text-[20px] leading-none">
+                                    edit
+                                </span>
+                            </x-shared::badge>
+                        </a>
                         <div x-data="{ url: '{{ route('profile.show', $profile) }}', copied: false }"
                             @click="navigator.clipboard.writeText(url).then(() => { copied = true; setTimeout(() => copied = false, 1200) })"
                             class="relative cursor-pointer">
@@ -42,39 +50,31 @@
                     @if(!empty($profile->roles))
                     <div class="mt-2 flex flex-wrap gap-2">
                         @foreach($profile->roles as $role)
-                        <x-shared::badge color="primary" :outline="false"
+                        <x-shared::badge color="primary" :outline="false" size="md"
                             title="{{ $role->description }}">
                             {{ $role->name }}
                         </x-shared::badge>
                         @endforeach
                     </div>
                     @endif
-                    <p class="text-blue-100 mt-1">{{ __('profile::show.member_since') }} {{ $profile->created_at->translatedFormat('F Y') }}</p>
 
-                    @if($isOwn)
-                    <div class="mt-4">
-                        <a href="{{ route('profile.edit') }}"
-                            class="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                            {{ __('profile::show.edit_profile') }}
-                        </a>
+                    <div>
+                        <x-shared::badge color="neutral" :outline="false">
+                            {{ __('profile::show.member_since') }} {{ $profile->created_at->translatedFormat('F Y') }}
+                        </x-shared::badge>
                     </div>
-                    @endif
                 </div>
             </div>
         </div>
 
         @php $initialTab = $isOwn ? 'stories' : 'about'; @endphp
         <!-- Profile Content -->
-        <div class="px-6 py-8 w-full">
+        <div class="w-full">
             <div class="lg:col-span-2">
                 <x-shared::tabs :tabs="[
                         ...(Auth::check() ? [[ 'key' => 'about', 'label' => __('profile::show.about') ]] : []),
                         [ 'key' => 'stories', 'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories') ],
-                    ]" :initial="$initialTab">
+                    ]" :initial="$initialTab" color="primary" navClass="text-2xl font-semibold">
                     <div x-data="{
                                 storiesLoaded: false,
                                 loading: false,

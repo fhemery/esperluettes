@@ -20,7 +20,7 @@
             <x-input-error :messages="$errors->get('author_note')" class="mt-2" />
         </div>
         <div x-show="!showAuthorNote">
-            <x-shared::button color="neutral" icon="add" type="button" @click="showAuthorNote = true">{{ __('story::chapters.form.author_note.add') }}</x-shared::button>
+            <x-shared::button color="neutral" :outline="true" icon="add" type="button" @click="showAuthorNote = true">{{ __('story::chapters.form.author_note.add') }}</x-shared::button>
         </div>
     </div>
 

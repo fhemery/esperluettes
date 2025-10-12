@@ -1,6 +1,5 @@
-<div>
-    <div class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('profile::about.title') }}</h2>
+<div class="m-4 surface-read text-on-surface p-4">
+    <div>
         <div class="prose prose-sm rich-content max-w-none text-gray-700">
             @if($profile->description)
                 {!! $profile->description !!}

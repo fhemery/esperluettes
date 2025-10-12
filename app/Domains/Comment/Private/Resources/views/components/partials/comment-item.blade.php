@@ -74,7 +74,7 @@
           @enderror
           <div class="mt-2 flex gap-2">
             <x-shared::button type="submit" color="accent" x-bind:disabled="!editorValid">{{ __('comment::comments.actions.save') }}</x-shared::button>
-            <x-shared::button color="neutral" data-action="cancel-edit" data-comment-id="{{ $comment->id }}">{{ __('comment::comments.actions.cancel') }}</x-shared::button>
+            <x-shared::button color="neutral" :outline="true" data-action="cancel-edit" data-comment-id="{{ $comment->id }}">{{ __('comment::comments.actions.cancel') }}</x-shared::button>
           </div>
         </form>
       </div>
@@ -117,7 +117,7 @@
           @enderror
           <div class="mt-2 flex gap-2">
             <x-shared::button type="submit" color="accent" x-bind:disabled="!editorValid">{{ __('comment::comments.actions.reply') }}</x-shared::button>
-            <x-shared::button color="neutral" data-action="cancel-reply" data-comment-id="{{ $comment->id }}">{{ __('comment::comments.actions.cancel') }}</x-shared::button>
+            <x-shared::button color="neutral" :outline="true" data-action="cancel-reply" data-comment-id="{{ $comment->id }}">{{ __('comment::comments.actions.cancel') }}</x-shared::button>
           </div>
         </form>
       </div>

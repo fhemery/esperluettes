@@ -5,7 +5,7 @@
             <p class="mb-8">{{ __('shared::errors.419.description') }}</p>
 
             <div class="flex items-center justify-center gap-3">
-                <x-shared::button onclick="history.back()" color="neutral">
+                <x-shared::button onclick="history.back()" color="neutral" :outline="true">
                     {{ __('shared::errors.actions.back') }}
                 </x-shared::button>
                 @auth

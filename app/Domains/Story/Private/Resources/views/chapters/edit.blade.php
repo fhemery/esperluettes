@@ -13,7 +13,7 @@
 
             <div class="flex justify-end gap-4">
                 <a href="{{ url('/stories/'.$story->slug.'/chapters/'.$chapter->slug) }}">
-                    <x-shared::button color="neutral">{{ __('story::chapters.form.cancel') }}</x-shared::button>
+                    <x-shared::button color="neutral" :outline="true">{{ __('story::chapters.form.cancel') }}</x-shared::button>
                 </a>
                 <x-shared::button color="accent" type="submit">{{ __('story::chapters.form.update') }}</x-shared::button>
             </div>

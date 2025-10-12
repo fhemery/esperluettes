@@ -252,17 +252,17 @@ html {
   }
 
   .surface-neutral {
-    --surface-bg: transparent;
-    --surface-fg: var(--color-fg);
-    --surface-border: var(--color-fg);
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-read-fg);
+    --surface-border: var(--color-read-bg);
     color-scheme: light;
-    background-color: transparent;
+    background-color: rgb(var(--color-read-bg));
 
     // This badge, as neutral as it is, it already an outline one
     &.is-outline {
       --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-fg);
-      --surface-border: var(--color-fg);
+      --surface-fg: var(--color-read-fg);
+      --surface-border: var(--color-read-fg);
       background-color: rgb(var(--color-read-bg));
     }
   }

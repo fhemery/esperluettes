@@ -159,6 +159,7 @@
                                 name="{{ $viewModel->getTypeName() }}"
                                 description="{{ $viewModel->getTypeDescription() }}"
                                 color="neutral"
+                                :outline="true"
                                 size="sm"
                                 icon="category" />
                         @endif
@@ -167,6 +168,7 @@
                                 name="{{ $viewModel->getAudienceName() }}"
                                 description="{{ $viewModel->getAudienceDescription() }}"
                                 color="neutral"
+                                :outline="true"
                                 size="sm"
                                 icon="group" />
                         @endif
@@ -175,6 +177,7 @@
                                 name="{{ $viewModel->getCopyrightName() }}"
                                 description="{{ $viewModel->getCopyrightDescription() }}"
                                 color="neutral"
+                                :outline="true"
                                 size="sm"
                                 icon="copyright" />
                         @endif
@@ -183,6 +186,7 @@
                                 name="{{ $viewModel->getStatusName() }}"
                                 description="{{ $viewModel->getStatusDescription() }}"
                                 color="neutral"
+                                :outline="true"
                                 size="sm"
                                 icon="edit_note" />
                         @endif
@@ -191,6 +195,7 @@
                                 name="{{ $viewModel->getFeedbackName() }}"
                                 description="{{ $viewModel->getFeedbackDescription() }}"
                                 color="neutral"
+                                :outline="true"
                                 size="sm"
                                 icon="forum" />
                         @endif

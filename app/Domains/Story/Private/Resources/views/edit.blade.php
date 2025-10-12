@@ -11,7 +11,7 @@
             <x-story::form :story="$story" :referentials="$referentials" />
 
             <div class="flex justify-end gap-4">
-                <x-shared::button color="neutral" type="button" onclick="window.history.back()">
+                <x-shared::button color="neutral" :outline="true" type="button" onclick="window.history.back()">
                     {{ __('story::edit.actions.cancel') }}
                 </x-shared::button>
                 <x-shared::button color="accent" type="submit">
