@@ -29,9 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // Fallback: for any other exception, show our 500 page when debug is disabled
+        // Fallback: for any other exception, log it and show our 500 page when debug is disabled
         $exceptions->render(function (Throwable $e, $request) {
             if (!config('app.debug')) {
+                // Ensure the exception is reported to the logging stack
+                report($e);
                 return response()->view('shared::errors.500', [], 500);
             }
         });
