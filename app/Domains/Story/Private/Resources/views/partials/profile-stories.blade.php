@@ -1,29 +1,28 @@
-<div class="flex items-center justify-between mb-4">
-    <h2 class="text-xl font-semibold text-gray-900">
-        {{ $canEdit ? __('story::profile.my-stories') : __('story::profile.stories') }}
-    </h2>
-
-    <div class="flex items-center gap-3">
-        @if($canCreateStory)
-        <x-shared::popover placement="bottom" maxWidth="18rem">
-            <x-slot name="trigger">
-                <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-fg ring-1 ring-inset ring-gray-300">
-                    <span class="material-symbols-outlined text-[16px] leading-none">menu_book</span>
-                    <span>{{ (int)($availableChapterCredits ?? 0) }}</span>
-                </span>
-            </x-slot>
-            <div class="text-sm text-fg">
-                {{ trans_choice('story::profile.available-chapter-credits', (int)($availableChapterCredits ?? 0), ['count' => (int)($availableChapterCredits ?? 0)]) }}
-            </div>
-        </x-shared::popover>
+<div class="flex flex-col gap-4">
+    <div class="flex items-center justify-end gap-4">
+        <div class="flex items-center gap-3">
+            @if($canCreateStory)
+            <x-shared::popover placement="bottom" maxWidth="18rem">
+                <x-slot name="trigger">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-fg ring-1 ring-inset ring-gray-300">
+                        <span class="material-symbols-outlined text-[16px] leading-none">menu_book</span>
+                        <span>{{ (int)($availableChapterCredits ?? 0) }}</span>
+                    </span>
+                </x-slot>
+                <div class="text-sm text-fg">
+                    {{ trans_choice('story::profile.available-chapter-credits', (int)($availableChapterCredits ?? 0), ['count' => (int)($availableChapterCredits ?? 0)]) }}
+                </div>
+            </x-shared::popover>
 
 
-        <a href="{{ route('stories.create') }}"
-            class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-            {{ __('story::profile.new-story') }}
-        </a>
-        @endif
+            <x-shared::button color="accent">
+                <a href="{{ route('stories.create') }}">
+                    {{ __('story::profile.new-story') }}
+                </a>
+            </x-shared::button>
+            @endif
+        </div>
     </div>
-</div>
 
-<x-story::list-grid :view-model="$viewModel" :display-authors="false" />
+    <x-story::list-grid :view-model="$viewModel" :display-authors="false" />
+</div>

@@ -2,12 +2,14 @@
 
 <div x-data="discordComponent()" class="shrink-0">
     @if (!$isLinked)
-    <span class="self-end inline-flex items-center gap-2 py-2 px-4 rounded-full surface-read text-on-surface cursor-pointer"
-        data-discord-state="disconnected" data-action="open-link"
-        x-on:click="openLinkAndGenerate()">
-        <img src="{{ asset('images/icons/Discord-Symbol-Blurple.svg') }}" alt="Discord" class="w-6 h-6">
-        <span class="label">{{ __('discord::components.discord-component.link') }}</span>
-    </span>
+    <x-shared::badge color="neutral" outline="true">
+        <span class="flex items-center surface-read text-on-surface cursor-pointer gap-2"
+            data-discord-state="disconnected" data-action="open-link"
+            x-on:click="openLinkAndGenerate()">
+            <img src="{{ asset('images/icons/Discord-Symbol-Blurple.svg') }}" alt="Discord" class="w-6 h-6">
+            <span>{{ __('discord::components.discord-component.link') }}</span>
+        </span>
+    </x-shared::badge>
     @else
     <span class="self-end inline-flex items-center gap-2 py-2 px-4 rounded-full surface-read text-on-surface cursor-pointer"
         x-on:click="openUnlink">

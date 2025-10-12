@@ -5,7 +5,7 @@
             <template x-if="!editing">
                 <div class="flex items-center gap-2">
                     @if (!empty($chapters))
-                    <x-shared::button color="neutral" @click="editing = true">
+                    <x-shared::button color="neutral" :outline="true" @click="editing = true">
                         <span class="material-symbols-outlined text-[18px] leading-none">swap_vert</span>
                         {{ __('story::chapters.actions.reorder') }}
                     </x-shared::button>

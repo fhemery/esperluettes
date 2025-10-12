@@ -14,7 +14,7 @@
             </div>
 
             <div class="flex justify-end gap-4">
-                <x-shared::button color="neutral" type="button" onclick="history.back()">
+                <x-shared::button color="neutral" :outline="true" type="button" onclick="history.back()">
                     {{ __('story::create.actions.cancel') }}
                 </x-shared::button>
                 <x-shared::button color="accent" type="submit">

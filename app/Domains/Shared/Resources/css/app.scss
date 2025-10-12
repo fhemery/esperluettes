@@ -91,6 +91,8 @@ html {
   --color-tertiary: 99 157 165;   // Bleu / vert
   /* Public web root is /, so image path should not include /public */
   --home-bg-image: url('/images/themes/autumn/background.png');
+  --profile-bg-image-small: url('/images/themes/autumn/profile-bg-640.jpg');
+  --profile-bg-image-big: url('/images/themes/autumn/profile-bg-1280.jpg');
 }
 
 /* Rich content defaults (for sanitized HTML display) */
@@ -169,6 +171,18 @@ html {
     background-size: var(--home-bg-size);
   }
 
+  .bg-profile-seasonal {
+    background-image: var(--profile-bg-image-small);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .bg-profile-seasonal-big {
+    background-image: var(--profile-bg-image-big);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
   /* Surface system: season-agnostic light/dark panels */
   .surface-secondary {
     /* Set surface background/foreground tokens for children */
@@ -238,17 +252,17 @@ html {
   }
 
   .surface-neutral {
-    --surface-bg: transparent;
-    --surface-fg: var(--color-fg);
-    --surface-border: var(--color-fg);
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-read-fg);
+    --surface-border: var(--color-read-bg);
     color-scheme: light;
-    background-color: transparent;
+    background-color: rgb(var(--color-read-bg));
 
     // This badge, as neutral as it is, it already an outline one
     &.is-outline {
       --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-fg);
-      --surface-border: var(--color-fg);
+      --surface-fg: var(--color-read-fg);
+      --surface-border: var(--color-read-fg);
       background-color: rgb(var(--color-read-bg));
     }
   }

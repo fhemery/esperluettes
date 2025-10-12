@@ -1,82 +1,86 @@
 @section('title', __('profile::show.title', ['name' => $profile->display_name]))
 <x-app-layout>
-    <div class="mx-auto">
-        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-            <!-- Profile Header -->
-            <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-8">
-                <div class="flex items-center space-x-6">
-                    <!-- Profile Picture -->
-                    <div class="flex-shrink-0">
-                        <x-shared::avatar :src="$profile->profile_picture_path"
-                                          class="h-24 w-24 rounded-full border-4 border-white shadow-lg"
-                                          alt="{{ __('profile::show.alt_profile_picture', ['name' => $profile->display_name]) }}" />
+    <div class="overflow-hidden">
+        <!-- Profile Header -->
+        <div class="bg-profile-seasonal sm:bg-profile-seasonal-big px-8 py-6">
+            <div class="flex items-center gap-4">
+                <!-- Profile Picture -->
+                <div class="flex-shrink-0">
+                    <x-shared::avatar :src="$profile->profile_picture_path"
+                        class="h-24 w-24 sm:h-48 sm:w-48 rounded-full border-4 border-white shadow-lg"
+                        alt="{{ __('profile::show.alt_profile_picture', ['name' => $profile->display_name]) }}" />
+                </div>
+
+                <!-- User Info -->
+                <div class="flex-1 flex flex-col flex-start gap-2">
+                    <div class="flex items-center">
+                        <x-shared::title class="text-2xl sm:text-4xl text-secondary">{{ $profile->display_name }}</x-shared::title>
                     </div>
 
-                    <!-- User Info -->
-                    <div class="flex-1">
-                        <div class="flex items-center gap-3">
-                            <x-shared::title>{{ $profile->display_name }}</x-shared::title>
-                            @if($isOwn)
-                                <div x-data="{ url: '{{ route('profile.show', $profile) }}', copied: false }"
-                                     class="relative">
-                                    <button type="button"
-                                            @click="navigator.clipboard.writeText(url).then(() => { copied = true; setTimeout(() => copied = false, 1200) })"
-                                            class="inline-flex items-center justify-center h-8 w-8 rounded-full text-white/85 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/60 transition"
-                                            :title="url"
-                                            aria-label="{{ __('profile::show.copy_profile_link') }}">
-                                        <!-- Material Symbols link icon -->
+                    @if($isOwn)
+                    <div class="flex gap-4 items-center">
+                        <a href="{{ route('profile.edit') }}">
+                            <x-shared::popover placement="bottom">
+                                <x-slot name="trigger">
+                                    <x-shared::badge color="accent">
                                         <span class="material-symbols-outlined text-[20px] leading-none">
-                                        link
-                                    </span>
-                                    </button>
-                                    <!-- Tooltip -->
-                                    <div x-show="copied" x-cloak
-                                         class="absolute left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap text-xs text-white bg-black/60 rounded px-2 py-1 shadow"
-                                         x-transition.opacity.duration.150>
-                                        {{ __('profile::show.copied') }}
-                                    </div>
-                                </div>
-                                <x-discord::discord-component />
-                            @endif
-                        </div>
-                        @if(!empty($profile->roles))
-                            <div class="mt-2 flex flex-wrap gap-2">
-                                @foreach($profile->roles as $role)
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/15 text-white hover:bg-white/25 transition"
-                                        title="{{ $role->description }}">
-                                    {{ $role->name }}
+                                            edit
+                                        </span>
+                                    </x-shared::badge>
+                                </x-slot>
+                                {{ __('profile::show.edit_profile') }}
+                            </x-shared::popover>
+                        </a>
+                        <div x-data="{ url: '{{ route('profile.show', $profile) }}', copied: false }"
+                            @click="navigator.clipboard.writeText(url).then(() => { copied = true; setTimeout(() => copied = false, 1200) })"
+                            class="relative cursor-pointer">
+                            <x-shared::badge color="neutral" outline="true"
+                                title="{{ __('profile::show.copy_profile_link') }}"
+                                aria-label="{{ __('profile::show.copy_profile_link') }}">
+                                <!-- Material Symbols link icon -->
+                                <span class="material-symbols-outlined text-[20px] leading-none">
+                                    link
                                 </span>
-                                @endforeach
+                            </x-shared::badge>
+                            <!-- Tooltip -->
+                            <div x-show="copied" x-cloak
+                                class="absolute left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap text-xs text-white bg-black/60 rounded px-2 py-1 shadow"
+                                x-transition.opacity.duration.150>
+                                {{ __('profile::show.copied') }}
                             </div>
-                        @endif
-                        <p class="text-blue-100 mt-1">{{ __('profile::show.member_since') }} {{ $profile->created_at->translatedFormat('F Y') }}</p>
+                        </div>
+                        <x-discord::discord-component />
+                    </div>
+                    @endif
+                    @if(!empty($profile->roles))
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        @foreach($profile->roles as $role)
+                        <x-shared::badge color="primary" :outline="false" size="md"
+                            title="{{ $role->description }}">
+                            {{ $role->name }}
+                        </x-shared::badge>
+                        @endforeach
+                    </div>
+                    @endif
 
-                        @if($isOwn)
-                            <div class="mt-4">
-                                <a href="{{ route('profile.edit') }}"
-                                   class="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors duration-200">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                    {{ __('profile::show.edit_profile') }}
-                                </a>
-                            </div>
-                        @endif
+                    <div>
+                        <x-shared::badge color="neutral" :outline="false">
+                            {{ __('profile::show.member_since') }} {{ $profile->created_at->translatedFormat('F Y') }}
+                        </x-shared::badge>
                     </div>
                 </div>
             </div>
+        </div>
 
-            @php $initialTab = $isOwn ? 'stories' : 'about'; @endphp
-            <!-- Profile Content -->
-            <div class="px-6 py-8 w-full">
-                <div class="lg:col-span-2">
-                    <x-shared::tabs :tabs="[
+        @php $initialTab = $isOwn ? 'stories' : 'about'; @endphp
+        <!-- Profile Content -->
+        <div class="w-full">
+            <div class="lg:col-span-2">
+                <x-shared::tabs :tabs="[
                         ...(Auth::check() ? [[ 'key' => 'about', 'label' => __('profile::show.about') ]] : []),
                         [ 'key' => 'stories', 'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories') ],
-                    ]" :initial="$initialTab">
-                        <div x-data="{
+                    ]" :tracking="true" :initial="$initialTab" color="primary" navClass="text-2xl font-semibold">
+                    <div x-data="{
                                 storiesLoaded: false,
                                 loading: false,
                                 async loadStories() {
@@ -97,22 +101,24 @@
                                     }
                                 }
                             }"
-                            x-init="if (tab === 'stories') loadStories()"
-                            x-effect="if (tab === 'stories') loadStories()"
-                        >
-                            @if(Auth::check())
-                                <div x-show="tab==='about'" x-cloak>
-                                    <x-profile::about-panel :profile="$profile"/>
-                                </div>
-                            @endif
+                        x-init="if (tab === 'stories') loadStories()"
+                        x-effect="if (tab === 'stories') loadStories()">
+                        @if(Auth::check())
+                        <div x-show="tab==='about'" x-cloak>
+                            <div class="flex flex-col gap-4 m-4 p-4 surface-read text-on-surface">
+                                <x-profile::about-panel :profile="$profile" />
+                            </div>
+                        </div>
+                        @endif
 
-                            <div x-show="tab==='stories'" x-cloak>
+                        <div x-show="tab==='stories'" x-cloak>
+                            <div class="flex flex-col gap-4 m-4 p-4 surface-read text-on-surface">
                                 <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
                                 <div x-ref="stories" class="mt-2"></div>
                             </div>
                         </div>
-                    </x-shared::tabs>
-                </div>
+                    </div>
+                </x-shared::tabs>
             </div>
         </div>
     </div>

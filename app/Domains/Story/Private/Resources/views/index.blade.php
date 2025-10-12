@@ -113,7 +113,7 @@
                         <x-shared::button color="accent" type="submit">{{ __('story::index.filter') }}</x-shared::button>
                         <a href="{{ url('/stories') }}"
                             class="ml-3 text-sm text-gray-600 hover:text-gray-900">
-                            <x-shared::button color="neutral" type="button">{{ __('story::index.reset_filters') }}</x-shared::button>
+                            <x-shared::button color="neutral" :outline="true" type="button">{{ __('story::index.reset_filters') }}</x-shared::button>
                         </a>
                     </div>
                 </div>

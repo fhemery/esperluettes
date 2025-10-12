@@ -122,7 +122,6 @@ describe('Story list in profile tab', function () {
 
         $resp = $this->actingAs($owner)->get("/profiles/{$slug}/stories");
         $resp->assertOk();
-        $resp->assertSee('story::profile.my-stories');
         $resp->assertSee('story::profile.new-story');
     });
 
@@ -133,7 +132,6 @@ describe('Story list in profile tab', function () {
         $resp = $this->actingAs($owner)->get("/profiles/{$slug}/stories");
 
         $resp->assertOk();
-        $resp->assertSee('story::profile.my-stories');
         $resp->assertDontSee('story::profile.new-story');
     });
 
