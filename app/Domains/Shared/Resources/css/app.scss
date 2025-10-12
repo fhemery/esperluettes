@@ -91,6 +91,8 @@ html {
   --color-tertiary: 99 157 165;   // Bleu / vert
   /* Public web root is /, so image path should not include /public */
   --home-bg-image: url('/images/themes/autumn/background.png');
+  --profile-bg-image-small: url('/images/themes/autumn/profile-bg-640.jpg');
+  --profile-bg-image-big: url('/images/themes/autumn/profile-bg-1280.jpg');
 }
 
 /* Rich content defaults (for sanitized HTML display) */
@@ -167,6 +169,18 @@ html {
     background-repeat: repeat;
     background-position: top left;
     background-size: var(--home-bg-size);
+  }
+
+  .bg-profile-seasonal {
+    background-image: var(--profile-bg-image-small);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .bg-profile-seasonal-big {
+    background-image: var(--profile-bg-image-big);
+    background-repeat: no-repeat;
+    background-size: cover;
   }
 
   /* Surface system: season-agnostic light/dark panels */

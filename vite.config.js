@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
     return {
         server: {
             watch: {
-                ignored: ['dist/**'],
+                ignored: ['**/dist/**', '**/vendor/**', '**/storage/**', '**/node_modules/**'],
             },
             // Only enable proxy during development
             ...(mode === 'development'
