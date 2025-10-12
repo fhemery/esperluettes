@@ -74,7 +74,7 @@
                 <x-shared::tabs :tabs="[
                         ...(Auth::check() ? [[ 'key' => 'about', 'label' => __('profile::show.about') ]] : []),
                         [ 'key' => 'stories', 'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories') ],
-                    ]" :initial="$initialTab" color="primary" navClass="text-2xl font-semibold">
+                    ]" :tracking="true" :initial="$initialTab" color="primary" navClass="text-2xl font-semibold">
                     <div x-data="{
                                 storiesLoaded: false,
                                 loading: false,
@@ -100,13 +100,17 @@
                         x-effect="if (tab === 'stories') loadStories()">
                         @if(Auth::check())
                         <div x-show="tab==='about'" x-cloak>
-                            <x-profile::about-panel :profile="$profile" />
+                            <div class="flex flex-col gap-4 m-4 p-4 surface-read text-on-surface">
+                                <x-profile::about-panel :profile="$profile" />
+                            </div>
                         </div>
                         @endif
 
                         <div x-show="tab==='stories'" x-cloak>
-                            <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
-                            <div x-ref="stories" class="mt-2"></div>
+                            <div class="flex flex-col gap-4 m-4 p-4 surface-read text-on-surface">
+                                <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
+                                <div x-ref="stories" class="mt-2"></div>
+                            </div>
                         </div>
                     </div>
                 </x-shared::tabs>

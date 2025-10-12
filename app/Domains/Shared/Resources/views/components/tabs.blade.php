@@ -5,7 +5,8 @@
     'initial' => null,
     // Optional extra classes for the nav container
     'navClass' => '',
-    'color' => 'neutral'
+    'color' => 'neutral',
+    'tracking' => false,
 ])
 
 @php
@@ -19,7 +20,19 @@
     $initialKey = $initial ?? ($tabs->first()['key'] ?? '');
 @endphp
 
-<div x-data="{ tab: @js($initialKey) }" class="flex-1 w-full">
+<div
+    x-data="{
+        tab: @js($initialKey),
+        tracking: @js((bool) $tracking),
+        keys: @js($tabs->pluck('key')->values()),
+        setFromHash() {
+            const k = window.location.hash ? window.location.hash.substring(1) : '';
+            if (this.keys.includes(k)) this.tab = k;
+        }
+    }"
+    x-init="if (tracking) { setFromHash(); window.addEventListener('hashchange', () => setFromHash()); }"
+    class="flex-1 w-full"
+>
     <div>
         <nav class="surface-{{$color}} text-on-surface flex w-full gap-4 {{ $navClass }}" role="tablist" aria-label="Tabs">
             @foreach($tabs as $t)
@@ -31,7 +44,7 @@
                     role="tab"
                     :aria-selected="tab === @js($key) ? 'true' : 'false'"
                     :tabindex="tab === @js($key) ? '0' : '-1'"
-                    @click="if (!{{ $disabled ? 'true' : 'false' }}) tab = @js($key)"
+                    @click="if (!{{ $disabled ? 'true' : 'false' }}) { tab = @js($key); if (tracking) history.replaceState(null, '', '#' + @js($key)); }"
                     @keydown.arrow-right.prevent="
                         const buttons = Array.from($el.parentElement.querySelectorAll('button[role=\'tab\']'));
                         const i = buttons.indexOf($el);
