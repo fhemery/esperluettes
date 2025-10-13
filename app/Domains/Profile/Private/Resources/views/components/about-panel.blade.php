@@ -1,7 +1,7 @@
 <div class="p-4 gap-8 flex flex-col">
-    <div class="sm:profile-about sm:p-20 flex flex-col gap-8">
-        <div>
-            <div class="prose prose-sm rich-content max-w-none text-gray-700">
+    <div class="sm:profile-about sm:p-32 flex flex-col gap-8">
+        <div class="max-w-[800px] mx-auto">
+            <div class="text-lg rich-content max-w-none text-fg">
                 @if($profile->description)
                 {!! $profile->description !!}
                 @else
@@ -12,7 +12,7 @@
 
 
         @if($profile->hasSocialNetworks())
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4 max-w-[800px] w-full mx-auto">
             @if($profile->facebook_url)
             <a href="{{ $profile->facebook_url }}" target="_blank" rel="noopener noreferrer"
                 class="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
@@ -27,33 +27,33 @@
             @if($profile->x_url)
             <a href="{{ $profile->x_url }}" target="_blank" rel="noopener noreferrer"
                 class="flex items-center text-gray-900 hover:text-gray-700 transition-colors duration-200">
-                <svg class="w-10 h-10 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path
                         d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
-                <span class="text-xl font-semibold text-accent">{{ __('X (Twitter)') }}</span>
+                <span class="text-lg font-semibold text-accent">{{ __('X (Twitter)') }}</span>
             </a>
             @endif
 
             @if($profile->instagram_url)
             <a href="{{ $profile->instagram_url }}" target="_blank" rel="noopener noreferrer"
                 class="flex items-center text-pink-600 hover:text-pink-800 transition-colors duration-200">
-                <svg class="w-10 h-10 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path
                         d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987c6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447c0-1.297.49-2.448 1.297-3.323.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.807.875 1.297 2.026 1.297 3.323c0 1.297-.49 2.448-1.297 3.323-.875.807-2.026 1.297-3.323 1.297zm7.83-9.404h-1.297V6.287h1.297v1.297zm-1.297 1.297h1.297v1.297h-1.297V8.881z" />
                 </svg>
-                <span class="text-xl font-semibold text-accent">{{ __('Instagram') }}</span>
+                <span class="text-lg font-semibold text-accent">{{ __('Instagram') }}</span>
             </a>
             @endif
 
             @if($profile->youtube_url)
             <a href="{{ $profile->youtube_url }}" target="_blank" rel="noopener noreferrer"
                 class="flex items-center text-red-600 hover:text-red-800 transition-colors duration-200">
-                <svg class="w-10 h-10 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path
                         d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                 </svg>
-                <span class="text-xl font-semibold text-accent">{{ __('YouTube') }}</span>
+                <span class="text-lg font-semibold text-accent">{{ __('YouTube') }}</span>
             </a>
             @endif
         </div>
