@@ -2,8 +2,8 @@
 <x-app-layout>
     <div class="overflow-hidden">
         <!-- Profile Header -->
-        <div class="bg-profile-seasonal sm:bg-profile-seasonal-big px-8 py-6">
-            <div class="flex items-center gap-4">
+        <div class="bg-profile-seasonal sm:bg-profile-seasonal-big px-2 sm:px-8 py-4 sm:py-8">
+            <div class="flex items-center gap-2 sm:gap-4">
                 <!-- Profile Picture -->
                 <div class="flex-shrink-0">
                     <x-shared::avatar :src="$profile->profile_picture_path"
@@ -18,7 +18,7 @@
                     </div>
 
                     @if($isOwn)
-                    <div class="flex gap-4 items-center">
+                    <div class="flex flex-wrap gap-4 items-center">
                         <a href="{{ route('profile.edit') }}">
                             <x-shared::badge color="accent">
                                 <span class="material-symbols-outlined text-[20px] leading-none" title="{{ __('profile::show.edit_profile') }}">
