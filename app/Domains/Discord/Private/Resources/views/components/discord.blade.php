@@ -54,7 +54,8 @@
     <x-shared::modal name="discord-unlink">
         <div class="p-4 surface-read text-on-surface flex flex-col gap-4">
             <x-shared::title tag="h3">{{ __('discord::components.discord-component.unlink_title') }}</x-shared::title>
-            <p>{!! __('discord::components.discord-component.unlink_description') !!}</p>
+            <p>{{ __('discord::components.discord-component.unlink_description') }}</p>
+            <p>{!! __('discord::components.discord-component.disconnect_instructions') !!}</p>
             <div class="surface-secondary text-on-surface px-3 py-2 rounded font-mono tracking-wide">
                 <span class="flex items-center justify-between gap-2">
                     <span>/disconnect</span>
