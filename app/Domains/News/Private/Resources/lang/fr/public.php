@@ -2,9 +2,11 @@
 
 return [
     'index' => [
-        'title' => 'Actualités',
+        'pinned_title' => 'Actualités importantes',
+        'title' => 'Toutes les actualités',
         'read_more' => 'Lire la suite',
         'empty' => 'Aucune actualité pour le moment.',
+        'updated_at' => 'Mis à jour le',
     ],
 
     'carousel' => [
