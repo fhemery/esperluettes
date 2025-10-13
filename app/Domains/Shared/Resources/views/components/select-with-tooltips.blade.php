@@ -17,6 +17,7 @@
     'descriptionField' => 'description',
     'required' => false,
     'color' => 'accent',
+    'truncateValues' => true,
 ])
 
 @php
@@ -84,7 +85,7 @@
                               :class="opt.value === state.selected ? 'text-{{$color}}' : 'text-transparent'">check</span>
                         
                         <div class="flex-1 min-w-0">
-                            <div x-text="opt.label" class="truncate"></div>
+                            <div x-text="opt.label" class="{{ $truncateValues ? 'truncate' : '' }}"></div>
                         </div>
 
                         <!-- Tooltip for options with descriptions -->

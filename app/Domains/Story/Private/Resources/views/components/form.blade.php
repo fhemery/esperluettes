@@ -54,7 +54,9 @@
                 labelField="name"
                 descriptionField="description"
                 :required="true"
-                color="accent" />
+                color="accent" 
+                :truncateValues="false"
+                />
             <x-input-error :messages="$errors->get('story_ref_type_id')" class="mt-2" />
         </div>
 
