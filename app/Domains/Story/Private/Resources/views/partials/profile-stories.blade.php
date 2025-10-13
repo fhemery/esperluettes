@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-4">
-    <div class="flex items-center justify-between gap-4">
-        <x-shared::title tag="h2" icon="nest_eco_leaf">{{ __('story::profile.stories') }}</x-shared::title>
+    <div class="flex items-center justify-end sm:justify-between gap-4">
+        <x-shared::title tag="h2" class="hidden sm:flex" icon="nest_eco_leaf">{{ __('story::profile.stories') }}</x-shared::title>
         <div class="flex items-center gap-3">
             @if($canCreateStory)
             <x-shared::popover placement="bottom" maxWidth="18rem">
