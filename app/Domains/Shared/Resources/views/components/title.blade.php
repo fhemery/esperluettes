@@ -1,5 +1,6 @@
 @props([
     'icon' => null,
+    'tag' => 'h1',
 ])
 
 <div {{ $attributes->merge(['class' => 'flex items-center gap-2 font-extrabold mb-4 text-4xl text-accent']) }}>
@@ -8,6 +9,6 @@
             {{ $icon }}
         </span>
     @endif
-    <h1>{{ $slot }}</h1>
+    <{{ $tag }}>{{ $slot }}</{{ $tag }}>
     
 </div>
