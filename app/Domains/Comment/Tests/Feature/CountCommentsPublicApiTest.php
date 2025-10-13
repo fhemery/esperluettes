@@ -102,5 +102,25 @@ describe('CommentPublicApi: Count', function () {
             $count = $api->countRootCommentsByUser($entityType, $alice->id);
             expect($count)->toBe(2);
         });
+
+        it('counts user root comments across different chapters (one on each)', function () {
+            /** @var CommentPublicApi $api */
+            $api = app(CommentPublicApi::class);
+
+            $alice = alice($this);
+            $this->actingAs($alice);
+
+            $entityType = 'chapter';
+            // Use arbitrary chapter ids (we don't need actual chapter models here)
+            $chapter1 = 101;
+            $chapter2 = 202;
+
+            // One root comment on each distinct chapter
+            createComment($entityType, $chapter1, generateDummyText(150));
+            createComment($entityType, $chapter2, generateDummyText(150));
+
+            $count = $api->countRootCommentsByUser($entityType, $alice->id);
+            expect($count)->toBe(2);
+        });
     });
 });

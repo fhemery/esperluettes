@@ -96,12 +96,13 @@ class CommentRepository
 
     public function countByTargetAndAuthor(string $entityType, int $authorId, bool $isRoot=false): int
     {
+        // We need the DISTINCT number of targets (e.g., chapters) where this author has at least one root comment
         return Comment::query()
             ->where('commentable_type', $entityType)
             ->where('author_id', $authorId)
             ->when($isRoot, fn($q) => $q->whereNull('parent_comment_id'))
-            ->groupBy('commentable_id')
-            ->count();
+            ->distinct('commentable_id')
+            ->count('commentable_id');
     }
 
     public function create(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment
