@@ -71,7 +71,7 @@
                                 </svg>
                                 <x-input-label for="facebook_url" :value="__('profile::edit.networks.facebook')" class="text-on-surface" />
                             </div>
-                            <x-text-input id="facebook_url" class="w-full" type="url" name="facebook_url" :value="old('facebook_url', $profile->facebook_url)" required autofocus autocomplete="facebook_url" />
+                            <x-text-input id="facebook_url" class="w-full" type="url" name="facebook_url" :value="old('facebook_url', $profile->facebook_url)" autocomplete="facebook_url" />
                             <x-input-error :messages="$errors->get('facebook_url')" class="error-on-surface" />
                         </div>
 
@@ -83,7 +83,7 @@
                                 </svg>
                                 <x-input-label for="x_url" :value="__('profile::edit.networks.x')" class="text-on-surface" />
                             </div>
-                            <x-text-input id="x_url" class="w-full" type="url" name="x_url" :value="old('x_url', $profile->x_url)" required autofocus autocomplete="x_url" />
+                            <x-text-input id="x_url" class="w-full" type="url" name="x_url" :value="old('x_url', $profile->x_url)" autocomplete="x_url" />
                             <x-input-error :messages="$errors->get('x_url')" class="error-on-surface" />
                         </div>
 
@@ -95,7 +95,7 @@
                                 </svg>
                                 <x-input-label for="instagram_url" :value="__('profile::edit.networks.instagram')" class="text-on-surface" />
                             </div>
-                            <x-text-input id="instagram_url" class="w-full" type="url" name="instagram_url" :value="old('instagram_url', $profile->instagram_url)" required autofocus autocomplete="instagram_url" />
+                            <x-text-input id="instagram_url" class="w-full" type="url" name="instagram_url" :value="old('instagram_url', $profile->instagram_url)" autocomplete="instagram_url" />
                             <x-input-error :messages="$errors->get('instagram_url')" class="error-on-surface" />
                         </div>
 
@@ -107,7 +107,7 @@
                                 </svg>
                                 <x-input-label for="youtube_url" :value="__('profile::edit.networks.youtube')" class="text-on-surface" />
                             </div>
-                            <x-text-input id="youtube_url" class="w-full" type="url" name="youtube_url" :value="old('youtube_url', $profile->youtube_url)" required autofocus autocomplete="youtube_url" />
+                            <x-text-input id="youtube_url" class="w-full" type="url" name="youtube_url" :value="old('youtube_url', $profile->youtube_url)" autocomplete="youtube_url" />
                             <x-input-error :messages="$errors->get('youtube_url')" class="error-on-surface" />
                         </div>
                     </div>
