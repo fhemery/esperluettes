@@ -2,7 +2,7 @@
 /** @var array<\App\Domains\Story\Private\ViewModels\StorySummaryViewModel> $vms */
     @endphp
 
-    <div class="flex flex-col gap-4 min-w-0 surface-read text-on-surface p-4 pb-6">
+    <div class="flex flex-col gap-8 min-w-0 surface-read text-on-surface p-4 pb-6">
         <div class="flex items-center justify-between text-accent">
             <x-shared::title tag="h2" icon="nest_eco_leaf">
                 {{ __('story::discover.title') }}

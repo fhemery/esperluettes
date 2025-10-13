@@ -10,7 +10,7 @@
     $twDisclosure = $item->getTwDisclosure();
 @endphp
 
-<div class="group flex flex-col overflow-hidden w-[230px]">
+<div class="flex-1 group flex flex-col overflow-hidden w-[230px]">
 
     <div class="w-[230px] h-[306px] mx-auto overflow-hidden">
         <a href="{{ url('/stories/' . $item->getSlug()) }}" class="block">

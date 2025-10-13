@@ -1,4 +1,4 @@
-<div class="flex flex-col justify-between gap-4 items-center surface-read text-on-surface p-4 h-full">
+<div class="flex flex-col items-center gap-4 surface-read text-on-surface p-4 h-full">
     <x-shared::title tag="h2" icon="stylus_fountain_pen" class="font-semibold">
         {{ __('story::keep-writing.title') }}
     </x-shared::title>
@@ -20,7 +20,9 @@
         </x-shared::button>
     </a>
     @else
-    <x-story::card :item="$vm" :display-authors="false" />
+    <div class="flex-1 flex flex-col">
+        <x-story::card :item="$vm" :display-authors="false" />
+    </div>
 
     <div class="flex justify-center items-center gap-2 w-full ">
         <a href="{{ route('chapters.create', ['storySlug' => $vm->getSlug()]) }}">

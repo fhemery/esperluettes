@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-4 items-center justify-between surface-read text-on-surface p-4 h-full">
+<div class="flex flex-col gap-4 items-center surface-read text-on-surface p-4 h-full">
     <x-shared::title tag="h2" icon="book_ribbon">
         {{ __('story::keep-reading.title') }}
     </x-shared::title>
@@ -12,9 +12,11 @@
     </a>
     @else
 
-    <x-story::card :item="$story" :display-authors="false" />
+    <div class="flex-1 flex flex-col">
+        <x-story::card :item="$story" :display-authors="false" />
+    </div>
 
-    <div class="mt-4 flex gap-2">
+    <div class="flex gap-2">
         <a href="{{ $nextChapterUrl }}">
             <x-shared::button color="accent">
                 {{ __('story::keep-reading.continue') }}
