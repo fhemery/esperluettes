@@ -25,7 +25,7 @@
 
         <!-- Flash Messages -->
         @if (session('status') || session('success') || session('error') || $errors->any())
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 10000)" class="max-w-7xl mx-auto px-2 sm:px-6 sm:py-6 py-2">
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 10000)" class="fixed top-24 right-4 z-50 w-full max-w-sm sm:max-w-md px-2 space-y-2">
             @if (session('status'))
             <div class="flex items-center justify-between p-4 rounded surface-info border-l-4 border-info-fg text-on-surface">
                 <p>{{ session('status') }}</p>
