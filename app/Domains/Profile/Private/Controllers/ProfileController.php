@@ -7,6 +7,8 @@ use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Profile\Private\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Private\Services\ProfileService;
 use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
+use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
+use App\Domains\Shared\ViewModels\PageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -53,8 +55,20 @@ class ProfileController extends Controller
         $profile = $this->profileService->getProfile($user->id);
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
+        // Build PageViewModel with breadcrumbs
+        $trail = BreadcrumbViewModel::FromHome(Auth::check());
+        $trail->push(__('profile::show.title', ['name' => $profile->display_name]), route('profile.show.own'));
+        $trail->push(__('profile::show.edit_profile'), null, true);
 
-        return view('profile::pages.edit', compact('profile', 'user'));
+        $page = PageViewModel::make()
+            ->withTitle(__('profile::edit.title', ['name' => $profile->display_name]))
+            ->withBreadcrumbs($trail);
+
+        return view('profile::pages.edit', [
+            'profile' => $profile,
+            'user' => $user,
+            'page' => $page,
+        ]);
     }
 
     /**

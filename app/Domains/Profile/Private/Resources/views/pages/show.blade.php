@@ -20,16 +20,11 @@
                     @if($isOwn)
                     <div class="flex gap-4 items-center">
                         <a href="{{ route('profile.edit') }}">
-                            <x-shared::popover placement="bottom">
-                                <x-slot name="trigger">
-                                    <x-shared::badge color="accent">
-                                        <span class="material-symbols-outlined text-[20px] leading-none">
-                                            edit
-                                        </span>
-                                    </x-shared::badge>
-                                </x-slot>
-                                {{ __('profile::show.edit_profile') }}
-                            </x-shared::popover>
+                            <x-shared::badge color="accent">
+                                <span class="material-symbols-outlined text-[20px] leading-none" title="{{ __('profile::show.edit_profile') }}">
+                                    edit
+                                </span>
+                            </x-shared::badge>
                         </a>
                         <div x-data="{ url: '{{ route('profile.show', $profile) }}', copied: false }"
                             @click="navigator.clipboard.writeText(url).then(() => { copied = true; setTimeout(() => copied = false, 1200) })"

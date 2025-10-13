@@ -2,7 +2,7 @@
     'icon' => null,
 ])
 
-<div {{ $attributes->merge(['class' => 'flex gap-2 font-extrabold mb-4 text-4xl text-accent']) }}>
+<div {{ $attributes->merge(['class' => 'flex items-center gap-2 font-extrabold mb-4 text-4xl text-accent']) }}>
     @if ($icon)
         <span class="material-symbols-outlined">
             {{ $icon }}

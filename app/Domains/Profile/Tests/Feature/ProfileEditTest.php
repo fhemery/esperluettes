@@ -229,4 +229,33 @@ describe('Editing profile', function () {
                 ->assertSee(__('profile::edit.title', ['name' => 'Alice']));
         });
     });
+
+    describe('Breadcrumbs', function () {
+        it('shows Home/Dashboard > "Profil : <display_name>" (link) > "Éditer le profil" (active) on edit page', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            $resp = $this->get('/profile/edit');
+            $resp->assertOk();
+
+            $items = breadcrumb_items($resp);
+            // Expect at least 3 items: root, profile, edit
+            expect(count($items))->toBeGreaterThanOrEqual(3);
+
+            $profileUrl = route('profile.show.own');
+
+            // Find profile crumb (clickable) with translated label
+            $profileCrumb = null;
+            foreach ($items as $it) {
+                if (($it['href'] ?? null) === $profileUrl) { $profileCrumb = $it; break; }
+            }
+            $this->assertNotNull($profileCrumb, 'Profile breadcrumb link not found');
+            $this->assertSame(__('profile::show.title', ['name' => 'Alice']), $profileCrumb['text'] ?? null);
+
+            // Last crumb should be the edit label, non-clickable
+            $last = $items[count($items) - 1];
+            $this->assertNull($last['href'] ?? null, 'Edit breadcrumb should be non-clickable');
+            $this->assertSame(__('profile::show.edit_profile'), $last['text'] ?? null);
+        });
+    });
 });
