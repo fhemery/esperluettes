@@ -38,7 +38,7 @@ class KeepWritingComponent extends Component
             return;
         }
             
-        $story = $this->storyService->getStoryByLatestAddedChapter($userId);
+        $story = $this->storyService->getLatestStoryForKeepWriting($userId);
         if ($story) {
             $this->vm = $this->builder->buildStorySummaryItem($story);
             $this->hasCreditsLeft = $this->creditService->availableForUser($userId) > 0;

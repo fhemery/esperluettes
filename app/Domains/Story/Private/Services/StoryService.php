@@ -240,6 +240,57 @@ class StoryService
         return $this->storiesRepository->getStoryById($latestChapter?->story_id, Auth::id(), GetStoryOptions::ForCardDisplay());
     }
 
+    /**
+     * Return the most relevant story for the Keep Writing widget.
+     * Chooses the maximum of:
+     * - the story of the latest edited chapter (by last_edited_at), and
+     * - the latest created story (by created_at),
+     * both restricted to stories authored by the user.
+     */
+    public function getLatestStoryForKeepWriting(int $userId): ?Story
+    {
+        // Latest activity by chapter edit
+        $latestChapter = Chapter::query()
+            ->with('story')
+            ->whereHas('story', function ($q) use ($userId) {
+                $q->whereHas('authors', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
+            })
+            ->orderByDesc('last_edited_at')
+            ->first();
+
+        // Latest story by creation date authored by the user
+        $latestStory = Story::query()
+            ->whereHas('authors', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->orderByDesc('created_at')
+            ->first();
+
+        if (!$latestChapter && !$latestStory) {
+            return null;
+        }
+
+        if ($latestChapter && !$latestStory) {
+            return $this->storiesRepository->getStoryById((int) $latestChapter->story_id, Auth::id(), GetStoryOptions::ForCardDisplay());
+        }
+
+        if ($latestStory && !$latestChapter) {
+            return $this->storiesRepository->getStoryById((int) $latestStory->id, Auth::id(), GetStoryOptions::ForCardDisplay());
+        }
+
+        // Both exist: compare timestamps
+        $chapterEditedAt = $latestChapter?->last_edited_at;
+        $storyCreatedAt = $latestStory?->created_at;
+
+        if ($chapterEditedAt !== null && $storyCreatedAt !== null && $chapterEditedAt->greaterThanOrEqualTo($storyCreatedAt)) {
+            return $this->storiesRepository->getStoryById((int) $latestChapter->story_id, Auth::id(), GetStoryOptions::ForCardDisplay());
+        }
+
+        return $this->storiesRepository->getStoryById((int) $latestStory->id, Auth::id(), GetStoryOptions::ForCardDisplay());
+    }
+
     public function getKeepReadingContextForUser(int $userId): ?StoryWithNextChapter
     {
         // Get distinct story IDs ordered by latest activity (updated_at/read_at) to avoid duplicates

@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
@@ -72,6 +73,52 @@ describe('Keep Writing Component', function () {
             ->toContain('My Latest Story')
             ->toContain(__('story::keep-writing.new_chapter'))
             ->toContain('disabled="disabled"');
+    });
+
+    it('selects the most recent between last edited chapter and last created story', function () {
+        $author = alice($this);
+        $this->actingAs($author);
+
+        // Story A: has chapters, last edited in the past
+        $storyA = publicStory('Story With Chapters', $author->id);
+        $chapterA1 = createPublishedChapter($this, $storyA, $author, ['title' => 'C1']);
+        // Make sure last_edited_at is older
+        Chapter::whereKey($chapterA1->id)->update(['last_edited_at' => now()->subDays(2)]);
+
+        // Story B: newer story without chapters, created more recently than the last chapter edit
+        // Sleep a tiny moment to ensure different timestamp order if needed
+        $storyB = publicStory('Brand New Idea', $author->id);
+        Story::whereKey($storyB->id)->update(['created_at' => now()->subDay()]);
+
+        // Now update Story A with a newer chapter edit to surpass storyB created_at
+        $chapterA2 = createPublishedChapter($this, $storyA, $author, ['title' => 'C2']);
+        Chapter::whereKey($chapterA2->id)->update(['last_edited_at' => now()]);
+
+        $html = Blade::render('<x-story::keep-writing-component />');
+
+        // Should pick Story A because its latest chapter edit is now the most recent activity
+        expect($html)
+            ->toContain('Story With Chapters')
+            ->toContain(__('story::keep-writing.new_chapter'))
+            ->toContain(route('chapters.create', ['storySlug' => $storyA->slug]));
+    });
+
+    it('shows the last created story when there are no chapters at all', function () {
+        $author = alice($this);
+        $this->actingAs($author);
+
+        // Two stories, no chapters on either
+        $older = publicStory('Older Draft', $author->id);
+        Story::whereKey($older->id)->update(['created_at' => now()->subDays(3)]);
+        $newer = publicStory('New Shiny Draft', $author->id);
+        Story::whereKey($newer->id)->update(['created_at' => now()->subDay()]);
+
+        $html = Blade::render('<x-story::keep-writing-component />');
+
+        expect($html)
+            ->toContain('New Shiny Draft')
+            ->toContain(__('story::keep-writing.new_chapter'))
+            ->toContain(route('chapters.create', ['storySlug' => $newer->slug]));
     });
 
     it('should show an error if the user is not confirmed', function () {

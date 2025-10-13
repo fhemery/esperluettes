@@ -29,7 +29,9 @@
             <x-shared::title tag="h3" icon="group" class="text-tertiary">
                 {{ __('dashboard::index.placeholder_title') }}
             </x-shared::title>
-            <img src="{{ asset('images/errors/not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto flex-1">
+            <div class="flex-1">
+                <img src="{{ asset('images/errors/not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto">
+            </div>
             <p class="text-sm text-muted">{{ __('dashboard::index.placeholder_text') }}</p>
         </div>
 
