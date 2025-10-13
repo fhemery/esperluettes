@@ -534,8 +534,19 @@ describe('Story details page', function () {
 
             // Extract breadcrumb items via shared helper
             $items = breadcrumb_items($resp);
-            // Expect exactly root + story
-            expect(count($items))->toBeGreaterThanOrEqual(2);
+            // Expect at least: root + library + story
+            expect(count($items))->toBeGreaterThanOrEqual(3);
+
+            // Middle crumb should be the library link to stories index with translated label
+            $indexUrl = route('stories.index');
+            $foundLibrary = false;
+            foreach ($items as $it) {
+                if (($it['href'] ?? null) === $indexUrl) {
+                    expect($it['text'])->toEqual(__('shared::navigation.stories'));
+                    $foundLibrary = true;
+                }
+            }
+            expect($foundLibrary)->toBeTrue();
 
             // Last crumb should be the story title and non-clickable
             $last = $items[count($items) - 1];

@@ -140,6 +140,7 @@ class ChapterController
 
         // Build PageViewModel
         $trail = BreadcrumbViewModel::FromHome($user !== null);
+        $trail->push(__('shared::navigation.stories'), route('stories.index'));
         $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
         $trail->push($chapter->title, null, true);
 
@@ -167,6 +168,7 @@ class ChapterController
 
         // Build PageViewModel with breadcrumbs
         $trail = BreadcrumbViewModel::FromHome($request->user() !== null);
+        $trail->push(__('shared::navigation.stories'), route('stories.index'));
         $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
         $trail->push($chapter->title, route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
         $trail->push(__('story::chapters.edit.breadcrumb'), null, true);

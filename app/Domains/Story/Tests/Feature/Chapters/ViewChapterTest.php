@@ -421,7 +421,7 @@ describe('Chapter display', function () {
 
     describe('Breadcrumbs', function (){
 
-        it('displays breadcrumbs with story link clickable and chapter non-clickable', function () {
+        it('displays breadcrumbs with Home > Library > story (clickable) > chapter (active)', function () {
             $author = alice($this);
             $story = publicStory('Breadcrumb Story', $author->id);
             $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Breadcrumb Chapter']);
@@ -430,6 +430,19 @@ describe('Chapter display', function () {
             $resp->assertOk();
 
             $items = breadcrumb_items($resp);
+            // Expect at least Home + Library + Story + Chapter
+            expect(count($items))->toBeGreaterThanOrEqual(4);
+
+            // Find library crumb linking to stories index with translated label
+            $indexUrl = route('stories.index');
+            $foundLibrary = false;
+            foreach ($items as $it) {
+                if (($it['href'] ?? null) === $indexUrl) {
+                    expect($it['text'])->toEqual(__('shared::navigation.stories'));
+                    $foundLibrary = true;
+                }
+            }
+            expect($foundLibrary)->toBeTrue();
             $storyUrl = route('stories.show', ['slug' => $story->slug]);
 
             // Find story crumb

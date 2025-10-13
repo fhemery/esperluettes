@@ -243,7 +243,7 @@ describe('Editing a chapter', function () {
     });
 
     describe('Breadcrumbs', function () {
-        it('shows Home/Dashboard > story link > chapter link > edit label on edit page', function () {
+        it('shows Home/Dashboard > Bibliothèque > story link > chapter link > edit label on edit page', function () {
             $author = alice($this);
             $story = publicStory('BC Story', $author->id);
             $chapter = createPublishedChapter($this, $story, $author, ['title' => 'BC Chapter']);
@@ -253,10 +253,22 @@ describe('Editing a chapter', function () {
             $resp->assertOk();
 
             $items = breadcrumb_items($resp);
-            expect(count($items))->toBeGreaterThanOrEqual(4);
+            // Expect at least: root, library, story, chapter, edit
+            expect(count($items))->toBeGreaterThanOrEqual(5);
 
             $storyUrl = route('stories.show', ['slug' => $story->slug]);
             $chapterUrl = route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]);
+
+            // Library crumb (clickable)
+            $indexUrl = route('stories.index');
+            $foundLibrary = false;
+            foreach ($items as $it) {
+                if (($it['href'] ?? null) === $indexUrl) {
+                    expect($it['text'])->toEqual(__('shared::navigation.stories'));
+                    $foundLibrary = true;
+                }
+            }
+            $this->assertTrue($foundLibrary, 'Library breadcrumb link not found');
 
             // Story crumb (clickable)
             $foundStory = false; $foundChapter = false;

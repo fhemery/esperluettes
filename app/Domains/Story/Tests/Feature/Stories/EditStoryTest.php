@@ -411,10 +411,21 @@ describe('Editing story', function () {
             $resp->assertOk();
 
             $items = breadcrumb_items($resp);
-            // Expect at least 3 items: root, story, edit
-            expect(count($items))->toBeGreaterThanOrEqual(3);
+            // Expect at least 4 items: root, library, story, edit
+            expect(count($items))->toBeGreaterThanOrEqual(4);
 
             $storyUrl = route('stories.show', ['slug' => $story->slug]);
+
+            // Find library crumb (clickable) linking to stories index
+            $indexUrl = route('stories.index');
+            $foundLibrary = false;
+            foreach ($items as $it) {
+                if (($it['href'] ?? null) === $indexUrl) {
+                    expect($it['text'])->toEqual(__('shared::navigation.stories'));
+                    $foundLibrary = true;
+                }
+            }
+            expect($foundLibrary)->toBeTrue();
 
             // Find story crumb (clickable)
             $storyCrumb = null;

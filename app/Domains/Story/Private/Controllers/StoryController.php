@@ -150,8 +150,9 @@ class StoryController
         }
 
         $referentials = $this->lookup->getStoryReferentials();
-        // Build PageViewModel with breadcrumbs: Home/Dashboard > Story (link) > Edit (active)
+        // Build PageViewModel with breadcrumbs: Home/Dashboard > Library > Story (link) > Edit (active)
         $trail = BreadcrumbViewModel::FromHome(Auth::check());
+        $trail->push(__('shared::navigation.stories'), route('stories.index'));
         $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
         $trail->push(trans('story::edit.breadcrumb'), null, true);
 
@@ -382,8 +383,9 @@ class StoryController
 
         $metaDescription = Seo::excerpt($viewModel->getDescription());
 
-        // Build PageViewModel (root with icon, then active story)
+        // Build PageViewModel (root with icon, then library link, then active story)
         $trail = BreadcrumbViewModel::FromHome(Auth::check());
+        $trail->push(__('shared::navigation.stories'), route('stories.index'));
         $trail->push($viewModel->getTitle(), null, true);
 
         $page = PageViewModel::make()
