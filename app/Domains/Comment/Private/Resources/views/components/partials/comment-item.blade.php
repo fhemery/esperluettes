@@ -20,11 +20,11 @@
 
     <!-- Header: author + date + edit icon (right) -->
     <div class="flex items-center gap-2 grow">
-      <div class="font-semibold text-gray-800">
+      <div class="font-semibold text-secondary">
         @if($isUnknown || empty($comment->authorProfile->slug))
-        <span>{{ $displayName }}</span>
+        <span class="text-fg/80">{{ $displayName }}</span>
         @else
-        <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-gray-600">{{ $displayName }}</a>
+        <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-secondary/80">{{ $displayName }}</a>
         @endif
       </div>
       @if($comment->canEditOwn && Auth::check() && Auth::id() === $comment->authorId)
@@ -47,7 +47,11 @@
 
     <div class="col-span-2">
       <!-- Body or Edit form -->
-      <div class="rich-content comment-body pl-2 sm:pl-6 text-sm text-gray-700" x-show="activeEditId !== {{ $comment->id }}">{!! $comment->body !!}</div>
+      <div class="rich-content comment-body text-lg pl-2 sm:pl-6" x-show="activeEditId !== {{ $comment->id }}">
+        {!! $comment->body !!}
+      </div>
+
+
       @if($comment->canEditOwn && Auth::check() && Auth::id() === $comment->authorId)
       <div class="mt-3" x-show="activeEditId === {{ $comment->id }}">
         <form
