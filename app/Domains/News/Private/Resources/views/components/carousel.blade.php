@@ -49,7 +49,7 @@ $items = $items ?? collect();
                     </div>
                 </a>
                 @else
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:px-24">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:px-24 pb-8">
                     <a href="{{ route('news.show', $item->slug) }}" class="block relative">
                         <picture>
                             <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
@@ -62,7 +62,7 @@ $items = $items ?? collect();
                                 loading="eager">
                         </picture>
                     </a>
-                    <div class="flex flex-col gap-4 h-full pb-4">
+                    <div class="flex flex-col gap-4 h-full">
                         <a href="{{ route('news.show', $item->slug) }}" class="block relative">
                             <x-shared::title tag="h3" class="text-xl text-secondary">{{ $item->title }}</x-shared::title>
                         </a>
