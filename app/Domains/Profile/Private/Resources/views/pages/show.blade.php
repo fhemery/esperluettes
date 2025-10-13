@@ -100,14 +100,14 @@
                         x-effect="if (tab === 'stories') loadStories()">
                         @if(Auth::check())
                         <div x-show="tab==='about'" x-cloak>
-                            <div class="flex flex-col gap-4 m-4 p-4 surface-read text-on-surface">
+                            <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
                                 <x-profile::about-panel :profile="$profile" />
                             </div>
                         </div>
                         @endif
 
                         <div x-show="tab==='stories'" x-cloak>
-                            <div class="flex flex-col gap-4 m-4 p-4 surface-read text-on-surface">
+                            <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
                                 <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
                                 <div x-ref="stories" class="mt-2"></div>
                             </div>
