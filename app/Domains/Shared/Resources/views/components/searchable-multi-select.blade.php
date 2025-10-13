@@ -42,9 +42,9 @@
     })" class="max-w-full" @click.outside="open = false" x-init="initiated = true">
     <div class="relative">
         <!-- Input -->
-        <div class="min-h-8 w-full rounded-md border border-{{$color}} px-2 focus-within:ring-2 focus-within:ring-{{$color}}/90">
+        <div x-ref="button" @click.stop class="min-h-8 w-full rounded-md border border-{{$color}} px-2 focus-within:ring-2 focus-within:ring-{{$color}}/90">
             <div class="flex items-center gap-1.5">
-                <input type="text" x-model="state.query" @focus="open = true" @keydown.down.prevent="move(1)"
+                <input type="text" x-model="state.query" @focus="open = true; $nextTick(() => updatePosition())" @keydown.down.prevent="move(1)"
                        @keydown.up.prevent="move(-1)" @keydown.enter.prevent="chooseHighlighted()"
                        class="flex-1 min-w-[8rem] bg-transparent border-0 focus:ring-0 text placeholder-accent"
                        :class="state.selected.length ? 'placeholder:font-semibold' : ''"
@@ -53,8 +53,18 @@
         </div>
 
         <!-- Dropdown -->
-        <div x-cloak x-show="open" class="absolute z-20 mt-1 w-full rounded-md bg-white border border-{{$color}} ring-5 ring-{{$color}}">
-            <ul class="max-h-60 overflow-auto py-1" :style="{maxHeight: maxHeight}">
+        <template x-teleport="body">
+        <div x-cloak x-show="open" @click.outside="open = false" @mousedown.stop @click.stop
+             x-transition:enter="transition ease-out duration-100"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             x-ref="dropdown"
+             :style="dropdownStyle"
+             class="fixed z-[100] mt-1 rounded-md bg-white border border-{{$color}} shadow-lg">
+            <ul class="overflow-auto py-1" :style="{maxHeight: maxHeight, width: dropdownWidth}">
                 <template x-for="(opt, idx) in state.filtered" :key="opt.slug">
                     <li>
                         <button type="button" @mousedown.prevent="toggle(opt.slug)" @mouseenter="highlight = idx"
@@ -79,6 +89,7 @@
                 </template>
             </ul>
         </div>
+        </template>
     </div>
 
     <!-- Hidden inputs -->
@@ -109,6 +120,8 @@
                         maxHeight: maxHeight,
                         highlight: -1,
                         initiated: false,
+                        dropdownStyle: { left: '0px', top: '0px', width: '0px' },
+                        dropdownWidth: '0px',
                         optionMap: options.reduce((acc, option) => {
                             acc[option.slug] = option;
                             return acc;
@@ -182,6 +195,31 @@
                                 return `${firstLabel} (+${remaining})`;
                             }
                             return '';
+                        },
+                        init() {
+                            // Keep dropdown positioned on resize/scroll
+                            const handler = () => this.open && this.updatePosition();
+                            this._resizeHandler = handler;
+                            window.addEventListener('resize', handler);
+                            window.addEventListener('scroll', handler, true);
+                            this.$watch('open', (val) => { if (val) this.$nextTick(() => this.updatePosition()); });
+                        },
+                        destroy() {
+                            window.removeEventListener('resize', this._resizeHandler);
+                            window.removeEventListener('scroll', this._resizeHandler, true);
+                        },
+                        updatePosition() {
+                            const btn = this.$refs.button;
+                            if (!btn) return;
+                            const rect = btn.getBoundingClientRect();
+                            const gap = 4; // small gap under the trigger
+                            this.dropdownStyle = {
+                                position: 'fixed',
+                                left: `${Math.round(rect.left)}px`,
+                                top: `${Math.round(rect.bottom + gap)}px`,
+                                width: `${Math.round(rect.width)}px`,
+                            };
+                            this.dropdownWidth = `${Math.round(rect.width)}px`;
                         },
                     }
                 }
