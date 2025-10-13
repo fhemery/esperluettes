@@ -10,7 +10,7 @@
     </div>
 
     @if($profile->hasSocialNetworks())
-    <div class="grid grid-cols-2 gap-4 mx-10">
+    <div class="grid grid-cols-2 gap-4">
         @if($profile->facebook_url)
         <a href="{{ $profile->facebook_url }}" target="_blank" rel="noopener noreferrer"
             class="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
