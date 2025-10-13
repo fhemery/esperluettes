@@ -82,14 +82,12 @@
         </button>
     </div>
     
-    <x-shared::confirm-modal
+    <x-story::confirm-delete-chapter
         name="confirm-delete-chapter-{{ $ch->id }}"
-        :title="__('story::chapters.actions.delete')"
-        :body="__('story::chapters.confirm_delete_warning', ['chapterTitle' => $ch->title])"
-        :cancel="__('story::show.cancel')"
+        :storySlug="$story->slug"
+        :chapterSlug="$ch->slug"
+        :chapterTitle="$ch->title"
         :confirm="__('story::show.chapter.confirm_delete')"
-        :action="route('chapters.destroy', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug])"
-        method="DELETE"
-        maxWidth="md" />
+    />
     @endforeach
 </div>

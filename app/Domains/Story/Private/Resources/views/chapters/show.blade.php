@@ -192,14 +192,12 @@
     @endpush
 
     @if($vm->isAuthor)
-    <x-shared::confirm-modal
+    <x-story::confirm-delete-chapter
         name="confirm-delete-chapter"
-        :title="__('story::chapters.actions.delete')"
-        :body="__('story::chapters.confirm_delete_warning', ['chapterTitle' => $vm->chapter->title])"
-        :cancel="__('story::show.cancel')"
+        :storySlug="$vm->story->slug"
+        :chapterSlug="$vm->chapter->slug"
+        :chapterTitle="$vm->chapter->title"
         :confirm="__('story::show.confirm_delete')"
-        :action="route('chapters.destroy', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug])"
-        method="DELETE"
-        maxWidth="md" />
+    />
     @endif
 </x-app-layout>

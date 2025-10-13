@@ -84,5 +84,8 @@ return [
     ],
     'author_note' => 'Note de l\'esperluette : ',
     'by' => 'Par ',
-    'confirm_delete_warning' => 'Êtes-vous sûr de vouloir supprimer le chapitre ":chapterTitle" ?',
+    'delete' => [
+        'confirm_warning' => 'Êtes-vous sûr·e de vouloir supprimer le chapitre ":chapterTitle" ?',
+        'no_refund' => 'Note : supprimer un chapitre n\'octroie pas de crédit pour en poster un autre.'
+    ] 
 ];

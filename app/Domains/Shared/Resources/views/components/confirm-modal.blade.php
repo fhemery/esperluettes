@@ -16,6 +16,8 @@
         @endif
         @if($body)
             <p class="mt-2 text-sm text-gray-600">{{ $body }}</p>
+        @else
+            {{ $slot }}
         @endif
 
         <div class="mt-6 flex justify-end gap-3">
