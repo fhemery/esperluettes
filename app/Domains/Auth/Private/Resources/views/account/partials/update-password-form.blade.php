@@ -1,12 +1,8 @@
 <section class="flex flex-col gap-4">
     <header class="flex flex-col gap-2">
-        <h2 class="text-xl font-semibold text-accent flex gap-2 items-center">
-            <span class="material-symbols-outlined">
-                lock
-            </span>
-
+        <x-shared::title icon="lock" tag="h2">
             {{ __('auth::account.password.update_title') }}
-        </h2>
+        </x-shared::title>
 
         <p>
             {{ __('auth::account.password.update_help') }}

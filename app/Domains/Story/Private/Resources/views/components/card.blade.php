@@ -33,7 +33,7 @@
         {{-- Title + summary tooltip icon --}}
         <div class="flex items-center gap-1">
             <a href="{{ url('/stories/' . $item->getSlug()) }}" class="block">
-                <h2 class="flex-1 font-extrabold text-gray-900 text-md leading-5 line-clamp-2 hover:underline">{{ $item->getTitle() }}</h2>
+                <div class="flex-1 font-extrabold text-gray-900 text-md leading-5 line-clamp-2 hover:underline">{{ $item->getTitle() }}</div>
             </a>
             @if(trim($item->getDescription()) !== '')
             <div class="-mb-1">

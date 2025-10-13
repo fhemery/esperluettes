@@ -12,7 +12,7 @@
 <x-shared::modal :name="$name" :maxWidth="$maxWidth">
     <div class="p-6">
         @if($title)
-            <h2 class="text-lg font-medium text-gray-900">{{ $title }}</h2>
+            <x-shared::title tag="h2">{{ $title }}</x-shared::title>
         @endif
         @if($body)
             <p class="mt-2 text-sm text-gray-600">{{ $body }}</p>

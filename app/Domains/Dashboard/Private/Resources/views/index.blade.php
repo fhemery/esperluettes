@@ -26,13 +26,10 @@
 
         <!-- Placeholder side image -->
         <div class="col-span-1 sm:col-span-2 flex flex-col gap-2 items-center justify-center p-4 surface-read text-on-surface">
-            <h3 class="text-xl font-semibold flex flex-start gap-2 text-tertiary self-start">
-                <span class="material-symbols-outlined">
-                    group
-                </span>
+            <x-shared::title tag="h3" icon="group" class="text-tertiary">
                 {{ __('dashboard::index.placeholder_title') }}
-            </h3>
-            <img src="{{ asset('images/errors/not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto">
+            </x-shared::title>
+            <img src="{{ asset('images/errors/not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto flex-1">
             <p class="text-sm text-muted">{{ __('dashboard::index.placeholder_text') }}</p>
         </div>
 

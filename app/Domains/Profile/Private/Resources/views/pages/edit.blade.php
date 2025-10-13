@@ -12,7 +12,9 @@
             <!-- Left: Picture + upload/remove controls -->
             <div class="md:col-span-1 flex flex-col gap-4 items-center"
                 x-data="{ hasFile: false }">
-                <h2 class="text-lg text-center font-semibold text-accent">{{ __('profile::edit.profile_picture.title') }}</h2>
+                <x-shared::title tag="h2" >
+                    {{ __('profile::edit.profile_picture.title') }}
+                </x-shared::title>
 
                 <x-shared::avatar :src="$profile->profile_picture_path" class="h-32 w-32 rounded-full mx-auto" />
 
@@ -61,7 +63,9 @@
 
                 <!-- Social Networks -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <h2 class="text-lg text-accent font-semibold md:col-span-2">{{ __('profile::edit.networks.title') }}</h2>
+                    <x-shared::title tag="h2" class="md:col-span-2">
+                        {{ __('profile::edit.networks.title') }}
+                    </x-shared::title>
 
                         <!-- Facebook -->
                         <div class="flex flex-col gap-2">

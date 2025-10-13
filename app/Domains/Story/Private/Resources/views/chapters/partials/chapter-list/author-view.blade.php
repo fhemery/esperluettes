@@ -1,6 +1,6 @@
 <section class="mt-10" x-data="{ editing: false }">
     <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold">{{ __('story::chapters.sections.chapters') }}</h2>
+        <x-shared::title tag="h2">{{ __('story::chapters.sections.chapters') }}</x-shared::title>
         <div class="flex items-center gap-2">
             <template x-if="!editing">
                 <div class="flex items-center gap-2">

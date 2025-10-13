@@ -1,6 +1,6 @@
 <section class="mt-10">
     <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold">{{ __('story::chapters.sections.chapters') }}</h2>
+        <x-shared::title tag="h2">{{ __('story::chapters.sections.chapters') }}</x-shared::title>
     </div>
 
     @php($chapters = $chapters ?? ($viewModel->chapters ?? []))

@@ -1,12 +1,8 @@
 <section class="space-y-6">
     <header class="flex flex-col gap-2">
-        <h2 class="text-xl font-semibold text-accent flex gap-2 items-center">
-            <span class="material-symbols-outlined">
-                delete
-            </span>
-
+        <x-shared::title icon="delete" tag="h2">
             {{ __('auth::account.delete.title') }}
-        </h2>
+        </x-shared::title>
 
         <p >
             {{ __('auth::account.delete.description') }}
@@ -23,9 +19,9 @@
             @csrf
             @method('delete')
 
-            <h2 class="text-lg font-medium text-accent">
+            <x-shared::title tag="h2">
                 {{ __('auth::account.delete.confirm_title') }}
-            </h2>
+            </x-shared::title>
 
             <p class="mt-1 text-sm">
                 {{ __('auth::account.delete.confirm_description') }}

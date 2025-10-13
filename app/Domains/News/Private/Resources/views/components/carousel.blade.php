@@ -43,8 +43,8 @@ $items = $items ?? collect();
                                 loading="eager">
                         </picture>
                         <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pl-16 text-white">
-                            <h3 class="text-2xl leading-7 font-semibold">{{ $item->title }}</h3>
-                            <p class="text-lg opacity-90 leading-6 line-clamp-2">{{ $item->summary }}</p>
+                            <x-shared::title tag="h3" class="leading-7 text-white">{{ $item->title }}</x-shared::title>
+                            <p class="text-lg opacity-90 leading-6 line-clamp-2 text-white">{{ $item->summary }}</p>
                         </div>
                     </div>
                 </a>

@@ -15,9 +15,9 @@
     </div>
 @else
     <div class="flex flex-col gap-4 surface-read text-on-surface p-6 w-full">
-        <h2 class="text-xl font-semibold text-center">
+        <x-shared::title tag="h2" class="text-center">
             {{ __('dashboard::welcome.welcome_message') }} <span class="text-accent">{{$displayName}}</span>
-        </h2>
+        </x-shared::title>
 
         <div class="space-y-2 text-md text-center">
             <p>

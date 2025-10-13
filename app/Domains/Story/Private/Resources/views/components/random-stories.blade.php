@@ -4,13 +4,9 @@
 
     <div class="flex flex-col gap-4 min-w-0 surface-read text-on-surface p-4 pb-6">
         <div class="flex items-center justify-between text-accent">
-
-            <h3 class="text-xl font-semibold flex items-center gap-2">
-                <span class="material-symbols-outlined">
-                    nest_eco_leaf
-                </span>
+            <x-shared::title tag="h2" icon="nest_eco_leaf">
                 {{ __('story::discover.title') }}
-            </h3>
+            </x-shared::title>
             <a href="{{ route('stories.index') }}" class="text-sm hover:underline">{{ __('story::discover.view_all') }}</a>
         </div>
 

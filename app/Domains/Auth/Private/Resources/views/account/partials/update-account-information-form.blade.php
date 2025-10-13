@@ -1,12 +1,8 @@
 <section>
     <header class="flex flex-col gap-2">
-        <h2 class="text-xl font-semibold text-accent flex gap-2 items-center">
-            <span class="material-symbols-outlined">
-                mail
-            </span>
-
+        <x-shared::title icon="mail" tag="h2">
             {{ __('auth::account.info.title') }}
-        </h2>
+        </x-shared::title>
 
         <p>
             {{ __('auth::account.info.description') }}

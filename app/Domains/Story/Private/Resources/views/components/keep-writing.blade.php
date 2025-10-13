@@ -1,10 +1,7 @@
 <div class="flex flex-col justify-between gap-4 items-center surface-read text-on-surface p-4 h-full">
-    <h3 class="flex items-center self-center gap-2 text-accent font-semibold text-xl">
-        <span class="material-symbols-outlined">
-            stylus_fountain_pen
-        </span> 
+    <x-shared::title tag="h2" icon="stylus_fountain_pen" class="font-semibold">
         {{ __('story::keep-writing.title') }}
-    </h3>
+    </x-shared::title>
 
     @if($error)
     <p>{{ $error }}</p>
