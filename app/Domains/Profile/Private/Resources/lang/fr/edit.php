@@ -8,6 +8,7 @@ return [
         'remove' => 'Supprimer la photo actuelle',
         'upload' => 'Téléverser une nouvelle photo',
         'upload_hint' => 'JPG, PNG, GIF jusqu\'à 2 Mo. Min 100x100 px.',
+        'click_save' => 'Cliquez sur "Enregister" en bas de la page pour finaliser le changement de photo',
     ],
     'display_name'=> [
         'label' => 'Nom d\'Esperluette',
