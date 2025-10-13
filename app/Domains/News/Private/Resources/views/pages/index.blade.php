@@ -1,7 +1,14 @@
 <x-app-layout :page="$page">
     <div class="w-full flex flex-col gap-6">
-        <x-shared::title icon="news">{{ __('news::public.index.title') }}</x-shared::title>
+        <!-- News carousel -->
+        <x-shared::title icon="news">{{ __('news::public.index.pinned_title') }}</x-shared::title>
+        
+        <div class="py-4 md:py-8 md:px-16 surface-read text-on-surface">
+            <x-news::carousel :items="$pinned" />
+        </div>
 
+        <!-- All news -->
+        <x-shared::title icon="news">{{ __('news::public.index.title') }}</x-shared::title>
 
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             @forelse($news as $news)

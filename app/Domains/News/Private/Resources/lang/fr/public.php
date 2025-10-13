@@ -2,7 +2,7 @@
 
 return [
     'index' => [
-        'pinned_title' => 'Actualités importantes',
+        'pinned_title' => 'À la une',
         'title' => 'Toutes les actualités',
         'read_more' => 'Lire la suite',
         'empty' => 'Aucune actualité pour le moment.',

@@ -128,8 +128,8 @@ describe('Carousel Component', function () {
         $view = $component->render();
         $html = $view->render();
 
-        expect($html)->toContain('‹')
-            ->and($html)->toContain('›')
+        expect($html)->toContain('chevron_left')
+            ->and($html)->toContain('chevron_right')
             ->and($html)->toContain('aria-label')
             ->and($html)->toContain('@click');
     });
@@ -150,7 +150,7 @@ describe('Carousel Component', function () {
         $html = $view->render();
 
         expect($html)->toContain('h-2 w-2 rounded-full')
-            ->and($html)->toContain('bg-white')
+            ->and($html)->toContain('bg-accent')
             ->and($html)->toContain('aria-current');
     });
 
