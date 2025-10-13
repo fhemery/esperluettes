@@ -93,6 +93,11 @@ html {
   --home-bg-image: url('/images/themes/autumn/background.png');
   --profile-bg-image-small: url('/images/themes/autumn/profile-bg-640.jpg');
   --profile-bg-image-big: url('/images/themes/autumn/profile-bg-1280.jpg');
+
+  --profile-about-corner-tl:url('/images/themes/autumn/profile/profile-about-corner-tl.png');
+  --profile-about-corner-tr:url('/images/themes/autumn/profile/profile-about-corner-tr.png');
+  --profile-about-corner-bl:url('/images/themes/autumn/profile/profile-about-corner-bl.png');
+  --profile-about-corner-br:url('/images/themes/autumn/profile/profile-about-corner-br.png');
 }
 
 /* Rich content defaults (for sanitized HTML display) */
@@ -181,6 +186,12 @@ html {
     background-image: var(--profile-bg-image-big);
     background-repeat: no-repeat;
     background-size: cover;
+  }
+
+  .profile-about {
+    background-image: var(--profile-about-corner-tl), var(--profile-about-corner-tr), var(--profile-about-corner-bl), var(--profile-about-corner-br);
+    background-position: top left, top right, bottom left, bottom right;
+    background-repeat: no-repeat;
   }
 
   /* Surface system: season-agnostic light/dark panels */
