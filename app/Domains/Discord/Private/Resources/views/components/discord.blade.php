@@ -25,7 +25,7 @@
             <h3 class="font-semibold text-lg mb-2">{{ __('discord::components.discord-component.connect_title') }}</h3>
             <p class="text-sm mb-2">{{ __('discord::components.discord-component.connect_description') }}</p>
             <p class="text-sm text-on-surface-variant mb-2">
-                {{ __('discord::components.discord-component.connect_instructions') }}
+                {!! __('discord::components.discord-component.connect_instructions') !!}
             </p>
             <div class="surface-secondary text-on-surface px-3 py-2 rounded font-mono tracking-wide">
                 <template x-if="loading">
@@ -48,7 +48,7 @@
     <x-shared::modal name="discord-unlink">
         <div class="p-4 surface-read text-on-surface flex flex-col gap-4">
             <h3 class="font-semibold text-lg text-accent">{{ __('discord::components.discord-component.unlink_title') }}</h3>
-            <p>{{ __('discord::components.discord-component.unlink_description') }}</p>
+            <p>{!! __('discord::components.discord-component.unlink_description') !!}</p>
             <div class="surface-secondary text-on-surface px-3 py-2 rounded font-mono tracking-wide">
                 <span>/disconnect</span>
             </div>
