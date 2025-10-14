@@ -32,4 +32,12 @@ class FeatureToggleRepository
     {
         return FeatureToggle::where('domain', $domain)->where('name', $name)->exists();
     }
+
+    /**
+     * @return array<int,FeatureToggle>
+     */
+    public function all(): array
+    {
+        return FeatureToggle::orderBy('domain')->orderBy('name')->get()->all();
+    }
 }

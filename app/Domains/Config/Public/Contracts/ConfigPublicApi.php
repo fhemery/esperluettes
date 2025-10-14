@@ -28,5 +28,14 @@ class ConfigPublicApi {
     {
         $this->service->deleteFeatureToggle($featureToggleName, $domain);
     }
-}
 
+    /**
+     * List all feature toggles visible to the current admin/tech admin.
+     *
+     * @return array<FeatureToggle>
+     */
+    public function listFeatureToggles(): array
+    {
+        return $this->service->listFeatureToggles();
+    }
+}
