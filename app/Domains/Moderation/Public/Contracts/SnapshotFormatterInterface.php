@@ -21,4 +21,6 @@ interface SnapshotFormatterInterface
      * Returns the entity's created_by_user_id or equivalent.
      */
     public function getReportedUserId(int $entityId): int;
+
+    public function getContentUrl(int $entityId): string;
 }

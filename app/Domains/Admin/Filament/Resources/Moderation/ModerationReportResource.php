@@ -2,7 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\Moderation;
 
-use App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pages\EditModerationReport;
+use App\Domains\Admin\Filament\Resources\Moderation\ModerationReportResource\Pages\EditModerationReport;
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReportResource\Pages\ListModerationReports;
 use App\Domains\Moderation\Models\ModerationReason;
 use App\Domains\Moderation\Models\ModerationReport;
@@ -15,7 +15,9 @@ use Filament\Tables\Table;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 
 class ModerationReportResource extends Resource
 {
@@ -72,6 +74,34 @@ class ModerationReportResource extends Resource
                 Textarea::make('review_comment')
                     ->label(__('admin::moderation.reports.fields.review_comment'))
                     ->helperText(__('admin::moderation.reports.fields.review_comment_hint')),
+
+                Placeholder::make('snapshot_render')
+                    ->label(__('admin::moderation.reports.fields.snapshot'))
+                    ->content(function ($record) {
+                        if (! $record) {
+                            return null;
+                        }
+
+                        /** @var ModerationRegistry $registry */
+                        $registry = app(ModerationRegistry::class);
+                        if (! $registry->hasFormatter($record->topic_key)) {
+                            return null;
+                        }
+
+                        $snapshot = $record->content_snapshot ?? [];
+                        if (empty($snapshot)) {
+                            return null;
+                        }
+
+                        $formatter = $registry->getFormatter($record->topic_key);
+                        $html = (string) $formatter->render($snapshot);
+                        if (trim($html) === '') {
+                            return null;
+                        }
+
+                        return new HtmlString($html);
+                    })
+                    ->columnSpanFull(),
             ]);
     }
 

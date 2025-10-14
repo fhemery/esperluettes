@@ -38,7 +38,8 @@ return [
             'status' => 'Statut',
             'created_at' => 'Date',
             'review_comment' => 'Commentaire modération',
-            'review_comment_hint' => 'Ce commentaire est interne aux modérateurices, destiné à se souvenir des décisions et actions.'
+            'review_comment_hint' => 'Ce commentaire est interne aux modérateurices, destiné à se souvenir des décisions et actions.',
+            'snapshot' => 'Aperçu',
         ],
 
         'status' => [

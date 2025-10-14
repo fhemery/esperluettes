@@ -102,14 +102,16 @@ class ModerationService
      */
     private function buildContentUrl(string $topicKey, int $entityId): string
     {
-        // Basic URL generation based on topic
-        // TODO: This should be improved to use actual routes from domains
-        return match ($topicKey) {
-            'profile' => route('profile.show', $entityId),
-            'story' => route('story.show', $entityId),
-            'chapter' => route('chapter.show', $entityId),
-            'comment' => '#comment-' . $entityId, // Comments are anchors within pages
-            default => '/',
-        };
+        // Prefer formatter-specific URL if available
+        if ($this->registry->hasFormatter($topicKey)) {
+            try {
+                return $this->registry->getFormatter($topicKey)->getContentUrl($entityId);
+            } catch (\Throwable $e) {
+                // Fallback to basic generation below
+            }
+        }
+
+        // Basic fallback URL generation based on topic
+        return '';
     }
 }

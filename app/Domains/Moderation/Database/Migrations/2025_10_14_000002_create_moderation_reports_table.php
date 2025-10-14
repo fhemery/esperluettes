@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('reason_id')->constrained('moderation_reasons');
             $table->text('description')->nullable(); // additional details from reporter
             $table->json('content_snapshot')->nullable(); // Domain-specific snapshot as JSON
-            $table->string('content_url'); // URL to the reported content
+            $table->string('content_url')->nullable(); // URL to the reported content
             $table->enum('status', ['pending', 'confirmed', 'dismissed'])->default('pending');
             $table->unsignedBigInteger('reviewed_by_user_id')->nullable(); // moderator
             $table->timestamp('reviewed_at')->nullable();

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pages;
+namespace App\Domains\Admin\Filament\Resources\Moderation\ModerationReportResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReportResource;
 use Filament\Actions;

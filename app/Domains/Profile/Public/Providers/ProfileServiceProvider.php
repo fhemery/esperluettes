@@ -18,6 +18,7 @@ use App\Domains\Profile\Public\Events\BioUpdated;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Profile\Private\Listeners\RemoveProfileOnUserDeleted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use App\Domains\Profile\Public\Moderation\ProfileSnapshotFormatter;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -72,7 +73,7 @@ class ProfileServiceProvider extends ServiceProvider
         app(ModerationRegistry::class)->register(
             key: 'profile',
             displayName: __('profile::moderation.topic_name'),
-            formatterClass: null // No formatter implementation yet
+            formatterClass: ProfileSnapshotFormatter::class
         );
     }
 }
