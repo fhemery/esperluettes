@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Profile\Private\Controllers\ProfileController;
+use App\Domains\Profile\Private\Controllers\ProfileLookupController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,4 +26,14 @@ Route::middleware('web')->group(function () {
 
     // Public profile page (by slug) - accessible to guests
     Route::get('/profile/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
+
+    // Admin-only (auth) small lookup endpoints for UI components
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/profiles/lookup', [ProfileLookupController::class, 'search'])
+            ->middleware(['throttle:60,1'])
+            ->name('profiles.lookup');
+        Route::get('/profiles/lookup/by-ids', [ProfileLookupController::class, 'byIds'])
+            ->middleware(['throttle:60,1'])
+            ->name('profiles.lookup.by_ids');
+    });
 });

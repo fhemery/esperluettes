@@ -15,6 +15,7 @@ return [
     App\Domains\Profile\Public\Providers\ProfileServiceProvider::class,
     App\Domains\StoryRef\Public\Providers\StoryServiceRefProvider::class,
     App\Domains\Comment\Public\Providers\CommentServiceProvider::class,
+    App\Domains\Message\Public\Providers\MessageServiceProvider::class,
     App\Domains\Story\Public\Providers\StoryServiceProvider::class,
     App\Domains\Search\Public\Providers\SearchServiceProvider::class,
     App\Domains\Discord\Public\Providers\DiscordServiceProvider::class,

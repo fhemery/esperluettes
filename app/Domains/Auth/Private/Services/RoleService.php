@@ -3,6 +3,7 @@
 namespace App\Domains\Auth\Private\Services;
 
 use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Private\Models\Role;
 use App\Domains\Auth\Private\Services\RoleCacheService;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Public\Events\UserRoleGranted;
@@ -78,5 +79,50 @@ class RoleService
     {
         $this->revoke($user, $confirmedRole);
         $this->grant($user, $probationRole);
+    }
+
+    /**
+     * Search roles by partial name or slug.
+     *
+     * @return array<int, Role>
+     */
+    public function searchByName(string $q, int $limit = 25): array
+    {
+        $term = trim($q);
+        if ($term === '') {
+            return [];
+        }
+        $cap = max(1, min(50, (int) $limit));
+        $like = "%{$term}%";
+        return Role::query()
+            ->where(function ($w) use ($like) {
+                $w->where('name', 'like', $like)
+                  ->orWhere('slug', 'like', $like);
+            })
+            ->orderBy('name')
+            ->limit($cap)
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Fetch roles by slugs.
+     *
+     * @param array<int,string> $slugs
+     * @return array<int, Role>
+     */
+    public function getBySlugs(array $slugs): array
+    {
+        $slugs = array_values(array_unique(array_filter(array_map(function ($s) {
+            return is_string($s) ? trim($s) : '';
+        }, $slugs), fn ($s) => $s !== '')));
+        if (empty($slugs)) {
+            return [];
+        }
+        return Role::query()
+            ->whereIn('slug', $slugs)
+            ->orderBy('name')
+            ->get()
+            ->all();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Public\Api;
 
 use App\Domains\Auth\Public\Api\Dto\RoleDto;
 use App\Domains\Auth\Private\Services\RoleCacheService;
+use App\Domains\Auth\Private\Services\UserQueryService;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,6 +12,7 @@ class AuthPublicApi
 {
     public function __construct(
         private RoleCacheService $roleCache,
+        private UserQueryService $userQuery,
     ) {}
 
     /**
@@ -55,5 +57,27 @@ class AuthPublicApi
             return false;
         }
         return true;
+    }
+
+    /**
+     * Get user IDs for users who have any of the specified roles.
+     *
+     * @param array<string> $roleSlugs Role slugs to filter by
+     * @param bool $activeOnly If true, only return active users (default: true)
+     * @return array<int> Array of user IDs
+     */
+    public function getUserIdsByRoles(array $roleSlugs, bool $activeOnly = true): array
+    {
+        return $this->userQuery->getUserIdsByRoles($roleSlugs, $activeOnly);
+    }
+
+    /**
+     * Get all active user IDs.
+     *
+     * @return array<int> Array of user IDs
+     */
+    public function getAllActiveUserIds(): array
+    {
+        return $this->userQuery->getAllActiveUserIds();
     }
 }

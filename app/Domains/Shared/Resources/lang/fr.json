@@ -14,5 +14,6 @@
     "All rights reserved.": "Tous droits réservés.",
     "You're logged in!": "Vous êtes connecté !",
     "Whoops! Something went wrong.": "Oups ! Une erreur s'est produite.",
-    "validation.uploaded": "L'image ne vérifie pas les critères de taille et de format."
+    "validation.uploaded": "L'image ne vérifie pas les critères de taille et de format.",
+    "validation.required": "Champ obligatoire"
 }
