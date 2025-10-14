@@ -46,10 +46,9 @@ describe('Compose Message', function () {
         
         $response = $this->post('/messages', [
             'title' => 'Test Message',
-            'content' => '<p>Hello everyone!</p>',
+            'content' => '<p>Hello world!</p>',
             'target_users' => [$recipient1->id, $recipient2->id],
             'target_roles' => [],
-            'target_everyone' => false,
         ]);
 
         $response->assertRedirect('/messages');
@@ -81,29 +80,6 @@ describe('Compose Message', function () {
         expect($deliveries->count())->toBeGreaterThanOrEqual(2);
         expect($deliveries->pluck('user_id')->toArray())->toContain($alice->id);
         expect($deliveries->pluck('user_id')->toArray())->toContain($bob->id);
-    });
-
-    it('allows admin to send a broadcast message to everyone', function () {
-        $sender = admin($this);
-        $user1 = alice($this);
-        $user2 = bob($this);
-        $user3 = carol($this);
-        
-        $this->actingAs($sender);
-        
-        $response = $this->post('/messages', [
-            'title' => 'Broadcast Message',
-            'content' => '<p>Important announcement!</p>',
-            'target_users' => [],
-            'target_roles' => [],
-            'target_everyone' => true,
-        ]);
-
-        $response->assertRedirect('/messages');
-        
-        // All 4 users (sender + 3 recipients)
-        $deliveries = MessageDelivery::all();
-        expect($deliveries)->toHaveCount(4);
     });
 
     it('does not create duplicate deliveries for the same user', function () {

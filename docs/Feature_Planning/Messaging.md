@@ -5,12 +5,11 @@ Owner: TBD
 Last updated: 2025-10-02
 
 ## Purpose
-Allow admins to send messages to individual users, multiple users by role selection, or broadcast to everyone. All users can read messages, see unread counts, mark as read (by opening), and delete their messages.
+Allow admins to send messages to individual users, multiple users by role selection. All users can read messages, see unread counts, mark as read (by opening), and delete their messages.
 
 ## Glossary
 - Message: An item with `title`, `content` (rich text), and metadata, delivered to one or more users.
 - Delivery: The association of a Message to a specific recipient user, tracking read/deleted state and timestamps.
-- Broadcast: A message sent to a large set of users, including “everyone”.
 
 ## Scope
 ### Core Features
@@ -18,7 +17,6 @@ Allow admins to send messages to individual users, multiple users by role select
 - Admin can target:
   - A specific user (through a searchable file on profile display_names)
   - A role
-  - Everyone
 - Logged users see a mail icon in topbar (visible only if they have messages OR can send messages i.e., admins).
 - Unread badge shows count on topbar icon (hidden when count=0).
 - Messages list page showing all messages with unread styling (bold + red dot).
@@ -162,7 +160,7 @@ Indexes:
 ---
 
 ## Performance Considerations
-- Broadcast to everyone can be heavy: batch inserts for `MessageDelivery`.
+- Broadcast can be heavy: batch inserts for `MessageDelivery`.
 - Add indexes as specified for fast unread count and list queries.
 - Consider pagination for list view.
 - Future: optimize broadcast using chunked jobs/queues.

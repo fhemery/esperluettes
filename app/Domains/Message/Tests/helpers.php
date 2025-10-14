@@ -16,7 +16,6 @@ function sendMessage(
     string $content,
     array $recipientUserIds = [],
     array $recipientRoles = [],
-    bool $everyone = false
 ): Message {
     $t->actingAs($sender);
     
@@ -25,7 +24,6 @@ function sendMessage(
         'content' => $content,
         'target_users' => $recipientUserIds,
         'target_roles' => $recipientRoles,
-        'target_everyone' => $everyone,
     ];
     
     $t->post('/messages', $payload)->assertRedirect();
@@ -47,14 +45,6 @@ function sendMessageToUsers(TestCase $t, Authenticatable $sender, string $title,
 function sendMessageToRoles(TestCase $t, Authenticatable $sender, string $title, string $content, array $roles): Message
 {
     return sendMessage($t, $sender, $title, $content, recipientRoles: $roles);
-}
-
-/**
- * Send a broadcast message to everyone.
- */
-function sendMessageToEveryone(TestCase $t, Authenticatable $sender, string $title, string $content): Message
-{
-    return sendMessage($t, $sender, $title, $content, everyone: true);
 }
 
 /**

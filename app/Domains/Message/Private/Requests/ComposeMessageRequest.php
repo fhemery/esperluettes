@@ -23,14 +23,12 @@ class ComposeMessageRequest extends FormRequest
             'target_users.*' => ['integer', 'exists:users,id'],
             'target_roles' => ['nullable', 'array'],
             'target_roles.*' => ['string', 'exists:roles,slug'],
-            'target_everyone' => ['nullable', 'boolean'],
         ];
     }
 
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'target_everyone' => $this->boolean('target_everyone'),
             'target_users' => $this->input('target_users', []),
             'target_roles' => $this->input('target_roles', []),
         ]);

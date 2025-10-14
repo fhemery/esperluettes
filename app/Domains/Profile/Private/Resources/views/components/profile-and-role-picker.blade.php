@@ -14,7 +14,7 @@
             @keydown.arrow-up.prevent="highlightPrev()"
             @keydown.enter.prevent="activateHighlighted()"
             placeholder="{{ __('profile::picker.placeholder') }}"
-            class="w-full border px-3 py-2 focus:ring-2 focus:ring-accent/40 focus:border-accent"
+            class="w-full border border-accent px-3 py-2 focus:ring-2 focus:ring-accent/40 focus:border-accent"
             aria-label="{{ __('profile::picker.placeholder') }}"
         />
         <template x-if="loading">

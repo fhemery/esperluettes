@@ -105,7 +105,6 @@ class MessageController extends Controller
         $recipientIds = $this->dispatcher->resolveRecipients(
             userIds: $data['target_users'] ?? [],
             roles: $data['target_roles'] ?? [],
-            everyone: $data['target_everyone'] ?? false
         );
 
         if (empty($recipientIds)) {

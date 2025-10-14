@@ -72,10 +72,9 @@ class MessageDispatchService
      *
      * @param array $userIds Explicit user IDs
      * @param array $roles Role slugs to target
-     * @param bool $everyone Target all users
      * @return array Array of unique user IDs
      */
-    public function resolveRecipients(array $userIds = [], array $roles = [], bool $everyone = false): array
+    public function resolveRecipients(array $userIds = [], array $roles = []): array
     {
         $recipientIds = [];
 
@@ -86,12 +85,6 @@ class MessageDispatchService
         if (!empty($roles)) {
             $roleUsers = $this->authApi->getUserIdsByRoles($roles);
             $recipientIds = array_merge($recipientIds, $roleUsers);
-        }
-
-        // Add everyone
-        if ($everyone) {
-            $allUsers = $this->authApi->getAllActiveUserIds();
-            $recipientIds = array_merge($recipientIds, $allUsers);
         }
 
         return array_unique(array_filter($recipientIds));
