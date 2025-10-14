@@ -63,6 +63,16 @@
                             {{ __('profile::show.member_since') }} {{ $profile->created_at->translatedFormat('F Y') }}
                         </x-shared::badge>
                     </div>
+
+                    @if(Auth::check() && !$isOwn)
+                    <div class="flex justify-end w-full">
+                        <x-moderation::report-button 
+                            topic-key="profile" 
+                            :entity-id="$profile->user_id"
+                            button-class="text-sm text-gray-600 hover:text-gray-900"
+                        />
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

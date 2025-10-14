@@ -445,12 +445,11 @@ Moderator reviews in Filament
 3. ✅ Implement `ModerationRegistry` service (public) with `SnapshotFormatterInterface`
 4. ✅ Register every topic that requires moderation in service providers, with nullable `SnapshotFormatterInterface` (no implementation yet)
 5. ✅ Create Filament reasons resources in Admin domain reasons
-6. Build `ModerationService` (report creation, approval, rejection)
-7. Create Filament reports resources in Admin domain reports
-8. Implement caching for reasons per topic, including killing the cache every time Admin change reasons
-9. Build report-button component (Alpine.js + Ajax)
+6. Build report-button component (Alpine.js + Ajax + `ModerationService` to register the request + Tests)
+7. Import this component in the view of the Profile domain as an example + Tests showing the button appears
+8. Create Filament reports resources in Admin domain reports
+9. Implement caching for reasons per topic, including killing the cache every time Admin change reasons
 10. Create domain integration guide with example
-11. Implement first topic (Profile) as reference implementation
 
 ---
 

@@ -3,6 +3,7 @@
 namespace App\Domains\Moderation\Providers;
 
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class ModerationServiceProvider extends ServiceProvider
@@ -16,6 +17,18 @@ class ModerationServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register domain-specific migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(app_path('Domains/Moderation/Database/Migrations'));
+
+        // Register routes
+        $this->loadRoutesFrom(app_path('Domains/Moderation/Private/routes.php'));
+
+        // Register translations
+        $this->loadTranslationsFrom(app_path('Domains/Moderation/Private/Resources/lang'), 'moderation');
+
+        // Register views
+        $this->loadViewsFrom(app_path('Domains/Moderation/Private/Resources/views'), 'moderation');
+
+        // Register anonymous components
+        Blade::anonymousComponentPath(app_path('Domains/Moderation/Private/Resources/views/components'), 'moderation');
     }
 }

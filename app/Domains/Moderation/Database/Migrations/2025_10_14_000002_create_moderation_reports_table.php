@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('topic_key')->index(); // e.g., 'profile', 'story', 'chapter', 'comment'
             $table->unsignedBigInteger('entity_id'); // ID of the reported entity
-            $table->unsignedBigInteger('reported_user_id'); // content owner
+            $table->unsignedBigInteger('reported_user_id')->nullable(); // content owner (nullable until formatters implemented)
             $table->unsignedBigInteger('reported_by_user_id'); // reporter
             $table->foreignId('reason_id')->constrained('moderation_reasons');
             $table->text('description')->nullable(); // additional details from reporter
