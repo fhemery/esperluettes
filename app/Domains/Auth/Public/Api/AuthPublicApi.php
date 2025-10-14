@@ -5,6 +5,7 @@ namespace App\Domains\Auth\Public\Api;
 use App\Domains\Auth\Public\Api\Dto\RoleDto;
 use App\Domains\Auth\Private\Services\RoleCacheService;
 use App\Domains\Auth\Private\Services\UserQueryService;
+use App\Domains\Auth\Private\Services\RoleService;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,6 +14,7 @@ class AuthPublicApi
     public function __construct(
         private RoleCacheService $roleCache,
         private UserQueryService $userQuery,
+        private RoleService $roleService,
     ) {}
 
     /**
@@ -79,5 +81,16 @@ class AuthPublicApi
     public function getAllActiveUserIds(): array
     {
         return $this->userQuery->getAllActiveUserIds();
+    }
+
+    /**
+     * Get all roles as RoleDto, ordered by name.
+     *
+     * @return array<int, RoleDto>
+     */
+    public function getAllRoles(): array
+    {
+        $roles = $this->roleService->all();
+        return array_map(fn ($r) => RoleDto::fromModel($r), $roles);
     }
 }
