@@ -26,12 +26,17 @@ class FeatureToggleResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin::pages.feature_toggles.nav_label');
+        return __('admin::config.feature_toggles.nav_label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin::pages.groups.tech');
+        return __('admin::config.group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin::config.feature_toggles.model_label');
     }
 
     public static function table(Table $table): Table
@@ -47,25 +52,25 @@ class FeatureToggleResource extends Resource
             )
             ->paginated(false)
             ->columns([
-                TextColumn::make('domain')->label(__('admin::pages.feature_toggles.columns.domain')),
-                TextColumn::make('name')->label(__('admin::pages.feature_toggles.columns.name'))->searchable(),
+                TextColumn::make('domain')->label(__('admin::config.feature_toggles.columns.domain')),
+                TextColumn::make('name')->label(__('admin::config.feature_toggles.columns.name'))->searchable(),
                 TextColumn::make('description')
-                    ->label(__('admin::pages.feature_toggles.columns.description'))
+                    ->label(__('admin::config.feature_toggles.columns.description'))
                     ->state(function ($record) {
                         $key = $record->domain . '::config.feature_toggles.' . $record->name;
                         return Lang::has($key) ? __($key) : '';
                     })
                     ->wrap()
                     ->limit(120),
-                TextColumn::make('access')->label(__('admin::pages.feature_toggles.columns.access'))
+                TextColumn::make('access')->label(__('admin::config.feature_toggles.columns.access'))
                     ->colors([
                         'success' => fn ($state) => $state === 'on',
                         'danger' => fn ($state) => $state === 'off',
                         'warning' => fn ($state) => $state === 'role_based',
                     ])->badge()->formatStateUsing(fn ($state) => strtoupper($state)),
-                TextColumn::make('admin_visibility')->label(__('admin::pages.feature_toggles.columns.admin_visibility'))
+                TextColumn::make('admin_visibility')->label(__('admin::config.feature_toggles.columns.admin_visibility'))
                     ->formatStateUsing(fn (string $state): string => str_replace('_',' ', $state)),
-                TextColumn::make('roles')->label(__('admin::pages.feature_toggles.columns.roles'))
+                TextColumn::make('roles')->label(__('admin::config.feature_toggles.columns.roles'))
                     ->formatStateUsing(function ($state) {
                         if (empty($state)) return '—';
                         return implode(', ', (array) $state);
@@ -73,27 +78,27 @@ class FeatureToggleResource extends Resource
             ])
             ->headerActions([
                 Tables\Actions\Action::make('create')
-                    ->label(__('admin::pages.feature_toggles.actions.create'))
+                    ->label(__('admin::config.feature_toggles.actions.create'))
                     ->icon('heroicon-o-plus')
                     ->visible(fn () => Auth::user()?->hasRole('tech-admin') ?? false)
                     ->form([
-                        Forms\Components\TextInput::make('name')->label(__('admin::pages.feature_toggles.form.name'))->required()->maxLength(100),
-                        Forms\Components\TextInput::make('domain')->label(__('admin::pages.feature_toggles.form.domain'))->default('config')->required()->maxLength(100),
+                        Forms\Components\TextInput::make('name')->label(__('admin::config.feature_toggles.form.name'))->required()->maxLength(100),
+                        Forms\Components\TextInput::make('domain')->label(__('admin::config.feature_toggles.form.domain'))->default('config')->required()->maxLength(100),
                         Forms\Components\Select::make('admin_visibility')
-                            ->label(__('admin::pages.feature_toggles.form.admin_visibility'))
+                            ->label(__('admin::config.feature_toggles.form.admin_visibility'))
                             ->options([
-                                FeatureToggleAdminVisibility::TECH_ADMINS_ONLY->value => __('admin::pages.feature_toggles.admin_visibility.tech_admins_only'),
-                                FeatureToggleAdminVisibility::ALL_ADMINS->value => __('admin::pages.feature_toggles.admin_visibility.all_admins'),
+                                FeatureToggleAdminVisibility::TECH_ADMINS_ONLY->value => __('admin::config.feature_toggles.admin_visibility.tech_admins_only'),
+                                FeatureToggleAdminVisibility::ALL_ADMINS->value => __('admin::config.feature_toggles.admin_visibility.all_admins'),
                             ])->default(FeatureToggleAdminVisibility::TECH_ADMINS_ONLY->value)->required(),
                         Forms\Components\Select::make('access')
-                            ->label(__('admin::pages.feature_toggles.form.access'))
+                            ->label(__('admin::config.feature_toggles.form.access'))
                             ->options([
-                                FeatureToggleAccess::OFF->value => __('admin::pages.feature_toggles.access.off'),
-                                FeatureToggleAccess::ON->value => __('admin::pages.feature_toggles.access.on'),
-                                FeatureToggleAccess::ROLE_BASED->value => __('admin::pages.feature_toggles.access.role_based'),
+                                FeatureToggleAccess::OFF->value => __('admin::config.feature_toggles.access.off'),
+                                FeatureToggleAccess::ON->value => __('admin::config.feature_toggles.access.on'),
+                                FeatureToggleAccess::ROLE_BASED->value => __('admin::config.feature_toggles.access.role_based'),
                             ])->default(FeatureToggleAccess::OFF->value)->required(),
                         Forms\Components\Select::make('roles')
-                            ->label(__('admin::pages.feature_toggles.form.roles'))
+                            ->label(__('admin::config.feature_toggles.form.roles'))
                             ->multiple()
                             ->searchable()
                             ->options(function () {
@@ -105,7 +110,7 @@ class FeatureToggleResource extends Resource
                                 }
                                 return $options;
                             })
-                            ->helperText(__('admin::pages.feature_toggles.form.roles_helper')),
+                            ->helperText(__('admin::config.feature_toggles.form.roles_helper')),
                     ])
                     ->action(function (array $data) {
                         /** @var ConfigPublicApi $api */
@@ -118,31 +123,31 @@ class FeatureToggleResource extends Resource
                             roles: $data['roles'] ?? [],
                         );
                         $api->addFeatureToggle($feature);
-                        Notification::make()->title(__('admin::pages.feature_toggles.notifications.created'))->success()->send();
+                        Notification::make()->title(__('admin::config.feature_toggles.notifications.created'))->success()->send();
                     })
             ])
             ->actions([
-                Tables\Actions\Action::make('on')->label(__('admin::pages.feature_toggles.actions.set_on'))->color('success')
+                Tables\Actions\Action::make('on')->label(__('admin::config.feature_toggles.actions.set_on'))->color('success')
                     ->action(function (FeatureToggleModel $record) {
                         app(ConfigPublicApi::class)->updateFeatureToggle($record->name, FeatureToggleAccess::ON, $record->domain);
-                        Notification::make()->title(__('admin::pages.feature_toggles.notifications.updated'))->success()->send();
+                        Notification::make()->title(__('admin::config.feature_toggles.notifications.updated'))->success()->send();
                     }),
-                Tables\Actions\Action::make('off')->label(__('admin::pages.feature_toggles.actions.set_off'))->color('danger')
+                Tables\Actions\Action::make('off')->label(__('admin::config.feature_toggles.actions.set_off'))->color('danger')
                     ->action(function (FeatureToggleModel $record) {
                         app(ConfigPublicApi::class)->updateFeatureToggle($record->name, FeatureToggleAccess::OFF, $record->domain);
-                        Notification::make()->title(__('admin::pages.feature_toggles.notifications.updated'))->success()->send();
+                        Notification::make()->title(__('admin::config.feature_toggles.notifications.updated'))->success()->send();
                     }),
-                Tables\Actions\Action::make('role_based')->label(__('admin::pages.feature_toggles.actions.set_role_based'))->color('warning')
+                Tables\Actions\Action::make('role_based')->label(__('admin::config.feature_toggles.actions.set_role_based'))->color('warning')
                     ->action(function (FeatureToggleModel $record) {
                         app(ConfigPublicApi::class)->updateFeatureToggle($record->name, FeatureToggleAccess::ROLE_BASED, $record->domain);
-                        Notification::make()->title(__('admin::pages.feature_toggles.notifications.updated'))->success()->send();
+                        Notification::make()->title(__('admin::config.feature_toggles.notifications.updated'))->success()->send();
                     }),
-                Tables\Actions\Action::make('delete')->label(__('admin::pages.feature_toggles.actions.delete'))->icon('heroicon-o-trash')
+                Tables\Actions\Action::make('delete')->label(__('admin::config.feature_toggles.actions.delete'))->icon('heroicon-o-trash')
                     ->visible(fn () => Auth::user()?->hasRole('tech-admin') ?? false)
                     ->requiresConfirmation()
                     ->action(function (FeatureToggleModel $record) {
                         app(ConfigPublicApi::class)->deleteFeatureToggle($record->name, $record->domain);
-                        Notification::make()->title(__('admin::pages.feature_toggles.notifications.deleted'))->success()->send();
+                        Notification::make()->title(__('admin::config.feature_toggles.notifications.deleted'))->success()->send();
                     }),
             ]);
     }
