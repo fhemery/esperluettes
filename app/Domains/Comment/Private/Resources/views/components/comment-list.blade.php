@@ -163,7 +163,7 @@
           } catch (e) {
             // no-op: editor initialization failures should not block pagination
           }
-          const next = res.headers.get('X-Next-Page');
+          const next = res.headers.get('X-Next-Page') || res.headers.get('x-next-page');
           if (next) {
             this.page = parseInt(next, 10) - 1; // we increment below
           } else {
