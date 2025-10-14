@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Lang;
 
 class FeatureToggleResource extends Resource
 {
@@ -46,8 +47,16 @@ class FeatureToggleResource extends Resource
             )
             ->paginated(false)
             ->columns([
-                TextColumn::make('name')->label(__('admin::pages.feature_toggles.columns.name'))->searchable(),
                 TextColumn::make('domain')->label(__('admin::pages.feature_toggles.columns.domain')),
+                TextColumn::make('name')->label(__('admin::pages.feature_toggles.columns.name'))->searchable(),
+                TextColumn::make('description')
+                    ->label(__('admin::pages.feature_toggles.columns.description'))
+                    ->state(function ($record) {
+                        $key = $record->domain . '::config.feature_toggles.' . $record->name;
+                        return Lang::has($key) ? __($key) : '';
+                    })
+                    ->wrap()
+                    ->limit(120),
                 TextColumn::make('access')->label(__('admin::pages.feature_toggles.columns.access'))
                     ->colors([
                         'success' => fn ($state) => $state === 'on',

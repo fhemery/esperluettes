@@ -29,6 +29,7 @@ return [
         'columns' => [
             'name' => 'Nom',
             'domain' => 'Domaine',
+            'description' => 'Description',
             'access' => 'Accès',
             'admin_visibility' => 'Visibilité admin',
             'roles' => 'Rôles',
