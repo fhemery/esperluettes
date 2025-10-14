@@ -441,15 +441,16 @@ Moderator reviews in Filament
 
 ### Next Steps
 1. ✅ **Planning Complete** - Document approved
-2. Create migrations (reasons, reports tables)
-3. Implement `ModerationRegistry` service (public) with `SnapshotFormatterInterface`
-4. Register every topic that requires moderation in service providers, with nullable `SnapshotFormatterInterface` (no implementation yet)
-5. Create Filament resources in Admin domain (reasons, reports)
+2. ✅ Create migrations (reasons, reports tables)
+3. ✅ Implement `ModerationRegistry` service (public) with `SnapshotFormatterInterface`
+4. ✅ Register every topic that requires moderation in service providers, with nullable `SnapshotFormatterInterface` (no implementation yet)
+5. ✅ Create Filament reasons resources in Admin domain reasons
 6. Build `ModerationService` (report creation, approval, rejection)
-7. Implement caching for reasons per topic, including killing the cache every time Admin change reasons
-8. Build report-button component (Alpine.js + Ajax)
-9. Create domain integration guide with example
-10. Implement first topic (Profile) as reference implementation
+7. Create Filament reports resources in Admin domain reports
+8. Implement caching for reasons per topic, including killing the cache every time Admin change reasons
+9. Build report-button component (Alpine.js + Ajax)
+10. Create domain integration guide with example
+11. Implement first topic (Profile) as reference implementation
 
 ---
 

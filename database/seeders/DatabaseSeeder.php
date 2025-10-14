@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             \App\Domains\Admin\Database\Seeders\AdminUserSeeder::class,
             // Story domain seeders
             \App\Domains\StoryRef\Database\Seeders\StoryRefSeeder::class,
+            // Moderation domain seeders
+            \App\Domains\Moderation\Database\Seeders\ModerationSeeder::class,
         ]);
     }
 }
