@@ -126,6 +126,22 @@
                         @endauth
                         @endif
                     </div>
+
+                     <!-- BOUTON REMONTER (à côté de Next) -->
+                    <div class="flex items-center gap-2">
+                        <button
+                            id="inlineScrollTopBtn"
+                            onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+                            aria-label="{{ __('Goto top') }}"
+                            class="flex gap-4 items-center text-xl font-bold text-tertiary hover:text-tertiary/80 transition">
+                            <div class="text-read text-4xl bg-tertiary hover:bg-tertiary/80 rounded-full w-10 h-10 flex items-center justify-center leading-none">
+                                ⯅
+                            </div>
+
+                            <div class="max-w-[120px] hidden sm:block">{{ __('Up') }}</div>
+                        </button>
+                    </div>
+
                     <div>
                         @php($nextButtonClass = $vm->nextChapter ? 'text-tertiary hover:text-tertiary/80' : 'text-tertiary/30 cursor-not-allowed')
                         <a href="{{ $vm->nextChapter ? route('chapters.show', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->nextChapter->slug]) : 'javascript:void(0);' }}"
@@ -149,7 +165,18 @@
     </div>
 
 
+
     @push('scripts')
+    <script>
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('inlineScrollTopBtn');
+            if (window.scrollY > 300) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        });
+    </script>
     <script>
         function markRead({
             isRead,
@@ -188,7 +215,6 @@
         }
     </script>
     @endpush
-
     @if($vm->isAuthor)
     <x-story::confirm-delete-chapter
         name="confirm-delete-chapter"
