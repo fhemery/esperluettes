@@ -18,7 +18,7 @@ class ComposeMessageRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:150'],
-            'content' => ['required', 'string', 'max:1000'],
+            'content' => ['required', 'string'],
             'target_users' => ['nullable', 'array'],
             'target_users.*' => ['integer', 'exists:users,id'],
             'target_roles' => ['nullable', 'array'],

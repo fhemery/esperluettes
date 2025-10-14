@@ -1,6 +1,6 @@
 <x-app-layout>
-    <div class="flex-1 flex flex-col gap-6 h-full">
-        <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col gap-6 h-[calc(100vh-150px)]">
+        <div class="flex justify-between items-center">
             <x-shared::title icon="mail">{{ __('message::messages.title') }}</x-shared::title>
             @if(Auth::user()->isAdmin())
             <a href="{{ route('messages.compose') }}">
@@ -11,9 +11,9 @@
             @endif
         </div>
 
-        <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- Messages List --}}
-            <div class="lg:col-span-1">
+            <div class="lg:col-span-1 overflow-y-auto min-h-0">
                 <div class="surface-read text-on-surface">
                     @forelse($deliveries as $delivery)
                     <a
@@ -51,17 +51,17 @@
             </div>
 
             {{-- Message Detail --}}
-            <div class="lg:col-span-2">
+            <div class="lg:col-span-2 overflow-y-auto min-h-0 surface-read text-on-surface">
                 @if($selectedDelivery)
-                <div class="surface-read text-on-surface">
-                    <div class="border-b pb-4 mb-4">
-                        <h2 class="text-2xl font-semibold">{{ $selectedDelivery->message->title }}</h2>
-                        <p class="text-sm text-gray-500 mt-2">
+                <div class="h-full flex flex-col p-4 lg:p-8 gap-6">
+                    <div class="border-b border-accent pb-4">
+                        <x-shared::title>{{ $selectedDelivery->message->title }}</x-shared::title>
+                        <p class="text-sm text-fg/80">
                             {{ __('message::messages.sent_at') }}: {{ $selectedDelivery->message->sent_at->format('d/m/Y H:i') }}
                         </p>
                     </div>
 
-                    <div class="prose max-w-none mb-6">
+                    <div class="flex-1 prose max-w-none">
                         {!! $selectedDelivery->message->content !!}
                     </div>
 
@@ -76,7 +76,7 @@
                     </div>
                 </div>
                 @else
-                <div class="surface-read text-on-surface p-12 text-center text-gray-500">
+                <div class="h-full flex flex-col justify-center items-center surface-read text-on-surface p-12 text-center text-fg/80">
                     {{ __('message::messages.select_message') }}
                 </div>
                 @endif
