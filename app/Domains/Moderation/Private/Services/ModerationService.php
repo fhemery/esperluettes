@@ -32,6 +32,18 @@ class ModerationService
             ->get(['id', 'label']);
     }
 
+    public function approveReport(int $reportId): void
+    {
+        $report = ModerationReport::findOrFail($reportId);
+        $report->update(['status' => 'confirmed']);
+    }
+
+    public function dismissReport(int $reportId): void
+    {
+        $report = ModerationReport::findOrFail($reportId);
+        $report->update(['status' => 'dismissed']);
+    }
+
     /**
      * Create a new moderation report.
      *
