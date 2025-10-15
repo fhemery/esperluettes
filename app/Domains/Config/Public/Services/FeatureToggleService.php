@@ -9,6 +9,11 @@ use App\Domains\Config\Private\Repositories\FeatureToggleRepository;
 use App\Domains\Config\Public\Contracts\FeatureToggle as FeatureToggleContract;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
+use App\Domains\Config\Public\Events\DTO\FeatureToggleSnapshot;
+use App\Domains\Config\Public\Events\FeatureToggleAdded;
+use App\Domains\Config\Public\Events\FeatureToggleDeleted;
+use App\Domains\Config\Public\Events\FeatureToggleUpdated;
+use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -18,6 +23,7 @@ class FeatureToggleService
     public function __construct(
         private AuthPublicApi $auth,
         private FeatureToggleRepository $repo,
+        private EventBus $events,
     ) {}
 
     public function addFeatureToggle(FeatureToggleContract $featureToggle): void
@@ -36,11 +42,16 @@ class FeatureToggleService
         ]);
 
         Cache::forget($this->allCacheKey());
+
+        // Emit domain event
+        $snapshot = FeatureToggleSnapshot::fromFeatureToggle($featureToggle);
+        $this->events->emit(new FeatureToggleAdded($snapshot));
     }
 
     public function isToggleEnabled(string $name, ?string $domain = 'config'): bool
     {
-        $domain = $domain ?? 'config';
+        $domain = strtolower($domain ?? 'config');
+        $name = strtolower($name);
         $all = $this->getAllCached();
         $data = $all['byDomain'][$domain][$name] ?? null;
         if (!$data) {
@@ -57,9 +68,18 @@ class FeatureToggleService
 
     public function updateFeatureToggle(string $name, FeatureToggleAccess $access, ?string $domain = 'config'): void
     {
-        $model = $this->repo->findByDomainAndName($domain ?? 'config', $name);
-        if (!$model instanceof FeatureToggleModel) {
+        // Resolve via cache (case-insensitive), then load exact model
+        $domainKey = strtolower($domain ?? 'config');
+        $nameKey = strtolower($name);
+        $all = $this->getAllCached();
+        $row = $all['byDomain'][$domainKey][$nameKey] ?? null;
+        if (!$row) {
             // No-op if not found (aligns with current tests)
+            return;
+        }
+
+        $model = $this->repo->findByDomainAndName($row['domain'], $row['name']);
+        if (!$model instanceof FeatureToggleModel) {
             return;
         }
 
@@ -80,13 +100,29 @@ class FeatureToggleService
         ]);
 
         Cache::forget($this->allCacheKey());
+
+        // Emit domain event with updated snapshot
+        $vis = FeatureToggleAdminVisibility::from($model->admin_visibility);
+        $toggle = new \App\Domains\Config\Public\Contracts\FeatureToggle(
+            name: $model->name,
+            domain: $model->domain,
+            admin_visibility: $vis,
+            access: $access,
+            roles: $model->roles ?? [],
+        );
+        $snapshot = FeatureToggleSnapshot::fromFeatureToggle($toggle);
+        $this->events->emit(new FeatureToggleUpdated($snapshot));
     }
 
     public function deleteFeatureToggle(string $name, ?string $domain = 'config'): void
     {
-        $domain = $domain ?? 'config';
-        $model = $this->repo->findByDomainAndName($domain, $name);
-        if (!$model instanceof FeatureToggleModel) {
+        $domainKey = strtolower($domain ?? 'config');
+        $nameKey = strtolower($name);
+
+        // Resolve original row via cache for case-insensitive behavior
+        $all = $this->getAllCached();
+        $row = $all['byDomain'][$domainKey][$nameKey] ?? null;
+        if (!$row) {
             // No-op (aligns with current tests)
             return;
         }
@@ -95,9 +131,27 @@ class FeatureToggleService
             throw new AuthorizationException('Only tech admins can delete feature toggles');
         }
 
-        $this->repo->delete($model);
+        // Find and delete the exact model
+        $model = $this->repo->findByDomainAndName($row['domain'], $row['name']);
+        if ($model instanceof FeatureToggleModel) {
+            $this->repo->delete($model);
+        }
 
+        // Invalidate cache first so subsequent reads miss
         Cache::forget($this->allCacheKey());
+
+        // Emit domain event with snapshot from the resolved row
+        $vis = FeatureToggleAdminVisibility::from($row['admin_visibility']);
+        $access = FeatureToggleAccess::from($row['access']);
+        $toggle = new \App\Domains\Config\Public\Contracts\FeatureToggle(
+            name: $row['name'],
+            domain: $row['domain'],
+            admin_visibility: $vis,
+            access: $access,
+            roles: $row['roles'] ?? [],
+        );
+        $snapshot = FeatureToggleSnapshot::fromFeatureToggle($toggle);
+        $this->events->emit(new FeatureToggleDeleted($snapshot));
     }
 
     /**
@@ -119,7 +173,7 @@ class FeatureToggleService
                     'roles' => $m->roles ?? [],
                 ];
                 $list[] = $row;
-                $byDomain[$m->domain][$m->name] = $row;
+                $byDomain[strtolower($m->domain)][strtolower($m->name)] = $row;
             }
             return ['list' => $list, 'byDomain' => $byDomain];
         });
