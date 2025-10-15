@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Domains\Admin\Filament\Resources\Shared;
+namespace App\Domains\Admin\Filament\Resources\Event;
 
-use App\Domains\Admin\Filament\Resources\Shared\DomainEventResource\Pages;
+use App\Domains\Admin\Filament\Resources\Event\DomainEventResource\Pages\ListDomainEvents;
+use App\Domains\Admin\Filament\Resources\Event\DomainEventResource\Pages\ViewDomainEvent;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Events\Private\Models\StoredDomainEvent;
 use App\Domains\Events\Private\Services\DomainEventFactory;
@@ -220,8 +221,8 @@ class DomainEventResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDomainEvents::route('/'),
-            'view' => Pages\ViewDomainEvent::route('/{record}'),
+            'index' => ListDomainEvents::route('/'),
+            'view' => ViewDomainEvent::route('/{record}'),
         ];
     }
 }
