@@ -6,7 +6,9 @@ namespace App\Domains\Message\Private\View\Components;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Config\Public\Contracts\ConfigPublicApi as ContractsConfigPublicApi;
 use App\Domains\Message\Private\Services\UnreadCounterService;
+use App\Domains\Message\Private\Support\FeatureToggles;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
 
@@ -17,9 +19,15 @@ class MessageIconComponent extends Component
 
     public function __construct(
         private UnreadCounterService $unreadCounter,
-        private AuthPublicApi $authPublicApi
+        private AuthPublicApi $authPublicApi,
+        private ContractsConfigPublicApi $configApi
     ) {
         if (!Auth::check()) {
+            return;
+        }
+        
+        $featureToggle = $this->configApi->isToggleEnabled(FeatureToggles::ActiveFeatureName, FeatureToggles::DomainName);
+        if (!$featureToggle) {
             return;
         }
 

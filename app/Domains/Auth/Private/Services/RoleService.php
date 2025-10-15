@@ -125,4 +125,17 @@ class RoleService
             ->get()
             ->all();
     }
+
+    /**
+     * List all roles ordered by name.
+     *
+     * @return array<int, Role>
+     */
+    public function all(): array
+    {
+        return Role::query()
+            ->orderBy('name')
+            ->get()
+            ->all();
+    }
 }
