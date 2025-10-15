@@ -24,6 +24,9 @@ return [
         'instagram' => 'Instagram',
         'youtube' => 'YouTube',
     ],
+    'errors' => [
+        'profile_picture_too_large' => 'Image trop grande (max 2 Mo).',
+    ],
     'submit' => 'Enregistrer',
     'cancel' => 'Annuler',
 ];
