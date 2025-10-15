@@ -437,7 +437,7 @@ async function main() {
   log(null, '');
   log(null, '\u001b[33m📖 Next steps:\u001b[0m');
   log(null, '1. Upload the desired zip to the server');
-  log(null, "2. Run migrations if needed: ./vendor/bin/sail artisan migrate --env=<environment>");
+  log(null, "2. Run migrations if needed: sail artisan cache:clear && sail artisan migrate --env=<environment> && sail artisan cache:clear");
   log(null, "3. After deploy: php artisan optimize:clear (on the server)");
   log(null, '');
  
