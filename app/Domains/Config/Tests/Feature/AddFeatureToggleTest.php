@@ -8,6 +8,7 @@ use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
 use App\Domains\Config\Public\Events\FeatureToggleAdded;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -45,20 +46,57 @@ describe('Feature toggles - addFeatureToggle', function () {
         expect(checkToggleState('test-feature'))->toBeTrue();
     });
 
+    it('should throw a ValidationException if name is empty or whitespace', function () {
+        $user = techAdmin($this);
+        $this->actingAs($user);
+
+        $this->expectException(ValidationException::class);
+
+        createFeatureToggle($this, new FeatureToggle(
+            name: '  ',
+            domain: 'config',
+            access: FeatureToggleAccess::ON,
+        ));
+    });
+
+    it('should throw a ValidationException if domain is empty or whitespace', function () {
+        $user = techAdmin($this);
+        $this->actingAs($user);
+
+        $this->expectException(ValidationException::class);
+
+        createFeatureToggle($this, new FeatureToggle(
+            name: 'test-feature',
+            domain: '  ',
+            access: FeatureToggleAccess::ON,
+        ));
+    });
+
+    it('should throw a ValidationException if toggle already exists', function () {
+        createFeatureToggle($this, new FeatureToggle(
+            name: 'test-feature',
+            domain: 'config',
+            access: FeatureToggleAccess::ON,
+        ));
+
+        $this->expectException(ValidationException::class);
+
+        createFeatureToggle($this, new FeatureToggle(
+            name: 'test-feature',
+            domain: 'config',
+            access: FeatureToggleAccess::OFF,
+        ));
+    });
+
     describe('Events', function () {
         it('should emit an event when a feature toggle is added', function () {
-            $user = techAdmin($this);
-            $this->actingAs($user);
-
-            $api = app(ConfigPublicApi::class);
-
             $feature = new FeatureToggle(
                 name: 'test-feature',
                 domain: 'config',
                 access: FeatureToggleAccess::ON,
             );
 
-            $api->addFeatureToggle($feature);
+            createFeatureToggle($this, $feature);
 
             $event = latestEventOf(FeatureToggleAdded::name(), FeatureToggleAdded::class);
             expect($event)->not->toBeNull();

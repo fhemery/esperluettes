@@ -17,6 +17,8 @@ use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class FeatureToggleService
 {
@@ -31,6 +33,9 @@ class FeatureToggleService
         if (!$this->auth->hasAnyRole([Roles::TECH_ADMIN])) {
             throw new AuthorizationException('Only tech admins can create feature toggles');
         }
+
+        // Validate inputs and uniqueness
+        $this->assertNewToggleIsValid($featureToggle);
 
         $this->repo->create([
             'domain' => $featureToggle->domain,
@@ -182,6 +187,39 @@ class FeatureToggleService
     private function allCacheKey(): string
     {
         return 'feature_toggles:all';
+    }
+
+    /**
+     * Validate required fields and uniqueness for a new feature toggle.
+     * Throws ValidationException on error.
+     */
+    private function assertNewToggleIsValid(FeatureToggleContract $featureToggle): void
+    {
+        // Basic required validation (trim to guard whitespace-only)
+        $data = [
+            'name' => trim((string) $featureToggle->name),
+            'domain' => trim((string) $featureToggle->domain),
+        ];
+        $rules = [
+            'name' => ['required', 'string', 'min:1'],
+            'domain' => ['required', 'string', 'min:1'],
+        ];
+        $validator = Validator::make($data, $rules);
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        // Uniqueness (case-insensitive on domain+name)
+        $existing = $this->repo->all();
+        $dn = strtolower($data['domain']);
+        $nn = strtolower($data['name']);
+        foreach ($existing as $m) {
+            if (strtolower($m->domain) === $dn && strtolower($m->name) === $nn) {
+                throw ValidationException::withMessages([
+                    'name' => [__('This feature toggle already exists in this domain.')],
+                ]);
+            }
+        }
     }
 
     /**
