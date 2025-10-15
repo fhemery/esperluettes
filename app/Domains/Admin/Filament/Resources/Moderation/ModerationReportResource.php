@@ -4,6 +4,7 @@ namespace App\Domains\Admin\Filament\Resources\Moderation;
 
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReportResource\Pages\EditModerationReport;
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReportResource\Pages\ListModerationReports;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Moderation\Models\ModerationReason;
 use App\Domains\Moderation\Models\ModerationReport;
 use App\Domains\Moderation\Private\Services\ModerationService;
@@ -44,6 +45,13 @@ class ModerationReportResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('admin::moderation.reports.navigation_label');
+    }
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]) ?? false;
     }
 
     public static function form(Form $form): Form

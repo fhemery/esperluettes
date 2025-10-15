@@ -4,6 +4,7 @@ namespace App\Domains\Admin\Filament\Resources\News;
 
 use App\Domains\News\Private\Models\News;
 use App\Domains\Admin\Filament\Resources\News\PinnedNewsResource\Pages\ReorderPinnedNews;
+use App\Domains\Auth\Public\Api\Roles;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
@@ -28,6 +29,13 @@ class PinnedNewsResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('admin::news.navigation.pinned_order');
+    }
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
     }
 
     public static function table(Table $table): Table

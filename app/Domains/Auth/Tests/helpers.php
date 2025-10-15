@@ -46,6 +46,14 @@ function techAdmin(TestCase $t, array $overrides = [], bool $isVerified = true, 
     ], $overrides), $isVerified, $roles);
 }
 
+function moderator(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::MODERATOR, Roles::USER_CONFIRMED]): User
+{
+    return registerUserThroughForm($t, array_merge([
+        'name' => 'Moderator',
+        'email' => 'moderator@moderator.com',
+    ], $overrides), $isVerified, $roles);
+}
+
 /**
  * Helper to build a valid signed verification URL for the given user.
  */

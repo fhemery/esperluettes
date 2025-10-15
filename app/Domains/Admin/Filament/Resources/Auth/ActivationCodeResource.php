@@ -4,6 +4,7 @@ namespace App\Domains\Admin\Filament\Resources\Auth;
 
 use App\Domains\Admin\Filament\Resources\Auth\ActivationCodeResource\Pages;
 use App\Domains\Auth\Private\Models\ActivationCode;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -49,6 +50,13 @@ class ActivationCodeResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-key';
 
     protected static ?int $navigationSort = 3;
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
+    }
 
     /**
      * Resolve the shared ProfilePublicApi once for use in static callbacks.

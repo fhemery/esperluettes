@@ -5,6 +5,7 @@ namespace App\Domains\Admin\Filament\Resources\Moderation;
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pages\CreateModerationReason;
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pages\EditModerationReason;
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pages\ListModerationReasons;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Moderation\Models\ModerationReason;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use Filament\Forms;
@@ -12,7 +13,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ModerationReasonResource extends Resource
@@ -48,8 +48,8 @@ class ModerationReasonResource extends Resource
     public static function canAccess(): bool
     {
         /** @var \App\Domains\Auth\Private\Models\User|null $user */
-        $user = Auth::user();
-        return $user?->hasRole('admin') || $user?->hasRole('tech-admin');
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]) ?? false;
     }
 
     public static function form(Form $form): Form
