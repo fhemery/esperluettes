@@ -2,9 +2,7 @@
 
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Auth\Public\Events\UserDeleted;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 

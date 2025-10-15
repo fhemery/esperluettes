@@ -15,21 +15,6 @@ class AuthSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ensure roles exist (idempotent by slug)
-        $roles = [
-            ['name' => 'admin', 'slug' => 'admin', 'description' => 'Administrator role'],
-            ['name' => Roles::USER, 'slug' => Roles::USER, 'description' => 'Unconfirmed user role'],
-            ['name' => Roles::USER_CONFIRMED, 'slug' => Roles::USER_CONFIRMED, 'description' => 'Confirmed user role'],
-            ['name' => 'Tech Admin', 'slug' => Roles::TECH_ADMIN, 'description' => 'Technical administrator role'],
-        ];
-
-        foreach ($roles as $data) {
-            Role::updateOrCreate(
-                ['slug' => $data['slug']],
-                ['name' => $data['name'], 'description' => $data['description'] ?? null]
-            );
-        }
-
         $confirmedRoleId = Role::where('slug', Roles::USER_CONFIRMED)->value('id');
         $userRoleId = Role::where('slug', Roles::USER)->value('id');
 
