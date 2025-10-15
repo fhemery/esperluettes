@@ -144,6 +144,22 @@ deptrac:
         - type: directory
           value: app/Domains/Message/Tests/
 
+    #Moderation Domain
+    - name: ModerationPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Moderation/Public/'
+
+    - name: ModerationPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/Moderation/Private/
+
+    - name: ModerationTests
+      collectors:
+        - type: directory
+          value: app/Domains/Moderation/Tests/
+
     # News Domain
     - name: NewsPublic
       collectors:
@@ -243,6 +259,7 @@ deptrac:
       - AuthPublic
       - CommentPrivate
       - EventsPublic
+      - ModerationPublic
 
     ConfigPublic:
       - Shared
@@ -267,6 +284,10 @@ deptrac:
       - MessagePrivate
       - EventsPublic
 
+    ModerationPublic:
+      - Shared
+      - ModerationPrivate
+
     NewsPublic:
       - AuthPublic
       - Shared
@@ -278,6 +299,7 @@ deptrac:
       - ProfilePrivate
       - AuthPublic
       - EventsPublic
+      - ModerationPublic
 
     StaticPagePublic:
       - AuthPublic
@@ -293,6 +315,7 @@ deptrac:
       - StoryRefPrivate
       - EventsPublic
       - AuthPublic
+      - ModerationPublic
 
     StoryRefPublic:
       - Shared
@@ -325,6 +348,8 @@ deptrac:
       - EventsPrivate
       - ConfigPublic
       - ConfigPrivate
+      - ModerationPublic
+      - ModerationPrivate
 
     AuthPrivate:
       - Shared
@@ -364,6 +389,10 @@ deptrac:
       - MessagePublic
       - EventsPublic
       - ConfigPublic
+
+    ModerationPrivate:
+      - Shared
+      - ModerationPublic
 
     NewsPrivate:
       - Shared

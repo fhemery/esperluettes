@@ -17,6 +17,8 @@ use App\Domains\Profile\Public\Events\AvatarChanged;
 use App\Domains\Profile\Public\Events\BioUpdated;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Profile\Private\Listeners\RemoveProfileOnUserDeleted;
+use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use App\Domains\Profile\Public\Moderation\ProfileSnapshotFormatter;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -66,5 +68,12 @@ class ProfileServiceProvider extends ServiceProvider
         $eventBus->registerEvent(ProfileDisplayNameChanged::name(), ProfileDisplayNameChanged::class);
         $eventBus->registerEvent(AvatarChanged::name(), AvatarChanged::class);
         $eventBus->registerEvent(BioUpdated::name(), BioUpdated::class);
+
+        // Register Profile topic for moderation
+        app(ModerationRegistry::class)->register(
+            key: 'profile',
+            displayName: __('profile::moderation.topic_name'),
+            formatterClass: ProfileSnapshotFormatter::class
+        );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\Config;
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Config\Private\Models\FeatureToggle as FeatureToggleModel;
 use App\Domains\Config\Public\Contracts\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\FeatureToggle as FeatureToggleContract;
@@ -39,10 +40,18 @@ class FeatureToggleResource extends Resource
         return __('admin::config.feature_toggles.model_label');
     }
 
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
+    }
+
     public static function table(Table $table): Table
     {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
         $user = Auth::user();
-        $isTech = $user?->hasRole('tech-admin') ?? false;
+        $isTech = $user?->hasRole(Roles::TECH_ADMIN) ?? false;
 
         return $table
             ->query(
@@ -80,7 +89,7 @@ class FeatureToggleResource extends Resource
                 Tables\Actions\Action::make('create')
                     ->label(__('admin::config.feature_toggles.actions.create'))
                     ->icon('heroicon-o-plus')
-                    ->visible(fn () => Auth::user()?->hasRole('tech-admin') ?? false)
+                    ->visible(fn () => Auth::user()?->hasRole(Roles::TECH_ADMIN) ?? false)
                     ->form([
                         Forms\Components\TextInput::make('name')->label(__('admin::config.feature_toggles.form.name'))->required()->maxLength(100),
                         Forms\Components\TextInput::make('domain')->label(__('admin::config.feature_toggles.form.domain'))->default('config')->required()->maxLength(100),
@@ -143,7 +152,7 @@ class FeatureToggleResource extends Resource
                         Notification::make()->title(__('admin::config.feature_toggles.notifications.updated'))->success()->send();
                     }),
                 Tables\Actions\Action::make('delete')->label(__('admin::config.feature_toggles.actions.delete'))->icon('heroicon-o-trash')
-                    ->visible(fn () => Auth::user()?->hasRole('tech-admin') ?? false)
+                    ->visible(fn () => Auth::user()?->hasRole(Roles::TECH_ADMIN) ?? false)
                     ->requiresConfirmation()
                     ->action(function (FeatureToggleModel $record) {
                         app(ConfigPublicApi::class)->deleteFeatureToggle($record->name, $record->domain);

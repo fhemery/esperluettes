@@ -2,6 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\StoryRef;
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\StoryRef\Private\Models\StoryRefType;
 use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use Filament\Forms;
@@ -34,6 +35,13 @@ class TypeResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('admin::story.type.navigation_label');
+    }
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
     }
 
     public static function form(Form $form): Form

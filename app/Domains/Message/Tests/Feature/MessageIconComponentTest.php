@@ -4,6 +4,7 @@ use App\Domains\Config\Public\Contracts\FeatureToggle;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Message\Private\Support\FeatureToggles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
 
@@ -33,6 +34,28 @@ describe('MessageIconComponent', function () {
 
             expect($rendered)->toContain('href="' . route('messages.index') . '"');
             expect($rendered)->not->toContain('unread-badge'); // No unread badge
+        });
+
+        it('displays the icon for tech-admins even with zero messages', function () {
+            $user = techAdmin($this);
+
+            $this->actingAs($user);
+
+            $rendered = Blade::render('<x-message::message-icon-component />');
+
+            expect($rendered)->toContain('href="' . route('messages.index') . '"');
+            expect($rendered)->not->toContain('unread-badge');
+        });
+
+        it('displays the icon for moderators even with zero messages', function () {
+            $user = moderator($this);
+
+            $this->actingAs($user);
+
+            $rendered = Blade::render('<x-message::message-icon-component />');
+
+            expect($rendered)->toContain('href="' . route('messages.index') . '"');
+            expect($rendered)->not->toContain('unread-badge');
         });
 
         it('displays the icon for regular users who have messages', function () {
@@ -101,6 +124,7 @@ describe('MessageIconComponent', function () {
 
         it('does not display anything for guests', function () {
             // No actingAs - testing as guest
+            Auth::logout();
 
             $rendered = Blade::render('<x-message::message-icon-component />');
 

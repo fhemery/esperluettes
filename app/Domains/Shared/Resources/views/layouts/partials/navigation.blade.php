@@ -32,7 +32,7 @@
                             {{ __('shared::navigation.my-stories') }}
                         </x-nav-link>
                         @endif
-                        @if (Auth::user() && Auth::user()->isAdmin())
+                        @if (Auth::user() && Auth::user()->hasRole(['admin','tech-admin','moderator']))
                         <x-nav-link :href="route('filament.admin.pages.dashboard')"
                             :active="request()->routeIs('filament.admin.*')">
                             {{ __('shared::navigation.admin') }}
@@ -85,7 +85,7 @@
                     {{ __('shared::navigation.my-stories') }}
                 </x-responsive-nav-link>
                 @endif
-                @if(Auth::user()->isAdmin())
+                @if (Auth::user() && Auth::user()->hasRole(['admin','tech-admin','moderator']))
                 <x-responsive-nav-link :href="route('filament.admin.pages.dashboard')"
                     :active="request()->routeIs('filament.admin.*')">
                     {{ __('shared::navigation.admin') }}

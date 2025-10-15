@@ -36,7 +36,7 @@ class MessageIconComponent extends Component
         // Display icon if:
         // - User is admin (even with 0 messages)
         // - OR user has any messages
-        $isAdmin = $this->authPublicApi->hasAnyRole([Roles::ADMIN]);
+        $isAdmin = $this->authPublicApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]);
         $hasMessages = $this->unreadCounter->hasAnyMessages($userId);
 
         $this->shouldDisplay = $isAdmin || $hasMessages;

@@ -15,6 +15,7 @@ require_once __DIR__ . '/../app/Domains/Message/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Shared/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Discord/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Config/Tests/helpers.php';
+require_once __DIR__ . '/../app/Domains/Moderation/Tests/helpers.php';
 
 // Root tests directory
 uses(TestCase::class)->in('Feature');

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\News;
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\News\Private\Models\News;
 use App\Domains\News\Private\Services\NewsService;
 use App\Domains\Shared\Support\HtmlLinkUtils;
@@ -32,6 +33,13 @@ class NewsResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('admin::news.navigation.news');
+    }
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
     }
 
     public static function form(Form $form): Form

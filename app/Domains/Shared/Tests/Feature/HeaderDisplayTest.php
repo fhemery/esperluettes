@@ -86,6 +86,16 @@ describe('Logged header display', function () {
         $response->assertSee(__('shared::navigation.admin'));
     });
 
+    it('should show admin link to moderators', function () {
+        $user = moderator($this);
+        $this->actingAs($user);
+
+        $response = $this->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee(__('shared::navigation.admin'));
+    });
+
     it('should show news and stories to authenticated users', function () {
         $user = alice($this);
 

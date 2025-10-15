@@ -16,6 +16,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use App\Domains\Admin\Controllers\LogDownloadController;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -90,7 +91,7 @@ class AdminServiceProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                CheckRole::class . ':admin,tech-admin',
+                CheckRole::class . ':' . Roles::ADMIN . ',' . Roles::TECH_ADMIN . ',' . Roles::MODERATOR,
             ]);
     }
 }

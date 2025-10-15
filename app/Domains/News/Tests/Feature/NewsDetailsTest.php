@@ -72,6 +72,22 @@ describe('News Details Test', function () {
         $response->assertSee('Banner Test');
     });
 
+    it('shows draft preview with banner to tech-admins', function () {
+        $tech = techAdmin($this);
+        $news = News::factory()->create([
+            'title' => 'Tech Admin Draft',
+            'slug' => 'tech-admin-draft',
+            'status' => 'draft',
+            'published_at' => null,
+            'created_by' => $tech->id,
+        ]);
+
+        $response = $this->actingAs($tech)->get(route('news.show', ['slug' => $news->slug]));
+        $response->assertOk();
+        $response->assertSee('news::public.draft_preview');
+        $response->assertSee('Tech Admin Draft');
+    });
+
     it('allows direct access to published news', function () {
         $admin = admin($this);
         $a = News::factory()->published()->create([

@@ -29,6 +29,7 @@ use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
 use App\Domains\Story\Private\Listeners\RemoveStoriesOnUserDeleted;
 use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
+use App\Domains\Moderation\Public\Services\ModerationRegistry;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -83,5 +84,17 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->subscribe(UserDeleted::class, [app(RemoveStoriesOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveChapterCreditsOnUserDeleted::class), 'handle']);
 
+        // Register Story and Chapter topics for moderation
+        $moderationRegistry = app(ModerationRegistry::class);
+        $moderationRegistry->register(
+            key: 'story',
+            displayName: __('story::moderation.topic_story'),
+            formatterClass: null // No formatter implementation yet
+        );
+        $moderationRegistry->register(
+            key: 'chapter',
+            displayName: __('story::moderation.topic_chapter'),
+            formatterClass: null // No formatter implementation yet
+        );
     }
 }

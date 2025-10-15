@@ -55,7 +55,7 @@ class NewsController extends BaseController
 
         if (!$news) {
             // If not published and user is admin, allow preview of draft by direct lookup
-            if ($this->authApi->hasAnyRole([Roles::ADMIN])) {
+            if ($this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
                 $news = News::query()->where('slug', $slug)->first();
                 if (!$news) {
                     abort(404);
@@ -67,7 +67,7 @@ class NewsController extends BaseController
 
         // If draft, only admins may access
         if ($news->status === 'draft') {
-            if (!$this->authApi->hasAnyRole([Roles::ADMIN])) {
+            if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
                 abort(404);
             }
         }

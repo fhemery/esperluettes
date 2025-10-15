@@ -3,6 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\Shared;
 
 use App\Domains\Admin\Filament\Resources\Shared\DomainEventResource\Pages;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Events\Private\Models\StoredDomainEvent;
 use App\Domains\Events\Private\Services\DomainEventFactory;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
@@ -20,6 +21,13 @@ class DomainEventResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-bolt';
     protected static ?int $navigationSort = 99;
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]) ?? false;
+    }
 
     public static function getNavigationLabel(): string
     {
