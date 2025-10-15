@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Moderation\Models\ModerationReason;
+use App\Domains\Moderation\Private\Models\ModerationReason;
 
 /**
  * Create a ModerationReason for a topic.

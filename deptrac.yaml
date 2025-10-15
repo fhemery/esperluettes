@@ -455,6 +455,11 @@ deptrac:
       - MessagePrivate
       - MessagePublic
 
+    ModerationTests:
+      - TestHelpers
+      - ModerationPrivate
+      - ModerationPublic
+
     NewsTests:
       - Shared
       - TestHelpers

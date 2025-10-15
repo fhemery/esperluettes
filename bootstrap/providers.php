@@ -6,7 +6,7 @@ return [
     // Events domain
     App\Domains\Config\Public\Providers\ConfigServiceProvider::class,
     App\Domains\Events\Public\Providers\EventsServiceProvider::class,
-    App\Domains\Moderation\Providers\ModerationServiceProvider::class,
+    App\Domains\Moderation\Public\Providers\ModerationServiceProvider::class,
     
     // Domain-specific providers
     App\Domains\Admin\Providers\AdminServiceProvider::class,

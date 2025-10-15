@@ -2,8 +2,8 @@
 
 namespace App\Domains\Moderation\Private\Services;
 
-use App\Domains\Moderation\Models\ModerationReason;
-use App\Domains\Moderation\Models\ModerationReport;
+use App\Domains\Moderation\Private\Models\ModerationReason;
+use App\Domains\Moderation\Private\Models\ModerationReport;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use Illuminate\Support\Facades\Auth;
 

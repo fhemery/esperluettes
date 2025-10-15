@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource;
-use App\Domains\Moderation\Models\ModerationReason;
+use App\Domains\Moderation\Private\Models\ModerationReason;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateModerationReason extends CreateRecord

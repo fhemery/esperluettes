@@ -6,7 +6,7 @@ use App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pag
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pages\EditModerationReason;
 use App\Domains\Admin\Filament\Resources\Moderation\ModerationReasonResource\Pages\ListModerationReasons;
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Moderation\Models\ModerationReason;
+use App\Domains\Moderation\Private\Models\ModerationReason;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use Filament\Forms;
 use Filament\Forms\Form;

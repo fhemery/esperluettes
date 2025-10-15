@@ -3,7 +3,7 @@
 namespace App\Domains\Moderation\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Domains\Moderation\Models\ModerationReason;
+use App\Domains\Moderation\Private\Models\ModerationReason;
 
 class ModerationSeeder extends Seeder
 {

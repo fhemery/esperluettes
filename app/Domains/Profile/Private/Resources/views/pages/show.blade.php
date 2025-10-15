@@ -69,7 +69,6 @@
                         <x-moderation::report-button 
                             topic-key="profile" 
                             :entity-id="$profile->user_id"
-                            button-class="text-sm text-gray-600 hover:text-gray-900"
                         />
                     </div>
                     @endif

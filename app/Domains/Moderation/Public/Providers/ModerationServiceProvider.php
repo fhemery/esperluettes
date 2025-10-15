@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Moderation\Providers;
+namespace App\Domains\Moderation\Public\Providers;
 
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use Illuminate\Support\Facades\Blade;
