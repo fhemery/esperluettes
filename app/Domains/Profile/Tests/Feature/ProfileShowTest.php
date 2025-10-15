@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Profile\Private\Models\Profile;
+use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -98,6 +100,21 @@ describe('Profile page', function () {
     });
 
     describe('Moderation', function () {
+        beforeEach(function () {
+            createFeatureToggle($this, new FeatureToggle('reporting', 'moderation', access: FeatureToggleAccess::ON));
+        });
+
+        it('should not show the report button on own profile', function () {
+            $user = alice($this);
+
+            $this->actingAs($user);
+
+            $response = $this->get('/profile');
+
+            $response->assertOk();
+            $response->assertDontSee(__('moderation::report.button'));
+        });
+
         it('shows the report button when viewing someone else\'s profile', function () {
             // Arrange two users with profiles
             $alice = alice($this);

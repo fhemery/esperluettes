@@ -3,6 +3,12 @@
     'entityId',    // ID of the entity being reported
     'buttonClass' => 'text-sm text-gray-600 hover:text-gray-900',
 ])
+@php
+    $configApi = app(App\Domains\Config\Public\Contracts\ConfigPublicApi::class);
+    if (!$configApi->isToggleEnabled('reporting', 'moderation')) {
+        return;
+    }
+@endphp
 
 <div x-data="reportButton('{{ $topicKey }}', {{ $entityId }})" x-cloak>
     {{-- Lightweight Report Button --}}
