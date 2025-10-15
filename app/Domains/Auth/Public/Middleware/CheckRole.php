@@ -35,11 +35,6 @@ class CheckRole
             return $next($request);
         }
 
-        // If user is an admin, allow access to all routes
-        if ($user->isAdmin()) {
-            return $next($request);
-        }
-
         // If no role matches, redirect to home with error
         return redirect()->route('dashboard')
             ->with('error', 'You do not have permission to access this page.');

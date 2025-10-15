@@ -72,6 +72,22 @@ it('shows draft preview with banner to admins', function () {
     $response->assertSee('Legal Notice');
 });
 
+it('shows draft preview with banner to tech-admins', function () {
+    $tech = techAdmin($this);
+    $page = StaticPage::factory()->create([
+        'title' => 'Tech Draft',
+        'slug' => 'tech-draft',
+        'status' => 'draft',
+        'published_at' => null,
+        'created_by' => $tech->id,
+    ]);
+
+    $response = $this->actingAs($tech)->get('/' . $page->slug);
+    $response->assertOk();
+    $response->assertSee('static::public.draft_preview');
+    $response->assertSee('Tech Draft');
+});
+
 it('rebuilds slug map cache on CRUD and status changes', function () {
     $admin = admin($this);
 

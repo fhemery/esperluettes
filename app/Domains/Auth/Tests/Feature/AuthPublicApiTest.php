@@ -80,7 +80,7 @@ describe('AuthPublicApi', function () {
             expect($confirmedIds)->not->toContain($alice->id);
             
             // Get users with admin role
-            $adminIds = $api->getUserIdsByRoles(['admin']);
+            $adminIds = $api->getUserIdsByRoles([Roles::ADMIN]);
             expect($adminIds)->toContain($adminUser->id);
         });
         

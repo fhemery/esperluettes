@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-6 h-[calc(100vh-150px)]">
         <div class="flex justify-between items-center">
             <x-shared::title icon="mail">{{ __('message::messages.title') }}</x-shared::title>
-            @if(Auth::user()->isAdmin())
+            @if($canCompose)
             <a href="{{ route('messages.compose') }}">
                 <x-shared::button color="accent">
                     {{ __('message::messages.compose') }}

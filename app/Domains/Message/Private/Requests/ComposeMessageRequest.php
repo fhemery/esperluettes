@@ -10,8 +10,7 @@ class ComposeMessageRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Only admins can compose messages in v1
-        return $this->user() && $this->user()->isAdmin();
+        return true; // Routing should take care of this
     }
 
     public function rules(): array
