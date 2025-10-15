@@ -24,7 +24,6 @@ use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Collection;
 
 class StoryService
 {
@@ -123,7 +122,12 @@ class StoryService
         $opts = $options ?? GetStoryOptions::Full();
         $id = SlugWithId::extractId($slug);
 
-        return $this->storiesRepository->getStoryById($id, Auth::id(), $opts);
+        $story = $this->storiesRepository->getStoryById($id, Auth::id(), $opts);
+        if ($story && $opts->includeChapters && !$story->collaborators()->where('user_id', Auth::id())->exists()) {
+            $story->chapters = $story->chapters->filter(fn($chapter) => $chapter->status === Chapter::STATUS_PUBLISHED);
+        }
+
+        return $story;
     }
 
     /**

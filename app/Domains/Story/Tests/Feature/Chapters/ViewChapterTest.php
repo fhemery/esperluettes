@@ -232,13 +232,31 @@ describe('Chapter display', function () {
 
                 $c1 = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
                 $c2 = createPublishedChapter($this, $story, $author, ['title' => 'C2']);
-                $c3 = createPublishedChapter($this, $story, $author, ['title' => 'C3']);
+                $c3 = createUnpublishedChapter($this, $story, $author, ['title' => 'C3']);
 
                 $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c1->slug]));
                 $resp->assertOk();
                 $resp->assertSee($c1->title);
                 $resp->assertSee($c2->title);
                 $resp->assertSee($c3->title);
+            });
+
+            it('should not show private chapters to non collaborators', function () {
+                $author = alice($this);
+                $story = publicStory('Public Story', $author->id);
+                
+                $c1 = createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1']);
+                $c2 = createPublishedChapter($this, $story, $author, ['title' => 'Chapter 2']);
+                $c3 = createUnpublishedChapter($this, $story, $author, ['title' => 'Chapter 3']);
+                
+                $reader = bob($this);
+                $this->actingAs($reader);
+
+                $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c1->slug]));
+                $resp->assertOk();
+                $resp->assertSee($c1->title);
+                $resp->assertSee($c2->title);
+                $resp->assertDontSee($c3->title);
             });
         });
 
