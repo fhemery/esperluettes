@@ -21,7 +21,11 @@ trigger: always_on
 - We use a Domain Oriented Architecture, with modules located in app/Domains
 - No test, no Middleware, no blade component should be created outside of app/Domains/<domain> subfolders unless explicitly requested
 - Controllers are not allowed to call the Databse directly (or through models). They must use a service. 
+- At the root of the domain (/app/Domains/<domain name>), only Public, Private, Database and Tests folders are allowed
+- Refer to docs/Domain_Structure.md whenever creating a file
 - Database Migrations goes into /app/Domains/<relevant domain>/Database/Migrations folder
+- Database Migrations should never define foreign keys to tables not located inside the Domain. In particular, there should be no foreign key towards 'users' table from outside of Auth domain
+
 
 # Laravel Coding Standards
 
@@ -42,8 +46,10 @@ trigger: always_on
 
 ## Migrations
 - Use descriptive migration names
+- Prefix all migrations with date and time of migration YYYYMMDD_HHiiss_<migration_name>
 - Always add `down()` methods
-- Use foreign key constraints
+- Use foreign key constraints only for tables from same domain.
+
 - Add indexes for search columns
 - Use proper column types (text for long content, string for short)
 
