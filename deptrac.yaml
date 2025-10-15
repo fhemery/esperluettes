@@ -74,6 +74,22 @@ deptrac:
         - type: directory
           value: 'app/Domains/Comment/Tests/'
 
+    # Config Domain
+    - name: ConfigPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Config/Public/'
+
+    - name: ConfigPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/Config/Private/
+
+    - name: ConfigTests
+      collectors:
+        - type: directory
+          value: app/Domains/Config/Tests/
+
     # Dashboard Domain
     - name: DashboardPublic
       collectors:
@@ -228,6 +244,12 @@ deptrac:
       - CommentPrivate
       - EventsPublic
 
+    ConfigPublic:
+      - Shared
+      - ConfigPrivate
+      - EventsPublic
+      - AuthPublic
+
     DashboardPublic:
       - Shared
       - DashboardPrivate
@@ -301,6 +323,8 @@ deptrac:
       - HomePrivate
       - EventsPublic
       - EventsPrivate
+      - ConfigPublic
+      - ConfigPrivate
 
     AuthPrivate:
       - Shared
@@ -312,6 +336,10 @@ deptrac:
       - AuthPublic
       - CommentPublic
       - EventsPublic
+
+    ConfigPrivate:
+      - Shared
+      - ConfigPublic
 
     DashboardPrivate:
       - Shared
@@ -335,6 +363,7 @@ deptrac:
       - AuthPublic
       - MessagePublic
       - EventsPublic
+      - ConfigPublic
 
     NewsPrivate:
       - Shared
@@ -381,6 +410,11 @@ deptrac:
       - TestHelpers
       - CommentPrivate
       - CommentPublic
+
+    ConfigTests:
+      - TestHelpers
+      - ConfigPrivate
+      - ConfigPublic
 
     EventsTests:
       - TestHelpers
