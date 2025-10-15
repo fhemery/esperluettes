@@ -169,7 +169,6 @@
           } else {
             this.hasMore = false;
           }
-          this.page = this.page + 1;
         } finally {
           this.loading = false;
         }
