@@ -73,7 +73,7 @@
                         @if($isModerator)
                         <x-shared::popover position="top">
                             <x-slot name="trigger">
-                                <x-shared::badge color="neutral" :outline="false">
+                                <x-shared::badge color="warning" :outline="false">
                                     <span class="material-symbols-outlined text-[20px] leading-none">
                                         report
                                     </span>

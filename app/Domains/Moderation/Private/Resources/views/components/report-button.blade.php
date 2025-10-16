@@ -18,7 +18,7 @@
         color="tertiary"
         x-bind:disabled="loading"
     >
-        <span class="material-symbols-outlined">report</span>
+        <span class="material-symbols-outlined">flag</span>
         {{ __('moderation::report.button') }}
     </x-shared::button>
 
