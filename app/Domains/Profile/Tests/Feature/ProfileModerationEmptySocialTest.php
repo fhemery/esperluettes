@@ -3,19 +3,19 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Profile\Public\Events\AboutModerated;
+use App\Domains\Profile\Public\Events\SocialModerated;
 use App\Domains\Profile\Private\Models\Profile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-describe('Profile moderation - Empty About', function () {
+describe('Profile moderation - Empty Social', function () {
     beforeEach(function () {
         $this->owner = alice($this);
         $this->profile = Profile::where('user_id', $this->owner->id)->firstOrFail();
         $this->slug = $this->profile->slug;
-        $this->targetUrl = "/profile/{$this->slug}/moderation/empty-about";
+        $this->targetUrl = "/profile/{$this->slug}/moderation/empty-social";
         $this->referer = "/profile/{$this->slug}";
     });
 
@@ -38,37 +38,27 @@ describe('Profile moderation - Empty About', function () {
                 ->actingAs($moderatorUser)
                 ->post($this->targetUrl)
                 ->assertRedirect($this->referer)
-                ->assertSessionHas('success', __('profile::moderation.empty_about.success'));
+                ->assertSessionHas('success', __('profile::moderation.empty_social.success'));
         });
     });
 
-    describe('Empty about', function () {
-        it('empties the about/description field in database and UI', function () {
-            // Arrange: set a description and verify it appears on the profile page
-            $bio = 'This is a sample bio that should be removed by moderation.';
+    describe('Empty social', function () {
+        it('empties all social network fields in database and UI', function () {
+            // Arrange: seed social links and verify they appear on the profile page
             $this->actingAs($this->owner)
                 ->from('/profile/edit')
-                ->put('/profile', ['description' => $bio])
+                ->put('/profile', [
+                    'facebook_url' => 'https://facebook.com/alice',
+                    'x_url' => 'https://x.com/alice',
+                    'instagram_url' => 'https://instagram.com/alice',
+                    'youtube_url' => 'https://youtube.com/@alice',
+                ])
                 ->assertRedirect('/profile');
 
             $response = $this->get("/profile/{$this->slug}");
-            $response->assertSee('This is a sample bio', false);
-
-            // Act: moderator empties the about section
-            $moderatorUser = moderator($this);
-            $this->from($this->referer)
-                ->actingAs($moderatorUser)
-                ->post($this->targetUrl)
-                ->assertRedirect($this->referer);
-
-            $response = $this->get("/profile/{$this->slug}");
-            $response->assertDontSee($bio, false);
-        });
-
-        it('emits AboutModerated event when moderator empties the about section', function () {
-            // Arrange: set a description
-            $bio = 'This is a sample bio that should be removed by moderation.';
-            $this->profile->update(['description' => $bio]);
+            $response->assertSee('facebook-link', false);
+            $response->assertSee('instagram-link', false);
+            $response->assertSee('youtube-link', false);
 
             // Act
             $moderatorUser = moderator($this);
@@ -77,8 +67,23 @@ describe('Profile moderation - Empty About', function () {
                 ->post($this->targetUrl)
                 ->assertRedirect($this->referer);
 
-            /** @var AboutModerated $event */
-            $event = latestEventOf(AboutModerated::name(), AboutModerated::class);
+            // Assert: DB and UI
+            $response = $this->get("/profile/{$this->slug}");
+            $response->assertDontSee('facebook-link', false);
+            $response->assertDontSee('instagram-link', false);
+            $response->assertDontSee('youtube-link', false);
+        });
+
+        it('emits SocialModerated event when moderator empties the social networks', function () {
+            // Act
+            $moderatorUser = moderator($this);
+            $this->from($this->referer)
+                ->actingAs($moderatorUser)
+                ->post($this->targetUrl)
+                ->assertRedirect($this->referer);
+
+            /** @var SocialModerated $event */
+            $event = latestEventOf(SocialModerated::name(), SocialModerated::class);
             expect($event)->not->toBeNull();
             expect($event->userId)->toBe($this->owner->id);
         });

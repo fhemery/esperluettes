@@ -35,6 +35,20 @@ class ProfileService
         return true;
     }
 
+    public function emptySocial(Profile $profile): bool
+    {
+        $fields = [
+            'facebook_url' => null,
+            'x_url' => null,
+            'instagram_url' => null,
+            'youtube_url' => null,
+        ];
+
+        $profile->update($fields);
+        $this->cache->forgetByUserId($profile->user_id);
+        return true;
+    }
+
     /**
      * Emit BioUpdated if any of the bio/network fields changed.
      *

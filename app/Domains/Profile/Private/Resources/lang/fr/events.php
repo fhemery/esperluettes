@@ -18,4 +18,7 @@ return [
     'avatar_moderated' => [
         'summary' => "Avatar supprimé par la modération (userId = :userId)",
     ],
+    'social_moderated' => [
+        'summary' => "Réseaux sociaux vidés par la modération (userId = :userId)",
+    ],
 ];
