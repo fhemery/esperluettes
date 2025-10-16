@@ -87,6 +87,18 @@
                                         {{ __('profile::moderation.remove_image.label') }}
                                     </x-shared::button>
                                 </form>
+                                <form action="{{ route('profile.moderation.empty-about', $profile->slug) }}" method="POST">
+                                    @csrf
+                                    <x-shared::button type="submit" color="neutral">
+                                        {{ __('profile::moderation.empty_about.label') }}
+                                    </x-shared::button>
+                                </form>
+                                <form action="{{ route('profile.moderation.empty-social', $profile->slug) }}" method="POST">
+                                    @csrf
+                                    <x-shared::button type="submit" color="neutral">
+                                        {{ __('profile::moderation.empty_social.label') }}
+                                    </x-shared::button>
+                                </form>
                             </div>
                         </x-shared::popover>
                         @endif

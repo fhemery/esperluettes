@@ -24,6 +24,17 @@ class ProfileService
     ) {
     }
 
+    public function emptyAbout(Profile $profile): bool
+    {
+        if ($profile->description === null) {
+            return false;
+        }
+
+        $profile->update(['description' => null]);
+        $this->cache->forgetByUserId($profile->user_id);
+        return true;
+    }
+
     /**
      * Emit BioUpdated if any of the bio/network fields changed.
      *

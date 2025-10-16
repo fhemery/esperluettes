@@ -28,6 +28,8 @@ Route::middleware('web')->prefix('profile')->group(function () {
     Route::middleware(['role:' . Roles::MODERATOR . ',' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])
         ->prefix('/{profile:slug}/moderation')->group(function () {
             Route::post('/remove-image', [ProfileModerationController::class, 'removeImage'])->name('profile.moderation.remove-image');
+            Route::post('/empty-about', [ProfileModerationController::class, 'emptyAbout'])->name('profile.moderation.empty-about');
+            Route::post('/empty-social', [ProfileModerationController::class, 'emptySocial'])->name('profile.moderation.empty-social');
     });
    
     // Auth protected small lookup endpoints for UI components
