@@ -221,9 +221,9 @@ class ProfileService
     }
 
     /**
-     * Delete profile picture
+     * Delete profile picture and handle side-effects (event + cache).
      */
-    private function deleteProfilePicture(Profile $profile): bool
+    public function deleteProfilePicture(Profile $profile): bool
     {
         if ($profile->profile_picture_path) {
             Storage::disk('public')->delete($profile->profile_picture_path);
@@ -234,6 +234,10 @@ class ProfileService
                 userId: $profile->user_id,
                 profilePicturePath: null,
             ));
+
+            // Invalidate cache for this user
+            $this->cache->forgetByUserId($profile->user_id);
+
             return true;
         }
         

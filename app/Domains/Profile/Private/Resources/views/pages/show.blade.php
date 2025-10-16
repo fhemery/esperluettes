@@ -65,11 +65,32 @@
                     </div>
 
                     @if(Auth::check() && !$isOwn)
-                    <div class="flex justify-end w-full">
+                    <div class="flex gap-4 justify-end w-full">
                         <x-moderation::report-button 
                             topic-key="profile" 
                             :entity-id="$profile->user_id"
                         />
+                        @if($isModerator)
+                        <x-shared::popover position="top">
+                            <x-slot name="trigger">
+                                <x-shared::badge color="neutral" :outline="false">
+                                    <span class="material-symbols-outlined text-[20px] leading-none">
+                                        report
+                                    </span>
+                                </x-shared::badge>
+                            </x-slot>
+                            <div class="flex flex-col gap-2" id="profile-moderator-btn" >
+                                <x-shared::title tag="h3">{{ __('profile::moderation.popup_title') }}</x-shared::title>
+                                <form action="{{ route('profile.moderation.remove-image', $profile->slug) }}" method="POST">
+                                    @csrf
+                                    <x-shared::button type="submit" color="neutral">
+                                        {{ __('profile::moderation.remove_image.label') }}
+                                    </x-shared::button>
+                                </form>
+                            </div>
+                        </x-shared::popover>
+                        @endif
+                        
                     </div>
                     @endif
                 </div>

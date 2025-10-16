@@ -3,6 +3,7 @@
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Profile\Private\Controllers\ProfileController;
 use App\Domains\Profile\Private\Controllers\ProfileLookupController;
+use App\Domains\Profile\Private\Controllers\ProfileModerationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,24 +17,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('web')->group(function () {
+Route::middleware('web')->prefix('profile')->group(function () {
     // Protected routes for own profile and editing
     Route::middleware(['role:' . Roles::USER . ',' . Roles::USER_CONFIRMED])->group(function () {
-        Route::get('/profile', [ProfileController::class, 'showOwn'])->name('profile.show.own');
-        Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/', [ProfileController::class, 'showOwn'])->name('profile.show.own');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/', [ProfileController::class, 'update'])->name('profile.update');
     });
 
-    // Public profile page (by slug) - accessible to guests
-    Route::get('/profile/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
-
-    // Admin-only (auth) small lookup endpoints for UI components
+    Route::middleware(['role:' . Roles::MODERATOR . ',' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])
+        ->prefix('/{profile:slug}/moderation')->group(function () {
+            Route::post('/remove-image', [ProfileModerationController::class, 'removeImage'])->name('profile.moderation.remove-image');
+    });
+   
+    // Auth protected small lookup endpoints for UI components
     Route::middleware(['auth'])->group(function () {
-        Route::get('/profiles/lookup', [ProfileLookupController::class, 'search'])
+        Route::get('/lookup', [ProfileLookupController::class, 'search'])
             ->middleware(['throttle:60,1'])
             ->name('profiles.lookup');
-        Route::get('/profiles/lookup/by-ids', [ProfileLookupController::class, 'byIds'])
+        Route::get('/lookup/by-ids', [ProfileLookupController::class, 'byIds'])
             ->middleware(['throttle:60,1'])
             ->name('profiles.lookup.by_ids');
     });
+
+     // Public profile page (by slug) - accessible to guests
+    Route::get('/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
+
 });
