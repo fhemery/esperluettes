@@ -19,6 +19,8 @@ use App\Domains\Story\Public\Events\ChapterPublished;
 use App\Domains\Story\Public\Events\ChapterUnpublished;
 use App\Domains\Story\Public\Events\ChapterDeleted;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
+use App\Domains\Story\Public\Events\StoryModeratedAsPrivate;
+use App\Domains\Story\Public\Events\StorySummaryModerated;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -77,6 +79,8 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->registerEvent(ChapterUnpublished::name(), ChapterUnpublished::class);
         $eventBus->registerEvent(ChapterDeleted::name(), ChapterDeleted::class);
         $eventBus->registerEvent(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
+        $eventBus->registerEvent(StoryModeratedAsPrivate::name(), StoryModeratedAsPrivate::class);
+        $eventBus->registerEvent(StorySummaryModerated::name(), StorySummaryModerated::class);
 
         // Subscribe to cross-domain events (after-commit listeners)
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);

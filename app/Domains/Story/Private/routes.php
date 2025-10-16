@@ -6,12 +6,23 @@ use App\Domains\Story\Private\Controllers\StoryCreateController;
 use App\Domains\Story\Private\Controllers\StoryController;
 use App\Domains\Story\Private\Controllers\ChapterController;
 use App\Domains\Story\Private\Controllers\ReadingProgressController;
+use App\Domains\Story\Private\Controllers\StoryModerationController;
 
 Route::middleware(['web'])->group(function () {
     Route::get('/stories', [StoryController::class, 'index'])
         ->name('stories.index');
 
-    Route::middleware(['role:'.Roles::USER_CONFIRMED])->group(function () {
+    Route::middleware(['role:' . Roles::MODERATOR . ',' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])->group(function () {
+        Route::post('/stories/{slug}/moderation/make-private', [StoryModerationController::class, 'makePrivate'])
+            ->where('slug', '.*')
+            ->name('stories.moderation.make-private');
+
+        Route::post('/stories/{slug}/moderation/empty-summary', [StoryModerationController::class, 'emptySummary'])
+            ->where('slug', '.*')
+            ->name('stories.moderation.empty-summary');
+    });
+
+    Route::middleware(['role:' . Roles::USER_CONFIRMED])->group(function () {
         Route::get('/stories/create', [StoryCreateController::class, 'create'])
             ->name('stories.create');
 

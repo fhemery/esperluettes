@@ -56,7 +56,13 @@ class StoryShowViewModel
         $this->twDisclosure = (string)$twDisclosure;
     }
 
-    
+    /**
+     * Get story id
+     */
+    public function getId(): int
+    {
+        return $this->story->id;
+    }
 
     /**
      * Get story title

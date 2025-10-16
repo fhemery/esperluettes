@@ -31,4 +31,10 @@ return [
     'story_visibility_changed' => [
         'summary' => "Histoire :title (id: :id) visibilité changée : :old → :new.",
     ],
+    'story_moderated_as_private' => [
+        'summary' => "Histoire rendue privée par la modération (id: :id, :title).",
+    ],
+    'story_summary_moderated' => [
+        'summary' => "Résumé vidé par la modération (id: :id, :title).",
+    ],
 ];

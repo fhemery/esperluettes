@@ -20,6 +20,16 @@ final class StoryRepository
         return $query->find($storyId);
     }
 
+    public function setVisibility(int $storyId, string $visibility): void
+    {
+        Story::query()->where('id', $storyId)->update(['visibility' => $visibility]);
+    }
+
+    public function clearDescription(int $storyId): void
+    {
+        Story::query()->where('id', $storyId)->update(['description' => '']);
+    }
+
     /**
      * Return a paginator of stories for card display with filters applied.
      */

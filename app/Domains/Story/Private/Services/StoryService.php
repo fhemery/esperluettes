@@ -131,6 +131,52 @@ class StoryService
     }
 
     /**
+     * Set a story visibility to private. Returns true if it changed, false if already private.
+     */
+    public function makePrivate(string $slug): bool
+    {
+        $story = $this->getStory($slug);
+        if (!$story) {
+            abort(404);
+        }
+
+        if ($story->visibility === Story::VIS_PRIVATE) {
+            return false;
+        }
+
+        $before = $story->visibility;
+        $this->storiesRepository->setVisibility($story->id, Story::VIS_PRIVATE);
+
+        // Emit visibility changed event for consistency across the system
+        $this->eventBus->emit(new StoryVisibilityChanged(
+            storyId: (int) $story->id,
+            title: (string) $story->title,
+            oldVisibility: (string) $before,
+            newVisibility: (string) $story->visibility,
+        ));
+
+        return true;
+    }
+
+    /**
+     * Empty the story summary (description). Returns true if it changed, false if already null.
+     */
+    public function emptySummary(string $slug): bool
+    {
+        $story = $this->getStory($slug);
+        if (!$story) {
+            abort(404);
+        }
+
+        if ($story->description === null) {
+            return false;
+        }
+
+        $this->storiesRepository->clearDescription($story->id);
+        return true;
+    }
+
+    /**
      * Update a story's core fields and relations, emitting Story.Updated with before/after snapshots.
      */
     public function updateStory(StoryRequest $request, Story $story): Story
