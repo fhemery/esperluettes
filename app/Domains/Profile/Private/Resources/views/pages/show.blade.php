@@ -71,36 +71,29 @@
                             :entity-id="$profile->user_id"
                         />
                         @if($isModerator)
-                        <x-shared::popover position="top">
-                            <x-slot name="trigger">
-                                <x-shared::badge color="warning" :outline="false">
-                                    <span class="material-symbols-outlined text-[20px] leading-none">
-                                        report
-                                    </span>
-                                </x-shared::badge>
-                            </x-slot>
-                            <div class="flex flex-col gap-2" id="profile-moderator-btn" >
-                                <x-shared::title tag="h3">{{ __('profile::moderation.popup_title') }}</x-shared::title>
-                                <form action="{{ route('profile.moderation.remove-image', $profile->slug) }}" method="POST">
-                                    @csrf
-                                    <x-shared::button type="submit" color="neutral">
-                                        {{ __('profile::moderation.remove_image.label') }}
-                                    </x-shared::button>
-                                </form>
-                                <form action="{{ route('profile.moderation.empty-about', $profile->slug) }}" method="POST">
-                                    @csrf
-                                    <x-shared::button type="submit" color="neutral">
-                                        {{ __('profile::moderation.empty_about.label') }}
-                                    </x-shared::button>
-                                </form>
-                                <form action="{{ route('profile.moderation.empty-social', $profile->slug) }}" method="POST">
-                                    @csrf
-                                    <x-shared::button type="submit" color="neutral">
-                                        {{ __('profile::moderation.empty_social.label') }}
-                                    </x-shared::button>
-                                </form>
-                            </div>
-                        </x-shared::popover>
+                        <x-moderation::moderation-button
+                            badgeColor="warning"
+                            position="top"
+                            id="profile-moderator-btn"
+                        >
+                            <x-moderation::action
+                                :action="route('profile.moderation.remove-image', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.remove_image.label')"
+                            />
+
+                            <x-moderation::action
+                                :action="route('profile.moderation.empty-about', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.empty_about.label')"
+                            />
+
+                            <x-moderation::action
+                                :action="route('profile.moderation.empty-social', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.empty_social.label')"
+                            />
+                        </x-moderation::moderation-button>
                         @endif
                         
                     </div>
