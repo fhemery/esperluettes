@@ -7,7 +7,7 @@
                 <!-- Profile Picture -->
                 <div class="flex-shrink-0">
                     <x-shared::avatar :src="$profile->profile_picture_path"
-                        class="h-25 w-25 sm:h-50 sm:w-50 rounded-full border-4 border-white shadow-lg"
+                        class="h-[100px] w-[100px] sm:h-[200px] sm:w-[200px] rounded-full border-4 border-white"
                         alt="{{ __('profile::show.alt_profile_picture', ['name' => $profile->display_name]) }}" />
                 </div>
 
