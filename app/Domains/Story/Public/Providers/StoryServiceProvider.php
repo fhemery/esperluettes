@@ -32,6 +32,8 @@ use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
 use App\Domains\Story\Private\Listeners\RemoveStoriesOnUserDeleted;
 use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use App\Domains\Story\Public\Events\ChapterContentModerated;
+use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -81,6 +83,8 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->registerEvent(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
         $eventBus->registerEvent(StoryModeratedAsPrivate::name(), StoryModeratedAsPrivate::class);
         $eventBus->registerEvent(StorySummaryModerated::name(), StorySummaryModerated::class);
+        $eventBus->registerEvent(ChapterUnpublishedByModeration::name(), ChapterUnpublishedByModeration::class);
+        $eventBus->registerEvent(ChapterContentModerated::name(), ChapterContentModerated::class);
 
         // Subscribe to cross-domain events (after-commit listeners)
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);

@@ -9,11 +9,96 @@
 @endpush
 
 <x-app-layout :display-ribbon="true" :page="$page">
-    <div class="w-full grid md:grid-cols-[230px_1fr] lg:grid-cols-[230px_1fr_230px] gap-4">
+    <div
+        x-data="chapterPage()"
+        x-init="init()"
+        @resize.window="handleResize()"
+        class="w-full grid md:grid-cols-[230px_1fr] lg:grid-cols-[230px_1fr_230px] gap-4">
         <aside class="hidden md:block">
-            <x-story::chapter.story-nav :story="$vm->story" :current-chapter-slug="$vm->chapter->slug" />
+            <div id="chapter-nav-host-desktop"></div>
         </aside>
+
+        <button
+            type="button"
+            class="md:hidden fixed bottom-4 left-4 z-40 p-2 w-10 h-10 rounded-full bg-primary text-on-primary shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            aria-controls="mobile-chapter-drawer"
+            :aria-expanded="open ? 'true' : 'false'"
+            @click="open = !open"
+            title="{{ __('story::chapters.side_nav.label') }}">
+            <span class="material-symbols-outlined text-[18px] leading-none">side_navigation</span>
+        </button>
+
+        <!-- Mobile drawer for chapter navigation -->
+        <div class="md:hidden">
+            <!-- Edge swipe area (open) -->
+            <div class="fixed left-0 top-0 bottom-0 w-3 z-20" aria-hidden="true"
+                @touchstart.passive="startX = $event.touches[0].clientX; tracking = true"
+                @touchmove.passive="if(tracking && ($event.touches[0].clientX - startX) > 24){ open = true; tracking = false }"
+                @touchend.passive="tracking = false"></div>
+
+            <!-- Backdrop -->
+            <div x-show="open" x-transition.opacity class="fixed inset-0 bg-black/30 z-30" @click="open = false" aria-hidden="true"></div>
+
+            <!-- Drawer panel (left side) -->
+            <div
+                id="mobile-chapter-drawer"
+                class="fixed top-0 bottom-0 left-0 z-40 w-64 max-w-[85vw] bg-bg border-r border-accent"
+                x-show="open"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="-translate-x-full opacity-0"
+                x-transition:enter-end="translate-x-0 opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="translate-x-0 opacity-100"
+                x-transition:leave-end="-translate-x-full opacity-0"
+                @keydown.escape.window="open = false"
+                role="dialog"
+                aria-modal="true">
+                <div class="p-6 flex items-center justify-between border-b border-accent">
+                    <div class="font-medium">{{ $vm->chapter->title }}</div>
+                    <button type="button" class="p-1" @click="open = false" aria-label="Close">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="h-full overflow-y-auto p-6">
+                    <div id="chapter-nav-host-mobile"></div>
+                </div>
+            </div>
+        </div>
+
+        <!--Chapter navigation and moderation -->
+        {{-- This div is not displayed because it is either sent to mobile drawer or desktop dependending on resolution --}}
+        <div x-ref="chapterNav" style="display: none">
+            <div class="flex flex-col gap-4 items-center">
+                <x-story::chapter.story-nav :story="$vm->story" :current-chapter-slug="$vm->chapter->slug" />
+                <div class="flex gap-2">
+                    @if(!$vm->isAuthor)
+                    <div class="flex gap-2">
+                        <x-moderation::report-button
+                            topic-key="chapter"
+                            :entity-id="$vm->chapter->id" />
+                        @if($isModerator)
+                        <x-moderation::moderation-button
+                            badgeColor="warning"
+                            position="top"
+                            id="chapter-moderator-btn">
+                            <x-moderation::action
+                                :action="route('chapters.moderation.unpublish', $vm->chapter->slug)"
+                                method="POST"
+                                :label="__('story::moderation.unpublish.label')" />
+                            <x-moderation::action
+                                :action="route('chapters.moderation.empty-content', $vm->chapter->slug)"
+                                method="POST"
+                                :label="__('story::moderation.empty_chapter_content.label')" />
+                        </x-moderation::moderation-button>
+                        @endif
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
         <div class="flex flex-col gap-4">
+
+
             <div class="flex flex-col gap-4 surface-read text-on-surface p-2 sm:p-8">
                 <div class="flex flex-col items-center gap-2 max-w-[730px]">
                     <div class="flex items-center gap-2">
@@ -151,6 +236,33 @@
 
     @push('scripts')
     <script>
+        function chapterPage() {
+            return {
+                open: false,
+                startX: 0,
+                tracking: false,
+                init() {
+                    this.placeNav()
+                },
+                handleResize() {
+                    this.placeNav()
+                },
+                placeNav() {
+                    const desktop = document.getElementById('chapter-nav-host-desktop');
+                    const mobile = document.getElementById('chapter-nav-host-mobile');
+                    const nav = this.$refs.chapterNav;
+                    if (!desktop || !mobile || !nav) return;
+                    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+                    const target = isDesktop ? desktop : mobile;
+                    if (nav.parentElement !== target) {
+                        target.innerHTML = '';
+                        target.appendChild(nav);
+                        nav.style.display = 'block';
+                    }
+                },
+            };
+        }
+
         function markRead({
             isRead,
             urlRead,
@@ -195,7 +307,6 @@
         :storySlug="$vm->story->slug"
         :chapterSlug="$vm->chapter->slug"
         :chapterTitle="$vm->chapter->title"
-        :confirm="__('story::show.confirm_delete')"
-    />
+        :confirm="__('story::show.confirm_delete')" />
     @endif
 </x-app-layout>

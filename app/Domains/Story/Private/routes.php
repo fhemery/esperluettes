@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Domains\Story\Private\Controllers\StoryCreateController;
 use App\Domains\Story\Private\Controllers\StoryController;
 use App\Domains\Story\Private\Controllers\ChapterController;
+use App\Domains\Story\Private\Controllers\ChapterModerationController;
 use App\Domains\Story\Private\Controllers\ReadingProgressController;
 use App\Domains\Story\Private\Controllers\StoryModerationController;
 
@@ -20,6 +21,14 @@ Route::middleware(['web'])->group(function () {
         Route::post('/stories/{slug}/moderation/empty-summary', [StoryModerationController::class, 'emptySummary'])
             ->where('slug', '.*')
             ->name('stories.moderation.empty-summary');
+
+        Route::post('/chapters/{slug}/moderation/unpublish', [ChapterModerationController::class, 'unpublish'])
+            ->where('slug', '.*')
+            ->name('chapters.moderation.unpublish');
+
+        Route::post('/chapters/{slug}/moderation/empty-content', [ChapterModerationController::class, 'emptyContent'])
+            ->where('slug', '.*')
+            ->name('chapters.moderation.empty-content');
     });
 
     Route::middleware(['role:' . Roles::USER_CONFIRMED])->group(function () {

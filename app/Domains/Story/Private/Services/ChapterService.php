@@ -12,6 +12,8 @@ use App\Domains\Story\Public\Events\ChapterCreated;
 use App\Domains\Story\Public\Events\ChapterUpdated;
 use App\Domains\Story\Public\Events\ChapterPublished;
 use App\Domains\Story\Public\Events\ChapterUnpublished;
+use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
+use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Story\Private\Services\ChapterCreditService;
@@ -37,7 +39,7 @@ class ChapterService
         if ($this->credits->availableForUser($userId) <= 0) {
             throw new \Illuminate\Auth\Access\AuthorizationException('No chapter credits left. Comment other chapters to earn more.');
         }
-
+        
         return DB::transaction(function () use ($story, $title, $authorNoteHtml, $contentHtml, $published, $userId) {
             // compute sparse sort order
             $maxOrder = (int) (Chapter::where('story_id', $story->id)->max('sort_order') ?? 0);
@@ -86,6 +88,71 @@ class ChapterService
             $this->credits->spendOne((int)$userId);
 
             return $chapter;
+        });
+    }
+
+
+    /**
+     * Empty the chapter content (set to empty string, not null) by slug.
+     */
+    public function emptyContentBySlug(string $slug): void
+    {
+        DB::transaction(function () use ($slug) {
+            /** @var Chapter|null $chapter */
+            $chapter = Chapter::query()->where('slug', $slug)->first();
+            if (!$chapter) {
+                throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Chapter not found');
+            }
+
+            $chapter->content = '';
+            $chapter->save();
+
+            $this->eventBus->emit(new ChapterContentModerated(
+                storyId: (int)$chapter->story_id,
+                chapterId: (int)$chapter->id,
+                title: (string)$chapter->title,
+            ));
+        });
+    }
+
+
+    /**
+     * Unpublish a chapter by its canonical slug. No-op if already not published.
+     */
+    public function unpublishBySlug(string $slug): Story
+    {
+        return DB::transaction(function () use ($slug) {
+            /** @var Chapter|null $chapter */
+            $chapter = Chapter::query()->where('slug', $slug)->first();
+            if (!$chapter) {
+                throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Chapter not found');
+            }
+
+            /** @var Story $story */
+            $story = Story::query()->findOrFail((int)$chapter->story_id);
+
+            $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
+            if ($wasPublished) {
+                $chapter->status = Chapter::STATUS_NOT_PUBLISHED;
+                $chapter->save();
+
+                // Emit base domain transition event
+                $this->eventBus->emit(new ChapterUnpublished(
+                    storyId: (int) $story->id,
+                    chapter: \App\Domains\Story\Public\Events\DTO\ChapterSnapshot::fromModel($chapter),
+                ));
+
+                // Update story last published timestamp when transitions happen
+                $this->updateStoryLastPublished($story);
+            }
+
+            // Emit moderation event even if already unpublished? Align with Story tests -> emit on action.
+            $this->eventBus->emit(new ChapterUnpublishedByModeration(
+                storyId: (int)$story->id,
+                chapterId: (int)$chapter->id,
+                title: (string)$chapter->title,
+            ));
+            return $story;
         });
     }
 

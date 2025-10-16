@@ -1,6 +1,8 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -130,6 +132,57 @@ describe('Chapter display', function () {
             $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
             $resp->assertOk();
             $resp->assertSee('Draft');
+        });
+    });
+
+    describe('Moderation', function () {
+        beforeEach(function () {
+            createFeatureToggle($this, new FeatureToggle('reporting', 'moderation', access: FeatureToggleAccess::ON));
+        });
+
+        it('does not show the report button on own chapter', function () {
+            $author = alice($this);
+            $story = publicStory('Moderation Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Mod Chap']);
+
+            $this->actingAs($author)
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->assertDontSee(__('moderation::report.button'));
+        });
+
+        it('shows the report button when viewing someone else\'s chapter', function () {
+            $author = alice($this);
+            $story = publicStory('Moderation Story 2', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Mod Chap 2']);
+
+            $bob = bob($this);
+            $this->actingAs($bob)
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->assertSee(__('moderation::report.button'));
+        });
+
+        it('does not show the moderator popover to guests', function () {
+            $author = alice($this);
+            $story = publicStory('Moderation Story 3', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Mod Chap 3']);
+
+            $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->assertDontSee('id="chapter-moderator-btn"', false);
+        });
+
+        it('shows the moderator popover to moderators', function () {
+            $author = alice($this);
+            $story = publicStory('Moderation Story 4', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Mod Chap 4']);
+
+            $moderatorUser = moderator($this);
+            $this->actingAs($moderatorUser)
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->assertSee('id="chapter-moderator-btn"', false);
         });
     });
 
