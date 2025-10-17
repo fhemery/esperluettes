@@ -16,6 +16,7 @@ use App\Domains\Comment\Public\Events\CommentContentModerated;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Comment\Private\Listeners\RemoveAuthorOnUserDeleted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use App\Domains\Comment\Public\Support\Moderation\CommentSnapshotFormatter;
 
 class CommentServiceProvider extends ServiceProvider
 {
@@ -63,7 +64,7 @@ class CommentServiceProvider extends ServiceProvider
         app(ModerationRegistry::class)->register(
             key: 'comment',
             displayName: __('comment::moderation.topic_name'),
-            formatterClass: null // No formatter implementation yet
+            formatterClass: CommentSnapshotFormatter::class
         );
     }
 }
