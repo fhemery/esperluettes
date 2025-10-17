@@ -123,8 +123,8 @@
 
     <!-- Results Section -->
     <div class="w-full mt-4">
-        <div class="overflow-hidden sm:rounded-lg">
-            <div class="p-2 sm:p-4 text-fg">
+        <div class="overflow-hidden">
+            <div class="text-fg">
                 @if ($viewModel->isEmpty())
                 <div class="text-center text-fg py-16">
                     {{ __('story::index.empty') }}
