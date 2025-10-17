@@ -11,6 +11,8 @@ use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Comment\Public\Events\DTO\CommentSnapshot;
 use App\Domains\Comment\Public\Events\CommentEdited;
+use App\Domains\Comment\Public\Events\CommentDeletedByModeration;
+use Illuminate\Support\Facades\DB;
 
 class CommentService
 {
@@ -120,5 +122,24 @@ class CommentService
     public function nullifyAuthor(int $userId): int
     {
         return $this->repository->nullifyAuthor($userId);
+    }
+
+    /**
+     * Moderation: delete a comment and its direct children.
+     */
+    public function deleteByModeration(int $commentId): void
+    {
+        DB::transaction(function () use ($commentId) {
+            $comment = $this->repository->getById($commentId);
+            $this->repository->deleteWithChildren($commentId);
+
+            $this->eventBus->emit(new CommentDeletedByModeration(
+                commentId: (int)$commentId,
+                entityType: (string)$comment->commentable_type,
+                entityId: (int)$comment->commentable_id,
+                isRoot: $comment->parent_comment_id === null,
+                authorId: $comment->author_id !== null ? (int)$comment->author_id : null,
+            ));
+        });
     }
 }

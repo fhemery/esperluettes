@@ -122,6 +122,18 @@ class CommentRepository
     }
 
     /**
+     * Hard delete a comment and its direct children.
+     * Returns number of deleted rows.
+     */
+    public function deleteWithChildren(int $commentId): int
+    {
+        return Comment::query()
+            ->whereKey($commentId)
+            ->orWhere('parent_comment_id', $commentId)
+            ->forceDelete();
+    }
+
+    /**
      * Update the body of a comment and persist changes.
      */
     public function updateBody(int $commentId, string $body): Comment

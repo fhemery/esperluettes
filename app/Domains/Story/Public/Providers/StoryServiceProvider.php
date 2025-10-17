@@ -29,6 +29,7 @@ use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
+use App\Domains\Story\Private\Listeners\CommentDeletedListener;
 use App\Domains\Story\Private\Listeners\RemoveStoriesOnUserDeleted;
 use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
@@ -91,6 +92,7 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveStoriesOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveChapterCreditsOnUserDeleted::class), 'handle']);
+        $eventBus->subscribe(\App\Domains\Comment\Public\Events\CommentDeletedByModeration::class, [app(CommentDeletedListener::class), 'handle']);
 
         // Register Story and Chapter topics for moderation
         $moderationRegistry = app(ModerationRegistry::class);
