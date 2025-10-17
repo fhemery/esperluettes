@@ -394,6 +394,7 @@ deptrac:
     ModerationPrivate:
       - Shared
       - ModerationPublic
+      - AuthPublic
 
     NewsPrivate:
       - Shared

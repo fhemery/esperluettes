@@ -5,10 +5,12 @@ namespace App\Domains\Moderation\Private\Services;
 use App\Domains\Moderation\Private\Models\ModerationReason;
 use App\Domains\Moderation\Private\Models\ModerationReport;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 
 class ModerationService
 {
+    private const PENDING_COUNT_CACHE_KEY = 'moderation.pending_reports_count';
     public function __construct(
         private ModerationRegistry $registry
     ) {
@@ -36,12 +38,18 @@ class ModerationService
     {
         $report = ModerationReport::findOrFail($reportId);
         $report->update(['status' => 'confirmed']);
+
+        // Invalidate cached pending count
+        Cache::forget(self::PENDING_COUNT_CACHE_KEY);
     }
 
     public function dismissReport(int $reportId): void
     {
         $report = ModerationReport::findOrFail($reportId);
         $report->update(['status' => 'dismissed']);
+
+        // Invalidate cached pending count
+        Cache::forget(self::PENDING_COUNT_CACHE_KEY);
     }
 
     /**
@@ -83,7 +91,7 @@ class ModerationService
         $contentUrl = $this->buildContentUrl($topicKey, $entityId);
 
         // Create report
-        return ModerationReport::create([
+        $created = ModerationReport::create([
             'topic_key' => $topicKey,
             'entity_id' => $entityId,
             'reported_user_id' => $reportedUserId,
@@ -94,6 +102,11 @@ class ModerationService
             'content_url' => $contentUrl,
             'status' => 'pending',
         ]);
+
+        // Invalidate cached pending count
+        Cache::forget(self::PENDING_COUNT_CACHE_KEY);
+
+        return $created;
     }
 
     /**
@@ -113,5 +126,15 @@ class ModerationService
 
         // Basic fallback URL generation based on topic
         return '';
+    }
+
+    /**
+     * Get total number of pending moderation reports (cached until invalidated).
+     */
+    public function getPendingReportsCount(): int
+    {
+        return Cache::rememberForever(self::PENDING_COUNT_CACHE_KEY, function () {
+            return ModerationReport::where('status', 'pending')->count();
+        });
     }
 }

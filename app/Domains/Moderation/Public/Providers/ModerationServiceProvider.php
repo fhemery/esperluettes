@@ -28,7 +28,8 @@ class ModerationServiceProvider extends ServiceProvider
         // Register views
         $this->loadViewsFrom(app_path('Domains/Moderation/Private/Resources/views'), 'moderation');
 
-        // Register anonymous components
+        // Register PHP and anonymous components
+        Blade::componentNamespace('App\\Domains\\Moderation\\Private\\View\\Components', 'moderation');
         Blade::anonymousComponentPath(app_path('Domains/Moderation/Private/Resources/views/components'), 'moderation');
     }
 }
