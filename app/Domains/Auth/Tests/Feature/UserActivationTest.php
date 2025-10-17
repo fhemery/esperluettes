@@ -2,7 +2,7 @@
 
 use App\Domains\Auth\Public\Events\UserDeactivated;
 use App\Domains\Auth\Public\Events\UserReactivated;
-use App\Domains\Auth\Private\Services\UserActivationService;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Private\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -23,7 +23,7 @@ describe('Auth user activation and deactivation', function () {
             // Admin deactivates the user
             $admin = admin($this);
             $this->actingAs($admin);
-            app(UserActivationService::class)->deactivateUser($user);
+            app(AuthPublicApi::class)->deactivateUserById($user->id);
 
             // Ensure logout to simulate fresh login attempt
             $this->post('/logout');
@@ -43,9 +43,9 @@ describe('Auth user activation and deactivation', function () {
             $admin = admin($this);
             $this->actingAs($admin);
 
-            // Deactivate then reactivate
-            app(UserActivationService::class)->deactivateUser($user);
-            app(UserActivationService::class)->activateUser($user);
+            // Deactivate then reactivate via Public API
+            app(AuthPublicApi::class)->deactivateUserById($user->id);
+            app(AuthPublicApi::class)->activateUserById($user->id);
 
             // Logout admin to simulate user login
             $this->post('/logout');
@@ -64,17 +64,13 @@ describe('Auth user activation and deactivation', function () {
     describe('Events', function () {
 
         it('emits UserDeactivated when deactivating an active user', function () {
-            /** @var User $admin */
             $admin = admin($this);
-            $this->actingAs($admin);
-
-            /** @var User $target */
             $target = alice($this); // verified and confirmed by default
+
+            $this->actingAs($admin);
             expect($target->isActive())->toBeTrue();
 
-            /** @var UserActivationService $svc */
-            $svc = app(UserActivationService::class);
-            $svc->deactivateUser($target);
+            app(AuthPublicApi::class)->deactivateUserById($target->id);
 
             /** @var UserDeactivated|null $event */
             $event = latestEventOf(UserDeactivated::name(), UserDeactivated::class);
@@ -83,19 +79,17 @@ describe('Auth user activation and deactivation', function () {
         });
 
         it('emits UserReactivated when activating an inactive user', function () {
-            /** @var User $admin */
             $admin = admin($this);
-            $this->actingAs($admin);
-
-            /** @var User $target */
             $target = alice($this);
+
+            $this->actingAs($admin);
             // First deactivate
-            app(UserActivationService::class)->deactivateUser($target);
+            app(AuthPublicApi::class)->deactivateUserById($target->id);
             $target->refresh();
             expect($target->isActive())->toBeFalse();
 
             // Then activate
-            app(UserActivationService::class)->activateUser($target);
+            app(AuthPublicApi::class)->activateUserById($target->id);
 
             /** @var UserReactivated|null $event */
             $event = latestEventOf(UserReactivated::name(), UserReactivated::class);
@@ -104,14 +98,12 @@ describe('Auth user activation and deactivation', function () {
         });
 
         it('does not emit when deactivating an already inactive user (no-op)', function () {
-            /** @var User $admin */
             $admin = admin($this);
-            $this->actingAs($admin);
-
-            /** @var User $target */
             $target = alice($this);
-            app(UserActivationService::class)->deactivateUser($target);
-            app(UserActivationService::class)->deactivateUser($target);
+            
+            $this->actingAs($admin);
+            app(AuthPublicApi::class)->deactivateUserById($target->id);
+            app(AuthPublicApi::class)->deactivateUserById($target->id);
 
             expect(countEvents(UserDeactivated::name()))->toBe(1);
         });

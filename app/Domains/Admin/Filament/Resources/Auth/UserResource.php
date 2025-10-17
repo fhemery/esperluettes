@@ -177,8 +177,8 @@ class UserResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading(__('admin::auth.users.activation.confirm_title'))
                     ->modalDescription(__('admin::auth.users.activation.confirm_message'))
-                    ->action(function (User $record, UserActivationService $service) {
-                        $service->activateUser($record);
+                    ->action(function (User $record, AuthPublicApi $api) {
+                        $api->activateUserById($record->id);
                         Notification::make()
                             ->title(__('admin::auth.users.activation.success'))
                             ->success()
@@ -220,8 +220,8 @@ class UserResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading(__('admin::auth.users.deactivation.confirm_title'))
                     ->modalDescription(__('admin::auth.users.deactivation.confirm_message'))
-                    ->action(function (User $record, UserActivationService $service) {
-                        $service->deactivateUser($record);
+                    ->action(function (User $record, AuthPublicApi $api) {
+                        $api->deactivateUserById($record->id);
                         Notification::make()
                             ->title(__('admin::auth.users.deactivation.success'))
                             ->success()

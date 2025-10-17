@@ -113,4 +113,36 @@ class AuthPublicApi
         $user = User::query()->findOrFail($userId);
         $this->userService->deleteUser($user);
     }
+
+    /**
+     * Deactivate a user by ID (admin or tech-admin only).
+     *
+     * @throws AuthorizationException
+     */
+    public function deactivateUserById(int $userId): void
+    {
+        if (! $this->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+            throw new AuthorizationException('You are not authorized to deactivate users.');
+        }
+
+        /** @var User $user */
+        $user = User::query()->findOrFail($userId);
+        $this->userService->deactivateUser($user);
+    }
+
+    /**
+     * Activate a user by ID (admin or tech-admin only).
+     *
+     * @throws AuthorizationException
+     */
+    public function activateUserById(int $userId): void
+    {
+        if (! $this->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+            throw new AuthorizationException('You are not authorized to activate users.');
+        }
+
+        /** @var User $user */
+        $user = User::query()->findOrFail($userId);
+        $this->userService->activateUser($user);
+    }
 }
