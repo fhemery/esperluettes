@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'label'=> 'Chapitre',
     'created_success' => 'Chapitre créé avec succès.',
     'updated_success' => 'Chapitre mis à jour avec succès.',
     'deleted_success' => 'Chapitre supprimé avec succès.',

@@ -12,6 +12,7 @@ use App\Domains\Story\Private\Http\Requests\ChapterRequest;
 use App\Domains\Story\Private\Http\Requests\ReorderChaptersRequest;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\ReadingProgressService;
 use App\Domains\Story\Private\Services\StoryService;
@@ -29,7 +30,8 @@ class ChapterController
         private StoryService $storyService,
         private ReadingProgressService $readingProgress,
         private ProfilePublicApi $profileApi,
-        private AuthPublicApi $authApi
+        private AuthPublicApi $authApi,
+        private ChapterCreditService $chapterCreditService
     ) {
     }
 
@@ -159,6 +161,7 @@ class ChapterController
                 Roles::ADMIN,
                 Roles::TECH_ADMIN,
             ]),
+            'canCreateChapter' => $isAuthor && $this->chapterCreditService->availableForUser($userId) > 0,
         ]);
     }
 

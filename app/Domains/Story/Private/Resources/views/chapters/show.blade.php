@@ -70,6 +70,10 @@
         <div x-ref="chapterNav" style="display: none">
             <div class="flex flex-col gap-4 items-center">
                 <x-story::chapter.story-nav :story="$vm->story" :current-chapter-slug="$vm->chapter->slug" />
+                @if($vm->isAuthor)
+                <!-- Create chapter button -->
+                <x-story::chapter.create-button :storySlug="$vm->story->slug" :canCreateChapter="$canCreateChapter" />
+                @endif
                 <div class="flex gap-2">
                     @if(!$vm->isAuthor)
                     <div class="flex gap-2">

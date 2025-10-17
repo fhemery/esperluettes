@@ -5,6 +5,7 @@ use App\Domains\Config\Public\Contracts\FeatureToggle;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Domains\Story\Private\Services\ChapterCreditService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -297,11 +298,11 @@ describe('Chapter display', function () {
             it('should not show private chapters to non collaborators', function () {
                 $author = alice($this);
                 $story = publicStory('Public Story', $author->id);
-                
+
                 $c1 = createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1']);
                 $c2 = createPublishedChapter($this, $story, $author, ['title' => 'Chapter 2']);
                 $c3 = createUnpublishedChapter($this, $story, $author, ['title' => 'Chapter 3']);
-                
+
                 $reader = bob($this);
                 $this->actingAs($reader);
 
@@ -310,6 +311,61 @@ describe('Chapter display', function () {
                 $resp->assertSee($c1->title);
                 $resp->assertSee($c2->title);
                 $resp->assertDontSee($c3->title);
+            });
+
+
+            describe('Create chapter button', function () {
+                it('does not show create button for reader', function () {
+                    $author = alice($this);
+                    $reader = bob($this);
+                    $story = createStoryForAuthor($author->id, ['title' => 'Has Credits Story']);
+
+                    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Any Chapter']);
+
+                    $this->actingAs($reader);
+                    $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+                    $resp->assertOk();
+                    $resp->assertDontSee("createChapterBtn");
+                });
+
+                it('shows enabled create button for author when user has credits (should FAIL now)', function () {
+                    $author = alice($this);
+                    $this->actingAs($author);
+                    $story = createStoryForAuthor($author->id, ['title' => 'Has Credits Story']);
+
+                    // Ensure there is a chapter to view
+                    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Any Chapter']);
+
+                    setUserCredits($author->id, 5);
+
+                    $this->actingAs($author);
+                    $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+                    $resp->assertOk();
+
+                    // Expect an enabled link to create chapter
+                    $resp->assertSee("createChapterBtn", false);
+                    $resp->assertSee(route('chapters.create', ['storySlug' => $story->slug]), false);
+                    $resp->assertDontSee('disabled="true"', false);
+                });
+
+                it('shows disabled create button for author when user has no credits', function () {
+                    $author = alice($this);
+                    $this->actingAs($author);
+                    $story = createStoryForAuthor($author->id, ['title' => 'No Credits Story']);
+
+                    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Any Chapter']);
+
+                    setUserCredits($author->id, 0);
+
+                    $this->actingAs($author);
+                    $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+                    $resp->assertOk();
+
+                    // Expect no link and a disabled button
+                    $resp->assertSee("createChapterBtn", false);
+                    $resp->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]), false);
+                    $resp->assertSee('disabled="true"', false);
+                });
             });
         });
 
@@ -490,7 +546,7 @@ describe('Chapter display', function () {
         });
     });
 
-    describe('Breadcrumbs', function (){
+    describe('Breadcrumbs', function () {
 
         it('displays breadcrumbs with Home > Library > story (clickable) > chapter (active)', function () {
             $author = alice($this);

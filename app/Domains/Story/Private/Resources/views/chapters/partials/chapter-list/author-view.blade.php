@@ -10,29 +10,7 @@
                         {{ __('story::chapters.actions.reorder') }}
                     </x-shared::button>
                     @endif
-                    @php($avail = isset($availableChapterCredits) ? (int)$availableChapterCredits : 0)
-                    <div class="flex items-center gap-2">
-
-                        @if($avail <= 0)
-                            <x-shared::button color="accent" disabled="true">
-                                <span class="material-symbols-outlined text-[18px] leading-none">add</span>
-                                {{ __('story::chapters.sections.add_chapter') }}
-                            </x-shared::button>
-
-                            <x-shared::tooltip icon="info" placement="top" maxWidth="18rem">
-                                <div class="text-sm text-fg">
-                                    {{ __('story::chapters.no_chapter_credits_left') }}
-                                </div>
-                            </x-shared::tooltip>
-                        @else
-                        <a href="{{ route('chapters.create', ['storySlug' => $story->slug]) }}">
-                            <x-shared::button color="accent">
-                                <span class="material-symbols-outlined text-[18px] leading-none">add</span>
-                                {{ __('story::chapters.sections.add_chapter') }}
-                            </x-shared::button>
-                        </a>
-                        @endif
-                    </div>
+                    <x-story::chapter.create-button :storySlug="$story->slug" :canCreateChapter="$availableChapterCredits > 0" />
                 </div>
             </template>
             <template x-if="editing">
