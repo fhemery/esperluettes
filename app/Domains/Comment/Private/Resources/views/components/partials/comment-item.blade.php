@@ -1,4 +1,4 @@
-<li class="sm:p-4 mb-4">
+<li class="py-4 sm:px-4 sm:mb-4">
   @php
   $config = $config ?? null;
   $isUnknown = is_null($comment->authorId);
@@ -154,7 +154,7 @@
 
       <!-- Children -->
       @if(!empty($comment->children))
-      <ul class="mt-6 border-l-2 border-accent ml-2 sm:ml-6 pl-2 sm:pl-2">
+      <ul class="mb-3 border-l-2 border-accent ml-2 sm:ml-6 pl-2 sm:pl-2">
         @foreach($comment->children as $child)
         @include('comment::components.partials.comment-item', ['comment' => $child, 'isChild' => true, 'isLastChild' => $loop->last, 'parentCommentId' => $comment->id, 'config' => $config, 'isModerator' => $isModerator])
         @endforeach
