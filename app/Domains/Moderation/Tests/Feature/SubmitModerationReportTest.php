@@ -125,4 +125,26 @@ describe('moderation report submission', function () {
         $response->assertStatus(400)
             ->assertJson(['success' => false]);
     });
+
+    it('emits ReportSubmitted event when a report is created', function () {
+        $user = alice($this);
+        $reason = createReason('profile', 'Spam');
+
+        $this->actingAs($user)
+            ->postJson('/moderation/report', [
+                'topic_key' => 'profile',
+                'entity_id' => 123,
+                'reason_id' => $reason->id,
+                'description' => 'spam profile',
+            ])
+            ->assertOk();
+
+        $event = latestEventOf(\App\Domains\Moderation\Public\Events\ReportSubmitted::name(), \App\Domains\Moderation\Public\Events\ReportSubmitted::class);
+        expect($event)->not->toBeNull();
+        expect($event->topicKey)->toBe('profile');
+        expect($event->entityId)->toBe(123);
+        expect($event->reasonId)->toBe($reason->id);
+        expect($event->reportedByUserId)->toBe($user->id);
+        expect($event->reportId)->toBeGreaterThan(0);
+    });
 });

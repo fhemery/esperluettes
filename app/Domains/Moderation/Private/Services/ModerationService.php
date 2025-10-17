@@ -5,6 +5,10 @@ namespace App\Domains\Moderation\Private\Services;
 use App\Domains\Moderation\Private\Models\ModerationReason;
 use App\Domains\Moderation\Private\Models\ModerationReport;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use App\Domains\Moderation\Public\Events\ReportSubmitted;
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Moderation\Public\Events\ReportApproved;
+use App\Domains\Moderation\Public\Events\ReportRejected;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 
@@ -41,6 +45,9 @@ class ModerationService
 
         // Invalidate cached pending count
         Cache::forget(self::PENDING_COUNT_CACHE_KEY);
+
+        // Emit ReportApproved event
+        app(EventBus::class)->emit(new ReportApproved(reportId: $reportId));
     }
 
     public function dismissReport(int $reportId): void
@@ -50,6 +57,9 @@ class ModerationService
 
         // Invalidate cached pending count
         Cache::forget(self::PENDING_COUNT_CACHE_KEY);
+
+        // Emit ReportRejected event
+        app(EventBus::class)->emit(new ReportRejected(reportId: $reportId));
     }
 
     /**
@@ -105,6 +115,18 @@ class ModerationService
 
         // Invalidate cached pending count
         Cache::forget(self::PENDING_COUNT_CACHE_KEY);
+
+        // Emit domain event (persisted and dispatched)
+        /** @var EventBus $eventBus */
+        $eventBus = app(EventBus::class);
+        $eventBus->emitSync(new ReportSubmitted(
+            reportId: (int) $created->id,
+            topicKey: $topicKey,
+            entityId: $entityId,
+            reasonId: $reasonId,
+            reportedByUserId: (int) Auth::id(),
+            reasonLabel: $reason->label ?? null,
+        ));
 
         return $created;
     }

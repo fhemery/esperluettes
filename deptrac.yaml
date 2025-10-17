@@ -287,6 +287,8 @@ deptrac:
     ModerationPublic:
       - Shared
       - ModerationPrivate
+      - EventsPublic
+      - AuthPublic
 
     NewsPublic:
       - AuthPublic
@@ -395,6 +397,7 @@ deptrac:
       - Shared
       - ModerationPublic
       - AuthPublic
+      - EventsPublic
 
     NewsPrivate:
       - Shared

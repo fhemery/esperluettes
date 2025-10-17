@@ -7,7 +7,7 @@ use App\Domains\Admin\Filament\Resources\Moderation\ModerationReportResource\Pag
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Moderation\Private\Models\ModerationReason;
 use App\Domains\Moderation\Private\Models\ModerationReport;
-use App\Domains\Moderation\Private\Services\ModerationService;
+use App\Domains\Moderation\Public\Api\ModerationPublicApi;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Filament\Resources\Resource;
@@ -180,14 +180,14 @@ class ModerationReportResource extends Resource
                     ->iconButton()
                     ->tooltip(__('admin::moderation.reports.actions.approve'))
                     ->visible(fn(ModerationReport $record) => $record->status === 'pending')
-                    ->action(fn(ModerationReport $record) => app(ModerationService::class)->approveReport($record->id)),
+                    ->action(fn(ModerationReport $record) => app(ModerationPublicApi::class)->approveReport($record->id)),
                 Tables\Actions\Action::make('dismiss')
                     ->label('')
                     ->icon('heroicon-o-x-mark')
                     ->iconButton()
                     ->tooltip(__('admin::moderation.reports.actions.dismiss'))
                     ->visible(fn(ModerationReport $record) => $record->status === 'pending')
-                    ->action(fn(ModerationReport $record) => app(ModerationService::class)->dismissReport($record->id)),
+                    ->action(fn(ModerationReport $record) => app(ModerationPublicApi::class)->rejectReport($record->id)),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
