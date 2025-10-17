@@ -77,7 +77,7 @@ describe('Card display', function () {
             // Assert: check icon and tooltip
             $resp->assertOk();
             $resp->assertSee('No TW Story');
-            $resp->assertSee('check_circle');
+            $resp->assertSee('warning_off');
             $resp->assertSee(trans('story::shared.trigger_warnings.tooltips.no_tw'));
         });
 
