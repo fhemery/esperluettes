@@ -126,6 +126,22 @@ class CommentService
     }
 
     /**
+     * Soft delete all comments authored by the given user.
+     */
+    public function softDeleteByAuthor(int $userId): int
+    {
+        return $this->repository->softDeleteByAuthor($userId);
+    }
+
+    /**
+     * Restore all soft-deleted comments authored by the given user.
+     */
+    public function restoreByAuthor(int $userId): int
+    {
+        return $this->repository->restoreByAuthor($userId);
+    }
+
+    /**
      * Moderation: delete a comment and its direct children.
      */
     public function deleteByModeration(int $commentId): void

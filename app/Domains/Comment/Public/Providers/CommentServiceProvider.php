@@ -14,6 +14,10 @@ use App\Domains\Comment\Public\Events\CommentEdited;
 use App\Domains\Comment\Public\Events\CommentDeletedByModeration;
 use App\Domains\Comment\Public\Events\CommentContentModerated;
 use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Auth\Public\Events\UserDeactivated;
+use App\Domains\Comment\Private\Listeners\SoftDeleteCommentsOnUserDeactivated;
+use App\Domains\Auth\Public\Events\UserReactivated;
+use App\Domains\Comment\Private\Listeners\RestoreCommentsOnUserReactivated;
 use App\Domains\Comment\Private\Listeners\RemoveAuthorOnUserDeleted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Comment\Private\Support\Moderation\CommentSnapshotFormatter;
@@ -57,8 +61,10 @@ class CommentServiceProvider extends ServiceProvider
         $eventBus->registerEvent(CommentDeletedByModeration::name(), CommentDeletedByModeration::class);
         $eventBus->registerEvent(CommentContentModerated::name(), CommentContentModerated::class);
         
-        // Subscribe to Auth.UserDeleted to nullify comment authors
+        // Subscribe to Auth events
         $eventBus->subscribe(UserDeleted::name(), [RemoveAuthorOnUserDeleted::class, 'handle']);
+        $eventBus->subscribe(UserDeactivated::name(), [SoftDeleteCommentsOnUserDeactivated::class, 'handle']);
+        $eventBus->subscribe(UserReactivated::name(), [RestoreCommentsOnUserReactivated::class, 'handle']);
 
         // Register Comment topic for moderation
         app(ModerationRegistry::class)->register(
