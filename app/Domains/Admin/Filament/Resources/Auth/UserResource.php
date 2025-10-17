@@ -6,6 +6,7 @@ use App\Domains\Admin\Filament\Resources\Auth\UserResource\Pages;
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Private\Models\Role;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Private\Services\RoleService;
 use App\Domains\Auth\Private\Services\UserActivationService;
 use Filament\Forms;
@@ -227,11 +228,22 @@ class UserResource extends Resource
                             ->send();
                     }),
                     Tables\Actions\EditAction::make()->iconButton()->label(''),
-                    Tables\Actions\DeleteAction::make()->iconButton()->label('')
+                    Action::make('delete')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading(__('admin::auth.users.deletion.confirm_title') ?? 'Delete user')
+                        ->modalDescription(__('admin::auth.users.deletion.confirm_message') ?? 'Are you sure you want to delete this user?')
+                        ->action(function (User $record, AuthPublicApi $api) {
+                            $api->deleteUserById($record->id);
+                            Notification::make()
+                                ->title(__('admin::auth.users.deletion.success') ?? 'User deleted')
+                                ->success()
+                                ->send();
+                        })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
