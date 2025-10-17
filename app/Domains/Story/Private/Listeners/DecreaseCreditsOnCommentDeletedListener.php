@@ -5,7 +5,7 @@ namespace App\Domains\Story\Private\Listeners;
 use App\Domains\Comment\Public\Events\CommentDeletedByModeration;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 
-class CommentDeletedListener
+class DecreaseCreditsOnCommentDeletedListener
 {
     public function __construct(private ChapterCreditService $credits) {}
 

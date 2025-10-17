@@ -5,12 +5,11 @@ declare(strict_types=1);
 use App\Domains\Comment\Public\Events\CommentDeletedByModeration;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-describe('CommentDeletedListener', function () {
+describe('DecreaseCreditsOnCommentDeletedListener', function () {
     beforeEach(function () {
         $this->author = alice($this);
         // initialize credits row for easier assertions
@@ -29,8 +28,8 @@ describe('CommentDeletedListener', function () {
             isRoot: true,
             authorId: $this->author->id,
         );
-        // Directly invoke listener via container
-        app(\App\Domains\Story\Private\Listeners\CommentDeletedListener::class)->handle($event);
+        // Dispatch via EventBus to exercise registration path
+        dispatchEvent($event);
 
         $after = $credits->availableForUser($this->author->id);
         expect($after)->toBe($before - 1);
@@ -47,7 +46,7 @@ describe('CommentDeletedListener', function () {
             isRoot: false,
             authorId: $this->author->id,
         );
-        app(\App\Domains\Story\Private\Listeners\CommentDeletedListener::class)->handle($event);
+        dispatchEvent($event);
 
         $after = $credits->availableForUser($this->author->id);
         expect($after)->toBe($before);
@@ -64,7 +63,7 @@ describe('CommentDeletedListener', function () {
             isRoot: true,
             authorId: null,
         );
-        app(\App\Domains\Story\Private\Listeners\CommentDeletedListener::class)->handle($event);
+        dispatchEvent($event);
 
         $after = $credits->availableForUser($this->author->id);
         expect($after)->toBe($before);
@@ -81,7 +80,7 @@ describe('CommentDeletedListener', function () {
             isRoot: true,
             authorId: $this->author->id,
         );
-        app(\App\Domains\Story\Private\Listeners\CommentDeletedListener::class)->handle($event);
+        dispatchEvent($event);
 
         $after = $credits->availableForUser($this->author->id);
         expect($after)->toBe($before);

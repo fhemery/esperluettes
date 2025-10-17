@@ -4,7 +4,6 @@ use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Private\Models\Comment;
 use App\Domains\Comment\Private\Services\CommentService;
-use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

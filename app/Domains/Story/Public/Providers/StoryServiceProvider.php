@@ -29,7 +29,7 @@ use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
-use App\Domains\Story\Private\Listeners\CommentDeletedListener;
+use App\Domains\Story\Private\Listeners\DecreaseCreditsOnCommentDeletedListener;
 use App\Domains\Story\Private\Listeners\RemoveStoriesOnUserDeleted;
 use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
 use App\Domains\Auth\Public\Events\UserDeactivated;
@@ -101,7 +101,7 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->subscribe(UserDeleted::class, [app(RemoveChapterCreditsOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeactivated::class, [app(SoftDeleteStoriesOnUserDeactivated::class), 'handle']);
         $eventBus->subscribe(UserReactivated::class, [app(RestoreStoriesOnUserReactivated::class), 'handle']);
-        $eventBus->subscribe(CommentDeletedByModeration::class, [app(CommentDeletedListener::class), 'handle']);
+        $eventBus->subscribe(CommentDeletedByModeration::class, [app(DecreaseCreditsOnCommentDeletedListener::class), 'handle']);
 
         // Register Story and Chapter topics for moderation
         $moderationRegistry = app(ModerationRegistry::class);
