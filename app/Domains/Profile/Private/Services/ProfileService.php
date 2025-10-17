@@ -418,4 +418,28 @@ class ProfileService
 
         $this->cache->forgetByUserId($userId);
     }
+
+    /**
+     * Soft delete a user's profile and clear cache.
+     */
+    public function softDeleteProfileByUserId(int $userId): void
+    {
+        $profile = Profile::query()->where('user_id', $userId)->first();
+        if ($profile) {
+            $profile->delete(); // soft delete
+        }
+        $this->cache->forgetByUserId($userId);
+    }
+
+    /**
+     * Restore a soft-deleted user's profile and clear cache.
+     */
+    public function restoreProfileByUserId(int $userId): void
+    {
+        $profile = Profile::withTrashed()->where('user_id', $userId)->first();
+        if ($profile && $profile->trashed()) {
+            $profile->restore();
+        }
+        $this->cache->forgetByUserId($userId);
+    }
 }

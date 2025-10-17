@@ -17,6 +17,10 @@ use App\Domains\Profile\Public\Events\AvatarChanged;
 use App\Domains\Profile\Public\Events\BioUpdated;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Profile\Private\Listeners\RemoveProfileOnUserDeleted;
+use App\Domains\Auth\Public\Events\UserDeactivated;
+use App\Domains\Profile\Private\Listeners\SoftDeleteProfileOnUserDeactivated;
+use App\Domains\Auth\Public\Events\UserReactivated;
+use App\Domains\Profile\Private\Listeners\RestoreProfileOnUserReactivated;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Profile\Public\Events\AvatarModerated;
 use App\Domains\Profile\Public\Events\AboutModerated;
@@ -64,8 +68,9 @@ class ProfileServiceProvider extends ServiceProvider
         // Subscribe to domain event via EventBus
         $eventBus->subscribe(UserRegistered::name(), [CreateProfileOnUserRegistered::class, 'handle']);
         $eventBus->subscribe(EmailVerified::name(), [ClearProfileCacheOnEmailVerified::class, 'handle']);
-        // Clean up profile on user deletion
         $eventBus->subscribe(UserDeleted::name(), [RemoveProfileOnUserDeleted::class, 'handle']);
+        $eventBus->subscribe(UserDeactivated::name(), [SoftDeleteProfileOnUserDeactivated::class, 'handle']);
+        $eventBus->subscribe(UserReactivated::name(), [RestoreProfileOnUserReactivated::class, 'handle']);
 
         // Register Profile domain events mapping
         $eventBus->registerEvent(ProfileDisplayNameChanged::name(), ProfileDisplayNameChanged::class);

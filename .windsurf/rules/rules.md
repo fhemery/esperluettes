@@ -46,7 +46,7 @@ trigger: always_on
 
 ## Migrations
 - Use descriptive migration names
-- Prefix all migrations with date and time of migration YYYYMMDD_HHiiss_<migration_name>
+- Prefix all migrations with date and time of migration YYYY_MM_DD_HHiiss_<migration_name>
 - Always add `down()` methods
 - Use foreign key constraints only for tables from same domain.
 
