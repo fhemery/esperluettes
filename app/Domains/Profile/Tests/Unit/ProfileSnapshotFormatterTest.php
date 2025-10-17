@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Profile\Public\Moderation\ProfileSnapshotFormatter;
+use App\Domains\Profile\Private\Support\Moderation\ProfileSnapshotFormatter;
 use App\Domains\Profile\Private\Models\Profile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

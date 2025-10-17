@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Story\Public\Moderation\ChapterSnapshotFormatter;
+use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;

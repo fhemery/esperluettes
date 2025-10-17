@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Comment\Public\Support\Moderation;
+namespace App\Domains\Comment\Private\Support\Moderation;
 
 use App\Domains\Moderation\Public\Contracts\SnapshotFormatterInterface;
 use App\Domains\Comment\Private\Models\Comment;

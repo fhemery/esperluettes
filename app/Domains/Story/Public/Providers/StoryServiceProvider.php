@@ -35,8 +35,8 @@ use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
-use App\Domains\Story\Public\Moderation\StorySnapshotFormatter;
-use App\Domains\Story\Public\Moderation\ChapterSnapshotFormatter;
+use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
+use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 
 class StoryServiceProvider extends ServiceProvider
 {

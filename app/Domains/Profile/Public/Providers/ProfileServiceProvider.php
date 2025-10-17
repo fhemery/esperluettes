@@ -21,7 +21,7 @@ use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Profile\Public\Events\AvatarModerated;
 use App\Domains\Profile\Public\Events\AboutModerated;
 use App\Domains\Profile\Public\Events\SocialModerated;
-use App\Domains\Profile\Public\Moderation\ProfileSnapshotFormatter;
+use App\Domains\Profile\Private\Support\Moderation\ProfileSnapshotFormatter;
 
 class ProfileServiceProvider extends ServiceProvider
 {

@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Story\Public\Moderation\StorySnapshotFormatter;
+use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

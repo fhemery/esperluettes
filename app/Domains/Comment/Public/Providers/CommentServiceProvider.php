@@ -16,7 +16,7 @@ use App\Domains\Comment\Public\Events\CommentContentModerated;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Comment\Private\Listeners\RemoveAuthorOnUserDeleted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
-use App\Domains\Comment\Public\Support\Moderation\CommentSnapshotFormatter;
+use App\Domains\Comment\Private\Support\Moderation\CommentSnapshotFormatter;
 
 class CommentServiceProvider extends ServiceProvider
 {

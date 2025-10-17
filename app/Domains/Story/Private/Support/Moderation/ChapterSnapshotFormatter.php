@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Story\Public\Moderation;
+namespace App\Domains\Story\Private\Support\Moderation;
 
 use App\Domains\Moderation\Public\Contracts\SnapshotFormatterInterface;
 use App\Domains\Story\Private\Models\Chapter;

@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Comment\Public\Support\Moderation\CommentSnapshotFormatter;
+use App\Domains\Comment\Private\Support\Moderation\CommentSnapshotFormatter;
 use App\Domains\Comment\Private\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
