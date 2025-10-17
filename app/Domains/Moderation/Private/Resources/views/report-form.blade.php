@@ -72,7 +72,7 @@
                     <x-shared::button type="button" x-on:click="closeModal()" color="neutral" :outline="true">
                         {{ __('moderation::report.cancel') }}
                     </x-shared::button>
-                    <x-shared::button type="submit" x-bind:disabled="submitting" color="accent">
+                    <x-shared::button x-bind:disabled="submitting" color="accent">
                         <span x-show="!submitting">{{ __('moderation::report.submit') }}</span>
                         <span x-show="submitting">
                             <span class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
