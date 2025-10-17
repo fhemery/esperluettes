@@ -302,7 +302,7 @@ class ChapterService
             $this->comments->deleteFor('chapter', (int) $chapter->id);
 
             // Rely on FK cascade to delete related reading_progress rows
-            $chapter->delete();
+            $chapter->forceDelete();
 
             $this->updateStoryLastPublished($story);
 

@@ -32,6 +32,11 @@ use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
 use App\Domains\Story\Private\Listeners\CommentDeletedListener;
 use App\Domains\Story\Private\Listeners\RemoveStoriesOnUserDeleted;
 use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
+use App\Domains\Auth\Public\Events\UserDeactivated;
+use App\Domains\Story\Private\Listeners\SoftDeleteStoriesOnUserDeactivated;
+use App\Domains\Auth\Public\Events\UserReactivated;
+use App\Domains\Comment\Public\Events\CommentDeletedByModeration;
+use App\Domains\Story\Private\Listeners\RestoreStoriesOnUserReactivated;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
@@ -94,7 +99,9 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveStoriesOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveChapterCreditsOnUserDeleted::class), 'handle']);
-        $eventBus->subscribe(\App\Domains\Comment\Public\Events\CommentDeletedByModeration::class, [app(CommentDeletedListener::class), 'handle']);
+        $eventBus->subscribe(UserDeactivated::class, [app(SoftDeleteStoriesOnUserDeactivated::class), 'handle']);
+        $eventBus->subscribe(UserReactivated::class, [app(RestoreStoriesOnUserReactivated::class), 'handle']);
+        $eventBus->subscribe(CommentDeletedByModeration::class, [app(CommentDeletedListener::class), 'handle']);
 
         // Register Story and Chapter topics for moderation
         $moderationRegistry = app(ModerationRegistry::class);

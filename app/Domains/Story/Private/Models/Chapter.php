@@ -3,6 +3,7 @@
 namespace App\Domains\Story\Private\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Domains\Story\Private\Models\ReadingProgress;
@@ -10,6 +11,7 @@ use App\Domains\Shared\Contracts\Sortable;
 
 class Chapter extends Model implements Sortable
 {
+    use SoftDeletes;
     protected $table = 'story_chapters';
 
     protected $fillable = [

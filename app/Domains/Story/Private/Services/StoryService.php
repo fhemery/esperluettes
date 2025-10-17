@@ -261,7 +261,7 @@ class StoryService
             }
 
             // Perform deletion (DB cascades will remove related rows)
-            $story->delete();
+            $story->forceDelete();
 
             // Emit deletion event
             $this->eventBus->emit(new StoryDeleted($before, $chapterSnaps));
@@ -395,5 +395,66 @@ class StoryService
         foreach ($stories as $story) {
             $this->deleteStory($story);
         }
+    }
+
+    /**
+     * Soft delete all stories authored by the given user, including their chapters.
+     * Intended to be used on user deactivation.
+     */
+    public function softDeleteStoriesByAuthor(int $userId): void
+    {
+        $stories = $this->storiesRepository->findByAuthor($userId);
+
+        foreach ($stories as $story) {
+            $this->softDeleteStory($story);
+        }
+    }
+
+    /**
+     * Soft delete a story and its chapters.
+     */
+    private function softDeleteStory(Story $story): void
+    {
+        DB::transaction(function () use ($story) {
+            // Soft delete chapters first
+            $story->chapters()->delete();
+            // Then soft delete story
+            $story->delete();
+        });
+    }
+
+    /**
+     * Restore all soft-deleted stories authored by the given user, including their chapters.
+     * Intended to be used on user reactivation.
+     */
+    public function restoreStoriesByAuthor(int $userId): void
+    {
+        // Find all stories (including trashed) where user is an author
+        $stories = Story::withTrashed()->whereHas('authors', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->get();
+
+        foreach ($stories as $story) {
+            $this->restoreStory($story);
+        }
+    }
+
+    /**
+     * Restore a soft-deleted story and its chapters.
+     */
+    private function restoreStory(Story $story): void
+    {
+        DB::transaction(function () use ($story) {
+            // Restore story first to ensure relations can be accessed
+            if (method_exists($story, 'trashed') && $story->trashed()) {
+                $story->restore();
+            }
+            // Restore chapters
+            Chapter::withTrashed()->where('story_id', $story->id)->get()->each(function (Chapter $c) {
+                if (method_exists($c, 'trashed') && $c->trashed()) {
+                    $c->restore();
+                }
+            });
+        });
     }
 }
