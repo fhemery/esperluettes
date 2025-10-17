@@ -47,11 +47,12 @@ export function initQuillEditor(id) {
       // no-op
     }
 
-    // Height handling: enforce min and max lines, scroll when exceeding max
+    // Height handling: enforce min and max lines; support optional vertical resize via data-resizable
     // Defaults: min 5 lines, max nbLines (from data-nb-lines or 5)
     const nbLines = container.getAttribute('data-nb-lines') || 5;
     const minLines = 5;
     const maxLines = nbLines || 15;
+    const isResizable = container.getAttribute('data-resizable') === 'true';
     const computed = window.getComputedStyle(editor.root);
     const lineHeight = parseFloat(computed.lineHeight) || 24;
     const minPx = minLines * lineHeight;
@@ -62,8 +63,17 @@ export function initQuillEditor(id) {
     if (qlContainer) {
       qlContainer.style.boxSizing = 'border-box';
       qlContainer.style.minHeight = minPx + 'px';
-      qlContainer.style.height = maxPx + 'px'; // fix container height so inner editor can scroll
-      qlContainer.style.overflow = 'hidden';
+      if (isResizable) {
+        // Allow the user to resize vertically like a textarea
+        qlContainer.style.height = maxPx + 'px'; // sensible initial height
+        qlContainer.style.maxHeight = '';
+        qlContainer.style.resize = 'vertical';
+        qlContainer.style.overflow = 'auto';
+      } else {
+        // Fixed container height; editor scrolls within
+        qlContainer.style.height = maxPx + 'px';
+        qlContainer.style.overflow = 'hidden';
+      }
     }
 
     // Make the editor (.ql-editor) scroll inside the container
