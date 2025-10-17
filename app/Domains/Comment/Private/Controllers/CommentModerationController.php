@@ -17,7 +17,7 @@ class CommentModerationController extends Controller
 
     public function emptyContent(int $commentId): RedirectResponse
     {
-        //$this->service->emptyContent($commentId);
+        $this->service->emptyContentByModeration($commentId);
         return redirect()->back()->with('success', __('comment::moderation.empty_content.success'));
     }
 

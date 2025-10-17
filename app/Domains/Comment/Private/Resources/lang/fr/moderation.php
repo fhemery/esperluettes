@@ -10,5 +10,6 @@ return [
         'label' => 'Vider le contenu',
         'success' => 'Contenu du commentaire vidé',
     ],
+    'default_text' => '<Commentaire supprimé>',
 ];
 

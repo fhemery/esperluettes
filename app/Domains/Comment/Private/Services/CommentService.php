@@ -12,6 +12,7 @@ use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Comment\Public\Events\DTO\CommentSnapshot;
 use App\Domains\Comment\Public\Events\CommentEdited;
 use App\Domains\Comment\Public\Events\CommentDeletedByModeration;
+use App\Domains\Comment\Public\Events\CommentContentModerated;
 use Illuminate\Support\Facades\DB;
 
 class CommentService
@@ -139,6 +140,23 @@ class CommentService
                 entityId: (int)$comment->commentable_id,
                 isRoot: $comment->parent_comment_id === null,
                 authorId: $comment->author_id !== null ? (int)$comment->author_id : null,
+            ));
+        });
+    }
+
+    /**
+     * Moderation: replace comment body with default translated text.
+     */
+    public function emptyContentByModeration(int $commentId): void
+    {
+        DB::transaction(function () use ($commentId) {
+            $default = e(__('comment::moderation.default_text'));
+            $updated = $this->repository->updateBody($commentId, $default);
+
+            $this->eventBus->emit(new CommentContentModerated(
+                commentId: (int)$updated->id,
+                entityType: (string)$updated->commentable_type,
+                entityId: (int)$updated->commentable_id,
             ));
         });
     }
