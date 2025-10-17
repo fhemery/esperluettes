@@ -1,5 +1,5 @@
-<x-app-layout :page="$page" size="sm">
-    <article class="w-full">
+<x-app-layout :page="$page">
+    <article class=" max-w-[800px] mx-auto">
         <header class="mb-6 md:mb-10">
             <x-shared::title>{{ $news->title }}</x-shared::title>
             @if($news->published_at)
@@ -37,6 +37,7 @@
             .news-content p {
                 margin: 0.75rem 0;
                 line-height: 1.75;
+                text-align: justify;
             }
 
             .news-content h2 {
@@ -80,7 +81,7 @@
                 height: auto;
             }
         </style>
-        <div class="news-content max-w-[800px] mx-auto">
+        <div class="news-content">
             {!! $news->content !!}
         </div>
     </article>
