@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Comment\Private\Controllers;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Private\Requests\UpdateCommentRequest;
@@ -18,7 +20,9 @@ use Illuminate\Validation\ValidationException;
 
 class CommentController extends Controller
 {
-    public function __construct(private CommentPublicApi $api)
+    public function __construct(
+        private CommentPublicApi $api, 
+        private AuthPublicApi $authApi)
     {
     }
 
@@ -80,6 +84,7 @@ class CommentController extends Controller
         $html = view('comment::fragments.items', [
             'items' => $list->items,
             'config' => $list->config,
+            'isModerator' => $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]),
         ])->render();
 
         $response = new Response($html, 200, [

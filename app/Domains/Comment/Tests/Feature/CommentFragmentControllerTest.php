@@ -5,6 +5,8 @@ use App\Domains\Comment\Public\Api\Contracts\CommentDto;
 use App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy;
 use App\Domains\Comment\Private\Models\Comment;
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
+use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -299,6 +301,81 @@ describe('Comment list partial display', function () {
 
 
             $response->assertDontSee('data-action="edit"', false);
+        });
+    });
+
+    describe('Moderation UI in fragments', function () {
+        beforeEach(function () {
+            createFeatureToggle($this, new FeatureToggle(
+                'reporting',
+                'moderation',
+                access: FeatureToggleAccess::ON
+            ));
+        });
+
+        it('shows the report button to authenticated non-authors in fragment HTML', function () {
+            $entityType = 'default';
+            $entityId = 789;
+
+            $author = alice($this);
+            $viewer = bob($this);
+            $this->actingAs($author);
+            createComment($entityType, $entityId, 'Hello world');
+
+            // Viewer requests the fragment (not author)
+            $this->actingAs($viewer);
+            $resp = $this->get(route('comments.fragments', [
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'page' => 1,
+                'per_page' => 10,
+            ]));
+
+            $resp->assertOk();
+            // Compact report button sets the title attribute to the translated text
+            $resp->assertSee(e(__('moderation::report.button')), false);
+        });
+
+        it('does not show the report button to the comment author', function () {
+            $entityType = 'default';
+            $entityId = 790;
+
+            $author = alice($this);
+            $this->actingAs($author);
+            createComment($entityType, $entityId, 'Author comment');
+
+            $resp = $this->get(route('comments.fragments', [
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'page' => 1,
+                'per_page' => 10,
+            ]));
+
+            $resp->assertOk();
+            // Should not render the compact report button title for the author
+            $resp->assertDontSee(e(__('moderation::report.button')));
+        });
+
+        it('shows the moderator popover to moderators in fragment HTML', function () {
+            $entityType = 'default';
+            $entityId = 791;
+
+            $author = alice($this);
+            $moderator = moderator($this);
+            $this->actingAs($author);
+            createComment($entityType, $entityId, 'Moderate me');
+
+            // Moderator requests the fragment
+            $this->actingAs($moderator);
+            $resp = $this->get(route('comments.fragments', [
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'page' => 1,
+                'per_page' => 10,
+            ]));
+
+            $resp->assertOk();
+            $resp->assertSee('id="comment-moderator-btn"', false);
         });
     });
 });

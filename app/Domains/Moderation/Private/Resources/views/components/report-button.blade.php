@@ -2,6 +2,8 @@
     'topicKey',    // e.g., 'profile', 'story', 'chapter', 'comment'
     'entityId',    // ID of the entity being reported
     'buttonClass' => 'text-sm text-gray-600 hover:text-gray-900',
+    'compact' => false,
+    'size' => 'md',
 ])
 @php
     $configApi = app(App\Domains\Config\Public\Contracts\ConfigPublicApi::class);
@@ -17,9 +19,13 @@
         x-on:click="loadForm()"
         color="tertiary"
         x-bind:disabled="loading"
+        :title="$compact ? __('moderation::report.button'): ''"
+        :size="$size"
     >
-        <span class="material-symbols-outlined">report</span>
-        {{ __('moderation::report.button') }}
+        <span class="material-symbols-outlined">flag</span>
+        @if(!$compact)
+            {{ __('moderation::report.button') }}
+        @endif
     </x-shared::button>
 
     {{-- Modal Container (populated via AJAX) --}}

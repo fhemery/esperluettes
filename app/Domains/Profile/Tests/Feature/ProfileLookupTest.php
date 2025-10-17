@@ -15,7 +15,7 @@ describe('profile lookup', function () {
 
         $this->actingAs($admin);
 
-        $resp = $this->getJson('/profiles/lookup?q=Jan&limit=25');
+        $resp = $this->getJson('/profile/lookup?q=Jan&limit=25');
         $resp->assertOk();
         $data = $resp->json();
 
@@ -41,7 +41,7 @@ describe('profile lookup by ids', function () {
 
         $this->actingAs($admin);
 
-        $resp = $this->getJson('/profiles/lookup/by-ids?ids=' . implode(',', [$u1->id, $u2->id]));
+        $resp = $this->getJson('/profile/lookup/by-ids?ids=' . implode(',', [$u1->id, $u2->id]));
         $resp->assertOk();
         $data = $resp->json();
 

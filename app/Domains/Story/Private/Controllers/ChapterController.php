@@ -2,6 +2,8 @@
 
 namespace App\Domains\Story\Private\Controllers;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
 use App\Domains\Shared\ViewModels\PageViewModel;
@@ -26,7 +28,8 @@ class ChapterController
         private ChapterService $service,
         private StoryService $storyService,
         private ReadingProgressService $readingProgress,
-        private ProfilePublicApi $profileApi
+        private ProfilePublicApi $profileApi,
+        private AuthPublicApi $authApi
     ) {
     }
 
@@ -151,6 +154,11 @@ class ChapterController
         return view('story::chapters.show', [
             'vm' => $vm,
             'page' => $page,
+            'isModerator' => $this->authApi->hasAnyRole([
+                Roles::MODERATOR,
+                Roles::ADMIN,
+                Roles::TECH_ADMIN,
+            ]),
         ]);
     }
 

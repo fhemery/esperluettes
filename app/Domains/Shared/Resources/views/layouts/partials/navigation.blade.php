@@ -45,6 +45,8 @@
             
             <!-- Messages Icon -->
             <x-message::message-icon-component />
+            <!-- Moderation Icon -->
+            <x-moderation::moderation-icon-component />
             
             <!-- Profile with drawer -->
             <div class="flex items-center shrink-0">

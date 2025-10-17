@@ -3,6 +3,10 @@
 namespace App\Domains\Moderation\Public\Providers;
 
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use App\Domains\Moderation\Public\Events\ReportSubmitted;
+use App\Domains\Moderation\Public\Events\ReportApproved;
+use App\Domains\Moderation\Public\Events\ReportRejected;
+use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,7 +32,14 @@ class ModerationServiceProvider extends ServiceProvider
         // Register views
         $this->loadViewsFrom(app_path('Domains/Moderation/Private/Resources/views'), 'moderation');
 
-        // Register anonymous components
+        // Register PHP and anonymous components
+        Blade::componentNamespace('App\\Domains\\Moderation\\Private\\View\\Components', 'moderation');
         Blade::anonymousComponentPath(app_path('Domains/Moderation/Private/Resources/views/components'), 'moderation');
+
+        // Register Moderation domain events
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(ReportSubmitted::name(), ReportSubmitted::class);
+        $eventBus->registerEvent(ReportApproved::name(), ReportApproved::class);
+        $eventBus->registerEvent(ReportRejected::name(), ReportRejected::class);
     }
 }

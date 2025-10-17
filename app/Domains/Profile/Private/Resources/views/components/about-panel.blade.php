@@ -14,7 +14,7 @@
         @if($profile->hasSocialNetworks())
         <div class="grid grid-cols-2 gap-4 max-w-[800px] w-full mx-auto">
             @if($profile->facebook_url)
-            <a href="{{ $profile->facebook_url }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $profile->facebook_url }}" target="_blank" rel="noopener noreferrer" id="facebook-link"
                 class="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
                 <svg class="w-10 h-10 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path
@@ -25,7 +25,7 @@
             @endif
 
             @if($profile->x_url)
-            <a href="{{ $profile->x_url }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $profile->x_url }}" target="_blank" rel="noopener noreferrer" id="x-link"
                 class="flex items-center text-gray-900 hover:text-gray-700 transition-colors duration-200">
                 <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path
@@ -36,7 +36,7 @@
             @endif
 
             @if($profile->instagram_url)
-            <a href="{{ $profile->instagram_url }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $profile->instagram_url }}" target="_blank" rel="noopener noreferrer" id="instagram-link"
                 class="flex items-center text-pink-600 hover:text-pink-800 transition-colors duration-200">
                 <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path
@@ -47,7 +47,7 @@
             @endif
 
             @if($profile->youtube_url)
-            <a href="{{ $profile->youtube_url }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $profile->youtube_url }}" target="_blank" rel="noopener noreferrer" id="youtube-link"
                 class="flex items-center text-red-600 hover:text-red-800 transition-colors duration-200">
                 <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path

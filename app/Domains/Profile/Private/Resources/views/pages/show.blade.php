@@ -65,11 +65,37 @@
                     </div>
 
                     @if(Auth::check() && !$isOwn)
-                    <div class="flex justify-end w-full">
+                    <div class="flex gap-4 justify-end w-full">
                         <x-moderation::report-button 
                             topic-key="profile" 
                             :entity-id="$profile->user_id"
                         />
+                        @if($isModerator)
+                        <x-moderation::moderation-button
+                            badgeColor="warning"
+                            position="top"
+                            id="profile-moderator-btn"
+                        >
+                            <x-moderation::action
+                                :action="route('profile.moderation.remove-image', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.remove_image.label')"
+                            />
+
+                            <x-moderation::action
+                                :action="route('profile.moderation.empty-about', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.empty_about.label')"
+                            />
+
+                            <x-moderation::action
+                                :action="route('profile.moderation.empty-social', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.empty_social.label')"
+                            />
+                        </x-moderation::moderation-button>
+                        @endif
+                        
                     </div>
                     @endif
                 </div>

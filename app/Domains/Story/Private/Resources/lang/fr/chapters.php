@@ -87,5 +87,8 @@ return [
     'delete' => [
         'confirm_warning' => 'Êtes-vous sûr·e de vouloir supprimer le chapitre ":chapterTitle" ?',
         'no_refund' => 'Note : supprimer un chapitre n\'octroie pas de crédit pour en poster un autre.'
-    ] 
+    ],
+    'side_nav' => [
+        'label' => 'Détails du roman'
+    ]
 ];

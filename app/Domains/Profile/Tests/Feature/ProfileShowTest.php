@@ -129,6 +129,26 @@ describe('Profile page', function () {
             $response->assertOk();
             $response->assertSee(__('moderation::report.button'));
         });
+
+        it('does not show the moderator popover to guests', function () {
+            $alice = alice($this);
+            $aliceProfile = Profile::where('user_id', $alice->id)->firstOrFail();
+
+            $this->get("/profile/{$aliceProfile->slug}")
+                ->assertOk()
+                ->assertDontSee('id="profile-moderator-btn"', false);
+        });
+
+        it('shows the moderator popover to moderators', function () {
+            $alice = alice($this);
+            $aliceProfile = Profile::where('user_id', $alice->id)->firstOrFail();
+            $moderatorUser = moderator($this);
+
+            $this->actingAs($moderatorUser)
+                ->get("/profile/{$aliceProfile->slug}")
+                ->assertOk()
+                ->assertSee('id="profile-moderator-btn"', false);
+        });
     });
 
     describe('tab selection', function () {

@@ -287,6 +287,8 @@ deptrac:
     ModerationPublic:
       - Shared
       - ModerationPrivate
+      - EventsPublic
+      - AuthPublic
 
     NewsPublic:
       - AuthPublic
@@ -361,6 +363,7 @@ deptrac:
       - AuthPublic
       - CommentPublic
       - EventsPublic
+      - ModerationPublic
 
     ConfigPrivate:
       - Shared
@@ -393,6 +396,8 @@ deptrac:
     ModerationPrivate:
       - Shared
       - ModerationPublic
+      - AuthPublic
+      - EventsPublic
 
     NewsPrivate:
       - Shared
@@ -404,6 +409,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - ModerationPublic
       - ProfilePublic
 
     StaticPagePrivate:
@@ -416,6 +422,7 @@ deptrac:
       - Shared
       - AuthPublic
       - CommentPublic
+      - ModerationPublic
       - ProfilePublic
       - StoryRefPrivate
       - EventsPublic

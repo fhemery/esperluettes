@@ -397,6 +397,7 @@ class StoryController
             'metaDescription' => $metaDescription,
             'availableChapterCredits' => $availableChapterCredits,
             'page' => $page,
+            'isModerator' => $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]),
         ]);
     }
 

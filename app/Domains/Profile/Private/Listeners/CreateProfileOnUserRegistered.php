@@ -4,9 +4,8 @@ namespace App\Domains\Profile\Private\Listeners;
 
 use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Profile\Private\Services\ProfileService;
-use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class CreateProfileOnUserRegistered implements ShouldHandleEventsAfterCommit
+class CreateProfileOnUserRegistered
 {
     public function __construct(private ProfileService $profiles)
     {

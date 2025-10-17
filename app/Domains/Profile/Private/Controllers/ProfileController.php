@@ -3,6 +3,7 @@
 namespace App\Domains\Profile\Private\Controllers;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Profile\Private\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Private\Services\ProfileService;
@@ -29,11 +30,12 @@ class ProfileController extends Controller
     public function show(Profile $profile): View
     {
         $isOwn = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
+        $isModerator = $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]);
 
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
 
-        return view('profile::pages.show', compact('profile', 'isOwn'));
+        return view('profile::pages.show', compact('profile', 'isOwn', 'isModerator'));
     }
 
     /**
