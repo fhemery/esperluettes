@@ -72,7 +72,7 @@
                     <x-shared::button type="button" x-on:click="closeModal()" color="neutral" :outline="true">
                         {{ __('moderation::report.cancel') }}
                     </x-shared::button>
-                    <x-shared::button x-bind:disabled="submitting" color="accent">
+                    <x-shared::button x-on:click="submitReport()" x-bind:disabled="submitting" color="accent">
                         <span x-show="!submitting">{{ __('moderation::report.submit') }}</span>
                         <span x-show="submitting">
                             <span class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
@@ -83,60 +83,3 @@
         </div>
     </x-modal>
 </div>
-
-<script>
-function reportForm(topicKey, entityId) {
-    return {
-        submitting: false,
-        submitted: false,
-        form: {
-            topic_key: topicKey,
-            entity_id: entityId,
-            reason_id: '',
-            description: '',
-        },
-        errors: {},
-        errorMessage: '',
-        successMessage: '',
-
-        openModal() {
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'report-modal-' + topicKey + '-' + entityId }));
-        },
-
-        closeModal() {
-            window.dispatchEvent(new CustomEvent('close-modal', { detail: 'report-modal-' + topicKey + '-' + entityId }));
-        },
-
-        async submitReport() {
-            this.submitting = true;
-            this.errors = {};
-            this.errorMessage = '';
-
-            try {
-                const response = await fetch('/moderation/report', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify(this.form),
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    this.submitted = true;
-                    this.successMessage = data.message || '{{ __("moderation::report.submitted") }}';
-                } else {
-                    this.errorMessage = data.message || '{{ __("moderation::report.error") }}';
-                }
-            } catch (error) {
-                this.errorMessage = '{{ __("moderation::report.error") }}';
-            } finally {
-                this.submitting = false;
-            }
-        },
-    };
-}
-</script>
