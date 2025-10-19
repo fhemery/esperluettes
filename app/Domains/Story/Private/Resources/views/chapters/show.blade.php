@@ -20,7 +20,7 @@
 
         <button
             type="button"
-            class="md:hidden fixed bottom-4 left-4 z-40 p-2 w-10 h-10 rounded-full bg-primary text-on-primary shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            class="md:hidden fixed bottom-4 left-4 z-40 p-2 w-10 h-10 flex items-center justify-center rounded-full bg-primary text-on-primary shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             aria-controls="mobile-chapter-drawer"
             :aria-expanded="open ? 'true' : 'false'"
             @click="open = !open"
