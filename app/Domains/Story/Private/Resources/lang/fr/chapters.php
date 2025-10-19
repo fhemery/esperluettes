@@ -36,7 +36,7 @@ return [
             'label' => 'Publié',
             'help' => [
                 'label' => 'Statut de publication',
-                'text' => 'Décochez si vous souhaitez garder le chapitre en brouillon, ou le cacher temporairement.',
+                'text' => 'Décochez si vous souhaitez garder le chapitre en brouillon, ou le cacher temporairement. Si votre histoire est privée, ce chapitre ne sera pas visible par la communauté même publié',
             ],
         ],
         'cancel' => 'Annuler',
