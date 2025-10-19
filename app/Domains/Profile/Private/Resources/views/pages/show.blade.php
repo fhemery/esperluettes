@@ -50,10 +50,14 @@
                     @if(!empty($profile->roles))
                     <div class="mt-2 flex flex-wrap gap-2">
                         @foreach($profile->roles as $role)
-                        <x-shared::badge color="primary" :outline="false" size="md"
-                            title="{{ $role->description }}">
-                            {{ $role->name }}
-                        </x-shared::badge>
+                        <x-shared::popover placement="bottom">
+                            <x-slot name="trigger">
+                                <x-shared::badge color="primary" :outline="false" size="md">
+                                    {{ $role->name }}
+                                </x-shared::badge>
+                            </x-slot>
+                            {{ $role->description }}
+                        </x-shared::popover>
                         @endforeach
                     </div>
                     @endif
