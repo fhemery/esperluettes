@@ -16,7 +16,7 @@
     </div>
 
     <div class="mt-8">
-        {!! $viewModel->links() !!}
+        {!! $viewModel->links('shared::components.pagination') !!}
     </div>
 @endif
 
