@@ -18,36 +18,33 @@
                     <x-search::components.header-search />
                 </div>
 
-                <div class="flex gap-8 h-full" id="desktop-nav-links">
+                <div class="hidden md:flex md:gap-8 uppercase" id="desktop-nav-links">
                     <!-- Links -->
-                    <div class="hidden md:flex md:gap-8 uppercase">
-                        <x-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
-                            {{ __('shared::navigation.stories') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('news.index')" :active="request()->routeIs('news.index')">
-                            {{ __('shared::navigation.news') }}
-                        </x-nav-link>
-                        @if (Auth::user() && Auth::user()->isConfirmed())
-                        <x-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
-                            {{ __('shared::navigation.my-stories') }}
-                        </x-nav-link>
-                        @endif
-                        @if (Auth::user() && Auth::user()->hasRole(['admin','tech-admin','moderator']))
-                        <x-nav-link :href="route('filament.admin.pages.dashboard')"
-                            :active="request()->routeIs('filament.admin.*')">
-                            {{ __('shared::navigation.admin') }}
-                        </x-nav-link>
-                        @endif
-                    </div>
-
+                    <x-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
+                        {{ __('shared::navigation.stories') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('news.index')" :active="request()->routeIs('news.index')">
+                        {{ __('shared::navigation.news') }}
+                    </x-nav-link>
+                    @if (Auth::user() && Auth::user()->isConfirmed())
+                    <x-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
+                        {{ __('shared::navigation.my-stories') }}
+                    </x-nav-link>
+                    @endif
+                    @if (Auth::user() && Auth::user()->hasRole(['admin','tech-admin','moderator']))
+                    <x-nav-link :href="route('filament.admin.pages.dashboard')"
+                        :active="request()->routeIs('filament.admin.*')">
+                        {{ __('shared::navigation.admin') }}
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
-            
+
             <!-- Messages Icon -->
             <x-message::message-icon-component />
             <!-- Moderation Icon -->
             <x-moderation::moderation-icon-component />
-            
+
             <!-- Profile with drawer -->
             <div class="flex items-center shrink-0">
                 <button
