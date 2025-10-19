@@ -3,7 +3,7 @@
 <nav x-data class="{{ $additionalClass }}">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-1 sm:px-4 lg:px-6">
-        <div class="flex justify-between h-16 gap-4 sm:gap-8">
+        <div class="flex justify-between h-16 gap-4 md:gap-8">
             <!-- Logo -->
             <div class="shrink-0 flex items-center">
                 <a href="{{ route('dashboard') }}">
@@ -20,7 +20,7 @@
 
                 <div class="flex gap-8 h-full" id="desktop-nav-links">
                     <!-- Links -->
-                    <div class="hidden sm:flex sm:gap-8 uppercase">
+                    <div class="hidden md:flex md:gap-8 uppercase">
                         <x-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
                             {{ __('shared::navigation.stories') }}
                         </x-nav-link>
@@ -75,7 +75,7 @@
         </x-slot:header>
         <div id="desktop-nav-drawer">
 
-            <div class="block sm:hidden pt-2 space-y-1 pb-4 border-b-2 border-accent">
+            <div class="block md:hidden pt-2 space-y-1 pb-4 border-b-2 border-accent">
                 <x-responsive-nav-link :href="route('news.index')" :active="request()->routeIs('news.index')">
                     {{ __('shared::navigation.news') }}
                 </x-responsive-nav-link>
