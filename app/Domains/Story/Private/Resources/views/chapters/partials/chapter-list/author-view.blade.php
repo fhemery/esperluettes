@@ -15,16 +15,12 @@
             </template>
             <template x-if="editing">
                 <div class="flex items-center gap-2">
-                    <button type="button" @click="window.dispatchEvent(new CustomEvent('chapters-reorder-save'))"
-                        class="inline-flex items-center gap-1 px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
-                        <span class="material-symbols-outlined text-[18px] leading-none">save</span>
+                    <x-shared::button color="accent" icon="save" x-on:click="window.dispatchEvent(new CustomEvent('chapters-reorder-save'))">
                         {{ __('story::chapters.actions.save_order') }}
-                    </button>
-                    <button type="button" @click="window.dispatchEvent(new CustomEvent('chapters-reorder-cancel')); editing = false"
-                        class="inline-flex items-center gap-1 px-3 py-2 rounded-md border text-gray-700 hover:bg-gray-50">
-                        <span class="material-symbols-outlined text-[18px] leading-none">close</span>
+                    </x-shared::button>
+                    <x-shared::button color="neutral" icon="close" x-on:click="window.dispatchEvent(new CustomEvent('chapters-reorder-cancel')); editing = false">
                         {{ __('story::chapters.actions.cancel') }}
-                    </button>
+                    </x-shared::button>
                 </div>
             </template>
         </div>

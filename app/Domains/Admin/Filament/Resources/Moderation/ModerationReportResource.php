@@ -76,11 +76,13 @@ class ModerationReportResource extends Resource
                     ->disabled(),
                 Textarea::make('description')
                     ->label(__('admin::moderation.reports.fields.description'))
+                    ->rows(10)
                     ->readOnly()
                     ->disabled(),
                 
                 Textarea::make('review_comment')
                     ->label(__('admin::moderation.reports.fields.review_comment'))
+                    ->rows(3)
                     ->helperText(__('admin::moderation.reports.fields.review_comment_hint')),
 
                 Placeholder::make('snapshot_render')
@@ -130,8 +132,14 @@ class ModerationReportResource extends Resource
                 Tables\Columns\TextColumn::make('reason.label')->label(__('admin::moderation.reports.fields.reason'))
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('description')->label(__('admin::moderation.reports.fields.description'))
+                    ->formatStateUsing(function (string $state) {
+                        return strlen($state) > 50 ? substr($state, 0, 50). "..." : $state;
+                    })
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('review_comment')->label(__('admin::moderation.reports.fields.review_comment'))
+                    ->formatStateUsing(function (string $state) {
+                        return strlen($state) > 50 ? substr($state, 0, 50). "..." : $state;
+                    })
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('reported_by_user_id')->label(__('admin::moderation.reports.fields.reported_by'))
                     ->formatStateUsing(function (int $state) {

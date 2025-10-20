@@ -1,6 +1,6 @@
-<div x-data="globalSearch()" x-init="init()" class="relative w-full max-w-md" @keydown.escape.window="close()">
-    <div class="flex justify-end md:justify-start md:border-b md:border-fg max-w-[20rem]">
-        <button type="button" @click="isMobile ? openFromIcon() : null" class="md:pointer-events-none">
+<div x-data="globalSearch()" x-init="init()" class="ml-auto relative w-full max-w-md flex justify-end lg:justify-start" @keydown.escape.window="close()">
+    <div class="flex justify-end lg:justify-start lg:border-b lg:border-fg max-w-[20rem]">
+        <button type="button" @click="isMobile ? openFromIcon() : null" class="lg:pointer-events-none">
             <i class="material-symbols-outlined text-3xl font-extralight">search</i>
         </button>
         <input
@@ -10,7 +10,7 @@
             @keydown.arrow-up.prevent="highlightPrev()"
             @keydown.enter.prevent="activateHighlighted()"
             type="search"
-            class="hidden md:block bg-transparent border-transparent outline-none w-full placeholder-fg focus:ring-1 focus:ring-accent/50 focus:border-transparent"
+            class="hidden lg:block bg-transparent border-transparent outline-none w-full placeholder-fg focus:ring-1 focus:ring-accent/50 focus:border-transparent"
             placeholder="{{ __('search::header.label') }}"
             aria-label="{{ __('search::header.label') }}"
         />
@@ -22,10 +22,10 @@
         </template>
     </div>
 
-    <div x-show="open" x-transition role="dialog" aria-live="polite" class="max-w-4xl fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[80vw] md:w-[96vw]">
+    <div x-show="open" x-transition role="dialog" aria-live="polite" class="max-w-4xl fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[80vw] lg:w-[96vw]">
         <div class="rounded-md shadow-lg border bg-white text-black overflow-hidden" x-ref="dropdown" @click.outside="close()">
             <!-- Mobile-only input inside popup -->
-            <div class="p-3 border-b md:hidden">
+            <div class="p-3 border-b lg:hidden">
                 <input
                     x-model.debounce.300ms="q"
                     @keydown.arrow-down.prevent="highlightNext()"
@@ -53,7 +53,7 @@
                 highlightedIndex: -1,
                 isMobile: false,
                 init() {
-                    const mq = window.matchMedia('(max-width: 767px)');
+                    const mq = window.matchMedia('(max-width: 1023px)');
                     const setMobile = () => { this.isMobile = mq.matches; };
                     setMobile();
                     mq.addEventListener ? mq.addEventListener('change', setMobile) : mq.addListener(setMobile);

@@ -45,7 +45,7 @@
                 {{-- Pagination --}}
                 @if($deliveries->hasPages())
                 <div class="mt-4">
-                    {{ $deliveries->links() }}
+                    {!! $deliveries->links('shared::components.pagination') !!}
                 </div>
                 @endif
             </div>
