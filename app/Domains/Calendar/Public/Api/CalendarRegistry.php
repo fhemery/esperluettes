@@ -26,4 +26,12 @@ class CalendarRegistry
     {
         return $this->types[$typeKey];
     }
+
+    /**
+     * @return array<int,string> list of registered activity type keys
+     */
+    public function keys(): array
+    {
+        return array_keys($this->types);
+    }
 }

@@ -28,7 +28,8 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by_user_id')->nullable();
             $table->timestamps();
 
-            $table->index(['activity_type', 'active_starts_at', 'active_ends_at']);
+            // Short index name to satisfy MySQL identifier length limits
+            $table->index(['activity_type', 'active_starts_at', 'active_ends_at'], 'ca_type_active_idx');
         });
     }
 

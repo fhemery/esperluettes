@@ -8,6 +8,8 @@ use App\Domains\Calendar\Public\Api\ActivityRegistrationInterface;
 
 class JardinoRegistration implements ActivityRegistrationInterface
 {
+    public const ACTIVITY_TYPE = 'jardino';
+
     public function displayComponentKey(): string
     {
         return 'calendar.activities.jardino';

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Calendar\Public\Providers;
 
+use App\Domains\Calendar\Private\Activities\Jardino\JardinoRegistration;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Calendar\Public\Api\CalendarRegistry;
 
@@ -21,5 +22,8 @@ class CalendarServiceProvider extends ServiceProvider
 
         // Register PHP translations under 'calendar' namespace
         $this->loadTranslationsFrom(app_path('Domains/Calendar/Private/Resources/lang'), 'calendar');
+
+        $registry = app(CalendarRegistry::class);
+        $registry->register(JardinoRegistration::ACTIVITY_TYPE, new JardinoRegistration());
     }
 }
