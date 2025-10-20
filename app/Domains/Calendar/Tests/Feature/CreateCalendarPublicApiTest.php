@@ -17,7 +17,7 @@ describe('CalendarPublicApi - create', function () {
     it('rejects creation if caller is not ADMIN or TECH_ADMIN', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -34,7 +34,7 @@ describe('CalendarPublicApi - create', function () {
     it('rejects creation when required fields are only whitespace (trimmed)', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -57,7 +57,7 @@ describe('CalendarPublicApi - create', function () {
     it('rejects when active_starts_at is before preview_starts_at', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -77,7 +77,7 @@ describe('CalendarPublicApi - create', function () {
     it('rejects when active_ends_at is before active_starts_at', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -98,7 +98,7 @@ describe('CalendarPublicApi - create', function () {
     it('rejects when archived_at is before active_ends_at', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -120,7 +120,7 @@ describe('CalendarPublicApi - create', function () {
     it('allows equal boundaries across preview/active start/active end/archive', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -141,7 +141,7 @@ describe('CalendarPublicApi - create', function () {
     it('sanitizes description using admin-content profile (allows links, strips scripts)', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -161,7 +161,7 @@ describe('CalendarPublicApi - create', function () {
     it('rejects creation when mandatory fields are missing', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -184,7 +184,7 @@ describe('CalendarPublicApi - create', function () {
     it('allows creation when caller has admin rights', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);

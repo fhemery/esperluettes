@@ -3,8 +3,22 @@
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Public\Api\CalendarPublicApi;
 use App\Domains\Calendar\Public\Api\CalendarRegistry;
+use App\Domains\Calendar\Public\Api\ActivityRegistrationInterface;
 use App\Domains\Calendar\Public\Contracts\ActivityToCreateDto;
 use Tests\TestCase;
+
+class FakeActivityRegistration implements ActivityRegistrationInterface
+{
+    public function displayComponentKey(): string
+    {
+        return 'calendar.activities.fake';
+    }
+
+    public function configComponentKey(): ?string
+    {
+        return null;
+    }
+}
 
 function makeActivityCreateDto(array $overrides = []): ActivityToCreateDto
 {
@@ -25,6 +39,16 @@ function makeActivityCreateDto(array $overrides = []): ActivityToCreateDto
 }
 
 /**
+ * Ensure a fake activity type is registered for tests.
+ */
+function registerFakeActivityType(CalendarRegistry $registry, string $key = 'fake'): void
+{
+    if (! $registry->has($key)) {
+        $registry->register($key, new FakeActivityRegistration());
+    }
+}
+
+/**
  * Create an activity through the public API. If no actor id is provided,
  * we will create and authenticate an admin user.
  */
@@ -33,9 +57,7 @@ function createActivity(TestCase $t, array $overrides = [], ?int $actorUserId = 
     /** @var CalendarRegistry $registry */
     $registry = app(CalendarRegistry::class);
     // Ensure the 'fake' type is registered for tests
-    if (!method_exists($registry, 'has') || !$registry->has('fake')) {
-        $registry->register('fake', new class { });
-    }
+    registerFakeActivityType($registry, 'fake');
 
     /** @var CalendarPublicApi $api */
     $api = app(CalendarPublicApi::class);

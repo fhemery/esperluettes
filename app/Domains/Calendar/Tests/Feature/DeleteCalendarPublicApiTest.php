@@ -16,7 +16,7 @@ describe('CalendarPublicApi - delete', function () {
     it('rejects delete if caller is not ADMIN or TECH_ADMIN', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -35,7 +35,7 @@ describe('CalendarPublicApi - delete', function () {
     it('allows hard delete for admins and getOne returns 404 afterwards', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);

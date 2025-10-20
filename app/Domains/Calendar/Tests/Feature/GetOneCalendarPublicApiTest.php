@@ -16,7 +16,7 @@ describe('CalendarPublicApi - getOne', function () {
     it('returns 404 for draft to non-admin/tech-admin users', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -38,7 +38,7 @@ describe('CalendarPublicApi - getOne', function () {
     it('allows getOne for draft to ADMIN and TECH_ADMIN', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -60,7 +60,7 @@ describe('CalendarPublicApi - getOne', function () {
     it('allows getOne for non-draft to USER and USER_CONFIRMED', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);

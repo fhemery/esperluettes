@@ -17,7 +17,7 @@ describe('CalendarPublicApi - update', function () {
     it('rejects update if caller is not ADMIN or TECH_ADMIN', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry, 'fake');
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -42,8 +42,8 @@ describe('CalendarPublicApi - update', function () {
     it('rejects update if activity_type changes (immutable)', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
-        $registry->register('other', new class { });
+        registerFakeActivityType($registry, 'fake');
+        registerFakeActivityType($registry, 'other');
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -65,7 +65,7 @@ describe('CalendarPublicApi - update', function () {
     it('allows full replace update for admins and reflects in getOne', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry, 'fake');
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -101,7 +101,7 @@ describe('CalendarPublicApi - update', function () {
     it('rejects update when required fields are only whitespace (trimmed) or type unknown', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry, 'fake');
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -119,7 +119,7 @@ describe('CalendarPublicApi - update', function () {
         })->toThrow(ValidationException::class);
 
         // Unknown type (still immutable check, but keep type same path)
-        $registry->register('other', new class { });
+        registerFakeActivityType($registry, 'other');
         $invalid2 = new ActivityToUpdateDto(
             name: 'Ok',
             activity_type: 'unknown',
@@ -132,7 +132,7 @@ describe('CalendarPublicApi - update', function () {
     it('rejects update when active_starts_at is before preview_starts_at', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -154,7 +154,7 @@ describe('CalendarPublicApi - update', function () {
     it('rejects update when active_ends_at is before active_starts_at', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -177,7 +177,7 @@ describe('CalendarPublicApi - update', function () {
     it('rejects update when archived_at is before active_ends_at', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
@@ -201,7 +201,7 @@ describe('CalendarPublicApi - update', function () {
     it('allows update with equal boundaries across preview/active start/active end/archive', function () {
         /** @var CalendarRegistry $registry */
         $registry = app(CalendarRegistry::class);
-        $registry->register('fake', new class { });
+        registerFakeActivityType($registry);
 
         /** @var CalendarPublicApi $api */
         $api = app(CalendarPublicApi::class);
