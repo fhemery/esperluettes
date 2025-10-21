@@ -1,4 +1,4 @@
-<li class="sm:p-4 mb-4">
+<li class="py-4 sm:px-4 sm:mb-4">
   @php
   $config = $config ?? null;
   $isUnknown = is_null($comment->authorId);
@@ -18,7 +18,7 @@
       @endif
     </div>
 
-    <!-- Header: author + date + edit icon (right) -->
+    <!-- Header: author + + report + date + edit icon (right) -->
     <div class="flex items-center gap-2 grow">
       <div class="font-semibold text-secondary">
         @if($isUnknown || empty($comment->authorProfile->slug))
@@ -27,6 +27,31 @@
         <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-secondary/80">{{ $displayName }}</a>
         @endif
       </div>
+      @if(Auth::id() !== $comment->authorId) 
+        <div class="ml-2 flex gap-2">
+          <x-moderation::report-button
+              topic-key="comment"
+              :entity-id="$comment->id"
+              :compact="true"
+              size="xs" />
+          @if($isModerator)
+          <x-moderation::moderation-button
+              badgeColor="warning"
+              position="top"
+              id="comment-moderator-btn">
+              <x-moderation::action
+                  :action="route('comments.moderation.delete', $comment->id)"
+                  method="DELETE"
+                  :label="__('comment::moderation.delete.label')" />
+              <x-moderation::action
+                  :action="route('comments.moderation.empty-content', $comment->id)"
+                  method="POST"
+                  :label="__('comment::moderation.empty_content.label')" />
+          </x-moderation::moderation-button>
+          @endif
+      </div>
+      @endif
+      
       @if($comment->canEditOwn && Auth::check() && Auth::id() === $comment->authorId)
       <button type="button" class="text-gray-400 hover:text-gray-600" data-action="edit" data-comment-id="{{ $comment->id }}" title="{{ __('comment::comments.actions.edit') }}" aria-label="{{ __('comment::comments.actions.edit') }}">
         <span class="material-symbols-outlined text-[16px] leading-none">edit</span>
@@ -129,9 +154,9 @@
 
       <!-- Children -->
       @if(!empty($comment->children))
-      <ul class="mt-6 border-l-2 border-accent ml-2 sm:ml-6 pl-2 sm:pl-2">
+      <ul class="mb-3 border-l-2 border-accent ml-2 sm:ml-6 pl-2 sm:pl-2">
         @foreach($comment->children as $child)
-        @include('comment::components.partials.comment-item', ['comment' => $child, 'isChild' => true, 'isLastChild' => $loop->last, 'parentCommentId' => $comment->id, 'config' => $config])
+        @include('comment::components.partials.comment-item', ['comment' => $child, 'isChild' => true, 'isLastChild' => $loop->last, 'parentCommentId' => $comment->id, 'config' => $config, 'isModerator' => $isModerator])
         @endforeach
       </ul>
       @endif

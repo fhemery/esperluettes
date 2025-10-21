@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'label'=> 'Chapitre',
     'created_success' => 'Chapitre créé avec succès.',
     'updated_success' => 'Chapitre mis à jour avec succès.',
     'deleted_success' => 'Chapitre supprimé avec succès.',
@@ -35,7 +36,7 @@ return [
             'label' => 'Publié',
             'help' => [
                 'label' => 'Statut de publication',
-                'text' => 'Décochez si vous souhaitez garder le chapitre en brouillon, ou le cacher temporairement.',
+                'text' => 'Décochez si vous souhaitez garder le chapitre en brouillon, ou le cacher temporairement. Si votre histoire est privée, ce chapitre ne sera pas visible par la communauté même publié',
             ],
         ],
         'cancel' => 'Annuler',
@@ -87,5 +88,11 @@ return [
     'delete' => [
         'confirm_warning' => 'Êtes-vous sûr·e de vouloir supprimer le chapitre ":chapterTitle" ?',
         'no_refund' => 'Note : supprimer un chapitre n\'octroie pas de crédit pour en poster un autre.'
-    ] 
+    ],
+    'side_nav' => [
+        'label' => 'Détails du roman'
+    ],
+    'back_to_top' => [
+        'label' => 'Retour en haut'
+    ]
 ];

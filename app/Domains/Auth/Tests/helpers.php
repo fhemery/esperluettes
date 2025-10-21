@@ -2,9 +2,7 @@
 
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Auth\Public\Events\UserDeleted;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -37,6 +35,22 @@ function admin(TestCase $t, array $overrides = [], bool $isVerified = true, arra
     return registerUserThroughForm($t, array_merge([
         'name' => 'Admin',
         'email' => 'admin@admin.com',
+    ], $overrides), $isVerified, $roles);
+}
+
+function techAdmin(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::TECH_ADMIN, Roles::USER_CONFIRMED]): User
+{
+    return registerUserThroughForm($t, array_merge([
+        'name' => 'Tech Admin',
+        'email' => 'techadmin@techadmin.com',
+    ], $overrides), $isVerified, $roles);
+}
+
+function moderator(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::MODERATOR, Roles::USER_CONFIRMED]): User
+{
+    return registerUserThroughForm($t, array_merge([
+        'name' => 'Moderator',
+        'email' => 'moderator@moderator.com',
     ], $overrides), $isVerified, $roles);
 }
 

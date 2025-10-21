@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-6 h-[calc(100vh-150px)]">
         <div class="flex justify-between items-center">
             <x-shared::title icon="mail">{{ __('message::messages.title') }}</x-shared::title>
-            @if(Auth::user()->isAdmin())
+            @if($canCompose)
             <a href="{{ route('messages.compose') }}">
                 <x-shared::button color="accent">
                     {{ __('message::messages.compose') }}
@@ -45,7 +45,7 @@
                 {{-- Pagination --}}
                 @if($deliveries->hasPages())
                 <div class="mt-4">
-                    {{ $deliveries->links() }}
+                    {!! $deliveries->links('shared::components.pagination') !!}
                 </div>
                 @endif
             </div>

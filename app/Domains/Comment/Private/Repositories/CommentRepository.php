@@ -122,6 +122,18 @@ class CommentRepository
     }
 
     /**
+     * Hard delete a comment and its direct children.
+     * Returns number of deleted rows.
+     */
+    public function deleteWithChildren(int $commentId): int
+    {
+        return Comment::query()
+            ->whereKey($commentId)
+            ->orWhere('parent_comment_id', $commentId)
+            ->forceDelete();
+    }
+
+    /**
      * Update the body of a comment and persist changes.
      */
     public function updateBody(int $commentId, string $body): Comment
@@ -166,5 +178,25 @@ class CommentRepository
         return Comment::query()
             ->where('author_id', $userId)
             ->update(['author_id' => null]);
+    }
+
+    /**
+     * Soft-delete all comments authored by the given user.
+     */
+    public function softDeleteByAuthor(int $userId): int
+    {
+        return Comment::query()
+            ->where('author_id', $userId)
+            ->delete();
+    }
+
+    /**
+     * Restore all soft-deleted comments authored by the given user.
+     */
+    public function restoreByAuthor(int $userId): int
+    {
+        return Comment::withTrashed()
+            ->where('author_id', $userId)
+            ->restore();
     }
 }

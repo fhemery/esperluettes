@@ -74,6 +74,22 @@ deptrac:
         - type: directory
           value: 'app/Domains/Comment/Tests/'
 
+    # Config Domain
+    - name: ConfigPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Config/Public/'
+
+    - name: ConfigPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/Config/Private/
+
+    - name: ConfigTests
+      collectors:
+        - type: directory
+          value: app/Domains/Config/Tests/
+
     # Dashboard Domain
     - name: DashboardPublic
       collectors:
@@ -127,6 +143,22 @@ deptrac:
       collectors:
         - type: directory
           value: app/Domains/Message/Tests/
+
+    #Moderation Domain
+    - name: ModerationPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Moderation/Public/'
+
+    - name: ModerationPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/Moderation/Private/
+
+    - name: ModerationTests
+      collectors:
+        - type: directory
+          value: app/Domains/Moderation/Tests/
 
     # News Domain
     - name: NewsPublic
@@ -227,6 +259,13 @@ deptrac:
       - AuthPublic
       - CommentPrivate
       - EventsPublic
+      - ModerationPublic
+
+    ConfigPublic:
+      - Shared
+      - ConfigPrivate
+      - EventsPublic
+      - AuthPublic
 
     DashboardPublic:
       - Shared
@@ -245,6 +284,12 @@ deptrac:
       - MessagePrivate
       - EventsPublic
 
+    ModerationPublic:
+      - Shared
+      - ModerationPrivate
+      - EventsPublic
+      - AuthPublic
+
     NewsPublic:
       - AuthPublic
       - Shared
@@ -256,6 +301,7 @@ deptrac:
       - ProfilePrivate
       - AuthPublic
       - EventsPublic
+      - ModerationPublic
 
     StaticPagePublic:
       - AuthPublic
@@ -271,6 +317,7 @@ deptrac:
       - StoryRefPrivate
       - EventsPublic
       - AuthPublic
+      - ModerationPublic
 
     StoryRefPublic:
       - Shared
@@ -301,6 +348,10 @@ deptrac:
       - HomePrivate
       - EventsPublic
       - EventsPrivate
+      - ConfigPublic
+      - ConfigPrivate
+      - ModerationPublic
+      - ModerationPrivate
 
     AuthPrivate:
       - Shared
@@ -312,6 +363,11 @@ deptrac:
       - AuthPublic
       - CommentPublic
       - EventsPublic
+      - ModerationPublic
+
+    ConfigPrivate:
+      - Shared
+      - ConfigPublic
 
     DashboardPrivate:
       - Shared
@@ -335,6 +391,13 @@ deptrac:
       - AuthPublic
       - MessagePublic
       - EventsPublic
+      - ConfigPublic
+
+    ModerationPrivate:
+      - Shared
+      - ModerationPublic
+      - AuthPublic
+      - EventsPublic
 
     NewsPrivate:
       - Shared
@@ -346,6 +409,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - ModerationPublic
       - ProfilePublic
 
     StaticPagePrivate:
@@ -358,6 +422,7 @@ deptrac:
       - Shared
       - AuthPublic
       - CommentPublic
+      - ModerationPublic
       - ProfilePublic
       - StoryRefPrivate
       - EventsPublic
@@ -382,6 +447,11 @@ deptrac:
       - CommentPrivate
       - CommentPublic
 
+    ConfigTests:
+      - TestHelpers
+      - ConfigPrivate
+      - ConfigPublic
+
     EventsTests:
       - TestHelpers
       - EventsPrivate
@@ -391,6 +461,11 @@ deptrac:
       - TestHelpers
       - MessagePrivate
       - MessagePublic
+
+    ModerationTests:
+      - TestHelpers
+      - ModerationPrivate
+      - ModerationPublic
 
     NewsTests:
       - Shared

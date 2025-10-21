@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'brand_description' => 'Ce site est une plateforme de publication d’histoires en ligne et d’entraide sur l’écriture créative.',
+    'brand_description' => 'Ce site est une plateforme de publication d’histoires en ligne et d’entraide autour de l’écriture (ré)créative.',
 
     'title_garden' => 'Le Jardin',
 

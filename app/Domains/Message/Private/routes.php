@@ -8,7 +8,7 @@ Route::middleware(['web', 'auth'])
     ->prefix('messages')
     ->name('messages.')
     ->group(function () {
-        Route::middleware(['role:'.Roles::ADMIN])->group(function () {
+        Route::middleware(['role:'.Roles::ADMIN.','.Roles::TECH_ADMIN.','.Roles::MODERATOR])->group(function () {
             Route::get('/compose', [MessageController::class, 'compose'])->name('compose');
             Route::post('/', [MessageController::class, 'store'])->name('store');
         });

@@ -40,7 +40,7 @@
                 @endif
             </div>
 
-            <!-- Image -->
+            <!-- Image + Reporting / moderation -->
             <div
                 class="col-start-1 col-span-1 row-start-2 row-span-3
                     flex flex-col gap-2 items-center justify-center">
@@ -48,6 +48,28 @@
                 <div class="flex items-center">
                     <x-story::story-visibility-display :visibility="$viewModel->getVisibility()" />
                 </div>
+                @if(!$viewModel->isAuthor())
+                <div class="flex gap-2">
+                    <x-moderation::report-button
+                        topic-key="story"
+                        :entity-id="$viewModel->getId()" />
+                    @if($isModerator)
+                    <x-moderation::moderation-button
+                        badgeColor="warning"
+                        position="top"
+                        id="story-moderator-btn">
+                        <x-moderation::action
+                            :action="route('stories.moderation.make-private', $viewModel->getSlug())"
+                            method="POST"
+                            :label="__('story::moderation.make_private.label')" />
+                        <x-moderation::action
+                            :action="route('stories.moderation.empty-summary', $viewModel->getSlug())"
+                            method="POST"
+                            :label="__('story::moderation.empty_summary.label')" />
+                    </x-moderation::moderation-button>
+                    @endif
+                </div>
+                @endif
             </div>
 
             <!-- Author, genres -->
@@ -67,11 +89,11 @@
                         @if(!empty($genres))
                         <span class="inline-flex flex-wrap gap-2">
                             @foreach($genres as $g)
-                                <x-story::ref-badge
-                                    :name="$g->getName()"
-                                    :description="$g->getDescription()"
-                                    color="accent"
-                                    size="md" />
+                            <x-story::ref-badge
+                                :name="$g->getName()"
+                                :description="$g->getDescription()"
+                                color="accent"
+                                size="md" />
                             @endforeach
                         </span>
                         @endif
@@ -81,8 +103,8 @@
 
             </div>
 
-             <!-- Stats -->
-             <div class="col-start-2 col-span-1 row-start-3 row-span-1
+            <!-- Stats -->
+            <div class="col-start-2 col-span-1 row-start-3 row-span-1
                 border-y border-fg
                 pt-2 pb-2 w-full flex items-center flex-start gap-1 md:gap-4">
                 <x-shared::metric-badge
@@ -140,11 +162,11 @@
                     @if(!empty($tws))
                     <span class="inline-flex flex-wrap gap-2">
                         @foreach($tws as $tw)
-                            <x-story::ref-badge
-                                :name="$tw->getName()"
-                                :description="$tw->getDescription()"
-                                color="primary"
-                                size="md" />
+                        <x-story::ref-badge
+                            :name="$tw->getName()"
+                            :description="$tw->getDescription()"
+                            color="primary"
+                            size="md" />
                         @endforeach
                     </span>
                     @endif
@@ -155,49 +177,49 @@
                 <div class="text-sm text-gray-700">
                     <span class="inline-flex flex-wrap gap-2">
                         @if($viewModel->getTypeName())
-                            <x-story::ref-badge
-                                name="{{ $viewModel->getTypeName() }}"
-                                description="{{ $viewModel->getTypeDescription() }}"
-                                color="neutral"
-                                :outline="true"
-                                size="sm"
-                                icon="category" />
+                        <x-story::ref-badge
+                            name="{{ $viewModel->getTypeName() }}"
+                            description="{{ $viewModel->getTypeDescription() }}"
+                            color="neutral"
+                            :outline="true"
+                            size="sm"
+                            icon="category" />
                         @endif
                         @if($viewModel->getAudienceName())
-                            <x-story::ref-badge
-                                name="{{ $viewModel->getAudienceName() }}"
-                                description="{{ $viewModel->getAudienceDescription() }}"
-                                color="neutral"
-                                :outline="true"
-                                size="sm"
-                                icon="group" />
+                        <x-story::ref-badge
+                            name="{{ $viewModel->getAudienceName() }}"
+                            description="{{ $viewModel->getAudienceDescription() }}"
+                            color="neutral"
+                            :outline="true"
+                            size="sm"
+                            icon="group" />
                         @endif
                         @if($viewModel->getCopyrightName())
-                            <x-story::ref-badge
-                                name="{{ $viewModel->getCopyrightName() }}"
-                                description="{{ $viewModel->getCopyrightDescription() }}"
-                                color="neutral"
-                                :outline="true"
-                                size="sm"
-                                icon="copyright" />
+                        <x-story::ref-badge
+                            name="{{ $viewModel->getCopyrightName() }}"
+                            description="{{ $viewModel->getCopyrightDescription() }}"
+                            color="neutral"
+                            :outline="true"
+                            size="sm"
+                            icon="copyright" />
                         @endif
                         @if($viewModel->getStatusName())
-                            <x-story::ref-badge
-                                name="{{ $viewModel->getStatusName() }}"
-                                description="{{ $viewModel->getStatusDescription() }}"
-                                color="neutral"
-                                :outline="true"
-                                size="sm"
-                                icon="edit_note" />
+                        <x-story::ref-badge
+                            name="{{ $viewModel->getStatusName() }}"
+                            description="{{ $viewModel->getStatusDescription() }}"
+                            color="neutral"
+                            :outline="true"
+                            size="sm"
+                            icon="edit_note" />
                         @endif
                         @if($viewModel->getFeedbackName())
-                            <x-story::ref-badge
-                                name="{{ $viewModel->getFeedbackName() }}"
-                                description="{{ $viewModel->getFeedbackDescription() }}"
-                                color="neutral"
-                                :outline="true"
-                                size="sm"
-                                icon="forum" />
+                        <x-story::ref-badge
+                            name="{{ $viewModel->getFeedbackName() }}"
+                            description="{{ $viewModel->getFeedbackDescription() }}"
+                            color="neutral"
+                            :outline="true"
+                            size="sm"
+                            icon="forum" />
                         @endif
                     </span>
                 </div>
@@ -207,7 +229,7 @@
             <div class="col-span-2 flex flex-col flex-start h-full gap-2
                 lg:col-start-3 lg:col-span-1 lg:row-span-3 lg:row-start-2">
                 <div class="p-4 bg-bg flex-1">
-                <article class="min-w-0 w-full p-4 prose flex-1 surface-read text-on-surface overflow-x-hidden [overflow-wrap:anywhere] h-full">
+                    <article class="min-w-0 w-full p-4 prose flex-1 surface-read text-on-surface overflow-x-hidden [overflow-wrap:anywhere] h-full">
                         @if(!$viewModel->hasDescription())
                         <p class="italic text-gray-500">{{ __('story::show.no_description') }}</p>
                         @else
@@ -215,16 +237,16 @@
                         @endif
                     </article>
                 </div>
-               
+
             </div>
 
             @if($viewModel->story->last_chapter_published_at)
-                <div class="col-span-2 flex justify-end h-full gap-2
+            <div class="col-span-2 flex justify-end h-full gap-2
                 lg:col-start-3 lg:col-span-1 lg:row-span-1 lg:row-start-5
                 " x-data="{ date: new Date('{{ $viewModel->story->last_chapter_published_at }}') }">
-                    {{ __('story::show.last_update') }} <span x-text="DateUtils.formatDate(date)"></span>
-                </div>
-                @endif
+                {{ __('story::show.last_update') }} <span x-text="DateUtils.formatDate(date)"></span>
+            </div>
+            @endif
         </div>
 
     </div>

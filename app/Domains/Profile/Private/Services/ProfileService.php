@@ -24,6 +24,31 @@ class ProfileService
     ) {
     }
 
+    public function emptyAbout(Profile $profile): bool
+    {
+        if ($profile->description === null) {
+            return false;
+        }
+
+        $profile->update(['description' => null]);
+        $this->cache->forgetByUserId($profile->user_id);
+        return true;
+    }
+
+    public function emptySocial(Profile $profile): bool
+    {
+        $fields = [
+            'facebook_url' => null,
+            'x_url' => null,
+            'instagram_url' => null,
+            'youtube_url' => null,
+        ];
+
+        $profile->update($fields);
+        $this->cache->forgetByUserId($profile->user_id);
+        return true;
+    }
+
     /**
      * Emit BioUpdated if any of the bio/network fields changed.
      *
@@ -221,9 +246,9 @@ class ProfileService
     }
 
     /**
-     * Delete profile picture
+     * Delete profile picture and handle side-effects (event + cache).
      */
-    private function deleteProfilePicture(Profile $profile): bool
+    public function deleteProfilePicture(Profile $profile): bool
     {
         if ($profile->profile_picture_path) {
             Storage::disk('public')->delete($profile->profile_picture_path);
@@ -234,6 +259,10 @@ class ProfileService
                 userId: $profile->user_id,
                 profilePicturePath: null,
             ));
+
+            // Invalidate cache for this user
+            $this->cache->forgetByUserId($profile->user_id);
+
             return true;
         }
         
@@ -387,6 +416,30 @@ class ProfileService
             Storage::disk('public')->delete($defaultAvatarPath);
         }
 
+        $this->cache->forgetByUserId($userId);
+    }
+
+    /**
+     * Soft delete a user's profile and clear cache.
+     */
+    public function softDeleteProfileByUserId(int $userId): void
+    {
+        $profile = Profile::query()->where('user_id', $userId)->first();
+        if ($profile) {
+            $profile->delete(); // soft delete
+        }
+        $this->cache->forgetByUserId($userId);
+    }
+
+    /**
+     * Restore a soft-deleted user's profile and clear cache.
+     */
+    public function restoreProfileByUserId(int $userId): void
+    {
+        $profile = Profile::withTrashed()->where('user_id', $userId)->first();
+        if ($profile && $profile->trashed()) {
+            $profile->restore();
+        }
         $this->cache->forgetByUserId($userId);
     }
 }

@@ -49,6 +49,10 @@
                        class="flex-1 min-w-[8rem] bg-transparent border-0 focus:ring-0 text placeholder-accent"
                        :class="state.selected.length ? 'placeholder:font-semibold' : ''"
                        :placeholder="state.query.length ? '' : countPlaceholder()">
+                <button type="button" x-cloak x-show="open" @click.stop="open = false" aria-label="Close"
+                        class="p-1 text-{{$color}} hover:text-{{$color}}/80">
+                    <span class="material-symbols-outlined text-[18px] leading-none">close</span>
+                </button>
             </div>
         </div>
 

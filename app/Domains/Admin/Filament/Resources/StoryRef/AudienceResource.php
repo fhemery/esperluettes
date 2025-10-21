@@ -2,6 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\StoryRef;
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\StoryRef\Private\Models\StoryRefAudience;
 use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use Filament\Forms;
@@ -15,6 +16,13 @@ class AudienceResource extends Resource
     protected static ?string $model = StoryRefAudience::class;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $slug = 'story/audiences';
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
+    }
 
     public static function getNavigationGroup(): ?string
     {

@@ -4,7 +4,9 @@ return [
     // Shared services
     App\Domains\Shared\Providers\SharedServiceProvider::class,
     // Events domain
+    App\Domains\Config\Public\Providers\ConfigServiceProvider::class,
     App\Domains\Events\Public\Providers\EventsServiceProvider::class,
+    App\Domains\Moderation\Public\Providers\ModerationServiceProvider::class,
     
     // Domain-specific providers
     App\Domains\Admin\Providers\AdminServiceProvider::class,
@@ -25,3 +27,4 @@ return [
     // This one should be put last, because it declares catch-all routes
     App\Domains\StaticPage\Public\Providers\StaticPageServiceProvider::class,
 ];
+

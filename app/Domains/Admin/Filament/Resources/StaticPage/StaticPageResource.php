@@ -2,6 +2,7 @@
 
 namespace App\Domains\Admin\Filament\Resources\StaticPage;
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use App\Domains\StaticPage\Private\Models\StaticPage;
 use App\Domains\StaticPage\Private\Services\StaticPageService;
@@ -32,6 +33,13 @@ class StaticPageResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('admin::static.navigation.pages');
+    }
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
     }
 
     public static function form(Form $form): Form

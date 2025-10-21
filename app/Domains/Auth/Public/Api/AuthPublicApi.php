@@ -5,6 +5,10 @@ namespace App\Domains\Auth\Public\Api;
 use App\Domains\Auth\Public\Api\Dto\RoleDto;
 use App\Domains\Auth\Private\Services\RoleCacheService;
 use App\Domains\Auth\Private\Services\UserQueryService;
+use App\Domains\Auth\Private\Services\RoleService;
+use App\Domains\Auth\Private\Services\UserService;
+use App\Domains\Auth\Private\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,6 +17,8 @@ class AuthPublicApi
     public function __construct(
         private RoleCacheService $roleCache,
         private UserQueryService $userQuery,
+        private RoleService $roleService,
+        private UserService $userService,
     ) {}
 
     /**
@@ -79,5 +85,64 @@ class AuthPublicApi
     public function getAllActiveUserIds(): array
     {
         return $this->userQuery->getAllActiveUserIds();
+    }
+
+    /**
+     * Get all roles as RoleDto, ordered by name.
+     *
+     * @return array<int, RoleDto>
+     */
+    public function getAllRoles(): array
+    {
+        $roles = $this->roleService->all();
+        return array_map(fn ($r) => RoleDto::fromModel($r), $roles);
+    }
+
+    /**
+     * Delete a user by ID (admin or tech-admin only).
+     *
+     * @throws AuthorizationException
+     */
+    public function deleteUserById(int $userId): void
+    {
+        if (! $this->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+            throw new AuthorizationException('You are not authorized to delete users.');
+        }
+
+        /** @var User $user */
+        $user = User::query()->findOrFail($userId);
+        $this->userService->deleteUser($user);
+    }
+
+    /**
+     * Deactivate a user by ID (admin or tech-admin only).
+     *
+     * @throws AuthorizationException
+     */
+    public function deactivateUserById(int $userId): void
+    {
+        if (! $this->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+            throw new AuthorizationException('You are not authorized to deactivate users.');
+        }
+
+        /** @var User $user */
+        $user = User::query()->findOrFail($userId);
+        $this->userService->deactivateUser($user);
+    }
+
+    /**
+     * Activate a user by ID (admin or tech-admin only).
+     *
+     * @throws AuthorizationException
+     */
+    public function activateUserById(int $userId): void
+    {
+        if (! $this->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+            throw new AuthorizationException('You are not authorized to activate users.');
+        }
+
+        /** @var User $user */
+        $user = User::query()->findOrFail($userId);
+        $this->userService->activateUser($user);
     }
 }

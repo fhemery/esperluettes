@@ -34,11 +34,11 @@ class StoryListViewModel
         return empty($this->items);
     }
 
-    public function links(): string
+    public function links(?string $view = null, array $data = []): string
     {
         if (!empty($this->appends)) {
-            return (string) $this->paginator->appends($this->appends)->links();
+            return (string) $this->paginator->appends($this->appends)->links($view, $data);
         }
-        return (string) $this->paginator->links();
+        return (string) $this->paginator->links($view, $data);
     }
 }

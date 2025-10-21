@@ -2,6 +2,8 @@
 
 namespace App\Domains\Story\Private\Controllers;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
 use App\Domains\Shared\ViewModels\PageViewModel;
@@ -10,6 +12,7 @@ use App\Domains\Story\Private\Http\Requests\ChapterRequest;
 use App\Domains\Story\Private\Http\Requests\ReorderChaptersRequest;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\ReadingProgressService;
 use App\Domains\Story\Private\Services\StoryService;
@@ -26,7 +29,9 @@ class ChapterController
         private ChapterService $service,
         private StoryService $storyService,
         private ReadingProgressService $readingProgress,
-        private ProfilePublicApi $profileApi
+        private ProfilePublicApi $profileApi,
+        private AuthPublicApi $authApi,
+        private ChapterCreditService $chapterCreditService
     ) {
     }
 
@@ -151,6 +156,12 @@ class ChapterController
         return view('story::chapters.show', [
             'vm' => $vm,
             'page' => $page,
+            'isModerator' => $this->authApi->hasAnyRole([
+                Roles::MODERATOR,
+                Roles::ADMIN,
+                Roles::TECH_ADMIN,
+            ]),
+            'canCreateChapter' => $isAuthor && $this->chapterCreditService->availableForUser($userId) > 0,
         ]);
     }
 

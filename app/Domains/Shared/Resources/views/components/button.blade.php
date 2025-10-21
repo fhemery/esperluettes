@@ -35,9 +35,44 @@
     }
 @endphp
 
-<button {{ $attributes->merge(['type' => $type, 'class' => "$base $sizeClasses $colorClasses", 'disabled' => $disabled]) }}>
+<button
+    x-data="SubmitBtn()"
+    {{ $attributes->merge(['type' => $type, 'class' => "$base $sizeClasses $colorClasses", 'disabled' => $disabled]) }}>
     @if ($icon)
         <span class="material-symbols-outlined">{{ $icon }}</span>
     @endif
     {{ $slot }}
+    <span x-cloak x-show="loading" class="js-btn-spinner ml-2 inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" aria-hidden="true"></span>
 </button>
+
+@once
+@push('scripts')
+<script>
+(function(){
+  if (window.SubmitBtn) return;
+  window.SubmitBtn = function(){
+    return {
+      loading: false,
+      disableButton(){
+        if (this.$el.disabled) return;
+        this.loading = true;
+        this.$el.disabled = true;
+        this.$el.setAttribute('aria-busy', 'true');
+      },
+      init(){
+        const type = (this.$el.getAttribute('type') || 'button').toLowerCase();
+        if (type !== 'submit') return;
+        const form = this.$el.form;
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+          if (e.defaultPrevented) return;
+          if (e.submitter && e.submitter !== this.$el) return;
+          requestAnimationFrame(() => this.disableButton());
+        });
+      }
+    }
+  }
+})();
+</script>
+@endpush
+@endonce

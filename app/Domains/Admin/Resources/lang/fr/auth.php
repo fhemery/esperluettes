@@ -46,6 +46,11 @@ return [
             'confirm_message' => "Cela remplacera le rôle « :from » par « :to ».",
             'success' => "L’utilisateur a été promu au rôle « :role ».",
         ],
+        'deletion' => [
+            'confirm_title' => 'Supprimer l’utilisateur',
+            'confirm_message' => 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
+            'success' => "L’utilisateur a été supprimé avec succès.",
+        ],
     ],
 
     'activation_codes' => [

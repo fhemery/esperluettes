@@ -45,7 +45,7 @@ What we do not want:
 - `RecordAllDomainEvents.php` listener is registered in `SharedServiceProvider`, recording any Event in the `App\Domains` namespace
 - Storage model: `DomainEvent` with JSON `payload`, contextual fields, pruning by `occurred_at` using `config('shared.event_auditing_retention_days', 90)` and a computed `summary` (supports `SummarizableDomainEvent`).
 - Profile domain listener: `CreateProfileOnUserRegistered` listens to `UserRegistered` and implements `ShouldHandleEventsAfterCommit`.
-- Admin visibility: Filament resources exist for `DomainEvent` (list/view) under `App\Domains\Admin\Filament\Resources\Shared\DomainEventResource*`.
+- Admin visibility: Filament resources exist for `DomainEvent` (list/view) under `App\Domains\Admin\Filament\Resources\Event\DomainEventResource*`.
 
 Gaps we should address:
 

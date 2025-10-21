@@ -2,6 +2,8 @@
 
 namespace App\Domains\Comment\Private\View\Components;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\View\Component;
 use Illuminate\Contracts\View\View as ViewContract;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
@@ -14,6 +16,7 @@ class CommentList extends Component
     public bool $isGuest = false;
 
     public function __construct(
+        private AuthPublicApi $authApi,
         public string $entityType,
         public int $entityId,
         public int $perPage = 5,
@@ -45,6 +48,7 @@ class CommentList extends Component
             'entityId' => $this->entityId,
             'error' => $this->error,
             'isGuest' => $this->isGuest,
+            'isModerator' => $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]),
         ]);
     }
 }

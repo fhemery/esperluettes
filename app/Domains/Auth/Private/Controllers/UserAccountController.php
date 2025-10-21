@@ -3,19 +3,19 @@
 namespace App\Domains\Auth\Private\Controllers;
 
 use App\Domains\Auth\Private\Requests\UserAccountUpdateRequest;
+use App\Domains\Auth\Private\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Domains\Shared\Controllers\Controller;
 use App\Domains\Events\Public\Api\EventBus;
-use App\Domains\Auth\Public\Events\UserDeleted;
 
 class UserAccountController extends Controller
 {
     public function __construct(
         private readonly EventBus $eventBus,
+        private readonly UserService $userService,
     ) {}
     /**
      * Display the user's Account form.
@@ -52,17 +52,7 @@ class UserAccountController extends Controller
             'password' => ['required', 'current_password'],
         ]);
 
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        // Emit deletion event
-        $this->eventBus->emit(new UserDeleted(userId: (int) $user->id));
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $this->userService->deleteUser($request->user(), $request);
 
         return Redirect::to('/');
     }

@@ -102,7 +102,7 @@
                 async preload(userIds, roleSlugs) {
                     if (Array.isArray(userIds) && userIds.length) {
                         try {
-                            const res = await fetch(`/profiles/lookup/by-ids?ids=${encodeURIComponent(userIds.join(','))}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                            const res = await fetch(`/profile/lookup/by-ids?ids=${encodeURIComponent(userIds.join(','))}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                             const data = await res.json();
                             const fresh = (data.profiles || []).filter(p => !this.selected.users.some(u => u.id === p.id));
                             this.selected.users.push(...fresh);
@@ -123,7 +123,7 @@
                     this.loading = true;
                     try {
                         const [pRes, rRes] = await Promise.all([
-                            fetch(`/profiles/lookup?q=${encodeURIComponent(q)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }),
+                            fetch(`/profile/lookup?q=${encodeURIComponent(q)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }),
                             fetch(`/auth/roles/lookup?q=${encodeURIComponent(q)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }),
                         ]);
                         const pJson = await pRes.json();

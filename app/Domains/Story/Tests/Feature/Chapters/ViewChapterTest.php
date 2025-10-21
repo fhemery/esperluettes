@@ -1,8 +1,11 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Domains\Story\Private\Services\ChapterCreditService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -133,6 +136,57 @@ describe('Chapter display', function () {
         });
     });
 
+    describe('Moderation', function () {
+        beforeEach(function () {
+            createFeatureToggle($this, new FeatureToggle('reporting', 'moderation', access: FeatureToggleAccess::ON));
+        });
+
+        it('does not show the report button on own chapter', function () {
+            $author = alice($this);
+            $story = publicStory('Moderation Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Mod Chap']);
+
+            $this->actingAs($author)
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->assertDontSee(__('moderation::report.button'));
+        });
+
+        it('shows the report button when viewing someone else\'s chapter', function () {
+            $author = alice($this);
+            $story = publicStory('Moderation Story 2', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Mod Chap 2']);
+
+            $bob = bob($this);
+            $this->actingAs($bob)
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->assertSee(__('moderation::report.button'));
+        });
+
+        it('does not show the moderator popover to guests', function () {
+            $author = alice($this);
+            $story = publicStory('Moderation Story 3', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Mod Chap 3']);
+
+            $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->assertDontSee('id="chapter-moderator-btn"', false);
+        });
+
+        it('shows the moderator popover to moderators', function () {
+            $author = alice($this);
+            $story = publicStory('Moderation Story 4', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Mod Chap 4']);
+
+            $moderatorUser = moderator($this);
+            $this->actingAs($moderatorUser)
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->assertSee('id="chapter-moderator-btn"', false);
+        });
+    });
+
     describe('Page content', function () {
 
         it('shows a draft badge on unpublished chapter', function () {
@@ -232,13 +286,86 @@ describe('Chapter display', function () {
 
                 $c1 = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
                 $c2 = createPublishedChapter($this, $story, $author, ['title' => 'C2']);
-                $c3 = createPublishedChapter($this, $story, $author, ['title' => 'C3']);
+                $c3 = createUnpublishedChapter($this, $story, $author, ['title' => 'C3']);
 
                 $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c1->slug]));
                 $resp->assertOk();
                 $resp->assertSee($c1->title);
                 $resp->assertSee($c2->title);
                 $resp->assertSee($c3->title);
+            });
+
+            it('should not show private chapters to non collaborators', function () {
+                $author = alice($this);
+                $story = publicStory('Public Story', $author->id);
+
+                $c1 = createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1']);
+                $c2 = createPublishedChapter($this, $story, $author, ['title' => 'Chapter 2']);
+                $c3 = createUnpublishedChapter($this, $story, $author, ['title' => 'Chapter 3']);
+
+                $reader = bob($this);
+                $this->actingAs($reader);
+
+                $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c1->slug]));
+                $resp->assertOk();
+                $resp->assertSee($c1->title);
+                $resp->assertSee($c2->title);
+                $resp->assertDontSee($c3->title);
+            });
+
+
+            describe('Create chapter button', function () {
+                it('does not show create button for reader', function () {
+                    $author = alice($this);
+                    $reader = bob($this);
+                    $story = createStoryForAuthor($author->id, ['title' => 'Has Credits Story']);
+
+                    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Any Chapter']);
+
+                    $this->actingAs($reader);
+                    $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+                    $resp->assertOk();
+                    $resp->assertDontSee("createChapterBtn");
+                });
+
+                it('shows enabled create button for author when user has credits (should FAIL now)', function () {
+                    $author = alice($this);
+                    $this->actingAs($author);
+                    $story = createStoryForAuthor($author->id, ['title' => 'Has Credits Story']);
+
+                    // Ensure there is a chapter to view
+                    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Any Chapter']);
+
+                    setUserCredits($author->id, 5);
+
+                    $this->actingAs($author);
+                    $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+                    $resp->assertOk();
+
+                    // Expect an enabled link to create chapter
+                    $resp->assertSee("createChapterBtn", false);
+                    $resp->assertSee(route('chapters.create', ['storySlug' => $story->slug]), false);
+                    $resp->assertDontSee('disabled="true"', false);
+                });
+
+                it('shows disabled create button for author when user has no credits', function () {
+                    $author = alice($this);
+                    $this->actingAs($author);
+                    $story = createStoryForAuthor($author->id, ['title' => 'No Credits Story']);
+
+                    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Any Chapter']);
+
+                    setUserCredits($author->id, 0);
+
+                    $this->actingAs($author);
+                    $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+                    $resp->assertOk();
+
+                    // Expect no link and a disabled button
+                    $resp->assertSee("createChapterBtn", false);
+                    $resp->assertDontSee(route('chapters.create', ['storySlug' => $story->slug]), false);
+                    $resp->assertSee('disabled="true"', false);
+                });
             });
         });
 
@@ -419,7 +546,7 @@ describe('Chapter display', function () {
         });
     });
 
-    describe('Breadcrumbs', function (){
+    describe('Breadcrumbs', function () {
 
         it('displays breadcrumbs with Home > Library > story (clickable) > chapter (active)', function () {
             $author = alice($this);

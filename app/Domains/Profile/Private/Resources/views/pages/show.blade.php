@@ -7,7 +7,7 @@
                 <!-- Profile Picture -->
                 <div class="flex-shrink-0">
                     <x-shared::avatar :src="$profile->profile_picture_path"
-                        class="h-25 w-25 sm:h-50 sm:w-50 rounded-full border-4 border-white shadow-lg"
+                        class="h-[100px] w-[100px] sm:h-[200px] sm:w-[200px] rounded-full border-4 border-white"
                         alt="{{ __('profile::show.alt_profile_picture', ['name' => $profile->display_name]) }}" />
                 </div>
 
@@ -50,10 +50,14 @@
                     @if(!empty($profile->roles))
                     <div class="mt-2 flex flex-wrap gap-2">
                         @foreach($profile->roles as $role)
-                        <x-shared::badge color="primary" :outline="false" size="md"
-                            title="{{ $role->description }}">
-                            {{ $role->name }}
-                        </x-shared::badge>
+                        <x-shared::popover placement="bottom">
+                            <x-slot name="trigger">
+                                <x-shared::badge color="primary" :outline="false" size="md">
+                                    {{ $role->name }}
+                                </x-shared::badge>
+                            </x-slot>
+                            {{ $role->description }}
+                        </x-shared::popover>
                         @endforeach
                     </div>
                     @endif
@@ -63,6 +67,41 @@
                             {{ __('profile::show.member_since') }} {{ $profile->created_at->translatedFormat('F Y') }}
                         </x-shared::badge>
                     </div>
+
+                    @if(Auth::check() && !$isOwn)
+                    <div class="flex gap-4 justify-end w-full">
+                        <x-moderation::report-button 
+                            topic-key="profile" 
+                            :entity-id="$profile->user_id"
+                        />
+                        @if($isModerator)
+                        <x-moderation::moderation-button
+                            badgeColor="warning"
+                            position="top"
+                            id="profile-moderator-btn"
+                        >
+                            <x-moderation::action
+                                :action="route('profile.moderation.remove-image', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.remove_image.label')"
+                            />
+
+                            <x-moderation::action
+                                :action="route('profile.moderation.empty-about', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.empty_about.label')"
+                            />
+
+                            <x-moderation::action
+                                :action="route('profile.moderation.empty-social', $profile->slug)"
+                                method="POST"
+                                :label="__('profile::moderation.empty_social.label')"
+                            />
+                        </x-moderation::moderation-button>
+                        @endif
+                        
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

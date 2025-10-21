@@ -6,6 +6,7 @@ use App\Domains\Admin\Filament\Resources\Auth\UserResource\Pages;
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Private\Models\Role;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Private\Services\RoleService;
 use App\Domains\Auth\Private\Services\UserActivationService;
 use Filament\Forms;
@@ -45,6 +46,13 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?int $navigationSort = 1;
+
+    public static function canAccess(): bool
+    {
+        /** @var \App\Domains\Auth\Private\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return $user?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -169,8 +177,8 @@ class UserResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading(__('admin::auth.users.activation.confirm_title'))
                     ->modalDescription(__('admin::auth.users.activation.confirm_message'))
-                    ->action(function (User $record, UserActivationService $service) {
-                        $service->activateUser($record);
+                    ->action(function (User $record, AuthPublicApi $api) {
+                        $api->activateUserById($record->id);
                         Notification::make()
                             ->title(__('admin::auth.users.activation.success'))
                             ->success()
@@ -212,19 +220,30 @@ class UserResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading(__('admin::auth.users.deactivation.confirm_title'))
                     ->modalDescription(__('admin::auth.users.deactivation.confirm_message'))
-                    ->action(function (User $record, UserActivationService $service) {
-                        $service->deactivateUser($record);
+                    ->action(function (User $record, AuthPublicApi $api) {
+                        $api->deactivateUserById($record->id);
                         Notification::make()
                             ->title(__('admin::auth.users.deactivation.success'))
                             ->success()
                             ->send();
                     }),
                     Tables\Actions\EditAction::make()->iconButton()->label(''),
-                    Tables\Actions\DeleteAction::make()->iconButton()->label('')
+                    Action::make('delete')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading(__('admin::auth.users.deletion.confirm_title') ?? 'Delete user')
+                        ->modalDescription(__('admin::auth.users.deletion.confirm_message') ?? 'Are you sure you want to delete this user?')
+                        ->action(function (User $record, AuthPublicApi $api) {
+                            $api->deleteUserById($record->id);
+                            Notification::make()
+                                ->title(__('admin::auth.users.deletion.success') ?? 'User deleted')
+                                ->success()
+                                ->send();
+                        })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

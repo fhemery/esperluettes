@@ -61,16 +61,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if the user has admin role.
-     *
-     * @return bool
-     */
-    public function isAdmin(): bool
-    {
-        return $this->hasRole('admin');
-    }
-
-    /**
      * Check if the user is on probation
      *
      * @return bool

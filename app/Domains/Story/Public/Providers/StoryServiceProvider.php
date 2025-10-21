@@ -19,6 +19,8 @@ use App\Domains\Story\Public\Events\ChapterPublished;
 use App\Domains\Story\Public\Events\ChapterUnpublished;
 use App\Domains\Story\Public\Events\ChapterDeleted;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
+use App\Domains\Story\Public\Events\StoryModeratedAsPrivate;
+use App\Domains\Story\Public\Events\StorySummaryModerated;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -27,8 +29,19 @@ use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
+use App\Domains\Story\Private\Listeners\DecreaseCreditsOnCommentDeletedListener;
 use App\Domains\Story\Private\Listeners\RemoveStoriesOnUserDeleted;
 use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
+use App\Domains\Auth\Public\Events\UserDeactivated;
+use App\Domains\Story\Private\Listeners\SoftDeleteStoriesOnUserDeactivated;
+use App\Domains\Auth\Public\Events\UserReactivated;
+use App\Domains\Comment\Public\Events\CommentDeletedByModeration;
+use App\Domains\Story\Private\Listeners\RestoreStoriesOnUserReactivated;
+use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use App\Domains\Story\Public\Events\ChapterContentModerated;
+use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
+use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
+use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -76,12 +89,31 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->registerEvent(ChapterUnpublished::name(), ChapterUnpublished::class);
         $eventBus->registerEvent(ChapterDeleted::name(), ChapterDeleted::class);
         $eventBus->registerEvent(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
+        $eventBus->registerEvent(StoryModeratedAsPrivate::name(), StoryModeratedAsPrivate::class);
+        $eventBus->registerEvent(StorySummaryModerated::name(), StorySummaryModerated::class);
+        $eventBus->registerEvent(ChapterUnpublishedByModeration::name(), ChapterUnpublishedByModeration::class);
+        $eventBus->registerEvent(ChapterContentModerated::name(), ChapterContentModerated::class);
 
         // Subscribe to cross-domain events (after-commit listeners)
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);
         $eventBus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveStoriesOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveChapterCreditsOnUserDeleted::class), 'handle']);
+        $eventBus->subscribe(UserDeactivated::class, [app(SoftDeleteStoriesOnUserDeactivated::class), 'handle']);
+        $eventBus->subscribe(UserReactivated::class, [app(RestoreStoriesOnUserReactivated::class), 'handle']);
+        $eventBus->subscribe(CommentDeletedByModeration::class, [app(DecreaseCreditsOnCommentDeletedListener::class), 'handle']);
 
+        // Register Story and Chapter topics for moderation
+        $moderationRegistry = app(ModerationRegistry::class);
+        $moderationRegistry->register(
+            key: 'story',
+            displayName: __('story::moderation.topic_story'),
+            formatterClass: StorySnapshotFormatter::class
+        );
+        $moderationRegistry->register(
+            key: 'chapter',
+            displayName: __('story::moderation.topic_chapter'),
+            formatterClass: ChapterSnapshotFormatter::class
+        );
     }
 }

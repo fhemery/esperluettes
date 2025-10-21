@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Message\Private\Controllers;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Message\Private\Models\MessageDelivery;
 use App\Domains\Message\Private\Requests\ComposeMessageRequest;
 use App\Domains\Message\Private\Requests\DeleteMessageRequest;
@@ -21,7 +23,8 @@ class MessageController extends Controller
     public function __construct(
         private UnreadCounterService $unreadCounter,
         private MessageDispatchService $dispatcher,
-        private MessageQueryService $queryService
+        private MessageQueryService $queryService,
+        private AuthPublicApi $authApi
     ) {
     }
 
@@ -35,6 +38,7 @@ class MessageController extends Controller
         return view('message::pages.index', [
             'deliveries' => $deliveries,
             'selectedDelivery' => null,
+            'canCompose' => $this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]),
         ]);
     }
 
@@ -61,6 +65,7 @@ class MessageController extends Controller
         return view('message::pages.index', [
             'deliveries' => $deliveries,
             'selectedDelivery' => $delivery,
+            'canCompose' => $this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]),
         ]);
     }
 

@@ -4,6 +4,7 @@ import registerTooltip from './tooltip.js';
 import { initQuillEditor } from './editor.js';
 import * as DateUtils from './date-utils.js';
 import {BadgeOverflow} from './badge-overflow.js';
+import '../../../Moderation/Private/Resources/js/moderation.js';
 
 window.Alpine = Alpine;
 window.initQuillEditor = initQuillEditor;

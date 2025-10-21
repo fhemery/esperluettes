@@ -68,6 +68,22 @@ class ChapterCreditService
     }
 
     /**
+     * Revoke one earned credit (decrease credits_gained by 1).
+     */
+    public function revokeOne(int $userId): void
+    {
+        if (!$this->hasRow($userId)) {
+            $this->grantInitialOnRegistration($userId);
+        }
+        DB::table('story_chapter_credits')
+            ->where('user_id', $userId)
+            ->update([
+                'credits_gained' => DB::raw('credits_gained - 1'),
+                'updated_at' => now(),
+            ]);
+    }
+
+    /**
      * Remove the chapter credits row for a user (used on account deletion cleanup).
      */
     public function deleteRow(int $userId): void

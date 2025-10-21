@@ -31,8 +31,8 @@
                 <input type="file"
                     name="profile_picture"
                     id="profile_picture"
-                    accept="image/*"
-                    @change="hasFile = $event.target.files && $event.target.files.length > 0"
+                    accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
+                    @change="hasFile = window.ensureMaxFileSize($event, 2); if(!hasFile){ $event.target.value=''; }"
                     class="block w-full text-sm text-gray-700 ring-1 ring-inset ring-gray-200 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     :class="{
                                                'ring-green-300 file:bg-green-50 file:text-green-700 hover:file:bg-green-100': hasFile,
@@ -131,4 +131,17 @@
             </div>
         </div>
     </form>
+    @push('scripts')
+    <script>
+      window.ensureMaxFileSize = function(e, maxMB){
+        const f = e.target.files && e.target.files[0];
+        if(!f) return false;
+        if(f.size > maxMB * 1024 * 1024){
+          alert('{{ __("profile::edit.errors.profile_picture_too_large") }}');
+          return false;
+        }
+        return true;
+      }
+    </script>
+    @endpush
 </x-app-layout>

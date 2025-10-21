@@ -91,7 +91,7 @@ class StoryController
         // Parse "No TW only" checkbox
         $noTwOnly = request()->boolean('no_tw_only', false);
 
-        $filter = new StoryFilterAndPagination(page: $page, perPage: 24, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds, noTwOnly: $noTwOnly);
+        $filter = new StoryFilterAndPagination(page: $page, perPage: 12, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds, noTwOnly: $noTwOnly);
         $paginator = $this->service->getStories($filter);
 
         // Referentials lookup for display (types, ...)
@@ -397,6 +397,7 @@ class StoryController
             'metaDescription' => $metaDescription,
             'availableChapterCredits' => $availableChapterCredits,
             'page' => $page,
+            'isModerator' => $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]),
         ]);
     }
 

@@ -69,7 +69,7 @@
     @else
       <ul class="space-y-3" x-ref="list">
         @foreach($list->items as $comment)
-          @include('comment::components.partials.comment-item', ['comment' => $comment, 'config' => $list->config])
+          @include('comment::components.partials.comment-item', ['comment' => $comment, 'config' => $list->config, 'isModerator' => $isModerator])
         @endforeach
       </ul>
       <div class="mt-3 text-sm text-gray-500" x-show="loading">Loading…</div>
@@ -169,7 +169,6 @@
           } else {
             this.hasMore = false;
           }
-          this.page = this.page + 1;
         } finally {
           this.loading = false;
         }

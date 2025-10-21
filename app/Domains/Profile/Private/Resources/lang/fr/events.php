@@ -12,4 +12,13 @@ return [
     'bio_updated' => [
         'summary' => "Biographie mise à jour",
     ],
+    'about_moderated' => [
+        'summary' => "Biographie supprimée par la modération (userId = :userId)",
+    ],
+    'avatar_moderated' => [
+        'summary' => "Avatar supprimé par la modération (userId = :userId)",
+    ],
+    'social_moderated' => [
+        'summary' => "Réseaux sociaux vidés par la modération (userId = :userId)",
+    ],
 ];

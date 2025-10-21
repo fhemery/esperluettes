@@ -15,5 +15,13 @@
     "You're logged in!": "Vous êtes connecté !",
     "Whoops! Something went wrong.": "Oups ! Une erreur s'est produite.",
     "validation.uploaded": "L'image ne vérifie pas les critères de taille et de format.",
-    "validation.required": "Champ obligatoire"
+    "validation.required": "Champ obligatoire",
+    "Pagination Navigation": "Navigation par pages",
+    "pagination.previous": "Précédent",
+    "pagination.next": "Suivant",
+    "pagination.showing": "Affichage de",
+    "pagination.to": "à",
+    "pagination.of": "sur",
+    "pagination.results": "résultats",
+    "pagination.go_to_page": "Aller à la page :page"
 }

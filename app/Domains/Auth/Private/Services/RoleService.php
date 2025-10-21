@@ -5,6 +5,7 @@ namespace App\Domains\Auth\Private\Services;
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Private\Models\Role;
 use App\Domains\Auth\Private\Services\RoleCacheService;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Public\Events\UserRoleGranted;
 use App\Domains\Auth\Public\Events\UserRoleRevoked;
@@ -30,7 +31,7 @@ class RoleService
         $nowHasRole = $user->roles()->where('slug', $role)->exists();
         if (!$hadRole && $nowHasRole) {
             $actorId = AuthFacade::id();
-            $targetIsAdmin = $user->hasRole('admin');
+            $targetIsAdmin = $user->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]);
             $this->eventBus->emit(new UserRoleGranted(
                 userId: (int) $user->id,
                 role: $role,
@@ -53,7 +54,7 @@ class RoleService
         $nowHasRole = $user->roles()->where('slug', $role)->exists();
         if ($hadRole && !$nowHasRole) {
             $actorId = AuthFacade::id();
-            $targetIsAdmin = $user->hasRole('admin');
+            $targetIsAdmin = $user->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]);
             $this->eventBus->emit(new UserRoleRevoked(
                 userId: (int) $user->id,
                 role: $role,
@@ -121,6 +122,19 @@ class RoleService
         }
         return Role::query()
             ->whereIn('slug', $slugs)
+            ->orderBy('name')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * List all roles ordered by name.
+     *
+     * @return array<int, Role>
+     */
+    public function all(): array
+    {
+        return Role::query()
             ->orderBy('name')
             ->get()
             ->all();

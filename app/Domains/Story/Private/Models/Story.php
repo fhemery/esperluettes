@@ -6,10 +6,12 @@ use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Story extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
         'created_by_user_id',
         'title',

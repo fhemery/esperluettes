@@ -24,7 +24,6 @@ use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Collection;
 
 class StoryService
 {
@@ -123,7 +122,58 @@ class StoryService
         $opts = $options ?? GetStoryOptions::Full();
         $id = SlugWithId::extractId($slug);
 
-        return $this->storiesRepository->getStoryById($id, Auth::id(), $opts);
+        $story = $this->storiesRepository->getStoryById($id, Auth::id(), $opts);
+        if ($story && $opts->includeChapters && !$story->collaborators()->where('user_id', Auth::id())->exists()) {
+            $story->chapters = $story->chapters->filter(fn($chapter) => $chapter->status === Chapter::STATUS_PUBLISHED);
+        }
+
+        return $story;
+    }
+
+    /**
+     * Set a story visibility to private. Returns true if it changed, false if already private.
+     */
+    public function makePrivate(string $slug): bool
+    {
+        $story = $this->getStory($slug);
+        if (!$story) {
+            abort(404);
+        }
+
+        if ($story->visibility === Story::VIS_PRIVATE) {
+            return false;
+        }
+
+        $before = $story->visibility;
+        $this->storiesRepository->setVisibility($story->id, Story::VIS_PRIVATE);
+
+        // Emit visibility changed event for consistency across the system
+        $this->eventBus->emit(new StoryVisibilityChanged(
+            storyId: (int) $story->id,
+            title: (string) $story->title,
+            oldVisibility: (string) $before,
+            newVisibility: (string) $story->visibility,
+        ));
+
+        return true;
+    }
+
+    /**
+     * Empty the story summary (description). Returns true if it changed, false if already null.
+     */
+    public function emptySummary(string $slug): bool
+    {
+        $story = $this->getStory($slug);
+        if (!$story) {
+            abort(404);
+        }
+
+        if ($story->description === null) {
+            return false;
+        }
+
+        $this->storiesRepository->clearDescription($story->id);
+        return true;
     }
 
     /**
@@ -211,7 +261,7 @@ class StoryService
             }
 
             // Perform deletion (DB cascades will remove related rows)
-            $story->delete();
+            $story->forceDelete();
 
             // Emit deletion event
             $this->eventBus->emit(new StoryDeleted($before, $chapterSnaps));
@@ -345,5 +395,66 @@ class StoryService
         foreach ($stories as $story) {
             $this->deleteStory($story);
         }
+    }
+
+    /**
+     * Soft delete all stories authored by the given user, including their chapters.
+     * Intended to be used on user deactivation.
+     */
+    public function softDeleteStoriesByAuthor(int $userId): void
+    {
+        $stories = $this->storiesRepository->findByAuthor($userId);
+
+        foreach ($stories as $story) {
+            $this->softDeleteStory($story);
+        }
+    }
+
+    /**
+     * Soft delete a story and its chapters.
+     */
+    private function softDeleteStory(Story $story): void
+    {
+        DB::transaction(function () use ($story) {
+            // Soft delete chapters first
+            $story->chapters()->delete();
+            // Then soft delete story
+            $story->delete();
+        });
+    }
+
+    /**
+     * Restore all soft-deleted stories authored by the given user, including their chapters.
+     * Intended to be used on user reactivation.
+     */
+    public function restoreStoriesByAuthor(int $userId): void
+    {
+        // Find all stories (including trashed) where user is an author
+        $stories = Story::withTrashed()->whereHas('authors', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->get();
+
+        foreach ($stories as $story) {
+            $this->restoreStory($story);
+        }
+    }
+
+    /**
+     * Restore a soft-deleted story and its chapters.
+     */
+    private function restoreStory(Story $story): void
+    {
+        DB::transaction(function () use ($story) {
+            // Restore story first to ensure relations can be accessed
+            if (method_exists($story, 'trashed') && $story->trashed()) {
+                $story->restore();
+            }
+            // Restore chapters
+            Chapter::withTrashed()->where('story_id', $story->id)->get()->each(function (Chapter $c) {
+                if (method_exists($c, 'trashed') && $c->trashed()) {
+                    $c->restore();
+                }
+            });
+        });
     }
 }

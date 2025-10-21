@@ -77,7 +77,7 @@ describe('Card display', function () {
             // Assert: check icon and tooltip
             $resp->assertOk();
             $resp->assertSee('No TW Story');
-            $resp->assertSee('check_circle');
+            $resp->assertSee('warning_off');
             $resp->assertSee(trans('story::shared.trigger_warnings.tooltips.no_tw'));
         });
 
@@ -497,17 +497,17 @@ describe('Ordering and Pagination', function () {
         // Arrange
         $author = alice($this);
 
-        // Create 30 public stories, each with a published chapter and set last_chapter_published_at for ordering
+        // Create 20 public stories, each with a published chapter and set last_chapter_published_at for ordering
         // We need to increase the chapter counter of the user
         $chapterCreditService = app(ChapterCreditService::class);
 
-        for ($i = 1; $i <= 30; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
             $story = publicStory(sprintf('Story %02d', $i), $author->id, [
                 'description' => '<p>Desc</p>',
             ]);
             $chapterCreditService->grantOne($author->id);
             createPublishedChapter($this, $story, $author);
-            // Set synthetic ordering based on last_chapter_published_at (newest first should be Story 30)
+            // Set synthetic ordering based on last_chapter_published_at (newest first should be Story 20)
             $story->last_chapter_published_at = now()->subMinutes(60 - $i);
             $story->saveQuietly();
         }
@@ -515,9 +515,9 @@ describe('Ordering and Pagination', function () {
         // Act: first page
         $page1 = $this->get('/stories');
 
-        // Assert: shows newest first (Story 30 by last_chapter_published_at) and does not include oldest beyond 24 (Story 06)
+        // Assert: shows newest first (Story 20 by last_chapter_published_at) and does not include oldest beyond 24 (Story 06)
         $page1->assertOk();
-        $page1->assertSee('Story 30');
+        $page1->assertSee('Story 20');
         $page1->assertDontSee('Story 06');
         $page1->assertSee('/stories?page=2'); // pagination link to next page
 

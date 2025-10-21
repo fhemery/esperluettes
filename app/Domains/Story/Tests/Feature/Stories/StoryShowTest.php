@@ -1,6 +1,8 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -206,6 +208,47 @@ describe('Story details page', function () {
                 $resp->assertSee(trans('story::shared.trigger_warnings.unspoiled'));
                 $resp->assertSee(trans('story::shared.trigger_warnings.tooltips.unspoiled'));
             });
+        });
+    });
+
+    describe('Moderation', function () {
+        beforeEach(function () {
+            createFeatureToggle($this, new FeatureToggle(
+                'reporting',
+                'moderation',
+                access: FeatureToggleAccess::ON
+            ));
+        });
+
+        it('does not show the moderator popover to guests', function () {
+            $author = alice($this);
+            $story = publicStory('Public Story', $author->id, ['description' => '<p>desc</p>']);
+
+            $this->get('/stories/' . $story->slug)
+                ->assertOk()
+                ->assertDontSee('id="story-moderator-btn"', false);
+        });
+
+        it('shows the report button to authenticated non-authors', function () {
+            $author = alice($this);
+            $viewer = bob($this);
+            $story = publicStory('Public Story', $author->id, ['description' => '<p>desc</p>']);
+
+            $this->actingAs($viewer)
+                ->get('/stories/' . $story->slug)
+                ->assertOk()
+                ->assertSee(__('moderation::report.button'));
+        });
+
+        it('shows the moderator popover to moderators', function () {
+            $author = alice($this);
+            $story = publicStory('Public Story', $author->id, ['description' => '<p>desc</p>']);
+            $moderator = moderator($this);
+
+            $this->actingAs($moderator)
+                ->get('/stories/' . $story->slug)
+                ->assertOk()
+                ->assertSee('id="story-moderator-btn"', false);
         });
     });
 
