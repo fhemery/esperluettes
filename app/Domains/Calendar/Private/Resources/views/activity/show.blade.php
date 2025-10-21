@@ -35,6 +35,8 @@ $stateLabel = match($activity->state) {
             <div class="prose max-w-none">
                 {!! $activity->description !!}
             </div>
+
+            <x-dynamic-component :component="$componentKey" :activity="$activity" />
         </div>
     </div>
 </x-app-layout>

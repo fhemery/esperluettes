@@ -12,11 +12,11 @@ class JardinoRegistration implements ActivityRegistrationInterface
 
     public function displayComponentKey(): string
     {
-        return 'calendar.activities.jardino';
+        return 'jardino::jardino-component';
     }
 
     public function configComponentKey(): ?string
     {
-        return 'calendar.activities.jardino-config';
+        return null;
     }
 }

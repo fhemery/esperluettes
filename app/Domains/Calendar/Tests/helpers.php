@@ -11,7 +11,7 @@ class FakeActivityRegistration implements ActivityRegistrationInterface
 {
     public function displayComponentKey(): string
     {
-        return 'calendar.activities.fake';
+        return 'calendar::test-fake-empty';
     }
 
     public function configComponentKey(): ?string
@@ -19,6 +19,7 @@ class FakeActivityRegistration implements ActivityRegistrationInterface
         return null;
     }
 }
+
 
 function makeActivityCreateDto(array $overrides = []): ActivityToCreateDto
 {
@@ -46,6 +47,8 @@ function registerFakeActivityType(CalendarRegistry $registry, string $key = 'fak
     if (! $registry->has($key)) {
         $registry->register($key, new FakeActivityRegistration());
     }
+
+    // No need to register a class-based component when returning a view key
 }
 
 /**

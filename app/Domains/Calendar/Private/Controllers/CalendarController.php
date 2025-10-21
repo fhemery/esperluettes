@@ -6,6 +6,7 @@ namespace App\Domains\Calendar\Private\Controllers;
 
 use App\Domains\Calendar\Private\Services\ActivityService;
 use Illuminate\Contracts\View\View as ViewContract;
+use App\Domains\Calendar\Public\Api\CalendarRegistry;
 
 class CalendarController
 {
@@ -16,9 +17,13 @@ class CalendarController
     public function show(string $slug): ViewContract
     {
         $activity = $this->activities->findVisibleBySlugOrFail($slug);
+        /** @var CalendarRegistry $registry */
+        $registry = app(CalendarRegistry::class);
+        $componentKey = $registry->get($activity->activity_type)->displayComponentKey();
 
         return view('calendar::activity.show', [
             'activity' => $activity,
+            'componentKey' => $componentKey,
         ]);
     }
 }

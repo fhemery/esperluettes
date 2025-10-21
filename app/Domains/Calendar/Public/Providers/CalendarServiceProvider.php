@@ -14,6 +14,8 @@ class CalendarServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CalendarRegistry::class, fn () => new CalendarRegistry());
+        // Register activity-specific providers (per-activity assets)
+        $this->app->register(\App\Domains\Calendar\Private\Activities\Jardino\JardinoServiceProvider::class);
     }
 
     public function boot(): void

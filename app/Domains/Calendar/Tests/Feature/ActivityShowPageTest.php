@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Private\Models\Activity;
+use App\Domains\Calendar\Public\Api\CalendarRegistry;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -15,6 +15,10 @@ uses(TestCase::class, RefreshDatabase::class);
 /**
  * Route under test: GET /activities/{slug}
  */
+
+ beforeEach(function () {
+    registerFakeActivityType(app(CalendarRegistry::class));
+});
 
 describe('Activity detail page', function () {
     it('redirects guests to login', function () {
@@ -26,6 +30,7 @@ describe('Activity detail page', function () {
             'role_restrictions' => [Roles::USER_CONFIRMED],
             'preview_starts_at' => Carbon::now()->subDay(),
             'active_starts_at' => Carbon::now()->addDays(5),
+            'activity_type' => 'fake',
         ], $admin->id);
         Auth::logout();
 
@@ -44,6 +49,7 @@ describe('Activity detail page', function () {
             'role_restrictions' => [Roles::MODERATOR],
             'preview_starts_at' => Carbon::now()->subDay(),
             'active_starts_at' => Carbon::now()->addDays(5),
+            'activity_type' => 'fake',
         ], $admin->id);
 
         /** @var Activity $activity */
@@ -85,7 +91,7 @@ describe('Activity detail page', function () {
         $this->get('/activities/' . $activity->slug)->assertNotFound();
     });
 
-    it('shows preview activity for allowed role', function () {
+    it('shows preview activity for allowed role and render component', function () {
         $admin = admin($this);
         $this->actingAs($admin);
         $id = createActivity($this, [
@@ -93,6 +99,7 @@ describe('Activity detail page', function () {
             'role_restrictions' => [Roles::USER_CONFIRMED],
             'preview_starts_at' => Carbon::now()->subDay(),
             'active_starts_at' => Carbon::now()->addDays(5),
+            'activity_type' => 'fake',
         ], $admin->id);
 
         $activity = Activity::query()->findOrFail($id);
@@ -101,10 +108,10 @@ describe('Activity detail page', function () {
 
         $response = $this->get('/activities/' . $activity->slug);
         $response->assertOk();
-        $response->assertSee('Preview Detail');
+        $response->assertSee('FAKE COMPONENT');
     });
 
-    it('shows active activity for allowed role', function () {
+    it('shows active activity for allowed role and render component', function () {
         $admin = admin($this);
         $this->actingAs($admin);
         $id = createActivity($this, [
@@ -113,6 +120,7 @@ describe('Activity detail page', function () {
             'preview_starts_at' => Carbon::now()->subDays(10),
             'active_starts_at' => Carbon::now()->subDays(2),
             'active_ends_at' => Carbon::now()->addDays(10),
+            'activity_type' => 'fake',
         ], $admin->id);
 
         $activity = Activity::query()->findOrFail($id);
@@ -121,7 +129,7 @@ describe('Activity detail page', function () {
 
         $response = $this->get('/activities/' . $activity->slug);
         $response->assertOk();
-        $response->assertSee('Active Detail');
+        $response->assertSee('FAKE COMPONENT');
     });
 
     it('shows ended activity for allowed role', function () {
@@ -134,6 +142,7 @@ describe('Activity detail page', function () {
             'active_starts_at' => Carbon::now()->subDays(15),
             'active_ends_at' => Carbon::now()->subDays(5),
             'archived_at' => null,
+            'activity_type' => 'fake',
         ], $admin->id);
 
         $activity = Activity::query()->findOrFail($id);
@@ -142,6 +151,6 @@ describe('Activity detail page', function () {
 
         $response = $this->get('/activities/' . $activity->slug);
         $response->assertOk();
-        $response->assertSee('Ended Detail');
+        $response->assertSee('FAKE COMPONENT');
     });
 });
