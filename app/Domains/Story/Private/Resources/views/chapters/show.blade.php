@@ -127,21 +127,6 @@
                         @endif
                     </div>
 
-                     <!-- BOUTON REMONTER (à côté de Next) -->
-                    <div class="flex items-center gap-2">
-                        <button
-                            id="inlineScrollTopBtn"
-                            onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-                            aria-label="{{ __('Goto top') }}"
-                            class="flex gap-4 items-center text-xl font-bold text-tertiary hover:text-tertiary/80 transition">
-                            <div class="text-read text-4xl bg-tertiary hover:bg-tertiary/80 rounded-full w-10 h-10 flex items-center justify-center leading-none">
-                                ⯅
-                            </div>
-
-                            <div class="max-w-[120px] hidden sm:block">{{ __('Up') }}</div>
-                        </button>
-                    </div>
-
                     <div>
                         @php($nextButtonClass = $vm->nextChapter ? 'text-tertiary hover:text-tertiary/80' : 'text-tertiary/30 cursor-not-allowed')
                         <a href="{{ $vm->nextChapter ? route('chapters.show', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->nextChapter->slug]) : 'javascript:void(0);' }}"
@@ -162,19 +147,35 @@
                 <x-comment-list entity-type="chapter" entity-id="{{ $vm->chapter->id }}" page="0" perPage="5" />
             </div>
         </div>
+
+        <x-shared::badge 
+            id="inlineScrollTopBtn"
+            color="accent" 
+            :outline="true" 
+            class="fixed bottom-10 right-10 cursor-pointer transition-opacity duration-300 opacity-0 pointer-events-none"
+            onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            aria-label="{{ __('Retour en haut') }}"
+        >
+            <span class="material-symbols-outlined text-3xl leading-none">
+                keyboard_arrow_up
+            </span>
+        </x-shared::badge>
     </div>
 
 
 
     @push('scripts')
     <script>
+        let lastScrollTop = 0;
+        const scrollTopBtn = document.getElementById('inlineScrollTopBtn');
         window.addEventListener('scroll', () => {
-            const btn = document.getElementById('inlineScrollTopBtn');
-            if (window.scrollY > 300) {
-                btn.classList.remove('hidden');
+            const st = window.scrollY || document.documentElement.scrollTop;
+            if (st < lastScrollTop) {
+                scrollTopBtn?.classList.remove('opacity-0', 'pointer-events-none');
             } else {
-                btn.classList.add('hidden');
+                scrollTopBtn?.classList.add('opacity-0', 'pointer-events-none');
             }
+            lastScrollTop = st <= 0 ? 0 : st;
         });
     </script>
     <script>
