@@ -4,7 +4,9 @@
     </x-shared::title>
 
     @if($story === null)
-    <p>{{ __('story::keep-reading.empty') }}</p>
+    <div class="flex-1 flex flex-col justify-center">
+        <p>{{ __('story::keep-reading.empty') }}</p>
+    </div>
     <a href="{{ route('stories.index') }}">
         <x-shared::button color="accent">
             {{ __('story::keep-reading.go_read') }}
