@@ -30,7 +30,7 @@
         }
     }"
     x-init="el = $refs.scroller; updateBounds(); el.addEventListener('scroll', updateBounds); window.addEventListener('resize', updateBounds)"
-    class="relative w-full min-w-0 overflow-hidden">
+    class="relative h-full w-full min-w-0 overflow-hidden">
 
     <button type="button"
         @click="scrollByPage(-1)"
@@ -42,8 +42,8 @@
         <span class="material-symbols-outlined">chevron_left</span>
     </button>
 
-    <div x-ref="scroller" class="w-full overflow-x-auto overflow-y-hidden scroll-smooth scroll-hide max-w-full min-w-0">
-        <div class="flex w-max" style="{{$gapAttribute}}">
+    <div x-ref="scroller" class="h-full w-full overflow-x-auto overflow-y-hidden scroll-smooth scroll-hide max-w-full min-w-0">
+        <div class="flex h-full w-max" style="{{$gapAttribute}}">
             <div class="[@media(pointer:coarse)]:hidden shrink-0 w-6 sm:w-10"></div>
             {{ $slot }}
             <div class="[@media(pointer:coarse)]:hidden shrink-0 w-6 sm:w-10"></div>

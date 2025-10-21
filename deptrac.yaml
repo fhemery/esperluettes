@@ -399,6 +399,7 @@ deptrac:
       - ProfilePublic
       - StoryPublic
       - CommentPublic
+      - ConfigPublic
 
     EventsPrivate:
       - Shared
