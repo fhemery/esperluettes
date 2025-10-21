@@ -18,15 +18,32 @@
             <div id="chapter-nav-host-desktop"></div>
         </aside>
 
-        <button
+        <!-- Mobile drawer trigger button -->
+        <x-shared::badge
             type="button"
-            class="md:hidden fixed bottom-4 left-4 z-40 p-2 w-10 h-10 flex items-center justify-center rounded-full bg-primary text-on-primary shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            class="md:hidden fixed bottom-6 left-6 z-40"
+            color="accent"
+            :outline="true"
             aria-controls="mobile-chapter-drawer"
-            :aria-expanded="open ? 'true' : 'false'"
-            @click="open = !open"
+            x-bind:aria-expanded="open ? 'true' : 'false'"
+            x-on:click="open = !open"
             title="{{ __('story::chapters.side_nav.label') }}">
-            <span class="material-symbols-outlined text-[18px] leading-none">side_navigation</span>
-        </button>
+            <span class="material-symbols-outlined text-3xl leading-none">side_navigation</span>
+        </x-shared::badge>
+
+        <!-- Back to top button. Appears only on scroll top -->
+        <x-shared::badge 
+            id="inlineScrollTopBtn"
+            color="accent" 
+            :outline="true" 
+            class="fixed bottom-6 right-6 cursor-pointer transition-opacity duration-300 opacity-0 pointer-events-none"
+            onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            aria-label="{{ __('story::chapters.back_to_top.label') }}"
+        >
+            <span class="material-symbols-outlined text-3xl leading-none">
+                keyboard_arrow_up
+            </span>
+        </x-shared::badge>
 
         <!-- Mobile drawer for chapter navigation -->
         <div class="md:hidden">
@@ -215,6 +232,7 @@
                         @endauth
                         @endif
                     </div>
+
                     <div>
                         @php($nextButtonClass = $vm->nextChapter ? 'text-tertiary hover:text-tertiary/80' : 'text-tertiary/30 cursor-not-allowed')
                         <a href="{{ $vm->nextChapter ? route('chapters.show', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->nextChapter->slug]) : 'javascript:void(0);' }}"
@@ -238,7 +256,21 @@
     </div>
 
 
+
     @push('scripts')
+    <script>
+        let lastScrollTop = 0;
+        const scrollTopBtn = document.getElementById('inlineScrollTopBtn');
+        window.addEventListener('scroll', () => {
+            const st = window.scrollY || document.documentElement.scrollTop;
+            if (st < lastScrollTop) {
+                scrollTopBtn?.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                scrollTopBtn?.classList.add('opacity-0', 'pointer-events-none');
+            }
+            lastScrollTop = st <= 0 ? 0 : st;
+        });
+    </script>
     <script>
         function chapterPage() {
             return {
@@ -304,7 +336,6 @@
         }
     </script>
     @endpush
-
     @if($vm->isAuthor)
     <x-story::confirm-delete-chapter
         name="confirm-delete-chapter"

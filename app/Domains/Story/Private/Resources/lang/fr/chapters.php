@@ -91,5 +91,8 @@ return [
     ],
     'side_nav' => [
         'label' => 'Détails du roman'
+    ],
+    'back_to_top' => [
+        'label' => 'Retour en haut'
     ]
 ];
