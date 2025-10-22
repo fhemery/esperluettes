@@ -249,4 +249,36 @@ class FaqService
             }
         });
     }
+
+    /**
+     * Get active FAQ categories ordered by sort_order for frontend display.
+     */
+    public function getActiveCategoriesOrdered()
+    {
+        return FaqCategory::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'slug']);
+    }
+
+    /**
+     * Get active questions for an active category identified by slug, ordered by sort_order.
+     */
+    public function getActiveQuestionsForCategorySlug(string $categorySlug)
+    {
+        $category = FaqCategory::query()
+            ->where('is_active', true)
+            ->where('slug', $categorySlug)
+            ->first(['id']);
+
+        if (!$category) {
+            return collect();
+        }
+
+        return FaqQuestion::query()
+            ->where('faq_category_id', $category->id)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'question', 'slug', 'answer', 'image_path', 'image_alt_text']);
+    }
 }
