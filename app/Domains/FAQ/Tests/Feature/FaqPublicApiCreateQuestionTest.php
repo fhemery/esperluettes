@@ -127,6 +127,25 @@ describe('FaqPublicApi createQuestion', function () {
         expect($created->createdByUserId)->toBe($techAdmin->id);
     });
 
+    it('should create question when caller is moderator', function () {
+        $moderator = moderator($this);
+        $this->actingAs($moderator);
+
+        $category = createFaqCategory('Test Category');
+
+        $api = app(FaqPublicApi::class);
+        $dto = new CreateFaqQuestionDto(
+            faqCategoryId: $category->id,
+            question: 'Moderator question?',
+            answer: '<p>Moderator answer</p>',
+        );
+
+        $created = $api->createQuestion($dto);
+
+        expect($created->question)->toBe('Moderator question?');
+        expect($created->createdByUserId)->toBe($moderator->id);
+    });
+
     it('should auto-generate unique slug from question', function () {
         $admin = admin($this);
         $this->actingAs($admin);

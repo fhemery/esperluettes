@@ -216,6 +216,40 @@ describe('FaqPublicApi updateQuestion', function () {
         expect($updated->updatedByUserId)->toBe($admin2->id);
     });
 
+    it('should allow moderator to update questions', function () {
+        $admin = admin($this);
+        $moderator = moderator($this);
+
+        $this->actingAs($admin);
+        $category = createFaqCategory('Test Category');
+        $api = app(FaqPublicApi::class);
+
+        $createDto = new CreateFaqQuestionDto(
+            faqCategoryId: $category->id,
+            question: 'Original question?',
+            answer: '<p>Original answer</p>',
+        );
+        $created = $api->createQuestion($createDto);
+
+        $this->actingAs($moderator);
+
+        $updateDto = new UpdateFaqQuestionDto(
+            faqCategoryId: $category->id,
+            question: 'Updated by moderator?',
+            slug: $created->slug,
+            answer: '<p>Updated by moderator</p>',
+            imagePath: null,
+            imageAltText: null,
+            isActive: true,
+            sortOrder: 3,
+        );
+
+        $updated = $api->updateQuestion($created->id, $updateDto);
+
+        expect($updated->question)->toBe('Updated by moderator?');
+        expect($updated->updatedByUserId)->toBe($moderator->id);
+    });
+
     it('should sanitize HTML in answer field on update', function () {
         $admin = admin($this);
         $this->actingAs($admin);

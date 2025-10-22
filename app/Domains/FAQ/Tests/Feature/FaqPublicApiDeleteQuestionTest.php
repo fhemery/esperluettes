@@ -86,6 +86,29 @@ describe('FaqPublicApi deleteQuestion', function () {
             ->toThrow(ModelNotFoundException::class);
     });
 
+    it('should delete question when caller is moderator', function () {
+        $admin = admin($this);
+        $moderator = moderator($this);
+
+        $this->actingAs($admin);
+        $category = createFaqCategory('Test Category');
+        $api = app(FaqPublicApi::class);
+
+        $createDto = new CreateFaqQuestionDto(
+            faqCategoryId: $category->id,
+            question: 'To delete?',
+            answer: '<p>Answer</p>',
+        );
+        $created = $api->createQuestion($createDto);
+
+        $this->actingAs($moderator);
+
+        $api->deleteQuestion($created->id);
+
+        expect(fn () => $api->getQuestion($created->id))
+            ->toThrow(ModelNotFoundException::class);
+    });
+
     it('should delete question when caller is tech-admin', function () {
         $admin = admin($this);
         $techAdmin = techAdmin($this);

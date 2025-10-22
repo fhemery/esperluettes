@@ -117,6 +117,22 @@ deptrac:
         - type: directory
           value: app/Domains/Events/Tests/
 
+    # FAQ domains
+    - name: FaqPublic
+      collectors:
+        - type: directory
+          value: app/Domains/FAQ/Public/
+
+    - name: FaqPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/FAQ/Private/
+
+    - name: FaqTests
+      collectors:
+        - type: directory
+          value: app/Domains/FAQ/Tests/
+
     # Home Domain
     - name: HomePublic
       collectors:
@@ -275,6 +291,11 @@ deptrac:
       - Shared
       - EventsPrivate
 
+    FaqPublic:
+      - Shared
+      - FaqPrivate
+      - AuthPublic
+
     HomePublic:
       - Shared
       - HomePrivate
@@ -352,6 +373,8 @@ deptrac:
       - ConfigPrivate
       - ModerationPublic
       - ModerationPrivate
+      - FaqPublic
+      - FaqPrivate
 
     AuthPrivate:
       - Shared
@@ -380,6 +403,10 @@ deptrac:
     EventsPrivate:
       - Shared
       - EventsPublic
+
+    FaqPrivate:
+      - Shared
+      - FaqPublic
 
     HomePrivate:
       - Shared
@@ -456,6 +483,11 @@ deptrac:
       - TestHelpers
       - EventsPrivate
       - EventsPublic
+
+    FaqTests:
+      - TestHelpers
+      - FaqPrivate
+      - FaqPublic
 
     MessageTests:
       - TestHelpers

@@ -66,6 +66,22 @@ describe('FaqPublicApi deleteCategory', function () {
             ->toThrow(ModelNotFoundException::class);
     });
 
+    it('should delete category when caller is moderator', function () {
+        $admin = admin($this);
+        $moderator = moderator($this);
+
+        $this->actingAs($admin);
+        $created = createFaqCategory('Test Category');
+
+        $this->actingAs($moderator);
+        $api = app(FaqPublicApi::class);
+
+        $api->deleteCategory($created->id);
+
+        expect(fn () => getFaqCategory($created->id))
+            ->toThrow(ModelNotFoundException::class);
+    });
+
     it('should delete category when caller is tech-admin', function () {
         $admin = admin($this);
         $techAdmin = techAdmin($this);

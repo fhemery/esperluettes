@@ -31,7 +31,7 @@ class FaqPublicApi
      */
     public function createCategory(CreateFaqCategoryDto $dto): FaqCategoryDto
     {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new AuthorizationException('You are not authorized to create FAQ categories.');
         }
 
@@ -52,7 +52,7 @@ class FaqPublicApi
      */
     public function updateCategory(int $categoryId, UpdateFaqCategoryDto $dto): FaqCategoryDto
     {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new AuthorizationException('You are not authorized to update FAQ categories.');
         }
 
@@ -86,28 +86,11 @@ class FaqPublicApi
      */
     public function deleteCategory(int $categoryId): void
     {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new AuthorizationException('You are not authorized to delete FAQ categories.');
         }
 
         $this->faqService->deleteCategory($categoryId);
-    }
-
-    /**
-     * Reorder FAQ categories (admin or tech-admin only).
-     *
-     * @param array<int> $categoryIds Array of category IDs in desired order
-     * @return void
-     * @throws AuthorizationException
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function reorderCategories(array $categoryIds): void
-    {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
-            throw new AuthorizationException('You are not authorized to reorder FAQ categories.');
-        }
-
-        $this->faqService->reorderCategories($categoryIds);
     }
 
     /**
@@ -120,7 +103,7 @@ class FaqPublicApi
      */
     public function createQuestion(CreateFaqQuestionDto $dto): FaqQuestionDto
     {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new AuthorizationException('You are not authorized to create FAQ questions.');
         }
 
@@ -142,7 +125,7 @@ class FaqPublicApi
      */
     public function updateQuestion(int $questionId, UpdateFaqQuestionDto $dto): FaqQuestionDto
     {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new AuthorizationException('You are not authorized to update FAQ questions.');
         }
 
@@ -176,7 +159,7 @@ class FaqPublicApi
      */
     public function deleteQuestion(int $questionId): void
     {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new AuthorizationException('You are not authorized to delete FAQ questions.');
         }
 
@@ -193,7 +176,7 @@ class FaqPublicApi
      */
     public function activateQuestion(int $questionId): void
     {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new AuthorizationException('You are not authorized to activate FAQ questions.');
         }
 
@@ -210,28 +193,10 @@ class FaqPublicApi
      */
     public function deactivateQuestion(int $questionId): void
     {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new AuthorizationException('You are not authorized to deactivate FAQ questions.');
         }
 
         $this->faqService->deactivateQuestion($questionId);
-    }
-
-    /**
-     * Reorder FAQ questions within a specific category (admin or tech-admin only).
-     *
-     * @param int $categoryId
-     * @param array<int> $questionIds Array of question IDs in desired order
-     * @return void
-     * @throws AuthorizationException
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function reorderQuestionsInCategory(int $categoryId, array $questionIds): void
-    {
-        if (!$this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
-            throw new AuthorizationException('You are not authorized to reorder FAQ questions.');
-        }
-
-        $this->faqService->reorderQuestionsInCategory($categoryId, $questionIds);
     }
 }

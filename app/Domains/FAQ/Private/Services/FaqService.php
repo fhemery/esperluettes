@@ -75,46 +75,6 @@ class FaqService
         $category->delete();
     }
 
-    /**
-     * Reorder categories by updating their sort_order based on array position.
-     *
-     * @param array<int> $categoryIds Array of category IDs in desired order
-     * @throws ValidationException
-     */
-    public function reorderCategories(array $categoryIds): void
-    {
-        // Validation
-        if (empty($categoryIds)) {
-            throw ValidationException::withMessages([
-                'category_ids' => ['The category IDs array cannot be empty.'],
-            ]);
-        }
-
-        // Check for duplicates
-        if (count($categoryIds) !== count(array_unique($categoryIds))) {
-            throw ValidationException::withMessages([
-                'category_ids' => ['The category IDs array contains duplicates.'],
-            ]);
-        }
-
-        // Verify all categories exist
-        $existingCount = FaqCategory::query()->whereIn('id', $categoryIds)->count();
-        if ($existingCount !== count($categoryIds)) {
-            throw ValidationException::withMessages([
-                'category_ids' => ['One or more category IDs do not exist.'],
-            ]);
-        }
-
-        // Update sort_order in a transaction
-        DB::transaction(function () use ($categoryIds) {
-            foreach ($categoryIds as $index => $categoryId) {
-                FaqCategory::query()
-                    ->where('id', $categoryId)
-                    ->update(['sort_order' => $index]);
-            }
-        });
-    }
-
     public function createQuestion(array $data): FaqQuestion
     {
         $user = Auth::user();
@@ -196,58 +156,6 @@ class FaqService
         /** @var FaqQuestion $question */
         $question = FaqQuestion::query()->findOrFail($questionId);
         $question->update(['is_active' => false]);
-    }
-
-    /**
-     * Reorder questions within a specific category.
-     *
-     * @param int $categoryId
-     * @param array<int> $questionIds Array of question IDs in desired order
-     * @throws ValidationException
-     */
-    public function reorderQuestionsInCategory(int $categoryId, array $questionIds): void
-    {
-        // Validate category exists
-        if (!FaqCategory::query()->where('id', $categoryId)->exists()) {
-            throw ValidationException::withMessages([
-                'category_id' => ['The specified category does not exist.'],
-            ]);
-        }
-
-        // Validation
-        if (empty($questionIds)) {
-            throw ValidationException::withMessages([
-                'question_ids' => ['The question IDs array cannot be empty.'],
-            ]);
-        }
-
-        // Check for duplicates
-        if (count($questionIds) !== count(array_unique($questionIds))) {
-            throw ValidationException::withMessages([
-                'question_ids' => ['The question IDs array contains duplicates.'],
-            ]);
-        }
-
-        // Verify all questions exist and belong to the category
-        $existingCount = FaqQuestion::query()
-            ->whereIn('id', $questionIds)
-            ->where('faq_category_id', $categoryId)
-            ->count();
-
-        if ($existingCount !== count($questionIds)) {
-            throw ValidationException::withMessages([
-                'question_ids' => ['One or more question IDs do not exist or do not belong to this category.'],
-            ]);
-        }
-
-        // Update sort_order in a transaction
-        DB::transaction(function () use ($questionIds) {
-            foreach ($questionIds as $index => $questionId) {
-                FaqQuestion::query()
-                    ->where('id', $questionId)
-                    ->update(['sort_order' => $index]);
-            }
-        });
     }
 
     /**

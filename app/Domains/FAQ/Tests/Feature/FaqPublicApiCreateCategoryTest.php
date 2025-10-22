@@ -85,6 +85,27 @@ describe('FaqPublicApi createCategory', function () {
         expect($retrieved->isActive)->toBeFalse();
     });
 
+    it('should create category when caller is moderator', function () {
+        $moderator = moderator($this);
+        $this->actingAs($moderator);
+
+        $created = createFaqCategory(
+            'Moderator Topics',
+            'Created by moderator',
+            true
+        );
+
+        expect($created)->toBeInstanceOf(FaqCategoryDto::class);
+        expect($created->name)->toBe('Moderator Topics');
+        expect($created->slug)->toBe('moderator-topics');
+        expect($created->description)->toBe('Created by moderator');
+        expect($created->isActive)->toBeTrue();
+        expect($created->createdByUserId)->toBe($moderator->id);
+
+        $retrieved = getFaqCategory($created->id);
+        expect($retrieved->name)->toBe('Moderator Topics');
+    });
+
     it('should auto-generate unique slug from name', function () {
         $admin = admin($this);
         $this->actingAs($admin);

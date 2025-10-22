@@ -141,4 +141,28 @@ describe('FaqPublicApi updateCategory', function () {
         expect($updated->name)->toBe('Updated by Tech Admin');
         expect($updated->updatedByUserId)->toBe($techAdmin->id);
     });
+
+    it('should allow moderator to update categories', function () {
+        $admin = admin($this);
+        $moderator = moderator($this);
+
+        $this->actingAs($admin);
+        $created = createFaqCategory($admin, 'Test');
+
+        $this->actingAs($moderator);
+        $api = app(FaqPublicApi::class);
+
+        $updateDto = new UpdateFaqCategoryDto(
+            name: 'Updated by Moderator',
+            slug: 'updated-by-moderator',
+            description: 'New desc by mod',
+            isActive: true,
+            sortOrder: 11,
+        );
+
+        $updated = $api->updateCategory($created->id, $updateDto);
+
+        expect($updated->name)->toBe('Updated by Moderator');
+        expect($updated->updatedByUserId)->toBe($moderator->id);
+    });
 });
