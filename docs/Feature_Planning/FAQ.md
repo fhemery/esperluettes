@@ -25,11 +25,7 @@ The FAQ (Frequently Asked Questions) feature provides a structured, searchable k
 - **Audit Trail**: created_by_user_id, updated_by_user_id, created_at, updated_at (no foreign keys)
 
 ### Multi-Language Support
-- **Configuration**: `FAQ_MULTILANGUAGE` environment variable (default: false)
-- **Fields**: When enabled, question, answer, category name, and description become translatable
-- **UI Adaptation**: Admin interface shows language tabs only when multiple languages configured
-- **Default Language**: French (fr)
-- **Future-Ready**: Architecture supports multiple languages even if initially hidden
+No suport for now
 
 ### Admin Interface (Filament)
 - **Location**: Admin domain (`app/Domains/Admin/Filament/Resources/`)
@@ -431,13 +427,6 @@ x-data="faqSearch"
 - Image optimization
 - Final UI polish
 
-### Phase 8: Multi-Language Support (Optional)
-- Translatable fields implementation
-- Admin UI language tabs (conditional)
-- Language switcher (if multiple languages)
-- RTL support if needed
-- Language-specific slugs
-
 ## Technical Considerations
 
 ### Performance
@@ -468,12 +457,7 @@ x-data="faqSearch"
 - Color contrast compliance
 
 ### Multi-Language Considerations
-- JSON columns for translatable fields
-- Fallback to default language if translation missing
-- Conditional UI rendering based on `FAQ_MULTILANGUAGE` env var
-- Slug generation per language (optional)
-- Language-aware search (search in user's language)
-- RTL support for future Arabic/Hebrew
+- No multi language support
 
 ### Audit Trail
 - Track created_by_user_id and updated_by_user_id
@@ -485,21 +469,7 @@ x-data="faqSearch"
 ## Configuration
 
 ### Environment Variables
-```env
-# Multi-language support
-FAQ_MULTILANGUAGE=false
-
-# Cache settings
-FAQ_CACHE_TTL=3600  # 1 hour in seconds
-FAQ_SEARCH_CACHE_TTL=900  # 15 minutes
-
-# Image settings
-FAQ_IMAGE_MAX_WIDTH=800
-FAQ_IMAGE_STORAGE_PATH=faq
-
-# Search settings
-FAQ_SEARCH_RESULTS_PER_PAGE=20
-```
+No environment, hardcode the defaults (ttl, image page, image max-width, etc...)
 
 ## Future Enhancements (Out of Scope)
 
@@ -562,7 +532,6 @@ FAQ_SEARCH_RESULTS_PER_PAGE=20
 ### Integration Tests
 - Admin panel CRUD operations through PublicApi
 - Image upload and processing
-- Multi-language switching (when enabled)
 - Full search workflow
 
 ## Documentation

@@ -21,6 +21,7 @@ return [
     App\Domains\Story\Public\Providers\StoryServiceProvider::class,
     App\Domains\Search\Public\Providers\SearchServiceProvider::class,
     App\Domains\Discord\Public\Providers\DiscordServiceProvider::class,
+    App\Domains\FAQ\Private\Providers\FaqServiceProvider::class,
     
     // Add other domain providers here as they are created
 
