@@ -384,6 +384,17 @@ class StoryService
     }
 
     /**
+     * Return a simple list of authored stories for a user as DTOs, optionally excluding co-authored ones.
+     * Ordered by updated_at DESC, id DESC.
+     *
+     * @return array<int, Story>
+     */
+    public function getStoriesForUserList(int $userId, bool $excludeCoauthored = false): array
+    {
+        return $this->storiesRepository->findAuthoredForUserOrdered($userId, $excludeCoauthored)->all();
+    }
+
+    /**
      * Delete all stories authored by the given user, including chapters and their comments.
      * A story qualifies if the user appears in its authors (even if there are other authors).
      */

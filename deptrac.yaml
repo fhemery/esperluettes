@@ -408,6 +408,7 @@ deptrac:
       - Shared
       - CalendarPublic
       - AuthPublic
+      - StoryPublic
  
     CommentPrivate:
       - Shared

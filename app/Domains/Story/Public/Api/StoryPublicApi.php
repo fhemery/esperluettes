@@ -6,6 +6,8 @@ use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\StorySearchResultDto;
 use App\Domains\Story\Private\Services\StorySearchService;
 use App\Domains\Story\Private\Services\StoryService;
+use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Public\Contracts\UserStoryListItemDto;
 
 class StoryPublicApi
 {
@@ -14,6 +16,23 @@ class StoryPublicApi
         private readonly StorySearchService $search,
         private readonly StoryService $storyService
     ) {
+    }
+
+    /**
+     * Return a simple list of stories authored by the given user as DTOs.
+     * Results ordered by updated_at DESC (then id DESC). Optionally exclude co-authored.
+     *
+     * @return array<int, \App\Domains\Story\Public\Contracts\UserStoryListItemDto>
+     */
+    public function getStoriesForUser(int $userId, bool $excludeCoauthored = false): array
+    {
+        $stories = $this->storyService->getStoriesForUserList($userId, $excludeCoauthored);
+        return collect($stories)->map(function (Story $story) {
+            return new UserStoryListItemDto(
+                id: (int) $story->id,
+                title: (string) $story->title,
+            );
+        })->all();
     }
 
     public function countAuthoredStories(int $userId): int

@@ -8,5 +8,11 @@
             {{ __('jardino::details.description') }}. 
             <a href="{{ route('static.show', 'jardino') }}" class="text-accent hover:underline">{{ __('jardino::details.read_more') }}</a>
         </p>
+
+        @isset($vm)
+            @if ($vm->objective === null)
+                <x-jardino::set-objective :stories="$vm->stories" />
+            @endif
+        @endisset
     </div>
 </div>
