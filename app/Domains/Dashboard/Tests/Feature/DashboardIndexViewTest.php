@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Domains\News\Private\Models\News;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -92,4 +94,42 @@ it('renders Keep Writing widget with empty state on dashboard', function () {
     expect($content)
         ->toContain(__('story::keep-writing.title'))
         ->and($content)->toContain(__('story::keep-writing.empty'));
+});
+
+it('shows Calendar widget when feature toggle enabled', function () {
+    // Enable calendar toggle using real Config helpers
+    createFeatureToggle($this, new FeatureToggle(
+        name: 'enabled',
+        domain: 'calendar',
+        access: FeatureToggleAccess::ON,
+        roles: [],
+    ));
+
+    $user = alice($this);
+    $this->actingAs($user);
+
+    $response = $this->get('/dashboard');
+    $response->assertOk();
+
+    $content = $response->getContent();
+    expect($content)->toContain(__('calendar::activity.list.title'));
+});
+
+it('shows placeholder when Calendar feature toggle disabled', function () {
+    // Ensure calendar toggle is OFF (explicit)
+    createFeatureToggle($this, new FeatureToggle(
+        name: 'enabled',
+        domain: 'calendar',
+        access: FeatureToggleAccess::OFF,
+        roles: [],
+    ));
+
+    $user = alice($this);
+    $this->actingAs($user);
+
+    $response = $this->get('/dashboard');
+    $response->assertOk();
+
+    $content = $response->getContent();
+    expect($content)->toContain(__('dashboard::index.placeholder_title'));
 });

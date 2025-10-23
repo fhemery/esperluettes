@@ -74,6 +74,22 @@ deptrac:
         - type: directory
           value: 'app/Domains/Comment/Tests/'
 
+    # Calendar domain
+    - name: CalendarPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Calendar/Public/'
+
+    - name: CalendarPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/Calendar/Private/
+
+    - name: CalendarTests
+      collectors:
+        - type: directory
+          value: app/Domains/Calendar/Tests/
+
     # Config Domain
     - name: ConfigPublic
       collectors:
@@ -270,6 +286,11 @@ deptrac:
       - AuthPrivate
       - EventsPublic
 
+    CalendarPublic:
+      - Shared
+      - CalendarPrivate
+      - AuthPublic
+
     CommentPublic: 
       - Shared
       - AuthPublic
@@ -375,11 +396,18 @@ deptrac:
       - ModerationPrivate
       - FaqPublic
       - FaqPrivate
+      - CalendarPublic
+      - CalendarPrivate
 
     AuthPrivate:
       - Shared
       - AuthPublic
       - EventsPublic
+
+    CalendarPrivate:
+      - Shared
+      - CalendarPublic
+      - AuthPublic
  
     CommentPrivate:
       - Shared
@@ -399,6 +427,7 @@ deptrac:
       - ProfilePublic
       - StoryPublic
       - CommentPublic
+      - ConfigPublic
 
     EventsPrivate:
       - Shared
@@ -467,6 +496,12 @@ deptrac:
       - Shared
       - TestHelpers
       - AuthPrivate
+      - AuthPublic
+
+    CalendarTests:
+      - TestHelpers
+      - CalendarPrivate
+      - CalendarPublic
       - AuthPublic
 
     CommentTests:

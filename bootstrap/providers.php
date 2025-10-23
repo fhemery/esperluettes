@@ -22,6 +22,7 @@ return [
     App\Domains\Search\Public\Providers\SearchServiceProvider::class,
     App\Domains\Discord\Public\Providers\DiscordServiceProvider::class,
     App\Domains\FAQ\Private\Providers\FaqServiceProvider::class,
+    App\Domains\Calendar\Public\Providers\CalendarServiceProvider::class,
     
     // Add other domain providers here as they are created
 
