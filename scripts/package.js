@@ -29,6 +29,68 @@ const log = makeLog('deploy');
 // Wrapper to ensure cwd defaults to projectRoot for our run calls
 function runHere(cmd, args, options = {}) { return run(cmd, args, { cwd: projectRoot, ...options }); }
 
+async function listFilesRecursive(dir) {
+  const results = [];
+  async function walk(current) {
+    if (!(await exists(current))) return;
+    const entries = await fsp.readdir(current, { withFileTypes: true });
+    for (const ent of entries) {
+      const full = path.join(current, ent.name);
+      if (ent.isDirectory()) {
+        await walk(full);
+      } else if (ent.isFile()) {
+        // store as path relative to dir
+        results.push(path.relative(dir, full).split(path.sep).join('/'));
+      }
+    }
+  }
+  await walk(dir);
+  return results;
+}
+
+async function verifyViteBuildSync() {
+  const buildDir = path.join(projectRoot, 'public', 'build');
+  const manifestPath = path.join(buildDir, 'manifest.json');
+
+  if (!(await exists(buildDir))) {
+    throw new Error('Vite build directory missing: public/build');
+  }
+  if (!(await exists(manifestPath))) {
+    throw new Error('Vite manifest missing: public/build/manifest.json');
+  }
+
+  const raw = await fsp.readFile(manifestPath, 'utf8');
+  let manifest;
+  try {
+    manifest = JSON.parse(raw);
+  } catch (e) {
+    throw new Error(`Vite manifest is not valid JSON: ${e.message}`);
+  }
+
+  const referenced = new Set();
+  const values = Object.values(manifest || {});
+  for (const v of values) {
+    if (v && typeof v === 'object') {
+      if (v.file) referenced.add(v.file);
+      if (Array.isArray(v.css)) v.css.forEach((f) => referenced.add(f));
+      if (Array.isArray(v.assets)) v.assets.forEach((f) => referenced.add(f));
+    }
+  }
+
+  // Ensure every referenced file exists
+  const missing = [];
+  for (const rel of referenced) {
+    const abs = path.join(buildDir, rel);
+    if (!(await exists(abs))) missing.push(rel);
+  }
+  if (missing.length) {
+    const details = missing.map((m) => `  - ${m}`).join('\n');
+    throw new Error(`Vite manifest references missing files:\n${details}`);
+  }
+
+  log('ok', 'Vite manifest and produced JS/CSS files are in sync.');
+}
+
 function ask(question) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise((resolve) => rl.question(question, (answer) => {
@@ -407,6 +469,7 @@ async function main() {
 
   log(null, '🏗️ Step 4: Rebuilding front and sending it to dist as well');
   r.npm(['run', 'build']);
+  await verifyViteBuildSync();
 
   log(null, '📦 Step 5: installing vendor folder and optimizing')
   const composerArgs = ['install', '--optimize-autoloader', '--no-dev', '--no-interaction'];
