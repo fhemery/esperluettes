@@ -36,6 +36,17 @@ class ModerationPublicApi
         $this->service->dismissReport($reportId);
     }
 
+    /**
+     * Delete a moderation report (admin, tech-admin, moderator only).
+     *
+     * @throws AuthorizationException
+     */
+    public function deleteReport(int $reportId): void
+    {
+        $this->authorize();
+        $this->service->deleteReport($reportId);
+    }
+
     private function authorize(): void
     {
         $ok = $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]);

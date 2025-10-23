@@ -196,6 +196,18 @@ class ModerationReportResource extends Resource
                     ->tooltip(__('admin::moderation.reports.actions.dismiss'))
                     ->visible(fn(ModerationReport $record) => $record->status === 'pending')
                     ->action(fn(ModerationReport $record) => app(ModerationPublicApi::class)->rejectReport($record->id)),
+                Tables\Actions\Action::make('delete')
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->iconButton()
+                    ->requiresConfirmation()
+                    ->modalHeading(__('admin::moderation.reports.actions.delete.title'))
+                    ->modalDescription(__('admin::moderation.reports.actions.delete.confirm'))
+                    ->tooltip(__('admin::moderation.reports.actions.delete.label'))
+                    ->action(function (ModerationReport $record) {
+                        app(ModerationPublicApi::class)->deleteReport($record->id);
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -62,6 +62,14 @@ class ModerationService
         app(EventBus::class)->emit(new ReportRejected(reportId: $reportId));
     }
 
+    public function deleteReport(int $reportId): void
+    {
+        $report = ModerationReport::findOrFail($reportId);
+        $report->delete();
+
+        Cache::forget(self::PENDING_COUNT_CACHE_KEY);
+    }
+
     /**
      * Create a new moderation report.
      *

@@ -52,6 +52,11 @@ return [
             'open' => 'Ouvrir',
             'approve' => 'Approuver',
             'dismiss' => 'Refuser',
+            'delete' => [
+                'label' => 'Supprimer',
+                'title' => 'Supprimer ce signalement',
+                'confirm' => 'Êtes-vous sûr de vouloir supprimer ce signalement ?',
+            ],
         ],
     ]
 ];
