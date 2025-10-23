@@ -11,7 +11,9 @@
 
         @isset($vm)
             @if ($vm->objective === null)
-                <x-jardino::set-objective :stories="$vm->stories" />
+                <x-jardino::set-objective :stories="$vm->stories" :activityId="$vm->activityId" />
+            @else
+                @include('jardino::components.objective', ['objective' => $vm->objective])
             @endif
         @endisset
     </div>

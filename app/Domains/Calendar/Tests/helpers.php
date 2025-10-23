@@ -6,6 +6,8 @@ use App\Domains\Calendar\Public\Api\CalendarRegistry;
 use App\Domains\Calendar\Public\Api\ActivityRegistrationInterface;
 use App\Domains\Calendar\Public\Contracts\ActivityToCreateDto;
 use Tests\TestCase;
+use App\Domains\Calendar\Private\Models\Activity;
+require_once __DIR__ . '/Feature/Jardino/helpers.php';
 
 class FakeActivityRegistration implements ActivityRegistrationInterface
 {

@@ -7,6 +7,8 @@ use App\Domains\Shared\Dto\StorySearchResultDto;
 use App\Domains\Story\Private\Services\StorySearchService;
 use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Support\GetStoryOptions;
+use App\Domains\Story\Public\Contracts\StoryDto;
 use App\Domains\Story\Public\Contracts\UserStoryListItemDto;
 
 class StoryPublicApi
@@ -33,6 +35,12 @@ class StoryPublicApi
                 title: (string) $story->title,
             );
         })->all();
+    }
+
+    public function getStory(int $storyId): ?StoryDto
+    {
+        $story = $this->storyService->getStoryById($storyId, new GetStoryOptions());
+        return $story ? StoryDto::fromModel($story) : null;
     }
 
     public function countAuthoredStories(int $userId): int

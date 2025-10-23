@@ -10,6 +10,7 @@ final class JardinoViewModel
 {
     /** @param array<int, UserStoryListItemDto> $stories */
     public function __construct(
+        public readonly int $activityId,
         public readonly ?JardinoObjectiveViewModel $objective,
         public readonly array $stories,
     ) {}

@@ -19,6 +19,10 @@ class JardinoServiceProvider extends ServiceProvider
         // Translations (keep using the 'calendar' namespace for unified lookups)
         $this->loadTranslationsFrom(app_path('Domains/Calendar/Private/Activities/Jardino/Resources/lang'), 'jardino');
 
+        // Load migrations and routes for the Jardino activity
+        $this->loadMigrationsFrom(app_path('Domains/Calendar/Private/Activities/Jardino/Database/Migrations'));
+        $this->loadRoutesFrom(app_path('Domains/Calendar/Private/Activities/Jardino/Http/routes.php'));
+
         // Register a component namespace so 'jardino::jardino-component' resolves to the class
         Blade::componentNamespace('App\\Domains\\Calendar\\Private\\Activities\\Jardino\\View\\Components', 'jardino');
     }

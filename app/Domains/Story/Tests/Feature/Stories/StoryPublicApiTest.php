@@ -2,6 +2,7 @@
 
 use Tests\TestCase;
 use App\Domains\Story\Public\Api\StoryPublicApi;
+use App\Domains\Story\Public\Contracts\StoryDto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -42,7 +43,7 @@ describe('Story public API', function () {
             $coauth = publicStory('Coauthored Story', $alice->id);
 
             // Add Bob as co-author on coauthored story
-            \DB::table('story_collaborators')->insert([
+            DB::table('story_collaborators')->insert([
                 'story_id' => $coauth->id,
                 'user_id' => $bob->id,
                 'role' => 'author',
@@ -84,6 +85,24 @@ describe('Story public API', function () {
             $items = $api->getStoriesForUser($alice->id, excludeCoauthored: true);
             expect($items)->toBeArray()->and(count($items))->toBe(1);
             expect($items[0]->title)->toBe('Solo Story');
+        });
+    });
+
+    describe('GetStory', function () {
+        it('returns null for a non existing story', function () {
+            $api = app(StoryPublicApi::class);
+            $resp = $api->getStory(999999);
+            expect($resp)->toBeNull();
+        });
+        it('returns a story by id', function () {
+            $api = app(StoryPublicApi::class);
+            $story = publicStory('Test Story', alice($this)->id);
+            $resp = $api->getStory($story->id);
+            expect($resp)->toBeInstanceOf(StoryDto::class);
+            expect($resp->title)->toBe('Test Story');
+            expect($resp->slug)->toBe($story->slug);
+            expect($resp->visibility)->toBe($story->visibility);
+            expect($resp->cover_url)->toBe('');
         });
     });
 });
