@@ -8,7 +8,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ## 1. Discovery & Registration
 
-### US-01: View JardiNo Activity Information
+### [DONE] US-01: View JardiNo Activity Information
 
 **As a** confirmed user  
 **I want to** view information about the JardiNo activity  
@@ -88,7 +88,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 **I want to** be prompted to select a new story  
 **So that** I can resume earning flowers
 
-**UI Impact:** Dashboard shows warning message "Your target story was deleted. Please select a new story to continue." Garden access is hidden until new story is selected.
+**UI Impact:** Dashboard shows warning message "Your target story was deleted. Progress is paused until you select a new story." The user can still view the garden and can plant/unplant any available flowers. Selecting a new story resumes progress accumulation.
 
 ---
 
@@ -100,7 +100,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 **I want to** view the shared garden grid with all planted flowers  
 **So that** I can see the collective artwork being created
 
-**UI Impact:** Garden page displays grid (50x50 or 75x75) with planted flowers as small images, blocked cells in dark color, empty cells with transparent dots, and coordinate labels (X, Y).
+**UI Impact:** Garden page displays grid (60x60) with planted flowers as small images, blocked cells in dark color, empty cells with transparent dots, and coordinate labels (X, Y).
 
 ---
 
@@ -232,11 +232,11 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ### US-22: Cannot Access JardiNo Without Confirmation Role
 
-**As a** non-confirmed user  
-**I want to** be prevented from accessing JardiNo  
-**So that** participation is restricted to verified community members
+**As a** user  
+**I want to** have access controlled by the activity's configured rules  
+**So that** visibility and participation follow the event settings
 
-**UI Impact:** JardiNo links/pages return 403 or redirect to home with message "JardiNo is available to confirmed users only."
+**UI Impact:** Access to the garden and participation (goal creation/updates) are allowed or denied based on the Calendar activity configuration (e.g., may require confirmed role). If not allowed, pages return 403 or redirect with an appropriate message.
 
 ---
 
@@ -260,23 +260,23 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ---
 
-### US-25: Understand Daily Earning Limits
+### US-25: Understand Daily Earning Cap (No Queue)
 
 **As a** JardiNo participant who writes a lot in one day  
 **I want to** understand why I didn't get all my eligible flowers immediately  
-**So that** I know they're queued for future days
+**So that** I know more flowers will become available as days pass
 
-**UI Impact:** Dashboard shows message "Daily limit reached (2 flowers/day). You have X queued flowers that will be awarded tomorrow."
+**UI Impact:** Dashboard shows message like "Daily cap reached (2 flowers/day). Your progress exceeds today's cap; additional flowers will become available on subsequent days." No queue is displayed.
 
 ---
 
-### US-26: See Queued Flowers Awarded Next Day
+### US-26: See Available Flowers Increase As Days Pass
 
-**As a** JardiNo participant with queued flowers  
-**I want to** automatically receive them on subsequent days  
-**So that** I don't lose progress due to daily limits
+**As a** JardiNo participant who exceeded today's cap  
+**I want to** see my available flower count increase on subsequent days  
+**So that** I benefit from my prior progress without any manual action
 
-**UI Impact:** Dashboard updates available flower count automatically when new days begin; no user action required.
+**UI Impact:** Dashboard updates available flower count automatically when new days begin; no user action required. No queue is shown.
 
 ---
 

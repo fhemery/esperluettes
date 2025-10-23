@@ -60,10 +60,11 @@ When a user changes their target story:
 ### Story Deletion Edge Case
 
 - If a user **deletes their target story** mid-event:
-  - Their goal is **stalled** (no further progress possible)
-  - Progress is retained (as it was a word different stored)
+  - Their goal is **stalled** (no further progress accumulation)
+  - Progress is retained
   - Previously earned flowers are **retained**
-  - User must select a **new target story** to resume progress
+  - The user can still view the garden and can plant/unplant any available flowers
+  - Selecting a **new target story** resumes progress accumulation
 
 ---
 
@@ -98,35 +99,31 @@ When a user changes their target story:
 - **Milestones:** 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%, 45%, 50%, 55%, 60%, 65%, 70%, 75%, 80%, 85%, 90%, 95%, 100%, 105%, 110%, 115%, 120%, 125%
 - **Maximum:** 25 flowers total (at 125% of target)
 
-### Daily Limit Rule
+### Daily Limit Rule (No Queue)
 
-- Users can earn **maximum 2 flowers per day**
-- If a user crosses multiple thresholds in one day, excess flowers **queue up** for future days
-- Queued flowers are distributed automatically on subsequent days (up to 2 flowers per day until queue is cleared)
+- Users can earn at most **2 flowers per day**.
+- No queue is stored. Instead, the total flowers available is computed as the minimum of:
+  - flowers based on progress (5% milestones),
+  - flowers allowed by the day-based cap (2 per day since activity start), and
+  - the global cap of 25.
+- As days pass, the day-based cap increases, which may increase available flowers automatically even without additional writing.
 
 ### Award Timing
 
-- Flowers are awarded when a chapter's word count changes
-- Award happens via **event-driven system** (JardiNo listens to Story domain events)
-- Award is immediate but respects daily limit (excess queued)
+- Flowers are updated when a chapter's word count changes
+- Computation happens via an **event-driven system** (JardiNo listens to Story domain events)
+- Availability respects the daily limit cap; no queue is stored
 
 ### Example Scenario
 
 **Day 1:**
-- User writes 1000 words, crossing 5%, 10%, 15%, 20%, 25% thresholds (5 flowers eligible)
-- System awards **2 flowers** immediately
-- **3 flowers queued** for future days
+- User crosses several milestones. Progress-based total equals 5 flowers; day-based cap allows **2**; available flowers = **2**.
 
 **Day 2:**
-- User writes nothing
-- System awards **2 flowers from queue** automatically
-- **1 flower remains queued**
+- User writes nothing. Day-based cap increases to **4** total; progress-based still **5**; available flowers = **4**.
 
 **Day 3:**
-- User writes 500 words, crossing 30%, 35% thresholds (2 more flowers eligible)
-- System awards **1 flower from queue + 2 new flowers = 3 flowers**
-- But daily limit is 2, so user gets **2 flowers**
-- **1 flower queued**
+- User crosses two more milestones (progress-based now **7**). Day-based cap is **6**; available flowers = **6**.
 
 ---
 
@@ -134,7 +131,7 @@ When a user changes their target story:
 
 ### Grid Structure
 
-- **Size:** 50x50 or 75x75 cells (exact size to be finalized during implementation)
+- **Size:** 60x60 cells
 - **Cell Occupancy:** One flower per cell maximum
 - **Coordinate System:** X (horizontal) and Y (vertical) coordinates for cell identification
   - Displayed to allow users to communicate positions (e.g., "X:25, Y:10")
@@ -155,7 +152,7 @@ When a user changes their target story:
 
 ### Visibility
 
-- **Who Can View:** Only users with `user-confirmed` role (Activity-level restriction)
+- **Who Can View:** Anyone who can access the activity (activity-level restrictions apply)
 - **Real-time Updates:** Static page initially; polling may be added later
 - **Owner Display:** Hovering over a flower shows the owner's **display name** (from Profile domain)
 
@@ -267,6 +264,10 @@ Participants see a personal progress dashboard showing:
 - The website does not have a notification system yet
 - Users must check the garden and dashboard manually for updates
 - Communication about garden decoration happens on Discord
+
+### Timezone
+
+- All calculations are server-side. The activity starts at midnight CET; the daily limit uses CET day boundaries.
 
 ---
 

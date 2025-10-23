@@ -9,6 +9,7 @@ Technical implementation of JardiNo: a collaborative writing challenge where use
 - Formula-based flower calculation (no queue)
 - Sparse data structures for performance
 - Alpine.js for garden UI
+ - Activity-driven access control (only 'verified' middleware; checks happen server-side per activity rules)
 
 ---
 
@@ -78,6 +79,8 @@ CREATE TABLE calendar_jardino_garden_cells (
 
 **Sparse Storage:** Empty cells have no database row (performance optimization).
 
+**Account Deletion Cleanup:** A listener reacts to `Auth` domain's `UserDeleted` public event to remove all planted flowers for the deleted user in active/archived activities.
+
 ---
 
 ## Directory Structure
@@ -134,7 +137,8 @@ calculateProgress(JardinoGoal $goal): array
 ```php
 $flowerEligibleWords = sum(biggest - initial);
 $progressFlowers = floor(($flowerEligibleWords / $target) * 20);
-$daysSinceStart = floor((now() - activityStart) / 86400);
+// Use CET midnight boundaries derived from the activity's timezone (CET)
+$daysSinceStart = today('CET')->diffInDays(startDateAtMidnightCET) + 1; // min 1 on start day
 $dailyLimitFlowers = 2 * $daysSinceStart;
 
 return min($progressFlowers, $dailyLimitFlowers, 25);
@@ -144,8 +148,13 @@ return min($progressFlowers, $dailyLimitFlowers, 25);
 
 ```php
 getGardenData(int $activityId, int $userId): array
-plantFlower(int $activityId, int $userId, int $x, int $y, string $flowerImage): void
-removeFlower(int $activityId, int $userId, int $x, int $y): void
+plantFlower(int $activityId, int $userId, int $x, int $y, string $flowerImage): void  // Disallowed if activity ended
+removeFlower(int $activityId, int $userId, int $x, int $y): void                       // Disallowed if activity ended
+
+// Notes:
+// - Activity-based checks enforce: access rights, blocked cells, ownership, and end-of-event read-only state
+// - If the user's current target story was deleted, they can still plant/unplant (using available flowers) and view the garden,
+//   but no further progress accumulation occurs until they select a new target story
 ```
 
 ---
@@ -160,6 +169,8 @@ removeFlower(int $activityId, int $userId, int $x, int $y): void
 Event::listen(ChapterCreated::class, HandleChapterCreated::class);
 Event::listen(ChapterUpdated::class, HandleChapterUpdated::class);
 Event::listen(ChapterDeleted::class, HandleChapterDeleted::class);
+// Remove all flowers for a deleted user
+Event::listen(\App\Domains\Auth\Public\Events\UserDeleted::class, HandleUserDeleted::class);
 ```
 
 **HandleChapterUpdated.php:**
@@ -182,7 +193,7 @@ public function handle(ChapterUpdated $event): void
 
 ```php
 [
-    'grid_size' => ['width' => 50, 'height' => 50],
+    'grid_size' => ['width' => 60, 'height' => 60],
     'cells' => [
         // Only occupied cells (~1,250 max, not 2,500)
         ['x' => 5, 'y' => 10, 'type' => 'flower', 'flower_image' => '12.png', 
@@ -266,6 +277,7 @@ ProfilePublicApi::getDisplayNamesBatch($userIds)
 ## Routes
 
 ```php
+// Only 'verified' middleware; activity-level checks occur in controllers/services
 Route::middleware(['auth', 'verified'])->prefix('calendar/activities/{activity}')->group(function () {
     Route::get('/jardino', [JardinoDashboardController::class, 'index']);
     Route::post('/jardino/goal', [JardinoDashboardController::class, 'createGoal']);
@@ -274,6 +286,11 @@ Route::middleware(['auth', 'verified'])->prefix('calendar/activities/{activity}'
     Route::post('/jardino/garden/plant', [JardinoGardenController::class, 'plant']);
     Route::post('/jardino/garden/remove', [JardinoGardenController::class, 'remove']);
 });
+
+// Activity-based checks must verify:
+// - Access visibility: garden visible to anyone allowed by the activity (not necessarily only confirmed users)
+// - Participation eligibility (e.g., confirmed role) for creating/updating goals
+// - Post-event read-only: plant/remove disabled after end date/time (CET)
 ```
 
 ---
@@ -296,17 +313,23 @@ Route::middleware(['auth', 'verified'])->prefix('calendar/activities/{activity}'
 - User can plant/remove flowers
 - Cannot plant in occupied/blocked cells
 - Cannot remove other users' flowers
+ - Plant/remove are disabled when the activity has ended
 
 **Event Handling:**
 - Word count updates on chapter events
 - `biggest_word_count` never decreases
+ - User deletion removes their planted flowers via event listener
 
 ---
 
 ## Performance Considerations
 
-1. **Sparse Garden Data:** Only ~1,250 cells transmitted (not 5,625)
+1. **Sparse Garden Data:** Only occupied/blocked cells transmitted (e.g., << 3,600 for 60x60)
 2. **CSS Grid Layout:** Browser-optimized rendering
 3. **Batch Profile Loading:** Single query for all display names
 4. **Formula-Based Flowers:** No queue table to manage
 5. **Small Cell Size:** 15-20px for pixel art effect, entire grid fits in viewport
+
+## Configuration
+
+- Define grid size as constants in code for easy tuning, e.g., `GRID_WIDTH=60`, `GRID_HEIGHT=60` (used by both backend payload and frontend rendering).

@@ -4,6 +4,9 @@
         <h3 class="font-semibold">{{ __('jardino::details.title') }}</h3>
     </div>
     <div class="text-sm text-fg/80 mt-2">
-        {{-- Type-specific rendering placeholder for Jardino activities --}}
+        <p>
+            {{ __('jardino::details.description') }}. 
+            <a href="{{ route('static.show', 'jardino') }}" class="text-accent hover:underline">{{ __('jardino::details.read_more') }}</a>
+        </p>
     </div>
 </div>
