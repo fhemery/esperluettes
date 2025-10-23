@@ -4,13 +4,17 @@ namespace App\Domains\FAQ\Private\Services;
 
 use App\Domains\FAQ\Private\Models\FaqCategory;
 use App\Domains\FAQ\Private\Models\FaqQuestion;
+use App\Domains\FAQ\Private\Services\FaqCache;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Mews\Purifier\Facades\Purifier;
 
 class FaqService
 {
+    public function __construct(private readonly FaqCache $cache)
+    {
+    }
+
     public function createCategory(array $data): FaqCategory
     {
         $user = Auth::user();
@@ -29,7 +33,9 @@ class FaqService
             $categoryData['slug'] = $data['slug'];
         }
 
-        return FaqCategory::create($categoryData);
+        $category = FaqCategory::create($categoryData);
+        $this->cache->clear();
+        return $category;
     }
 
     public function updateCategory(int $categoryId, array $data): FaqCategory
@@ -64,7 +70,7 @@ class FaqService
         }
 
         $category->update($updateData);
-
+        $this->cache->clear();
         return $category->fresh();
     }
 
@@ -73,6 +79,7 @@ class FaqService
         /** @var FaqCategory $category */
         $category = FaqCategory::query()->findOrFail($categoryId);
         $category->delete();
+        $this->cache->clear();
     }
 
     public function createQuestion(array $data): FaqQuestion
@@ -103,7 +110,9 @@ class FaqService
             $questionData['slug'] = $data['slug'];
         }
 
-        return FaqQuestion::create($questionData);
+        $question = FaqQuestion::create($questionData);
+        $this->cache->clear();
+        return $question;
     }
 
     public function updateQuestion(int $questionId, array $data): FaqQuestion
@@ -133,7 +142,7 @@ class FaqService
         ];
 
         $question->update($updateData);
-
+        $this->cache->clear();
         return $question->fresh();
     }
 
@@ -142,6 +151,7 @@ class FaqService
         /** @var FaqQuestion $question */
         $question = FaqQuestion::query()->findOrFail($questionId);
         $question->delete();
+        $this->cache->clear();
     }
 
     public function activateQuestion(int $questionId): void
@@ -149,6 +159,7 @@ class FaqService
         /** @var FaqQuestion $question */
         $question = FaqQuestion::query()->findOrFail($questionId);
         $question->update(['is_active' => true]);
+        $this->cache->clear();
     }
 
     public function deactivateQuestion(int $questionId): void
@@ -156,6 +167,7 @@ class FaqService
         /** @var FaqQuestion $question */
         $question = FaqQuestion::query()->findOrFail($questionId);
         $question->update(['is_active' => false]);
+        $this->cache->clear();
     }
 
     /**
@@ -163,10 +175,7 @@ class FaqService
      */
     public function getActiveCategoriesOrdered()
     {
-        return FaqCategory::query()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get(['id', 'name', 'slug']);
+        return $this->cache->getActiveCategoriesOrdered();
     }
 
     /**
@@ -174,19 +183,6 @@ class FaqService
      */
     public function getActiveQuestionsForCategorySlug(string $categorySlug)
     {
-        $category = FaqCategory::query()
-            ->where('is_active', true)
-            ->where('slug', $categorySlug)
-            ->first(['id']);
-
-        if (!$category) {
-            return collect();
-        }
-
-        return FaqQuestion::query()
-            ->where('faq_category_id', $category->id)
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get(['id', 'question', 'slug', 'answer', 'image_path', 'image_alt_text']);
+        return $this->cache->getActiveQuestionsForCategorySlug($categorySlug);
     }
 }

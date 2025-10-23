@@ -14,7 +14,7 @@
                     @foreach($vm->tabsAsArray() as $tab)
                         @php $active = $tab['key'] === $vm->getInitialTabKey(); @endphp
                         <a href="{{ route('faq.category', ['categorySlug' => $tab['key']]) }}"
-                           class="surface-primary text-on-surface flex-1 border-r-read 
+                           class="surface-primary text-on-surface uppercase flex-1 border-r-read 
                             text-center px-2 py-2 text-md font-medium {{ $active ? 'is-outline' : '' }}">
                             {{ $tab['label'] }}
                         </a>
