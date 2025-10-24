@@ -79,4 +79,50 @@ describe('Jardino Info Component (US-01)', function () {
                 ->and($html)->toContain('type="number"');
         });
     });
+
+    describe('When a goal is set', function() {
+        it('should display the objective, the progress, the number of flowers earned, planted and available', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            // Create a story for the user
+            $story = publicStory('My JardiNo Story', $user->id);
+
+            // Create activity
+            $admin = admin($this);
+            $this->actingAs($admin);
+            $activity = createActiveJardino($this);
+
+            // Create a goal
+            $resp = $this->post("/calendar/activities/{$activity->id}/jardino/goal", [
+                'story_id' => $story->id,
+                'target_word_count' => 10000,
+            ]);
+            $resp->assertRedirect();
+
+            // Render the component
+            $activity = Activity::findOrFail($activity->id);
+            $html = Blade::render('<x-jardino::jardino-component :activity="$activity" />', compact('activity'));
+
+            // Check that the objective is displayed
+            expect($html)->toContain('My JardiNo Story')
+                ->and($html)->toContain('10 000')
+
+                // Check progress statistics (initially 0 since no snapshots exist yet)
+                ->and($html)->toContain(__('jardino::objective.words_written'))
+                ->and($html)->toContain('0')
+
+                // Check progress percentage
+                ->and($html)->toContain(__('jardino::objective.progress'))
+                ->and($html)->toContain('0')
+
+                // Check flower statistics (initially 0 since no snapshots exist)
+                ->and($html)->toContain(__('jardino::objective.flowers_earned'))
+                ->and($html)->toContain('0')
+                ->and($html)->toContain(__('jardino::objective.flowers_planted'))
+                ->and($html)->toContain('0')
+                ->and($html)->toContain(__('jardino::objective.flowers_available'))
+                ->and($html)->toContain('0');
+        });
+    });
 });

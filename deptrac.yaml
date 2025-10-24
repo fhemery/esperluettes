@@ -409,6 +409,7 @@ deptrac:
       - CalendarPublic
       - AuthPublic
       - StoryPublic
+      - EventsPublic
  
     CommentPrivate:
       - Shared
@@ -504,6 +505,7 @@ deptrac:
       - CalendarPrivate
       - CalendarPublic
       - AuthPublic
+      - StoryPublic
 
     CommentTests:
       - TestHelpers

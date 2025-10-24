@@ -39,7 +39,7 @@ class StoryPublicApi
 
     public function getStory(int $storyId): ?StoryDto
     {
-        $story = $this->storyService->getStoryById($storyId, new GetStoryOptions());
+        $story = $this->storyService->getStoryById($storyId, new GetStoryOptions(includeChapters: true));
         return $story ? StoryDto::fromModel($story) : null;
     }
 

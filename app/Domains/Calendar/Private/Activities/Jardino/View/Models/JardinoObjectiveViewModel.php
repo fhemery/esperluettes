@@ -10,5 +10,10 @@ final class JardinoObjectiveViewModel
         public readonly int $storyId,
         public readonly string $storyTitle,
         public readonly int $targetWordCount,
+        public readonly int $wordsWritten,
+        public readonly float $progressPercentage,
+        public readonly int $flowersEarned,
+        public readonly int $flowersPlanted,
+        public readonly int $flowersAvailable,
     ) {}
 }

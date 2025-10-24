@@ -77,3 +77,10 @@ function createActivity(TestCase $t, array $overrides = [], ?int $actorUserId = 
     $dto = makeActivityCreateDto($overrides);
     return $api->create($dto, $actorId);
 }
+
+function updateActivityStartDate(int $activityId, DateTimeInterface $startDate): void
+{
+    $activity = Activity::findOrFail($activityId);
+    $activity->active_starts_at = $startDate;
+    $activity->save();
+}

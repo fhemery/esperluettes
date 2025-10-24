@@ -86,8 +86,7 @@ describe('Jardino Save Goal', function () {
 
             $this->actingAs($user);
             // Missing story_id and target too small
-            $comingFrom = $jardino->url;
-            $this->from($comingFrom);
+            $this->from($jardino->url);
             $resp = $this->followingRedirects()->post("/calendar/activities/{$jardino->id}/jardino/goal", [
                 'target_word_count' => 999,
             ]);
@@ -103,8 +102,7 @@ describe('Jardino Save Goal', function () {
                 'role_restrictions' => [Roles::USER_CONFIRMED],
             ]);
 
-            $comingFrom = $jardino->url;
-            $this->from($comingFrom);
+            $this->from($jardino->url);
             $resp = $this->followingRedirects()->post("/calendar/activities/{$jardino->id}/jardino/goal", [
                 'story_id' => $story->id,
                 'target_word_count' => 999,
@@ -122,19 +120,12 @@ describe('Jardino Save Goal', function () {
             $story = publicStory('Alpha Story', $user->id);
 
             // Create confirmed-only ACTIVE Jardino activity
-            $activityId = createActivity($this, overrides: [
-                'name' => 'title',
-                'activity_type' => 'jardino',
-                'preview_starts_at' => now()->subDay(),
-                'active_starts_at' => now()->subHour(),
-                'active_ends_at' => now()->addDay(),
-            ]);
+            $activity = createActiveJardino($this);
 
             $this->actingAs($user);
-            $comingFrom = route('calendar.activities.show', 'title-' . $activityId);
-            $this->from($comingFrom);
+            $this->from($activity->url);
             // Post form with >= 1000 target and follow redirect back to the activity page
-            $resp = $this->followingRedirects()->post("/calendar/activities/{$activityId}/jardino/goal", [
+            $resp = $this->followingRedirects()->post("/calendar/activities/{$activity->id}/jardino/goal", [
                 'story_id' => $story->id,
                 'target_word_count' => 1500,
             ]);

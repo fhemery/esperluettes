@@ -11,7 +11,8 @@ class StoryDto
         public string $title,
         public string $slug,
         public string $visibility,
-        public string $cover_url
+        public string $cover_url,
+        public int $word_count,
     ) {
     }
 
@@ -23,6 +24,7 @@ class StoryDto
             slug: (string) $story->slug,
             visibility: (string) $story->visibility,
             cover_url: (string) $story->cover_url,
+            word_count: (int) $story->chapters()->sum('word_count'),
         );
     }
 }

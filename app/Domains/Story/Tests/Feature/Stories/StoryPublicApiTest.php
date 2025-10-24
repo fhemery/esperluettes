@@ -104,5 +104,25 @@ describe('Story public API', function () {
             expect($resp->visibility)->toBe($story->visibility);
             expect($resp->cover_url)->toBe('');
         });
+
+        it('should sum the chapters of event private stories', function() {
+            $api = app(StoryPublicApi::class);
+            $alice = alice($this);
+            $story = privateStory('Test Story', $alice->id);
+            createPublishedChapter($this, $story, $alice, 
+            [
+                'title' => 'Chapter 1',
+                'content' => 'Description One',
+            ]);
+            createUnpublishedChapter($this, $story, $alice, 
+            [
+                'title' => 'Chapter 2',
+                'content' => 'Description Two',
+            ]);
+            
+            $resp = $api->getStory($story->id);
+            expect($resp)->toBeInstanceOf(StoryDto::class);
+            expect($resp->word_count)->toBe(4);
+        });
     });
 });

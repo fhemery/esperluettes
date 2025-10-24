@@ -8,6 +8,8 @@ use App\Domains\Calendar\Private\Models\Activity;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoViewModel;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoObjectiveViewModel;
 use App\Domains\Calendar\Private\Activities\Jardino\Models\JardinoGoal;
+use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoProgressService;
+use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoFlowerService;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\View\View;
@@ -17,7 +19,9 @@ class JardinoComponent extends Component
 {
     public function __construct(
         public Activity $activity,
-        private readonly StoryPublicApi $stories
+        private readonly StoryPublicApi $stories,
+        private readonly JardinoProgressService $progressService,
+        private readonly JardinoFlowerService $flowerService,
     ) {}
 
     public function render(): View
@@ -27,15 +31,29 @@ class JardinoComponent extends Component
         $goal = JardinoGoal::query()
             ->where('activity_id', $this->activity->id)
             ->where('user_id', $userId)
+            ->with('storySnapshots')
             ->first();
 
         $objective = null;
         if ($goal) {
-            $storyDto = $this->stories->getStory((int) $goal->story_id);
+            $storyDto = $this->stories->getStory($goal->story_id);
+
+            // Calculate progress statistics
+            $wordsWritten = $this->progressService->calculateTotalWordsWritten($goal);
+            $progressPercentage = $this->progressService->calculateProgressPercentage($goal);
+
+            // Calculate flower statistics
+            $flowerStats = $this->flowerService->calculateAvailableFlowers($goal);
+
             $objective = new JardinoObjectiveViewModel(
-                storyId: (int) $goal->story_id,
+                storyId: $goal->story_id,
                 storyTitle: (string) ($storyDto?->title ?? ''),
-                targetWordCount: (int) $goal->target_word_count,
+                targetWordCount: $goal->target_word_count,
+                wordsWritten: $wordsWritten,
+                progressPercentage: $progressPercentage,
+                flowersEarned: $flowerStats['earned'],
+                flowersPlanted: $flowerStats['planted'],
+                flowersAvailable: $flowerStats['available'],
             );
         }
 
