@@ -137,4 +137,29 @@ final class JardinoFlowerService
 
         $cell->delete();
     }
+
+    /**
+     * Get all planted flowers for garden map display (raw data)
+     */
+    public function getGardenMapData(int $activityId): array
+    {
+        $cells = JardinoGardenCell::query()
+            ->where('activity_id', $activityId)
+            ->where('type', 'flower')
+            ->get();
+
+        $occupiedCells = [];
+        foreach ($cells as $cell) {
+            $occupiedCells[] = [
+                'x' => $cell->x,
+                'y' => $cell->y,
+                'type' => $cell->type,
+                'flower_image' => $cell->flower_image,
+                'user_id' => $cell->user_id,
+                'planted_at' => $cell->planted_at,
+            ];
+        }
+
+        return $occupiedCells;
+    }
 }

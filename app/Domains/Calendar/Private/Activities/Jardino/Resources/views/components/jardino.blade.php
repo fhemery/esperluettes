@@ -15,6 +15,8 @@
             @else
                 @include('jardino::components.objective', ['objective' => $vm->objective])
             @endif
+
+            @include('jardino::components.garden', ['viewModel' => $vm])
         @endisset
     </div>
 </div>

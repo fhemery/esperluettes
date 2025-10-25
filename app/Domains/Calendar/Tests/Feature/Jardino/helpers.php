@@ -3,11 +3,14 @@
 declare(strict_types=1);
 
 use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoFlowerService;
+use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoGoalService;
 use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoProgressService;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Components\JardinoComponent;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoObjectiveViewModel;
+use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoViewModel;
 use Tests\TestCase;
 use App\Domains\Calendar\Private\Models\Activity;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use App\Domains\Story\Public\Events\ChapterCreated;
 use App\Domains\Story\Public\Events\ChapterDeleted;
@@ -119,20 +122,54 @@ function dispatchChapterDeleted(int $storyId, int $nbWords): void
     dispatchEvent(new ChapterDeleted($storyId, $chapter));
 }
 
-/**
- * Create component and return its viewmodel for testing
- */
-function getJardinoViewModel(Activity $activity): ?JardinoObjectiveViewModel
+function renderJardinoComponent(Activity $activity): string
 {
     $component = new JardinoComponent(
         activity: $activity,
         stories: app(StoryPublicApi::class),
         progressService: app(JardinoProgressService::class),
         flowerService: app(JardinoFlowerService::class),
+        profileApi: app(ProfilePublicApi::class),
+    );
+
+    return $component->render()->render();
+}
+
+/**
+ * Create component and return its viewmodel for testing
+ */
+function getJardinoViewModel(Activity $activity): ?JardinoViewModel
+{
+    $component = new JardinoComponent(
+        activity: $activity,
+        stories: app(StoryPublicApi::class),
+        progressService: app(JardinoProgressService::class),
+        flowerService: app(JardinoFlowerService::class),
+        profileApi: app(ProfilePublicApi::class),
     );
 
     $view = $component->render();
     $viewModel = $view->getData()['vm'];
 
-    return $viewModel->objective;
+    return $viewModel;
+}
+
+function getJardinoObjectiveViewModel(Activity $activity): ?JardinoObjectiveViewModel
+{
+    return getJardinoViewModel($activity)->objective;
+}
+
+function createGoal(int $activityId, int $userId, int $storyId, int $wordCount): void
+{
+    $goalService = app(JardinoGoalService::class);
+    $goalService->createOrUpdateGoal($activityId, $userId, $storyId, $wordCount);
+}
+
+function plantFlower(TestCase $t, int $activityId, int $x, int $y, string $flowerName='01'): void
+{
+    $t->post(route('jardino.flower.plant', $activityId), [
+        'x' => $x,
+        'y' => $y,
+        'flower_image' => $flowerName.'.png',
+    ])->assertOk();
 }

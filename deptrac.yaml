@@ -506,6 +506,8 @@ deptrac:
       - CalendarPublic
       - AuthPublic
       - StoryPublic
+      - ProfilePublic
+      - Shared
 
     CommentTests:
       - TestHelpers

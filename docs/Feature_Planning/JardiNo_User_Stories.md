@@ -18,7 +18,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ---
 
-### US-02: Create My Writing Goal
+### [DONE] US-02: Create My Writing Goal
 
 **As a** confirmed user without a JardiNo goal  
 **I want to** create my writing goal by selecting a story and setting a word count target  
@@ -30,7 +30,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ## 2. Dashboard & Progress Tracking
 
-### US-03: View My Progress Dashboard
+### [DONE] US-03: View My Progress Dashboard
 
 **As a** JardiNo participant  
 **I want to** see my current progress, target, and flower inventory  
@@ -40,7 +40,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ---
 
-### US-04: See Real-Time Progress Updates
+### [DONE] US-04: See Real-Time Progress Updates
 
 **As a** JardiNo participant  
 **I want to** see my progress update automatically when I save chapters  
@@ -50,7 +50,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ---
 
-### US-05: Understand Flower Earning Mechanics
+### [DIFFERED] US-05: Understand Flower Earning Mechanics
 
 **As a** JardiNo participant  
 **I want to** understand how many flowers I've earned and why  
@@ -62,7 +62,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ## 3. Goal Management
 
-### US-06: Modify My Target Story
+### [DIFFERED] US-06: Modify My Target Story
 
 **As a** JardiNo participant  
 **I want to** change which story I'm tracking for the challenge  
@@ -72,7 +72,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ---
 
-### US-07: Adjust My Word Count Target
+### [DIFFERED] US-07: Adjust My Word Count Target
 
 **As a** JardiNo participant  
 **I want to** increase or decrease my target word count  
@@ -82,7 +82,7 @@ User stories for the JardiNo collaborative writing challenge. Each story include
 
 ---
 
-### US-08: Handle Deleted Target Story
+### [DIFFERED] US-08: Handle Deleted Target Story
 
 **As a** JardiNo participant whose target story was deleted  
 **I want to** be prompted to select a new story  
