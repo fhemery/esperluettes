@@ -8,6 +8,7 @@ use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoProgressServ
 use App\Domains\Calendar\Private\Activities\Jardino\View\Components\JardinoComponent;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoObjectiveViewModel;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoViewModel;
+use App\Domains\Calendar\Private\Services\ActivityService;
 use Tests\TestCase;
 use App\Domains\Calendar\Private\Models\Activity;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
@@ -16,6 +17,7 @@ use App\Domains\Story\Public\Events\ChapterCreated;
 use App\Domains\Story\Public\Events\ChapterDeleted;
 use App\Domains\Story\Public\Events\ChapterUpdated;
 use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
+use Illuminate\Testing\TestResponse;
 
 /**
  * Create an ACTIVE Jardino activity and return helper data.
@@ -130,6 +132,7 @@ function renderJardinoComponent(Activity $activity): string
         progressService: app(JardinoProgressService::class),
         flowerService: app(JardinoFlowerService::class),
         profileApi: app(ProfilePublicApi::class),
+        activityService: app(ActivityService::class),
     );
 
     return $component->render()->render();
@@ -146,6 +149,7 @@ function getJardinoViewModel(Activity $activity): ?JardinoViewModel
         progressService: app(JardinoProgressService::class),
         flowerService: app(JardinoFlowerService::class),
         profileApi: app(ProfilePublicApi::class),
+        activityService: app(ActivityService::class),
     );
 
     $view = $component->render();
@@ -165,11 +169,19 @@ function createGoal(int $activityId, int $userId, int $storyId, int $wordCount):
     $goalService->createOrUpdateGoal($activityId, $userId, $storyId, $wordCount);
 }
 
-function plantFlower(TestCase $t, int $activityId, int $x, int $y, string $flowerName='01'): void
+function plantFlower(TestCase $t, int $activityId, int $x, int $y, string $flowerName='01'): TestResponse
 {
-    $t->post(route('jardino.flower.plant', $activityId), [
+    return $t->post(route('jardino.flower.plant', $activityId), [
         'x' => $x,
         'y' => $y,
         'flower_image' => $flowerName.'.png',
-    ])->assertOk();
+    ]);
+}
+
+function removeFlower(TestCase $t, int $activityId, int $x, int $y): TestResponse
+{
+    return $t->post(route('jardino.flower.remove', $activityId), [
+        'x' => $x,
+        'y' => $y,
+    ]);
 }

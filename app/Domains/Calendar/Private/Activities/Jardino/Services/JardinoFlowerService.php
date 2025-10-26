@@ -6,18 +6,33 @@ namespace App\Domains\Calendar\Private\Activities\Jardino\Services;
 
 use App\Domains\Calendar\Private\Activities\Jardino\Models\JardinoGardenCell;
 use App\Domains\Calendar\Private\Activities\Jardino\Models\JardinoGoal;
+use App\Domains\Calendar\Private\Services\ActivityService;
 use App\Domains\Calendar\Private\Models\Activity;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 final class JardinoFlowerService
 {
+    public function __construct(
+        private readonly ActivityService $activityService,
+    ) {}
+
     /**
      * Calculate total flowers earned based on progress and daily limits
      */
     public function calculateAvailableFlowers(JardinoGoal $goal): array
     {
-        $activity = Activity::findOrFail($goal->activity_id);
+        $activity = $this->activityService->findById($goal->activity_id);
+
+        if (!$activity) {
+            return [
+                'available' => 0,
+                'earned' => 0,
+                'planted' => 0,
+                'progress_flowers' => 0,
+                'daily_limit_flowers' => 0,
+            ];
+        }
 
         // Calculate progress-based flowers (5% increments, max 25 at 125%)
         $flowerEligibleWords = (int) $goal->storySnapshots()

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Calendar\Private\Activities\Jardino\Http\Controllers;
 
 use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoFlowerService;
+use App\Domains\Calendar\Private\Services\ActivityService;
+use App\Domains\Calendar\Public\Contracts\ActivityState;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +16,18 @@ class JardinoFlowerController
 {
     public function __construct(
         private readonly JardinoFlowerService $flowerService,
+        private readonly ActivityService $activityService,
     ) {}
 
     public function plantFlower(Request $request, int $activityId): JsonResponse
     {
         try {
+            // Check if activity is ongoing
+            $activity = $this->activityService->findById($activityId);
+            if (!$activity || $activity->state !== ActivityState::ACTIVE) {
+                throw new \Exception('Activity is not ongoing');
+            }
+
             $validated = $request->validate([
                 'x' => 'required|integer|min:0|max:59',
                 'y' => 'required|integer|min:0|max:59',
@@ -57,6 +66,12 @@ class JardinoFlowerController
     public function removeFlower(Request $request, int $activityId): JsonResponse
     {
         try {
+            // Check if activity is ongoing
+            $activity = $this->activityService->findById($activityId);
+            if (!$activity || $activity->state !== ActivityState::ACTIVE) {
+                throw new \Exception('Activity is not ongoing');
+            }
+
             $validated = $request->validate([
                 'x' => 'required|integer|min:0|max:59',
                 'y' => 'required|integer|min:0|max:59',

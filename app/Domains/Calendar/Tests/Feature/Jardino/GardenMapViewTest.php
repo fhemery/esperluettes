@@ -65,8 +65,8 @@ describe('Garden Viewing Integration', function () {
         dispatchChapterCreated($this->story->id, 1000);
 
         // Plant some flowers first
-        plantFlower($this, $this->activity->id, 5, 10);
-        plantFlower($this, $this->activity->id, 15, 20, '02');
+        plantFlower($this, $this->activity->id, 5, 10)->assertOk();
+        plantFlower($this, $this->activity->id, 15, 20, '02')->assertOk();
 
         $viewModel = getJardinoViewModel($this->activity);
 
@@ -85,8 +85,8 @@ describe('Garden Viewing Integration', function () {
         dispatchChapterCreated($this->story->id, 1000);
 
         // Plant some flowers first
-        plantFlower($this, $this->activity->id, 1, 1);
-        plantFlower($this, $this->activity->id, 2, 2);
+        plantFlower($this, $this->activity->id, 1, 1)->assertOk();
+        plantFlower($this, $this->activity->id, 2, 2)->assertOk();
 
         $viewModel = getJardinoViewModel($this->activity);
 
@@ -113,10 +113,10 @@ describe('Garden Viewing Integration', function () {
 
         // Plant flowers for both users
         $this->actingAs($this->user);
-        plantFlower($this, $this->activity->id, 5, 10);
+        plantFlower($this, $this->activity->id, 5, 10)->assertOk();
 
         $this->actingAs($otherUser);
-        plantFlower($this, $this->activity->id, 15, 20);
+        plantFlower($this, $this->activity->id, 15, 20)->assertOk();
 
         $this->actingAs($this->user);
         $viewModel = getJardinoViewModel($this->activity);

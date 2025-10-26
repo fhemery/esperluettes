@@ -10,6 +10,7 @@ use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoObjective
 use App\Domains\Calendar\Private\Activities\Jardino\Models\JardinoGoal;
 use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoProgressService;
 use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoFlowerService;
+use App\Domains\Calendar\Private\Services\ActivityService;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\GardenMapViewModel;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\GardenCellViewModel;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
@@ -26,6 +27,7 @@ class JardinoComponent extends Component
         private readonly JardinoProgressService $progressService,
         private readonly JardinoFlowerService $flowerService,
         private readonly ProfilePublicApi $profileApi,
+        private readonly ActivityService $activityService,
     ) {}
 
     public function render(): View
