@@ -6,6 +6,8 @@ use App\Domains\Calendar\Public\Api\CalendarRegistry;
 use App\Domains\Calendar\Public\Api\ActivityRegistrationInterface;
 use App\Domains\Calendar\Public\Contracts\ActivityToCreateDto;
 use Tests\TestCase;
+use App\Domains\Calendar\Private\Models\Activity;
+require_once __DIR__ . '/Feature/Jardino/helpers.php';
 
 class FakeActivityRegistration implements ActivityRegistrationInterface
 {
@@ -74,4 +76,25 @@ function createActivity(TestCase $t, array $overrides = [], ?int $actorUserId = 
 
     $dto = makeActivityCreateDto($overrides);
     return $api->create($dto, $actorId);
+}
+
+function updateActivityStartDate(int $activityId, DateTimeInterface $startDate): void
+{
+    $activity = Activity::findOrFail($activityId);
+    $activity->active_starts_at = $startDate;
+    $activity->save();
+}
+
+function updateActivityEndDate(int $activityId, DateTimeInterface $endDate): void
+{
+    $activity = Activity::findOrFail($activityId);
+    $activity->active_ends_at = $endDate;
+    $activity->save();
+}
+
+function updateActivityVisibilityStartDate(int $activityId, DateTimeInterface $startDate): void
+{
+    $activity = Activity::findOrFail($activityId);
+    $activity->preview_starts_at = $startDate;
+    $activity->save();
 }

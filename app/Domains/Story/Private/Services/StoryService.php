@@ -119,10 +119,15 @@ class StoryService
      */
     public function getStory(string $slug, ?GetStoryOptions $options = null): ?Story
     {
-        $opts = $options ?? GetStoryOptions::Full();
         $id = SlugWithId::extractId($slug);
+        return $this->getStoryById($id, $options);
+    }
 
-        $story = $this->storiesRepository->getStoryById($id, Auth::id(), $opts);
+    public function getStoryById(int $storyId, ?GetStoryOptions $options = null): ?Story
+    {
+        $opts = $options ?? GetStoryOptions::Full();
+
+        $story = $this->storiesRepository->getStoryById($storyId, Auth::id(), $opts);
         if ($story && $opts->includeChapters && !$story->collaborators()->where('user_id', Auth::id())->exists()) {
             $story->chapters = $story->chapters->filter(fn($chapter) => $chapter->status === Chapter::STATUS_PUBLISHED);
         }
@@ -381,6 +386,17 @@ class StoryService
     public function getRandomStories(int $userId, int $nbStories = 7, array $visibilities = [Story::VIS_PUBLIC]): array
     {
         return $this->storiesRepository->getRandomStories($userId, $nbStories, $visibilities);
+    }
+
+    /**
+     * Return a simple list of authored stories for a user as DTOs, optionally excluding co-authored ones.
+     * Ordered by updated_at DESC, id DESC.
+     *
+     * @return array<int, Story>
+     */
+    public function getStoriesForUserList(int $userId, bool $excludeCoauthored = false): array
+    {
+        return $this->storiesRepository->findAuthoredForUserOrdered($userId, $excludeCoauthored)->all();
     }
 
     /**

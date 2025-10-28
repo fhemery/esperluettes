@@ -101,6 +101,30 @@ final class StoryRepository
     }
 
     /**
+     * Fetch authored stories for a user, optionally excluding co-authored ones.
+     * Ordered by updated_at DESC, then id DESC.
+     *
+     * @return Collection<int, Story>
+     */
+    public function findAuthoredForUserOrdered(int $userId, bool $excludeCoauthored = false): Collection
+    {
+        $query = Story::query()
+            ->whereHas('authors', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id');
+
+        if ($excludeCoauthored) {
+            $query->whereDoesntHave('authors', function ($q) use ($userId) {
+                $q->where('user_id', '!=', $userId);
+            });
+        }
+
+        return $query->get();
+    }
+
+    /**
      * Build the base query used for listing story cards with filters applied.
      * This centralizes eager-loading and aggregations so card displays stay consistent.
      */
