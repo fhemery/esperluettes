@@ -36,17 +36,16 @@ default => ['color' => 'neutral', 'label' => __('calendar::activity.state.draft'
 
 
         {{-- Title --}}
-        <div class="flex gap-2 flex-wrap items-center"
+        <div class="flex gap-2 flex-wrap items-center">
             <a href="{{ route('calendar.activities.show', $activity->slug) }}" class="block">
-            <h3 class="font-extrabold text-gray-900 text-md leading-5 line-clamp-2 hover:underline">
-                {{ $activity->name }}
-            </h3>
-            {{-- State badge --}}
-
+                <x-shared::title tag="h3" class="hover:underline">
+                    {{ $activity->name }}
+                </x-shared::title>
+                {{-- State badge --}}
             </a>
 
             <div>
-                <x-shared::badge :color="$stateBadgeConfig['color']" :outline="true" size="xs">
+                <x-shared::badge :color="$stateBadgeConfig['color']" :outline="false" size="xs">
                     {{ $stateBadgeConfig['label'] }}
                 </x-shared::badge>
             </div>
