@@ -22,6 +22,9 @@ class JardinoGoal extends Model
 
     protected $casts = [
         'target_word_count' => 'integer',
+        'story_id' => 'integer',
+        'user_id' => 'integer',
+        'activity_id' => 'integer',
     ];
 
     public function storySnapshots(): HasMany
