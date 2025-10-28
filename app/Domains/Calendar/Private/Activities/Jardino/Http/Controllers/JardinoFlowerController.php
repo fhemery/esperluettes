@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Calendar\Private\Activities\Jardino\View\Models\GardenMapConstants;
 use Illuminate\Validation\ValidationException;
 
 class JardinoFlowerController
@@ -32,8 +33,8 @@ class JardinoFlowerController
             }
 
             $validated = $request->validate([
-                'x' => 'required|integer|min:0|max:59',
-                'y' => 'required|integer|min:0|max:59',
+                'x' => 'required|integer|min:0|max:'.(GardenMapConstants::DEFAULT_WIDTH -1),
+                'y' => 'required|integer|min:0|max:'.(GardenMapConstants::DEFAULT_HEIGHT -1),
                 'flower_image' => ['required', 'string', 'regex:/^(\d{2})\.png$/'],
             ]);
 
@@ -76,8 +77,8 @@ class JardinoFlowerController
             }
 
             $validated = $request->validate([
-                'x' => 'required|integer|min:0|max:59',
-                'y' => 'required|integer|min:0|max:59',
+                'x' => 'required|integer|min:0|max:'.(GardenMapConstants::DEFAULT_WIDTH -1),
+                'y' => 'required|integer|min:0|max:'.(GardenMapConstants::DEFAULT_HEIGHT -1),
             ]);
 
             $userId = (int) Auth::id();
@@ -120,8 +121,8 @@ class JardinoFlowerController
             }
 
             $validated = $request->validate([
-                'x' => 'required|integer|min:0|max:59',
-                'y' => 'required|integer|min:0|max:59',
+                'x' => 'required|integer|min:0|max:'.(GardenMapConstants::DEFAULT_WIDTH -1),
+                'y' => 'required|integer|min:0|max:'.(GardenMapConstants::DEFAULT_HEIGHT -1),
             ]);
 
             $this->flowerService->blockCell(
@@ -161,8 +162,8 @@ class JardinoFlowerController
             }
 
             $validated = $request->validate([
-                'x' => 'required|integer|min:0|max:59',
-                'y' => 'required|integer|min:0|max:59',
+                'x' => 'required|integer|min:0|max:'.(GardenMapConstants::DEFAULT_WIDTH -1),
+                'y' => 'required|integer|min:0|max:'.(GardenMapConstants::DEFAULT_HEIGHT -1),
             ]);
 
             $this->flowerService->unblockCell(

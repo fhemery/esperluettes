@@ -25,6 +25,8 @@ class JardinoGardenCell extends Model
         'planted_at' => 'datetime',
         'x' => 'integer',
         'y' => 'integer',
+        'user_id' => 'integer',
+        'activity_id' => 'integer',
     ];
 
     public function goal(): BelongsTo

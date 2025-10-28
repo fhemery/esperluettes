@@ -28,6 +28,8 @@ class JardinoStorySnapshot extends Model
         'initial_word_count' => 'integer',
         'current_word_count' => 'integer',
         'biggest_word_count' => 'integer',
+        'goal_id' => 'integer',
+        'story_id' => 'integer',
     ];
 
     public function goal(): BelongsTo

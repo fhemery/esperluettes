@@ -108,7 +108,7 @@
                                 </div>
 
                                 <div class="flex gap-2">
-                                    <x-shared::button x-on:click="closeModal()" color="neutral" :outline="true">
+                                    <x-shared::button x-on:click="closeCellModal()" color="neutral" :outline="true">
                                         {{ __('jardino::planting.cancel') }}
                                     </x-shared::button>
                                     <x-shared::button x-on:click="plantFlower()"
