@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Calendar\Private\Activities\Jardino\View\Components;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Private\Models\Activity;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoViewModel;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\JardinoObjectiveViewModel;
@@ -28,6 +30,7 @@ class JardinoComponent extends Component
         private readonly JardinoFlowerService $flowerService,
         private readonly ProfilePublicApi $profileApi,
         private readonly ActivityService $activityService,
+        private readonly AuthPublicApi $authApi,
     ) {}
 
     public function render(): View
@@ -96,7 +99,7 @@ class JardinoComponent extends Component
             occupiedCells: $occupiedCells
         );
 
-        $vm = new JardinoViewModel($this->activity->id, $objective, $stories, $gardenMap);
+        $vm = new JardinoViewModel($this->activity->id, $objective, $stories, $gardenMap, $this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN]));
 
         return view('jardino::components.jardino', compact('vm'));
     }

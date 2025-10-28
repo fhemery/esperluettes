@@ -17,4 +17,10 @@ Route::middleware(['web', 'auth', 'verified'])
 
         Route::post('/jardino/remove-flower', [JardinoFlowerController::class, 'removeFlower'])
             ->name('jardino.flower.remove');
+
+        Route::post('/jardino/block-cell', [JardinoFlowerController::class, 'blockCell'])
+            ->name('jardino.cell.block');
+
+        Route::post('/jardino/unblock-cell', [JardinoFlowerController::class, 'unblockCell'])
+            ->name('jardino.cell.unblock');
     });

@@ -14,10 +14,9 @@
                  cellX: 0,
                  cellY: 0,
                  activityId: {{ $viewModel->activityId }},
-                 flowerPathPrefix: 'images/jardino/flowers/',
-                 flowerCount: 28,
                  flowersAvailable: {{ $viewModel->objective ? $viewModel->objective->flowersAvailable : 0 }},
-                 currentUserId: {{ auth()->id() }}
+                 currentUserId: {{ auth()->id() }},
+                 isAdmin: {{ $viewModel->isAdmin ? 'true' : 'false' }}
              })"
         style="display: grid; grid-template-columns: repeat({{ $viewModel->gardenMap->width }}, {{ $viewModel->gardenMap->cellWidth }}px); grid-template-rows: repeat({{ $viewModel->gardenMap->height }}, {{ $viewModel->gardenMap->cellHeight }}px); background-image: url({{  asset('images/activities/jardino/background.png') }});">
 
@@ -30,17 +29,18 @@
 
                 <div class="garden-cell relative cursor-pointer hover:bg-green-300 dark:hover:bg-green-700 transition-colors"
                     :class="{ 'cursor-not-allowed': {{ $isOccupied ? 'true' : 'false' }} }"
-                    @click="handleCellClick({{ $x }}, {{ $y }}, {{ $isOccupied ? 'true' : 'false' }}, {{ $isOccupied && $cell->type === 'flower' ? $cell->userId : 'null' }}, '{{ $isOccupied && $cell->type === 'flower' ? ($cell->displayName ?? '') : '' }}', '{{ $isOccupied && $cell->type === 'flower' ? ($cell->avatarUrl ?? '') : '' }}')"
+                    @click="handleCellClick($el)"
                     data-x="{{ $x }}"
                     data-y="{{ $y }}"
                     data-occupied="{{ $isOccupied ? 'true' : 'false' }}"
                     @if($isOccupied)
                     data-type="{{ $cell->type }}"
+                    @if($cell->type === 'flower')
                     data-flower-image="{{ $cell->flowerImage }}"
                     data-user-id="{{ $cell->userId }}"
                     data-display-name="{{ $cell->displayName ?? '' }}"
                     data-avatar-url="{{ $cell->avatarUrl ?? '' }}"
-                    data-planted-at="{{ $cell->plantedAt->format('Y-m-d H:i:s') }}"
+                    @endif
                     @endif
                     style="display: flex; align-items: center; justify-content: center; font-size: 8px;">
 
@@ -49,91 +49,97 @@
                         alt="Flower planted by {{ $cell->displayName ?: 'user ' . $cell->userId }}"
                         class="w-full h-full object-contain"
                         style="max-width: {{ $viewModel->gardenMap->cellWidth - 2 }}px; max-height: {{ $viewModel->gardenMap->cellHeight - 2 }}px;">
-                    @else
+                    @elseif(!$isOccupied)
                     <span class="bg-black/10 w-[50%] h-[50%] rounded-full"></span>
                     @endif
                 </div>
-            @endfor
-        @endfor
+                @endfor
+                @endfor
 
-        <!-- Cell Info Modal -->
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-show="showCellModal" x-cloak>
-            <div class="bg-white dark:bg-surface rounded-lg shadow-xl max-w-md w-full mx-4" @click.away="closeCellModal()">
-                <div class="flex items-center justify-between p-4 border-b border-surface/20">
-                    <h3 class="text-lg font-semibold text-on-surface" x-text="`{{ __('jardino::planting.position') }} ${selectedCellX}, ${selectedCellY}`"></h3>
-                    <button @click="closeCellModal()" class="text-fg/60 hover:text-fg">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-
-                <div class="p-4">
-                    <div x-show="isOwnFlower">
-                        <p class="text-center mb-4">{{ __('jardino::planting.confirm_unplant') }}</p>
-                        <div class="flex gap-2">
-                            <x-shared::button x-on:click="closeCellModal()" color="neutral" :outline="true">
-                                {{ __('jardino::planting.cancel') }}
-                            </x-shared::button>
-                            <x-shared::button x-on:click="unplantFlower()" color="accent">
-                                {{ __('jardino::planting.unplant') }}
-                            </x-shared::button>
-                        </div>
-                    </div>
-
-                    <div x-show="!isOwnFlower && targetUserId">
-                        <div class="flex items-center justify-center mx-auto gap-8">
-                            <img x-bind:src="targetAvatarUrl"
-                                    x-bind:alt="targetDisplayName ? targetDisplayName + ' avatar' : ''"
-                                    class="w-16 h-16 rounded-full object-cover"
-                                    x-show="targetAvatarUrl">
-                            <span class="material-symbols-outlined text-accent" x-show="!targetAvatarUrl">person</span>
-                            <p class="text-lg font-medium" x-text="targetDisplayName || 'Utilisateur #' + targetUserId"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Flower Selection Modal -->
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-show="showFlowerModal" x-cloak>
-            <div class="bg-white dark:bg-surface rounded-lg shadow-xl max-w-md w-full mx-4" @click.away="closeModal()">
-                <div class="flex items-center justify-between p-4 border-b border-surface/20">
-                    <h3 class="text-lg font-semibold text-on-surface" x-text="`{{ __('jardino::planting.position') }} ${selectedCellX}, ${selectedCellY}`"></h3>
-                    <button @click="closeModal()" class="text-fg/60 hover:text-fg">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-
-                <div class="p-4">
-                    <div class="grid grid-cols-4 gap-3 mb-4">
-                        @for($i = 1; $i <= 28; $i++)
-                            @php
-                            $flowerNumber=str_pad($i, 2, '0' , STR_PAD_LEFT);
-                            $flowerPath='images/activities/jardino/' . $flowerNumber . '.png' ;
-                            @endphp
-                            <button @click="selectedFlower = '{{ $flowerNumber }}'"
-                            class="flower-option p-2 border-2 rounded-lg transition-all hover:border-accent hover:scale-105"
-                            :class="{ 'border-accent bg-accent/10': selectedFlower === '{{ $flowerNumber }}', 'border-surface/30': selectedFlower !== '{{ $flowerNumber }}' }">
-                            <img src="{{ asset($flowerPath) }}"
-                                alt="Flower {{ $flowerNumber }}"
-                                class="w-full h-12 object-contain"
-                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <!-- Cell Info Modal -->
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-show="showCellModal" x-cloak>
+                    <div class="surface-read text-on-surface max-w-md w-full" @click.away="closeCellModal()">
+                        <div class="flex gap-2items-center justify-between p-4 border-b border-surface/20">
+                            <x-shared::title tag="h3" x-text="`{{ __('jardino::planting.position') }} ${selectedCellX}, ${selectedCellY}`"></x-shared::title>
+                            <button @click="closeCellModal()" class="text-fg/60 hover:text-fg">
+                                <span class="material-symbols-outlined">close</span>
                             </button>
-                            @endfor
-                    </div>
+                        </div>
 
-                    <div class="flex gap-2">
-                        <x-shared::button x-on:click="closeModal()" color="neutral" :outline="true">
-                            {{ __('jardino::planting.cancel') }}
-                        </x-shared::button>
-                        <x-shared::button x-on:click="plantFlower()"
-                            x-bind:disabled="!selectedFlower"
-                            color="accent">
-                            {{ __('jardino::planting.plant') }}
-                        </x-shared::button>
+                        <div class="p-4 flex flex-col gap-2">
+                            <div x-show="canUnplant">
+                                <p class="text-center mb-4">{{ __('jardino::planting.confirm_unplant') }}</p>
+                                <div class="flex gap-2">
+                                    <x-shared::button x-on:click="closeCellModal()" color="neutral" :outline="true">
+                                        {{ __('jardino::planting.cancel') }}
+                                    </x-shared::button>
+                                    <x-shared::button x-on:click="unplantFlower()" color="accent">
+                                        {{ __('jardino::planting.unplant') }}
+                                    </x-shared::button>
+                                </div>
+                            </div>
+
+                            <div x-show="!isOwnFlower && targetUserId">
+                                <div class="flex items-center justify-center mx-auto gap-8">
+                                    <x-shared::avatar x-bind:src="targetAvatarUrl"
+                                        x-bind:alt="targetDisplayName ? targetDisplayName + ' avatar' : ''"
+                                        class="w-16 h-16 rounded-full object-cover"
+                                        x-show="targetAvatarUrl"></x-shared::avatar>
+                                    <p class="text-lg font-medium" x-text="targetDisplayName || 'Utilisateur #' + targetUserId"></p>
+                                </div>
+                            </div>
+
+                            <div class="p-4" x-show="showPlanting">
+                                <div class="grid grid-cols-4 gap-3 mb-4">
+                                    @for($i = 1; $i <= 28; $i++)
+                                        @php
+                                        $flowerNumber=str_pad($i, 2, '0' , STR_PAD_LEFT);
+                                        $flowerPath='images/activities/jardino/' . $flowerNumber . '.png' ;
+                                        @endphp
+                                        <button @click="selectedFlower = '{{ $flowerNumber }}'"
+                                        class="flower-option p-2 border-2 rounded-lg transition-all hover:border-accent hover:scale-105"
+                                        :class="{ 'border-accent bg-accent/10': selectedFlower === '{{ $flowerNumber }}', 'border-surface/30': selectedFlower !== '{{ $flowerNumber }}' }">
+                                        <img src="{{ asset($flowerPath) }}"
+                                            alt="Flower {{ $flowerNumber }}"
+                                            class="w-full h-12 object-contain"
+                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        </button>
+                                        @endfor
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <x-shared::button x-on:click="closeModal()" color="neutral" :outline="true">
+                                        {{ __('jardino::planting.cancel') }}
+                                    </x-shared::button>
+                                    <x-shared::button x-on:click="plantFlower()"
+                                        x-bind:disabled="!selectedFlower"
+                                        color="accent">
+                                        {{ __('jardino::planting.plant') }}
+                                    </x-shared::button>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4" x-show="!showPlanting && !canUnplant">
+                                <x-shared::button x-on:click="showPlanting = true"
+                                    x-bind:disabled="!canPlant"
+                                    color="accent">
+                                    {{ __('jardino::planting.plant') }}
+                                </x-shared::button>
+
+                                <div x-show="canBlock">
+                                    <x-shared::button x-on:click="blockCell()" color="accent">
+                                        {{ __('jardino::planting.block_cell') }}
+                                    </x-shared::button>
+                                </div>
+                                <div x-show="canUnblock">
+                                    <x-shared::button x-on:click="unblockCell()" color="accent">
+                                        {{ __('jardino::planting.unblock') }}
+                                    </x-shared::button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
     </div>
 
     <div class="mt-4 text-sm text-fg/70">
@@ -147,7 +153,7 @@
             <span class="material-symbols-outlined text-sm align-middle mr-1">info</span>
             {{ __('jardino::planting.no_flowers_available') }}
             </p>
-        @endif
+            @endif
     </div>
     @else
     <div class="text-center py-8 text-fg/50">
@@ -162,72 +168,54 @@
                 cellX,
                 cellY,
                 activityId,
-                flowerPathPrefix,
-                flowerCount,
                 flowersAvailable,
                 currentUserId,
+                isAdmin,
             }) => ({
-                showFlowerModal: false,
                 showCellModal: false,
                 selectedFlower: null,
                 selectedCellX: null,
                 selectedCellY: null,
+                canPlant: null,
+                canUnplant: null,
+                canBlock: null,
+                canUnblock: null,
                 activityId: activityId,
-                flowerPathPrefix: flowerPathPrefix,
-                flowerCount: flowerCount,
                 flowersAvailable: flowersAvailable,
                 currentUserId: currentUserId,
+                isAdmin: isAdmin,
                 targetUserId: null,
                 targetDisplayName: null,
                 targetAvatarUrl: null,
                 isOwnFlower: false,
+                showPlanting: false,
 
-                handleCellClick(x, y, isOccupied, userId, displayName, avatarUrl) {
-                    if (!isOccupied) {
-                        // Empty cell - open plant flower modal
-                        this.openModal(x, y);
-                    } else if (userId == this.currentUserId) {
-                        // Own flower - open cell info modal for unplant
-                        this.openCellModal(x, y, true);
-                    } else {
-                        // Other user's flower - open cell info modal for user info
-                        this.openCellModal(x, y, false, userId, displayName, avatarUrl);
-                    }
-                },
-
-                openModal(x, y) {
-                    if (this.flowersAvailable <= 0) {
-                        alert('{{ __("jardino::planting.no_flowers_available") }}');
-                        return;
-                    }
-
-                    this.selectedCellX = x;
-                    this.selectedCellY = y;
-                    this.selectedFlower = null;
-                    this.showFlowerModal = true;
-                },
-
-                openCellModal(x, y, isOwnFlower, userId = null, displayName = null, avatarUrl = null) {
-                    this.selectedCellX = x;
-                    this.selectedCellY = y;
-                    this.isOwnFlower = isOwnFlower;
+                handleCellClick(el) {
+                    this.selectedCellX = parseInt(el.dataset.x, 10);
+                    this.selectedCellY = parseInt(el.dataset.y, 10);
+                    this.showPlanting = false;
+                    const isOccupied = el.dataset.occupied === 'true';
+                    const type = el.dataset.type || null;
+                    const userId = el.dataset.userId ? parseInt(el.dataset.userId, 10) : null;
                     this.targetUserId = userId;
-                    this.targetDisplayName = displayName || null;
-                    this.targetAvatarUrl = avatarUrl || null;
-                    this.showCellModal = true;
+                    this.targetDisplayName = el.dataset.displayName || null;
+                    this.targetAvatarUrl = el.dataset.avatarUrl || null;
+
+                    this.canPlant = !isOccupied && this.flowersAvailable > 0;
+                    this.canUnplant = isOccupied && userId == this.currentUserId && type === 'flower';
+                    this.canBlock = !isOccupied && this.isAdmin;
+                    this.canUnblock = type === 'blocked' && this.isAdmin;
+                    this.isOwnFlower = userId == this.currentUserId;
+
+                    this.openCellModal();
                 },
 
-                closeModal() {
-                    this.showFlowerModal = false;
-                    this.selectedFlower = null;
+                openCellModal() {
+                    this.showCellModal = true;
                 },
 
                 closeCellModal() {
                     this.showCellModal = false;
-                    this.targetUserId = null;
-                    this.targetDisplayName = null;
-                    this.targetAvatarUrl = null;
-                    this.isOwnFlower = false;
                 },
 
                 plantFlower() {
@@ -249,7 +237,7 @@
                         })
                         .then(response => {
                             if (response.ok) {
-                                this.closeModal();
+                                this.closeCellModal();
                                 location.reload();
                             } else {
                                 console.error('Failed to plant flower');
@@ -284,6 +272,60 @@
                         })
                         .catch(error => {
                             console.error('Error removing flower:', error);
+                        });
+                },
+
+                blockCell() {
+                    console.log('Blocking cell at', this.selectedCellX, this.selectedCellY);
+
+                    fetch(`/calendar/activities/${this.activityId}/jardino/block-cell`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                x: this.selectedCellX,
+                                y: this.selectedCellY
+                            })
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                this.closeCellModal();
+                                location.reload();
+                            } else {
+                                console.error('Failed to block cell');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error blocking cell:', error);
+                        });
+                },
+
+                unblockCell() {
+                    console.log('Unblocking cell at', this.selectedCellX, this.selectedCellY);
+
+                    fetch(`/calendar/activities/${this.activityId}/jardino/unblock-cell`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                x: this.selectedCellX,
+                                y: this.selectedCellY
+                            })
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                this.closeCellModal();
+                                location.reload();
+                            } else {
+                                console.error('Failed to unblock cell');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error unblocking cell:', error);
                         });
                 }
             }));

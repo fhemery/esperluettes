@@ -154,13 +154,12 @@ final class JardinoFlowerService
     }
 
     /**
-     * Get all planted flowers for garden map display (raw data)
+     * Get all planted flowers and blocked cells for garden map display (raw data)
      */
     public function getGardenMapData(int $activityId): array
     {
         $cells = JardinoGardenCell::query()
             ->where('activity_id', $activityId)
-            ->where('type', 'flower')
             ->get();
 
         $occupiedCells = [];
@@ -176,5 +175,50 @@ final class JardinoFlowerService
         }
 
         return $occupiedCells;
+    }
+    public function blockCell(int $activityId, int $x, int $y): void
+    {
+        DB::transaction(function () use ($activityId, $x, $y) {
+            // Check if cell is already occupied or blocked
+            $existingCell = JardinoGardenCell::query()
+                ->where('activity_id', $activityId)
+                ->where('x', $x)
+                ->where('y', $y)
+                ->first();
+
+            if ($existingCell) {
+                throw new \Exception('Cell is already occupied or blocked');
+            }
+
+            // Block the cell
+            JardinoGardenCell::create([
+                'activity_id' => $activityId,
+                'x' => $x,
+                'y' => $y,
+                'type' => 'blocked',
+                'flower_image' => null,
+                'user_id' => null,
+                'planted_at' => null,
+            ]);
+        });
+    }
+
+    /**
+     * Unblock a cell (admin only)
+     */
+    public function unblockCell(int $activityId, int $x, int $y): void
+    {
+        $cell = JardinoGardenCell::query()
+            ->where('activity_id', $activityId)
+            ->where('x', $x)
+            ->where('y', $y)
+            ->where('type', 'blocked')
+            ->first();
+
+        if (!$cell) {
+            throw new \Exception('Blocked cell not found');
+        }
+
+        $cell->delete();
     }
 }

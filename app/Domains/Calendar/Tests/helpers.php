@@ -84,3 +84,17 @@ function updateActivityStartDate(int $activityId, DateTimeInterface $startDate):
     $activity->active_starts_at = $startDate;
     $activity->save();
 }
+
+function updateActivityEndDate(int $activityId, DateTimeInterface $endDate): void
+{
+    $activity = Activity::findOrFail($activityId);
+    $activity->active_ends_at = $endDate;
+    $activity->save();
+}
+
+function updateActivityVisibilityStartDate(int $activityId, DateTimeInterface $startDate): void
+{
+    $activity = Activity::findOrFail($activityId);
+    $activity->preview_starts_at = $startDate;
+    $activity->save();
+}

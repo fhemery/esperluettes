@@ -15,5 +15,6 @@ final class JardinoViewModel
         public readonly ?JardinoObjectiveViewModel $objective,
         public readonly array $stories,
         public readonly ?GardenMapViewModel $gardenMap = null,
+        public readonly bool $isAdmin = false,
     ) {}
 }

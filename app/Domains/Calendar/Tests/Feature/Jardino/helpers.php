@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoFlowerService;
 use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoGoalService;
 use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoProgressService;
@@ -133,6 +134,7 @@ function renderJardinoComponent(Activity $activity): string
         flowerService: app(JardinoFlowerService::class),
         profileApi: app(ProfilePublicApi::class),
         activityService: app(ActivityService::class),
+        authApi: app(AuthPublicApi::class),
     );
 
     return $component->render()->render();
@@ -150,6 +152,7 @@ function getJardinoViewModel(Activity $activity): ?JardinoViewModel
         flowerService: app(JardinoFlowerService::class),
         profileApi: app(ProfilePublicApi::class),
         activityService: app(ActivityService::class),
+        authApi: app(AuthPublicApi::class),
     );
 
     $view = $component->render();
