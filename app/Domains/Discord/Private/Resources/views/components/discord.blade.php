@@ -33,7 +33,7 @@
                 </template>
                 <template x-if="!loading && code">
                     <span class="flex items-center justify-between gap-2">
-                        <span>/connect code:<span class="font-semibold" x-text="code"></span></span>
+                        <span class="font-semibold" x-text="code"></span>
                         <x-shared::button type="button" class="neutral" x-on:click="copyCode()" aria-label="Copy">
                             <span x-show="!copied" class="material-symbols-outlined text-sm" aria-hidden="true">content_copy</span>
                             <span x-show="copied" class="material-symbols-outlined text-sm" aria-hidden="true">check</span>
@@ -41,7 +41,7 @@
                     </span>
                 </template>
                 <template x-if="!loading && !code">
-                    <span>/connect code:________</span>
+                    <span>________</span>
                 </template>
             </div>
             <p class="text-sm">{{ __('discord::components.discord-component.connect_hint') }}</p>
@@ -56,15 +56,6 @@
             <x-shared::title tag="h3">{{ __('discord::components.discord-component.unlink_title') }}</x-shared::title>
             <p>{{ __('discord::components.discord-component.unlink_description') }}</p>
             <p>{!! __('discord::components.discord-component.disconnect_instructions') !!}</p>
-            <div class="surface-secondary text-on-surface px-3 py-2 rounded font-mono tracking-wide">
-                <span class="flex items-center justify-between gap-2">
-                    <span>/disconnect</span>
-                    <x-shared::button type="button" class="neutral" x-on:click="copyDisconnect()" aria-label="Copy">
-                        <span x-show="!copiedDisconnect" class="material-symbols-outlined text-sm" aria-hidden="true">content_copy</span>
-                        <span x-show="copiedDisconnect" class="material-symbols-outlined text-sm" aria-hidden="true">check</span>
-                    </x-shared::button>
-                </span>
-            </div>
             <div class="flex items-center justify-center gap-2">
                 <x-shared::button type="button" color="accent" x-on:click="closeUnlink">{{ __('discord::components.discord-component.ok') }}</x-shared::button>
             </div>
@@ -84,20 +75,11 @@
             copiedDisconnect: false,
             async copyCode() {
                 if (!this.code) return;
-                const text = `/connect code:${this.code}`;
+                const text = `${this.code}`;
                 try {
                     await navigator.clipboard.writeText(text);
                     this.copied = true;
                     setTimeout(() => { this.copied = false; }, 1500);
-                } catch (e) {
-                }
-            },
-            async copyDisconnect() {
-                const text = '/disconnect';
-                try {
-                    await navigator.clipboard.writeText(text);
-                    this.copiedDisconnect = true;
-                    setTimeout(() => { this.copiedDisconnect = false; }, 1500);
                 } catch (e) {
                 }
             },
