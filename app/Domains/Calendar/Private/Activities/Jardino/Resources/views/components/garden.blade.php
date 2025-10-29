@@ -5,11 +5,18 @@
     </div>
 
     @if($viewModel->gardenMap)
+    @php
+    $gardenMap = $viewModel->gardenMap;
+    $gardenWidth = $gardenMap->width;
+    $gardenHeight = $gardenMap->height;
+    $gardenCellWidth = $gardenMap->cellWidth;
+    $gardenCellHeight = $gardenMap->cellHeight;
+    @endphp
     <div class="garden-grid grid overflow-scroll grid gap-0 bg-cover bg-no-repeat bg-local max-h-[90vh] overflow-scroll"
-        data-width="{{ $viewModel->gardenMap->width }}"
-        data-height="{{ $viewModel->gardenMap->height }}"
-        data-cell-width="{{ $viewModel->gardenMap->cellWidth }}"
-        data-cell-height="{{ $viewModel->gardenMap->cellHeight }}"
+        data-width="{{ $gardenWidth }}"
+        data-height="{{ $gardenHeight }}"
+        data-cell-width="{{ $gardenCellWidth }}"
+        data-cell-height="{{ $gardenCellHeight }}"
         x-data="flowerModal({
                  cellX: 0,
                  cellY: 0,
@@ -18,12 +25,12 @@
                  currentUserId: {{ auth()->id() }},
                  isAdmin: {{ $viewModel->isAdmin ? 'true' : 'false' }}
              })"
-        style="display: grid; grid-template-columns: repeat({{ $viewModel->gardenMap->width }}, {{ $viewModel->gardenMap->cellWidth }}px); grid-template-rows: repeat({{ $viewModel->gardenMap->height }}, {{ $viewModel->gardenMap->cellHeight }}px); background-image: url({{  asset('images/activities/jardino/background.png') }});">
+        style="max-width: {{ $gardenWidth * $gardenCellWidth }}px; max-height: {{ $gardenHeight * $gardenCellHeight }}px; display: grid; grid-template-columns: repeat({{ $gardenWidth }}, {{ $gardenCellWidth }}px); grid-template-rows: repeat({{ $gardenHeight }}, {{ $gardenCellHeight }}px); background-image: url({{  asset('images/activities/jardino/background.png') }});">
 
-        @for($y = 0; $y < $viewModel->gardenMap->height; $y++)
-            @for($x = 0; $x < $viewModel->gardenMap->width; $x++)
+        @for($y = 0; $y < $gardenHeight; $y++)
+            @for($x = 0; $x < $gardenWidth; $x++)
                 @php
-                $cell = $viewModel->gardenMap->getCell($x, $y);
+                $cell = $gardenMap->getCell($x, $y);
                 $isOccupied = $cell !== null;
                 @endphp
 
@@ -48,7 +55,7 @@
                     <img src="{{ asset('images/activities/jardino/' . $cell->flowerImage) }}"
                         alt="Flower planted by {{ $cell->displayName ?: 'user ' . $cell->userId }}"
                         class="w-full h-full object-contain"
-                        style="max-width: {{ $viewModel->gardenMap->cellWidth - 2 }}px; max-height: {{ $viewModel->gardenMap->cellHeight - 2 }}px;">
+                        style="max-width: {{ $gardenCellWidth - 2 }}px; max-height: {{ $gardenCellHeight - 2 }}px;">
                     @elseif(!$isOccupied)
                     <span class="bg-black/10 w-[50%] h-[50%] rounded-full"></span>
                     @endif
@@ -58,7 +65,7 @@
 
                 <!-- Cell Info Modal -->
                 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-show="showCellModal" x-cloak>
-                    <div class="surface-read text-on-surface max-w-md w-full" @click.away="closeCellModal()">
+                    <div class="surface-read text-on-surface max-w-md w-full max-h-[50vh] overflow-hidden flex flex-col" @click.away="closeCellModal()">
                         <div class="flex gap-2items-center justify-between p-4 border-b border-surface/20">
                             <x-shared::title tag="h3" x-text="`{{ __('jardino::planting.position') }} ${selectedCellX}, ${selectedCellY}`"></x-shared::title>
                             <button @click="closeCellModal()" class="text-fg/60 hover:text-fg">
@@ -66,7 +73,7 @@
                             </button>
                         </div>
 
-                        <div class="p-4 flex flex-col gap-2">
+                        <div class="p-4 flex flex-col gap-2 flex-1 min-h-0">
                             <div x-show="canUnplant">
                                 <p class="text-center mb-4">{{ __('jardino::planting.confirm_unplant') }}</p>
                                 <div class="flex gap-2">
@@ -89,34 +96,32 @@
                                 </div>
                             </div>
 
-                            <div class="p-4" x-show="showPlanting">
-                                <div class="grid grid-cols-4 gap-3 mb-4">
-                                    @for($i = 1; $i <= 28; $i++)
-                                        @php
-                                        $flowerNumber=str_pad($i, 2, '0' , STR_PAD_LEFT);
-                                        $flowerPath='images/activities/jardino/' . $flowerNumber . '.png' ;
-                                        @endphp
-                                        <button @click="selectedFlower = '{{ $flowerNumber }}'"
-                                        class="flower-option p-2 border-2 rounded-lg transition-all hover:border-accent hover:scale-105"
-                                        :class="{ 'border-accent bg-accent/10': selectedFlower === '{{ $flowerNumber }}', 'border-surface/30': selectedFlower !== '{{ $flowerNumber }}' }">
-                                        <img src="{{ asset($flowerPath) }}"
-                                            alt="Flower {{ $flowerNumber }}"
-                                            class="w-full h-12 object-contain"
-                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        </button>
-                                        @endfor
-                                </div>
+                            <div class="grid grid-cols-4 gap-2 p-2 flex-1 overflow-y-auto" x-show="showPlanting">
+                                @for($i = 1; $i <= 28; $i++)
+                                    @php
+                                    $flowerNumber=str_pad($i, 2, '0' , STR_PAD_LEFT);
+                                    $flowerPath='images/activities/jardino/' . $flowerNumber . '.png' ;
+                                    @endphp
+                                    <button @click="selectedFlower = '{{ $flowerNumber }}'"
+                                    class="flower-option p-1 border-2 transition-all hover:border-accent hover:scale-105"
+                                    :class="{ 'border-accent bg-accent/10': selectedFlower === '{{ $flowerNumber }}', 'border-surface/30': selectedFlower !== '{{ $flowerNumber }}' }">
+                                    <img src="{{ asset($flowerPath) }}"
+                                        alt="Flower {{ $flowerNumber }}"
+                                        class="w-full h-12 object-contain"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    </button>
+                                    @endfor
+                            </div>
 
-                                <div class="flex gap-2">
-                                    <x-shared::button x-on:click="closeCellModal()" color="neutral" :outline="true">
-                                        {{ __('jardino::planting.cancel') }}
-                                    </x-shared::button>
-                                    <x-shared::button x-on:click="plantFlower()"
-                                        x-bind:disabled="!selectedFlower"
-                                        color="accent">
-                                        {{ __('jardino::planting.plant') }}
-                                    </x-shared::button>
-                                </div>
+                            <div class="flex gap-2" x-show="showPlanting">
+                                <x-shared::button x-on:click="closeCellModal()" color="neutral" :outline="true">
+                                    {{ __('jardino::planting.cancel') }}
+                                </x-shared::button>
+                                <x-shared::button x-on:click="plantFlower()"
+                                    x-bind:disabled="!selectedFlower"
+                                    color="accent">
+                                    {{ __('jardino::planting.plant') }}
+                                </x-shared::button>
                             </div>
 
                             <div class="flex gap-4" x-show="!showPlanting && !canUnplant">
