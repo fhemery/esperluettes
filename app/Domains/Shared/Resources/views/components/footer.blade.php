@@ -12,6 +12,7 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="{{ __('shared::footer.link_team.url') }}" class="hover:text-primary">{{ __('shared::footer.link_team.label') }}</a></li>
                     <li><a href="{{ __('shared::footer.link_rules.url') }}" class="hover:text-primary">{{ __('shared::footer.link_rules.label') }}</a></li>
+                    <li><a href="{{ __('shared::footer.link_thanks.url') }}" class="hover:text-primary">{{ __('shared::footer.link_thanks.label') }}</a></li>
                 </ul>
             </div>
 

@@ -13,6 +13,10 @@ return [
         'label' => 'Le règlement',
         'url' => '/reglement'
     ],
+    'link_thanks' => [
+        'label' => 'Remerciements',
+        'url' => '/remerciements'
+    ],
 
 
     'title_learn_more' => 'En savoir plus',
