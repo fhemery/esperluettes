@@ -322,7 +322,7 @@ Fetch all pending user activity notifications.
 }
 ```
 
-**Rate Limit**: 120 requests/hour (1 per minute)
+**Rate Limit**: 300 requests / minute
 
 **Example**:
 ```bash
