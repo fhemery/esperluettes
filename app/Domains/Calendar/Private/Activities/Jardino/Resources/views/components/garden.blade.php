@@ -1,7 +1,7 @@
-<div class="garden-container mt-6 border border-surface/20 rounded-lg p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
-    <div class="flex items-center gap-2 mb-4">
-        <span class="material-symbols-outlined text-green-600">grass</span>
-        <h4 class="font-semibold text-green-800 dark:text-green-200">{{ __('jardino::garden.title') }}</h4>
+<div class="garden-container mt-6 border border-surface/20 rounded-lg p-4 bg-gradient-to-br from-green-50 to-green-100">
+    <div class="flex items-center gap-2 mb-4 text-success">
+        <span class="material-symbols-outlined">grass</span>
+        <h4 class="font-semibold">{{ __('jardino::garden.title') }}</h4>
     </div>
 
     @if($viewModel->gardenMap)
@@ -34,7 +34,7 @@
                 $isOccupied = $cell !== null;
                 @endphp
 
-                <div class="garden-cell relative cursor-pointer hover:bg-green-300 dark:hover:bg-green-700 transition-colors"
+                <div class="garden-cell relative cursor-pointer hover:bg-green-300 transition-colors"
                     :class="{ 'cursor-not-allowed': {{ $isOccupied ? 'true' : 'false' }} }"
                     @click="handleCellClick($el)"
                     data-x="{{ $x }}"
@@ -154,7 +154,7 @@
                 'empty' => $viewModel->gardenMap->getEmptyCells()
             ]) }}</p>
         @if($viewModel->objective && $viewModel->objective->flowersAvailable <= 0)
-            <p class="mt-2 text-amber-600 dark:text-amber-400">
+            <p class="mt-2 text-warning">
             <span class="material-symbols-outlined text-sm align-middle mr-1">info</span>
             {{ __('jardino::planting.no_flowers_available') }}
             </p>

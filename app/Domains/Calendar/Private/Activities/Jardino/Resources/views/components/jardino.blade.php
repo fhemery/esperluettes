@@ -5,7 +5,7 @@
     </div>
     <div class="text-sm text-fg/80 mt-2">
         <p>
-            {{ __('jardino::details.description') }}. 
+            {{ __('jardino::details.description') }} 
             <a href="{{ route('static.show', 'jardino') }}" class="text-accent hover:underline">{{ __('jardino::details.read_more') }}</a>
         </p>
 
