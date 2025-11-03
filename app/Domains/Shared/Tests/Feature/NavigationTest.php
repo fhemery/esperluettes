@@ -144,5 +144,41 @@ describe('Top navbar', function () {
 
             expect(true)->toBeTrue();
         });
+
+        it('shows notification bell without badge when unread count is zero', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            $html = $this->get(route('dashboard'))
+                ->assertOk()
+                ->getContent();
+
+            // Bell link present
+            $notificationsUrl = route('notifications.index');
+            expect($html)->toContain('href="' . $notificationsUrl . '"');
+            // No unread badge
+            expect($html)->not->toContain('unread-badge');
+        });
+
+        it('shows notification bell with unread badge when there are notifications', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            // Create one unread notification using the public API
+            $api = app(\App\Domains\Notification\Public\Api\NotificationPublicApi::class);
+            $api->createNotification([$user->id], 'news::notification.posted', [
+                'title' => 'Hello',
+                'slug' => 'hello',
+            ], $user->id);
+
+            $html = $this->get(route('dashboard'))
+                ->assertOk()
+                ->getContent();
+
+            // Bell link present and badge shown
+            $notificationsUrl = route('notifications.index');
+            expect($html)->toContain('href="' . $notificationsUrl . '"');
+            expect($html)->toContain('unread-badge');
+        });
     });
 });

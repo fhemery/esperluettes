@@ -42,6 +42,8 @@
 
             <!-- Messages Icon -->
             <x-message::message-icon-component />
+            <!-- Notifications Icon -->
+            <x-notification::notification-icon-component />
             <!-- Moderation Icon -->
             <x-moderation::moderation-icon-component />
 
