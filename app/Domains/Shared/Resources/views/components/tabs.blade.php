@@ -59,7 +59,7 @@
                     "
                     class="flex-1 whitespace-nowrap py-3 px-1 border-b-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                     :class="tab === @js($key)
-                        ? 'selected border-none'
+                        ? 'selected border-none font-extrabold'
                         : 'border-transparent {{ $disabled ? 'opacity-50 cursor-not-allowed' : '' }}'"
                 >
                     {{ $label }}
