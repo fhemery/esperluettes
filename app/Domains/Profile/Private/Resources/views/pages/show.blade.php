@@ -39,7 +39,7 @@
                             </x-shared::badge>
                             <!-- Tooltip -->
                             <div x-show="copied" x-cloak
-                                class="absolute left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap text-xs text-white bg-black/60 rounded px-2 py-1 shadow"
+                                class="absolute left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap text-xs text-white bg-black/60 rounded px-2 py-1 shadow z-50"
                                 x-transition.opacity.duration.150>
                                 {{ __('profile::show.copied') }}
                             </div>
