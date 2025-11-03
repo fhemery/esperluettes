@@ -4,7 +4,7 @@
 'color' => 'accent'
 ])
 
-<div x-data="{ open: {{ $open ? 'true' : 'false' }} }" class="w-full mb-4 overflow-visible border-{{ $color }} border">
+<div x-data="{ open: {{ $open ? 'true' : 'false' }} }" class="w-full overflow-visible border-{{ $color }} border">
     <button type="button"
         class="w-full flex items-center justify-between px-4 py-2 text-left"
         @click="open = !open">

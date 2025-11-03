@@ -28,7 +28,7 @@
         @endif
 
         @if(isset($questions) && $questions->isNotEmpty())
-            <div class="surface-read p-2 sm:p-4 text-on-surface flex flex-col gap-2">
+            <div class="surface-read p-2 sm:p-4 text-on-surface flex flex-col gap-4">
                 @foreach($questions as $q)
                     <x-shared::collapsible :title="$q->question" color="primary">
                         @if(!empty($q->image_path))
