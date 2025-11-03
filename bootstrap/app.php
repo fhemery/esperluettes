@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Auth\Middleware\CheckRole;
+use App\Domains\Auth\Public\Middleware\CheckRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
