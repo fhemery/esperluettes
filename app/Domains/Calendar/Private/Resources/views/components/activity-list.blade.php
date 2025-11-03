@@ -19,6 +19,12 @@
             @foreach($activities as $activity)
                 <x-calendar::activity-card :activity="$activity" />
             @endforeach
+            <div class="w-[230px] h-full flex flex-col justify-center items-center gap-4">
+                <div>
+                    <img src="{{ asset('images/errors/not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto">
+                </div>
+                <div class="text-sm text-center">{{__('calendar::activity.list.no_more_activities')}}</div>
+            </div>
         </x-story::scroller>
     @endif
 </div>
