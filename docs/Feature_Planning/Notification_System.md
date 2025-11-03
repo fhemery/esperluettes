@@ -61,23 +61,31 @@ Notification/
 │   └── Renderers/
 │       └── NotificationRenderer.php
 ├── Private/
+│   ├── Models/
+│   │   ├── Notification.php
+│   │   └── NotificationRead.php
 │   ├── Services/
 │   │   └── NotificationService.php
 │   ├── Repositories/
 │   │   └── NotificationRepository.php
-│   └── Jobs/
-│       └── CleanupOldNotificationsJob.php
+│   ├── Jobs/
+│   │   └── CleanupOldNotificationsJob.php
+│   ├── Policies/
+│   │   └── NotificationReadPolicy.php
+│   ├── Providers/
+│   │   └── NotificationServiceProvider.php
+│   ├── Resources/
+│   │   └── views/
+│   │       ├── index.blade.php
+│   │       └── components/
+│   │           └── notification-item.blade.php
+│   └── routes.php
 ├── Database/
 │   ├── Factories/
 │   │   └── NotificationFactory.php
 │   └── Migrations/
 │       ├── YYYY_MM_DD_HHiiss_create_notifications_table.php
 │       └── YYYY_MM_DD_HHiiss_create_notification_reads_table.php
-├── Resources/
-│   └── views/
-│       ├── index.blade.php
-│       └── components/
-│           └── notification-item.blade.php
 └── Tests/
     ├── Feature/
     │   ├── NotificationPageTest.php
@@ -155,10 +163,13 @@ public function createBroadcastNotification(
     ?int $sourceUserId = null
 ): void
 
+// Get unread count for a user (helper for tests or external usage)
+public function getUnreadCount(int $userId): int
+
 ```
 
 **Note**: `NotificationService` (Private/Services) handles database operations internally.
-Public API only enables to create notifications. The Controllers and components are in charge of calling the `Notification Service` to handle them
+Public API primarily enables creation and read-count retrieval. Controllers and components use the `NotificationService` (Private) for fetching lists and actions.
 
 ### Architecture Pattern: Hybrid Approach
 
@@ -175,7 +186,7 @@ public function publishNews(NewsData $data): News
 {
     $news = $this->repository->create($data);
     
-    event(new NewsPosted($news)); // For other purposes
+    event(new NewsPublished($news)); // For other purposes
     
     // Broadcast to all users
     $this->notificationPublicApi->createBroadcastNotification(
@@ -316,6 +327,8 @@ return [
 
 ### Routes
 
+Registered in `Notification/Private/routes.php` and loaded by `NotificationServiceProvider`.
+
 ```php
 // Web routes (authenticated only)
 Route::middleware(['auth'])->group(function () {
@@ -341,8 +354,8 @@ public function loadMore(Request $request): View // Returns Blade partial (like 
 
 #### Navigation Bell Icon
 
-- Create a NotificationIconComponent within Notification domain, that will display the bell icon with `@auth` guard in `navigation.blade.php`
-- Display badge: `{{ $notificationPublicApi->getUnreadCount(auth()->id()) }}`
+- Create a NotificationIconComponent within Notification domain, displayed with `@auth` guard in `navigation.blade.php`
+- Display badge using the Private service (injected): unread count for `auth()->id()`
 - Link to `/notifications`
 
 #### Notifications Page
@@ -383,8 +396,11 @@ Notification::where('created_at', '<', now()->subDays(30))->delete();
 
 ### Authorization
 
-- Use Policy: only notification recipient can mark as read
-- All routes require authentication
+- Use Policy: only the notification recipient can mark as read.
+- Policy targets the `NotificationRead` row (join model) belonging to the current user.
+- Controller resolves the row by `(notification_id, auth()->id())`; non-owners get 404/403.
+- Mark-as-read is idempotent: sets `read_at = now()` when currently `NULL`.
+- All routes require authentication.
 
 ### Translation Keys
 
@@ -404,6 +420,8 @@ Notification::where('created_at', '<', now()->subDays(30))->delete();
 - Commenter not notified of own comment
 - Broadcast creates notification_reads for all users
 
+Note: broadcast targets users with roles `user` and `user-confirmed`.
+
 ---
 
 ## Implementation Steps
@@ -413,27 +431,29 @@ Notification::where('created_at', '<', now()->subDays(30))->delete();
 2. Migrations: `notifications` and `notification_reads` tables
 3. Models: Notification, NotificationRead (with NotificationFactory)
 4. Services: NotificationPublicApi (Public), NotificationService (Private), NotificationRepository
-5. NotificationRenderer
+5. Providers: NotificationServiceProvider (binds services, loads routes later)
+6. NotificationRenderer
 
 ### Phase 2: UI
-6. NotificationController + routes
-7. Navigation bell icon + unread badge
-8. Notifications index page + notification-item component
-9. AJAX mark as read (Alpine.js)
-10. NotificationPolicy
+7. NotificationController + routes (loaded via domain provider)
+8. Navigation bell icon + unread badge (uses Private service)
+9. Notifications index page + notification-item component (ordered by `notifications.created_at` DESC)
+10. AJAX mark as read (Alpine.js)
+11. NotificationPolicy
 
 ### Phase 3: Integration
-11. Story/Private/Listeners/NotifyOnCommentListener.php
-12. Update NewsService to call NotificationPublicApi
-13. Update JardinoFlowerService to call NotificationPublicApi
-14. Add translation files to each domain (story::notification.*, etc.)
-15. Register listeners in ServiceProviders
+12. Story/Private/Listeners/NotifyOnCommentListener.php
+13. Update NewsService to call NotificationPublicApi (emits NewsPublished)
+14. Update JardinoFlowerService to call NotificationPublicApi
+15. Add translation files to each domain (story::notification.*, etc.)
+16. Register listeners in ServiceProviders
 
 ### Phase 4: Maintenance & Testing
 16. CleanupOldNotificationsJob (scheduled daily)
 17. Write tests
 
 **Dependencies:** Create `NewsPosted` event if missing
+**Dependencies:** `NewsPublished` event exists in News domain (see `app/Domains/News/Public/Events/NewsPublished.php`).
 
 ---
 
@@ -444,6 +464,7 @@ Notification::where('created_at', '<', now()->subDays(30))->delete();
 - `notification_reads`: One row per (notification_id, user_id) created **at notification creation time**
 - `read_at`: NULL = unread, timestamp = read
 - Cleanup: Delete notifications older than 1 month (cascades to notification_reads)
+- Default ordering for display: `notifications.created_at` DESC
 
 **2. Domain Architecture** 
 - Hybrid: Synchronous calls when domain owns rule (News, JardiNo), event listeners in foreign domains (Story → CommentPosted)
@@ -452,7 +473,7 @@ Notification::where('created_at', '<', now()->subDays(30))->delete();
 **3. Public API**
 - `NotificationPublicApi` (Public/Services): Exposed to other domains
 - `NotificationService` (Private/Services): Internal database operations
-- Two methods: `createNotification(userIds)` and `createBroadcastNotification()`
+- Methods: `createNotification(userIds)`, `createBroadcastNotification()`, and `getUnreadCount(userId)`
 
 **4. Content Storage**
 - Store: `content_key` (translation key), `content_data` (JSON parameters)
@@ -466,3 +487,8 @@ Notification::where('created_at', '<', now()->subDays(30))->delete();
 **6. Real-time Updates**
 - Phase 1: Page refresh only
 - Future: Websockets/polling in Phase 2
+
+### Notes
+
+- Naming: "JardiNo" is the translated label; use `jardino` in file/class identifiers and translation keys (e.g., `calendar::notification.jardino.flowers`).
+
