@@ -81,7 +81,7 @@ return [
     'no_chapter_credits_left' => 'Vous devez lire et commenter davantage pour pouvoir publier un nouveau chapitre.',
     'comments' => [
         'label' => 'Commentaires',
-        'tooltip_unreplied' => 'Vous avez des commentaires non répondus.',
+        'tooltip_unreplied' => '<p>Vous avez des commentaires non répondus.</p> <a href=":link" class="text-accent hover:underline">Voir</a>',
     ],
     'author_note' => 'Note de l\'esperluette : ',
     'by' => 'Par ',

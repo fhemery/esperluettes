@@ -24,6 +24,6 @@
         <div class="font-semibold text-gray-900 text-center">{{ $label }}</div>
     @endif
     @if($tooltip !== '')
-        <div class="text-gray-700 text-center">{{ $tooltip }}</div>
+        <div class="text-gray-700 text-center">{!! $tooltip !!}</div>
     @endif
 </x-shared::popover>
