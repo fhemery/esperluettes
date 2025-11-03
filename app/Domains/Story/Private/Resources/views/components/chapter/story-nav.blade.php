@@ -16,10 +16,11 @@
     </div>
     <!-- Chapter list -->
      <div class="w-full">
-        <select x-data="{}" class="w-full bg-transparent" @change="window.location.href='{{ url('/stories/'.$story->slug.'/chapters') }}/' + $event.target.value">
-            @foreach($story->chapters as $chapter)
-                <option class="truncate text-sm" value="{{ $chapter->slug }}" {{ $chapter->slug === $currentChapterSlug ? 'selected' : '' }}>{{ $chapter->title }}</option>
-            @endforeach
-        </select>
+         <x-shared::select
+             :options="collect($story->chapters)->map(fn($c) => ['id' => $c->slug, 'name' => $c->title])->all()"
+             :selected="$currentChapterSlug"
+             x-on:select-change="window.location.href='{{ url('/stories/'.$story->slug.'/chapters') }}/' + $event.detail.value"
+             placeholder="{{ __('Select a chapter') }}"
+         />
      </div>
 </div>

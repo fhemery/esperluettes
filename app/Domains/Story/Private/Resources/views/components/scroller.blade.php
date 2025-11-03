@@ -33,7 +33,7 @@
     class="relative h-full w-full min-w-0 overflow-hidden">
 
     <button type="button"
-        @click="scrollByPage(-1)"
+        x-on:click="scrollByPage(-1)"
         :disabled="!canPrev"
         :aria-disabled="(!canPrev).toString()"
         aria-label="Précédent"
@@ -43,7 +43,7 @@
     </button>
 
     <div x-ref="scroller" class="h-full w-full overflow-x-auto overflow-y-hidden scroll-smooth scroll-hide max-w-full min-w-0">
-        <div class="flex h-full w-max" style="{{$gapAttribute}}">
+        <div class="flex h-full w-max" style="{{ $gapAttribute }}">
             <div class="[@media(pointer:coarse)]:hidden shrink-0 w-6 sm:w-10"></div>
             {{ $slot }}
             <div class="[@media(pointer:coarse)]:hidden shrink-0 w-6 sm:w-10"></div>
@@ -51,7 +51,7 @@
     </div>
 
     <button type="button"
-        @click="scrollByPage(1)"
+        x-on:click="scrollByPage(1)"
         :disabled="!canNext"
         :aria-disabled="(!canNext).toString()"
         aria-label="Suivant"
