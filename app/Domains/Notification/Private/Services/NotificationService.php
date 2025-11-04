@@ -23,26 +23,14 @@ class NotificationService
 
         $timestamp = $createdAt ?? now();
         
-        // If we have a custom timestamp (backfilling), disable automatic timestamps
-        if ($createdAt !== null) {
-            $notification = new Notification([
-                'source_user_id' => $sourceUserId,
-                'content_key' => $content::type(),
-                'content_data' => $content->toData(),
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp,
-            ]);
-            $notification->timestamps = false;
-            $notification->save();
-            $notification->timestamps = true; // Re-enable for future operations
-        } else {
-            // Normal creation with automatic timestamps
-            $notification = Notification::query()->create([
-                'source_user_id' => $sourceUserId,
-                'content_key' => $content::type(),
-                'content_data' => $content->toData(),
-            ]);
-        }
+        // Normal creation with automatic timestamps
+        $notification = Notification::query()->create([
+            'source_user_id' => $sourceUserId,
+            'content_key' => $content::type(),
+            'content_data' => $content->toData(),
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp
+        ]);
 
         $rows = [];
         foreach ($userIds as $uid) {
