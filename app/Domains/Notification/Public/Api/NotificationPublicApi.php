@@ -5,6 +5,7 @@ namespace App\Domains\Notification\Public\Api;
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Notification\Private\Services\NotificationService;
+use App\Domains\Notification\Public\Contracts\NotificationContent;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Illuminate\Validation\ValidationException;
 
@@ -19,24 +20,16 @@ class NotificationPublicApi
     }
 
     /**
-     * Create notification for specific users (validation only for this slice).
+     * Create notification for specific users.
      *
      * @param int[] $userIds
      * @throws ValidationException
      */
     public function createNotification(
         array $userIds,
-        string $contentKey,
-        array $contentData,
+        NotificationContent $content,
         ?int $sourceUserId = null
     ): void {
-        // contentKey required, non-empty after trim
-        if (trim($contentKey) === '') {
-            throw ValidationException::withMessages([
-                'contentKey' => [trans('notifications::validation.content_key_required')],
-            ]);
-        }
-
         // userIds cannot be empty
         if (empty($userIds)) {
             throw ValidationException::withMessages([
@@ -74,7 +67,7 @@ class NotificationPublicApi
         }
 
         // Delegate to persistence service
-        $this->service->createNotification($userIds, $contentKey, $contentData, $sourceUserId);
+        $this->service->createNotification($userIds, $content, $sourceUserId);
     }
 
     /**
@@ -91,16 +84,9 @@ class NotificationPublicApi
      * @throws ValidationException
      */
     public function createBroadcastNotification(
-        string $contentKey,
-        array $contentData,
+        NotificationContent $content,
         ?int $sourceUserId = null
     ): void {
-        if (trim($contentKey) === '') {
-            throw ValidationException::withMessages([
-                'contentKey' => [trans('notifications::validation.content_key_required')],
-            ]);
-        }
-
         if ($sourceUserId !== null && $this->profiles->getPublicProfile($sourceUserId) === null) {
             throw ValidationException::withMessages([
                 'sourceUserId' => [trans('notifications::validation.invalid_source_user')],
@@ -111,7 +97,7 @@ class NotificationPublicApi
         $targetIds = $this->authApi->getUserIdsByRoles([Roles::USER, Roles::USER_CONFIRMED], true);
         $targetIds = array_values(array_unique(array_map('intval', $targetIds)));
         if (!empty($targetIds)) {
-            $this->service->createNotification($targetIds, $contentKey, $contentData, $sourceUserId);
+            $this->service->createNotification($targetIds, $content, $sourceUserId);
         }
     }
 }

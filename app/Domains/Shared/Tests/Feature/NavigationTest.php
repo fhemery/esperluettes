@@ -165,11 +165,7 @@ describe('Top navbar', function () {
             $this->actingAs($user);
 
             // Create one unread notification using the public API
-            $api = app(\App\Domains\Notification\Public\Api\NotificationPublicApi::class);
-            $api->createNotification([$user->id], 'news::notification.posted', [
-                'title' => 'Hello',
-                'slug' => 'hello',
-            ], $user->id);
+            makeNotification([$user->id]);
 
             $html = $this->get(route('dashboard'))
                 ->assertOk()

@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
+use App\Domains\Notification\Tests\Fixtures\TestNotificationContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -22,32 +23,12 @@ describe('Create Notification public API', function () {
                 $alice->id,
                 $bob->id,
                 $nonExistingId,
-            ], 'story::notification.comment.root', [
-                'commenter_name' => 'Zed',
-            ], $alice->id))->toThrow(function (ValidationException $e) {
+            ], new TestNotificationContent(), $alice->id))->toThrow(function (ValidationException $e) {
                 $errors = $e->errors();
                 expect($errors)->toHaveKey('userIds');
                 expect($errors['userIds'][0])->toBe(trans('notifications::validation.non_existing_users'));
             });
         });
-
-        it('rejects when contentKey is empty or whitespace', function (string $badKey) {
-            $alice = alice($this);
-
-            /** @var NotificationPublicApi $api */
-            $api = app(NotificationPublicApi::class);
-
-            expect(fn() => $api->createNotification([
-                $alice->id,
-            ], $badKey, [], $alice->id))->toThrow(function (ValidationException $e) {
-                $errors = $e->errors();
-                expect($errors)->toHaveKey('contentKey');
-                expect($errors['contentKey'][0])->toBe(trans('notifications::validation.content_key_required'));
-            });
-        })->with([
-            '',
-            '   ',
-        ]);
 
         it('rejects when sourceUserId does not exist', function () {
             $alice = alice($this);
@@ -59,9 +40,7 @@ describe('Create Notification public API', function () {
 
             expect(fn() => $api->createNotification([
                 $alice->id,
-            ], 'story::notification.comment.root', [
-                'commenter_name' => 'Alice',
-            ], $nonExistingId))->toThrow(function (ValidationException $e) use ($nonExistingId) {
+            ], new TestNotificationContent(), $nonExistingId))->toThrow(function (ValidationException $e) use ($nonExistingId) {
                 $errors = $e->errors();
                 expect($errors)->toHaveKey('sourceUserId');
                 expect($errors['sourceUserId'][0])->toBe(trans('notifications::validation.invalid_source_user'));
@@ -79,9 +58,7 @@ describe('Create Notification public API', function () {
 
             $api->createNotification([
                 $alice->id,
-            ], 'story::notification.comment.root', [
-                'commenter_name' => 'Zed',
-            ], $alice->id);
+            ], new TestNotificationContent(), $alice->id);
 
             expect($api->getUnreadCount($alice->id))->toBe(1);
         });

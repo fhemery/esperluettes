@@ -1,6 +1,8 @@
 <?php
 
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
+use App\Domains\Notification\Public\Contracts\NotificationContent;
+use App\Domains\Notification\Tests\Fixtures\TestNotificationContent;
 use Tests\TestCase;
 
 /**
@@ -8,11 +10,22 @@ use Tests\TestCase;
  * Returns the created notification ID.
  * @param array<int,int> $userIds
  */
-function makeNotification(array $userIds, string $contentKey = 'test::notification.sample', array $contentData = [], ?int $sourceUserId = null, ?string $createdAt = null): int
+function makeNotification(array $userIds, ?NotificationContent $content = null, ?int $sourceUserId = null, ?string $createdAt = null): int
 {
     /** @var NotificationPublicApi $api */
     $api = app(NotificationPublicApi::class);
-    $api->createNotification($userIds, $contentKey, $contentData, $sourceUserId ?? ($userIds[0] ?? null));
+    
+    $content = $content ?? new TestNotificationContent();
+    
+    // Register test notification type (factory will store if not already there)
+    $factory = app(\App\Domains\Notification\Public\Services\NotificationFactory::class);
+    try {
+        $factory->register(TestNotificationContent::type(), TestNotificationContent::class);
+    } catch (\InvalidArgumentException $e) {
+        // Already registered, ignore
+    }
+    
+    $api->createNotification($userIds, $content, $sourceUserId ?? ($userIds[0] ?? null));
 
     // Fetch last inserted notification id
     $row = \Illuminate\Support\Facades\DB::table('notifications')->orderByDesc('id')->first(['id']);

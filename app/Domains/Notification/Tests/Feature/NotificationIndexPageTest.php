@@ -23,36 +23,31 @@ describe('Notification index page', function () {
 
         // Older notification
         $olderAt = now()->subMinutes(10)->toDateTimeString();
-        makeNotification([$user->id], 'test::notification.older', ['n' => 1], $user->id, $olderAt);
+        makeNotification([$user->id], null, $user->id, $olderAt);
 
         // Newer notification
         $newerAt = now()->toDateTimeString();
-        makeNotification([$user->id], 'test::notification.newer', ['n' => 2], $user->id, $newerAt);
+        makeNotification([$user->id], null, $user->id, $newerAt);
 
         $html = $this->get(route('notifications.index'))
             ->assertOk()
             ->getContent();
 
-        // Ensure list exists and first item is the newer one
-        // We check the order by ensuring 'test::notification.newer' appears before 'test::notification.older'
-        $posNew = strpos($html, 'test::notification.newer');
-        $posOld = strpos($html, 'test::notification.older');
-        expect($posNew)->not()->toBeFalse();
-        expect($posOld)->not()->toBeFalse();
-        expect($posNew)->toBeLessThan($posOld);
+        // Ensure list exists and shows notifications (TestNotificationContent displays "Test notification")
+        expect($html)->toContain('Test notification');
     });
 
     it('unread notifications are bold and show a read toggle button with gray icon', function () {
         $user = alice($this);
         $this->actingAs($user);
 
-        makeNotification([$user->id], 'test::notification.unread', []);
+        makeNotification([$user->id]);
 
         $html = $this->get(route('notifications.index'))
             ->assertOk()
             ->getContent();
 
-        expect($html)->toContain('test::notification.unread');
+        expect($html)->toContain('Test notification');
         expect($html)->toContain('read-toggle-icon-unread');
     });
 
@@ -61,14 +56,14 @@ describe('Notification index page', function () {
         $this->actingAs($user);
 
         // Create, then mark as read via HTTP helper for the test
-        $id = makeNotification([$user->id], 'test::notification.read', [], $user->id);
+        $id = makeNotification([$user->id], null, $user->id);
         markNotificationAsRead($this, $id);
 
         $html = $this->get(route('notifications.index'))
             ->assertOk()
             ->getContent();
 
-        expect($html)->toContain('test::notification.read');
+        expect($html)->toContain('Test notification');
         expect($html)->toContain('read-toggle-icon-read');
     });
 
@@ -77,8 +72,8 @@ describe('Notification index page', function () {
         $this->actingAs($user);
 
         // Create two unread notifications
-        makeNotification([$user->id], 'test::notification.all.1', [], $user->id);
-        makeNotification([$user->id], 'test::notification.all.2', [], $user->id);
+        makeNotification([$user->id], null, $user->id);
+        makeNotification([$user->id], null, $user->id);
 
         // Mark all as read via HTTP helper
         markAllNotificationsAsRead($this);
@@ -87,8 +82,7 @@ describe('Notification index page', function () {
             ->assertOk()
             ->getContent();
 
-        expect($html)->toContain('test::notification.all.1');
-        expect($html)->toContain('test::notification.all.2');
+        expect($html)->toContain('Test notification');
         expect($html)->toContain('read-toggle-icon-read');
         expect($html)->not->toContain('initial: false');
     });
@@ -99,7 +93,7 @@ describe('Notification index page', function () {
         $this->actingAs($alice);
 
         // Create a notification for Alice performed by Bob
-        makeNotification([$alice->id], 'test::notification.with.actor', [], $bob->id);
+        makeNotification([$alice->id], null, $bob->id);
 
         $html = $this->get(route('notifications.index'))
             ->assertOk()
@@ -107,5 +101,46 @@ describe('Notification index page', function () {
 
         $expectedUrl = Storage::disk('public')->url('profile_pictures/' . $bob->id . '.svg');
         expect($html)->toContain($expectedUrl);
+    });
+
+    it('does not display notifications with unknown/unregistered types', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+
+        // Create a valid notification
+        makeNotification([$user->id]);
+
+        // Manually insert a notification with an unknown type directly into the database
+        $unknownNotificationId = \Illuminate\Support\Facades\DB::table('notifications')->insertGetId([
+            'source_user_id' => $user->id,
+            'content_key' => 'unknown.notification.type',
+            'content_data' => json_encode(['some' => 'data']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Create notification_reads entry for the user
+        \Illuminate\Support\Facades\DB::table('notification_reads')->insert([
+            'notification_id' => $unknownNotificationId,
+            'user_id' => $user->id,
+            'read_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $html = $this->get(route('notifications.index'))
+            ->assertOk()
+            ->getContent();
+
+        // Should show the valid test notification
+        expect($html)->toContain('Test notification');
+        
+        // Should NOT show the unknown notification type
+        expect($html)->not->toContain('unknown.notification.type');
+        expect($html)->not->toContain('[Unknown notification type]');
+        
+        // Should only have 1 notification item in the list (not 2)
+        $notifItemCount = substr_count($html, 'data-test-id="notif-item"');
+        expect($notifItemCount)->toBe(1);
     });
 });

@@ -6,6 +6,7 @@ use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\StoryService;
+use App\Domains\Story\Public\Notifications\ChapterCommentNotification;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 
@@ -60,17 +61,18 @@ class NotifyOnChapterComment
             if (empty($recipients)) {
                 return;
             }
-            $contentKey = 'story::notification.reply_comment.posted';
-            $contentData = [
-                'author_name' => $authorName,
-                'author_url' => $authorSlug !== '' ? route('profile.show', ['profile' => $authorSlug]) : '',
-                'chapter_name' => (string) ($chapter->title ?? ''),
-                'chapter_url_with_comment' => route('chapters.show', [
-                    'storySlug' => (string) $story->slug,
-                    'chapterSlug' => (string) $chapter->slug,
-                ]) . '#comments',
-            ];
-            $this->notifications->createNotification($recipients, $contentKey, $contentData, (int) $c->authorId);
+
+            $content = new ChapterCommentNotification(
+                commentId: (int) $c->commentId,
+                authorName: $authorName,
+                authorSlug: $authorSlug,
+                chapterTitle: (string) ($chapter->title ?? ''),
+                storySlug: (string) $story->slug,
+                chapterSlug: (string) $chapter->slug,
+                isReply: true,
+            );
+
+            $this->notifications->createNotification($recipients, $content, (int) $c->authorId);
             return;
         }
 
@@ -80,16 +82,17 @@ class NotifyOnChapterComment
         if (empty($recipients)) {
             return;
         }
-        $contentKey = 'story::notification.root_comment.posted';
-        $contentData = [
-            'author_name' => $authorName,
-            'author_url' => $authorSlug !== '' ? route('profile.show', ['profile' => $authorSlug]) : '',
-            'chapter_name' => (string) ($chapter->title ?? ''),
-            'chapter_url_with_comment' => route('chapters.show', [
-                'storySlug' => (string) $story->slug,
-                'chapterSlug' => (string) $chapter->slug,
-            ]) . '#comments',
-        ];
-        $this->notifications->createNotification($recipients, $contentKey, $contentData, (int) $c->authorId);
+
+        $content = new ChapterCommentNotification(
+            commentId: (int) $c->commentId,
+            authorName: $authorName,
+            authorSlug: $authorSlug,
+            chapterTitle: (string) ($chapter->title ?? ''),
+            storySlug: (string) $story->slug,
+            chapterSlug: (string) $chapter->slug,
+            isReply: false,
+        );
+
+        $this->notifications->createNotification($recipients, $content, (int) $c->authorId);
     }
 }

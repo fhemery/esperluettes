@@ -44,6 +44,8 @@ use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
 use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
+use App\Domains\Notification\Public\Services\NotificationFactory;
+use App\Domains\Story\Public\Notifications\ChapterCommentNotification;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -118,6 +120,13 @@ class StoryServiceProvider extends ServiceProvider
             key: 'chapter',
             displayName: __('story::moderation.topic_chapter'),
             formatterClass: ChapterSnapshotFormatter::class
+        );
+
+        // Register notification content types
+        $notificationFactory = app(NotificationFactory::class);
+        $notificationFactory->register(
+            type: ChapterCommentNotification::type(),
+            class: ChapterCommentNotification::class
         );
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Domains\Notification\Private\ViewModels;
 
+use App\Domains\Notification\Public\Services\NotificationFactory;
+
 class NotificationPageViewModel
 {
     /** @var array<int, NotificationViewModel> */
@@ -10,11 +12,14 @@ class NotificationPageViewModel
     /**
      * @param array<int, array{id:int,content_key:string,content_data:array|mixed,created_at:string,read_at:?string,source_user_id?:?int}> $rows
      * @param array<int, object> $profilesById A map of user_id => profile-like object exposing avatar_url
+     * @param NotificationFactory $factory
      */
-    public static function fromRows(array $rows, array $profilesById = []): self
+    public static function fromRows(array $rows, array $profilesById = [], ?NotificationFactory $factory = null): self
     {
+        $factory = $factory ?? app(NotificationFactory::class);
+        
         $self = new self();
-        $self->notifications = array_map(function ($r) use ($profilesById) {
+        $self->notifications = array_values(array_filter(array_map(function ($r) use ($profilesById, $factory) {
             $sid = $r['source_user_id'] ?? null;
             if ($sid !== null) {
                 $profile = $profilesById[(int) $sid] ?? null;
@@ -22,8 +27,22 @@ class NotificationPageViewModel
                     $r['avatar_url'] = $profile->avatar_url;
                 }
             }
+            
+            // Render notification content using factory
+            $content = $factory->make(
+                (string) $r['content_key'],
+                is_array($r['content_data']) ? $r['content_data'] : (array) $r['content_data']
+            );
+            
+            // Discard notifications with no corresponding type
+            if (!$content) {
+                return null;
+            }
+            
+            $r['rendered_content'] = $content->display();
+            
             return NotificationViewModel::fromRow($r);
-        }, $rows);
+        }, $rows)));
         return $self;
     }
 }

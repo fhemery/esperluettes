@@ -3,6 +3,7 @@
 namespace App\Domains\Notification\Private\Services;
 
 use App\Domains\Notification\Private\Models\Notification;
+use App\Domains\Notification\Public\Contracts\NotificationContent;
 use Illuminate\Support\Facades\DB;
 
 class NotificationService
@@ -12,7 +13,7 @@ class NotificationService
      *
      * @param int[] $userIds
      */
-    public function createNotification(array $userIds, string $contentKey, array $contentData, ?int $sourceUserId = null): void
+    public function createNotification(array $userIds, NotificationContent $content, ?int $sourceUserId = null): void
     {
         $userIds = array_values(array_unique(array_map('intval', $userIds)));
         if (empty($userIds)) {
@@ -21,8 +22,8 @@ class NotificationService
 
         $notification = Notification::query()->create([
             'source_user_id' => $sourceUserId,
-            'content_key' => $contentKey,
-            'content_data' => $contentData,
+            'content_key' => $content::type(),
+            'content_data' => $content->toData(),
         ]);
 
         $now = now();

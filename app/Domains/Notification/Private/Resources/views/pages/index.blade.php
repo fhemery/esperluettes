@@ -30,7 +30,7 @@
                             csrf: '{{ csrf_token() }}',
                             isRead: {{ $n->readAt ? 'true' : 'false' }},
                         })"
-                            data-test-id="notif-item" data-content-key="{{ $n->contentKey }}">
+                            data-test-id="notif-item">
                             {{-- Avatar --}}
                             <div class="col-span-1 row-span-2 self-center">
                                 @if (!empty($n->avatarUrl))
@@ -40,7 +40,7 @@
 
                             {{-- Content --}}
                             <div class="col-span-2"
-                                :class="isRead ? '' : 'font-bold'">{!! __($n->contentKey, $n->contentData ?? []) !!}</div>
+                                :class="isRead ? '' : 'font-bold'">{!! $n->renderedContent !!}</div>
 
                             {{-- Date --}}
                             <div class="grid-col-1 flex items-center justify-between mt-1">

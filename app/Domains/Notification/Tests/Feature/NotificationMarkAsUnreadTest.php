@@ -17,7 +17,7 @@ describe('Notification mark as unread', function () {
         $this->actingAs($alice);
 
         // Create a notification for Bob and mark it read for Bob (owner)
-        $notifId = makeNotification([$bob->id], 'test::notification.for_bob', [], $bob->id);
+        $notifId = makeNotification([$bob->id], null, $bob->id);
         $this->actingAs($bob);
         markNotificationAsRead($this, $notifId);
 
@@ -37,7 +37,7 @@ describe('Notification mark as unread', function () {
         $user = alice($this);
         $this->actingAs($user);
 
-        $notifId = makeNotification([$user->id], 'test::notification.once', [], $user->id);
+        $notifId = makeNotification([$user->id], null, $user->id);
         // Already unread, calling unread should be 204 and remain null
         $this->postJson(route('notifications.markUnread', $notifId))
             ->assertNoContent();
@@ -49,7 +49,7 @@ describe('Notification mark as unread', function () {
         $user = alice($this);
         $this->actingAs($user);
 
-        $notifId = makeNotification([$user->id], 'test::notification.mark', [], $user->id);
+        $notifId = makeNotification([$user->id], null, $user->id);
         // Mark read first
         markNotificationAsRead($this, $notifId);
         $pre = notificationReadRow($user->id, $notifId);

@@ -23,7 +23,7 @@ describe('Notify authors chapter comment', function () {
 
         dispatchEvent(new CommentPosted($snapshot));
 
-        $notif = getLatestNotificationByKey('story::notification.root_comment.posted');
+        $notif = getLatestNotificationByKey('story.chapter.comment');
         expect($notif)->toBeNull();
     });
 
@@ -42,7 +42,7 @@ describe('Notify authors chapter comment', function () {
 
         dispatchEvent(new CommentPosted($snapshot));
 
-        $notif = getLatestNotificationByKey('story::notification.root_comment.posted');
+        $notif = getLatestNotificationByKey('story.chapter.comment');
         expect($notif)->toBeNull();
     });
 
@@ -72,7 +72,7 @@ describe('Notify authors chapter comment', function () {
 
             dispatchEvent(new CommentPosted($snapshot));
 
-            $notif = getLatestNotificationByKey('story::notification.root_comment.posted');
+            $notif = getLatestNotificationByKey('story.chapter.comment');
             expect($notif)->not->toBeNull();
             $targets = getNotificationTargetUserIds((int)$notif->id);
             sort($targets);
@@ -84,15 +84,15 @@ describe('Notify authors chapter comment', function () {
             if (is_string($payload)) {
                 $payload = json_decode($payload, true) ?: [];
             }
-            expect($payload)->toHaveKeys(['author_name', 'author_url', 'chapter_name', 'chapter_url_with_comment']);
+            expect($payload)->toHaveKeys(['comment_id', 'author_name', 'author_slug', 'chapter_title', 'story_slug', 'chapter_slug', 'is_reply']);
+            expect($payload['comment_id'])->toBe(12);
             expect($payload['author_name'])->toBe("Carol");
-            expect($payload['author_url'])->toBe(route('profile.show', ['profile' => 'carol']));
-            expect($payload['chapter_name'])->toBe('Chapter One');
-            expect($payload['chapter_url_with_comment'])->toBe(route('chapters.show', [
-                'storySlug' => $story1->slug,
-                'chapterSlug' => $chapter->slug,
-            ]) . '#comments');
-            expect((int)($notif->source_user_id ?? 0))->toBe($commenter->id);
+            expect($payload['author_slug'])->toBe('carol');
+            expect($payload['chapter_title'])->toBe('Chapter One');
+            expect($payload['story_slug'])->toBe($story1->slug);
+            expect($payload['chapter_slug'])->toBe($chapter->slug);
+            expect($payload['is_reply'])->toBe(false);
+            expect($notif->source_user_id)->toBe($commenter->id);
         });
     });
 
@@ -130,7 +130,7 @@ describe('Notify authors chapter comment', function () {
 
             $expectedRecipients = [$this->rootCommenter->id];
 
-            $notif = getLatestNotificationByKey('story::notification.reply_comment.posted');
+            $notif = getLatestNotificationByKey('story.chapter.comment');
             expect($notif)->not->toBeNull();
             $targets = getNotificationTargetUserIds((int)$notif->id);
             expect($targets)->toEqual($expectedRecipients);
@@ -163,7 +163,7 @@ describe('Notify authors chapter comment', function () {
 
             dispatchEvent(new CommentPosted($snapshot));
 
-            $notif = getLatestNotificationByKey('story::notification.reply_comment.posted');
+            $notif = getLatestNotificationByKey('story.chapter.comment');
             expect($notif)->not->toBeNull();
             $targets = getNotificationTargetUserIds((int)$notif->id);
             
