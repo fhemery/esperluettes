@@ -4,18 +4,16 @@
     @foreach($chapters as $ch)
     <!-- Read toggle, only for logged users -->
     @auth
-    <div class="col-span-1 surface-read text-on-surface p-2 flex items-center h-full">
-        <button type="button"
-            class="read-toggle inline-flex items-center justify-center rounded-full w-10 h-10"
-            data-story-slug="{{ $story->slug }}"
-            data-chapter-slug="{{ $ch->slug }}"
-            data-read="{{ $ch->isRead ? '1' : '0' }}"
-            data-label-read="{{ __('story::chapters.actions.marked_read') }}"
-            data-label-unread="{{ __('story::chapters.actions.mark_as_read') }}"
-            aria-label="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}"
-            title="{{ $ch->isRead ? __('story::chapters.actions.marked_read') : __('story::chapters.actions.mark_as_read') }}">
-            <span class="material-symbols-outlined text-[30px] leading-none {{ $ch->isRead ? 'text-success' : 'text-gray-300' }}">check_circle</span>
-        </button>
+    <div class="col-span-1 surface-read text-on-surface p-2 flex items-center h-full"
+         x-data="storyReadItem({
+            storySlug: '{{ $story->slug }}',
+            chapterSlug: '{{ $ch->slug }}',
+            csrf: '{{ csrf_token() }}',
+            isRead: {{ $ch->isRead ? 'true' : 'false' }},
+         })"
+         x-on:mark-read.stop="mark()"
+         x-on:mark-unread.stop="unmark()">
+        <x-shared::read-toggle :read="$ch->isRead" />
     </div>
     @else
     <div></div>
@@ -91,70 +89,48 @@
 @once
 @push('scripts')
 <script>
-    (function() {
-        function getCsrf() {
-            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        }
+    (function(){
+        if (window.storyReadItem) return;
 
         function buildUrl(storySlug, chapterSlug) {
             return `/stories/${encodeURIComponent(storySlug)}/chapters/${encodeURIComponent(chapterSlug)}/read`;
         }
 
-        function updateIcon(btn, isRead) {
-            const icon = btn.querySelector('.material-symbols-outlined');
-            if (!icon) return;
-            icon.textContent = 'check_circle';
-            // Apply colors via style to avoid JIT/class issues
-            if (isRead) {
-                icon.classList.add('text-success');
-                icon.classList.remove('text-gray-300');
-            } else {
-                icon.classList.remove('text-success');
-                icon.classList.add('text-gray-300');
-            }
-            btn.setAttribute('data-read', isRead ? '1' : '0');
-            const labelRead = btn.getAttribute('data-label-read') || 'Read';
-            const labelUnread = btn.getAttribute('data-label-unread') || 'Mark as read';
-            btn.setAttribute('aria-label', isRead ? labelRead : labelUnread);
-            btn.setAttribute('title', isRead ? labelRead : labelUnread);
-        }
-
-        async function toggle(btn) {
-            const inProgress = btn.getAttribute('data-busy') === '1';
-            if (inProgress) return;
-            btn.setAttribute('data-busy', '1');
-
-            const story = btn.getAttribute('data-story-slug');
-            const chapter = btn.getAttribute('data-chapter-slug');
-            const isRead = btn.getAttribute('data-read') === '1';
-            const url = buildUrl(story, chapter);
-            const method = isRead ? 'DELETE' : 'POST';
-
-            try {
-                const res = await fetch(url, {
-                    method,
-                    headers: {
-                        'X-CSRF-TOKEN': getCsrf(),
-                        'Accept': 'text/plain',
-                    },
-                });
-                if (res.status === 204) {
-                    updateIcon(btn, !isRead);
-                }
-            } catch (e) {
-                // noop
-            } finally {
-                btn.setAttribute('data-busy', '0');
-            }
-        }
-
-        function bind() {
-            document.querySelectorAll('button.read-toggle').forEach((btn) => {
-                btn.addEventListener('click', () => toggle(btn));
-            });
-        }
-
-        bind();
+        window.storyReadItem = function({ storySlug, chapterSlug, csrf, isRead }) {
+            return {
+                isRead: !!isRead,
+                async mark() {
+                    try {
+                        const res = await fetch(buildUrl(storySlug, chapterSlug), {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': csrf,
+                                'Accept': 'text/plain',
+                            },
+                        });
+                        if (res.status === 204) {
+                            this.isRead = true;
+                        }
+                    } catch (e) {
+                    }
+                },
+                async unmark() {
+                    try {
+                        const res = await fetch(buildUrl(storySlug, chapterSlug), {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': csrf,
+                                'Accept': 'text/plain',
+                            },
+                        });
+                        if (res.status === 204) {
+                            this.isRead = false;
+                        }
+                    } catch (e) {
+                    }
+                },
+            };
+        };
     })();
 </script>
 @endpush
