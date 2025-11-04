@@ -1,7 +1,8 @@
 @props([
     'src' => null,
     'alt' => 'User avatar',
-    'class' => 'h-10 w-10 rounded-full object-cover',
+    'class' => 'h-10 w-10',
+    'borderColor' => 'transparent',
 ])
 
 @php($default = asset('images/default-avatar.svg'))
@@ -14,5 +15,5 @@
     alt="{{ $alt }}"
     loading="lazy"
     decoding="async"
-    {{ $attributes->merge(['class' => $class]) }}
+    {{ $attributes->merge(['class' => $class . ' border-' . $borderColor . ' border-2 rounded-full object-cover']) }}
 />

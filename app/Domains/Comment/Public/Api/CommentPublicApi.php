@@ -38,8 +38,6 @@ class CommentPublicApi
         }
     }
 
-    
-
     /**
      * Bulk: for each target, determine if there exists at least one root comment without a reply
      * from any of the provided author ids.
@@ -140,7 +138,7 @@ class CommentPublicApi
     {
         $this->checkAccess();
 
-        $user = Auth::user();
+        $user = Auth::user();    
         // Compute plain length once using sanitizer
         $len = $this->sanitizer->plainTextLength($comment->body);
 
@@ -188,15 +186,33 @@ class CommentPublicApi
         return $this->service->postComment($comment->entityType, $comment->entityId, $user->id, $comment->body, $comment->parentCommentId)->id;
     }
 
-    public function getComment(int $commentId): CommentDto
+    public function getComment(int $commentId, bool $withChildren = false): CommentDto
     {
         $this->checkAccess();
-        $comment = $this->service->getComment($commentId);
-        $userId = (int) (Auth::id() ?? 0);
-        $profile = $this->profiles->getPublicProfile($comment->author_id);
-        $dto = CommentDto::fromModel($comment, $profile);
-        $dto->canReply = $this->policies->canReply($comment->commentable_type, $dto, $userId);
-        $dto->canEditOwn = $this->policies->canEditOwn($comment->commentable_type, $dto, $userId);
+        return $this->getCommentInternal($commentId, $withChildren, (int) (Auth::id() ?? 0));
+    }
+
+    /**
+     * Internal method to get a comment without authorization checks.
+     * For use by internal operations (e.g., backfill, admin operations).
+     */
+    public function getCommentInternal(int $commentId, bool $withChildren = false, int $contextUserId = 0): CommentDto
+    {
+        $comment = $this->service->getComment($commentId, $withChildren);
+
+        // Collect author ids from root and its children (children may be empty if not loaded)
+        $authorIds = [];
+        $authorIds[] = (int) $comment->author_id;
+        foreach ($comment->children ?? [] as $child) {
+            $authorIds[] = (int) $child->author_id;
+        }
+        $authorIds = array_values(array_unique($authorIds));
+        $profiles = $this->profiles->getPublicProfiles($authorIds); // [userId => ProfileDto|null]
+
+        $dto = $this->dtoMapper->mapRootWithChildren([$comment], $profiles, $this->policies, (string)$comment->commentable_type, $contextUserId)[0];
+        $dto->canReply = $this->policies->canReply($comment->commentable_type, $dto, $contextUserId);
+        $dto->canEditOwn = $this->policies->canEditOwn($comment->commentable_type, $dto, $contextUserId);
+        
         return $dto;
     }
 

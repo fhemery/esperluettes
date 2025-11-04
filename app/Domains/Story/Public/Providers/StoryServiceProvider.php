@@ -30,6 +30,7 @@ use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Story\Private\Listeners\GrantInitialCreditsOnUserRegistered;
 use App\Domains\Story\Private\Listeners\GrantCreditOnRootCommentPosted;
 use App\Domains\Story\Private\Listeners\MarkChapterReadOnRootCommentPosted;
+use App\Domains\Story\Private\Listeners\NotifyOnChapterComment;
 use App\Domains\Story\Private\Listeners\DecreaseCreditsOnCommentDeletedListener;
 use App\Domains\Story\Private\Listeners\RemoveStoriesOnUserDeleted;
 use App\Domains\Story\Private\Listeners\RemoveChapterCreditsOnUserDeleted;
@@ -41,13 +42,24 @@ use App\Domains\Story\Private\Listeners\RestoreStoriesOnUserReactivated;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
+use App\Domains\Story\Public\Events\ChapterCommentNotificationsBackfilled;
 use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
+use App\Domains\Notification\Public\Services\NotificationFactory;
+use App\Domains\Story\Public\Notifications\ChapterCommentNotification;
+use App\Domains\Story\Private\Console\BackfillChapterCommentNotificationsCommand;
 
 class StoryServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        // Register commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                BackfillChapterCommentNotificationsCommand::class,
+            ]);
+        }
+        
         // Load domain migrations
         $this->loadMigrationsFrom(app_path('Domains/Story/Database/Migrations'));
 
@@ -94,11 +106,13 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->registerEvent(StorySummaryModerated::name(), StorySummaryModerated::class);
         $eventBus->registerEvent(ChapterUnpublishedByModeration::name(), ChapterUnpublishedByModeration::class);
         $eventBus->registerEvent(ChapterContentModerated::name(), ChapterContentModerated::class);
+        $eventBus->registerEvent(ChapterCommentNotificationsBackfilled::name(), ChapterCommentNotificationsBackfilled::class);
 
         // Subscribe to cross-domain events (after-commit listeners)
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);
         $eventBus->subscribe(CommentPosted::class, [app(GrantCreditOnRootCommentPosted::class), 'handle']);
         $eventBus->subscribe(CommentPosted::class, [app(MarkChapterReadOnRootCommentPosted::class), 'handle']);
+        $eventBus->subscribe(CommentPosted::class, [app(NotifyOnChapterComment::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveStoriesOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeleted::class, [app(RemoveChapterCreditsOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeactivated::class, [app(SoftDeleteStoriesOnUserDeactivated::class), 'handle']);
@@ -116,6 +130,13 @@ class StoryServiceProvider extends ServiceProvider
             key: 'chapter',
             displayName: __('story::moderation.topic_chapter'),
             formatterClass: ChapterSnapshotFormatter::class
+        );
+
+        // Register notification content types
+        $notificationFactory = app(NotificationFactory::class);
+        $notificationFactory->register(
+            type: ChapterCommentNotification::type(),
+            class: ChapterCommentNotification::class
         );
     }
 }

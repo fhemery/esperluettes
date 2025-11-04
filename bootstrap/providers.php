@@ -23,6 +23,7 @@ return [
     App\Domains\Discord\Public\Providers\DiscordServiceProvider::class,
     App\Domains\FAQ\Private\Providers\FaqServiceProvider::class,
     App\Domains\Calendar\Public\Providers\CalendarServiceProvider::class,
+    App\Domains\Notification\Public\Providers\NotificationServiceProvider::class,
     
     // Add other domain providers here as they are created
 

@@ -15,7 +15,7 @@
 
 <div {{ $attributes->merge(['class' => 'flex items-center gap-2 ' . $classes . ' text-accent']) }}>
     @if ($icon)
-        <span class="material-symbols-outlined">
+        <span class="material-symbols-outlined {{ $classes }}">
             {{ $icon }}
         </span>
     @endif
