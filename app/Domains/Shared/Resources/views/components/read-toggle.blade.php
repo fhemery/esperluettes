@@ -22,9 +22,11 @@
                     if (!this.isRead) {
                         this.isRead = true;
                         this.$dispatch('markRead');
+                        this.$dispatch('mark-read');
                     } else {
                         this.isRead = false;
                         this.$dispatch('markUnread');
+                        this.$dispatch('mark-unread');
                     }
                 },
             }

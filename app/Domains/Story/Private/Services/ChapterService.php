@@ -91,6 +91,14 @@ class ChapterService
         });
     }
 
+    /**
+     * Lightweight accessor to retrieve a Chapter by its id.
+     */
+    public function getChapterById(int $chapterId): ?Chapter
+    {
+        return Chapter::query()->find($chapterId);
+    }
+
 
     /**
      * Empty the chapter content (set to empty string, not null) by slug.

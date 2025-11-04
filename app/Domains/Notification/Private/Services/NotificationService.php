@@ -65,6 +65,7 @@ class NotificationService
                 'n.id as id',
                 'n.content_key as content_key',
                 'n.content_data as content_data',
+                'n.source_user_id as source_user_id',
                 'n.created_at as created_at',
                 'nr.read_at as read_at',
             ]);
@@ -74,6 +75,7 @@ class NotificationService
                 'id' => (int) $r->id,
                 'content_key' => $r->content_key,
                 'content_data' => is_string($r->content_data) ? json_decode($r->content_data, true) : $r->content_data,
+                'source_user_id' => $r->source_user_id !== null ? (int) $r->source_user_id : null,
                 'created_at' => $r->created_at,
                 'read_at' => $r->read_at,
             ];

@@ -136,6 +136,17 @@ class StoryService
     }
 
     /**
+     * Return author user IDs for the given story.
+     * @return array<int,int>
+     */
+    public function getAuthorIds(int $storyId): array
+    {
+        return Story::query()
+            ->whereKey($storyId)
+            ->first()?->authors()->pluck('user_id')->map(fn($v) => (int)$v)->all() ?? [];
+    }
+
+    /**
      * Set a story visibility to private. Returns true if it changed, false if already private.
      */
     public function makePrivate(string $slug): bool

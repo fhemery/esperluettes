@@ -298,3 +298,15 @@ function setUserCredits(int $userId, int $credits): void
             'updated_at' => now(),
         ]);
 }
+
+function addCollaborator(int $storyId, int $userId, string $role = 'author'): void
+{
+    DB::table('story_collaborators')->insert([
+        'story_id' => $storyId,
+        'user_id' => $userId,
+        'role' => $role,
+        'invited_by_user_id' => $userId,
+        'invited_at' => now(),
+        'accepted_at' => now(),
+    ]);
+}

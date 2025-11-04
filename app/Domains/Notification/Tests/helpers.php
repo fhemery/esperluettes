@@ -66,3 +66,28 @@ function markAllNotificationsAsRead(TestCase $t): void
     $t->postJson(route('notifications.markAllRead'))
         ->assertNoContent();
 }
+
+/**
+ * Find the most recent notification by its content key. Returns stdClass or null.
+ * The returned object includes: id, content_key, content_data (JSON string or array depending on driver), source_user_id, created_at, updated_at.
+ */
+function getLatestNotificationByKey(string $contentKey): ?object
+{
+    return \Illuminate\Support\Facades\DB::table('notifications')
+        ->where('content_key', $contentKey)
+        ->orderByDesc('id')
+        ->first();
+}
+
+/**
+ * Return target user IDs for a given notification ID (from notification_reads table).
+ * @return array<int,int>
+ */
+function getNotificationTargetUserIds(int $notificationId): array
+{
+    return \Illuminate\Support\Facades\DB::table('notification_reads')
+        ->where('notification_id', $notificationId)
+        ->pluck('user_id')
+        ->map(fn($v) => (int) $v)
+        ->all();
+}

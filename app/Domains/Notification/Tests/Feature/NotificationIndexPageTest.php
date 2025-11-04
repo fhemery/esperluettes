@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -90,5 +91,21 @@ describe('Notification index page', function () {
         expect($html)->toContain('test::notification.all.2');
         expect($html)->toContain('read-toggle-icon-read');
         expect($html)->not->toContain('initial: false');
+    });
+
+    it('shows the actor avatar when source_user_id is present', function () {
+        $alice = alice($this);
+        $bob = bob($this);
+        $this->actingAs($alice);
+
+        // Create a notification for Alice performed by Bob
+        makeNotification([$alice->id], 'test::notification.with.actor', [], $bob->id);
+
+        $html = $this->get(route('notifications.index'))
+            ->assertOk()
+            ->getContent();
+
+        $expectedUrl = Storage::disk('public')->url('profile_pictures/' . $bob->id . '.svg');
+        expect($html)->toContain($expectedUrl);
     });
 });

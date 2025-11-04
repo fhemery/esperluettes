@@ -14,7 +14,7 @@ class NotificationViewModel
     ) {}
 
     /**
-     * @param array{id:int,content_key:string,content_data:array|mixed,created_at:string,read_at:?string} $row
+     * @param array{id:int,content_key:string,content_data:array|mixed,created_at:string,read_at:?string,avatar_url?:?string} $row
      */
     public static function fromRow(array $row): self
     {
@@ -24,7 +24,7 @@ class NotificationViewModel
             contentData: is_array($row['content_data']) ? $row['content_data'] : (array) $row['content_data'],
             createdAt: (string) $row['created_at'],
             readAt: $row['read_at'] ?? null,
-            avatarUrl: null,
+            avatarUrl: $row['avatar_url'] ?? null,
         );
     }
 }
