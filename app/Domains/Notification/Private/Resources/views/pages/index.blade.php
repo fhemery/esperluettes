@@ -2,12 +2,12 @@
     <div class="p-4 flex-1 flex flex-col">
 
 
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between">
             <x-shared::title icon="notifications">
                 {{ __('notifications::pages.index.title') }}
             </x-shared::title>
             @if (!empty($page->notifications))
-                <div class="mb-3" x-data="notifPage({ url: '{{ route('notifications.markAllRead') }}', csrf: '{{ csrf_token() }}' })">
+                <div class="mb-3 self-end" x-data="notifPage({ url: '{{ route('notifications.markAllRead') }}', csrf: '{{ csrf_token() }}' })">
                     <x-shared::button color="accent" data-test-id="mark-all-read" x-on:click="markAll()">
                         {{ __('notifications::pages.index.mark_all_read') }}
                     </x-shared::button>
