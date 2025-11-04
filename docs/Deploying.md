@@ -18,6 +18,8 @@ This project requires PHP >= 8.3 to be deployed. It works perfectly with a share
 - Web server (Apache or Nginx)
 
 ## Generating a package
+**IMPORTANT**: You must shut down vite dev server (`npm run dev`) before running the deployment script. Else the assets are going to point to your local server
+
 > npm run package
 
 This command requires Nodejs >= 20, and two files :
@@ -37,6 +39,11 @@ It performs the following steps:
 When your `.env.test` and `.env.production` files are ready, and filled it with your database information, you should setup the migrations table. You can do it remotely, or probably on the server in command line as well (once you have transfered and deployed the zip).
 
 > sail artisan migrate:install --env=<test/production>  # Use PHP directly if you are not running sail
+
+### [First time] Setting up storage
+On first deployment, you should create a symlink between `public_html/storage` and `storage/app/public` folder.
+
+Command `php artisan storage:link` should do the job (thought the symlinks were done manually at the time, so this is not verified).
 
 ### [First time] Setting up CRON jobs
 
