@@ -4,6 +4,7 @@ This is a repository to provide writing communities with a website to share and 
 
 The documentation will improve as the project progresses. For now, you can have a look at :
 - How to setup [Setup](docs/Setup.md) the environment locally to work with it
+- How to [Deploy](docs/Deploying.md) the application
 - The current chosen [Architecture](docs/Architecture.md).
 
 ## Comment Domain (Rendering and Endpoints)
