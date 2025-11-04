@@ -36,7 +36,8 @@
 
                 <div class="garden-cell relative cursor-pointer hover:bg-green-300 transition-colors"
                     :class="{ 'cursor-not-allowed': {{ $isOccupied ? 'true' : 'false' }} }"
-                    @click="handleCellClick($el)"
+                    @if($gardenMap->isPlantingAllowed)
+                    x-on:click="handleCellClick($el)"
                     data-x="{{ $x }}"
                     data-y="{{ $y }}"
                     data-occupied="{{ $isOccupied ? 'true' : 'false' }}"
@@ -49,6 +50,7 @@
                     data-avatar-url="{{ $cell->avatarUrl ?? '' }}"
                     @endif
                     @endif
+                    @endif
                     style="display: flex; align-items: center; justify-content: center; font-size: 8px;">
 
                     @if($isOccupied && $cell->type === 'flower')
@@ -56,7 +58,7 @@
                         alt="Flower planted by {{ $cell->displayName ?: 'user ' . $cell->userId }}"
                         class="w-full h-full object-contain"
                         style="max-width: {{ $gardenCellWidth - 2 }}px; max-height: {{ $gardenCellHeight - 2 }}px;">
-                    @elseif(!$isOccupied)
+                    @elseif(!$isOccupied && $gardenMap->isPlantingAllowed)
                     <span class="bg-black/10 w-[50%] h-[50%] rounded-full"></span>
                     @endif
                 </div>
@@ -68,7 +70,7 @@
                     <div class="surface-read text-on-surface max-w-md w-full max-h-[50vh] overflow-hidden flex flex-col" @click.away="closeCellModal()">
                         <div class="flex gap-2items-center justify-between p-4 border-b border-surface/20">
                             <x-shared::title tag="h3" x-text="`{{ __('jardino::planting.position') }} ${selectedCellX}, ${selectedCellY}`"></x-shared::title>
-                            <button @click="closeCellModal()" class="text-fg/60 hover:text-fg">
+                            <button x-on:click="closeCellModal()" class="text-fg/60 hover:text-fg">
                                 <span class="material-symbols-outlined">close</span>
                             </button>
                         </div>
@@ -102,7 +104,7 @@
                                     $flowerNumber=str_pad($i, 2, '0' , STR_PAD_LEFT);
                                     $flowerPath='images/activities/jardino/' . $flowerNumber . '.png' ;
                                     @endphp
-                                    <button @click="selectedFlower = '{{ $flowerNumber }}'"
+                                    <button x-on:click="selectedFlower = '{{ $flowerNumber }}'"
                                     class="flower-option p-1 border-2 transition-all hover:border-accent hover:scale-105"
                                     :class="{ 'border-accent bg-accent/10': selectedFlower === '{{ $flowerNumber }}', 'border-surface/30': selectedFlower !== '{{ $flowerNumber }}' }">
                                     <img src="{{ asset($flowerPath) }}"
@@ -281,8 +283,6 @@
                 },
 
                 blockCell() {
-                    console.log('Blocking cell at', this.selectedCellX, this.selectedCellY);
-
                     fetch(`/calendar/activities/${this.activityId}/jardino/block-cell`, {
                             method: 'POST',
                             headers: {

@@ -13,6 +13,7 @@ final class GardenMapViewModel
         public readonly int $cellWidth = GardenMapConstants::DEFAULT_CELL_WIDTH,
         public readonly int $cellHeight = GardenMapConstants::DEFAULT_CELL_HEIGHT,
         public readonly array $occupiedCells = [],
+        public readonly bool $isPlantingAllowed = false,
     ) {}
 
     public function getCell(int $x, int $y): ?GardenCellViewModel

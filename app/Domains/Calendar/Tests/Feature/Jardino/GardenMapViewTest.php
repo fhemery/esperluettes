@@ -131,3 +131,69 @@ describe('Garden Viewing Integration', function () {
         expect($cell2->displayName)->toBe('Bob');
     });
 });
+
+describe('Garden canPlant flag', function () {
+    beforeEach(function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $this->user = $user;
+    });
+
+    it('is true when activity is active and a goal is set', function () {
+        // Create story and active jardino
+        $story = publicStory('Story', $this->user->id);
+        $admin = admin($this);
+        $this->actingAs($admin);
+        $activityObj = createActiveJardino($this);
+
+        // Set goal
+        $this->actingAs($this->user);
+        createGoal($activityObj->id, $this->user->id, $story->id, 10000);
+
+        // ViewModel
+        $activity = Activity::findOrFail($activityObj->id);
+        $vm = getJardinoViewModel($activity);
+
+        expect($vm->gardenMap)->toBeInstanceOf(GardenMapViewModel::class);
+        expect($vm->gardenMap->isPlantingAllowed)->toBeTrue();
+    });
+
+    it('is false when activity is not ongoing (preview/ended)', function () {
+        // Create story and a non-active jardino (active starts in future)
+        $story = publicStory('Story', $this->user->id);
+        $admin = admin($this);
+        $this->actingAs($admin);
+        $activityId = createActiveJardino($this, [
+            'active_starts_at' => now()->addDay(),
+            'preview_starts_at' => now()->subDay(),
+        ]);
+
+        // Goal exists
+        $this->actingAs($this->user);
+        createGoal($activityId->id, $this->user->id, $story->id, 10000);
+
+        // ViewModel
+        $activity = Activity::findOrFail($activityId->id);
+        $vm = getJardinoViewModel($activity);
+
+        expect($vm->gardenMap)->toBeInstanceOf(GardenMapViewModel::class);
+        expect($vm->gardenMap->isPlantingAllowed)->toBeFalse();
+    });
+
+    it('is false when no goal is set for the user', function () {
+        // Create active jardino
+        $admin = admin($this);
+        $this->actingAs($admin);
+        $activityObj = createActiveJardino($this);
+
+        // Do NOT create a goal
+
+        // ViewModel as the user
+        $this->actingAs($this->user);
+        $activity = Activity::findOrFail($activityObj->id);
+        $vm = getJardinoViewModel($activity);
+
+        expect($vm->gardenMap)->toBeInstanceOf(GardenMapViewModel::class);
+        expect($vm->gardenMap->isPlantingAllowed)->toBeFalse();
+    });
+});

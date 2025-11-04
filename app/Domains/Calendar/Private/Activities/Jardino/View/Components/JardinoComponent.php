@@ -15,6 +15,7 @@ use App\Domains\Calendar\Private\Activities\Jardino\Services\JardinoFlowerServic
 use App\Domains\Calendar\Private\Services\ActivityService;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\GardenMapViewModel;
 use App\Domains\Calendar\Private\Activities\Jardino\View\Models\GardenCellViewModel;
+use App\Domains\Calendar\Public\Contracts\ActivityState;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use Illuminate\Support\Facades\Auth;
@@ -95,8 +96,11 @@ class JardinoComponent extends Component
             );
         }
 
+        $isPlantingAllowed = ($this->activity->state === ActivityState::ACTIVE) && ($objective !== null);
+
         $gardenMap = new GardenMapViewModel(
-            occupiedCells: $occupiedCells
+            occupiedCells: $occupiedCells,
+            isPlantingAllowed: $isPlantingAllowed,
         );
 
         $vm = new JardinoViewModel($this->activity->id, $objective, $stories, $gardenMap, $this->authApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN]));
