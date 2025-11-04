@@ -208,6 +208,22 @@ deptrac:
         - type: directory
           value: 'app/Domains/News/Tests/'
 
+    # Notification Domain
+    - name: NotificationPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Notification/Public/'
+
+    - name: NotificationPrivate
+      collectors:
+        - type: directory
+          value: app/Domains/Notification/Private/
+
+    - name: NotificationTests
+      collectors:
+        - type: directory
+          value: app/Domains/Notification/Tests/
+
     # Profile Domain
     - name: ProfilePublic
       collectors:
@@ -338,6 +354,12 @@ deptrac:
       - NewsPrivate
       - EventsPublic
 
+    NotificationPublic:
+      - Shared
+      - NotificationPrivate
+      - AuthPublic
+      - EventsPublic
+
     ProfilePublic:
       - Shared
       - ProfilePrivate
@@ -360,6 +382,7 @@ deptrac:
       - EventsPublic
       - AuthPublic
       - ModerationPublic
+      - NotificationPublic
 
     StoryRefPublic:
       - Shared
@@ -463,6 +486,11 @@ deptrac:
       - EventsPublic
       - NewsPublic
 
+    NotificationPrivate:
+      - Shared
+      - NotificationPublic
+      - EventsPublic
+
     ProfilePrivate:
       - Shared
       - AuthPublic
@@ -485,6 +513,7 @@ deptrac:
       - StoryRefPrivate
       - EventsPublic
       - StoryPublic
+      - NotificationPublic
 
     StoryRefPrivate:
       - Shared
@@ -545,6 +574,11 @@ deptrac:
       - NewsPrivate
       - NewsPublic
       - AuthPublic
+
+    NotificationTests:
+      - TestHelpers
+      - NotificationPrivate
+      - NotificationPublic
 
     ProfileTests:
       - Shared
