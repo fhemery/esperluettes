@@ -32,3 +32,67 @@
         <x-shared::read-toggle :read="(bool) $notification->readAt" />
     </div>
 </li>
+
+@once
+@push('scripts')
+<script>
+    (function(){
+        if (window.notifItem) return;
+        
+        window.notifItem = function({ id, markUrl, unmarkUrl, csrf, isRead }) {
+            return {
+                isRead: !!isRead,
+            async mark() {
+                try {
+                    await fetch(markUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrf,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            read: 1
+                        }),
+                        credentials: 'same-origin',
+                    });
+                    this.isRead = true;
+                    // Dispatch custom event for notification icon to update
+                    window.dispatchEvent(new CustomEvent('notification-read', { 
+                        detail: { notificationId: id },
+                        bubbles: true
+                    }));
+                } catch (e) {
+                    console.error('Failed to mark as read', e);
+                }
+            },
+            async unmark() {
+                try {
+                    await fetch(unmarkUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrf,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            read: 0
+                        }),
+                        credentials: 'same-origin',
+                    });
+                    this.isRead = false;
+                    // Dispatch custom event for notification icon to update
+                    window.dispatchEvent(new CustomEvent('notification-unread', { 
+                        detail: { notificationId: id },
+                        bubbles: true
+                    }));
+                } catch (e) {
+                    console.error('Failed to mark as unread', e);
+                }
+            }
+        };
+    };
+    })();
+</script>
+@endpush
+@endonce
