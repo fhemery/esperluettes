@@ -42,4 +42,14 @@ class NotificationFactory
         /** @var class-string<NotificationContent> $class */
         return $class::fromData($data);
     }
+
+    /**
+     * Get all registered notification types.
+     *
+     * @return array<int, string>
+     */
+    public function getRegisteredTypes(): array
+    {
+        return array_keys($this->map);
+    }
 }

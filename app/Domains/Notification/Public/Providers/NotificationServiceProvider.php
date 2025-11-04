@@ -2,6 +2,9 @@
 
 namespace App\Domains\Notification\Public\Providers;
 
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Notification\Private\Console\CleanupOldNotificationsCommand;
+use App\Domains\Notification\Public\Events\NotificationsCleanedUp;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
@@ -14,6 +17,11 @@ class NotificationServiceProvider extends ServiceProvider
         $this->app->singleton(NotificationFactory::class, function () {
             return new NotificationFactory();
         });
+
+        // Register console commands
+        $this->commands([
+            CleanupOldNotificationsCommand::class,
+        ]);
     }
 
     public function boot(): void
@@ -27,5 +35,17 @@ class NotificationServiceProvider extends ServiceProvider
         $this->loadViewsFrom(app_path('Domains/Notification/Private/Resources/views'), 'notification');
         Blade::componentNamespace('App\\Domains\\Notification\\Private\\View\\Components', 'notification');
         Blade::anonymousComponentPath(app_path('Domains/Notification/Private/Resources/views/components'), 'notification');
+
+        // Register Notification domain events with EventBus
+        $this->registerEvents();
+    }
+
+    private function registerEvents(): void
+    {
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(
+            NotificationsCleanedUp::name(),
+            NotificationsCleanedUp::class
+        );
     }
 }

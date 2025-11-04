@@ -147,4 +147,33 @@ class NotificationService
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
     }
+
+    /**
+     * Delete notifications older than the specified cutoff date.
+     * Returns the number of deleted notifications.
+     */
+    public function deleteOlderThan(\DateTimeInterface $cutoffDate): int
+    {
+        return DB::table('notifications')
+            ->where('created_at', '<', $cutoffDate)
+            ->delete();
+    }
+
+    /**
+     * Delete notifications with types that are not in the provided list.
+     * If the list is empty, deletes all notifications.
+     * Returns the number of deleted notifications.
+     *
+     * @param array<int, string> $registeredTypes
+     */
+    public function deleteUnknownTypes(array $registeredTypes): int
+    {
+        if (empty($registeredTypes)) {
+            return DB::table('notifications')->delete();
+        }
+
+        return DB::table('notifications')
+            ->whereNotIn('content_key', $registeredTypes)
+            ->delete();
+    }
 }
