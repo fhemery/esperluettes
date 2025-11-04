@@ -25,7 +25,7 @@ describe('NotificationIconComponent', function () {
         $rendered = Blade::render('<x-notification::notification-icon-component />');
 
         expect($rendered)->toContain(route('notifications.index'));
-        expect($rendered)->not->toContain('unread-badge');
+        expect($rendered)->toContain('initialCount: 0');
     });
 
     it('shows the correct unread count badge for logged-in users', function () {
@@ -46,6 +46,6 @@ describe('NotificationIconComponent', function () {
 
         expect($rendered)->toContain(route('notifications.index'));
         expect($rendered)->toContain('unread-badge');
-        expect($rendered)->toMatch('/bg-accent[^>]*>\s*1\s*</');
+        expect($rendered)->toContain('initialCount: 1');
     });
 });

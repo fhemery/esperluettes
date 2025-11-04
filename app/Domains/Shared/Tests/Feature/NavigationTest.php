@@ -156,8 +156,8 @@ describe('Top navbar', function () {
             // Bell link present
             $notificationsUrl = route('notifications.index');
             expect($html)->toContain('href="' . $notificationsUrl . '"');
-            // No unread badge
-            expect($html)->not->toContain('unread-badge');
+            expect($html)->toContain('unread-badge');
+            expect($html)->toContain('initialCount: 0');
         });
 
         it('shows notification bell with unread badge when there are notifications', function () {
