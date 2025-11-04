@@ -20,20 +20,19 @@ describe('Restoring comments after user reactivation', function () {
         $admin = admin($this);
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
 
-        // Create a story + published chapter as a valid target
-        $story = publicStory('Reactivation Comment Target', $user->id);
-        $chapter = createPublishedChapter($this, $story, $user);
+        $entityType='default';
+        $entityId = 42;
 
         /** @var CommentService $comments */
         $comments = app(CommentService::class);
 
         // Post a root comment by the user
-        $comment = $comments->postComment('chapter', (int) $chapter->id, (int) $user->id, 'Root by user');
+        $comment = $comments->postComment($entityType, $entityId, (int) $user->id, 'Root by user');
 
         // Deactivate -> soft-delete
         $this->actingAs($admin);
         app(AuthPublicApi::class)->deactivateUserById($user->id);
-        $afterDeact = $comments->countForAuthor('chapter', (int) $user->id, true);
+        $afterDeact = $comments->countForAuthor($entityType, (int) $user->id, true);
         expect($afterDeact)->toBe(0);
         $c = Comment::withTrashed()->find($comment->id);
         expect($c?->trashed())->toBeTrue();
@@ -42,7 +41,7 @@ describe('Restoring comments after user reactivation', function () {
         app(AuthPublicApi::class)->activateUserById($user->id);
 
         // Assert: count includes it again
-        $afterReact = $comments->countForAuthor('chapter', (int) $user->id, true);
+        $afterReact = $comments->countForAuthor($entityType, (int) $user->id, true);
         expect($afterReact)->toBe(1);
 
         // Assert: model not trashed
@@ -50,7 +49,7 @@ describe('Restoring comments after user reactivation', function () {
         expect($c?->trashed())->toBeFalse();
 
         // Assert: listing shows it again
-        $paged = $comments->getFor('chapter', (int) $chapter->id, 1, 20, false);
+        $paged = $comments->getFor($entityType, $entityId, 1, 20, false);
         $ids = collect($paged->items())->map(fn($cm) => (int)$cm->id)->all();
         expect(in_array((int)$comment->id, $ids, true))->toBeTrue();
     });
@@ -60,19 +59,18 @@ describe('Restoring comments after user reactivation', function () {
         $admin = admin($this);
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
 
-        // Create a story + published chapter as a valid target
-        $story = publicStory('Reactivation Reply Target', $user->id);
-        $chapter = createPublishedChapter($this, $story, $user);
+        $entityType='default';
+        $entityId = 42;
 
         /** @var CommentService $comments */
         $comments = app(CommentService::class);
 
         // Root by someone else
         $bob = bob($this, roles: [Roles::USER_CONFIRMED]);
-        $root = $comments->postComment('chapter', (int) $chapter->id, (int) $bob->id, 'Root');
+        $root = $comments->postComment($entityType, $entityId, (int) $bob->id, 'Root');
 
         // Reply by target user
-        $reply = $comments->postComment('chapter', (int) $chapter->id, (int) $user->id, 'Reply by user', (int) $root->id);
+        $reply = $comments->postComment($entityType, $entityId, (int) $user->id, 'Reply by user', (int) $root->id);
 
         // Deactivate -> soft-delete reply
         $this->actingAs($admin);
@@ -87,7 +85,7 @@ describe('Restoring comments after user reactivation', function () {
         $rc = Comment::withTrashed()->find($reply->id);
         expect($rc?->trashed())->toBeFalse();
 
-        $paged = $comments->getFor('chapter', (int) $chapter->id, 1, 20, true);
+        $paged = $comments->getFor($entityType, $entityId, 1, 20, true);
         $childIds = collect($paged->items())
             ->flatMap(fn($cm) => $cm->children->pluck('id')->all())
             ->map(fn($id) => (int)$id)
