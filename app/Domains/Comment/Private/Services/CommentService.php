@@ -73,11 +73,11 @@ class CommentService
     }
 
     /**
-     * Retrieve a comment by id as domain model.
+     * Retrieve a comment by id as domain model. Optionally eager-load direct children.
      */
-    public function getComment(int $commentId): Comment
+    public function getComment(int $commentId, bool $withChildren = false): Comment
     {
-        return $this->repository->getById($commentId);
+        return $this->repository->getById($commentId, $withChildren);
     }
 
     /**

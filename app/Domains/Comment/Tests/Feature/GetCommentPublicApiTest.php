@@ -87,4 +87,40 @@ describe('GetComment Public API', function () {
         expect($dto->children)->toBeArray()
             ->and($dto->children)->toBeEmpty();
     });
+
+    it('returns children when withChildren=true and sorts them ascending', function () {
+        $entityType = 'default';
+        $entityId = 1;
+
+        $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $bob = bob($this, roles: [Roles::USER_CONFIRMED]);
+        $carol = carol($this, roles: [Roles::USER_CONFIRMED]);
+
+        // Create root
+        $this->actingAs($author);
+        $rootId = createComment($entityType, $entityId, 'Root');
+
+        // Two replies in sequence to control ordering
+        $this->actingAs($bob);
+        $reply1Id = createComment($entityType, $entityId, 'First reply', $rootId);
+
+        $this->actingAs($carol);
+        $reply2Id = createComment($entityType, $entityId, 'Second reply', $rootId);
+
+        // Read with children
+        $this->actingAs($author);
+        /** @var App\Domains\Comment\Public\Api\CommentPublicApi $api */
+        $api = app(App\Domains\Comment\Public\Api\CommentPublicApi::class);
+        $dto = $api->getComment($rootId, true);
+
+        expect($dto->id)->toBe($rootId)
+            ->and($dto->children)->toBeArray()
+            ->and(count($dto->children))->toBe(2)
+            // Order should be chronological (reply1 then reply2)
+            ->and($dto->children[0]->id)->toBe($reply1Id)
+            ->and($dto->children[1]->id)->toBe($reply2Id)
+            // Basic content and permissions present
+            ->and($dto->children[0]->body)->toContain('First reply')
+            ->and($dto->children[1]->body)->toContain('Second reply');
+    });
 });

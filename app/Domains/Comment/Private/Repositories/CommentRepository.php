@@ -116,9 +116,15 @@ class CommentRepository
         ]);
     }
 
-    public function getById(int $commentId): Comment
+    public function getById(int $commentId, bool $withChildren = false): Comment
     {
-        return Comment::query()->findOrFail($commentId);
+        $query = Comment::query();
+        if ($withChildren) {
+            $query->with(['children' => function($q) {
+                $q->orderBy('created_at', 'asc');
+            }]);
+        }
+        return $query->findOrFail($commentId);
     }
 
     /**
