@@ -43,4 +43,7 @@ return [
     'chapter_unpublished_by_moderation' => [
         'summary' => "Chapitre dépublié par la modération (id: :id, :title).",
     ],
+    'chapter_comment_notifications_backfilled' => [
+        'summary' => "Remplissage des notifications de commentaires de chapitres : :processed événements traités, :created notifications créées, :deleted supprimées, :skipped ignorées.",
+    ],
 ];

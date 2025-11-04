@@ -3,6 +3,7 @@
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Notification\Public\Contracts\NotificationContent;
 use App\Domains\Notification\Tests\Fixtures\TestNotificationContent;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -103,4 +104,27 @@ function getNotificationTargetUserIds(int $notificationId): array
         ->pluck('user_id')
         ->map(fn($v) => (int) $v)
         ->all();
+}
+
+/**
+ * Get all notifications by content key.
+ * Returns a collection of stdClass objects.
+ * @return \Illuminate\Support\Collection
+ */
+function getAllNotificationsByKey(string $contentKey): \Illuminate\Support\Collection
+{
+    return DB::table('notifications')
+        ->where('content_key', $contentKey)
+        ->orderByDesc('id')
+        ->get();
+}
+
+/**
+ * Count notifications by content key using the public API.
+ */
+function countNotificationsByKey(string $contentKey): int
+{
+    /** @var NotificationPublicApi $api */
+    $api = app(NotificationPublicApi::class);
+    return $api->countNotificationsByType($contentKey);
 }

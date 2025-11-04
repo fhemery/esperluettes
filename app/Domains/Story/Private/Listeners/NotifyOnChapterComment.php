@@ -20,7 +20,14 @@ class NotifyOnChapterComment
         private CommentPublicApi $comments,
     ) {}
 
-    public function handle(CommentPosted $event): void
+    /**
+     * Handle a CommentPosted event.
+     * 
+     * @param CommentPosted $event
+     * @param \DateTime|null $eventDate Used for backfilling, to override notification timestamp
+     * @return void
+     */
+    public function handle(CommentPosted $event, ?\DateTime $eventDate = null): void
     {
         $c = $event->comment;
 
@@ -50,7 +57,7 @@ class NotifyOnChapterComment
             if (!$c->parentCommentId) {
                 return; // safety
             }
-            $rootWithChildren = $this->comments->getComment((int)$c->parentCommentId, true);
+            $rootWithChildren = $this->comments->getCommentInternal((int)$c->parentCommentId, true, 0);
             $rootAuthorId = (int) ($rootWithChildren->authorId ?? 0);
             $childAuthorIds = array_map(
                 fn($child) => (int) ($child->authorId ?? 0),
@@ -72,7 +79,7 @@ class NotifyOnChapterComment
                 isReply: true,
             );
 
-            $this->notifications->createNotification($recipients, $content, (int) $c->authorId);
+            $this->notifications->createNotification($recipients, $content, (int) $c->authorId, $eventDate);
             return;
         }
 
@@ -93,6 +100,6 @@ class NotifyOnChapterComment
             isReply: false,
         );
 
-        $this->notifications->createNotification($recipients, $content, (int) $c->authorId);
+        $this->notifications->createNotification($recipients, $content, (int) $c->authorId, $eventDate);
     }
 }

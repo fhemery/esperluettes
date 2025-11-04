@@ -42,15 +42,24 @@ use App\Domains\Story\Private\Listeners\RestoreStoriesOnUserReactivated;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
+use App\Domains\Story\Public\Events\ChapterCommentNotificationsBackfilled;
 use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Story\Public\Notifications\ChapterCommentNotification;
+use App\Domains\Story\Private\Console\BackfillChapterCommentNotificationsCommand;
 
 class StoryServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        // Register commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                BackfillChapterCommentNotificationsCommand::class,
+            ]);
+        }
+        
         // Load domain migrations
         $this->loadMigrationsFrom(app_path('Domains/Story/Database/Migrations'));
 
@@ -97,6 +106,7 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->registerEvent(StorySummaryModerated::name(), StorySummaryModerated::class);
         $eventBus->registerEvent(ChapterUnpublishedByModeration::name(), ChapterUnpublishedByModeration::class);
         $eventBus->registerEvent(ChapterContentModerated::name(), ChapterContentModerated::class);
+        $eventBus->registerEvent(ChapterCommentNotificationsBackfilled::name(), ChapterCommentNotificationsBackfilled::class);
 
         // Subscribe to cross-domain events (after-commit listeners)
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);

@@ -45,6 +45,31 @@ class EventService
             ->first();
     }
 
+    /**
+     * Get all events by name, ordered by ID descending (most recent first).
+     *
+     * @return array<StoredDomainEvent>
+     */
+    public function getEventsByName(string $name): array
+    {
+        $events = StoredDomainEvent::query()
+            ->where('name', $name)
+            ->orderBy('id', 'desc')
+            ->get([
+                'id',
+                'name',
+                'payload',
+                'triggered_by_user_id',
+                'context_ip',
+                'context_user_agent',
+                'context_url',
+                'meta',
+                'occurred_at',
+            ]);
+
+        return $events->all();
+    }
+
     public function store(DomainEvent $event): void {
         // Build base record
         $record = [

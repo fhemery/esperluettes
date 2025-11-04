@@ -20,15 +20,18 @@ class NotificationPublicApi
     }
 
     /**
-     * Create notification for specific users.
+     * Create a notification for a list of user IDs.
+     * The NotificationContent object supplies the key and data payload.
      *
      * @param int[] $userIds
+     * @param \DateTime|null $createdAt Optional timestamp for the notification (for backfilling)
      * @throws ValidationException
      */
     public function createNotification(
         array $userIds,
         NotificationContent $content,
-        ?int $sourceUserId = null
+        ?int $sourceUserId = null,
+        ?\DateTime $createdAt = null
     ): void {
         // userIds cannot be empty
         if (empty($userIds)) {
@@ -67,7 +70,7 @@ class NotificationPublicApi
         }
 
         // Delegate to persistence service
-        $this->service->createNotification($userIds, $content, $sourceUserId);
+        $this->service->createNotification($userIds, $content, $sourceUserId, $createdAt);
     }
 
     /**
@@ -99,5 +102,23 @@ class NotificationPublicApi
         if (!empty($targetIds)) {
             $this->service->createNotification($targetIds, $content, $sourceUserId);
         }
+    }
+
+    /**
+     * Delete all notifications of a specific type.
+     * Returns the number of deleted notifications.
+     * Cascade deletion will automatically remove associated notification_reads rows.
+     */
+    public function deleteNotificationsByType(string $contentKey): int
+    {
+        return $this->service->deleteNotificationsByType($contentKey);
+    }
+
+    /**
+     * Count notifications of a specific type.
+     */
+    public function countNotificationsByType(string $contentKey): int
+    {
+        return $this->service->countNotificationsByType($contentKey);
     }
 }

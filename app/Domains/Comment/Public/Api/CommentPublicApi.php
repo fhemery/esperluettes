@@ -189,8 +189,16 @@ class CommentPublicApi
     public function getComment(int $commentId, bool $withChildren = false): CommentDto
     {
         $this->checkAccess();
+        return $this->getCommentInternal($commentId, $withChildren, (int) (Auth::id() ?? 0));
+    }
+
+    /**
+     * Internal method to get a comment without authorization checks.
+     * For use by internal operations (e.g., backfill, admin operations).
+     */
+    public function getCommentInternal(int $commentId, bool $withChildren = false, int $contextUserId = 0): CommentDto
+    {
         $comment = $this->service->getComment($commentId, $withChildren);
-        $userId = (int) (Auth::id() ?? 0);
 
         // Collect author ids from root and its children (children may be empty if not loaded)
         $authorIds = [];
@@ -201,9 +209,9 @@ class CommentPublicApi
         $authorIds = array_values(array_unique($authorIds));
         $profiles = $this->profiles->getPublicProfiles($authorIds); // [userId => ProfileDto|null]
 
-        $dto = $this->dtoMapper->mapRootWithChildren([$comment], $profiles, $this->policies, (string)$comment->commentable_type, $userId)[0];
-        $dto->canReply = $this->policies->canReply($comment->commentable_type, $dto, $userId);
-        $dto->canEditOwn = $this->policies->canEditOwn($comment->commentable_type, $dto, $userId);
+        $dto = $this->dtoMapper->mapRootWithChildren([$comment], $profiles, $this->policies, (string)$comment->commentable_type, $contextUserId)[0];
+        $dto->canReply = $this->policies->canReply($comment->commentable_type, $dto, $contextUserId);
+        $dto->canEditOwn = $this->policies->canEditOwn($comment->commentable_type, $dto, $contextUserId);
         
         return $dto;
     }

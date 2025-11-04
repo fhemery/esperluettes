@@ -12,6 +12,8 @@ class Notification extends Model
         'source_user_id',
         'content_key',
         'content_data',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

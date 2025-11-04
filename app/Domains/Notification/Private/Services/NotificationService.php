@@ -12,29 +12,46 @@ class NotificationService
      * Persist a notification and create unread rows for target users.
      *
      * @param int[] $userIds
+     * @param \DateTime|null $createdAt Optional timestamp for backfilling
      */
-    public function createNotification(array $userIds, NotificationContent $content, ?int $sourceUserId = null): void
+    public function createNotification(array $userIds, NotificationContent $content, ?int $sourceUserId = null, ?\DateTime $createdAt = null): void
     {
         $userIds = array_values(array_unique(array_map('intval', $userIds)));
         if (empty($userIds)) {
             return;
         }
 
-        $notification = Notification::query()->create([
-            'source_user_id' => $sourceUserId,
-            'content_key' => $content::type(),
-            'content_data' => $content->toData(),
-        ]);
+        $timestamp = $createdAt ?? now();
+        
+        // If we have a custom timestamp (backfilling), disable automatic timestamps
+        if ($createdAt !== null) {
+            $notification = new Notification([
+                'source_user_id' => $sourceUserId,
+                'content_key' => $content::type(),
+                'content_data' => $content->toData(),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ]);
+            $notification->timestamps = false;
+            $notification->save();
+            $notification->timestamps = true; // Re-enable for future operations
+        } else {
+            // Normal creation with automatic timestamps
+            $notification = Notification::query()->create([
+                'source_user_id' => $sourceUserId,
+                'content_key' => $content::type(),
+                'content_data' => $content->toData(),
+            ]);
+        }
 
-        $now = now();
         $rows = [];
         foreach ($userIds as $uid) {
             $rows[] = [
                 'notification_id' => $notification->id,
                 'user_id' => (int) $uid,
                 'read_at' => null,
-                'created_at' => $now,
-                'updated_at' => $now,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
             ];
         }
         DB::table('notification_reads')->insert($rows);
@@ -175,5 +192,27 @@ class NotificationService
         return DB::table('notifications')
             ->whereNotIn('content_key', $registeredTypes)
             ->delete();
+    }
+
+    /**
+     * Delete all notifications of a specific type.
+     * Returns the number of deleted notifications.
+     * Cascade deletion will automatically remove associated notification_reads rows.
+     */
+    public function deleteNotificationsByType(string $contentKey): int
+    {
+        return DB::table('notifications')
+            ->where('content_key', $contentKey)
+            ->delete();
+    }
+
+    /**
+     * Count notifications of a specific type.
+     */
+    public function countNotificationsByType(string $contentKey): int
+    {
+        return DB::table('notifications')
+            ->where('content_key', $contentKey)
+            ->count();
     }
 }
