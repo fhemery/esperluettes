@@ -20,41 +20,32 @@
                 {{ __('notifications::pages.index.empty') }}
             </div>
         @else
-            <div class="surface-read text-on-surface p-4 min-h-[10rem]">
-                <ul class="divide-y divide-fg" data-test-id="notifications-list">
+            <div class="surface-read text-on-surface p-4 min-h-[10rem]" x-data="notificationList({ 
+                loadMoreUrl: '{{ route('notifications.loadMore') }}',
+                initialOffset: {{ count($page->notifications) }},
+                initialHasMore: {{ $page->hasMore ? 'true' : 'false' }},
+                csrf: '{{ csrf_token() }}'
+            })">
+                <ul class="divide-y divide-fg" data-test-id="notifications-list" x-ref="notificationsList">
                     @foreach ($page->notifications as $n)
-                        <li class="py-2 w-full grid grid-cols-[auto_1fr_auto] gap-4 notif-item" x-data="notifItem({
-                            id: {{ $n->id }},
-                            markUrl: '{{ route('notifications.markRead', $n->id) }}',
-                            unmarkUrl: '{{ route('notifications.markUnread', $n->id) }}',
-                            csrf: '{{ csrf_token() }}',
-                            isRead: {{ $n->readAt ? 'true' : 'false' }},
-                        })"
-                            data-test-id="notif-item">
-                            {{-- Avatar --}}
-                            <div class="col-span-1 row-span-2 self-center">
-                                @if (!empty($n->avatarUrl))
-                                    <x-shared::avatar class="h-10 w-10 sm:h-16 sm:w-16" :src="$n->avatarUrl" borderColor="accent" />
-                                @endif
-                            </div>
-
-                            {{-- Content --}}
-                            <div class="col-span-2"
-                                :class="isRead ? '' : 'font-bold'">{!! $n->renderedContent !!}</div>
-
-                            {{-- Date --}}
-                            <div class="grid-col-1 flex items-center justify-between mt-1">
-                                <div class="text-sm text-fg/70">
-                                    {{ \Illuminate\Support\Str::ucfirst(\Carbon\Carbon::parse($n->createdAt)->diffForHumans()) }}</div>
-                            </div>
-
-                            {{--  Read --}}
-                            <div class="grid-rows-2 self-center" x-on:mark-read.stop="mark()" x-on:mark-unread.stop="unmark()">
-                                <x-shared::read-toggle :read="(bool) $n->readAt" />
-                            </div>
-                        </li>
+                        <x-notification::notification-item :notification="$n" />
                     @endforeach
                 </ul>
+
+                {{-- Load More Button --}}
+                <div class="mt-4 flex flex-col items-center gap-2" x-show="hasMore">
+                    <x-shared::button 
+                        color="accent" 
+                        x-on:click="loadMore()"
+                        x-bind:disabled="loading"
+                        data-test-id="load-more-btn">
+                        <span x-show="!loading">{{ __('notifications::pages.index.load_more') }}</span>
+                        <span x-show="loading" x-cloak>{{ __('notifications::pages.index.loading') }}</span>
+                    </x-shared::button>
+                    <div x-show="error" x-cloak class="text-sm text-red-500" data-test-id="load-more-error">
+                        {{ __('notifications::pages.index.load_more_error') }}
+                    </div>
+                </div>
 
                 @once
 
@@ -88,6 +79,62 @@
                                         window.location.reload();
                                     } catch (e) {
                                         console.error('Failed to mark all as read', e);
+                                    }
+                                }
+                            }
+                        }
+
+                        function notificationList({
+                            loadMoreUrl,
+                            initialOffset,
+                            initialHasMore,
+                            csrf
+                        }) {
+                            return {
+                                currentOffset: initialOffset,
+                                hasMore: initialHasMore,
+                                loading: false,
+                                error: false,
+
+                                async loadMore() {
+                                    if (this.loading || !this.hasMore) return;
+
+                                    this.loading = true;
+                                    this.error = false;
+
+                                    try {
+                                        const response = await fetch(`${loadMoreUrl}?offset=${this.currentOffset}`, {
+                                            method: 'GET',
+                                            headers: {
+                                                'X-CSRF-TOKEN': csrf,
+                                                'Accept': 'text/html',
+                                            },
+                                            credentials: 'same-origin',
+                                        });
+
+                                        if (!response.ok) {
+                                            throw new Error('Failed to load more notifications');
+                                        }
+
+                                        const html = await response.text();
+                                        const hasMoreHeader = response.headers.get('X-Has-More');
+
+                                        // Append new items to the list
+                                        if (html.trim()) {
+                                            this.$refs.notificationsList.insertAdjacentHTML('beforeend', html);
+                                            // Count new items added (rough estimate)
+                                            const parser = new DOMParser();
+                                            const doc = parser.parseFromString(html, 'text/html');
+                                            const newItemsCount = doc.querySelectorAll('li.notif-item').length;
+                                            this.currentOffset += newItemsCount;
+                                        }
+
+                                        this.hasMore = hasMoreHeader === 'true';
+                                    } catch (e) {
+                                        console.error('Failed to load more notifications', e);
+                                        this.error = true;
+                                    } finally {
+                                        this.loading = false;
                                     }
                                 }
                             }
