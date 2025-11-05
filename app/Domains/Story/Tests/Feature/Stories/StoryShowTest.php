@@ -211,6 +211,19 @@ describe('Story details page', function () {
         });
     });
 
+    describe('ReadList related content', function() {
+        it('should show the Readlist button', function(){
+            $author = alice($this);
+            $story = publicStory('Story', $author->id);
+
+            $reader = bob($this);
+            $this->actingAs($reader);
+            $response = $this->get('/stories/' . $story->slug);
+            $response->assertOk();
+            $response->assertSee(__('readlist::button.add_button'));
+        });
+    });
+    
     describe('Moderation', function () {
         beforeEach(function () {
             createFeatureToggle($this, new FeatureToggle(

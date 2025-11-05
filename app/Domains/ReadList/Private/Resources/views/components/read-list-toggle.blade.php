@@ -7,7 +7,8 @@
     
     <x-shared::button
         type="submit"
-        :color="$isInReadList ? 'primary' : 'accent'"
+        color="tertiary"
+        :outline="$isInReadList"
         :icon="$isInReadList ? 'check' : null"
         size="md">
         {{ $isInReadList ? __('readlist::button.in_readlist_button') : __('readlist::button.add_button') }}

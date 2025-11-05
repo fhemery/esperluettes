@@ -318,8 +318,8 @@ p.ql-align-center { text-indent: 0; }
 
     &.is-outline {
       --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-success-bg);
-      --surface-border: var(--color-success-bg);
+      --surface-fg: var(--color-success-fg);
+      --surface-border: var(--color-success-fg);
       background-color: rgb(var(--color-read-bg));
     }
   }
