@@ -21,6 +21,30 @@ class StoryAccessService
      */
     public function filterUsersWithAccessToStory(array $userIds, int $storyId): array
     {
+        return $this->filterUsersWithAccess($userIds, $storyId, null);
+    }
+
+    /**
+     * Same rules as filterUsersWithAccessToStory, but compute for a provided visibility string.
+     * Authors (collaborators) always have access. Returns [] if story does not exist or no users provided.
+     *
+     * @param array<int,int> $userIds
+     * @return array<int,int>
+     */
+    public function filterUsersWithAccessToStoryForVisibility(array $userIds, int $storyId, string $visibility): array
+    {
+        return $this->filterUsersWithAccess($userIds, $storyId, $visibility);
+    }
+
+    /**
+     * Centralized access logic. If $visibilityOverride is null, uses story current visibility.
+     * Authors/collaborators always have access. Returns [] if story or users not found.
+     *
+     * @param array<int,int> $userIds
+     * @return array<int,int>
+     */
+    private function filterUsersWithAccess(array $userIds, int $storyId, ?string $visibilityOverride): array
+    {
         $ids = array_values(array_unique(array_map('intval', $userIds)));
         if (empty($ids)) {
             return [];
@@ -47,16 +71,16 @@ class StoryAccessService
         $collaboratorsIds = array_values(array_map('intval', $story->collaborators->pluck('user_id')->all()));
         $collaboratorsInInput = array_values(array_intersect($existingIds, $collaboratorsIds));
 
-        $visibility = (string) $story->visibility;
-        if ($visibility === 'private') {
+        $vis = $visibilityOverride !== null ? (string) $visibilityOverride : (string) $story->visibility;
+        if ($vis === 'private') {
             return $collaboratorsInInput;
         }
 
-        if ($visibility === 'public') {
+        if ($vis === 'public') {
             return $existingIds;
         }
 
-        if ($visibility === 'community') {
+        if ($vis === 'community') {
             $rolesByUser = $this->authApi->getRolesByUserIds($existingIds); // [id => RoleDto[]]
             $confirmedIds = [];
             foreach ($rolesByUser as $uid => $roleDtos) {

@@ -131,4 +131,33 @@ class StoryPublicApi
         return $this->accessService->filterUsersWithAccessToStory($userIds, $storyId);
     }
 
+    /**
+     * Compute which users gained or lost access after a visibility change.
+     * The comparison is restricted to the provided userIds.
+     *
+     * Returns ['gained' => int[], 'lost' => int[]]. If story does not exist,
+     * or previous visibility equals current, both lists are empty.
+     *
+     * @param array<int,int> $userIds
+     * @return array{gained: array<int,int>, lost: array<int,int>}
+     */
+    public function diffAccessForUsers(array $userIds, int $storyId, string $previousVisibility): array
+    {
+        $current = $this->accessService->filterUsersWithAccessToStory($userIds, $storyId);
+        $before = $this->accessService->filterUsersWithAccessToStoryForVisibility($userIds, $storyId, $previousVisibility);
+
+        // If either indicates story missing or vis unchanged, service will handle; we just diff
+        $setCurrent = array_values(array_unique(array_map('intval', $current)));
+        $setBefore = array_values(array_unique(array_map('intval', $before)));
+
+        // If previous equals current visibility, underlying service will return identical sets; diff yields empty
+        $gained = array_values(array_diff($setCurrent, $setBefore));
+        $lost = array_values(array_diff($setBefore, $setCurrent));
+
+        sort($gained);
+        sort($lost);
+
+        return ['gained' => $gained, 'lost' => $lost];
+    }
+
 }
