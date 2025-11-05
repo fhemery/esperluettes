@@ -31,6 +31,27 @@ describe('Story public API', function () {
         });
     });
 
+    describe('isAuthor', function () {
+        it('returns false for non-authors', function () {
+            $api = app(StoryPublicApi::class);
+            $user = alice($this);
+            $story = publicStory('Test Story', $user->id);
+
+            $reader = bob($this);
+            $resp = $api->isAuthor($reader->id, $story->id);
+            expect($resp)->toBe(false);
+        });
+
+        it('returns true for authors', function () {
+            $api = app(StoryPublicApi::class);
+            $user = alice($this);
+            $story = publicStory('Test Story', $user->id);
+
+            $resp = $api->isAuthor($user->id, $story->id);
+            expect($resp)->toBe(true);
+        });
+    });
+
     describe('getStoriesForUser', function () {
         it('returns my stories ordered by updated_at desc and includes coauthored by default', function () {
             $api = app(StoryPublicApi::class);

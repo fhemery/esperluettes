@@ -43,6 +43,11 @@ class StoryPublicApi
         return $story ? StoryDto::fromModel($story) : null;
     }
 
+    public function isAuthor(int $userId, int $storyId): bool
+    {
+        return in_array($userId, $this->storyService->getAuthorIds($storyId));
+    }
+
     public function countAuthoredStories(int $userId): int
     {
         return $this->storyService->countAuthoredStories($userId);
