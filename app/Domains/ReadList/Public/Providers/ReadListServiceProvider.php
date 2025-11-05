@@ -8,8 +8,12 @@ use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\ReadList\Public\Notifications\ReadListAddedNotification;
 use App\Domains\ReadList\Public\Notifications\ReadListChapterPublishedNotification;
 use App\Domains\ReadList\Public\Notifications\ReadListChapterUnpublishedNotification;
+use App\Domains\ReadList\Public\Notifications\ReadListStoryDeletedNotification;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\ReadList\Private\Listeners\HandleStoryDeletedForReadList;
+use App\Domains\ReadList\Private\Listeners\NotifyReadersOnChapterModified;
 use App\Domains\ReadList\Private\Listeners\NotifyReadersOnChapterPublished;
+use App\Domains\ReadList\Private\Listeners\NotifyReadersOnStoryDeleted;
 use App\Domains\ReadList\Public\Events\StoryAddedToReadList;
 use App\Domains\ReadList\Public\Events\StoryRemovedFromReadList;
 
@@ -49,6 +53,10 @@ class ReadListServiceProvider extends ServiceProvider
             type: ReadListChapterUnpublishedNotification::type(),
             class: ReadListChapterUnpublishedNotification::class
         );
+        $factory->register(
+            type: ReadListStoryDeletedNotification::type(),
+            class: ReadListStoryDeletedNotification::class
+        );
 
         // Register ReadList domain events with EventBus
         $eventBus = app(EventBus::class);
@@ -56,9 +64,10 @@ class ReadListServiceProvider extends ServiceProvider
         $eventBus->registerEvent(StoryRemovedFromReadList::name(), StoryRemovedFromReadList::class);
 
         // Subscribe to Story events for RL-008 (chapter publication notifications)
-        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterPublished::class, [app(NotifyReadersOnChapterPublished::class), 'onChapterPublished']);
-        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterCreated::class, [app(NotifyReadersOnChapterPublished::class), 'onChapterCreated']);
-        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterUnpublished::class, [app(NotifyReadersOnChapterPublished::class), 'onChapterUnpublished']);
-        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterDeleted::class, [app(NotifyReadersOnChapterPublished::class), 'onChapterDeleted']);
+        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterPublished::class, [app(NotifyReadersOnChapterModified::class), 'onChapterPublished']);
+        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterCreated::class, [app(NotifyReadersOnChapterModified::class), 'onChapterCreated']);
+        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterUnpublished::class, [app(NotifyReadersOnChapterModified::class), 'onChapterUnpublished']);
+        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterDeleted::class, [app(NotifyReadersOnChapterModified::class), 'onChapterDeleted']);
+        $eventBus->subscribe(\App\Domains\Story\Public\Events\StoryDeleted::class, [app(HandleStoryDeletedForReadList::class), 'handle']);
     }
 }

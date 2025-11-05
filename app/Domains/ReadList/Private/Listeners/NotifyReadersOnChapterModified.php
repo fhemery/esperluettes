@@ -3,7 +3,6 @@
 namespace App\Domains\ReadList\Private\Listeners;
 
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
-use App\Domains\ReadList\Private\Models\ReadListEntry;
 use App\Domains\ReadList\Private\Services\ReadListService;
 use App\Domains\ReadList\Public\Notifications\ReadListChapterPublishedNotification;
 use App\Domains\ReadList\Public\Notifications\ReadListChapterUnpublishedNotification;
@@ -12,10 +11,9 @@ use App\Domains\Story\Public\Api\StoryPublicApi;
 use App\Domains\Story\Public\Events\ChapterCreated;
 use App\Domains\Story\Public\Events\ChapterPublished;
 use App\Domains\Story\Public\Events\ChapterUnpublished;
-use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
 use App\Domains\Story\Public\Events\ChapterDeleted;
 
-class NotifyReadersOnChapterPublished
+class NotifyReadersOnChapterModified
 {
     public function __construct(
         private NotificationPublicApi $notifications,
