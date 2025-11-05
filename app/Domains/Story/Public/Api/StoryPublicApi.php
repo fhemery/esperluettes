@@ -48,6 +48,15 @@ class StoryPublicApi
         return in_array($userId, $this->storyService->getAuthorIds($storyId));
     }
 
+    /**
+     * Return list of author user IDs for a story.
+     * @return int[]
+     */
+    public function getAuthorIds(int $storyId): array
+    {
+        return array_values(array_map('intval', $this->storyService->getAuthorIds($storyId)));
+    }
+
     public function countAuthoredStories(int $userId): int
     {
         return $this->storyService->countAuthoredStories($userId);

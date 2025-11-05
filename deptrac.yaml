@@ -388,6 +388,7 @@ deptrac:
       - ReadListPrivate
       - AuthPublic
       - EventsPublic
+      - NotificationPublic
 
     StaticPagePublic:
       - AuthPublic
@@ -526,6 +527,7 @@ deptrac:
       - AuthPublic
       - EventsPublic
       - StoryPublic
+      - NotificationPublic
 
     StaticPagePrivate:
       - Shared
