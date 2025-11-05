@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\ReadList\Public\Notifications\ReadListAddedNotification;
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\ReadList\Public\Events\StoryAddedToReadList;
+use App\Domains\ReadList\Public\Events\StoryRemovedFromReadList;
 
 class ReadListServiceProvider extends ServiceProvider
 {
@@ -35,5 +38,10 @@ class ReadListServiceProvider extends ServiceProvider
             type: ReadListAddedNotification::type(),
             class: ReadListAddedNotification::class
         );
+
+        // Register ReadList domain events with EventBus
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(StoryAddedToReadList::name(), StoryAddedToReadList::class);
+        $eventBus->registerEvent(StoryRemovedFromReadList::name(), StoryRemovedFromReadList::class);
     }
 }

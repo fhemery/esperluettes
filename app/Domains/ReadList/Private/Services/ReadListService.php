@@ -7,6 +7,9 @@ use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\ReadList\Public\Notifications\ReadListAddedNotification;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Public\Api\StoryPublicApi;
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\ReadList\Public\Events\StoryAddedToReadList;
+use App\Domains\ReadList\Public\Events\StoryRemovedFromReadList;
 
 class ReadListService
 {
@@ -14,6 +17,7 @@ class ReadListService
         private NotificationPublicApi $notifications,
         private StoryPublicApi $stories,
         private ProfilePublicApi $profiles,
+        private EventBus $events,
     ) {}
 
     public function hasStory(int $userId, int $storyId): bool
@@ -38,14 +42,28 @@ class ReadListService
 
         $this->notifyAuthorsOnAdd($userId, $storyId);
 
+        // Emit domain event
+        $this->events->emit(new StoryAddedToReadList(
+            userId: $userId,
+            storyId: $storyId,
+        ));
+
         return true;
     }
 
     public function removeStory(int $userId, int $storyId): void
     {
-        ReadListEntry::where('user_id', $userId)
+        $deleted = ReadListEntry::where('user_id', $userId)
             ->where('story_id', $storyId)
             ->delete();
+
+        if ($deleted > 0) {
+            // Emit domain event only on actual removal
+            $this->events->emit(new StoryRemovedFromReadList(
+                userId: $userId,
+                storyId: $storyId,
+            ));
+        }
     }
 
     public function countReadersForStory(int $storyId): int
