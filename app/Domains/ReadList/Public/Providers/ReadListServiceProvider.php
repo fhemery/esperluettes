@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\ReadList\Public\Notifications\ReadListAddedNotification;
+use App\Domains\ReadList\Public\Notifications\ReadListChapterPublishedNotification;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\ReadList\Private\Listeners\NotifyReadersOnChapterPublished;
 use App\Domains\ReadList\Public\Events\StoryAddedToReadList;
 use App\Domains\ReadList\Public\Events\StoryRemovedFromReadList;
 
@@ -38,10 +40,18 @@ class ReadListServiceProvider extends ServiceProvider
             type: ReadListAddedNotification::type(),
             class: ReadListAddedNotification::class
         );
+        $factory->register(
+            type: ReadListChapterPublishedNotification::type(),
+            class: ReadListChapterPublishedNotification::class
+        );
 
         // Register ReadList domain events with EventBus
         $eventBus = app(EventBus::class);
         $eventBus->registerEvent(StoryAddedToReadList::name(), StoryAddedToReadList::class);
         $eventBus->registerEvent(StoryRemovedFromReadList::name(), StoryRemovedFromReadList::class);
+
+        // Subscribe to Story events for RL-008 (chapter publication notifications)
+        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterPublished::class, [app(NotifyReadersOnChapterPublished::class), 'onChapterPublished']);
+        $eventBus->subscribe(\App\Domains\Story\Public\Events\ChapterCreated::class, [app(NotifyReadersOnChapterPublished::class), 'onChapterCreated']);
     }
 }

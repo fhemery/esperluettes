@@ -389,6 +389,7 @@ deptrac:
       - AuthPublic
       - EventsPublic
       - NotificationPublic
+      - StoryPublic
 
     StaticPagePublic:
       - AuthPublic

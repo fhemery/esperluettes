@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-describe('RL-011 Notifications on ReadList add', function () {
+describe('Notifications on ReadList add', function () {
     beforeEach(function () {
        Cache::flush();
     });

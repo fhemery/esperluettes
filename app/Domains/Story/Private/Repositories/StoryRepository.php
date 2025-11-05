@@ -45,6 +45,7 @@ final class StoryRepository
     {
         $query = Story::query()
             ->when($options->includeAuthors, fn($q) => $q->with('authors'))
+            ->when($options->includeCollaborators, fn($q) => $q->with('collaborators'))
             ->when($options->includeGenreIds, fn($q) => $q->with('genres:id'))
             ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings:id'))
             ->when($options->includeChapters && !$options->includeReadingProgress, fn($q) => $q->with('chapters'))

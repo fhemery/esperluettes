@@ -225,7 +225,7 @@ The following are explicitly OUT OF SCOPE for the initial implementation:
 
 ### Author Stories
 - [DONE] **RL-010**: As an author, I want to know how many readers have my story in their Read List
-- **RL-011**: As an author, I want to be notified when someone adds my story to their Read List
+- [DONE] **RL-011**: As an author, I want to be notified when someone adds my story to their Read List
 
 ### Guest Stories
 - [DONE] **RL-012**: As a guest, I want to see how popular a story is (Read List counter) to help me decide if I should read it

@@ -101,4 +101,20 @@ class ReadListService
             $this->notifications->createNotification($recipients, $content, $userId);
         }
     }
+
+    /**
+     * Get all readers for a story
+     *
+     * @param int $storyId
+     * @return array<int>
+     */
+    public function getReadersForStory(int $storyId): array
+    {
+        return ReadListEntry::where('story_id', $storyId)
+            ->pluck('user_id')
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
+    }
 }

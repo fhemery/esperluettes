@@ -6,6 +6,7 @@ use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\StorySearchResultDto;
 use App\Domains\Story\Private\Services\StorySearchService;
 use App\Domains\Story\Private\Services\StoryService;
+use App\Domains\Story\Private\Services\StoryAccessService;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Public\Contracts\StoryDto;
@@ -16,7 +17,8 @@ class StoryPublicApi
     public function __construct(
         private readonly ProfilePublicApi $profiles,
         private readonly StorySearchService $search,
-        private readonly StoryService $storyService
+        private readonly StoryService $storyService,
+        private readonly StoryAccessService $accessService,
     ) {
     }
 
@@ -109,6 +111,24 @@ class StoryPublicApi
             'items' => $items,
             'total' => $total,
         ];
+    }
+
+    /**
+     * Filter a list of user IDs to those who currently have access to the given story.
+     * This method never expands beyond the provided list. It deduplicates and filters
+     * out non-existing users, then applies Story visibility rules.
+     *
+     * Rules:
+     * - public: all existing users
+     * - private: authors only
+     * - community: authors + users with role user-confirmed
+     *
+     * @param array<int,int> $userIds
+     * @return array<int,int>
+     */
+    public function filterUsersWithAccessToStory(array $userIds, int $storyId): array
+    {
+        return $this->accessService->filterUsersWithAccessToStory($userIds, $storyId);
     }
 
 }
