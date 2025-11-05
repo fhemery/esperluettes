@@ -240,6 +240,22 @@ deptrac:
         - type: directory
           value: 'app/Domains/Profile/Tests/'
 
+    # ReadList Domain
+    - name: ReadListPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/ReadList/Public/'
+
+    - name: ReadListPrivate
+      collectors:
+        - type: directory
+          value: 'app/Domains/ReadList/Private/'
+
+    - name: ReadListTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/ReadList/Tests/'
+
     # StaticPage Domain
     - name: StaticPagePublic
       collectors:
@@ -366,6 +382,12 @@ deptrac:
       - AuthPublic
       - EventsPublic
       - ModerationPublic
+
+    ReadListPublic:
+      - Shared
+      - ReadListPrivate
+      - AuthPublic
+      - EventsPublic
 
     StaticPagePublic:
       - AuthPublic
@@ -498,6 +520,13 @@ deptrac:
       - ModerationPublic
       - ProfilePublic
 
+    ReadListPrivate:
+      - Shared
+      - ReadListPublic
+      - AuthPublic
+      - EventsPublic
+      - StoryPublic
+
     StaticPagePrivate:
       - Shared
       - AuthPublic
@@ -587,6 +616,10 @@ deptrac:
       - ProfilePublic
       - AuthPublic
 
+    ReadListTests:
+      - TestHelpers
+      - ReadListPrivate
+      - ReadListPublic
 
     StaticPageTests:
       - Shared
