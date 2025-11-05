@@ -84,4 +84,51 @@ describe('ReadList Controller - Add to ReadList', function () {
         // Should only have one entry
         $this->assertDatabaseCount('read_list_entries', 1);
     });
+
+    it('forbids adding to readlist when user does not have access to story (community + USER)', function () {
+        $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $story = communityStory('Test Story', $author->id);
+
+        // USER (not confirmed) tries to add -> should be forbidden
+        $reader = bob($this, roles: [Roles::USER]);
+        $response = $this->actingAs($reader)->post("/readlist/{$story->id}");
+
+        $response->assertForbidden();
+
+        // Ensure no entry created
+        $this->assertDatabaseMissing('read_list_entries', [
+            'user_id' => $reader->id,
+            'story_id' => $story->id,
+        ]);
+    });
+
+    it('forbids adding to readlist for private story when user is not an author', function () {
+        $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $story = privateStory('Private Story', $author->id);
+
+        $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+        $response = $this->actingAs($reader)->post("/readlist/{$story->id}");
+
+        $response->assertForbidden();
+        $this->assertDatabaseMissing('read_list_entries', [
+            'user_id' => $reader->id,
+            'story_id' => $story->id,
+        ]);
+    });
+
+    it('allows adding to readlist for community story when user is user-confirmed', function () {
+        $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $story = communityStory('Community Story', $author->id);
+
+        $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+        $response = $this->actingAs($reader)->post("/readlist/{$story->id}");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', __('readlist::button.added_message'));
+
+        $this->assertDatabaseHas('read_list_entries', [
+            'user_id' => $reader->id,
+            'story_id' => $story->id,
+        ]);
+    });
 });

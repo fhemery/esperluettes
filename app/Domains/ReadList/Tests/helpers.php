@@ -5,5 +5,5 @@ use Tests\TestCase;
 
 function addToReadList(TestCase $t, int $storyId): TestResponse
 {
-    return $t->post(route('readlist.add', $storyId));
+    return $t->post(route('readlist.add', $storyId))->assertRedirect();
 }

@@ -94,7 +94,7 @@ describe('Notification on chapter published', function () {
 
     it('notifies only readers who have access (e.g. collaborators for private stories)', function () {
         $author = alice($this);
-        $story = privateStory('Private Notif', $author->id);
+        $story = publicStory('Private Notif', $author->id);
 
         // Two readers add story to readlist
         $collaborator = bob($this);   // will be collaborator → should receive notif
@@ -105,6 +105,8 @@ describe('Notification on chapter published', function () {
         addToReadList($this, $story->id);
         $this->actingAs($reader);
         addToReadList($this, $story->id);
+
+        setStoryVisibility($story->id, 'private');
 
         // Dispatch ChapterPublished event
         $snapshot = new ChapterSnapshot(

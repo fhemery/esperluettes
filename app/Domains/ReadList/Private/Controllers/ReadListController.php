@@ -32,6 +32,12 @@ class ReadListController
             abort(403);
         }
 
+        // Check user has access to the story
+        $allowed = $this->storyApi->filterUsersWithAccessToStory([$user->id], $storyId);
+        if (empty($allowed)) {
+            abort(403);
+        }
+
         // Add to read list (idempotent)
         $this->readListService->addStory($user->id, $storyId);
 
