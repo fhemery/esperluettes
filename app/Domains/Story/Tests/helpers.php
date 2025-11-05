@@ -310,3 +310,16 @@ function addCollaborator(int $storyId, int $userId, string $role = 'author'): vo
         'accepted_at' => now(),
     ]);
 }
+
+/**
+ * Change a story visibility to the requested value (e.g. 'public', 'community', 'private').
+ */
+function setStoryVisibility(int $storyId, string $visibility): void
+{
+    DB::table('stories')
+        ->where('id', $storyId)
+        ->update([
+            'visibility' => $visibility,
+            'updated_at' => now(),
+        ]);
+}
