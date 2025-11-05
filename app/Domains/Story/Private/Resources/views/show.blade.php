@@ -136,7 +136,13 @@
                 <!-- Trigger warnings -->
                 <div class="flex flex-col gap-2">
                     <div class="font-semibold text-md leading-5">
+                        @if ($viewModel->twDisclosure == 'no_tw')
+                        <span class="material-symbols-outlined translate-y-1 text-success">warning</span>
+                        @elseif ($viewModel->twDisclosure == 'unspoiled')
+                        <span class="material-symbols-outlined translate-y-1 text-warning">warning</span>
+                        @else
                         <span class="material-symbols-outlined translate-y-1 text-primary">warning</span>
+                        @endif
                         <span>{{ __('story::show.trigger_warnings.label') }}</span>
                     </div>
                     @switch($viewModel->twDisclosure)
