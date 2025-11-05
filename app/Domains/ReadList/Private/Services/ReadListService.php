@@ -35,4 +35,9 @@ class ReadListService
             ->where('story_id', $storyId)
             ->delete();
     }
+
+    public function countReadersForStory(int $storyId): int
+    {
+        return ReadListEntry::where('story_id', $storyId)->count();
+    }
 }

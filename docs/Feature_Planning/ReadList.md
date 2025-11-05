@@ -213,8 +213,8 @@ The following are explicitly OUT OF SCOPE for the initial implementation:
 ## User Stories
 
 ### Reader Stories
-- **RL-001**: As a reader, I want to add a story to my Read List so I can save it for later reading
-- **RL-002**: As a reader, I want to remove a story from my Read List when I'm no longer interested
+- [DONE] **RL-001**: As a reader, I want to add a story to my Read List so I can save it for later reading
+- [DONE] **RL-002**: As a reader, I want to remove a story from my Read List when I'm no longer interested
 - **RL-003**: As a reader, I want to see my reading progress for each story in my Read List
 - **RL-004**: As a reader, I want to quickly continue reading from where I left off
 - **RL-005**: As a reader, I want to browse chapters of a story in my Read List without leaving the page

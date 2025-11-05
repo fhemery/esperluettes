@@ -127,6 +127,8 @@
                     :tooltip="__('story::chapters.reads.tooltip')" />
 
                 <x-story::words-metric-badge size="md" :nb-words="$viewModel->getWordsTotal()" :nb-characters="$viewModel->getCharactersTotal()" />
+
+                <x-read-list::read-list-counter-component :story-id="$viewModel->getId()" />
             </div>
 
             <!-- triggers, status, feedback... -->

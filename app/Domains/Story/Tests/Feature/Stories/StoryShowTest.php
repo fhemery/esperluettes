@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\ReadList\Private\Models\ReadListEntry;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -208,6 +209,24 @@ describe('Story details page', function () {
                 $resp->assertSee(trans('story::shared.trigger_warnings.unspoiled'));
                 $resp->assertSee(trans('story::shared.trigger_warnings.tooltips.unspoiled'));
             });
+        });
+
+        it('should show the Readlist counter with tooltip and count to everyone', function(){
+            $author = alice($this);
+            $story = publicStory('Story', $author->id);
+
+            // Add one reader entry directly
+            $reader = bob($this);
+            $this->actingAs($reader);
+            addToReadList($this, $story->id);
+
+            // Guest can see it
+            Auth::logout();
+            $response = $this->get('/stories/' . $story->slug);
+            $response->assertOk();
+            $response->assertSee('bookmark');
+            $response->assertSee('1');
+            $response->assertSee(trans_choice('readlist::counter.counter_tooltip', 1));
         });
     });
 
