@@ -20,7 +20,12 @@
 
             <!-- Title -->
             <div class="col-span-2 lg:col-start-1 lg:col-end-4 flex items-center justify-between">
-                <x-shared::title>{{ $viewModel->getTitle() }}</x-shared::title>
+                <x-shared::title>
+                    <span>{{ $viewModel->getTitle() }}</span>
+                    <span class="ml-2">
+                        <x-story::story-visibility-display :visibility="$viewModel->getVisibility()" />
+                    </span>
+                </x-shared::title>
 
                 @if($viewModel->isAuthor())
                 <div class="flex items-center gap-2">
@@ -45,9 +50,6 @@
                 class="col-start-1 col-span-1 row-start-2 row-span-3
                     flex flex-col gap-2 items-center justify-center">
                 <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $viewModel->getTitle() }}" class="w-[150px] h-[200px] md:w-full md:h-full object-cover">
-                <div class="flex items-center">
-                    <x-story::story-visibility-display :visibility="$viewModel->getVisibility()" />
-                </div>
                 @if(!$viewModel->isAuthor())
                 <div class="flex gap-2">
                     <x-moderation::report-button
