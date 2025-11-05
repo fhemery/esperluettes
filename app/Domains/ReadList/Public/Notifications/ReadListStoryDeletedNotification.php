@@ -37,10 +37,16 @@ class ReadListStoryDeletedNotification implements NotificationContent
 
     public function display(): string
     {
-        $authorUrl = $this->authorSlug !== '' ? route('profile.show', ['profile' => $this->authorSlug]) : '';
-        return __('readlist::notification.story_deleted', [
-            'author_name' => $this->authorName,
-            'author_url' => $authorUrl,
+        if ($this->authorName !== '') {
+            $authorUrl = $this->authorSlug !== '' ? route('profile.show', ['profile' => $this->authorSlug]) : '';
+
+            return __('readlist::notification.story_deleted', [
+                'author_name' => $this->authorName,
+                'author_url' => $authorUrl,
+                'story_name' => $this->storyTitle,
+            ]);
+        }
+        return __('readlist::notification.story_deleted_unknown_user', [
             'story_name' => $this->storyTitle,
         ]);
     }

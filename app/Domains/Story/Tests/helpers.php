@@ -323,3 +323,10 @@ function setStoryVisibility(int $storyId, string $visibility): void
             'updated_at' => now(),
         ]);
 }
+
+function deleteStory(int $storyId): void
+{
+    DB::table('stories')
+        ->where('id', $storyId)
+        ->delete();
+}

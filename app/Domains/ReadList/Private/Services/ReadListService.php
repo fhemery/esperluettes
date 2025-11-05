@@ -81,6 +81,16 @@ class ReadListService
         return ReadListEntry::where('story_id', $storyId)->delete();
     }
 
+    /**
+     * Delete all readlist entries for the given user.
+     *
+     * @return int number of deleted rows
+     */
+    public function deleteAllForUser(int $userId): int
+    {
+        return ReadListEntry::where('user_id', $userId)->delete();
+    }
+
     private function notifyAuthorsOnAdd(int $userId, int $storyId): void
     {
         // Robustness: do not notify if user is an author

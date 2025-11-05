@@ -29,11 +29,7 @@ class HandleStoryDeletedForReadList
             return;
         }
 
-        // Filter by current story access
-        $userIds = $this->stories->filterUsersWithAccessToStory($userIds, $storyId);
-        if (empty($userIds)) {
-            return;
-        }
+        // We cannot check story access. Anyway, better warn everyone that story is not coming back.
 
         // Determine author from snapshot creator id
         $authorId = (int) $event->story->createdByUserId;
@@ -47,7 +43,7 @@ class HandleStoryDeletedForReadList
             storyTitle: $storyTitle,
         );
 
-        $this->notifications->createNotification($userIds, $content, $authorId > 0 ? $authorId : null);
+        $this->notifications->createNotification($userIds, $content, $author?->user_id);
 
         // Cleanup: delete all ReadList entries for this story
         $this->readListService->deleteAllForStory($storyId);

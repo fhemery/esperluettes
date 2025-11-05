@@ -2,6 +2,7 @@
 
 namespace App\Domains\ReadList\Public\Providers;
 
+use App\Domains\Auth\Public\Events\UserDeleted;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Notification\Public\Services\NotificationFactory;
@@ -15,8 +16,7 @@ use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\ReadList\Private\Listeners\HandleStoryDeletedForReadList;
 use App\Domains\ReadList\Private\Listeners\HandleStoryVisibilityChangedForReadList;
 use App\Domains\ReadList\Private\Listeners\NotifyReadersOnChapterModified;
-use App\Domains\ReadList\Private\Listeners\NotifyReadersOnChapterPublished;
-use App\Domains\ReadList\Private\Listeners\NotifyReadersOnStoryDeleted;
+use App\Domains\ReadList\Private\Listeners\HandleUserDeletedForReadList;
 use App\Domains\ReadList\Public\Events\StoryAddedToReadList;
 use App\Domains\ReadList\Public\Events\StoryRemovedFromReadList;
 use App\Domains\Story\Public\Events\ChapterCreated;
@@ -87,5 +87,8 @@ class ReadListServiceProvider extends ServiceProvider
         $eventBus->subscribe(ChapterDeleted::class, [app(NotifyReadersOnChapterModified::class), 'onChapterDeleted']);
         $eventBus->subscribe(StoryDeleted::class, [app(HandleStoryDeletedForReadList::class), 'handle']);
         $eventBus->subscribe(StoryVisibilityChanged::class, [app(HandleStoryVisibilityChangedForReadList::class), 'handle']);
+
+        // Subscribe to Auth events
+        $eventBus->subscribe(UserDeleted::class, [app(HandleUserDeletedForReadList::class), 'handle']);
     }
 }

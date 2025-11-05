@@ -27,6 +27,7 @@ describe('Readlist on story deletion', function () {
         addToReadList($this, $story->id);
 
         $snapshot = StorySnapshot::fromModel(getStory($story->id), $author->id);
+        deleteStory($story->id);
         dispatchEvent(new StoryDeleted(story: $snapshot, chapters: []));
 
         $notif = getLatestNotificationByKey('readlist.story.deleted');
@@ -37,28 +38,23 @@ describe('Readlist on story deletion', function () {
         expect($targets)->toHaveCount(2);
     });
 
-    it('filters recipients when story is community: only user-confirmed notified', function () {
+    it('defaults author name if author no longer exists (coming from UserDeleted)', function() {
         $author = alice($this);
-        $story = publicStory('Community Only', $author->id);
+        $story = publicStory('Story To Delete', $author->id);
 
-        $confirmed = bob($this, roles: [Roles::USER_CONFIRMED]);
-        $unconfirmed = carol($this, roles: [Roles::USER]);
-        $this->actingAs($confirmed);
-        addToReadList($this, $story->id);
-        $this->actingAs($unconfirmed);
-        addToReadList($this, $story->id);
+        $r1 = bob($this);
 
-        setStoryVisibility($story->id, 'community');
+        $this->actingAs($r1);
+        addToReadList($this, $story->id);
 
         $snapshot = StorySnapshot::fromModel(getStory($story->id), $author->id);
+        deleteUser($this, $author);
         dispatchEvent(new StoryDeleted(story: $snapshot, chapters: []));
 
         $notif = getLatestNotificationByKey('readlist.story.deleted');
         expect($notif)->not->toBeNull();
-        $targets = getNotificationTargetUserIds((int) $notif->id);
-        expect($targets)->toContain($confirmed->id);
-        expect($targets)->not->toContain($unconfirmed->id);
-        expect($targets)->toHaveCount(1);
+        expect($notif->content_data["author_name"])->toBe('');
+        expect($notif->content_data["author_slug"])->toBe('');
     });
 
     it('deletes all readlist entries for the story when StoryDeleted is emitted', function () {
@@ -77,6 +73,7 @@ describe('Readlist on story deletion', function () {
         $this->assertDatabaseHas('read_list_entries', ['user_id' => $u2->id, 'story_id' => $story->id]);
 
         $snapshot = StorySnapshot::fromModel(getStory($story->id), $author->id);
+        deleteStory($story->id);
         dispatchEvent(new StoryDeleted(story: $snapshot, chapters: []));
 
         // Entries should be gone
