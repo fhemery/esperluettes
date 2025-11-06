@@ -9,8 +9,16 @@ use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Services\StoryAccessService;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Support\GetStoryOptions;
+use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use App\Domains\Story\Public\Contracts\StorySummaryDto;
 use App\Domains\Story\Public\Contracts\UserStoryListItemDto;
+use App\Domains\Story\Public\Contracts\StoryQueryFilterDto;
+use App\Domains\Story\Public\Contracts\StoryQueryPaginationDto;
+use App\Domains\Story\Public\Contracts\StoryQueryFieldsToReturnDto;
+use App\Domains\Story\Public\Contracts\PaginatedStoryDto;
+use App\Domains\Story\Public\Contracts\StoriesPaginationDto;
+use App\Domains\Story\Public\Contracts\StoryDto as PublicStoryDto;
+use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 
 class StoryPublicApi
 {
@@ -19,7 +27,33 @@ class StoryPublicApi
         private readonly StorySearchService $search,
         private readonly StoryService $storyService,
         private readonly StoryAccessService $accessService,
+        private readonly StoryRefLookupService $storyRefService
     ) {
+    }
+
+    /**
+     * Return a list of stories matching the given filter and pagination.
+     */
+    public function listStories(
+        StoryQueryFilterDto $filter = new StoryQueryFilterDto(), 
+        StoryQueryPaginationDto $pagination = new StoryQueryPaginationDto(page: 1, pageSize: 10), 
+        StoryQueryFieldsToReturnDto $fieldsToReturn = new StoryQueryFieldsToReturnDto()
+    ): PaginatedStoryDto
+    {
+        // Basic slice: ignore filters for now and return public stories with id + title.
+        $page = max(1, (int) $pagination->page);
+        $perPage = max(1, (int) $pagination->pageSize);
+
+        $fp = new StoryFilterAndPagination(
+            page: $page,
+            perPage: $perPage,
+            visibilities: [Story::VIS_PUBLIC],
+            requirePublishedChapter: false,
+        );
+
+        $paginator = $this->storyService->getStories($fp, null);
+
+        return PaginatedStoryDto::from($paginator, $fieldsToReturn, $this->storyRefService);
     }
 
     /**

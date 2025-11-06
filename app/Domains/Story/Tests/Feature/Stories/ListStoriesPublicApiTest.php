@@ -1,0 +1,164 @@
+<?php
+
+declare(strict_types=1);
+
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Domains\Story\Public\Api\StoryPublicApi;
+use App\Domains\Story\Public\Contracts\StoryQueryFilterDto;
+use App\Domains\Story\Public\Contracts\StoryQueryPaginationDto;
+use App\Domains\Story\Public\Contracts\StoryQueryFieldsToReturnDto;
+use App\Domains\Story\Public\Contracts\StoryQueryReadStatus;
+use App\Domains\Story\Public\Contracts\PaginatedStoryDto;
+
+uses(TestCase::class, RefreshDatabase::class);
+
+describe('StoryPublicApi::listStories', function () {
+    beforeEach(function(){
+        $this->api = app(StoryPublicApi::class);
+    });
+
+    it('returns empty when no story match', function () {
+        $filter = new StoryQueryFilterDto(
+            onlyStoryIds: [999999],
+            readStatus: StoryQueryReadStatus::All,
+            filterByGenreIds: []
+        );
+
+        $result = $this->api->listStories($filter);
+
+        expect($result)->toBeInstanceOf(PaginatedStoryDto::class);
+        expect($result->data)->toBeArray()->toBeEmpty();
+        expect($result->pagination->total)->toBe(0);
+        expect($result->pagination->last_page)->toBe(1);
+    });
+
+    describe('Returning data', function () {
+        it('returns basic info for all stories (basic, no filters)', function () {
+            // Create two public stories
+            $s1 = publicStory('Alpha', alice($this)->id, ['description' => 'Story Alpha']);
+            $s2 = publicStory('Beta', alice($this)->id);
+
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories();
+
+            expect($result->data)->toBeArray();
+            // Collect titles and ids
+            $titles = array_map(fn($d) => $d->title, $result->data);
+            $ids = array_map(fn($d) => $d->id, $result->data);
+            $descriptions = array_map(fn($d) => $d->description, $result->data);
+
+            expect($titles)->toContain('Alpha');
+            expect($titles)->toContain('Beta');
+            expect($ids)->toContain($s1->id);
+            expect($ids)->toContain($s2->id);
+            expect($descriptions)->toContain($s1->description);
+        });
+
+        it('excludes genres and trigger warnings by default', function () {
+            publicStory('With Meta', alice($this)->id);
+            
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories();
+
+            $dto = $result->data[0];
+            expect($dto->genres)->toBeNull();
+            expect($dto->triggerWarnings)->toBeNull();
+        });
+
+        it('returns mapped genres when requested', function () {
+            $g1 = makeGenre('Horror');
+            $g2 = makeGenre('Romance');
+            $story = publicStory('With Genres', alice($this)->id, [
+                'story_ref_genre_ids' => [$g1->id, $g2->id],
+            ]);
+
+            $fields = new StoryQueryFieldsToReturnDto(
+                includeGenreIds: true,
+            );
+
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories(fieldsToReturn: $fields);
+
+            expect($result->data)->not()->toBeEmpty();
+            $dto = collect($result->data)->firstWhere(fn($d) => $d->id === $story->id);
+            expect($dto)->not()->toBeNull();
+            expect($dto->genres)->toBeArray();
+            $slugs = array_map(fn($g) => $g['slug'], $dto->genres);
+            expect($slugs)->toContain($g1->slug);
+            expect($slugs)->toContain($g2->slug);
+            $names = array_map(fn($g) => $g['name'], $dto->genres);
+            expect($names)->toContain('Horror');
+            expect($names)->toContain('Romance');
+        });
+
+        it('returns mapped trigger warnings when requested and includes tw_disclosure', function () {
+            $tw1 = makeTriggerWarning('Blood');
+            $tw2 = makeTriggerWarning('Death');
+            $story = publicStory('With TWs', alice($this)->id, [
+                'story_ref_trigger_warning_ids' => [$tw1->id, $tw2->id],
+            ]);
+
+            $fields = new StoryQueryFieldsToReturnDto(
+                includeTriggerWarningIds: true,
+            );
+
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories(fieldsToReturn: $fields);
+
+            expect($result->data)->toHaveCount(1);
+
+            $dto = $result->data[0];
+            expect($dto->triggerWarnings)->toBeArray();
+            $twSlugs = array_map(fn($tw) => $tw['slug'], $dto->triggerWarnings);
+            expect($twSlugs)->toContain($tw1->slug);
+            expect($twSlugs)->toContain($tw2->slug);
+            // tw_disclosure always present
+            expect($dto->twDisclosure)->not()->toBeNull();
+        });
+    });
+
+    describe('Regarding pagination', function () {
+        it('paginates results: page 1 of 2 with pageSize=2 over 3 stories', function () {
+            $api = app(StoryPublicApi::class);
+
+            // Create three public stories
+            publicStory('S1', alice($this)->id);
+            publicStory('S2', alice($this)->id);
+            publicStory('S3', alice($this)->id);
+
+            $filter = new StoryQueryFilterDto();
+            $pagination = new StoryQueryPaginationDto(page: 1, pageSize: 2);
+            $fields = new StoryQueryFieldsToReturnDto();
+
+            $result = $api->listStories($filter, $pagination, $fields);
+
+            expect($result->pagination->current_page)->toBe(1);
+            expect($result->pagination->per_page)->toBe(2);
+            expect($result->pagination->total)->toBe(3);
+            expect($result->pagination->last_page)->toBe(2);
+            expect(count($result->data))->toBe(2);
+        });
+
+        it('paginates results: page 2 of 2 with pageSize=2 over 3 stories', function () {
+            $api = app(StoryPublicApi::class);
+
+            // Create three public stories
+            publicStory('T1', alice($this)->id);
+            publicStory('T2', alice($this)->id);
+            publicStory('T3', alice($this)->id);
+
+            $filter = new StoryQueryFilterDto();
+            $pagination = new StoryQueryPaginationDto(page: 2, pageSize: 2);
+            $fields = new StoryQueryFieldsToReturnDto();
+
+            $result = $api->listStories($filter, $pagination, $fields);
+
+            expect($result->pagination->current_page)->toBe(2);
+            expect($result->pagination->per_page)->toBe(2);
+            expect($result->pagination->total)->toBe(3);
+            expect($result->pagination->last_page)->toBe(2);
+            expect(count($result->data))->toBe(1);
+        });
+    });
+});
