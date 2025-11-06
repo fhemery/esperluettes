@@ -32,6 +32,25 @@ final class StoryRepository
 
     /**
      * Return a paginator of stories for card display with filters applied.
+     * 
+     * @param StoryFilterAndPagination $filter
+     * @param GetStoryOptions $options
+     * @return LengthAwarePaginator<Story>
+     */
+    public function searchStories(StoryFilterAndPagination $filter, GetStoryOptions $options): LengthAwarePaginator
+    {
+        $query = Story::query()
+            ->when($options->includeAuthors, fn($q) => $q->with('authors'))
+            ->when($options->includeGenreIds, fn($q) => $q->with('genres:id'))
+            ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings:id'));
+           
+        /** @var LengthAwarePaginator $paginator */
+        $paginator = $query->paginate($filter->perPage, ['*'], 'page', $filter->page);
+        return $paginator;
+    }
+
+    /**
+     * Return a paginator of stories for card display with filters applied.
      */
     public function searchStoriesForCardDisplay(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
     {

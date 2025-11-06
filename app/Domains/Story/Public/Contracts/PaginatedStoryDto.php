@@ -2,12 +2,13 @@
 
 namespace App\Domains\Story\Public\Contracts;
 
+use App\Domains\Story\Public\Api\StoryMapperHelper;
 use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PaginatedStoryDto
 {
-    /** @param array<int, StoryDto> $data */
+    /** @var StoryDto[] $data */
     public function __construct(
         public array $data,
         public StoriesPaginationDto $pagination,
@@ -17,12 +18,12 @@ class PaginatedStoryDto
     public static function from(
         LengthAwarePaginator $paginator,
         StoryQueryFieldsToReturnDto $fieldsToReturn,
-        StoryRefLookupService $refService
+        StoryMapperHelper $helper
     ): self
     {
         $items = [];
         foreach ($paginator->items() as $story) {
-            $items[] = StoryDto::fromModel($story, $fieldsToReturn, $refService);
+            $items[] = StoryDto::fromModel($story, $fieldsToReturn, $helper);
         }
         $pagination = StoriesPaginationDto::from($paginator);
 

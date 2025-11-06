@@ -16,9 +16,21 @@ use App\Domains\Story\Public\Contracts\StoryQueryFilterDto;
 use App\Domains\Story\Public\Contracts\StoryQueryPaginationDto;
 use App\Domains\Story\Public\Contracts\StoryQueryFieldsToReturnDto;
 use App\Domains\Story\Public\Contracts\PaginatedStoryDto;
-use App\Domains\Story\Public\Contracts\StoriesPaginationDto;
-use App\Domains\Story\Public\Contracts\StoryDto as PublicStoryDto;
 use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+
+class StoryMapperHelper {
+    /**
+     * @var StoryRefGenre[] $genres
+     * @var StoryRefTriggerWarning[] $triggerWarnings
+     * @var ProfileDto[] $profiles
+     */
+    public function __construct(
+        public readonly array $genres,
+        public readonly array $triggerWarnings,
+        public readonly array $profiles,
+    ) {
+    }
+}
 
 class StoryPublicApi
 {
@@ -44,16 +56,39 @@ class StoryPublicApi
         $page = max(1, (int) $pagination->page);
         $perPage = max(1, (int) $pagination->pageSize);
 
+
         $fp = new StoryFilterAndPagination(
             page: $page,
             perPage: $perPage,
             visibilities: [Story::VIS_PUBLIC],
             requirePublishedChapter: false,
+
         );
 
-        $paginator = $this->storyService->getStories($fp, null);
+        $options = new GetStoryOptions(
+            includeAuthors: $fieldsToReturn->includeAuthors,
+            includeGenreIds: $fieldsToReturn->includeGenreIds,
+            includeTriggerWarningIds: $fieldsToReturn->includeTriggerWarningIds,
+        );
 
-        return PaginatedStoryDto::from($paginator, $fieldsToReturn, $this->storyRefService);
+        $paginator = $this->storyService->searchStories($fp, $options);
+        
+        $profiles = [];
+        if ($fieldsToReturn->includeAuthors) {
+            $authorIds = collect($paginator->items())
+                ->flatMap(fn($s) => $s->authors->pluck('user_id'))
+                ->unique()
+                ->values()
+                ->all();
+            $profiles = $this->profiles->getPublicProfiles($authorIds);
+        }
+        $helper = new StoryMapperHelper(
+            genres: $fieldsToReturn->includeGenreIds ? $this->storyRefService->getGenres()->all() : [],
+            triggerWarnings: $fieldsToReturn->includeTriggerWarningIds ? $this->storyRefService->getTriggerWarnings()->all() : [],
+            profiles: $profiles,
+        );
+
+        return PaginatedStoryDto::from($paginator, $fieldsToReturn, $helper);
     }
 
     /**

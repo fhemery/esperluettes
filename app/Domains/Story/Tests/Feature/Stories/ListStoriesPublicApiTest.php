@@ -66,6 +66,16 @@ describe('StoryPublicApi::listStories', function () {
             expect($dto->triggerWarnings)->toBeNull();
         });
 
+        it('excludes authors by default', function () {
+            publicStory('With Author', alice($this)->id);
+            
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories();
+
+            $dto = $result->data[0];
+            expect($dto->authors)->toBeNull();
+        });
+
         it('returns mapped genres when requested', function () {
             $g1 = makeGenre('Horror');
             $g2 = makeGenre('Romance');
@@ -115,6 +125,28 @@ describe('StoryPublicApi::listStories', function () {
             expect($twSlugs)->toContain($tw2->slug);
             // tw_disclosure always present
             expect($dto->twDisclosure)->not()->toBeNull();
+        });
+
+        it('returns mapped authors when requested', function () {
+            $author1 = alice($this);
+            $story = publicStory('With Authors', alice($this)->id);
+
+            $fields = new StoryQueryFieldsToReturnDto(
+                includeAuthors: true,
+            );
+
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories(fieldsToReturn: $fields);
+
+            expect($result->data)->toHaveCount(1);
+
+            $dto = $result->data[0];
+            expect($dto->authors)->toHaveCount(1);
+            $author = $dto->authors[0];
+            expect($author->user_id)->toBe($author1->id);
+            expect($author->display_name)->toBe('Alice');
+            expect($author->slug)->toBe('alice');
+            expect($author->avatar_url)->not()->toBeNull();
         });
     });
 

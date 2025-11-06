@@ -46,6 +46,11 @@ class StoryService
         return $this->storiesRepository->searchStoriesForCardDisplay($filter, $viewerId);
     }
 
+    public function searchStories(StoryFilterAndPagination $filter, GetStoryOptions $options = new GetStoryOptions()): LengthAwarePaginator
+    {
+        return $this->storiesRepository->searchStories($filter, $options);
+    }
+
     public function createStory(StoryRequest $request, int $userId): Story
     {
         return DB::transaction(function () use ($request, $userId) {
