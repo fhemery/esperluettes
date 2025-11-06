@@ -97,6 +97,15 @@ final class StoryRepository
             }
         });
 
+        // Filter by Genres (AND semantics: story must have all selected genre IDs)
+        if (!empty($filter->genreIds)) {
+            foreach ($filter->genreIds as $gid) {
+                $query->whereHas('genres', function ($q) use ($gid) {
+                    $q->where('story_ref_genres.id', (int) $gid);
+                });
+            }
+        }
+
         // Read status filtering (based on published chapters only)
         if ($filter->readStatus === StoryQueryReadStatus::UnreadOnly) {
             $query->whereHas('chapters', function ($q) use ($viewerId) {

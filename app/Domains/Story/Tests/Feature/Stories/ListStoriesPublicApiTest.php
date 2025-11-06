@@ -25,7 +25,7 @@ describe('StoryPublicApi::listStories', function () {
         $filter = new StoryQueryFilterDto(
             onlyStoryIds: [999999],
             readStatus: StoryQueryReadStatus::All,
-            filterByGenreIds: []
+            genreIds: []
         );
 
         $result = $this->api->listStories($filter);
@@ -228,6 +228,28 @@ describe('StoryPublicApi::listStories', function () {
                 // But because the chapter is unpublished, it is discarded
                 expect($result->data)->toHaveCount(1);
                 expect(collect($result->data)->pluck('id'))->toContain($readStory->id);
+            });
+        });
+
+        describe('filtering by genres', function () {
+            it('should return stories that have all the specified genres', function () {
+                $alice = alice($this);
+                $genre1 = makeGenre('Genre 1');
+                $genre2 = makeGenre('Genre 2');
+                
+                $story1 = publicStory('With Genres', $alice->id, ['story_ref_genre_ids' => [$genre1->id, $genre2->id]]);
+                $story2 = publicStory('Without Genres', $alice->id);
+                $story3 = publicStory('With One Genre', $alice->id, ['story_ref_genre_ids' => [$genre1->id]]);
+
+                $filter = new StoryQueryFilterDto(
+                    genreIds: [$genre1->id, $genre2->id],
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(1);
+                expect(collect($result->data)->pluck('id'))->toContain($story1->id);
             });
         });
     });

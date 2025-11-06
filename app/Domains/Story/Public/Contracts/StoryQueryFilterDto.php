@@ -9,7 +9,7 @@ class StoryQueryFilterDto
     public function __construct(
         public array $onlyStoryIds = [],
         public StoryQueryReadStatus $readStatus = StoryQueryReadStatus::All,
-        public array $filterByGenreIds = [],
+        public array $genreIds = [],
         public array $visibilities = [StoryVisibility::PUBLIC, StoryVisibility::COMMUNITY, StoryVisibility::PRIVATE],
     ) {
     }

@@ -60,6 +60,7 @@ class StoryPublicApi
             page: $page,
             perPage: $perPage,
             visibilities: $filter->visibilities,
+            genreIds: $filter->genreIds,
             requirePublishedChapter: false,
             onlyStoryIds: $filter->onlyStoryIds,
             readStatus: $filter->readStatus,
