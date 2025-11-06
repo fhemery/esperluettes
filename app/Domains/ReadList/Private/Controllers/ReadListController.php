@@ -5,6 +5,7 @@ namespace App\Domains\ReadList\Private\Controllers;
 use App\Domains\ReadList\Private\Services\ReadListService;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 
 class ReadListController
@@ -13,6 +14,11 @@ class ReadListController
         private ReadListService $readListService,
         private StoryPublicApi $storyApi
     ) {
+    }
+
+    public function index(): View
+    {
+        return view('read-list::pages.index');
     }
 
     public function add(int $storyId): RedirectResponse

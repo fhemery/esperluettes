@@ -220,7 +220,7 @@ The following are explicitly OUT OF SCOPE for the initial implementation:
 - **RL-005**: As a reader, I want to browse chapters of a story in my Read List without leaving the page
 - **RL-006**: As a reader, I want to filter my Read List to hide stories I'm up-to-date with
 - **RL-007**: As a reader, I want to filter my Read List by genre
-- **RL-008**: As a reader, I want to be notified when stories in my Read List have updates
+- [DONE] **RL-008**: As a reader, I want to be notified when stories in my Read List have updates
 - **RL-009**: As a reader, I want to see which stories were recently updated in my Read List
 
 ### Author Stories

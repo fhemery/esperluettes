@@ -26,6 +26,11 @@
                     <x-nav-link :href="route('news.index')" :active="request()->routeIs('news.index')">
                         {{ __('shared::navigation.news') }}
                     </x-nav-link>
+                    @if (Auth::user())
+                    <x-nav-link :href="route('readlist.index')" :active="request()->routeIs('readlist.*')">
+                        {{ __('shared::navigation.readlist') }}
+                    </x-nav-link>
+                    @endif
                     @if (Auth::user() && Auth::user()->isConfirmed())
                     <x-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
                         {{ __('shared::navigation.my-stories') }}
@@ -50,7 +55,7 @@
             <!-- Profile with drawer -->
             <div class="flex items-center shrink-0">
                 <button
-                    @click="$dispatch('drawer-open-profile')"
+                    x-on:click="$dispatch('drawer-open-profile')"
                     class="inline-flex items-center py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                     @if(isset($currentProfile) && $currentProfile)
                     <x-shared::avatar :src="$currentProfile->avatar_url" alt="avatar" class="h-10 w-10 rounded-full me-2" />
@@ -81,6 +86,11 @@
                 <x-responsive-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
                     {{ __('shared::navigation.stories') }}
                 </x-responsive-nav-link>
+                @if (Auth::user())
+                <x-responsive-nav-link :href="route('readlist.index')" :active="request()->routeIs('readlist.*')">
+                    {{ __('shared::navigation.readlist') }}
+                </x-responsive-nav-link>
+                @endif
                 @if (Auth::user() && Auth::user()->isConfirmed())
                 <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
                     {{ __('shared::navigation.my-stories') }}
