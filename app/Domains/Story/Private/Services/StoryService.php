@@ -406,7 +406,7 @@ class StoryService
 
             foreach ($story->chapters as $chapter) {
                 if ($chapter->status === Chapter::STATUS_PUBLISHED) {
-                    if (!$chapter->getIsRead()) {
+                    if (!($chapter->getIsRead()??false)) {
                         return new StoryWithNextChapter($story, $chapter);
                     }
                 }

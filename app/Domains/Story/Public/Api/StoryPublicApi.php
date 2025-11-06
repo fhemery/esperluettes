@@ -62,6 +62,7 @@ class StoryPublicApi
             visibilities: $filter->visibilities,
             requirePublishedChapter: false,
             onlyStoryIds: $filter->onlyStoryIds,
+            readStatus: $filter->readStatus,
         );
 
         $options = new GetStoryOptions(
@@ -69,6 +70,7 @@ class StoryPublicApi
             includeGenreIds: $fieldsToReturn->includeGenreIds,
             includeTriggerWarningIds: $fieldsToReturn->includeTriggerWarningIds,
             includeChapters: $fieldsToReturn->includeChapters,
+            includeReadingProgress: $fieldsToReturn->includeReadingProgress
         );
 
         $paginator = $this->storyService->searchStories($fp, $options);

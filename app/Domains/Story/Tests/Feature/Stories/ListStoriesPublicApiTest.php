@@ -64,7 +64,7 @@ describe('StoryPublicApi::listStories', function () {
                 expect(collect($result->data)->pluck('title'))->toContain('Beta');
             });
 
-            it('should not display private stories for which user is not collaborator', function(){
+            it('should not display private stories for which user is not collaborator', function () {
                 privateStory('Beta', alice($this)->id);
 
                 $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]));
@@ -74,7 +74,7 @@ describe('StoryPublicApi::listStories', function () {
                 expect($result->data)->toHaveCount(0);
             });
 
-            it('should display private stories for which user is collaborator', function(){
+            it('should display private stories for which user is collaborator', function () {
                 $aliceStory = privateStory('Alpha', alice($this)->id);
                 privateStory('Beta', bob($this)->id);
 
@@ -88,7 +88,7 @@ describe('StoryPublicApi::listStories', function () {
             });
         });
 
-        describe('When filtering explicitly' , function () {
+        describe('When filtering explicitly', function () {
             it('should only display required visibilities', function () {
                 $alice = alice($this);
                 publicStory('Alpha', $alice->id);
@@ -119,6 +119,115 @@ describe('StoryPublicApi::listStories', function () {
 
                 expect($result->data)->toBeArray();
                 expect($result->data)->toHaveCount(0);
+            });
+        });
+    });
+
+    describe('Filtering stories', function() {
+        describe('Regarding filtering by storyIds', function () {
+            it('should return only the stories with the given ids', function () {
+                $alice = alice($this);
+                $story1 = publicStory('With Chapters', $alice->id);
+                $story2 = publicStory('With Chapters', $alice->id);
+                $story3 = publicStory('With Chapters', $alice->id);
+
+                $filter = new StoryQueryFilterDto(onlyStoryIds: [$story1->id, $story2->id]);
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(2);
+                expect(collect($result->data)->pluck('id'))->toContain($story1->id);
+                expect(collect($result->data)->pluck('id'))->toContain($story2->id);
+            });
+        });
+
+        describe('regarding Read status filtering', function () {
+            it('should return stories that have an unread chapter when Read Status is UnreadOnly', function () {
+                $alice = alice($this);
+                $readStory = publicStory('All read by Bob', $alice->id);
+                $readChapter = createPublishedChapter($this, $readStory, $alice);
+                $emptyStory = publicStory('Empty story', $alice->id);
+                $unreadStory = publicStory('Unread story', $alice->id);
+                $unreadChapter = createPublishedChapter($this, $unreadStory, $alice);
+
+                $filter = new StoryQueryFilterDto(
+                    readStatus: StoryQueryReadStatus::UnreadOnly,
+                );
+
+                $this->actingAs(bob($this));
+                markAsRead($this, $readChapter);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(1);
+                $dto = $result->data[0];
+                expect($dto->id)->toBe($unreadStory->id);
+            });
+
+            it('should discard unpublished chapters from the count (for unread)', function () {
+                $alice = alice($this);
+                $readStory = publicStory('All read by Bob', $alice->id);
+                $readChapter = createPublishedChapter($this, $readStory, $alice);
+                $unreadChapter = createUnpublishedChapter($this, $readStory, $alice);
+
+                $filter = new StoryQueryFilterDto(
+                    readStatus: StoryQueryReadStatus::UnreadOnly,
+                );
+
+                $this->actingAs(bob($this));
+                markAsRead($this, $readChapter);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(0);
+            });
+
+            it('should consider all other stories as READ', function () {
+                $alice = alice($this);
+                $readStory = publicStory('All read by Bob', $alice->id);
+                $readChapter = createPublishedChapter($this, $readStory, $alice);
+                $emptyStory = publicStory('Empty story', $alice->id);
+                $unreadStory = publicStory('Unread story', $alice->id);
+                $unreadChapter = createPublishedChapter($this, $unreadStory, $alice);
+
+                $filter = new StoryQueryFilterDto(
+                    readStatus: StoryQueryReadStatus::ReadOnly,
+                );
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeChapters: true,
+                    includeReadingProgress: true,
+                );
+
+                $this->actingAs(bob($this));
+                markAsRead($this, $readChapter);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter, fieldsToReturn: $fields);
+
+                expect($result->data)->toHaveCount(2);
+                expect(collect($result->data)->pluck('id'))->toContain($readStory->id);
+                expect(collect($result->data)->pluck('id'))->toContain($emptyStory->id);
+            });
+
+            it('should discard unpublished chapters from the count (for read)', function () {
+                $alice = alice($this);
+                $readStory = publicStory('All read by Bob', $alice->id);
+                $readChapter = createPublishedChapter($this, $readStory, $alice);
+                $unreadChapter = createUnpublishedChapter($this, $readStory, $alice);
+
+                $filter = new StoryQueryFilterDto(
+                    readStatus: StoryQueryReadStatus::ReadOnly,
+                );
+
+                $this->actingAs(bob($this));
+                markAsRead($this, $readChapter);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                // Chapter is not read, story should not be returned
+                // But because the chapter is unpublished, it is discarded
+                expect($result->data)->toHaveCount(1);
+                expect(collect($result->data)->pluck('id'))->toContain($readStory->id);
             });
         });
     });
@@ -267,8 +376,8 @@ describe('StoryPublicApi::listStories', function () {
             });
         });
 
-        describe('About chapters', function() {
-            it('excludes chapters by default', function() {
+        describe('About chapters', function () {
+            it('excludes chapters by default', function () {
                 $alice = alice($this);
                 $story = publicStory('With Chapters', $alice->id);
                 createPublishedChapter($this, $story, $alice);
@@ -280,7 +389,7 @@ describe('StoryPublicApi::listStories', function () {
                 expect($dto->chapters)->toBeNull();
             });
 
-            it('should return chapter, without content, if requested', function(){
+            it('should return chapter, without content, if requested', function () {
                 $alice = alice($this);
                 $story = publicStory('With Chapters', $alice->id);
                 createPublishedChapter($this, $story, $alice, [
@@ -312,15 +421,15 @@ describe('StoryPublicApi::listStories', function () {
                 expect($chapter->characterCount)->toBeInt();
             });
 
-            it('should not return unpublished chapters to non-authors', function(){
-                 $alice = alice($this);
+            it('should not return unpublished chapters to non-authors', function () {
+                $alice = alice($this);
                 $story = publicStory('With Chapters', $alice->id);
                 createPublishedChapter($this, $story, $alice, [
                     'title' => 'Chapter 1',
-                    ]); 
+                ]);
                 createUnpublishedChapter($this, $story, $alice, [
                     'title' => 'Chapter 2',
-                    ]);
+                ]);
 
                 $fields = new StoryQueryFieldsToReturnDto(
                     includeChapters: true,
@@ -328,7 +437,7 @@ describe('StoryPublicApi::listStories', function () {
 
                 $this->actingAs(bob($this));
                 /** @var PaginatedStoryDto $result */
-                $result = $this->api->listStories(fieldsToReturn: $fields);   
+                $result = $this->api->listStories(fieldsToReturn: $fields);
 
                 $dto = $result->data[0];
                 expect($dto->chapters)->toHaveCount(1);
@@ -337,21 +446,46 @@ describe('StoryPublicApi::listStories', function () {
             });
         });
 
-        describe('Regarding filtering by storyIds', function(){
-            it('should return only the stories with the given ids', function(){
+        describe('Regarding reading progress', function () {
+            it('should not return reading progress by default', function () {
                 $alice = alice($this);
-                $story1 = publicStory('With Chapters', $alice->id);
-                $story2 = publicStory('With Chapters', $alice->id);
-                $story3 = publicStory('With Chapters', $alice->id);
+                $story = publicStory('With Chapters', $alice->id);
+                $chapter = createPublishedChapter($this, $story, $alice);
 
-                $filter = new StoryQueryFilterDto(onlyStoryIds: [$story1->id, $story2->id]);
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeChapters: true,
+                );
 
+                $this->actingAs(bob($this));
+                markAsRead($this, $chapter);
                 /** @var PaginatedStoryDto $result */
-                $result = $this->api->listStories($filter);
+                $result = $this->api->listStories(fieldsToReturn: $fields);
 
-                expect($result->data)->toHaveCount(2);
-                expect(collect($result->data)->pluck('id'))->toContain($story1->id);
-                expect(collect($result->data)->pluck('id'))->toContain($story2->id);
+                $dto = $result->data[0];
+                expect($dto->chapters[0]->isRead)->toBeNull();
+            });
+
+            it('should return reading progress if specified', function () {
+                $alice = alice($this);
+                $story = publicStory('With Chapters', $alice->id);
+                $chapter1 = createPublishedChapter($this, $story, $alice);
+                $chapter2 = createPublishedChapter($this, $story, $alice);
+
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeChapters: true,
+                    includeReadingProgress: true
+                );
+
+                $this->actingAs(bob($this));
+                markAsRead($this, $chapter1);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories(fieldsToReturn: $fields);
+
+                $dto = $result->data[0];
+                $chap1Dto = collect($dto->chapters)->firstWhere(fn($c) => (int)$c->id === (int)$chapter1->id);
+                $chap2Dto = collect($dto->chapters)->firstWhere(fn($c) => (int)$c->id === (int)$chapter2->id);
+                expect($chap1Dto?->isRead)->toBe(true);
+                expect($chap2Dto?->isRead)->toBe(false);
             });
         });
     });

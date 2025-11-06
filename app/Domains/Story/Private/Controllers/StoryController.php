@@ -351,7 +351,7 @@ class StoryController
                 title: (string)$c->title,
                 slug: (string)$c->slug,
                 isPublished: (string)$c->status === Chapter::STATUS_PUBLISHED,
-                isRead: $c->getIsRead(),
+                isRead: $c->getIsRead() ?? false,
                 readsLogged: (int)($c->reads_logged_count ?? 0),
                 wordCount: (int)($c->word_count ?? 0),
                 characterCount: (int)($c->character_count ?? 0),

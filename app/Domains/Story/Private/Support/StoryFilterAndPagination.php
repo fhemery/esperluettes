@@ -3,6 +3,7 @@
 namespace App\Domains\Story\Private\Support;
 
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Public\Contracts\StoryQueryReadStatus;
 
 class StoryFilterAndPagination
 {
@@ -14,7 +15,7 @@ class StoryFilterAndPagination
          */
         public array $visibilities = [Story::VIS_PUBLIC],
         /**
-         * Preferred alias for filtering by author user ID. If provided, it takes precedence over userId.
+         * Filtering by author user ID
          */
         public ?int $authorId = null,
         public ?int $typeId = null,
@@ -45,6 +46,12 @@ class StoryFilterAndPagination
          * @var array<int,int> IDs of stories to include (multi-select)
          */
         public ?array $onlyStoryIds = null,
+
+        /**
+         * @var StoryQueryReadStatus filters stories by read status
+         * Unread means at least one unread chapter. The rest is considered Read.
+         */
+        public StoryQueryReadStatus $readStatus = StoryQueryReadStatus::All,
     ) {
         // Normalize visibilities: ensure values and not empty
         $this->visibilities = array_values($this->visibilities);

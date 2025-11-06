@@ -17,6 +17,7 @@ class StoryChapterDto
         public ?\DateTimeInterface $firstPublishedAt = null,
         public int $readsLoggedCount = 0,
         public int $characterCount = 0,
+        public ?bool $isRead = null,
     ) {
     }
 
@@ -33,6 +34,7 @@ class StoryChapterDto
             firstPublishedAt: $c->first_published_at,
             readsLoggedCount: (int) ($c->reads_logged_count ?? 0),
             characterCount: (int) ($c->character_count ?? 0),
+            isRead: $c->getIsRead(),
         );
     }
 }
