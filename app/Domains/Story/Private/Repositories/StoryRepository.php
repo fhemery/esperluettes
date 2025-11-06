@@ -39,11 +39,49 @@ final class StoryRepository
      */
     public function searchStories(StoryFilterAndPagination $filter, GetStoryOptions $options): LengthAwarePaginator
     {
+        $viewerId = Auth::id();
+
         $query = Story::query()
             ->when($options->includeAuthors, fn($q) => $q->with('authors'))
             ->when($options->includeGenreIds, fn($q) => $q->with('genres:id'))
-            ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings:id'));
-           
+            ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings:id'))
+            ->when($options->includeChapters, function ($q) {
+                $q->with(['chapters' => function ($c) {
+                    // Exclude author_note and content for performance consideration
+                    // Important: include 'id' and 'story_id' to keep relation hydrated
+                    $c->select(['id', 'story_id', 'title', 'slug', 'sort_order', 'status', 'first_published_at', 'reads_logged_count', 'word_count', 'character_count']);
+                }]);
+            });
+
+        // Story visibility rules
+        $pubCom = array_values(array_intersect($filter->visibilities, [Story::VIS_PUBLIC, Story::VIS_COMMUNITY]));
+        $includePrivate = in_array(Story::VIS_PRIVATE, $filter->visibilities, true);
+
+        $query->where(function ($w) use ($pubCom, $includePrivate, $viewerId) {
+            $addedAny = false;
+
+            if (!empty($pubCom)) {
+                $w->whereIn('visibility', $pubCom);
+                $addedAny = true;
+            }
+
+            if ($includePrivate && $viewerId !== null) {
+                if ($addedAny) {
+                    $w->orWhere(function ($q) use ($viewerId) {
+                        $q->where('visibility', Story::VIS_PRIVATE)
+                            ->whereHas('collaborators', function ($c) use ($viewerId) {
+                                $c->where('user_id', $viewerId);
+                            });
+                    });
+                } else {
+                    $w->where('visibility', Story::VIS_PRIVATE)
+                        ->whereHas('collaborators', function ($c) use ($viewerId) {
+                            $c->where('user_id', $viewerId);
+                        });
+                }
+            }
+        });
+
         /** @var LengthAwarePaginator $paginator */
         $paginator = $query->paginate($filter->perPage, ['*'], 'page', $filter->page);
         return $paginator;

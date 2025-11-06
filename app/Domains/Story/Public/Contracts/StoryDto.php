@@ -3,6 +3,7 @@
 namespace App\Domains\Story\Public\Contracts;
 
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Public\Api\StoryMapperHelper;
 use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
@@ -13,6 +14,7 @@ class StoryDto
      * @var StoryRefGenre[] $genres
      * @var StoryRefTriggerWarning[] $triggerWarnings
      * @var ProfileDto[] $authors
+     * @var StoryChapterDto[] $chapters
      */
     public function __construct(
         public int $id,
@@ -23,6 +25,7 @@ class StoryDto
         public ?array $genres = null,
         public ?array $triggerWarnings = null,
         public ?array $authors = null,
+        public ?array $chapters = null,
     ) {
     }
 
@@ -46,6 +49,9 @@ class StoryDto
         }
         if ($fieldsToReturn->includeAuthors && $helper->profiles) {
             $dto->authors = collect($helper->profiles)->filter(fn($p) => in_array((int) $p->user_id, $story->authors->pluck('user_id')->map(fn($v) => (int) $v)->all(), true))->values()->all();
+        }
+        if ($fieldsToReturn->includeChapters) {
+            $dto->chapters = $story->chapters->map(fn(Chapter $c) => StoryChapterDto::fromModel($c))->values()->all();
         }
 
         return $dto;

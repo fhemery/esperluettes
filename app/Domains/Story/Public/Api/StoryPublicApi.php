@@ -52,7 +52,6 @@ class StoryPublicApi
         StoryQueryFieldsToReturnDto $fieldsToReturn = new StoryQueryFieldsToReturnDto()
     ): PaginatedStoryDto
     {
-        // Basic slice: ignore filters for now and return public stories with id + title.
         $page = max(1, (int) $pagination->page);
         $perPage = max(1, (int) $pagination->pageSize);
 
@@ -60,15 +59,15 @@ class StoryPublicApi
         $fp = new StoryFilterAndPagination(
             page: $page,
             perPage: $perPage,
-            visibilities: [Story::VIS_PUBLIC],
+            visibilities: $filter->visibilities,
             requirePublishedChapter: false,
-
         );
 
         $options = new GetStoryOptions(
             includeAuthors: $fieldsToReturn->includeAuthors,
             includeGenreIds: $fieldsToReturn->includeGenreIds,
             includeTriggerWarningIds: $fieldsToReturn->includeTriggerWarningIds,
+            includeChapters: $fieldsToReturn->includeChapters,
         );
 
         $paginator = $this->storyService->searchStories($fp, $options);

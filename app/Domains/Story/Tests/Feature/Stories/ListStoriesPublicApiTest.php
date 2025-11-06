@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Story\Private\Models\Story;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,6 +12,7 @@ use App\Domains\Story\Public\Contracts\StoryQueryPaginationDto;
 use App\Domains\Story\Public\Contracts\StoryQueryFieldsToReturnDto;
 use App\Domains\Story\Public\Contracts\StoryQueryReadStatus;
 use App\Domains\Story\Public\Contracts\PaginatedStoryDto;
+use App\Domains\Story\Public\Contracts\StoryVisibility;
 
 uses(TestCase::class, RefreshDatabase::class);
 
@@ -32,6 +34,93 @@ describe('StoryPublicApi::listStories', function () {
         expect($result->data)->toBeArray()->toBeEmpty();
         expect($result->pagination->total)->toBe(0);
         expect($result->pagination->last_page)->toBe(1);
+    });
+
+    describe('Applying business rules', function () {
+
+        describe('by default', function () {
+            it('should filter community stories if user is not confirmed', function () {
+                publicStory('Alpha', alice($this)->id);
+                communityStory('Beta', alice($this)->id);
+
+                $this->actingAs(bob($this, roles: [Roles::USER]));
+                $result = $this->api->listStories();
+
+                expect($result->data)->toBeArray();
+                expect($result->data)->toHaveCount(1);
+                expect($result->data[0]->title)->toBe('Alpha');
+            });
+
+            it('should display community stories if user is confirmed', function () {
+                publicStory('Alpha', alice($this)->id);
+                communityStory('Beta', alice($this)->id);
+
+                $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]));
+                $result = $this->api->listStories();
+
+                expect($result->data)->toBeArray();
+                expect($result->data)->toHaveCount(2);
+                expect(collect($result->data)->pluck('title'))->toContain('Alpha');
+                expect(collect($result->data)->pluck('title'))->toContain('Beta');
+            });
+
+            it('should not display private stories for which user is not collaborator', function(){
+                privateStory('Beta', alice($this)->id);
+
+                $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]));
+                $result = $this->api->listStories();
+
+                expect($result->data)->toBeArray();
+                expect($result->data)->toHaveCount(0);
+            });
+
+            it('should display private stories for which user is collaborator', function(){
+                $aliceStory = privateStory('Alpha', alice($this)->id);
+                privateStory('Beta', bob($this)->id);
+
+                addCollaborator($aliceStory->id, bob($this)->id, 'betareader');
+
+                $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]));
+                $result = $this->api->listStories();
+
+                expect($result->data)->toBeArray();
+                expect($result->data)->toHaveCount(2);
+            });
+        });
+
+        describe('When filtering explicitly' , function () {
+            it('should only display required visibilities', function () {
+                $alice = alice($this);
+                publicStory('Alpha', $alice->id);
+                communityStory('Beta', $alice->id);
+                privateStory('Gamma', $alice->id);
+
+                $this->actingAs($alice);
+                $filter = new StoryQueryFilterDto(visibilities: [StoryVisibility::PUBLIC]);
+
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toBeArray();
+                expect($result->data)->toHaveCount(1);
+                expect(collect($result->data)->pluck('title'))->toContain('Alpha');
+            });
+
+            it('should not override the business rules, such as community visibility', function () {
+                $alice = alice($this);
+                publicStory('Alpha', $alice->id);
+                communityStory('Beta', $alice->id);
+                privateStory('Gamma', $alice->id);
+
+                // Bob is not confirmed, so he sees nothing if he excludes Public
+                $this->actingAs(bob($this, roles: [Roles::USER]));
+                $filter = new StoryQueryFilterDto(visibilities: [StoryVisibility::COMMUNITY, StoryVisibility::PRIVATE]);
+
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toBeArray();
+                expect($result->data)->toHaveCount(0);
+            });
+        });
     });
 
     describe('Returning data', function () {
@@ -175,6 +264,76 @@ describe('StoryPublicApi::listStories', function () {
                 expect($author->display_name)->toBe('Alice');
                 expect($author->slug)->toBe('alice');
                 expect($author->avatar_url)->not()->toBeNull();
+            });
+        });
+
+        describe('About chapters', function() {
+            it('excludes chapters by default', function() {
+                $alice = alice($this);
+                $story = publicStory('With Chapters', $alice->id);
+                createPublishedChapter($this, $story, $alice);
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories();
+
+                $dto = $result->data[0];
+                expect($dto->chapters)->toBeNull();
+            });
+
+            it('should return chapter, without content, if requested', function(){
+                $alice = alice($this);
+                $story = publicStory('With Chapters', $alice->id);
+                createPublishedChapter($this, $story, $alice, [
+                    'title' => 'Chapter 1',
+                    'slug' => 'chapter-1',
+                    'author_note' => 'Summary of Chapter 1',
+                    'content' => 'Description of Chapter 1',
+                    'word_count' => 100,
+                ]);
+
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeChapters: true,
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories(fieldsToReturn: $fields);
+
+                $dto = $result->data[0];
+                expect($dto->chapters)->toHaveCount(1);
+                $chapter = $dto->chapters[0];
+                expect($chapter->title)->toBe('Chapter 1');
+                expect($chapter->slug)->toBe('chapter-1');
+                expect($chapter->wordCount)->toBe(4);
+                // Additional lightweight chapter metadata
+                expect($chapter->status)->toBe(\App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED);
+                expect($chapter->sortOrder)->toBeInt();
+                expect($chapter->firstPublishedAt)->not()->toBeNull();
+                expect($chapter->readsLoggedCount)->toBeInt();
+                expect($chapter->characterCount)->toBeInt();
+            });
+
+            it('should not return unpublished chapters to non-authors', function(){
+                 $alice = alice($this);
+                $story = publicStory('With Chapters', $alice->id);
+                createPublishedChapter($this, $story, $alice, [
+                    'title' => 'Chapter 1',
+                    ]); 
+                createUnpublishedChapter($this, $story, $alice, [
+                    'title' => 'Chapter 2',
+                    ]);
+
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeChapters: true,
+                );
+
+                $this->actingAs(bob($this));
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories(fieldsToReturn: $fields);   
+
+                $dto = $result->data[0];
+                expect($dto->chapters)->toHaveCount(1);
+                $chapter = $dto->chapters[0];
+                expect($chapter->title)->toBe('Chapter 1');
             });
         });
     });
