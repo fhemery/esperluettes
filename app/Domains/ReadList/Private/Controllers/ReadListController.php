@@ -7,6 +7,10 @@ use App\Domains\Story\Public\Api\StoryPublicApi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use App\Domains\ReadList\Private\ViewModels\ReadListIndexViewModel;
+use App\Domains\Story\Public\Contracts\StoryQueryFilterDto;
+use App\Domains\Story\Public\Contracts\StoryQueryPaginationDto;
+use App\Domains\Story\Public\Contracts\StoryQueryFieldsToReturnDto;
 
 class ReadListController
 {
@@ -18,7 +22,29 @@ class ReadListController
 
     public function index(): View
     {
-        return view('read-list::pages.index');
+        $user = Auth::user();
+        $userId = (int) $user->id;
+
+        // Fetch user's readlist story IDs
+        $storyIds = $this->readListService->getStoryIdsForUser($userId);
+
+        // Build filter & pagination (defaults: page 1, perPage 10)
+        $filter = new StoryQueryFilterDto(onlyStoryIds: $storyIds);
+        $pagination = new StoryQueryPaginationDto(page: 1, pageSize: 10);
+        // We need authors, genre ids and trigger warning ids to build names and links
+        $fields = new StoryQueryFieldsToReturnDto(
+            includeAuthors: true,
+            includeGenreIds: true,
+            includeTriggerWarningIds: true,
+            includeChapters: true,
+            includeReadingProgress: true,
+        );
+
+        // Query stories and build view model
+        $result = $this->storyApi->listStories($filter, $pagination, $fields);
+        $vm = ReadListIndexViewModel::fromPaginated($result);
+
+        return view('read-list::pages.index', compact('vm'));
     }
 
     public function add(int $storyId): RedirectResponse

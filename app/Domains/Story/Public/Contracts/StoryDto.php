@@ -19,6 +19,7 @@ class StoryDto
     public function __construct(
         public int $id,
         public string $title,
+        public string $slug,
         public string $twDisclosure,
         public ?string $summary,
         public ?string $description = null,
@@ -34,6 +35,7 @@ class StoryDto
         $dto = new self(
             id: (int) $story->id,
             title: (string) $story->title,
+            slug: (string) $story->slug,
             twDisclosure: (string) ($story->tw_disclosure ?? ''),
             summary: $story->description,
             description: $story->description,

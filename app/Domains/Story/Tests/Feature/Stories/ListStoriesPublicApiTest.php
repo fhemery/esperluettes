@@ -269,12 +269,15 @@ describe('StoryPublicApi::listStories', function () {
                 $titles = array_map(fn($d) => $d->title, $result->data);
                 $ids = array_map(fn($d) => $d->id, $result->data);
                 $descriptions = array_map(fn($d) => $d->description, $result->data);
+                $slugs = array_map(fn($d) => $d->slug, $result->data);
 
                 expect($titles)->toContain('Alpha');
                 expect($titles)->toContain('Beta');
                 expect($ids)->toContain($s1->id);
                 expect($ids)->toContain($s2->id);
                 expect($descriptions)->toContain($s1->description);
+                expect($slugs)->toContain($s1->slug);
+                expect($slugs)->toContain($s2->slug);
             });
         });
 

@@ -1,0 +1,100 @@
+@props([
+// App\Domains\ReadList\ViewModels\ReadListStoryViewModel
+'item',
+])
+
+<div class="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr_auto] gap-4">
+
+    {{-- Cover --}}
+    <div class="row-span-3 col-span-1 w-[230px] h-[306px] mx-auto overflow-hidden">
+        <a href="{{ url('/stories/' . $item->slug) }}" class="block">
+            <img
+                src="{{ asset('images/story/default-cover.svg') }}"
+                alt="{{ $item->title }}"
+                class="w-[230px] object-contain">
+        </a>
+    </div>
+
+    <div class="col-span-1">
+        {{-- Title + summary tooltip icon --}}
+        <div class="flex items-center gap-1">
+            <a href="{{ url('/stories/' . $item->slug) }}" class="block">
+                <x-shared::title tag="h2" class="hover:underline">{{ $item->title }}</x-shared::title>
+            </a>
+            @if(trim($item->description) !== '')
+            <div class="mb-1">
+                <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" maxWidth="20rem" iconClass="text-black">
+                    {{ strip_tags($item->description) }}
+                </x-shared::tooltip>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="col-start-2 row-start-2 row-span-1 col-span-1 flex flex-col justify-between gap-4">
+        @if(!empty($item->genreNames))
+        <div class="flex flex-wrap gap-2">
+            @foreach($item->genreNames as $g)
+                <x-shared::badge color="accent">{{ $g }}</x-shared::badge>
+            @endforeach
+        </div>
+        @endif
+
+        
+
+        {{-- Authors --}}
+        <div class="mt-1 text-sm text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
+            {{ __('story::shared.by') }}
+            <x-profile::inline-names :profiles="$item->authors" />
+        </div>
+    </div>
+
+    {{-- Bottom meta row: chapters and words + TW icon/tooltip --}}
+    <div class="col-start-2 row-start-3 row-span-1 col-span-1 border-t border-gray-700 pt-2">
+        <div class="flex items-center justify-between text-sm font-bold">
+            <div class="flex items-center gap-2 text-gray-600">
+
+                <span>{!! trans_choice('story::shared.metrics.chapters', $item->totalChaptersCount, ['count' => '<span class="text-accent">'. $item->totalChaptersCount . '</span>']) !!}</span>
+                @if($item->totalChaptersCount > 0)
+                    <span class="text-gray-400">|</span>
+                    <span>{!! trans_choice('story::shared.metrics.words', $item->totalWordCount, ['count' => '<span class="text-accent">'. \App\Domains\Shared\Support\NumberFormatter::compact($item->totalWordCount) . '</span>']) !!}</span>
+                @endif
+            </div>
+            @if(!empty($item->triggerWarningNames))
+                <x-shared::popover placement="top">
+                    <x-slot name="trigger">
+                        <button type="button" aria-label="{{ __('story::shared.trigger_warnings.label') }}"
+                            class="inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                            title="{{ __('story::shared.trigger_warnings.tooltips.listed') }}">
+                            <span class="translate-y-0.5 material-symbols-outlined text-[18px] leading-none text-error">warning</span>
+                        </button>
+                    </x-slot>
+                    <div class="font-semibold text-gray-900 mb-1">{{ __('story::shared.trigger_warnings.label') }}</div>
+                    <div class="flex flex-wrap gap-2 ">
+                        @foreach($item->triggerWarningNames as $tw)
+                        <x-shared::badge color="error" size="xs">{{ $tw }}</x-shared::badge>
+                        @endforeach
+                    </div>
+                </x-shared::popover>
+            @elseif($item->twDisclosure === 'no_tw')
+                <x-shared::popover placement="top">
+                    <x-slot name="trigger">
+                        <span class="inline-flex items-center justify-center h-5 w-5 rounded-full">
+                            <span class="translate-y-0.5 material-symbols-outlined text-[18px] leading-none text-success">warning_off</span>
+                        </span>
+                    </x-slot>
+                    <div>{{ __('story::shared.trigger_warnings.tooltips.no_tw') }}</div>
+                </x-shared::popover>
+            @elseif($item->twDisclosure === 'unspoiled')
+            <x-shared::popover placement="top">
+                    <x-slot name="trigger">
+                        <span class="inline-flex items-center justify-center h-5 w-5 rounded-full">
+                            <span class="translate-y-0.5 material-symbols-outlined text-[18px] leading-none text-warning">help</span>
+                        </span>
+                    </x-slot>
+                    <div>{{ __('story::shared.trigger_warnings.tooltips.unspoiled') }}</div>
+                </x-shared::popover>
+            @endif
+        </div>
+    </div>
+</div>

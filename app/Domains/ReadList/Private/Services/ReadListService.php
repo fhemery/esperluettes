@@ -91,6 +91,21 @@ class ReadListService
         return ReadListEntry::where('user_id', $userId)->delete();
     }
 
+    /**
+     * Get all story IDs in the user's read list, newest first by entry id.
+     *
+     * @return array<int>
+     */
+    public function getStoryIdsForUser(int $userId): array
+    {
+        return ReadListEntry::where('user_id', $userId)
+            ->orderByDesc('id')
+            ->pluck('story_id')
+            ->map(fn ($v) => (int) $v)
+            ->values()
+            ->all();
+    }
+
     private function notifyAuthorsOnAdd(int $userId, int $storyId): void
     {
         // Robustness: do not notify if user is an author
