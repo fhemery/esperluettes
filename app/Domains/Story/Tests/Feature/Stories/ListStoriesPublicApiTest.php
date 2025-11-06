@@ -336,6 +336,24 @@ describe('StoryPublicApi::listStories', function () {
                 expect($chapter->title)->toBe('Chapter 1');
             });
         });
+
+        describe('Regarding filtering by storyIds', function(){
+            it('should return only the stories with the given ids', function(){
+                $alice = alice($this);
+                $story1 = publicStory('With Chapters', $alice->id);
+                $story2 = publicStory('With Chapters', $alice->id);
+                $story3 = publicStory('With Chapters', $alice->id);
+
+                $filter = new StoryQueryFilterDto(onlyStoryIds: [$story1->id, $story2->id]);
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(2);
+                expect(collect($result->data)->pluck('id'))->toContain($story1->id);
+                expect(collect($result->data)->pluck('id'))->toContain($story2->id);
+            });
+        });
     });
 
     describe('Regarding pagination', function () {

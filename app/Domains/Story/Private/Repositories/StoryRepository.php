@@ -51,7 +51,8 @@ final class StoryRepository
                     // Important: include 'id' and 'story_id' to keep relation hydrated
                     $c->select(['id', 'story_id', 'title', 'slug', 'sort_order', 'status', 'first_published_at', 'reads_logged_count', 'word_count', 'character_count']);
                 }]);
-            });
+            })
+            ->when($filter->onlyStoryIds, fn($q) => $q->whereIn('id', $filter->onlyStoryIds));
 
         // Story visibility rules
         $pubCom = array_values(array_intersect($filter->visibilities, [Story::VIS_PUBLIC, Story::VIS_COMMUNITY]));

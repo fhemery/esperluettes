@@ -40,6 +40,11 @@ class StoryFilterAndPagination
          * When true, only include stories explicitly marked as having no trigger warnings.
          */
         public bool $noTwOnly = false,
+
+        /**
+         * @var array<int,int> IDs of stories to include (multi-select)
+         */
+        public ?array $onlyStoryIds = null,
     ) {
         // Normalize visibilities: ensure values and not empty
         $this->visibilities = array_values($this->visibilities);
@@ -62,5 +67,8 @@ class StoryFilterAndPagination
 
         // Normalize booleans
         $this->noTwOnly = (bool) $this->noTwOnly;
+
+        // Normalize story ids
+        $this->onlyStoryIds = $this->onlyStoryIds ? array_values(array_unique(array_map('intval', $this->onlyStoryIds))) : null;
     }
 }

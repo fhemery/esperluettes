@@ -61,6 +61,7 @@ class StoryPublicApi
             perPage: $perPage,
             visibilities: $filter->visibilities,
             requirePublishedChapter: false,
+            onlyStoryIds: $filter->onlyStoryIds,
         );
 
         $options = new GetStoryOptions(
