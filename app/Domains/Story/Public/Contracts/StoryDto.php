@@ -31,7 +31,7 @@ class StoryDto
         $dto = new self(
             id: (int) $story->id,
             title: (string) $story->title,
-            twDisclosure: (string) ($story->twDisclosure ?? ''),
+            twDisclosure: (string) ($story->tw_disclosure ?? ''),
             summary: $story->description,
             description: $story->description,
         );
