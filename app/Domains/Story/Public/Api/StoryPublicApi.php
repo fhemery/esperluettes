@@ -9,7 +9,7 @@ use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Services\StoryAccessService;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Support\GetStoryOptions;
-use App\Domains\Story\Public\Contracts\StoryDto;
+use App\Domains\Story\Public\Contracts\StorySummaryDto;
 use App\Domains\Story\Public\Contracts\UserStoryListItemDto;
 
 class StoryPublicApi
@@ -39,10 +39,10 @@ class StoryPublicApi
         })->all();
     }
 
-    public function getStory(int $storyId): ?StoryDto
+    public function getStory(int $storyId): ?StorySummaryDto
     {
         $story = $this->storyService->getStoryById($storyId, new GetStoryOptions(includeChapters: true));
-        return $story ? StoryDto::fromModel($story) : null;
+        return $story ? StorySummaryDto::fromModel($story) : null;
     }
 
     public function isAuthor(int $userId, int $storyId): bool

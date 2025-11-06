@@ -4,7 +4,7 @@ namespace App\Domains\Story\Public\Contracts;
 
 use App\Domains\Story\Private\Models\Story;
 
-class StoryDto
+class StorySummaryDto
 {
     public function __construct(
         public int $id,
