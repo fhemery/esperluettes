@@ -40,12 +40,12 @@ class ReadListChaptersViewModel
             // Start from the chapter immediately before first unread
             $startIndex = max(0, $firstUnreadIndex - 1);
         } else {
-            // All chapters are read, show last 5
-            $startIndex = max(0, $totalChapters - 5);
+            // All chapters are read, show last 4
+            $startIndex = max(0, $totalChapters - 4);
         }
 
-        // Get up to 5 chapters starting from startIndex
-        $displayChapters = array_slice($chapters, $startIndex, 5);
+        // Get up to 4 chapters starting from startIndex
+        $displayChapters = array_slice($chapters, $startIndex, 4);
 
         // Calculate chapters before and after the displayed slice
         $chaptersBefore = $startIndex;

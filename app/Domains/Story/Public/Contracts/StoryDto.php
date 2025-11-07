@@ -27,6 +27,8 @@ class StoryDto
         public ?array $triggerWarnings = null,
         public ?array $authors = null,
         public ?array $chapters = null,
+        public ?\DateTime $createdAt = null,
+        public ?\DateTime $lastChapterPublishedAt = null,
     ) {
     }
 
@@ -39,6 +41,8 @@ class StoryDto
             twDisclosure: (string) ($story->tw_disclosure ?? ''),
             summary: $story->description,
             description: $story->description,
+            createdAt: $story->created_at,
+            lastChapterPublishedAt: $story->last_chapter_published_at,
         );
 
         if ($fieldsToReturn->includeGenreIds) {

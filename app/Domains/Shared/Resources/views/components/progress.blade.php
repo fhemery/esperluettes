@@ -1,19 +1,15 @@
 @props([
     'value' => 0,
-    'label' => null,
     'bg' => 'bg-bg',
     'color' => 'bg-accent',
-    'height' => 'h-4',
+    'height' => 'h-6',
 ])
 
 @php
     $percent = max(0, min(100, (int) $value));
 @endphp
 
-@if($label)
-    <div {{ $attributes->only('id')->merge(['class' => 'text-fg font-bold mb-1']) }}>{{ $label }}</div>
-@endif
-
+<div class="flex-1 min-w-[10rem] flex gap-2 items-center" >
 <div
     role="progressbar"
     aria-valuenow="{{ $percent }}"
@@ -22,4 +18,6 @@
     {{ $attributes->except('id')->merge(['class' => "w-full border border-fg rounded-sm overflow-hidden $bg"]) }}
 >
     <div class="{{ $color }} {{ $height }}" style="width: {{ $percent }}%"></div>
+</div>
+<div class="text-sm">{{ $percent }}%</div>
 </div>

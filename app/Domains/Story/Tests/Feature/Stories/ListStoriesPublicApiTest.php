@@ -515,7 +515,43 @@ describe('StoryPublicApi::listStories', function () {
         });
     });
 
-    describe('Regarding pagination', function () {
+    describe('About date fields', function () {
+            it('returns created_at and last_chapter_published_at dates', function () {
+                $story = publicStory('With Dates', alice($this)->id);
+                
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories();
+
+                expect($result->data)->toHaveCount(1);
+                $dto = $result->data[0];
+                
+                expect($dto->createdAt)->toBeInstanceOf(\DateTime::class);
+                expect($dto->createdAt)->toEqual($story->created_at);
+                expect($dto->lastChapterPublishedAt)->toBeNull(); // No chapters published yet
+            });
+
+            it('returns last_chapter_published_at when story has published chapters', function () {
+                $alice = alice($this);
+                $story = publicStory('With Chapters', $alice->id);
+                $chapter = createPublishedChapter($this, $story, $alice);
+                
+                // Refresh story to get updated last_chapter_published_at
+                $story->refresh();
+                
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories();
+
+                expect($result->data)->toHaveCount(1);
+                $dto = $result->data[0];
+                
+                expect($dto->createdAt)->toBeInstanceOf(\DateTime::class);
+                expect($dto->lastChapterPublishedAt)->toBeInstanceOf(\DateTime::class);
+                expect($dto->createdAt)->toEqual($story->created_at);
+                expect($dto->lastChapterPublishedAt)->toEqual($story->last_chapter_published_at);
+            });
+        });
+
+        describe('Regarding pagination', function () {
         it('paginates results: page 1 of 2 with pageSize=2 over 3 stories', function () {
             $api = app(StoryPublicApi::class);
 

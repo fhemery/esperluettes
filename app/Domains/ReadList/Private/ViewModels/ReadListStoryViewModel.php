@@ -26,6 +26,7 @@ class ReadListStoryViewModel
         public readonly int $progressPercent = 0,
         public readonly ReadListChaptersViewModel $chapters,
         public readonly ?string $keepReadingUrl = null,
+        public readonly ?\DateTime $lastModified = null,
     ) {}
 
     public static function fromDto(StoryDto $dto): self
@@ -73,6 +74,9 @@ class ReadListStoryViewModel
             }
         }
         
+        // Compute last modified date: use lastChapterPublishedAt if exists, otherwise createdAt
+        $lastModified = $dto->lastChapterPublishedAt ?? $dto->createdAt;
+        
         return new self(
             id: (int) $dto->id,
             title: (string) $dto->title,
@@ -89,6 +93,7 @@ class ReadListStoryViewModel
             progressPercent: $percent,
             chapters: $chaptersViewModel,
             keepReadingUrl: $keepReadingUrl,
+            lastModified: $lastModified,
         );
     }
 }

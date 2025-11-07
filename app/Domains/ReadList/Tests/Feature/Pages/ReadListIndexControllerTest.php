@@ -224,17 +224,17 @@ describe('ReadListController index', function () {
             expect($s->chapters)->not->toBeNull();
             expect($s->chapters->isEmpty)->toBeFalse();
             
-            // Should display 5 chapters starting before first unread (chapter 4)
-            expect($s->chapters->chapters)->toHaveCount(5);
+            // Should display 4 chapters starting before first unread (chapter 4)
+            expect($s->chapters->chapters)->toHaveCount(4);
             expect($s->chapters->chaptersBefore)->toBe(2); // chapters 1-2
-            expect($s->chapters->chaptersAfter)->toBe(3); // chapters 8-10
+            expect($s->chapters->chaptersAfter)->toBe(4); // chapters 8-10
             
-            // Check displayed chapters are 3-7
+            // Check displayed chapters are 3-6
             $titles = $s->chapters->chapters->map(fn($c) => $c->title)->toArray();
-            expect($titles)->toEqual(['Chapter 3', 'Chapter 4', 'Chapter 5', 'Chapter 6', 'Chapter 7']);
+            expect($titles)->toEqual(['Chapter 3', 'Chapter 4', 'Chapter 5', 'Chapter 6']);
         });
 
-        it('displays last 5 chapters when all are read', function () {
+        it('displays last 4 chapters when all are read', function () {
             $author = alice($this, roles: [Roles::USER_CONFIRMED]);
             $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
 
@@ -266,16 +266,16 @@ describe('ReadListController index', function () {
             /** @var ReadListStoryViewModel $s */
             $s = $vm->stories->first();
 
-            expect($s->chapters->chapters)->toHaveCount(5);
-            expect($s->chapters->chaptersBefore)->toBe(2); // chapters 1-2
+            expect($s->chapters->chapters)->toHaveCount(4);
+            expect($s->chapters->chaptersBefore)->toBe(3); // chapters 1-3
             expect($s->chapters->chaptersAfter)->toBe(0);
             
-            // Should display last 5 chapters (3-7)
+            // Should display last 4 chapters (4-7)
             $titles = $s->chapters->chapters->map(fn($c) => $c->title)->toArray();
-            expect($titles)->toEqual(['Chapter 3', 'Chapter 4', 'Chapter 5', 'Chapter 6', 'Chapter 7']);
+            expect($titles)->toEqual(['Chapter 4', 'Chapter 5', 'Chapter 6', 'Chapter 7']);
         });
 
-        it('displays first 5 chapters when none are read', function () {
+        it('displays first 4 chapters when none are read', function () {
             $author = alice($this, roles: [Roles::USER_CONFIRMED]);
             $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
 
@@ -304,13 +304,13 @@ describe('ReadListController index', function () {
             /** @var ReadListStoryViewModel $s */
             $s = $vm->stories->first();
 
-            expect($s->chapters->chapters)->toHaveCount(5);
+            expect($s->chapters->chapters)->toHaveCount(4);
             expect($s->chapters->chaptersBefore)->toBe(0);
-            expect($s->chapters->chaptersAfter)->toBe(2);
+            expect($s->chapters->chaptersAfter)->toBe(3);
             
-            // Should display first 5 chapters (1-5)
+            // Should display first 4 chapters (1-4)
             $titles = $s->chapters->chapters->map(fn($c) => $c->title)->toArray();
-            expect($titles)->toEqual(['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4', 'Chapter 5']);
+            expect($titles)->toEqual(['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4']);
         });
 
         it('handles empty chapters list', function () {
@@ -446,6 +446,67 @@ describe('ReadListController index', function () {
 
             // Should have null keepReadingUrl when all chapters are read
             expect($s->keepReadingUrl)->toBeNull();
+        });
+
+        it('computes last modified date using last chapter published when available', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+
+            setUserCredits($author->id, 5);
+
+            // Create story first
+            $this->actingAs($author);
+            $story = publicStory('Modified Story', $author->id, ['description' => '']);
+            
+            // Wait a moment to ensure different timestamps
+            sleep(1);
+            
+            // Then publish a chapter
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1']);
+
+            // Refresh story to get updated last_chapter_published_at
+            $story->refresh();
+
+            // Reader adds to readlist
+            $this->actingAs($reader);
+            addToReadList($this, $story->id);
+
+            $response = $this->actingAs($reader)->get(route('readlist.index'));
+            $response->assertOk();
+
+            /** @var ReadListIndexViewModel $vm */
+            $vm = $response->viewData('vm');
+            /** @var ReadListStoryViewModel $s */
+            $s = $vm->stories->first();
+
+            // Should use last_chapter_published_at when available
+            expect($s->lastModified)->toBeInstanceOf(\DateTime::class);
+            expect($s->lastModified)->toEqual($story->last_chapter_published_at);
+            expect($s->lastModified)->not->toEqual($story->created_at);
+        });
+
+        it('computes last modified date using created_at when no chapters published', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+
+            // Create story without published chapters
+            $story = publicStory('Unmodified Story', $author->id, ['description' => '']);
+
+            // Reader adds to readlist
+            $this->actingAs($reader);
+            addToReadList($this, $story->id);
+
+            $response = $this->actingAs($reader)->get(route('readlist.index'));
+            $response->assertOk();
+
+            /** @var ReadListIndexViewModel $vm */
+            $vm = $response->viewData('vm');
+            /** @var ReadListStoryViewModel $s */
+            $s = $vm->stories->first();
+
+            // Should use created_at when no chapters published
+            expect($s->lastModified)->toBeInstanceOf(\DateTime::class);
+            expect($s->lastModified)->toEqual($story->created_at);
         });
 
         it('has no keep reading URL when story has no chapters', function () {
