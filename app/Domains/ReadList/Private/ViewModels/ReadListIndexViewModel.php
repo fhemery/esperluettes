@@ -27,4 +27,16 @@ class ReadListIndexViewModel
         })->values();
         return $vm;
     }
+
+    public static function empty(): self
+    {
+        $vm = new self();
+        $vm->pagination = new StoriesPaginationDto(
+            current_page: 1,
+            per_page: 10,
+            total: 0,
+            last_page: 1
+        );
+        return $vm;
+    }
 }

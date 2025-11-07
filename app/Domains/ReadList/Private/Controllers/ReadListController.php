@@ -29,6 +29,12 @@ class ReadListController
         // Fetch user's readlist story IDs
         $storyIds = $this->readListService->getStoryIdsForUser($userId);
 
+        // If user has no stories in readlist, return empty result
+        if (empty($storyIds)) {
+            $vm = ReadListIndexViewModel::empty();
+            return view('read-list::pages.index', compact('vm'));
+        }
+
         // Build filter & pagination (defaults: page 1, perPage 10)
         $filter = new StoryQueryFilterDto(onlyStoryIds: $storyIds);
         $pagination = new StoryQueryPaginationDto(page: 1, pageSize: 10);
@@ -104,6 +110,16 @@ class ReadListController
 
         // Fetch user's readlist story IDs
         $storyIds = $this->readListService->getStoryIdsForUser($userId);
+
+        // If user has no stories in readlist, return empty result
+        if (empty($storyIds)) {
+            return response()->json([
+                'html' => '',
+                'hasMore' => false,
+                'nextPage' => $page + 1,
+                'total' => 0,
+            ]);
+        }
 
         // Build filter & pagination
         $filter = new StoryQueryFilterDto(onlyStoryIds: $storyIds);

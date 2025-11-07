@@ -14,6 +14,65 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 describe('ReadListController index', function () {
+    it('returns empty list when user has no stories in readlist', function () {
+        $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+
+        // Create stories but DON'T add any to reader's readlist
+        setUserCredits($author->id, 10);
+        for ($i = 1; $i <= 5; $i++) {
+            $this->actingAs($author);
+            $story = publicStory("Story {$i}", $author->id);
+            createPublishedChapter($this, $story, $author);
+        }
+
+        // User has empty readlist
+        $response = $this->actingAs($reader)->get(route('readlist.index'));
+        $response->assertOk();
+
+        $vm = $response->viewData('vm');
+        expect($vm)->toBeInstanceOf(ReadListIndexViewModel::class);
+
+        // Should have 0 stories since readlist is empty
+        expect($vm->stories)->toBeInstanceOf(Collection::class);
+        expect($vm->stories->count())->toBe(0);
+        expect($vm->pagination->total)->toBe(0);
+        expect($vm->pagination->last_page)->toBe(1);
+    });
+
+    it('loadMore returns empty result when user has no stories in readlist', function () {
+        $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+
+        // Create stories but DON'T add any to reader's readlist
+        setUserCredits($author->id, 10);
+        for ($i = 1; $i <= 5; $i++) {
+            $this->actingAs($author);
+            $story = publicStory("Story {$i}", $author->id);
+            createPublishedChapter($this, $story, $author);
+        }
+
+        // Test loadMore endpoint with empty readlist
+        $response = $this->actingAs($reader)
+            ->getJson(route('readlist.load-more', [
+                'page' => 1,
+                'perPage' => 10
+            ]));
+
+        $response->assertOk();
+        $response->assertJsonStructure([
+            'html',
+            'hasMore',
+            'nextPage',
+            'total'
+        ]);
+
+        $data = $response->json();
+        expect($data['html'])->toBe('');
+        expect($data['hasMore'])->toBeFalse();
+        expect($data['total'])->toBe(0);
+    });
+
     it('provides a view model with my readlist stories and pagination', function () {
         $author1 = alice($this);
         $author2 = alice($this);

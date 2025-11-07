@@ -15,4 +15,6 @@ return [
     'show_chapters' => 'Afficher les chapitres',
     'hide_chapters' => 'Masquer les chapitres',
     'last_updated_at' => 'Dernière modification le',
+    'empty' => 'Votre Pile à Lire est vide ? Pas de panique, ça ne devrait pas durer...',
+    'empty_action' => 'Ajouter une histoire',
 ];

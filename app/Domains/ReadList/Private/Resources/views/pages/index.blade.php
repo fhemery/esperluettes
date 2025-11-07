@@ -1,6 +1,8 @@
 <x-shared::app-layout>
     <x-shared::title icon="bookmark">{{ __('readlist::page.title') }}</x-shared::title>
 
+    
+    @if ($vm->stories->count() >0)
     <div class="flex flex-col gap-4" x-data="readListInfiniteScroll()">
         {{-- Initial stories --}}
         @foreach($vm->stories as $story)
@@ -26,6 +28,12 @@
             <span class="ml-2 text-fg/70">Chargement...</span>
         </div>
     </div>
+    @else
+    <div class="surface-read text-on-surface flex-1 h-full w-full flex flex-col items-center justify-center gap-8">
+        <div>{{ __('readlist::page.empty') }}</div>
+        <x-shared::button color="accent"> {{ __('readlist::page.empty_action') }}</x-shared::button>
+    </div>
+    @endif
 </x-shared::app-layout>
 
 <script>
