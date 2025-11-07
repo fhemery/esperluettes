@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Notification\Private\Models\Notification;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Notification\Public\Contracts\NotificationContent;
 use App\Domains\Notification\Tests\Fixtures\TestNotificationContent;
@@ -85,9 +86,9 @@ function markAllNotificationsAsRead(TestCase $t): void
  * Find the most recent notification by its content key. Returns stdClass or null.
  * The returned object includes: id, content_key, content_data (JSON string or array depending on driver), source_user_id, created_at, updated_at.
  */
-function getLatestNotificationByKey(string $contentKey): ?object
+function getLatestNotificationByKey(string $contentKey): ?Notification
 {
-    return \Illuminate\Support\Facades\DB::table('notifications')
+    return Notification::query()
         ->where('content_key', $contentKey)
         ->orderByDesc('id')
         ->first();

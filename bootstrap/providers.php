@@ -24,6 +24,7 @@ return [
     App\Domains\FAQ\Private\Providers\FaqServiceProvider::class,
     App\Domains\Calendar\Public\Providers\CalendarServiceProvider::class,
     App\Domains\Notification\Public\Providers\NotificationServiceProvider::class,
+    App\Domains\ReadList\Public\Providers\ReadListServiceProvider::class,
     
     // Add other domain providers here as they are created
 

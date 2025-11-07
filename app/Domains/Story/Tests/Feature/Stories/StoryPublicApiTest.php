@@ -2,7 +2,7 @@
 
 use Tests\TestCase;
 use App\Domains\Story\Public\Api\StoryPublicApi;
-use App\Domains\Story\Public\Contracts\StoryDto;
+use App\Domains\Story\Public\Contracts\StorySummaryDto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +28,27 @@ describe('Story public API', function () {
 
             $resp = $api->countAuthoredStories($user->id);
             expect($resp)->toBe(1);
+        });
+    });
+
+    describe('isAuthor', function () {
+        it('returns false for non-authors', function () {
+            $api = app(StoryPublicApi::class);
+            $user = alice($this);
+            $story = publicStory('Test Story', $user->id);
+
+            $reader = bob($this);
+            $resp = $api->isAuthor($reader->id, $story->id);
+            expect($resp)->toBe(false);
+        });
+
+        it('returns true for authors', function () {
+            $api = app(StoryPublicApi::class);
+            $user = alice($this);
+            $story = publicStory('Test Story', $user->id);
+
+            $resp = $api->isAuthor($user->id, $story->id);
+            expect($resp)->toBe(true);
         });
     });
 
@@ -98,7 +119,7 @@ describe('Story public API', function () {
             $api = app(StoryPublicApi::class);
             $story = publicStory('Test Story', alice($this)->id);
             $resp = $api->getStory($story->id);
-            expect($resp)->toBeInstanceOf(StoryDto::class);
+            expect($resp)->toBeInstanceOf(StorySummaryDto::class);
             expect($resp->title)->toBe('Test Story');
             expect($resp->slug)->toBe($story->slug);
             expect($resp->visibility)->toBe($story->visibility);
@@ -121,7 +142,7 @@ describe('Story public API', function () {
             ]);
             
             $resp = $api->getStory($story->id);
-            expect($resp)->toBeInstanceOf(StoryDto::class);
+            expect($resp)->toBeInstanceOf(StorySummaryDto::class);
             expect($resp->word_count)->toBe(4);
         });
     });

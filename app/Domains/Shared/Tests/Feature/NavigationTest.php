@@ -99,7 +99,7 @@ describe('Top navbar', function () {
             'admins',
         ]);
 
-        it('should show "My stories" link for confirmed users', function() {
+        it('should show "My stories" link for confirmed users', function () {
             $user = alice($this);
             $this->actingAs($user);
 
@@ -108,7 +108,7 @@ describe('Top navbar', function () {
                 ->assertSee(__('shared::navigation.my-stories'));
         });
 
-        it('should not show "My stories" link for unconfirmed users', function() {
+        it('should not show "My stories" link for unconfirmed users', function () {
             $user = alice($this, roles: [Roles::USER]);
             $this->actingAs($user);
 
@@ -175,6 +175,21 @@ describe('Top navbar', function () {
             $notificationsUrl = route('notifications.index');
             expect($html)->toContain('href="' . $notificationsUrl . '"');
             expect($html)->toContain('unread-badge');
+        });
+
+        it('should show "Ma PàL" link for verified users', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            $this->get(route('dashboard'))
+                ->assertOk()
+                ->assertSee(__('shared::navigation.readlist'));
+        });
+
+        it('should not show "Ma PàL" link for guests', function () {
+            $this->get(route('stories.index'))
+                ->assertOk()
+                ->assertDontSee(__('shared::navigation.readlist'));
         });
     });
 });

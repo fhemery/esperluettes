@@ -70,7 +70,10 @@ class Chapter extends Model implements Sortable
     public function getId(): int { return (int)$this->id; }
     public function getSortOrder(): int { return (int)$this->sort_order; }
     public function setSortOrder(int $order): void { $this->sort_order = $order; }
-    public function getIsRead(): bool {
+    public function getIsRead(): ?bool {
+        if ($this->is_read === null) {
+            return null;
+        }
         return ($this->is_read ?? 0) > 0;
     }
 }

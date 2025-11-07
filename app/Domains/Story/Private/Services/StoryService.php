@@ -2,6 +2,8 @@
 
 namespace App\Domains\Story\Private\Services;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Private\Http\Requests\StoryRequest;
@@ -33,6 +35,7 @@ class StoryService
         private ProfilePublicApi $profileApi,
         private ChapterService $chapters,
         private StoryRepository $storiesRepository,
+        private AuthPublicApi $authPublicApi,
     ) {}
 
     /**
@@ -44,6 +47,32 @@ class StoryService
     public function getStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
     {
         return $this->storiesRepository->searchStoriesForCardDisplay($filter, $viewerId);
+    }
+
+    public function searchStories(StoryFilterAndPagination $filter, GetStoryOptions $options = new GetStoryOptions()): LengthAwarePaginator
+    {
+        if (!$filter->visibilities || count($filter->visibilities) === 0) {
+            $filter->visibilities = [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE];
+        }
+        // Remove community if user is not confirmed
+        if (!$this->authPublicApi->hasAnyRole([Roles::USER_CONFIRMED])) {
+            $filter->visibilities = array_filter($filter->visibilities, fn($v) => $v !== Story::VIS_COMMUNITY);
+        }
+        
+        $stories = $this->storiesRepository->searchStories($filter, $options);
+
+        // Filter out unpublished chapters for non-authors
+        if ($options->includeChapters) {
+            foreach ($stories as $story) {
+                $isAuthor = $story->authors->contains('id', Auth::id());
+                // if user is not author, filter out unpublished chapters
+                if (!$isAuthor) {
+                    $story->chapters = $story->chapters->filter(fn($chapter) => $chapter->status === Chapter::STATUS_PUBLISHED);
+                }
+            }
+        }
+
+        return $stories;
     }
 
     public function createStory(StoryRequest $request, int $userId): Story
@@ -377,7 +406,7 @@ class StoryService
 
             foreach ($story->chapters as $chapter) {
                 if ($chapter->status === Chapter::STATUS_PUBLISHED) {
-                    if (!$chapter->getIsRead()) {
+                    if (!($chapter->getIsRead()??false)) {
                         return new StoryWithNextChapter($story, $chapter);
                     }
                 }

@@ -43,7 +43,7 @@
                 @endif
             </div>
 
-            <!-- Image + Reporting / moderation -->
+            <!-- Image + ReadList + Reporting / moderation -->
             <div
                 class="col-start-1 col-span-1 row-start-2 row-span-3
                     flex flex-col gap-2 items-center justify-center">
@@ -61,6 +61,7 @@
                         @endif
                     </div>
                 @endif
+                <x-read-list::read-list-toggle-component :story-id="$viewModel->getId()" :is-author="$viewModel->isAuthor()" />
             </div>
 
             <!-- Author, genres -->
@@ -126,6 +127,8 @@
                     :tooltip="__('story::chapters.reads.tooltip')" />
 
                 <x-story::words-metric-badge size="md" :nb-words="$viewModel->getWordsTotal()" :nb-characters="$viewModel->getCharactersTotal()" />
+
+                <x-read-list::read-list-counter-component :story-id="$viewModel->getId()" />
             </div>
 
             <!-- triggers, status, feedback... -->
@@ -137,11 +140,11 @@
                 <div class="flex flex-col gap-2">
                     <div class="font-semibold text-md leading-5">
                         @if ($viewModel->twDisclosure == 'no_tw')
-                        <span class="material-symbols-outlined translate-y-1 text-success">warning</span>
+                            <span class="material-symbols-outlined translate-y-1 text-success">warning</span>
                         @elseif ($viewModel->twDisclosure == 'unspoiled')
-                        <span class="material-symbols-outlined translate-y-1 text-warning">warning</span>
+                            <span class="material-symbols-outlined translate-y-1 text-warning">warning</span>
                         @else
-                        <span class="material-symbols-outlined translate-y-1 text-primary">warning</span>
+                            <span class="material-symbols-outlined translate-y-1 text-primary">warning</span>
                         @endif
                         <span>{{ __('story::show.trigger_warnings.label') }}</span>
                     </div>

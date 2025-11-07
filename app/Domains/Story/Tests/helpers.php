@@ -36,6 +36,7 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
         // Column is NOT NULL in schema; default to empty string in tests
         'description' => $attributes['description'] ?? '',
         'visibility' => $attributes['visibility'] ?? Story::VIS_PUBLIC,
+        'tw_disclosure' => $attributes['tw_disclosure'] ?? Story::TW_NO_TW,
         'last_chapter_published_at' => $attributes['last_chapter_published_at'] ?? null,
         'story_ref_type_id' => $attributes['story_ref_type_id'] ?? defaultStoryType()->id,
         'story_ref_audience_id' => $attributes['story_ref_audience_id'] ?? defaultAudience()->id,
@@ -309,4 +310,24 @@ function addCollaborator(int $storyId, int $userId, string $role = 'author'): vo
         'invited_at' => now(),
         'accepted_at' => now(),
     ]);
+}
+
+/**
+ * Change a story visibility to the requested value (e.g. 'public', 'community', 'private').
+ */
+function setStoryVisibility(int $storyId, string $visibility): void
+{
+    DB::table('stories')
+        ->where('id', $storyId)
+        ->update([
+            'visibility' => $visibility,
+            'updated_at' => now(),
+        ]);
+}
+
+function deleteStory(int $storyId): void
+{
+    DB::table('stories')
+        ->where('id', $storyId)
+        ->delete();
 }

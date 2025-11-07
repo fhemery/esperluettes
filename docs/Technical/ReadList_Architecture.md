@@ -17,8 +17,8 @@ The ReadList domain enables users to bookmark stories for later reading. It foll
 ```sql
 read_list_entries
 - id (bigint, PK, auto-increment)
-- user_id (bigint, FK to users, NOT NULL)
-- story_id (bigint, FK to stories, NOT NULL)
+- user_id (bigint, NOT NULL)
+- story_id (bigint, NOT NULL)
 - created_at (timestamp)
 - updated_at (timestamp)
 
@@ -28,10 +28,6 @@ INDEX: story_id
 ```
 
 **Deletion**: Hard delete only (no soft deletes)
-
-**Foreign Keys**: 
-- `user_id` → `users.id` (CASCADE on delete)
-- `story_id` → Story domain (no FK constraint per domain rules)
 
 ---
 
@@ -58,21 +54,21 @@ app/Domains/ReadList/
 │   │   └── ReadListEntry.php
 │   ├── Resources/
 │   │   ├── lang/
-│   │   │   └── en/
+│   │   │   └── fr/
 │   │   │       ├── notifications.php
 │   │   │       └── readlist.php
 │   │   └── views/
 │   │       ├── components/
-│   │       │   ├── add-button.blade.php (for story page)
+│   │       │   ├── read-list-toggle.blade.php (for story page)
 │   │       │   └── counter-badge.blade.php (for story page)
 │   │       └── pages/
 │   │           └── index.blade.php
 │   ├── Services/
 │   │   └── ReadListService.php
-│   ├── Views/
+│   ├── View/
 │   │   └── Components/
-│   │       ├── AddButton.php
-│   │       └── CounterBadge.php
+│   │       ├── ReadListToggleComponent.php
+│   │       └── CounterBadgeComponent.php
 │   └── Providers/
 │       └── ReadListServiceProvider.php
 ├── Public/

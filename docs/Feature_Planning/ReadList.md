@@ -213,22 +213,22 @@ The following are explicitly OUT OF SCOPE for the initial implementation:
 ## User Stories
 
 ### Reader Stories
-- **RL-001**: As a reader, I want to add a story to my Read List so I can save it for later reading
-- **RL-002**: As a reader, I want to remove a story from my Read List when I'm no longer interested
+- [DONE] **RL-001**: As a reader, I want to add a story to my Read List so I can save it for later reading
+- [DONE] **RL-002**: As a reader, I want to remove a story from my Read List when I'm no longer interested
 - **RL-003**: As a reader, I want to see my reading progress for each story in my Read List
 - **RL-004**: As a reader, I want to quickly continue reading from where I left off
 - **RL-005**: As a reader, I want to browse chapters of a story in my Read List without leaving the page
 - **RL-006**: As a reader, I want to filter my Read List to hide stories I'm up-to-date with
 - **RL-007**: As a reader, I want to filter my Read List by genre
-- **RL-008**: As a reader, I want to be notified when stories in my Read List have updates
+- [DONE] **RL-008**: As a reader, I want to be notified when stories in my Read List have updates
 - **RL-009**: As a reader, I want to see which stories were recently updated in my Read List
 
 ### Author Stories
-- **RL-010**: As an author, I want to know how many readers have my story in their Read List
-- **RL-011**: As an author, I want to be notified when someone adds my story to their Read List
+- [DONE] **RL-010**: As an author, I want to know how many readers have my story in their Read List
+- [DONE] **RL-011**: As an author, I want to be notified when someone adds my story to their Read List
 
 ### Guest Stories
-- **RL-012**: As a guest, I want to see how popular a story is (Read List counter) to help me decide if I should read it
+- [DONE] **RL-012**: As a guest, I want to see how popular a story is (Read List counter) to help me decide if I should read it
 
 ---
 

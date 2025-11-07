@@ -30,6 +30,14 @@ function carol(TestCase $t, array $overrides = [], bool $isVerified = true, arra
     ], $overrides), $isVerified, $roles);
 }
 
+function daniel(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER_CONFIRMED]): User
+{
+    return registerUserThroughForm($t, array_merge([
+        'name' => 'Daniel',
+        'email' => 'daniel@example.com',
+    ], $overrides), $isVerified, $roles);
+}
+
 function admin(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::ADMIN, Roles::USER_CONFIRMED]): User
 {
     return registerUserThroughForm($t, array_merge([
