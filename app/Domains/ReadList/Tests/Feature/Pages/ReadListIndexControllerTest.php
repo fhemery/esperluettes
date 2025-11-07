@@ -8,9 +8,6 @@ use App\Domains\ReadList\Private\ViewModels\ReadListIndexViewModel;
 use App\Domains\ReadList\Private\ViewModels\ReadListStoryViewModel;
 use Illuminate\Support\Collection;
 use App\Domains\Shared\Dto\ProfileDto;
-use App\Domains\StoryRef\Private\Services\GenreService;
-use App\Domains\StoryRef\Private\Services\TriggerWarningService;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -36,22 +33,6 @@ describe('ReadListController index', function () {
 
         $vm = $response->viewData('vm');
         expect($vm)->toBeInstanceOf(ReadListIndexViewModel::class);
-        /*// Prefer a view model passed to the view
-        $response->assertViewHas('vm', function ($vm) use ($story1, $story2) {
-            // Expect stories as objects with id property
-            $ids = array_map(fn($s) => (int) $s->id, (array) $vm->stories);
-            sort($ids);
-            expect($ids)->toEqual([min($story1->id, $story2->id), max($story1->id, $story2->id)]);
-
-            // Expect pagination object with totals
-            expect($vm->pagination->current_page)->toBe(1);
-            expect($vm->pagination->per_page)->toBeGreaterThan(0);
-            expect($vm->pagination->total)->toBe(2);
-            expect($vm->pagination->last_page)->toBe(1);
-
-            return true;
-        });
-        */
     });
 
     describe('Pagination', function () {
@@ -507,6 +488,52 @@ describe('ReadListController index', function () {
             // Should use created_at when no chapters published
             expect($s->lastModified)->toBeInstanceOf(\DateTime::class);
             expect($s->lastModified)->toEqual($story->created_at);
+        });
+
+        it('loads more stories via AJAX endpoint', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+
+            setUserCredits($author->id, 25);
+
+            // Create 15 stories and add to reader's readlist
+            for ($i = 1; $i <= 15; $i++) {
+                $this->actingAs($author);
+                $story = publicStory("Story {$i}", $author->id);
+                createPublishedChapter($this, $story, $author);
+                
+                $this->actingAs($reader);
+                addToReadList($this, $story->id);
+            }
+
+            // Test loadMore endpoint
+            $response = $this->actingAs($reader)
+                ->getJson(route('readlist.load-more', [
+                    'page' => 2,
+                    'perPage' => 10
+                ]));
+
+            $response->assertOk();
+            $response->assertJsonStructure([
+                'html',
+                'hasMore',
+                'nextPage',
+                'total'
+            ]);
+
+            $data = $response->json();
+            
+            // Should have loaded stories 11-15 (5 stories), so no more pages
+            expect($data['hasMore'])->toBeFalse();
+            expect($data['nextPage'])->toBe(3);
+            expect($data['total'])->toBe(15);
+            $html = $data['html'];
+            expect($html)->not->toBeEmpty();
+            expect($html)->toContain('Story 11');
+            expect($html)->toContain('Story 12');
+            expect($html)->toContain('Story 13');
+            expect($html)->toContain('Story 14');
+            expect($html)->toContain('Story 15');
         });
 
         it('has no keep reading URL when story has no chapters', function () {

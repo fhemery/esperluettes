@@ -13,4 +13,7 @@ Route::middleware(['web', 'auth', 'role:' . Roles::USER_CONFIRMED . ',' . Roles:
     
     Route::delete('/readlist/{storyId}', [ReadListController::class, 'remove'])
         ->name('readlist.remove');
+    
+    Route::get('/readlist/load-more', [ReadListController::class, 'loadMore'])
+        ->name('readlist.load-more');
 });

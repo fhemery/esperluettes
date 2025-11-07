@@ -5,6 +5,7 @@ namespace App\Domains\ReadList\Private\Controllers;
 use App\Domains\ReadList\Private\Services\ReadListService;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use App\Domains\ReadList\Private\ViewModels\ReadListIndexViewModel;
@@ -90,5 +91,53 @@ class ReadListController
         $this->readListService->removeStory($user->id, $storyId);
 
         return redirect()->back()->with('info', __('readlist::button.removed_message'));
+    }
+
+    public function loadMore(): JsonResponse
+    {
+        $user = Auth::user();
+        $userId = (int) $user->id;
+
+        // Get pagination parameters from request
+        $page = (int) request('page', 2); // Default to page 2 for load more
+        $perPage = (int) request('perPage', 10);
+
+        // Fetch user's readlist story IDs
+        $storyIds = $this->readListService->getStoryIdsForUser($userId);
+
+        // Build filter & pagination
+        $filter = new StoryQueryFilterDto(onlyStoryIds: $storyIds);
+        $pagination = new StoryQueryPaginationDto(page: $page, pageSize: $perPage);
+        
+        // Build fields to return
+        $fields = new StoryQueryFieldsToReturnDto(
+            includeAuthors: true,
+            includeGenreIds: true,
+            includeTriggerWarningIds: true,
+            includeChapters: true,
+            includeReadingProgress: true,
+        );
+
+        // Query stories and build view model
+        $result = $this->storyApi->listStories($filter, $pagination, $fields);
+        
+        // Convert to view models
+        $viewModels = [];
+        foreach ($result->data as $storyDto) {
+            $viewModels[] = \App\Domains\ReadList\Private\ViewModels\ReadListStoryViewModel::fromDto($storyDto);
+        }
+
+        // Return HTML fragment for the stories
+        $html = '';
+        foreach ($viewModels as $viewModel) {
+            $html .= view('read-list::components.read-list-card', ['item' => $viewModel])->render();
+        }
+
+        return response()->json([
+            'html' => $html,
+            'hasMore' => $result->pagination->current_page < $result->pagination->last_page,
+            'nextPage' => $result->pagination->current_page + 1,
+            'total' => $result->pagination->total,
+        ]);
     }
 }
