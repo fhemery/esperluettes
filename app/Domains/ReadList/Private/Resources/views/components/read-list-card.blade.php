@@ -96,8 +96,8 @@
             <div x-on:click="loadChapters()" :aria-expanded="isOpen"
                 aria-label="{{ __('readlist::page.toggle_chapters') }}">
                 <x-shared::badge color="accent" :outline="true">
-                <span x-show="!isOpen && !isLoading" class="material-symbols-outlined">keyboard_arrow_up</span>
-                <span x-show="isOpen && !isLoading" class="material-symbols-outlined">keyboard_arrow_down</span>
+                <span x-show="!isOpen && !isLoading" class="material-symbols-outlined">keyboard_arrow_down</span>
+                <span x-show="isOpen && !isLoading" class="material-symbols-outlined">keyboard_arrow_up</span>
                 <span x-show="isLoading" class="material-symbols-outlined animate-spin">refresh</span>
             </x-shared::badge>
         </div>
