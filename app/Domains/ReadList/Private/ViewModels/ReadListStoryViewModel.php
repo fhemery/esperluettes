@@ -24,10 +24,14 @@ class ReadListStoryViewModel
         public readonly int $totalChaptersCount = 0,
         public readonly int $readChaptersCount = 0,
         public readonly int $progressPercent = 0,
-        public readonly ReadListChaptersViewModel $chapters,
         public readonly ?string $keepReadingUrl = null,
         public readonly ?\DateTime $lastModified = null,
     ) {}
+
+    public function hasChapters(): bool
+    {
+        return $this->totalChaptersCount > 0;
+    }
 
     public static function fromDto(StoryDto $dto): self
     {
@@ -58,10 +62,7 @@ class ReadListStoryViewModel
             return (int) $c?->wordCount ?? 0;
         })->sum();
         $percent = $total > 0 ? (int) round(($read / $total) * 100) : 0;
-        
-        // Create chapters view model
-        $chaptersViewModel = ReadListChaptersViewModel::fromChaptersArray($chapters->all(), $dto->slug);
-        
+      
         // Calculate keep reading URL
         $keepReadingUrl = null;
         if ($total > 0) {
@@ -91,7 +92,6 @@ class ReadListStoryViewModel
             totalChaptersCount: $total,
             readChaptersCount: $read,
             progressPercent: $percent,
-            chapters: $chaptersViewModel,
             keepReadingUrl: $keepReadingUrl,
             lastModified: $lastModified,
         );

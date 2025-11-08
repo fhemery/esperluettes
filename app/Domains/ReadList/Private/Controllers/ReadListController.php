@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use App\Domains\ReadList\Private\ViewModels\ReadListIndexViewModel;
+use App\Domains\ReadList\Private\ViewModels\ReadListChaptersViewModel;
 use App\Domains\Story\Public\Contracts\StoryQueryFilterDto;
 use App\Domains\Story\Public\Contracts\StoryQueryPaginationDto;
 use App\Domains\Story\Public\Contracts\StoryQueryFieldsToReturnDto;
@@ -154,6 +155,54 @@ class ReadListController
             'hasMore' => $result->pagination->current_page < $result->pagination->last_page,
             'nextPage' => $result->pagination->current_page + 1,
             'total' => $result->pagination->total,
+        ]);
+    }
+
+    public function chapters(int $storyId): JsonResponse
+    {
+        $user = Auth::user();
+
+        // Check if user has access to this story (is in their readlist)
+        $storyIds = $this->readListService->getStoryIdsForUser($user->id);
+        if (!in_array($storyId, $storyIds)) {
+            abort(404);
+        }
+
+        // Get the story with chapters
+        $filter = new StoryQueryFilterDto(onlyStoryIds: [$storyId]);
+        $pagination = new StoryQueryPaginationDto(page: 1, pageSize: 1);
+        $fields = new StoryQueryFieldsToReturnDto(
+            includeAuthors: false,
+            includeGenreIds: false,
+            includeTriggerWarningIds: false,
+            includeChapters: true,
+            includeReadingProgress: true,
+        );
+
+        $result = $this->storyApi->listStories($filter, $pagination, $fields);
+        
+        if (empty($result->data)) {
+            abort(404);
+        }
+
+        $story = $result->data[0];
+        
+        // Build chapters view model
+        $chaptersViewModel = ReadListChaptersViewModel::fromChapterDtos(
+            $story->chapters ?? [],
+            $story->slug
+        );
+
+        // Return HTML for the chapters list
+        $html = view('read-list::components.read-list-chapter-list', [
+            'chapters' => $chaptersViewModel->chapters,
+            'storySlug' => $chaptersViewModel->storySlug,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'count' => $chaptersViewModel->count(),
+            'isEmpty' => $chaptersViewModel->isEmpty(),
         ]);
     }
 }

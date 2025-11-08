@@ -4,14 +4,13 @@
 ])
 
 <div class="surface-read text-on-surface p-4 grid grid-cols-[auto_1fr] lg:grid-cols-[auto_30%_auto_1fr] lg:grid-rows-[auto_1fr_auto] gap-x-4 gap-y-2"
-    x-data="{ isDesktop: false, mobileOpen: false }" x-init="(() => { const mq = window.matchMedia('(min-width: 1024px)'); const update = () => { isDesktop = mq.matches; if (isDesktop) { mobileOpen = false; } };
-        update(); if (mq.addEventListener) { mq.addEventListener('change', update); } else { mq.addListener(update); } })()">
+    x-data="readListCard({{ $item->id }})">
 
     {{-- Cover --}}
-    <div class="row-span-3 w-[230px] h-[306px] mx-auto overflow-hidden">
+    <div class="col-start-1 row-start-1 row-span-3 w-[115px] h-[153px] md:w-[230px] md:h-[306px] mx-auto overflow-hidden">
         <a href="{{ url('/stories/' . $item->slug) }}" class="block">
             <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $item->title }}"
-                class="w-[230px] object-contain">
+                class="w-[115px] lg:w-[230px] object-contain">
         </a>
     </div>
 
@@ -32,13 +31,7 @@
                     </div>
                 @endif
             </div>
-            <div class="text-xs text-fg/70" x-data="{ lastModified: new Date('{{ $item->lastModified?->toISOString() }}') }">
-                {{ __('readlist::page.last_updated_at') }} <span x-text="DateUtils.formatDate(lastModified)"></span>
-            </div>
         </div>
-
-
-
 
         <div class="flex-1 flex flex-col justify-between">
             @if (!empty($item->genreNames))
@@ -62,7 +55,7 @@
                 <span>{!! trans_choice('story::shared.metrics.chapters', $item->totalChaptersCount, [
                     'count' => '<span class="text-accent">' . $item->totalChaptersCount . '</span>',
                 ]) !!}</span>
-                @if ($item->totalChaptersCount > 0)
+                @if ($item->hasChapters())
                     <span class="text-gray-400">|</span>
                     <span>{!! trans_choice('story::shared.metrics.words', $item->totalWordCount, [
                         'count' =>
@@ -76,8 +69,8 @@
         </div>
     </div>
 
-    {{--  Bottom = progress bar + keep reading button --}}
-     <div class="col-start-1 row-start-4 lg:col-start-3 lg:row-start-3 flex gap-2">
+     {{-- Bottom right = keep reading --}}
+    <div class="col-start-2 row-start-4 lg:col-start-4 lg:row-start-3 ml-auto">
         @if ($item->keepReadingUrl)
             <a href="{{ $item->keepReadingUrl }}" class="btn btn-primary">
                 <x-shared::button color="accent">
@@ -86,32 +79,43 @@
             </a>
         @endif
     </div>
-    @if (!$item->chapters->isEmpty)
-    <div class="flex gap-4">
-        <div class="col-start-2 row-start-4 lg:col-start-4 lg:row-start-3 ml-auto my-auto max-w-[10rem]">
-            <x-shared::progress :value="$item->progressPercent" />
-        </div>
 
-         {{-- Mobile chapters toggle --}}
-        <div x-on:click="mobileOpen = !mobileOpen" class="lg:hidden btn btn-secondary" :aria-expanded="mobileOpen"
-            aria-label="{{ __('readlist::page.toggle_chapters') }}">
-            <x-shared::badge color="accent" :outline="true">
-                <span x-show="!mobileOpen" class="material-symbols-outlined">keyboard_arrow_up</span>
-                <span x-show="mobileOpen" class="material-symbols-outlined">keyboard_arrow_down</span>
-            </x-shared::badge>
-        </div>
+     {{--  Bottom center = progress bar --}}
+    @if ($item->hasChapters())
+    <div class="row-start-4 lg:row-start-3 lg:col-start-3 lg:col-span-1 ml-auto my-auto max-w-[10rem]">
+        <x-shared::progress :value="$item->progressPercent" />
     </div>
     @endif
-   
+
+    {{-- Top right = last update + toogle --}}
+    <div class="row-start-5 col-span-2 lg:row-start-1 lg:col-start-3 lg:col-span-2 ml-auto flex items-center gap-8">
+        <div class="text-fg/70" x-data="{ lastModified: new Date('{{ $item->lastModified?->toISOString() }}') }">
+            {{ __('readlist::page.last_updated_at') }} <span x-text="DateUtils.formatDate(lastModified)"></span>
+        </div>
+        @if ($item->hasChapters())
+            <div x-on:click="loadChapters()" :aria-expanded="isOpen"
+                aria-label="{{ __('readlist::page.toggle_chapters') }}">
+                <x-shared::badge color="accent" :outline="true">
+                <span x-show="!isOpen && !isLoading" class="material-symbols-outlined">keyboard_arrow_up</span>
+                <span x-show="isOpen && !isLoading" class="material-symbols-outlined">keyboard_arrow_down</span>
+                <span x-show="isLoading" class="material-symbols-outlined animate-spin">refresh</span>
+            </x-shared::badge>
+        </div>
+        @endif
+    </div>
 
     {{-- Chapters list --}}
-    <div class="bg-bg p-2 lg:p-4 col-start-1 row-start-5 col-span-2 lg:col-start-3 lg:col-span-2 lg:row-start-1 lg:row-span-2"
-        x-show="isDesktop || mobileOpen" x-transition:enter="transition ease-out duration-200"
+    <div class="bg-bg p-2 lg:p-4 col-start-1 row-start-6 col-span-2 lg:col-start-1 lg:col-span-4 lg:row-start-4 lg:row-span-1"
+        x-show="isOpen" x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 transform -translate-y-2"
         x-transition:enter-end="opacity-100 transform translate-y-0"
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100 transform translate-y-0"
         x-transition:leave-end="opacity-0 transform -translate-y-2">
-        <x-read-list::read-list-chapters :chaptersViewModel="$item->chapters" :story="$item" />
+        
+        <div x-show="!isLoading" x-html="chaptersHtml"></div>
+        <div x-show="isLoading" class="flex items-center justify-center py-8">
+            <span class="material-symbols-outlined animate-spin text-2xl">refresh</span>
+        </div>
     </div>
 </div>

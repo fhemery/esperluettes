@@ -10,26 +10,5 @@
               :data-test-id="isRead ? 'read-toggle-icon-read' : 'read-toggle-icon-unread'">check_circle</span>
     </button>
 
-    <script>
-        function readToggle({ initial }) {
-            return {
-                isRead: !!initial,
-                labels: {
-                    read: '{{ __("shared::components.read_toggle.marked_read") }}',
-                    unread: '{{ __("shared::components.read_toggle.mark_as_read") }}',
-                },
-                toggle() {
-                    if (!this.isRead) {
-                        this.isRead = true;
-                        this.$dispatch('markRead');
-                        this.$dispatch('mark-read');
-                    } else {
-                        this.isRead = false;
-                        this.$dispatch('markUnread');
-                        this.$dispatch('mark-unread');
-                    }
-                },
-            }
-        }
-    </script>
+    @include('shared::components.read-toggle-script')
 </div>

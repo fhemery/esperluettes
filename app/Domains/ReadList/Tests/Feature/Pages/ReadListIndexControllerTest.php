@@ -105,7 +105,7 @@ describe('ReadListController index', function () {
                 $this->actingAs($author);
                 $story = publicStory('RL Story #' . $i, $author->id);
                 createPublishedChapter($this, $story, $author, ['title' => 'Ch ' . $i]);
-                
+
                 $this->actingAs($reader);
                 addToReadList($this, $story->id);
             }
@@ -192,7 +192,7 @@ describe('ReadListController index', function () {
             expect($s->coverUrl)->toBe('/images/story/default-cover.svg');
         });
 
-          it('computes read/total chapters and progress percentage', function () {
+        it('computes read/total chapters and progress percentage', function () {
             $author = alice($this, roles: [Roles::USER_CONFIRMED]);
             $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
 
@@ -226,156 +226,6 @@ describe('ReadListController index', function () {
             expect($s->readChaptersCount)->toBe(3);
             expect($s->progressPercent)->toBe(75);
             expect($s->totalWordCount)->toBe(11);
-        });
-
-        it('includes chapters view model with correct display logic', function () {
-            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
-            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
-
-            setUserCredits($author->id, 10);
-
-            // Create story with 10 chapters
-            $this->actingAs($author);
-            $story = publicStory('Chapter Story', $author->id, ['description' => '']);
-            $chapters = [];
-            for ($i = 1; $i <= 10; $i++) {
-                $chapters[] = createPublishedChapter($this, $story, $author, [
-                    'title' => "Chapter {$i}",
-                    'content' => "Content {$i}"
-                ]);
-            }
-
-            // Reader adds to readlist and marks first 3 as read
-            $this->actingAs($reader);
-            addToReadList($this, $story->id);
-            markAsRead($this, $chapters[0])->assertNoContent();
-            markAsRead($this, $chapters[1])->assertNoContent();
-            markAsRead($this, $chapters[2])->assertNoContent();
-
-            $response = $this->actingAs($reader)->get(route('readlist.index'));
-            $response->assertOk();
-
-            /** @var ReadListIndexViewModel $vm */
-            $vm = $response->viewData('vm');
-            /** @var ReadListStoryViewModel $s */
-            $s = $vm->stories->first();
-
-            // Should have chapters view model
-            expect($s->chapters)->not->toBeNull();
-            expect($s->chapters->isEmpty)->toBeFalse();
-            
-            // Should display 4 chapters starting before first unread (chapter 4)
-            expect($s->chapters->chapters)->toHaveCount(4);
-            expect($s->chapters->chaptersBefore)->toBe(2); // chapters 1-2
-            expect($s->chapters->chaptersAfter)->toBe(4); // chapters 8-10
-            
-            // Check displayed chapters are 3-6
-            $titles = $s->chapters->chapters->map(fn($c) => $c->title)->toArray();
-            expect($titles)->toEqual(['Chapter 3', 'Chapter 4', 'Chapter 5', 'Chapter 6']);
-        });
-
-        it('displays last 4 chapters when all are read', function () {
-            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
-            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
-
-            setUserCredits($author->id, 10);
-
-            // Create story with 7 chapters
-            $this->actingAs($author);
-            $story = publicStory('All Read Story', $author->id, ['description' => '']);
-            $chapters = [];
-            for ($i = 1; $i <= 7; $i++) {
-                $chapters[] = createPublishedChapter($this, $story, $author, [
-                    'title' => "Chapter {$i}",
-                    'content' => "Content {$i}"
-                ]);
-            }
-
-            // Reader adds to readlist and marks all as read
-            $this->actingAs($reader);
-            addToReadList($this, $story->id);
-            foreach ($chapters as $chapter) {
-                markAsRead($this, $chapter)->assertNoContent();
-            }
-
-            $response = $this->actingAs($reader)->get(route('readlist.index'));
-            $response->assertOk();
-
-            /** @var ReadListIndexViewModel $vm */
-            $vm = $response->viewData('vm');
-            /** @var ReadListStoryViewModel $s */
-            $s = $vm->stories->first();
-
-            expect($s->chapters->chapters)->toHaveCount(4);
-            expect($s->chapters->chaptersBefore)->toBe(3); // chapters 1-3
-            expect($s->chapters->chaptersAfter)->toBe(0);
-            
-            // Should display last 4 chapters (4-7)
-            $titles = $s->chapters->chapters->map(fn($c) => $c->title)->toArray();
-            expect($titles)->toEqual(['Chapter 4', 'Chapter 5', 'Chapter 6', 'Chapter 7']);
-        });
-
-        it('displays first 4 chapters when none are read', function () {
-            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
-            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
-
-            setUserCredits($author->id, 10);
-
-            // Create story with 7 chapters
-            $this->actingAs($author);
-            $story = publicStory('None Read Story', $author->id, ['description' => '']);
-            $chapters = [];
-            for ($i = 1; $i <= 7; $i++) {
-                $chapters[] = createPublishedChapter($this, $story, $author, [
-                    'title' => "Chapter {$i}",
-                    'content' => "Content {$i}"
-                ]);
-            }
-
-            // Reader adds to readlist but doesn't read any
-            $this->actingAs($reader);
-            addToReadList($this, $story->id);
-
-            $response = $this->actingAs($reader)->get(route('readlist.index'));
-            $response->assertOk();
-
-            /** @var ReadListIndexViewModel $vm */
-            $vm = $response->viewData('vm');
-            /** @var ReadListStoryViewModel $s */
-            $s = $vm->stories->first();
-
-            expect($s->chapters->chapters)->toHaveCount(4);
-            expect($s->chapters->chaptersBefore)->toBe(0);
-            expect($s->chapters->chaptersAfter)->toBe(3);
-            
-            // Should display first 4 chapters (1-4)
-            $titles = $s->chapters->chapters->map(fn($c) => $c->title)->toArray();
-            expect($titles)->toEqual(['Chapter 1', 'Chapter 2', 'Chapter 3', 'Chapter 4']);
-        });
-
-        it('handles empty chapters list', function () {
-            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
-            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
-
-            // Create story with no chapters
-            $story = publicStory('Empty Story', $author->id, ['description' => '']);
-
-            // Reader adds to readlist
-            $this->actingAs($reader);
-            addToReadList($this, $story->id);
-
-            $response = $this->actingAs($reader)->get(route('readlist.index'));
-            $response->assertOk();
-
-            /** @var ReadListIndexViewModel $vm */
-            $vm = $response->viewData('vm');
-            /** @var ReadListStoryViewModel $s */
-            $s = $vm->stories->first();
-
-            expect($s->chapters->isEmpty)->toBeTrue();
-            expect($s->chapters->chapters)->toHaveCount(0);
-            expect($s->chapters->chaptersBefore)->toBe(0);
-            expect($s->chapters->chaptersAfter)->toBe(0);
         });
 
         it('provides keep reading URL to next unread chapter', function () {
@@ -497,10 +347,10 @@ describe('ReadListController index', function () {
             // Create story first
             $this->actingAs($author);
             $story = publicStory('Modified Story', $author->id, ['description' => '']);
-            
+
             // Wait a moment to ensure different timestamps
             sleep(1);
-            
+
             // Then publish a chapter
             $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter 1']);
 
@@ -560,7 +410,7 @@ describe('ReadListController index', function () {
                 $this->actingAs($author);
                 $story = publicStory("Story {$i}", $author->id);
                 createPublishedChapter($this, $story, $author);
-                
+
                 $this->actingAs($reader);
                 addToReadList($this, $story->id);
             }
@@ -581,7 +431,7 @@ describe('ReadListController index', function () {
             ]);
 
             $data = $response->json();
-            
+
             // Should have loaded stories 11-15 (5 stories), so no more pages
             expect($data['hasMore'])->toBeFalse();
             expect($data['nextPage'])->toBe(3);
@@ -616,6 +466,73 @@ describe('ReadListController index', function () {
 
             // Should have null keepReadingUrl when no chapters
             expect($s->keepReadingUrl)->toBeNull();
+        });
+
+        describe('Chapters Endpoint', function () {
+            it('returns chapters HTML for story in readlist', function () {
+                $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+                $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+
+                setUserCredits($author->id, 10);
+
+                // Create story with 3 chapters
+                $this->actingAs($author);
+                $story = publicStory('Test Story', $author->id, ['description' => '']);
+                $chapters = [];
+                for ($i = 1; $i <= 3; $i++) {
+                    $chapters[] = createPublishedChapter($this, $story, $author, [
+                        'title' => "Chapter {$i}",
+                        'content' => "Content {$i}"
+                    ]);
+                }
+
+                // Reader adds to readlist
+                $this->actingAs($reader);
+                addToReadList($this, $story->id);
+
+                // Request chapters
+                $response = $this->actingAs($reader)->get(route('readlist.chapters', $story->id));
+
+                $response->assertOk();
+                $response->assertJsonStructure([
+                    'html',
+                    'count',
+                    'isEmpty'
+                ]);
+
+                $data = $response->json();
+                expect($data['count'])->toBe(3);
+                expect($data['isEmpty'])->toBeFalse();
+                expect($data['html'])->toContain('Chapter 1');
+                expect($data['html'])->toContain('Chapter 2');
+                expect($data['html'])->toContain('Chapter 3');
+            });
+
+            it('returns 404 for story not in readlist', function () {
+                $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+                $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+
+                // Create story
+                $this->actingAs($author);
+                $story = publicStory('Test Story', $author->id, ['description' => '']);
+
+                // Reader does NOT add to readlist
+                $this->actingAs($reader);
+
+                // Request chapters
+                $response = $this->actingAs($reader)->get(route('readlist.chapters', $story->id));
+
+                $response->assertNotFound();
+            });
+
+            it('requires authentication', function () {
+                $story = publicStory('Test Story', alice($this)->id, ['description' => '']);
+
+                // Request chapters without authentication
+                $response = $this->get(route('readlist.chapters', $story->id));
+
+                $response->assertRedirectToRoute('login');
+            });
         });
     });
 });

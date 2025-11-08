@@ -9,7 +9,7 @@
     $percent = max(0, min(100, (int) $value));
 @endphp
 
-<div class="flex-1 min-w-[10rem] flex gap-2 items-center" >
+<div class="flex-1 min-w-[7rem] sm:min-w-[10rem] flex gap-2 items-center" >
 <div
     role="progressbar"
     aria-valuenow="{{ $percent }}"

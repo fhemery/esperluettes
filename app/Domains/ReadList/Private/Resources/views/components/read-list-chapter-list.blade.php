@@ -40,57 +40,6 @@
 
     @endforeach
 </div>
-
-@once
-@push('scripts')
-<script>
-    (function(){
-        if (window.storyReadItem) return;
-
-        function buildUrl(storySlug, chapterSlug) {
-            return `/stories/${encodeURIComponent(storySlug)}/chapters/${encodeURIComponent(chapterSlug)}/read`;
-        }
-
-        window.storyReadItem = function({ storySlug, chapterSlug, csrf, isRead }) {
-            return {
-                isRead: !!isRead,
-                async mark() {
-                    try {
-                        const res = await fetch(buildUrl(storySlug, chapterSlug), {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': csrf,
-                                'Accept': 'text/plain',
-                            },
-                        });
-                        if (res.status === 204) {
-                            this.isRead = true;
-                        }
-                    } catch (e) {
-                    }
-                },
-                async unmark() {
-                    try {
-                        const res = await fetch(buildUrl(storySlug, chapterSlug), {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': csrf,
-                                'Accept': 'text/plain',
-                            },
-                        });
-                        if (res.status === 204) {
-                            this.isRead = false;
-                        }
-                    } catch (e) {
-                    }
-                },
-            };
-        };
-    })();
-</script>
-@endpush
-
-@endonce
 @else
     <p class="text-sm text-fg/60">{{ __('readlist::page.chapters.empty') }}</p>
 @endif

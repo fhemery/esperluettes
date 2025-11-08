@@ -16,4 +16,7 @@ Route::middleware(['web', 'auth', 'role:' . Roles::USER_CONFIRMED . ',' . Roles:
     
     Route::get('/readlist/load-more', [ReadListController::class, 'loadMore'])
         ->name('readlist.load-more');
+    
+    Route::get('/readlist/{storyId}/chapters', [ReadListController::class, 'chapters'])
+        ->name('readlist.chapters');
 });

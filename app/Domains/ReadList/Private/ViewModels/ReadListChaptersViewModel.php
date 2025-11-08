@@ -2,8 +2,6 @@
 
 namespace App\Domains\ReadList\Private\ViewModels;
 
-use App\Domains\Story\Public\Contracts\StoryChapterDto;
-
 use Illuminate\Support\Collection;
 
 class ReadListChaptersViewModel
@@ -11,56 +9,28 @@ class ReadListChaptersViewModel
     /** @param Collection<int, ReadListChapterViewModel> $chapters */
     public function __construct(
         public readonly Collection $chapters,
-        public readonly int $chaptersBefore,
-        public readonly int $chaptersAfter,
-        public readonly bool $isEmpty,
+        public readonly string $storySlug,
     ) {}
 
-    public static function fromChaptersArray(array $chapters, string $storySlug): self
+    public static function fromChapterDtos(array $chapterDtos, string $storySlug): self
     {
-        if (empty($chapters)) {
-            return new self(collect(), 0, 0, true);
-        }
-
-        $totalChapters = count($chapters);
-        $firstUnreadIndex = null;
-
-        // Find first unread chapter
-        foreach ($chapters as $index => $chapter) {
-            if (!$chapter->isRead) {
-                $firstUnreadIndex = $index;
-                break;
-            }
-        }
-
-        $displayChapters = [];
-        $startIndex = 0;
-
-        if ($firstUnreadIndex !== null) {
-            // Start from the chapter immediately before first unread
-            $startIndex = max(0, $firstUnreadIndex - 1);
-        } else {
-            // All chapters are read, show last 4
-            $startIndex = max(0, $totalChapters - 4);
-        }
-
-        // Get up to 4 chapters starting from startIndex
-        $displayChapters = array_slice($chapters, $startIndex, 4);
-
-        // Calculate chapters before and after the displayed slice
-        $chaptersBefore = $startIndex;
-        $chaptersAfter = max(0, $totalChapters - ($startIndex + count($displayChapters)));
-
-        // Convert to view models
-        $chapterViewModels = collect($displayChapters)
-            ->map(fn($chapter) => ReadListChapterViewModel::fromDto($chapter, $storySlug))
+        $chapters = collect($chapterDtos)
+            ->map(fn($dto) => ReadListChapterViewModel::fromDto($dto, $storySlug))
             ->values();
 
         return new self(
-            $chapterViewModels,
-            $chaptersBefore,
-            $chaptersAfter,
-            false
+            chapters: $chapters,
+            storySlug: $storySlug,
         );
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->chapters->isEmpty();
+    }
+
+    public function count(): int
+    {
+        return $this->chapters->count();
     }
 }
