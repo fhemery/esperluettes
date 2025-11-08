@@ -11,5 +11,5 @@ return [
     'verify-email' => 'Vérifier l\'adresse e-mail',
     'register' => 'Inscription',
     'login' => 'Connexion',
-    'readlist' => 'Ma PàL',
+    'readlist' => 'Ma PAL',
 ];

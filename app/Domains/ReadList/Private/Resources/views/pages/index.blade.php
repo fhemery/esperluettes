@@ -33,7 +33,9 @@
     @else
     <div class="surface-read text-on-surface flex-1 h-full w-full flex flex-col items-center justify-center gap-8">
         <div>{{ __('readlist::page.empty') }}</div>
-        <x-shared::button color="accent"> {{ __('readlist::page.empty_action') }}</x-shared::button>
+        <a href="{{ route('stories.index') }}">
+            <x-shared::button color="accent"> {{ __('readlist::page.empty_action') }}</x-shared::button>
+        </a>
     </div>
     @endif
 </x-shared::app-layout>
