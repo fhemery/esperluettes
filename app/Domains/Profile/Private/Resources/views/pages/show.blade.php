@@ -73,6 +73,7 @@
                         <x-moderation::report-button 
                             topic-key="profile" 
                             :entity-id="$profile->user_id"
+                            :compact="true"
                         />
                         @if($isModerator)
                         <x-moderation::moderation-button

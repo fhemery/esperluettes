@@ -1,7 +1,6 @@
 @props([
     'topicKey',    // e.g., 'profile', 'story', 'chapter', 'comment'
     'entityId',    // ID of the entity being reported
-    'buttonClass' => 'text-sm text-gray-600 hover:text-gray-900',
     'compact' => false,
     'size' => 'md',
 ])
@@ -17,7 +16,7 @@
     <x-shared::button
         type="button"
         x-on:click="loadForm()"
-        color="tertiary"
+        color="error"
         x-bind:disabled="loading"
         :title="$compact ? __('moderation::report.button'): ''"
         :size="$size"

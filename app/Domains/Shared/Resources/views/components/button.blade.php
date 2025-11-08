@@ -25,7 +25,7 @@
         'accent' => 'surface-accent text-on-surface border-surface hover:border-surface/90 focus:ring-accent/40',
         'tertiary' => 'surface-tertiary text-on-surface border-surface hover:border-surface/90 focus:ring-tertiary/40',
         'success' => 'surface-success text-on-surface border-surface hover:border-surface/90 focus:ring-green-500/40',
-        'danger' => 'surface-danger text-on-surface border-surface hover:border-surface/90 focus:ring-red-500/40',
+        'error' => 'surface-error text-on-surface border-surface hover:border-surface/90 focus:ring-red-500/40',
         'neutral' => 'surface-neutral text-on-surface border-surface hover:border-surface/90 focus:ring-gray-500/40',
     ];
     $colorClasses = $variants[$color] ?? $variants['primary'];

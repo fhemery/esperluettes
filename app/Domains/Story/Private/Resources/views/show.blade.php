@@ -49,18 +49,6 @@
                     flex flex-col gap-2 items-center justify-center">
                 <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $viewModel->getTitle() }}"
                     class="w-[150px] h-[200px] md:w-full md:h-full object-cover">
-                @if (!$viewModel->isAuthor())
-                    <div class="flex gap-2">
-                        <x-moderation::report-button topic-key="story" :entity-id="$viewModel->getId()" />
-                        @if ($isModerator)
-                            <x-moderation::moderation-button badgeColor="warning" position="top"
-                                id="story-moderator-btn">
-                                <x-moderation::action :action="route('stories.moderation.make-private', $viewModel->getSlug())" method="POST" :label="__('story::moderation.make_private.label')" />
-                                <x-moderation::action :action="route('stories.moderation.empty-summary', $viewModel->getSlug())" method="POST" :label="__('story::moderation.empty_summary.label')" />
-                            </x-moderation::moderation-button>
-                        @endif
-                    </div>
-                @endif
                 <x-read-list::read-list-toggle-component :story-id="$viewModel->getId()" :is-author="$viewModel->isAuthor()" />
             </div>
 
@@ -215,36 +203,50 @@
 
             </div>
 
-            @if ($viewModel->story->last_chapter_published_at)
-                <div class="col-span-2 flex justify-end h-full gap-2
-                lg:col-start-3 lg:col-span-1 lg:row-span-1 lg:row-start-5
-                "
-                    x-data="{ date: new Date('{{ $viewModel->story->last_chapter_published_at }}') }">
-                    {{ __('story::show.last_update') }} <span x-text="DateUtils.formatDate(date)"></span>
-                </div>
+            <div
+                class="col-span-2 flex justify-end h-full gap-2 items-center
+            lg:col-start-3 lg:col-span-1 lg:row-span-1 lg:row-start-5
+            ">
+                @if ($viewModel->story->last_chapter_published_at)
+                    <div x-data="{ date: new Date('{{ $viewModel->story->last_chapter_published_at }}') }">
+                        {{ __('story::show.last_update') }} <span x-text="DateUtils.formatDate(date)"></span>
+
+                    </div>
+                @endif
+                @if (!$viewModel->isAuthor())
+                    <div class="flex gap-2">
+                        <x-moderation::report-button topic-key="story" size="sm" :compact="true" :entity-id="$viewModel->getId()" />
+                        @if ($isModerator)
+                            <x-moderation::moderation-button badgeColor="warning" position="top"
+                                id="story-moderator-btn">
+                                <x-moderation::action :action="route('stories.moderation.make-private', $viewModel->getSlug())" method="POST" :label="__('story::moderation.make_private.label')" />
+                                <x-moderation::action :action="route('stories.moderation.empty-summary', $viewModel->getSlug())" method="POST" :label="__('story::moderation.empty_summary.label')" />
+                            </x-moderation::moderation-button>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+        </div>
+
+        {{-- Chapters section --}}
+        <div class="w-full mb-4">
+            @if ($viewModel->isAuthor())
+                @include('story::chapters.partials.chapter-list.author-view', [
+                    'story' => $viewModel->story,
+                    'chapters' => $viewModel->chapters,
+                    'creditsExhausted' => $creditsExhausted ?? false,
+                ])
+            @else
+                @include('story::chapters.partials.chapter-list.reader-view', [
+                    'story' => $viewModel->story,
+                    'chapters' => $viewModel->chapters,
+                ])
             @endif
         </div>
 
-    </div>
-
-    {{-- Chapters section --}}
-    <div class="w-full mb-4">
         @if ($viewModel->isAuthor())
-            @include('story::chapters.partials.chapter-list.author-view', [
-                'story' => $viewModel->story,
-                'chapters' => $viewModel->chapters,
-                'creditsExhausted' => $creditsExhausted ?? false,
-            ])
-        @else
-            @include('story::chapters.partials.chapter-list.reader-view', [
-                'story' => $viewModel->story,
-                'chapters' => $viewModel->chapters,
-            ])
+            <x-shared::confirm-modal name="confirm-delete-story" :title="__('story::show.delete_confirm_title')" :body="__('story::show.delete_confirm_body')"
+                :cancel="__('story::show.cancel')" :confirm="__('story::show.confirm_delete')" :action="route('stories.destroy', ['slug' => $viewModel->getSlug()])" method="DELETE" maxWidth="md" />
         @endif
-    </div>
-
-    @if ($viewModel->isAuthor())
-        <x-shared::confirm-modal name="confirm-delete-story" :title="__('story::show.delete_confirm_title')" :body="__('story::show.delete_confirm_body')" :cancel="__('story::show.cancel')"
-            :confirm="__('story::show.confirm_delete')" :action="route('stories.destroy', ['slug' => $viewModel->getSlug()])" method="DELETE" maxWidth="md" />
-    @endif
 </x-app-layout>
