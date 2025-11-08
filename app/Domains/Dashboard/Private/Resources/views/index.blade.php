@@ -26,7 +26,7 @@
 
         <!-- Calendar widget or placeholder -->
         @if($calendarEnabled)
-            <div class="col-span-1 sm:col-span-2">
+            <div class="col-span-1 sm:col-span-2 min-w-0">
                 <x-calendar::activity-list-component />
             </div>
         @else
