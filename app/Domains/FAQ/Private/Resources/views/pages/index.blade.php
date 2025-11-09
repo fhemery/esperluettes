@@ -15,7 +15,8 @@
                         @php $active = $tab['key'] === $vm->getInitialTabKey(); @endphp
                         <a href="{{ route('faq.category', ['categorySlug' => $tab['key']]) }}"
                            class="surface-primary text-on-surface uppercase flex-1 border-r-read 
-                            text-center px-2 py-2 text-md font-medium {{ $active ? 'is-outline' : '' }}">
+                            text-center px-2 py-2 text-md font-medium {{ $active ? 'is-outline' : '' }}
+                            flex items-center justify-center">
                             {{ $tab['label'] }}
                         </a>
                     @endforeach
@@ -30,7 +31,7 @@
         @if(isset($questions) && $questions->isNotEmpty())
             <div class="surface-read p-2 sm:p-4 text-on-surface flex flex-col gap-4">
                 @foreach($questions as $q)
-                    <x-shared::collapsible :title="$q->question" color="primary">
+                    <x-shared::collapsible :title="$q->question" color="primary" textColor="fg">
                         @if(!empty($q->image_path))
                             @php $url = asset('storage/' . $q->image_path); @endphp
                             <img src="{{ $url }}" alt="{{ $q->image_alt_text ?? '' }}" style="display:block; max-height:300px; width:auto; height:auto; max-width:100%; margin: 0 auto 0.75rem;" />
