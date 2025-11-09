@@ -6,10 +6,13 @@
     'size' => 'sm',
     'icon' => false,
     'outline' => false,
+    'wrap' => false
 ])
 
 @php
-    $base = 'inline-flex items-center rounded-full leading-none align-middle select-none whitespace-nowrap';
+    $base = 'inline-flex items-center rounded-full leading-none align-middle select-none'; 
+    
+    $wrapping = $wrap ? "whitespace-normal" : "whitespace-nowrap";
 
     // Size map
     $sizes = [
@@ -39,7 +42,7 @@
     }
 @endphp
 
-<span {{ $attributes->merge(['class' => "$base $sizeClasses $colorClasses" . ($icon ? ' gap-1' : '')]) }}>
+<span {{ $attributes->merge(['class' => "$base $sizeClasses $colorClasses $wrapping" . ($icon ? ' gap-1' : '')]) }}>
     @if($icon)
         <span class="material-symbols-outlined text-{{$size}} leading-none">{{ $icon }}</span>
     @endif

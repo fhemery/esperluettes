@@ -80,23 +80,23 @@
                                 @if ($viewModel->getTypeName())
                                     <x-story::ref-badge name="{{ $viewModel->getTypeName() }}"
                                         description="{{ $viewModel->getTypeDescription() }}" color="neutral"
-                                        :outline="true" size="sm" icon="category" />
+                                        :outline="true" :wrap="true" size="sm" icon="category" />
                                 @endif
                                 @if ($viewModel->getAudienceName())
                                     <x-story::ref-badge name="{{ $viewModel->getAudienceName() }}"
                                         description="{{ $viewModel->getAudienceDescription() }}" color="neutral"
-                                        :outline="true" size="sm" icon="group" />
+                                        :outline="true" :wrap="true" size="sm" icon="group" />
                                 @endif
 
                                 @if ($viewModel->getStatusName())
                                     <x-story::ref-badge name="{{ $viewModel->getStatusName() }}"
                                         description="{{ $viewModel->getStatusDescription() }}" color="neutral"
-                                        :outline="true" size="sm" icon="edit_note" />
+                                        :outline="true" :wrap="true" size="sm" icon="edit_note" />
                                 @endif
                                 @if ($viewModel->getFeedbackName())
                                     <x-story::ref-badge name="{{ $viewModel->getFeedbackName() }}"
                                         description="{{ $viewModel->getFeedbackDescription() }}" color="neutral"
-                                        :outline="true" size="sm" icon="forum" />
+                                        :outline="true" :wrap="true" size="sm" icon="forum" />
                                 @endif
                             </div>
                         @endif
@@ -108,9 +108,11 @@
 
             <!-- Stats -->
             <div
-                class="col-start-2 col-span-1 row-start-3 row-span-1
+                class="col-start-1 col-span-2 row-start-5 row-span-1
+                    md:col-start-2 md:col-span-1 md:row-start-3 md:row-span-1
+
                 border-y border-fg
-                pt-2 pb-2 w-full flex items-center flex-start gap-1 md:gap-4">
+                pt-2 pb-2 w-full flex items-center justify-center md:justify-start flex-start gap-1 md:gap-4">
                 <x-shared::metric-badge icon="visibility" size="md" :value="$viewModel->getReadsLoggedTotal()" :label="__('story::chapters.reads.label')"
                     :tooltip="__('story::chapters.reads.tooltip')" />
 
@@ -121,7 +123,7 @@
 
             <!-- triggers, status, feedback... -->
             <div
-                class="col-start-1 col-span-2 row-start-5 row-span-1 
+                class="col-start-1 col-span-2 row-start-6 row-span-1 
                 sm:col-start-2 sm:col-span-1 sm:row-start-4 sm:row-span-1
                 flex flex-col justify-between gap-2 h-full">
                 <!-- Trigger warnings -->

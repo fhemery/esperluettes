@@ -5,6 +5,7 @@
     'size' => 'sm',
     'icon' => null,
     'outline' => false,
+    'wrap' => false
 ])
 
 @php
@@ -24,6 +25,7 @@
                 size="{{ $size }}"
                 :icon="$icon"
                 :outline="$outline"
+                :wrap="$wrap"
             >
                 {{ $decodedName }}
             </x-shared::badge>
