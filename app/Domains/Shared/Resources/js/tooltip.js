@@ -32,6 +32,7 @@ export default function registerTooltip(Alpine) {
     trigger: null,
     placement: 'right',
     maxWidth: '20rem',
+    displayOnHover: true,
     margin: 8,
     panelH: 0,
     panelW: 0,
@@ -49,11 +50,12 @@ export default function registerTooltip(Alpine) {
         });
       }
     },
-    init(trigger, placement, maxWidth, maxHeight) {
+    init(trigger, placement, maxWidth, maxHeight, displayOnHover = true) {
       this.trigger = trigger;
       this.placement = placement || 'right';
       this.maxWidth = maxWidth || '20rem';
       this.maxHeight = maxHeight || '20rem';
+      this.displayOnHover = displayOnHover;
       this.$nextTick(() => {
         this.compute();
         window.addEventListener('resize', this.compute.bind(this));
@@ -99,6 +101,7 @@ export default function registerTooltip(Alpine) {
       this.$store.popover.openId = this.id;
     },
     onTriggerEnter() {
+      if (!this.displayOnHover) return;
       this.hoverTrigger = true;
       if (this.openTimer) clearTimeout(this.openTimer);
       this.openTimer = setTimeout(() => {
@@ -108,6 +111,7 @@ export default function registerTooltip(Alpine) {
       }, 250);
     },
     onTriggerLeave() {
+      if (!this.displayOnHover) return;
       this.hoverTrigger = false;
       if (this.openTimer) {
         clearTimeout(this.openTimer);

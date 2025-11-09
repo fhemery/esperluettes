@@ -2,6 +2,7 @@
     'placement' => 'right', // right|left|top|bottom
     'maxWidth' => '20rem',
     'maxHeight' => '20rem',
+    'displayOnHover' => true,
 ])
 
 <div class="flex items-center align-middle select-none z-10 cursor-pointer">
@@ -13,11 +14,11 @@
             aria-haspopup="dialog"
             :aria-expanded="(hoverOpen || pinned) ? 'true' : 'false'"
             x-ref="trigger"
-            @mouseenter="onTriggerEnter()"
-            @mouseleave="onTriggerLeave()"
-            @mousedown.stop.prevent="onTriggerMouseDown()"
-            @click.stop.prevent
-            @blur="onTriggerBlur()">
+            x-on:mouseenter="{{ $displayOnHover ? 'onTriggerEnter()' : '' }}"
+            x-on:mouseleave="{{ $displayOnHover ? 'onTriggerLeave()' : '' }}"
+            x-on:mousedown.stop.prevent="onTriggerMouseDown()"
+            x-on:click.stop.prevent
+            x-on:blur="onTriggerBlur()">
             {{ $trigger ?? '' }}
         </div>
         <template x-teleport="body">
@@ -27,11 +28,11 @@
                  x-ref="panel"
                  :style="styleObj"
                  style="display:none"
-                 x-init="init($refs.trigger, '{{ $placement }}', '{{ $maxWidth }}', '{{ $maxHeight }}')"
+                 x-init="init($refs.trigger, '{{ $placement }}', '{{ $maxWidth }}', '{{ $maxHeight }}', {{ $displayOnHover ? 'true' : 'false' }})"
                  x-effect="(hoverOpen || pinned) && measureAndCompute()"
-                 @mouseenter="hoverOpen = true; updateOpen()"
-                 @mouseleave="closeWithDelay()"
-                 @click.outside="if (this.trigger && this.trigger.contains($event.target)) { return } pinned = false; hoverOpen = false; updateOpen()">
+                 x-on:mouseenter="{{ $displayOnHover ? 'hoverOpen = true; updateOpen()' : '' }}"
+                 x-on:mouseleave="{{ $displayOnHover ? 'closeWithDelay()' : '' }}"
+                 x-on:click.outside="if (this.trigger && this.trigger.contains($event.target)) { return } pinned = false; hoverOpen = false; updateOpen()">
                 {{ $slot }}
             </div>
         </template>

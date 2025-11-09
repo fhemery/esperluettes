@@ -4,7 +4,7 @@
     'id' => null,
 ])
 
-<x-shared::popover :position="$position">
+<x-shared::popover :position="$position" :displayOnHover="false">
     <x-slot name="trigger">
         <x-shared::badge :color="$badgeColor" :outline="false">
             <span class="material-symbols-outlined text-[20px] leading-none">
