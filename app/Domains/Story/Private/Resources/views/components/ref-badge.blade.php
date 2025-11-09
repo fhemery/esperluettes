@@ -38,6 +38,7 @@
         size="{{ $size }}"
         :icon="$icon"
         :outline="$outline"
+        :wrap="$wrap"
     >
         {{ $decodedName }}
     </x-shared::badge>
