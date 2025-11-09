@@ -215,7 +215,8 @@
                 @endif
                 @if (!$viewModel->isAuthor())
                     <div class="flex gap-2">
-                        <x-moderation::report-button topic-key="story" size="sm" :compact="true" :entity-id="$viewModel->getId()" />
+                        <x-moderation::report-button topic-key="story" size="sm" :compact="true"
+                            :entity-id="$viewModel->getId()" />
                         @if ($isModerator)
                             <x-moderation::moderation-button badgeColor="warning" position="top"
                                 id="story-moderator-btn">
@@ -228,25 +229,25 @@
             </div>
 
         </div>
-
-        {{-- Chapters section --}}
-        <div class="w-full mb-4">
-            @if ($viewModel->isAuthor())
-                @include('story::chapters.partials.chapter-list.author-view', [
-                    'story' => $viewModel->story,
-                    'chapters' => $viewModel->chapters,
-                    'creditsExhausted' => $creditsExhausted ?? false,
-                ])
-            @else
-                @include('story::chapters.partials.chapter-list.reader-view', [
-                    'story' => $viewModel->story,
-                    'chapters' => $viewModel->chapters,
-                ])
-            @endif
-        </div>
-
+    </div>
+    {{-- Chapters section --}}
+    <div class="w-full mb-4">
         @if ($viewModel->isAuthor())
-            <x-shared::confirm-modal name="confirm-delete-story" :title="__('story::show.delete_confirm_title')" :body="__('story::show.delete_confirm_body')"
-                :cancel="__('story::show.cancel')" :confirm="__('story::show.confirm_delete')" :action="route('stories.destroy', ['slug' => $viewModel->getSlug()])" method="DELETE" maxWidth="md" />
+            @include('story::chapters.partials.chapter-list.author-view', [
+                'story' => $viewModel->story,
+                'chapters' => $viewModel->chapters,
+                'creditsExhausted' => $creditsExhausted ?? false,
+            ])
+        @else
+            @include('story::chapters.partials.chapter-list.reader-view', [
+                'story' => $viewModel->story,
+                'chapters' => $viewModel->chapters,
+            ])
         @endif
+    </div>
+
+    @if ($viewModel->isAuthor())
+        <x-shared::confirm-modal name="confirm-delete-story" :title="__('story::show.delete_confirm_title')" :body="__('story::show.delete_confirm_body')" :cancel="__('story::show.cancel')"
+            :confirm="__('story::show.confirm_delete')" :action="route('stories.destroy', ['slug' => $viewModel->getSlug()])" method="DELETE" maxWidth="md" />
+    @endif
 </x-app-layout>
