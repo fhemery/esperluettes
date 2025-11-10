@@ -21,9 +21,11 @@ describe('Comment Deep Linking', function () {
             // Target the oldest comment (should be on page 3 due to DESC ordering)
             $targetCommentId = $commentIds[0]; // "Root comment 0" - oldest, should be on page 3
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" :fragment="$fragment" />', [
+            // Mock request with comment query parameter
+            request()->query->set('comment', $targetCommentId);
+            
+            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
-                'fragment' => 'comment-' . $targetCommentId,
             ]);
 
             // Should contain all 15 comments (pages 1-3 pre-loaded)
@@ -44,9 +46,11 @@ describe('Comment Deep Linking', function () {
             // Target first comment
             $targetCommentId = $commentIds[0];
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" :fragment="$fragment" />', [
+            // Mock request with comment query parameter
+            request()->query->set('comment', $targetCommentId);
+            
+            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
-                'fragment' => 'comment-' . $targetCommentId,
             ]);
 
             // Should contain all 3 comments
@@ -74,9 +78,11 @@ describe('Comment Deep Linking', function () {
             // Target the second reply
             $targetReplyId = $replyId2;
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" :fragment="$fragment" />', [
+            // Mock request with comment query parameter
+            request()->query->set('comment', $targetReplyId);
+            
+            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
-                'fragment' => 'comment-' . $targetReplyId,
             ]);
 
             // Should contain the parent root comment
@@ -104,9 +110,11 @@ describe('Comment Deep Linking', function () {
             // Add replies to the target
             $replyId = createComment('story', 123, 'Target reply', $targetRootId);
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" :fragment="$fragment" />', [
+            // Mock request with comment query parameter
+            request()->query->set('comment', $replyId);
+            
+            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
-                'fragment' => 'comment-' . $replyId,
             ]);
 
             // Should contain all root comments from pages 1-2
@@ -128,9 +136,10 @@ describe('Comment Deep Linking', function () {
             createSeveralComments(3, 'story', 123, 'Normal comment');
             
             // Mock request with non-existent comment ID
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" :fragment="$fragment" />', [
+            request()->query->set('comment', 99999);
+            
+            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
                 'id' => 123,
-                'fragment' => 'comment-99999',
             ]);
 
             // 0 comments loaded
@@ -145,9 +154,10 @@ describe('Comment Deep Linking', function () {
             $otherCommentId = createComment('story', 456, 'Entity 456 comment');
             
             // Mock request with comment from different entity
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" :fragment="$fragment" />', [
+            request()->query->set('comment', $otherCommentId);
+            
+            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
                 'id' => 123,
-                'fragment' => 'comment-' . $otherCommentId,
             ]);
 
             // 0 comments loaded
@@ -158,10 +168,11 @@ describe('Comment Deep Linking', function () {
             // Create some comments
             createSeveralComments(3, 'story', 123, 'Normal comment');
             
-            // Mock request with invalid fragment format
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" :fragment="$fragment" />', [
+            // Mock request with invalid comment ID (non-numeric)
+            request()->query->set('comment', 'invalid-format');
+            
+            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
                 'id' => 123,
-                'fragment' => 'invalid-format',
             ]);
 
             // 0 comments loaded
@@ -191,10 +202,11 @@ describe('Comment Deep Linking', function () {
             // Logout user (guest)
             $this->post('/logout');
             
-            // Mock request with valid fragment
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" :fragment="$fragment" />', [
+            // Mock request with valid comment query parameter
+            request()->query->set('comment', $commentId);
+            
+            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
-                'fragment' => 'comment-' . $commentId,
             ]);
 
             // Should show members only error
