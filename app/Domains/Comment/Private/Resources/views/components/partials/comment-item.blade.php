@@ -1,4 +1,4 @@
-<li class="py-4 sm:px-4 sm:mb-4">
+<li class="py-4 sm:px-4 sm:mb-4" id="comment-{{ $comment->id }}">
   @php
   $config = $config ?? null;
   $isUnknown = is_null($comment->authorId);
