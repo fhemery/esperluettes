@@ -52,7 +52,7 @@ class ChapterCommentNotification implements NotificationContent
         $chapterUrl = route('chapters.show', [
             'storySlug' => $this->storySlug,
             'chapterSlug' => $this->chapterSlug
-        ]) . '#comments';
+        ]) . '?comment=' . $this->commentId;
 
         $authorUrl = $this->authorSlug !== ''
             ? route('profile.show', ['profile' => $this->authorSlug])
