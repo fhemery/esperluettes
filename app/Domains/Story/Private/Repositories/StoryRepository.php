@@ -134,6 +134,7 @@ final class StoryRepository
                 $query->whereRaw('1 = 0');
             }
         }
+        $query->orderByRaw('COALESCE(last_chapter_published_at, created_at) DESC');
 
         /** @var LengthAwarePaginator $paginator */
         $paginator = $query->paginate($filter->perPage, ['*'], 'page', $filter->page);

@@ -123,6 +123,38 @@ describe('StoryPublicApi::listStories', function () {
         });
     });
 
+    describe('Sorting stories', function () {
+        it('should sort stories by descending last modified date', function () {
+            $alice = alice($this);
+            $story1 = publicStory('Beta', $alice->id);
+            Story::where('id', $story1->id)->update(['last_chapter_published_at' => now()->subDays(3)]);
+            $story2 = publicStory('Alpha', $alice->id);
+            Story::where('id', $story2->id)->update(['last_chapter_published_at' => now()->subDays(2)]);
+
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories();
+
+            expect($result->data)->toHaveCount(2);
+            expect($result->data[0]->title)->toBe($story2->title);
+            expect($result->data[1]->title)->toBe($story1->title);
+        });
+
+        it('should use created_at instead of last_chapter_published_at when last_chapter_published_at is null', function () {
+            $alice = alice($this);
+            $story1 = publicStory('Beta', $alice->id);
+            Story::where('id', $story1->id)->update(['created_at' => now()->subDays(1)]);
+            $story2 = publicStory('Alpha', $alice->id);
+            Story::where('id', $story2->id)->update(['last_chapter_published_at' => now()->subDays(2)]);
+
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories();
+
+            expect($result->data)->toHaveCount(2);
+            expect($result->data[0]->title)->toBe($story1->title);
+            expect($result->data[1]->title)->toBe($story2->title);
+        });
+    });
+
     describe('Filtering stories', function() {
         describe('Regarding filtering by storyIds', function () {
             it('should return only the stories with the given ids', function () {
