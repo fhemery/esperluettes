@@ -1,11 +1,16 @@
 import Quill from 'quill';
 import Delta from 'quill-delta';
-import '@windmillcode/quill-emoji/quill-emoji.css';
 import 'quill/dist/quill.snow.css';
+import ToolbarEmoji from './quill-emoji/toolbar.js';
+import TextAreaEmoji from './quill-emoji/textarea.js';
 
 // Expose globally for existing initializer which expects window.Quill
 window.Quill = Quill;
 window.Delta = Delta;
+
+// Register custom emoji modules
+Quill.register('modules/emoji-toolbar', ToolbarEmoji);
+Quill.register('modules/emoji-textarea', TextAreaEmoji);
 
 export function initQuillEditor(id) {
   const run = () => {
@@ -28,6 +33,8 @@ export function initQuillEditor(id) {
           [{ list: 'ordered' }, { list: 'bullet' }],
           ['clean'],
         ],
+        'emoji-toolbar': true,
+        'emoji-textarea': true,
         // No image module registered, so user cannot insert images via toolbar
       },
       // Whitelist formats so unsupported formatting is dropped on paste
