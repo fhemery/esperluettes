@@ -1,14 +1,13 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import registerTooltip from './tooltip.js';
-import { initQuillEditor } from './editor.js';
 import * as DateUtils from './date-utils.js';
 import {BadgeOverflow} from './badge-overflow.js';
 import '../../../Moderation/Private/Resources/js/moderation.js';
 import intersect from '@alpinejs/intersect'
  
 window.Alpine = Alpine;
-window.initQuillEditor = initQuillEditor;
+
 window.DateUtils = DateUtils;
 window.BadgeOverflow = BadgeOverflow;
 

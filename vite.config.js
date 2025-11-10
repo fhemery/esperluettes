@@ -6,6 +6,12 @@ export default defineConfig(({ mode }) => {
     const appUrl = env.APP_URL ?? 'http://localhost';
 
     return {
+        resolve: {
+            alias: {
+                // Some Quill 2 plugins import from "Quill" (capital Q); alias to the package name
+                'Quill': 'quill',
+            },
+        },
         server: {
             watch: {
                 ignored: ['**/dist/**', '**/vendor/**', '**/storage/**', '**/node_modules/**'],
@@ -34,7 +40,11 @@ export default defineConfig(({ mode }) => {
         },
         plugins: [
             laravel({
-                input: ['app/Domains/Shared/Resources/css/app.scss', 'app/Domains/Shared/Resources/js/app.js'],
+                input: [
+                    'app/Domains/Shared/Resources/css/app.scss',
+                    'app/Domains/Shared/Resources/js/app.js',
+                    'app/Domains/Shared/Resources/js/editor-bundle.js',
+                ],
                 refresh: true,
             }),
         ],

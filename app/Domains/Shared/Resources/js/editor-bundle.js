@@ -1,5 +1,11 @@
-// Shared Quill initializer. Assumes Quill is globally available (window.Quill)
-// Exposes a single function to init per-editor instance without duplicating logic.
+import Quill from 'quill';
+import Delta from 'quill-delta';
+import '@windmillcode/quill-emoji/quill-emoji.css';
+import 'quill/dist/quill.snow.css';
+
+// Expose globally for existing initializer which expects window.Quill
+window.Quill = Quill;
+window.Delta = Delta;
 
 export function initQuillEditor(id) {
   const run = () => {
@@ -42,6 +48,12 @@ export function initQuillEditor(id) {
           btn.setAttribute('aria-label', label);
           btn.setAttribute('data-labeled', '1');
         }
+
+        // Ensure toolbar buttons do not submit parent forms
+        const allButtons = toolbar.container.querySelectorAll('button');
+        allButtons.forEach((b) => {
+          if (!b.getAttribute('type')) b.setAttribute('type', 'button');
+        });
       }
     } catch (e) {
       // no-op
@@ -96,12 +108,14 @@ export function initQuillEditor(id) {
 
     // Disallow pasted <img> elements (including base64 embeds)
     try {
-      const Delta = window.Quill.import('delta');
-      editor.clipboard.addMatcher('IMG', function() {
-        return new Delta(); // drop images entirely
-      });
+      const Delta = window.Delta; // Provided by editor-bundle for Quill v2
+      if (Delta) {
+        editor.clipboard.addMatcher('IMG', function () {
+          return new Delta(); // drop images entirely
+        });
+      }
     } catch (e) {
-      // no-op if Quill import fails
+      // no-op if Delta not available
     }
 
     // Intercept paste events that include image files and block them
@@ -185,3 +199,5 @@ export function initQuillEditor(id) {
     run();
   }
 }
+
+window.initQuillEditor = initQuillEditor;

@@ -367,3 +367,15 @@ p.ql-align-center { text-indent: 0; }
     background-color: rgb(var(--surface-error-bg));
   }
 }
+
+/* Quill emoji small adjustments*/
+
+#textarea-emoji {
+    
+  .bem {
+    width: 1.7rem;
+    height: 1.7rem;
+    font-size: 1.5rem;
+    margin: 2px;
+  }
+}

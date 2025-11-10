@@ -73,13 +73,18 @@
         @endforeach
       </ul>
       <div class="mt-3 text-sm text-gray-500" x-show="loading">Loading…</div>
-      <div class="h-1" x-ref="sentinel" 
-           x-intersect="loadMore()" 
-           x-intersect:margin="200px"></div>
+      <div class="h-1" x-ref="sentinel" x-intersect="loadMore()"></div>
     @endif
   @endif
 </div>
 
+@once
+  @if(!$isGuest)
+    @push('scripts')
+      @vite('app/Domains/Shared/Resources/js/editor-bundle.js')
+    @endpush
+  @endif
+@endonce
 @push('scripts')
 <script>
   window.commentList = function(opts){

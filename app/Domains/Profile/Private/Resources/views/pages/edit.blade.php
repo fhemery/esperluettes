@@ -132,6 +132,9 @@
         </div>
     </form>
     @push('scripts')
+        @vite('app/Domains/Shared/Resources/js/editor-bundle.js')
+    @endpush
+    @push('scripts')
     <script>
       window.ensureMaxFileSize = function(e, maxMB){
         const f = e.target.files && e.target.files[0];
