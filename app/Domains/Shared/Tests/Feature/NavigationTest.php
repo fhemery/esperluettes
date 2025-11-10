@@ -177,7 +177,7 @@ describe('Top navbar', function () {
             expect($html)->toContain('unread-badge');
         });
 
-        it('should show "Ma PàL" link for verified users', function () {
+        it('should show "Readlist" link for verified users', function () {
             $user = alice($this);
             $this->actingAs($user);
 
@@ -186,7 +186,7 @@ describe('Top navbar', function () {
                 ->assertSee(__('shared::navigation.readlist'));
         });
 
-        it('should not show "Ma PàL" link for guests', function () {
+        it('should not show "Readlist" link for guests', function () {
             $this->get(route('stories.index'))
                 ->assertOk()
                 ->assertDontSee(__('shared::navigation.readlist'));
