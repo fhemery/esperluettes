@@ -1,4 +1,6 @@
-<div x-data="globalSearch()" x-init="init()" class="ml-auto relative w-full max-w-md flex justify-end lg:justify-start" @keydown.escape.window="close()">
+<div x-data="globalSearch()" x-init="init()" 
+    class="ml-auto lg:mr-auto lg:ml-0 relative w-full max-w-md flex justify-end lg:justify-start" 
+    @keydown.escape.window="close()">
     <div class="flex justify-end lg:justify-start lg:border-b lg:border-fg max-w-[20rem]">
         <button type="button" @click="isMobile ? openFromIcon() : null" class="lg:pointer-events-none">
             <i class="material-symbols-outlined text-3xl font-extralight">search</i>
