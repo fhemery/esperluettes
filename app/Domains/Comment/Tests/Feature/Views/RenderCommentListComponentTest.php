@@ -14,7 +14,7 @@ describe('CommentListComponent', function () {
     describe('Access', function () {
         it('should display an alert if user is not logged, with a login button redirecting directly to comment area', function () {
             Auth::logout();
-            $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
                 'id' => 123,
             ]);
 
@@ -30,7 +30,7 @@ describe('CommentListComponent', function () {
             $user = alice($this, roles: [], isVerified: false);
             $this->actingAs($user);
 
-            $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
                 'id' => 123,
             ]);
 
@@ -46,7 +46,7 @@ describe('CommentListComponent', function () {
             $user = alice($this, roles: [Roles::USER_CONFIRMED]);
             $this->actingAs($user);
 
-            $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
                 'id' => 123,
             ]);
 
@@ -60,7 +60,7 @@ describe('CommentListComponent', function () {
             // Seed one comment
             createComment('default', 123, 'Hello world', null);
 
-            $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
                 'id' => 123,
             ]);
 
@@ -83,7 +83,7 @@ describe('CommentListComponent', function () {
             $user = alice($this);
             $this->actingAs($user);
 
-            $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
                 'id' => 123,
             ]);
 
@@ -105,7 +105,7 @@ describe('CommentListComponent', function () {
             $user = alice($this);
             $this->actingAs($user);
 
-            $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
                 'id' => 123,
             ]);
 
@@ -127,7 +127,7 @@ describe('CommentListComponent', function () {
             $user = alice($this);
             $this->actingAs($user);
 
-            $html = Blade::render('<x-comment-list entity-type="default" :entity-id="$id" :per-page="10" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
                 'id' => 123,
             ]);
 
@@ -147,7 +147,7 @@ describe('CommentListComponent', function () {
             $commentId = createComment('story', 123, 'Test comment for sharing');
 
             // Render the comment list
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -163,7 +163,7 @@ describe('CommentListComponent', function () {
             $commentId = createComment('story', 123, 'Test comment');
 
             // Render the comment list
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -179,7 +179,7 @@ describe('CommentListComponent', function () {
             $replyId = createComment('story', 123, 'Reply comment', $rootCommentId);
 
             // Render the comment list
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 

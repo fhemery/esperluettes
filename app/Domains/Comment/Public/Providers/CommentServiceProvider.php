@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Comment\Private\Repositories\CommentRepository;
-use App\Domains\Comment\Private\View\Components\CommentList;
+use App\Domains\Comment\Public\View\Components\CommentListComponent;
 use Illuminate\Support\Facades\Blade;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Comment\Public\Events\CommentPosted;
@@ -45,10 +45,7 @@ class CommentServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(app_path('Domains/Comment/Private/Resources/lang'), 'comment');
 
         // Register Blade components (both namespaced and alias)
-        // Global alias: <x-comment-list /> (used across Story and tests)
-        Blade::component(CommentList::class, 'comment-list');
-        // Optional namespaced variant: <x-comment::comment-list /> if we enable the component namespace later
-        // Blade::componentNamespace('App\\Domains\\Comment\\Private\\View\\Components', 'comment');
+        Blade::componentNamespace('App\\Domains\\Comment\\Public\\View\\Components', 'comment');
         Blade::anonymousComponentPath(app_path('Domains/Comment/Private/Resources/views/components'), 'comment');
 
         // Load domain routes

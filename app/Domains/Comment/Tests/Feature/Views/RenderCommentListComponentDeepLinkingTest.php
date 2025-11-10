@@ -24,7 +24,7 @@ describe('Comment Deep Linking', function () {
             // Mock request with comment query parameter
             request()->query->set('comment', $targetCommentId);
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -49,7 +49,7 @@ describe('Comment Deep Linking', function () {
             // Mock request with comment query parameter
             request()->query->set('comment', $targetCommentId);
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -81,7 +81,7 @@ describe('Comment Deep Linking', function () {
             // Mock request with comment query parameter
             request()->query->set('comment', $targetReplyId);
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -113,7 +113,7 @@ describe('Comment Deep Linking', function () {
             // Mock request with comment query parameter
             request()->query->set('comment', $replyId);
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -138,7 +138,7 @@ describe('Comment Deep Linking', function () {
             // Mock request with non-existent comment ID
             request()->query->set('comment', 99999);
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -156,7 +156,7 @@ describe('Comment Deep Linking', function () {
             // Mock request with comment from different entity
             request()->query->set('comment', $otherCommentId);
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -171,7 +171,7 @@ describe('Comment Deep Linking', function () {
             // Mock request with invalid comment ID (non-numeric)
             request()->query->set('comment', 'invalid-format');
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :page="0" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -184,7 +184,7 @@ describe('Comment Deep Linking', function () {
             createSeveralComments(3, 'story', 123, 'Normal comment');
             
             // Mock request without fragment
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 
@@ -205,7 +205,7 @@ describe('Comment Deep Linking', function () {
             // Mock request with valid comment query parameter
             request()->query->set('comment', $commentId);
             
-            $html = Blade::render('<x-comment-list entity-type="story" :entity-id="$id" :per-page="5" />', [
+            $html = Blade::render('<x-comment::comment-list-component entity-type="story" :entity-id="$id" :per-page="5" />', [
                 'id' => 123,
             ]);
 

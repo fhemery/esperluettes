@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Comment\Private\View\Components;
+namespace App\Domains\Comment\Public\View\Components;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
@@ -10,7 +10,7 @@ use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Comment\Public\Api\Contracts\CommentListDto;
 use Illuminate\Support\Facades\Auth;
 
-class CommentList extends Component
+class CommentListComponent extends Component
 {
     public CommentListDto $comments;
     public ?string $error = null;
