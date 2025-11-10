@@ -10,7 +10,7 @@
     <div class="col-start-1 row-start-1 row-span-3 w-[115px] h-[153px] md:w-[230px] md:h-[306px] mx-auto overflow-hidden">
         <a href="{{ url('/stories/' . $item->slug) }}" class="block">
             <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $item->title }}"
-                class="w-[115px] lg:w-[230px] object-contain">
+                class="w-[115px] md:w-[230px] object-contain">
         </a>
     </div>
 
@@ -82,7 +82,7 @@
 
      {{--  Bottom center = progress bar --}}
     @if ($item->hasChapters())
-    <div class="row-start-4 lg:row-start-3 lg:col-start-3 lg:col-span-1 ml-auto my-auto max-w-[10rem]">
+    <div class="row-start-4 lg:row-start-3 lg:col-start-3 lg:col-span-1 mx-auto my-auto max-w-[10rem]">
         <x-shared::progress :value="$item->progressPercent" />
     </div>
     @endif
