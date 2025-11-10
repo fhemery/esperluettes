@@ -4,12 +4,6 @@
     'compact' => false,
     'size' => 'md',
 ])
-@php
-    $configApi = app(App\Domains\Config\Public\Contracts\ConfigPublicApi::class);
-    if (!$configApi->isToggleEnabled('reporting', 'moderation')) {
-        return;
-    }
-@endphp
 
 <div x-data="reportButton('{{ $topicKey }}', {{ $entityId }})" x-cloak>
     {{-- Lightweight Report Button --}}
