@@ -73,7 +73,9 @@
         @endforeach
       </ul>
       <div class="mt-3 text-sm text-gray-500" x-show="loading">Loading…</div>
-      <div class="h-1" x-ref="sentinel"></div>
+      <div class="h-1" x-ref="sentinel" 
+           x-intersect="loadMore()" 
+           x-intersect:margin="200px"></div>
     @endif
   @endif
 </div>
@@ -148,12 +150,6 @@
             this.activeEditId = null;
           }
         });
-
-        if (!this.hasMore) return;
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach(e => { if (e.isIntersecting) this.loadMore(); });
-        }, { rootMargin: '200px 0px' });
-        io.observe(this.$refs.sentinel);
       },
       async loadMore(){
         if (this.loading || !this.hasMore) return;
