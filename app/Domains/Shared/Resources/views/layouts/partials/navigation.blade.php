@@ -52,6 +52,14 @@
             <!-- Moderation Icon -->
             <x-moderation::moderation-icon-component />
 
+            @if (config('app.discord_url'))
+            <div class="my-auto">
+                <a href="{{ config('app.discord_url') }}" target="_blank" title="Discord">
+                    <img src="{{ asset('images/icons/Discord-Symbol-Black.svg') }}" alt="Discord" title="Discord" class="h-8 w-8 rounded-full">
+                </a>
+            </div>
+            @endif
+
             <!-- Profile with drawer -->
             <div class="flex items-center shrink-0">
                 <button

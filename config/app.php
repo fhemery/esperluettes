@@ -136,4 +136,14 @@ return [
 
     'require_activation_code' => env('REQUIRE_ACTIVATION_CODE', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Discord URL
+    |--------------------------------------------------------------------------
+    |
+    | This value determines the URL of the Discord server.
+    |
+    */
+    'discord_url' => env('DISCORD_URL', null),
+
 ];

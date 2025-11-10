@@ -191,5 +191,34 @@ describe('Top navbar', function () {
                 ->assertOk()
                 ->assertDontSee(__('shared::navigation.readlist'));
         });
+
+        describe('Regarding discord', function() {
+            it('should show discord link when configured', function () {
+                $user = alice($this);
+            $this->actingAs($user);
+                $this->app->config->set('app.discord_url', 'https://discord.gg/discord');
+
+                $this->get(route('dashboard'))
+                    ->assertOk()
+                    ->assertSee('Discord');
+            });
+
+            it('should not show discord link when not configured', function () {
+                $user = alice($this);
+            $this->actingAs($user);
+                $this->app->config->set('app.discord_url', null);
+
+                $this->get(route('dashboard'))
+                    ->assertOk()
+                    ->assertDontSee('Discord');
+            });
+
+            it('should not show discord link to guests', function () {
+                $this->app->config->set('app.discord_url', 'https://discord.gg/discord');
+                $this->get(route('home'))
+                    ->assertOk()
+                    ->assertDontSee('Discord');
+            });
+        });
     });
 });
