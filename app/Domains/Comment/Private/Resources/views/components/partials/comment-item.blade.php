@@ -1,4 +1,4 @@
-<li class="py-4 sm:px-4 sm:mb-4">
+<li class="py-4 sm:px-4 sm:mb-4" id="comment-{{ $comment->id }}">
   @php
   $config = $config ?? null;
   $isUnknown = is_null($comment->authorId);
@@ -18,7 +18,7 @@
       @endif
     </div>
 
-    <!-- Header: author + + report + date + edit icon (right) -->
+    <!-- Header: author + share button + report + date + edit icon (right) -->
     <div class="flex items-center gap-2 grow">
       <div class="font-semibold text-secondary">
         @if($isUnknown || empty($comment->authorProfile->slug))
@@ -27,6 +27,24 @@
         <a href="{{ route('profile.show', ['profile' => $comment->authorProfile->slug]) }}" class="hover:text-secondary/80">{{ $displayName }}</a>
         @endif
       </div>
+      <!-- Share button -->
+        <div 
+          class="cursor-pointer relative"
+          x-data="{ copied: false }"
+          x-on:click="
+            const url = new URL(window.location);
+            url.searchParams.set('comment', {{ $comment->id }});
+            url.hash = 'comments';
+            
+            navigator.clipboard.writeText(url.toString()).then(() => {
+              copied = true;
+              setTimeout(() => copied = false, 2000);
+            });
+          "
+        >
+          <span class="material-symbols-outlined text-[16px] text-fg/50 leading-none" title="{{ __('comment::comments.actions.share') }}">share</span>
+          <span class="absolute top-[1rem] left-[-.5rem] text-success text-xs" x-show="copied">{{ __('comment::comments.actions.copied') }}</span>
+        </div>
       @if(Auth::id() !== $comment->authorId) 
         <div class="ml-2 flex gap-2">
           <x-moderation::report-button

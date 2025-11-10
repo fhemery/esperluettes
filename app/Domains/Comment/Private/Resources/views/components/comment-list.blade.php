@@ -73,7 +73,9 @@
         @endforeach
       </ul>
       <div class="mt-3 text-sm text-gray-500" x-show="loading">Loading…</div>
-      <div class="h-1" x-ref="sentinel"></div>
+      <div class="h-1" x-ref="sentinel" 
+           x-intersect="loadMore()" 
+           x-intersect:margin="200px"></div>
     @endif
   @endif
 </div>
@@ -92,6 +94,28 @@
       activeReplyId: null,
       activeEditId: null,
       init(){
+        // Focus on target comment if specified
+        @if($targetCommentId)
+          this.$nextTick(() => {
+            const targetElement = document.getElementById('comment-{{ $targetCommentId }}');
+            if (targetElement) {
+              // Add highlight effect
+              targetElement.classList.add('ring-2', 'ring-accent', 'ring-opacity-50');
+              
+              // Scroll to the comment
+              targetElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+              
+              // Remove highlight after 3 seconds
+              setTimeout(() => {
+                targetElement.classList.remove('ring-2', 'ring-accent', 'ring-opacity-50');
+              }, 3000);
+            }
+          });
+        @endif
+        
         // Delegated events for reply UI (demo only)
         this.$el.addEventListener('click', (e) => {
           const replyBtn = e.target.closest('[data-action="reply"]');
@@ -126,12 +150,6 @@
             this.activeEditId = null;
           }
         });
-
-        if (!this.hasMore) return;
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach(e => { if (e.isIntersecting) this.loadMore(); });
-        }, { rootMargin: '200px 0px' });
-        io.observe(this.$refs.sentinel);
       },
       async loadMore(){
         if (this.loading || !this.hasMore) return;

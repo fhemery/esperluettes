@@ -12,8 +12,7 @@ final class BackToCommentsRedirector
      */
     public static function build(): string
     {
-        $previous = url()->previous(); // e.g. http://localhost/default/123?param=1#frag
-        $base = preg_replace('/#.*/', '', $previous ?? ''); // strip fragment if any
+        $base = url()->previous(); // e.g. http://localhost/default/123?param=1, fragments are never transmitted
         $path = parse_url($base, PHP_URL_PATH) ?: '/';
         $query = parse_url($base, PHP_URL_QUERY) ?: null;
         $relative = './' . ltrim((string) $path, '/');

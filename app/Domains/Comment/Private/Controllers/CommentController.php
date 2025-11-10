@@ -38,9 +38,15 @@ class CommentController extends Controller
                 parentCommentId: $data['parent_comment_id'],
             );
     
-            $this->api->create($dto);
+            $commentId = $this->api->create($dto);
 
-            return redirect()->to(BackToCommentsRedirector::build())
+            // Build the redirect URL and add comment query parameter before fragment
+            $redirectUrl = BackToCommentsRedirector::build();
+            // Remove #comments fragment and add it back after the comment parameter
+            $redirectUrl = str_replace('#comments', '', $redirectUrl);
+            $redirectUrl .= (strpos($redirectUrl, '?') !== false ? '&' : '?') . 'comment=' . $commentId . '#comments';
+
+            return redirect()->to($redirectUrl)
                 ->with('status', __('comment::comments.posted'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());

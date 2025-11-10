@@ -25,6 +25,8 @@ return [
         'report' => 'Signaler',
         'cancel' => 'Annuler',
         'save' => 'Sauvegarder',
+        'share' => 'Partager',
+        'copied' => 'Copié!',
     ],
 
     'posted' => 'Commentaire publié',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Comment\Private\Models\Comment;
 use App\Domains\Comment\Public\Api\Contracts\CommentDto;
 use App\Domains\Comment\Public\Api\Contracts\CommentListDto;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
@@ -31,7 +32,13 @@ function createComment(string $entityType = 'default', int $entityId = 1,  strin
 function createSeveralComments($number,string $entityType = 'default', int $entityId = 1,  string $body = 'Hello', ?int $parentCommentId = null): array {
     $commentIds = [];
     for ($i = 0; $i < $number; $i++) {
-        $commentIds[] = createComment($entityType, $entityId, $body . ' ' . $i, $parentCommentId);
+        $commentId = createComment($entityType, $entityId, $body . ' ' . $i, $parentCommentId);
+        $commentIds[] = $commentId;
+
+        // Modify timestamp of creation to have comments correctly ordered
+        $comment = Comment::find($commentId);
+        $comment->created_at = now()->subMinutes($number - $i);
+        $comment->save();
     }
     return $commentIds;
 }
