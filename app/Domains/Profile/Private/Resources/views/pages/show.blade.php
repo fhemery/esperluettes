@@ -34,7 +34,7 @@
                                 aria-label="{{ __('profile::show.copy_profile_link') }}">
                                 <!-- Material Symbols link icon -->
                                 <span class="material-symbols-outlined text-[20px] leading-none">
-                                    link
+                                    share
                                 </span>
                             </x-shared::badge>
                             <!-- Tooltip -->
