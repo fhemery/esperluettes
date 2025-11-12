@@ -138,7 +138,7 @@ html {
 p.ql-align-center { text-indent: 0; }
 .ql-align-right { text-align: right; }
 .ql-align-justify { text-align: justify; }
-.ql-editor { 
+.rich-content .ql-editor { 
   font-size: 1rem; 
   line-height: 1.8;
 
@@ -155,7 +155,7 @@ p.ql-align-center { text-indent: 0; }
     font-style: normal;
   }
 }
-.ql-indent {
+.rich-content .ql-indent {
   p {
     text-indent: 2rem;
   }
