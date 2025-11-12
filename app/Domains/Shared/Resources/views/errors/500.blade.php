@@ -31,8 +31,9 @@
             </div>
         </div>
 
-        <!-- Image (optional placeholder while waiting for visual) -->
-        <!-- Intentionally omitted to avoid broken/misleading imagery; add when asset is ready -->
+        <div class="flex items-center justify-center">
+            <img src="{{ asset('images/errors/500.png') }}" alt="500" class="w-full">
+        </div>
     </div>
 
 </x-shared::app-layout>
