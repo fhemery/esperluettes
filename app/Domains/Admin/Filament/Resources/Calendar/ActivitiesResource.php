@@ -130,10 +130,22 @@ class ActivitiesResource extends Resource
                     ])->columns(3),
                 Forms\Components\Section::make(__('admin::calendar.sections.dates'))
                     ->schema([
-                        Forms\Components\DateTimePicker::make('preview_starts_at')->label(__('admin::calendar.fields.preview_starts_at'))->seconds(false),
-                        Forms\Components\DateTimePicker::make('active_starts_at')->label(__('admin::calendar.fields.active_starts_at'))->seconds(false),
-                        Forms\Components\DateTimePicker::make('active_ends_at')->label(__('admin::calendar.fields.active_ends_at'))->seconds(false),
-                        Forms\Components\DateTimePicker::make('archived_at')->label(__('admin::calendar.fields.archived_at'))->seconds(false),
+                        Forms\Components\DateTimePicker::make('preview_starts_at')
+                            ->label(__('admin::calendar.fields.preview_starts_at'))
+                            ->seconds(false)
+                            ->helperText(__('admin::shared.timezone.gmt_hint')),
+                        Forms\Components\DateTimePicker::make('active_starts_at')
+                            ->label(__('admin::calendar.fields.active_starts_at'))
+                            ->seconds(false)
+                            ->helperText(__('admin::shared.timezone.gmt_hint')),
+                        Forms\Components\DateTimePicker::make('active_ends_at')
+                            ->label(__('admin::calendar.fields.active_ends_at'))
+                            ->seconds(false)
+                            ->helperText(__('admin::shared.timezone.gmt_hint')),
+                        Forms\Components\DateTimePicker::make('archived_at')
+                            ->label(__('admin::calendar.fields.archived_at'))
+                            ->seconds(false)
+                            ->helperText(__('admin::shared.timezone.gmt_hint')),
                     ])->columns(2),
             ]);
     }
@@ -157,10 +169,30 @@ class ActivitiesResource extends Resource
                         default => (string) $state,
                     };
                 })->sortable(),
-                Tables\Columns\TextColumn::make('preview_starts_at')->label(__('admin::calendar.fields.preview_starts_at'))->dateTime()->sortable(),
-                Tables\Columns\TextColumn::make('active_starts_at')->label(__('admin::calendar.fields.active_starts_at'))->dateTime()->sortable(),
-                Tables\Columns\TextColumn::make('active_ends_at')->label(__('admin::calendar.fields.active_ends_at'))->dateTime()->sortable(),
-                Tables\Columns\TextColumn::make('archived_at')->label(__('admin::calendar.fields.archived_at'))->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('preview_starts_at')->label(__('admin::calendar.fields.preview_starts_at'))
+                ->formatStateUsing(function ($state) {
+                        if (empty($state)) return null;
+                        $iso = $state instanceof \Carbon\CarbonInterface ? $state->toIso8601String() : (string) $state;
+                        return "<time class=\"js-dt\" datetime=\"{$iso}\"></time>";
+                    })->html()->sortable(),
+                Tables\Columns\TextColumn::make('active_starts_at')->label(__('admin::calendar.fields.active_starts_at'))
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state)) return null;
+                        $iso = $state instanceof \Carbon\CarbonInterface ? $state->toIso8601String() : (string) $state;
+                        return "<time class=\"js-dt\" datetime=\"{$iso}\"></time>";
+                    })->html()->sortable(),
+                Tables\Columns\TextColumn::make('active_ends_at')->label(__('admin::calendar.fields.active_ends_at'))
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state)) return null;
+                        $iso = $state instanceof \Carbon\CarbonInterface ? $state->toIso8601String() : (string) $state;
+                        return "<time class=\"js-dt\" datetime=\"{$iso}\"></time>";
+                    })->html()->sortable(),
+                Tables\Columns\TextColumn::make('archived_at')->label(__('admin::calendar.fields.archived_at'))
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state)) return null;
+                        $iso = $state instanceof \Carbon\CarbonInterface ? $state->toIso8601String() : (string) $state;
+                        return "<time class=\"js-dt\" datetime=\"{$iso}\"></time>";
+                    })->html()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('state')->label(__('admin::calendar.fields.status'))->options([

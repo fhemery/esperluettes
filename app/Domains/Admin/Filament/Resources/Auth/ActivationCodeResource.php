@@ -103,7 +103,7 @@ class ActivationCodeResource extends Resource
 
                 DateTimePicker::make('expires_at')
                     ->label(__('admin::auth.activation_codes.expires_at_label'))
-                    ->helperText(__('admin::auth.activation_codes.expires_at_helper'))
+                    ->helperText(__('admin::auth.activation_codes.expires_at_helper') . ' ' . __('admin::shared.timezone.gmt_hint'))
                     ->nullable(),
             ]);
     }
@@ -151,13 +151,23 @@ class ActivationCodeResource extends Resource
 
                 TextColumn::make('used_at')
                     ->label(__('admin::auth.activation_codes.used_at_header'))
-                    ->dateTime()
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state)) return null;
+                        $iso = $state instanceof \Carbon\CarbonInterface ? $state->toIso8601String() : (string) $state;
+                        return "<time class=\"js-dt\" datetime=\"{$iso}\"></time>";
+                    })
+                    ->html()
                     ->placeholder(__('admin::auth.activation_codes.placeholder.not_used'))
                     ->sortable(),
 
                 TextColumn::make('expires_at')
                     ->label(__('admin::auth.activation_codes.expires_at_header'))
-                    ->dateTime()
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state)) return null;
+                        $iso = $state instanceof \Carbon\CarbonInterface ? $state->toIso8601String() : (string) $state;
+                        return "<time class='js-dt' datetime='{$iso}'></time>";
+                    })
+                    ->html()
                     ->placeholder(__('admin::auth.activation_codes.placeholder.no_expiration'))
                     ->sortable(),
 
@@ -168,7 +178,12 @@ class ActivationCodeResource extends Resource
 
                 TextColumn::make('created_at')
                     ->label(__('admin::shared.column.created_at'))
-                    ->dateTime()
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state)) return null;
+                        $iso = $state instanceof \Carbon\CarbonInterface ? $state->toIso8601String() : (string) $state;
+                        return "<time class=\"js-dt\" datetime=\"{$iso}\"></time>";
+                    })
+                    ->html()
                     ->sortable(),
             ])
             ->filtersLayout(FiltersLayout::AboveContentCollapsible)

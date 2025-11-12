@@ -92,7 +92,8 @@ class AdminServiceProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 CheckRole::class . ':' . Roles::ADMIN . ',' . Roles::TECH_ADMIN . ',' . Roles::MODERATOR,
-            ]);
+            ])
+            ->renderHook('panels::body.end', fn () => view('admin::partials.format-dates'));
     }
 }
 

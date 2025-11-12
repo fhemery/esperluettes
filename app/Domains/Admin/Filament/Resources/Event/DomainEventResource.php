@@ -56,8 +56,11 @@ class DomainEventResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('occurred_at')
                     ->label(__('admin::domain_events.columns.occurred_at'))
-                    ->dateTime(format: 'Y/m/d H:i:s')
-                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state)) return null;
+                        $iso = $state instanceof \Carbon\CarbonInterface ? $state->toIso8601String() : (string) $state;
+                        return "<time class=\"js-dt\" datetime=\"{$iso}\"></time>";
+                    })->html()->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('admin::domain_events.columns.event'))
