@@ -6,7 +6,7 @@ namespace App\Domains\Message\Private\View\Components;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Config\Public\Contracts\ConfigPublicApi as ContractsConfigPublicApi;
+use App\Domains\Config\Public\Api\ConfigPublicApi as ContractsConfigPublicApi;
 use App\Domains\Message\Private\Services\UnreadCounterService;
 use App\Domains\Message\Private\Support\FeatureToggles;
 use Illuminate\Support\Facades\Auth;

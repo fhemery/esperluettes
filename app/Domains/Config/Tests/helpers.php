@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Config\Public\Contracts\FeatureToggle;
-use App\Domains\Config\Public\Contracts\ConfigPublicApi;
+use App\Domains\Config\Public\Api\ConfigPublicApi;
 use Tests\TestCase;
 
 function createFeatureToggle(TestCase $t, FeatureToggle $featureToggle): FeatureToggle

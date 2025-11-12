@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Domains\Config\Public\Contracts;
+namespace App\Domains\Config\Public\Api;
 
+use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Config\Public\Services\FeatureToggleService;
 
 class ConfigPublicApi {

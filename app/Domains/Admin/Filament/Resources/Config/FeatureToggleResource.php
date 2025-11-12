@@ -4,7 +4,7 @@ namespace App\Domains\Admin\Filament\Resources\Config;
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Config\Private\Models\FeatureToggle as FeatureToggleModel;
-use App\Domains\Config\Public\Contracts\ConfigPublicApi;
+use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\FeatureToggle as FeatureToggleContract;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
