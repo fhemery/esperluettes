@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Domains\Story\Public\Api\StoryPublicApi;
@@ -18,6 +19,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 describe('StoryPublicApi::listStories', function () {
     beforeEach(function () {
+        /** @var StoryPublicApi $this->api */
         $this->api = app(StoryPublicApi::class);
     });
 
@@ -155,7 +157,7 @@ describe('StoryPublicApi::listStories', function () {
         });
     });
 
-    describe('Filtering stories', function() {
+    describe('Filtering stories', function () {
         describe('Regarding filtering by storyIds', function () {
             it('should return only the stories with the given ids', function () {
                 $alice = alice($this);
@@ -268,7 +270,7 @@ describe('StoryPublicApi::listStories', function () {
                 $alice = alice($this);
                 $genre1 = makeGenre('Genre 1');
                 $genre2 = makeGenre('Genre 2');
-                
+
                 $story1 = publicStory('With Genres', $alice->id, ['story_ref_genre_ids' => [$genre1->id, $genre2->id]]);
                 $story2 = publicStory('Without Genres', $alice->id);
                 $story3 = publicStory('With One Genre', $alice->id, ['story_ref_genre_ids' => [$genre1->id]]);
@@ -282,6 +284,167 @@ describe('StoryPublicApi::listStories', function () {
 
                 expect($result->data)->toHaveCount(1);
                 expect(collect($result->data)->pluck('id'))->toContain($story1->id);
+            });
+        });
+
+        describe('filtering by trigger warnings', function () {
+            it('should exclude stories that have any of the specified trigger warnings', function () {
+                $alice = alice($this);
+                $triggerWarning1 = makeTriggerWarning('Trigger Warning 1');
+                $triggerWarning2 = makeTriggerWarning('Trigger Warning 2');
+                $triggerWarning3 = makeTriggerWarning('Trigger Warning 3');
+
+                publicStory('With Trigger Warnings', $alice->id, ['tw_disclosure' => Story::TW_LISTED, 'story_ref_trigger_warning_ids' => [$triggerWarning1->id, $triggerWarning2->id]]);
+                $story2 = publicStory('Without Trigger Warnings', $alice->id);
+                publicStory('With One Trigger Warning', $alice->id, ['tw_disclosure' => Story::TW_LISTED, 'story_ref_trigger_warning_ids' => [$triggerWarning1->id]]);
+                $story4 = publicStory('With Another Trigger Warning', $alice->id, ['tw_disclosure' => Story::TW_LISTED, 'story_ref_trigger_warning_ids' => [$triggerWarning3->id]]);
+
+                $filter = new StoryQueryFilterDto(
+                    triggerWarningIds: [$triggerWarning1->id, $triggerWarning2->id],
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(2);
+                expect(collect($result->data)->pluck('id'))->toContain($story2->id);
+                expect(collect($result->data)->pluck('id'))->toContain($story4->id);
+            });
+
+            it('should only include stories without TW if specified', function () {
+                $alice = alice($this);
+                $triggerWarning1 = makeTriggerWarning('Trigger Warning 1');
+                $triggerWarning2 = makeTriggerWarning('Trigger Warning 2');
+
+                publicStory('With Trigger Warnings', $alice->id, ['tw_disclosure' => Story::TW_LISTED, 'story_ref_trigger_warning_ids' => [$triggerWarning1->id, $triggerWarning2->id]]);
+                $story2 = publicStory('Without Trigger Warnings', $alice->id, ['tw_disclosure' => Story::TW_NO_TW]);
+                publicStory('With One Trigger Warning', $alice->id, ['tw_disclosure' => Story::TW_UNSPOILED]);
+
+                $filter = new StoryQueryFilterDto(
+                    noTwOnly: true,
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(1);
+                expect(collect($result->data)->pluck('id'))->toContain($story2->id);
+            });
+        });
+
+        describe('filtering by story type', function () {
+            it('should return stories that have any of the specified visibilities', function () {
+                $alice = alice($this);
+                $novelStoryType = makeStoryType('Novel');
+                $shortStoryType = makeStoryType('Short Story');
+                $story1 = publicStory('Public Story', $alice->id, ['story_ref_type_id' => $novelStoryType->id]);
+                $story2 = privateStory('Private Story', $alice->id, ['story_ref_type_id' => $shortStoryType->id]);
+                $story3 = communityStory('Community Story', $alice->id);
+
+                $filter = new StoryQueryFilterDto(
+                    typeIds: [$novelStoryType->id, $shortStoryType->id],
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $this->actingAs($alice);
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(2);
+                expect(collect($result->data)->pluck('id'))->toContain($story1->id);
+                expect(collect($result->data)->pluck('id'))->toContain($story2->id);
+            });
+        });
+
+        describe('filtering by age', function () {
+            it('should return stories that have any of the specified age', function () {
+                $alice = alice($this);
+                $all = makeAudience('All');
+                $teens = makeAudience('Teens');
+                $adults = makeAudience('Adults');
+
+                $teenStory = publicStory('Teen Story', $alice->id, [
+                    'story_ref_audience_id' => $teens->id,
+                ]);
+
+                $adultStory = publicStory('Adult Story', $alice->id, [
+                    'story_ref_audience_id' => $adults->id,
+                ]);
+
+                publicStory('All Story', $alice->id, [
+                    'story_ref_audience_id' => $all->id,
+                ]);
+
+                $filter = new StoryQueryFilterDto(
+                    audienceIds: [$teens->id, $adults->id],
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $this->actingAs($alice);
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(2);
+                expect(collect($result->data)->pluck('id'))->toContain($teenStory->id);
+                expect(collect($result->data)->pluck('id'))->toContain($adultStory->id);
+            });
+        });
+
+        describe('Regarding authorIds', function () {
+            it('should return stories that have any of the specified authorIds', function () {
+                $alice = alice($this);
+                $bob = bob($this);
+                $carol = carol($this);
+                $story1 = publicStory('Story 1', $alice->id);
+                $story2 = publicStory('Story 2', $bob->id);
+                addCollaborator($story2->id, $carol->id);
+                $story3 = publicStory('Story 3', $bob->id);
+
+
+                $filter = new StoryQueryFilterDto(
+                    authorIds: [$alice->id, $carol->id],
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $this->actingAs($alice);
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(2);
+                expect(collect($result->data)->pluck('id'))->toContain($story1->id);
+                expect(collect($result->data)->pluck('id'))->toContain($story2->id);
+            });
+        });
+
+        describe('Regarding published chapters', function () {
+            it('should by default return stories with and without published chapters', function () {
+                $alice = alice($this);
+                publicStory('No Chapter', $alice->id);
+                $storyWithPublishedChapter = publicStory('With Chapter', $alice->id);
+                createPublishedChapter($this, $storyWithPublishedChapter, $alice);
+                $storyWithUnpublishedChapter = publicStory('With Unpublished Chapter', $alice->id);
+                createUnpublishedChapter($this, $storyWithUnpublishedChapter, $alice);
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories();
+
+                expect($result->data)->toHaveCount(3);
+            });
+
+            it('should return stories with published chapters only if specified', function () {
+                $alice = alice($this);
+                publicStory('No Chapter', $alice->id);
+                $storyWithPublishedChapter = publicStory('With Chapter', $alice->id);
+                createPublishedChapter($this, $storyWithPublishedChapter, $alice);
+                $storyWithUnpublishedChapter = publicStory('With Unpublished Chapter', $alice->id);
+                createUnpublishedChapter($this, $storyWithUnpublishedChapter, $alice);
+
+                $filter = new StoryQueryFilterDto(
+                    withPublishedChapterOnly: true,
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories($filter);
+
+                expect($result->data)->toHaveCount(1);
+                expect(collect($result->data)->pluck('id'))->toContain($storyWithPublishedChapter->id);
             });
         });
     });
@@ -545,45 +708,162 @@ describe('StoryPublicApi::listStories', function () {
                 expect($chap2Dto?->isRead)->toBe(false);
             });
         });
-    });
 
-    describe('About date fields', function () {
-            it('returns created_at and last_chapter_published_at dates', function () {
-                $story = publicStory('With Dates', alice($this)->id);
-                
-                /** @var PaginatedStoryDto $result */
-                $result = $this->api->listStories();
-
-                expect($result->data)->toHaveCount(1);
-                $dto = $result->data[0];
-                
-                expect($dto->createdAt)->toBeInstanceOf(\DateTime::class);
-                expect($dto->createdAt)->toEqual($story->created_at);
-                expect($dto->lastChapterPublishedAt)->toBeNull(); // No chapters published yet
-            });
-
-            it('returns last_chapter_published_at when story has published chapters', function () {
+        describe('Regarding chapter and word count', function () {
+            it('should include chapter count when requested', function () {
                 $alice = alice($this);
                 $story = publicStory('With Chapters', $alice->id);
                 $chapter = createPublishedChapter($this, $story, $alice);
-                
-                // Refresh story to get updated last_chapter_published_at
-                $story->refresh();
-                
-                /** @var PaginatedStoryDto $result */
-                $result = $this->api->listStories();
 
-                expect($result->data)->toHaveCount(1);
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includePublishedChaptersCount: true,
+                );
+
+                $this->actingAs(bob($this));
+                markAsRead($this, $chapter);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories(fieldsToReturn: $fields);
+
                 $dto = $result->data[0];
-                
-                expect($dto->createdAt)->toBeInstanceOf(\DateTime::class);
-                expect($dto->lastChapterPublishedAt)->toBeInstanceOf(\DateTime::class);
-                expect($dto->createdAt)->toEqual($story->created_at);
-                expect($dto->lastChapterPublishedAt)->toEqual($story->last_chapter_published_at);
+                expect($dto->publishedChaptersCount)->toBe(1);
+            });
+
+            it('should include word count when requested', function () {
+                $alice = alice($this);
+                $story = publicStory('With Chapters', $alice->id);
+                $chapter = createPublishedChapter($this, $story, $alice, ['content' => 'Hello World']);
+
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeWordCount: true,
+                );
+
+                $this->actingAs(bob($this));
+                markAsRead($this, $chapter);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories(fieldsToReturn: $fields);
+
+                $dto = $result->data[0];
+                expect($dto->wordCount)->toBe(2);
             });
         });
+    });
 
-        describe('Regarding pagination', function () {
+    describe('About date fields', function () {
+        it('returns created_at and last_chapter_published_at dates', function () {
+            $story = publicStory('With Dates', alice($this)->id);
+
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories();
+
+            expect($result->data)->toHaveCount(1);
+            $dto = $result->data[0];
+
+            expect($dto->createdAt)->toBeInstanceOf(\DateTime::class);
+            expect($dto->createdAt)->toEqual($story->created_at);
+            expect($dto->lastChapterPublishedAt)->toBeNull(); // No chapters published yet
+        });
+
+        it('returns last_chapter_published_at when story has published chapters', function () {
+            $alice = alice($this);
+            $story = publicStory('With Chapters', $alice->id);
+            $chapter = createPublishedChapter($this, $story, $alice);
+
+            // Refresh story to get updated last_chapter_published_at
+            $story->refresh();
+
+            /** @var PaginatedStoryDto $result */
+            $result = $this->api->listStories();
+
+            expect($result->data)->toHaveCount(1);
+            $dto = $result->data[0];
+
+            expect($dto->createdAt)->toBeInstanceOf(\DateTime::class);
+            expect($dto->lastChapterPublishedAt)->toBeInstanceOf(\DateTime::class);
+            expect($dto->createdAt)->toEqual($story->created_at);
+            expect($dto->lastChapterPublishedAt)->toEqual($story->last_chapter_published_at);
+        });
+    });
+
+    describe('Regarding ordering', function () {
+        it('orders stories by last published chapter date desc on first page', function () {
+            // Arrange
+            $author = alice($this);
+
+            $old = publicStory('Old Story', $author->id, [
+                'description' => '<p>Desc</p>',
+            ]);
+            createPublishedChapter($this, $old, $author);
+            // We are not usually modifying DB directly in tests, but in this case, 
+            // we need to set last_chapter_published_at to a specific value
+            $old->last_chapter_published_at = now()->subMinutes(30);
+            $old->saveQuietly();
+
+            $mid = publicStory('Mid Story', $author->id, [
+                'description' => '<p>Desc</p>',
+            ]);
+            createPublishedChapter($this, $mid, $author);
+            $mid->last_chapter_published_at = now()->subMinutes(20);
+            $mid->saveQuietly();
+
+            $new = publicStory('New Story', $author->id, [
+                'description' => '<p>Desc</p>',
+            ]);
+            createPublishedChapter($this, $new, $author);
+            $new->last_chapter_published_at = now()->subMinutes(10);
+            $new->saveQuietly();
+
+            // Act
+            $resp = $this->api->listStories();
+
+            // Assert ordering by last_chapter_published_at DESC
+            expect($resp->data)->toHaveCount(3);
+            expect($resp->data[0]->title)->toBe('New Story');
+            expect($resp->data[1]->title)->toBe('Mid Story');
+            expect($resp->data[2]->title)->toBe('Old Story');
+        });
+
+
+        it('uses created_at as a tiebreaker when last published dates are equal', function () {
+            // Arrange
+            $author = alice($this);
+
+            $t = now()->subHour();
+
+            // Older created_at
+            $olderCreated = publicStory('Older Created', $author->id, [
+                'description' => '<p>Desc</p>',
+            ]);
+            createPublishedChapter($this, $olderCreated, $author);
+
+            // We are not usually modifying DB directly in tests, but in this case, 
+            // we need to set last_chapter_published_at to a specific value
+            // and update created_at and updated_at to match
+            $olderCreated->last_chapter_published_at = $t;
+            $olderCreated->created_at = now()->subDays(2);
+            $olderCreated->updated_at = $olderCreated->created_at;
+            $olderCreated->saveQuietly();
+
+            // Newer created_at (should come first when last_chapter_published_at ties)
+            $newerCreated = publicStory('Newer Created', $author->id, [
+                'description' => '<p>Desc</p>',
+            ]);
+            createPublishedChapter($this, $newerCreated, $author);
+            $newerCreated->last_chapter_published_at = $t;
+            $newerCreated->created_at = now()->subDay();
+            $newerCreated->updated_at = $newerCreated->created_at;
+            $newerCreated->saveQuietly();
+
+            // Act
+            $resp = $this->api->listStories();
+
+            // Assert: ties broken by created_at DESC
+            expect($resp->data)->toHaveCount(2);
+            expect($resp->data[0]->title)->toBe('Newer Created');
+            expect($resp->data[1]->title)->toBe('Older Created');
+        });
+    });
+
+    describe('Regarding pagination', function () {
         it('paginates results: page 1 of 2 with pageSize=2 over 3 stories', function () {
             $api = app(StoryPublicApi::class);
 

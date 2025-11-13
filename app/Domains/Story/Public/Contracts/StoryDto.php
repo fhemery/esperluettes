@@ -29,6 +29,8 @@ class StoryDto
         public ?array $chapters = null,
         public ?\DateTime $createdAt = null,
         public ?\DateTime $lastChapterPublishedAt = null,
+        public ?int $publishedChaptersCount = null,
+        public ?int $wordCount = null
     ) {
     }
 
@@ -58,6 +60,12 @@ class StoryDto
         }
         if ($fieldsToReturn->includeChapters) {
             $dto->chapters = $story->chapters->map(fn(Chapter $c) => StoryChapterDto::fromModel($c))->values()->all();
+        }
+        if ($fieldsToReturn->includePublishedChaptersCount) {
+            $dto->publishedChaptersCount = $story->published_chapters_count;
+        }
+        if ($fieldsToReturn->includeWordCount) {
+            $dto->wordCount = $story->published_words_total;
         }
 
         return $dto;

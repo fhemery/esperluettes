@@ -91,8 +91,17 @@ class StoryController
         // Parse "No TW only" checkbox
         $noTwOnly = request()->boolean('no_tw_only', false);
 
-        $filter = new StoryFilterAndPagination(page: $page, perPage: 12, visibilities: $vis, typeId: $typeId, audienceIds: $audienceIds, genreIds: $genreIds, excludeTriggerWarningIds: $excludeTwIds, noTwOnly: $noTwOnly);
-        $paginator = $this->service->getStories($filter);
+        $filter = new StoryFilterAndPagination(page: $page, 
+            perPage: 12, 
+            visibilities: $vis, 
+            typeIds: $typeId ? [$typeId] : [], 
+            audienceIds: $audienceIds, 
+            genreIds: $genreIds, 
+            excludeTriggerWarningIds: $excludeTwIds, 
+            noTwOnly: $noTwOnly
+        );
+        $fieldsToReturn = GetStoryOptions::ForCardDisplay();
+        $paginator = $this->service->searchStories($filter, $fieldsToReturn);
 
         // Referentials lookup for display (types, ...)
         $referentials = $this->lookup->getStoryReferentials();
@@ -208,10 +217,11 @@ class StoryController
             page: $page,
             perPage: 12,
             visibilities: $vis,
-            authorId: $userId,
+            authorIds: [$userId],
             requirePublishedChapter: false // profile pages list stories even without published chapters
         );
-        $paginator = $this->service->getStories($filter, Auth::id());
+
+        $paginator = $this->service->searchStories($filter, GetStoryOptions::ForCardDisplay());
 
         // Build items using shared helper (with authors, genres, TW, and preloaded aggregates)
         $items = $this->vmBuilder->buildStorySummaryItems($paginator->items());

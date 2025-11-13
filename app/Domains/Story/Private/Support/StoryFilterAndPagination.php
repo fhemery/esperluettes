@@ -19,6 +19,12 @@ class StoryFilterAndPagination
          */
         public ?int $authorId = null,
         public ?int $typeId = null,
+
+        /**
+         * @var array<int, int> Filtering by author user IDs (OR semantics)
+         */
+        public array $authorIds = [],
+
         /**
          * @var array<int,int> Audience IDs to filter by (multi-select)
          */
@@ -27,6 +33,10 @@ class StoryFilterAndPagination
          * @var array<int,int> Genre IDs to filter by (multi-select, AND semantics)
          */
         public array $genreIds = [],
+        /**
+         * @var array<int,int> Story Type IDs to filter by (multi-select, OR semantics)
+         */
+        public array $typeIds = [],
         /**
          * @var array<int,int> Trigger Warning IDs to EXCLUDE (multi-select, OR semantics)
          */

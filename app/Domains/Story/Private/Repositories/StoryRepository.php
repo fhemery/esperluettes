@@ -46,13 +46,16 @@ final class StoryRepository
             ->when($options->includeAuthors, fn($q) => $q->with('authors'))
             ->when($options->includeGenreIds, fn($q) => $q->with('genres:id'))
             ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings:id'))
-            ->when($options->includeChapters && !$options->includeReadingProgress, 
+            ->when(
+                $options->includeChapters && !$options->includeReadingProgress,
                 fn($q) => $q->with(['chapters' => function ($c) {
                     // Exclude author_note and content for performance consideration
                     // Important: include 'id' and 'story_id' to keep relation hydrated
                     $c->select(['id', 'story_id', 'title', 'slug', 'sort_order', 'status', 'first_published_at', 'reads_logged_count', 'word_count', 'character_count']);
-                }]))
-            ->when($options->includeChapters && $options->includeReadingProgress, 
+                }])
+            )
+            ->when(
+                $options->includeChapters && $options->includeReadingProgress,
                 fn($q) => $q->with(['chapters' => function ($chapters) use ($viewerId) {
                     // Add an is_read count (0/1) per chapter for the current user
                     $chapters->withCount([
@@ -65,7 +68,18 @@ final class StoryRepository
                             }
                         }
                     ]);
-                }]))
+                }])
+            )
+            ->when($options->includePublishedChaptersCount, fn($q) => $q->withCount([
+                'chapters as published_chapters_count' => function ($q) {
+                    $q->where('status', Chapter::STATUS_PUBLISHED);
+                },
+            ]))
+            ->when($options->includeWordCount, fn($q) => $q->withSum([
+                'chapters as published_words_total' => function ($q) {
+                    $q->where('status', Chapter::STATUS_PUBLISHED);
+                },
+            ], 'word_count'))
             ->when($filter->onlyStoryIds, fn($q) => $q->whereIn('id', $filter->onlyStoryIds));
 
         // Story visibility rules
@@ -106,47 +120,70 @@ final class StoryRepository
             }
         }
 
+        // Exclude stories that have ANY of the selected trigger warnings (OR semantics)
+        if ($filter->noTwOnly) {
+            $query->where('tw_disclosure', Story::TW_NO_TW);
+        } else if (!empty($filter->excludeTriggerWarningIds)) {
+            $ids = $filter->excludeTriggerWarningIds;
+            $query->whereDoesntHave('triggerWarnings', function ($q) use ($ids) {
+                $q->whereIn('story_ref_trigger_warnings.id', $ids);
+            });
+        }
+
+        // Filter by Story Types (OR semantics: story must have at least one selected story type ID)
+        if (!empty($filter->typeIds)) {
+            $query->whereIn('story_ref_type_id', $filter->typeIds);
+        }
+
+        // Filter by Audience (OR semantics: story must have at least one selected audience ID)
+        if (!empty($filter->audienceIds)) {
+            $query->whereIn('story_ref_audience_id', $filter->audienceIds);
+        }
+
+        // Filter by Author (OR semantics: story must have at least one selected author ID)
+        if (!empty($filter->authorIds)) {
+            $query->whereHas('authors', function ($q) use ($filter) {
+                $q->whereIn('user_id', $filter->authorIds);
+            });
+        }
+
+        // Filter stories that have no published chapter
+        if ($filter->requirePublishedChapter) {
+            $query->whereHas('chapters', function ($q) {
+                $q->where('status', Chapter::STATUS_PUBLISHED);
+            });
+        }
+
         // Read status filtering (based on published chapters only)
         if ($filter->readStatus === StoryQueryReadStatus::UnreadOnly) {
             $query->whereHas('chapters', function ($q) use ($viewerId) {
                 $q->where('status', Chapter::STATUS_PUBLISHED)
-                  ->whereDoesntHave('readingProgress', function ($rp) use ($viewerId) {
-                      if ($viewerId) {
-                          $rp->where('user_id', $viewerId);
-                      } else {
-                          // Guest: no reading progress -> all chapters are considered unread
-                          $rp->whereRaw('1 = 0');
-                      }
-                  });
+                    ->whereDoesntHave('readingProgress', function ($rp) use ($viewerId) {
+                        if ($viewerId) {
+                            $rp->where('user_id', $viewerId);
+                        } else {
+                            // Guest: no reading progress -> all chapters are considered unread
+                            $rp->whereRaw('1 = 0');
+                        }
+                    });
             });
         } elseif ($filter->readStatus === StoryQueryReadStatus::ReadOnly) {
             if ($viewerId) {
                 // Consider a story READ if it has NO unread published chapters for the viewer
                 $query->whereDoesntHave('chapters', function ($q) use ($viewerId) {
                     $q->where('status', Chapter::STATUS_PUBLISHED)
-                      ->whereDoesntHave('readingProgress', function ($rp) use ($viewerId) {
-                          // If the chapter lacks a reading progress row for this viewer, it's unread
-                          $rp->where('user_id', $viewerId);
-                      });
+                        ->whereDoesntHave('readingProgress', function ($rp) use ($viewerId) {
+                            // If the chapter lacks a reading progress row for this viewer, it's unread
+                            $rp->where('user_id', $viewerId);
+                        });
                 });
             } else {
                 // Guest cannot have read chapters -> return none for ReadOnly
                 $query->whereRaw('1 = 0');
             }
         }
-        $query->orderByRaw('COALESCE(last_chapter_published_at, created_at) DESC');
+        $query->orderByRaw('COALESCE(last_chapter_published_at, created_at) DESC, created_at DESC');
 
-        /** @var LengthAwarePaginator $paginator */
-        $paginator = $query->paginate($filter->perPage, ['*'], 'page', $filter->page);
-        return $paginator;
-    }
-
-    /**
-     * Return a paginator of stories for card display with filters applied.
-     */
-    public function searchStoriesForCardDisplay(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
-    {
-        $query = $this->buildCardListingQuery($filter, $viewerId);
         /** @var LengthAwarePaginator $paginator */
         $paginator = $query->paginate($filter->perPage, ['*'], 'page', $filter->page);
         return $paginator;
@@ -236,96 +273,6 @@ final class StoryRepository
         return $query->get();
     }
 
-    /**
-     * Build the base query used for listing story cards with filters applied.
-     * This centralizes eager-loading and aggregations so card displays stay consistent.
-     */
-    private function buildCardListingQuery(StoryFilterAndPagination $filter, ?int $viewerId = null): Builder
-    {
-        $query = $this->selectFields(GetStoryOptions::ForCardDisplay());
-
-        // Only require a published chapter for general listings; profile owner views can include drafts/no chapters
-        if ($filter->requirePublishedChapter) {
-            $query->whereNotNull('last_chapter_published_at');
-        }
-
-        // Order: newest publication first, then creation date; NULL last_chapter_published_at naturally sorts last on DESC
-        $query->orderByDesc('last_chapter_published_at')
-            ->orderByDesc('created_at');
-
-        // Filter by author user ID (prefer authorId)
-        $authorId = $filter->authorId;
-        if ($authorId !== null) {
-            $query->whereHas('authors', function ($q) use ($authorId) {
-                $q->where('user_id', $authorId);
-            });
-        }
-
-        // Filter by Type if provided
-        if ($filter->typeId !== null) {
-            $query->where('story_ref_type_id', $filter->typeId);
-        }
-
-        // Filter by Audience if provided (multi-select)
-        if (!empty($filter->audienceIds)) {
-            $query->whereIn('story_ref_audience_id', $filter->audienceIds);
-        }
-
-        // Filter by Genres (AND semantics: story must have all selected genre IDs)
-        if (!empty($filter->genreIds)) {
-            foreach ($filter->genreIds as $gid) {
-                $query->whereHas('genres', function ($q) use ($gid) {
-                    $q->where('story_ref_genres.id', $gid);
-                });
-            }
-        }
-
-        // Exclude stories that have ANY of the selected trigger warnings (OR semantics)
-        if (!empty($filter->excludeTriggerWarningIds)) {
-            $ids = $filter->excludeTriggerWarningIds;
-            $query->whereDoesntHave('triggerWarnings', function ($q) use ($ids) {
-                $q->whereIn('story_ref_trigger_warnings.id', $ids);
-            });
-        }
-
-        // Filter only explicit No-TW stories if requested
-        if ($filter->noTwOnly === true) {
-            $query->where('tw_disclosure', Story::TW_NO_TW);
-        }
-
-        // Visibilities already normalized in DTO
-        $visibilities = $filter->visibilities;
-
-        $pubCom = array_values(array_intersect($visibilities, [Story::VIS_PUBLIC, Story::VIS_COMMUNITY]));
-        $includePrivate = in_array(Story::VIS_PRIVATE, $visibilities, true);
-
-        $query->where(function ($w) use ($pubCom, $includePrivate, $viewerId) {
-            $addedAny = false;
-
-            if (!empty($pubCom)) {
-                $w->whereIn('visibility', $pubCom);
-                $addedAny = true;
-            }
-
-            if ($includePrivate && $viewerId !== null) {
-                if ($addedAny) {
-                    $w->orWhere(function ($q) use ($viewerId) {
-                        $q->where('visibility', Story::VIS_PRIVATE)
-                            ->whereHas('collaborators', function ($c) use ($viewerId) {
-                                $c->where('user_id', $viewerId);
-                            });
-                    });
-                } else {
-                    $w->where('visibility', Story::VIS_PRIVATE)
-                        ->whereHas('collaborators', function ($c) use ($viewerId) {
-                            $c->where('user_id', $viewerId);
-                        });
-                }
-            }
-        });
-
-        return $query;
-    }
 
     /**
      * Fetch random stories for discovery, excluding stories authored by the given viewer.

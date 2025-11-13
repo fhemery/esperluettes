@@ -38,17 +38,9 @@ class StoryService
         private AuthPublicApi $authPublicApi,
     ) {}
 
-    /**
-     * Generic listing with optional filters.
-     *
-     * @param StoryFilterAndPagination $filter Filters and pagination (page, perPage, visibilities, userId)
-     * @param int|null $viewerId If provided, include private stories where this user is a collaborator
-     */
-    public function getStories(StoryFilterAndPagination $filter, ?int $viewerId = null): LengthAwarePaginator
-    {
-        return $this->storiesRepository->searchStoriesForCardDisplay($filter, $viewerId);
-    }
-
+    /** 
+     * This is a generic and versatile method to search stories 
+     * */
     public function searchStories(StoryFilterAndPagination $filter, GetStoryOptions $options = new GetStoryOptions()): LengthAwarePaginator
     {
         if (!$filter->visibilities || count($filter->visibilities) === 0) {
