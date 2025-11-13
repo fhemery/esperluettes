@@ -15,12 +15,6 @@ class StoryFilterAndPagination
          */
         public array $visibilities = [Story::VIS_PUBLIC],
         /**
-         * Filtering by author user ID
-         */
-        public ?int $authorId = null,
-        public ?int $typeId = null,
-
-        /**
          * @var array<int, int> Filtering by author user IDs (OR semantics)
          */
         public array $authorIds = [],
