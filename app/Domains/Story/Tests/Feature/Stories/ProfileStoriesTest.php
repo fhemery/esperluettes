@@ -86,15 +86,8 @@ describe('Story list in profile tab', function () {
         $private = privateStory('Contributor Private', $owner->id);
 
         // Add bob as collaborator to the private story
-        DB::table('story_collaborators')->insert([
-            'story_id' => $private->id,
-            'user_id' => $contrib->id,
-            'role' => 'author',
-            'invited_by_user_id' => $owner->id,
-            'invited_at' => now(),
-            'accepted_at' => now(),
-        ]);
-
+        addCollaborator($private->id, $contrib->id, 'betareader');
+        
         $resp = $this->actingAs($contrib)->get("/profiles/{$slug}/stories");
 
         $resp->assertOk();

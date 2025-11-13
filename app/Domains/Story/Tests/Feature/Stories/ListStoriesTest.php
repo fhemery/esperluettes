@@ -12,6 +12,9 @@ beforeEach(function () {
     \Illuminate\Support\Facades\Cache::flush();
 });
 
+// Note: this test is basically checking that the mapping is done correctly.
+// Business rules are tests in deep length in ListStoriesPublicApiTest
+
 describe('Card display', function () {
     it('displays genre badges on list cards', function () {
         // Arrange
@@ -168,48 +171,6 @@ describe('Filtering', function () {
         $resp->assertDontSee('Violent Story');
     });
 
-    it('excludes stories having any of multiple selected trigger warnings (OR)', function () {
-        // Arrange
-        $author = alice($this);
-        $violence = makeTriggerWarning('Violence');
-        $abuse = makeTriggerWarning('Abuse');
-        $drugs = makeTriggerWarning('Drugs');
-
-        $onlyViolence = publicStory('Only Violence', $author->id, [
-            'description' => '<p>Desc</p>',
-            'story_ref_trigger_warning_ids' => [$violence->id],
-        ]);
-        createPublishedChapter($this, $onlyViolence, $author);
-
-        $onlyAbuse = publicStory('Only Abuse', $author->id, [
-            'description' => '<p>Desc</p>',
-            'story_ref_trigger_warning_ids' => [$abuse->id],
-        ]);
-        createPublishedChapter($this, $onlyAbuse, $author);
-
-        $onlyDrugs = publicStory('Only Drugs', $author->id, [
-            'description' => '<p>Desc</p>',
-            'story_ref_trigger_warning_ids' => [$drugs->id],
-        ]);
-        createPublishedChapter($this, $onlyDrugs, $author);
-
-        $cleanNoTw = publicStory('Clean Story', $author->id, [
-            'description' => '<p>Desc</p>',
-            'story_ref_trigger_warning_ids' => [],
-        ]);
-        createPublishedChapter($this, $cleanNoTw, $author);
-
-        // Act: exclude violence and abuse (comma separated)
-        $resp = $this->get('/stories?exclude_tw=' . $violence->slug . ',' . $abuse->slug);
-
-        // Assert: stories having either of the excluded TWs disappear; others remain
-        $resp->assertOk();
-        $resp->assertDontSee('Only Violence');
-        $resp->assertDontSee('Only Abuse');
-        $resp->assertSee('Only Drugs');
-        $resp->assertSee('Clean Story');
-    });
-
     it('filters to only explicit No TW stories when no_tw_only=1', function () {
         // Arrange
         $author = alice($this);
@@ -295,7 +256,6 @@ describe('Filtering', function () {
         $resp->assertDontSee('Only Drama');
     });
 
-
     it('filters stories by type slug', function () {
         // Arrange
         $author = alice($this);
@@ -360,8 +320,6 @@ describe('Filtering', function () {
 });
 
 describe('Story access', function () {
-
-
     it('shows empty state when there are no public stories', function () {
         // Act
         $response = $this->get('/stories');
@@ -493,7 +451,7 @@ describe('Story access', function () {
 });
 
 describe('Ordering and Pagination', function () {
-    it('paginates 24 stories ordered by last published chapter date desc', function () {
+    it('paginates 12 stories ordered by last published chapter date desc', function () {
         // Arrange
         $author = alice($this);
 
@@ -528,87 +486,6 @@ describe('Ordering and Pagination', function () {
         $page2->assertOk();
         $page2->assertSee('Story 06');
         $page2->assertSee('Story 01');
-    });
-
-    it('orders stories by last published chapter date desc on first page', function () {
-        // Arrange
-        $author = alice($this);
-
-        $old = publicStory('Old Story', $author->id, [
-            'description' => '<p>Desc</p>',
-        ]);
-        createPublishedChapter($this, $old, $author);
-        // We are not usually modifying DB directly in tests, but in this case, 
-        // we need to set last_chapter_published_at to a specific value
-        $old->last_chapter_published_at = now()->subMinutes(30);
-        $old->saveQuietly();
-
-        $mid = publicStory('Mid Story', $author->id, [
-            'description' => '<p>Desc</p>',
-        ]);
-        createPublishedChapter($this, $mid, $author);
-        $mid->last_chapter_published_at = now()->subMinutes(20);
-        $mid->saveQuietly();
-
-        $new = publicStory('New Story', $author->id, [
-            'description' => '<p>Desc</p>',
-        ]);
-        createPublishedChapter($this, $new, $author);
-        $new->last_chapter_published_at = now()->subMinutes(10);
-        $new->saveQuietly();
-
-        // Act
-        $resp = $this->get('/stories');
-
-        // Assert ordering by last_chapter_published_at DESC
-        $resp->assertOk();
-        $resp->assertSeeInOrder([
-            'New Story',
-            'Mid Story',
-            'Old Story',
-        ]);
-    });
-
-
-    it('uses created_at as a tiebreaker when last published dates are equal', function () {
-        // Arrange
-        $author = alice($this);
-
-        $t = now()->subHour();
-
-        // Older created_at
-        $olderCreated = publicStory('Older Created', $author->id, [
-            'description' => '<p>Desc</p>',
-        ]);
-        createPublishedChapter($this, $olderCreated, $author);
-
-        // We are not usually modifying DB directly in tests, but in this case, 
-        // we need to set last_chapter_published_at to a specific value
-        // and update created_at and updated_at to match
-        $olderCreated->last_chapter_published_at = $t;
-        $olderCreated->created_at = now()->subDays(2);
-        $olderCreated->updated_at = $olderCreated->created_at;
-        $olderCreated->saveQuietly();
-
-        // Newer created_at (should come first when last_chapter_published_at ties)
-        $newerCreated = publicStory('Newer Created', $author->id, [
-            'description' => '<p>Desc</p>',
-        ]);
-        createPublishedChapter($this, $newerCreated, $author);
-        $newerCreated->last_chapter_published_at = $t;
-        $newerCreated->created_at = now()->subDay();
-        $newerCreated->updated_at = $newerCreated->created_at;
-        $newerCreated->saveQuietly();
-
-        // Act
-        $resp = $this->get('/stories');
-
-        // Assert: ties broken by created_at DESC
-        $resp->assertOk();
-        $resp->assertSeeInOrder([
-            'Newer Created',
-            'Older Created',
-        ]);
     });
 });
 
