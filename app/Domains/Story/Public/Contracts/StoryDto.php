@@ -26,6 +26,7 @@ class StoryDto
         public ?array $genres = null,
         public ?array $triggerWarnings = null,
         public ?array $authors = null,
+        public ?array $collaborators = null,
         public ?array $chapters = null,
         public ?\DateTime $createdAt = null,
         public ?\DateTime $lastChapterPublishedAt = null,
@@ -57,6 +58,9 @@ class StoryDto
         }
         if ($fieldsToReturn->includeAuthors && $helper->profiles) {
             $dto->authors = collect($helper->profiles)->filter(fn($p) => in_array((int) $p->user_id, $story->authors->pluck('user_id')->map(fn($v) => (int) $v)->all(), true))->values()->all();
+        }
+        if ($fieldsToReturn->includeCollaborators && $helper->profiles) {
+            $dto->collaborators = collect($helper->profiles)->filter(fn($p) => in_array((int) $p->user_id, $story->collaborators->pluck('user_id')->map(fn($v) => (int) $v)->all(), true))->values()->all();
         }
         if ($fieldsToReturn->includeChapters) {
             $dto->chapters = $story->chapters->map(fn(Chapter $c) => StoryChapterDto::fromModel($c))->values()->all();

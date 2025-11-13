@@ -73,6 +73,7 @@ class StoryPublicApi
 
         $options = new GetStoryOptions(
             includeAuthors: $fieldsToReturn->includeAuthors,
+            includeCollaborators: $fieldsToReturn->includeCollaborators,
             includeGenreIds: $fieldsToReturn->includeGenreIds,
             includeTriggerWarningIds: $fieldsToReturn->includeTriggerWarningIds,
             includeChapters: $fieldsToReturn->includeChapters,
@@ -83,15 +84,27 @@ class StoryPublicApi
 
         $paginator = $this->storyService->searchStories($fp, $options);
         
-        $profiles = [];
+        $userIdsToRetrieve = [];
         if ($fieldsToReturn->includeAuthors) {
-            $authorIds = collect($paginator->items())
+            $userIdsToRetrieve = collect($paginator->items())
                 ->flatMap(fn($s) => $s->authors->pluck('user_id'))
                 ->unique()
                 ->values()
                 ->all();
-            $profiles = $this->profiles->getPublicProfiles($authorIds);
         }
+        if ($fieldsToReturn->includeCollaborators) {
+            $userIdsToRetrieve = array_merge($userIdsToRetrieve, collect($paginator->items())
+                ->flatMap(fn($s) => $s->collaborators->pluck('user_id'))
+                ->unique()
+                ->values()
+                ->all());
+        }
+
+        $profiles = [];
+        if ($userIdsToRetrieve) {
+            $profiles = $this->profiles->getPublicProfiles($userIdsToRetrieve);
+        }
+        
         $helper = new StoryMapperHelper(
             genres: $fieldsToReturn->includeGenreIds ? $this->storyRefService->getGenres()->all() : [],
             triggerWarnings: $fieldsToReturn->includeTriggerWarningIds ? $this->storyRefService->getTriggerWarnings()->all() : [],

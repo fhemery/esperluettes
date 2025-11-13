@@ -596,6 +596,50 @@ describe('StoryPublicApi::listStories', function () {
             });
         });
 
+        describe('About collaborators', function(){
+            it('excludes collaborators by default', function () {
+                $alice = alice($this);
+                $story = publicStory('With Collaborators', $alice->id);
+                addCollaborator($story->id, bob($this)->id, 'betareader');
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories();
+
+                $dto = $result->data[0];
+                expect($dto->collaborators)->toBeNull();
+            });
+
+            it('returns mapped collaborators when requested', function () {
+                $alice = alice($this);
+                $story = publicStory('With Collaborators', $alice->id);
+                addCollaborator($story->id, bob($this)->id, 'betareader');
+
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeCollaborators: true,
+                );
+
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories(fieldsToReturn: $fields);
+
+                expect($result->data)->toHaveCount(1);
+
+                $dto = $result->data[0];
+                expect($dto->collaborators)->toHaveCount(2);
+
+                $aliceAsCollab = $dto->collaborators[0];
+                expect($aliceAsCollab->user_id)->toBe($alice->id);
+                expect($aliceAsCollab->display_name)->toBe('Alice');
+                expect($aliceAsCollab->slug)->toBe('alice');
+                expect($aliceAsCollab->avatar_url)->not()->toBeNull();
+
+                $bobAsCollab = $dto->collaborators[1];
+                expect($bobAsCollab->user_id)->toBe(bob($this)->id);
+                expect($bobAsCollab->display_name)->toBe('Bob');
+                expect($bobAsCollab->slug)->toBe('bob');
+                expect($bobAsCollab->avatar_url)->not()->toBeNull();
+            });
+        });
+
         describe('About chapters', function () {
             it('excludes chapters by default', function () {
                 $alice = alice($this);
