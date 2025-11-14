@@ -6,12 +6,16 @@ use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 use App\Domains\StoryRef\Private\Models\StoryRefAudience;
+use App\Domains\StoryRef\Private\Models\StoryRefStatus;
 use App\Domains\StoryRef\Private\Services\GenreRefService;
 use App\Domains\StoryRef\Private\Services\AudienceRefService;
+use App\Domains\StoryRef\Private\Services\StatusRefService;
 use App\Domains\StoryRef\Public\Contracts\GenreDto;
 use App\Domains\StoryRef\Public\Contracts\GenreWriteDto;
 use App\Domains\StoryRef\Public\Contracts\AudienceDto;
 use App\Domains\StoryRef\Public\Contracts\AudienceWriteDto;
+use App\Domains\StoryRef\Public\Contracts\StatusDto;
+use App\Domains\StoryRef\Public\Contracts\StatusWriteDto;
 use App\Domains\StoryRef\Public\Contracts\StoryRefFilterDto;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
@@ -22,6 +26,7 @@ class StoryRefPublicApi
         private readonly AuthPublicApi $auth,
         private readonly GenreRefService $genreRefService,
         private readonly AudienceRefService $audienceRefService,
+        private readonly StatusRefService $statusRefService,
     ) {}
 
     /**
@@ -151,6 +156,72 @@ class StoryRefPublicApi
         $this->assertAdminOrTechAdmin();
 
         return $this->audienceRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, StatusDto>
+     */
+    public function getAllStatuses(?StoryRefFilterDto $filter = null): Collection
+    {
+        $dtos = $this->statusRefService->getAll()
+            ->map(fn (StoryRefStatus $model) => StatusDto::fromModel($model));
+
+        $filter = $filter ?? new StoryRefFilterDto();
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (StatusDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getStatusById(int $id): ?StatusDto
+    {
+        $model = $this->statusRefService->getOneById($id);
+
+        return $model ? StatusDto::fromModel($model) : null;
+    }
+
+    public function getStatusBySlug(string $slug): ?StatusDto
+    {
+        $model = $this->statusRefService->getOneBySlug($slug);
+
+        return $model ? StatusDto::fromModel($model) : null;
+    }
+
+    public function createStatus(StatusWriteDto $input): StatusDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->statusRefService->create([
+            'name' => $input->name,
+            'slug' => $input->slug,
+            'description' => $input->description,
+            'is_active' => $input->is_active,
+            'order' => $input->order,
+        ]);
+
+        return StatusDto::fromModel($model);
+    }
+
+    public function updateStatus(int $id, StatusWriteDto $input): ?StatusDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->statusRefService->update($id, [
+            'name' => $input->name,
+            'slug' => $input->slug,
+            'description' => $input->description,
+            'is_active' => $input->is_active,
+            'order' => $input->order,
+        ]);
+
+        return $model ? StatusDto::fromModel($model) : null;
+    }
+
+    public function deleteStatus(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->statusRefService->delete($id);
     }
 
     /**
