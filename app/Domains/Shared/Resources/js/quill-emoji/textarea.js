@@ -106,8 +106,21 @@ export default class TextAreaEmoji extends Module {
   _positionAt(index){
     const bounds = this.quill.getBounds(index);
     const editorRect = this.container.getBoundingClientRect();
-    const top = bounds.bottom + 6; // within editor container
-    const left = bounds.left;
+    const rowHeight = 32; // approximate height of a single emoji row
+    const menuMaxWidth = 260; // matches maxWidth style
+
+    // Prefer below caret if there is room for at least one row
+    let top = bounds.bottom + 6;
+    if (top + rowHeight > editorRect.height) {
+      // Not enough space below: place above caret
+      top = Math.max(0, bounds.top - 6 - rowHeight);
+    }
+
+    let left = bounds.left;
+    if (left + menuMaxWidth > editorRect.width) {
+      left = Math.max(0, editorRect.width - menuMaxWidth - 4);
+    }
+
     this.menu.style.top = `${top}px`;
     this.menu.style.left = `${left}px`;
   }
