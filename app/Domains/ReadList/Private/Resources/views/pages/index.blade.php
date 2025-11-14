@@ -4,6 +4,17 @@
     {{-- This load is need for toggling read/unread on chapters to work, as the chunk is loaded asynchronously --}}
     @include('shared::components.read-toggle-script')
 
+    {{-- Filter form --}}
+    <form method="GET" action="{{ route('readlist.index') }}" class="mb-6">
+        <div class="flex items-center gap-4 justify-end">
+            <input type="checkbox" name="hide_up_to_date" value="1"
+                {{ $hideUpToDate ? 'checked' : '' }}
+                onchange="this.form.submit()"
+                class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
+            <span>{{ __('readlist::page.filters.hide_up_to_date.label') }}</span>
+        </div>
+    </form>
+
     @if ($vm->stories->count() >0)
     <div class="flex flex-col gap-4" x-data="readListInfiniteScroll()">
         {{-- Initial stories --}}
@@ -46,6 +57,7 @@ function readListInfiniteScroll() {
         currentPage: 1,
         hasMore: true,
         isLoading: false,
+        hideUpToDate: @json($hideUpToDate ?? false),
         
         init() {
             // Set initial hasMore based on pagination
@@ -62,6 +74,11 @@ function readListInfiniteScroll() {
                     page: this.currentPage + 1,
                     perPage: 10
                 });
+                
+                // Add filter state if active
+                if (this.hideUpToDate) {
+                    params.append('hide_up_to_date', '1');
+                }
                 
                 const response = await fetch(`{{ route('readlist.load-more') }}?${params}`);
                 const data = await response.json();

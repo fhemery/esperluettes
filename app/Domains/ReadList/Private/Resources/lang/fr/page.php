@@ -17,4 +17,9 @@ return [
     'last_updated_at' => 'Dernière mise à jour le',
     'empty' => 'Votre Pile à Lire est vide ? Pas de panique, ça ne devrait pas durer...',
     'empty_action' => 'Ajouter une histoire',
+    'filters' => [
+        'hide_up_to_date' => [
+            'label' => 'Cacher les histoires à jour',
+        ],
+    ],
 ];

@@ -4,6 +4,7 @@ namespace App\Domains\ReadList\Private\Controllers;
 
 use App\Domains\ReadList\Private\Services\ReadListService;
 use App\Domains\Story\Public\Api\StoryPublicApi;
+use App\Domains\Story\Public\Contracts\StoryQueryReadStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
@@ -27,17 +28,23 @@ class ReadListController
         $user = Auth::user();
         $userId = (int) $user->id;
 
+        // Get filter state from request
+        $hideUpToDate = request('hide_up_to_date') === '1';
+
         // Fetch user's readlist story IDs
         $storyIds = $this->readListService->getStoryIdsForUser($userId);
 
         // If user has no stories in readlist, return empty result
         if (empty($storyIds)) {
             $vm = ReadListIndexViewModel::empty();
-            return view('read-list::pages.index', compact('vm'));
+            return view('read-list::pages.index', compact('vm', 'hideUpToDate'));
         }
 
         // Build filter & pagination (defaults: page 1, perPage 10)
-        $filter = new StoryQueryFilterDto(onlyStoryIds: $storyIds);
+        $filter = new StoryQueryFilterDto(
+            onlyStoryIds: $storyIds,
+            readStatus: $hideUpToDate ? StoryQueryReadStatus::UnreadOnly : StoryQueryReadStatus::All
+        );
         $pagination = new StoryQueryPaginationDto(page: 1, pageSize: 10);
         // We need authors, genre ids and trigger warning ids to build names and links
         $fields = new StoryQueryFieldsToReturnDto(
@@ -52,7 +59,7 @@ class ReadListController
         $result = $this->storyApi->listStories($filter, $pagination, $fields);
         $vm = ReadListIndexViewModel::fromPaginated($result);
 
-        return view('read-list::pages.index', compact('vm'));
+        return view('read-list::pages.index', compact('vm', 'hideUpToDate'));
     }
 
     public function add(int $storyId): RedirectResponse
@@ -108,6 +115,9 @@ class ReadListController
         // Get pagination parameters from request
         $page = (int) request('page', 2); // Default to page 2 for load more
         $perPage = (int) request('perPage', 10);
+        
+        // Get filter state from request
+        $hideUpToDate = request('hide_up_to_date') === '1';
 
         // Fetch user's readlist story IDs
         $storyIds = $this->readListService->getStoryIdsForUser($userId);
@@ -123,7 +133,10 @@ class ReadListController
         }
 
         // Build filter & pagination
-        $filter = new StoryQueryFilterDto(onlyStoryIds: $storyIds);
+        $filter = new StoryQueryFilterDto(
+            onlyStoryIds: $storyIds,
+            readStatus: $hideUpToDate ? StoryQueryReadStatus::UnreadOnly : StoryQueryReadStatus::All
+        );
         $pagination = new StoryQueryPaginationDto(page: $page, pageSize: $perPage);
         
         // Build fields to return
