@@ -9,11 +9,13 @@ use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 use App\Domains\StoryRef\Private\Models\StoryRefAudience;
 use App\Domains\StoryRef\Private\Models\StoryRefStatus;
 use App\Domains\StoryRef\Private\Models\StoryRefFeedback;
+use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 use App\Domains\StoryRef\Private\Services\TypeRefService;
 use App\Domains\StoryRef\Private\Services\GenreRefService;
 use App\Domains\StoryRef\Private\Services\AudienceRefService;
 use App\Domains\StoryRef\Private\Services\StatusRefService;
 use App\Domains\StoryRef\Private\Services\FeedbackRefService;
+use App\Domains\StoryRef\Private\Services\TriggerWarningRefService;
 use App\Domains\StoryRef\Public\Contracts\TypeDto;
 use App\Domains\StoryRef\Public\Contracts\TypeWriteDto;
 use App\Domains\StoryRef\Public\Contracts\GenreDto;
@@ -24,6 +26,8 @@ use App\Domains\StoryRef\Public\Contracts\StatusDto;
 use App\Domains\StoryRef\Public\Contracts\StatusWriteDto;
 use App\Domains\StoryRef\Public\Contracts\FeedbackDto;
 use App\Domains\StoryRef\Public\Contracts\FeedbackWriteDto;
+use App\Domains\StoryRef\Public\Contracts\TriggerWarningDto;
+use App\Domains\StoryRef\Public\Contracts\TriggerWarningWriteDto;
 use App\Domains\StoryRef\Public\Contracts\StoryRefFilterDto;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
@@ -37,6 +41,7 @@ class StoryRefPublicApi
         private readonly AudienceRefService $audienceRefService,
         private readonly StatusRefService $statusRefService,
         private readonly FeedbackRefService $feedbackRefService,
+        private readonly TriggerWarningRefService $triggerWarningRefService,
     ) {}
 
     /**
@@ -362,6 +367,72 @@ class StoryRefPublicApi
         $this->assertAdminOrTechAdmin();
 
         return $this->feedbackRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, TriggerWarningDto>
+     */
+    public function getAllTriggerWarnings(?StoryRefFilterDto $filter = null): Collection
+    {
+        $dtos = $this->triggerWarningRefService->getAll()
+            ->map(fn (StoryRefTriggerWarning $model) => TriggerWarningDto::fromModel($model));
+
+        $filter = $filter ?? new StoryRefFilterDto();
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (TriggerWarningDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getTriggerWarningById(int $id): ?TriggerWarningDto
+    {
+        $model = $this->triggerWarningRefService->getOneById($id);
+
+        return $model ? TriggerWarningDto::fromModel($model) : null;
+    }
+
+    public function getTriggerWarningBySlug(string $slug): ?TriggerWarningDto
+    {
+        $model = $this->triggerWarningRefService->getOneBySlug($slug);
+
+        return $model ? TriggerWarningDto::fromModel($model) : null;
+    }
+
+    public function createTriggerWarning(TriggerWarningWriteDto $input): TriggerWarningDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->triggerWarningRefService->create([
+            'name' => $input->name,
+            'slug' => $input->slug,
+            'description' => $input->description,
+            'is_active' => $input->is_active,
+            'order' => $input->order,
+        ]);
+
+        return TriggerWarningDto::fromModel($model);
+    }
+
+    public function updateTriggerWarning(int $id, TriggerWarningWriteDto $input): ?TriggerWarningDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->triggerWarningRefService->update($id, [
+            'name' => $input->name,
+            'slug' => $input->slug,
+            'description' => $input->description,
+            'is_active' => $input->is_active,
+            'order' => $input->order,
+        ]);
+
+        return $model ? TriggerWarningDto::fromModel($model) : null;
+    }
+
+    public function deleteTriggerWarning(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->triggerWarningRefService->delete($id);
     }
 
     /**

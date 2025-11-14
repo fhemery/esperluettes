@@ -11,6 +11,8 @@ use App\Domains\StoryRef\Public\Contracts\FeedbackDto;
 use App\Domains\StoryRef\Public\Contracts\FeedbackWriteDto;
 use App\Domains\StoryRef\Public\Contracts\TypeDto;
 use App\Domains\StoryRef\Public\Contracts\TypeWriteDto;
+use App\Domains\StoryRef\Public\Contracts\TriggerWarningDto;
+use App\Domains\StoryRef\Public\Contracts\TriggerWarningWriteDto;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -120,4 +122,26 @@ function makeRefType(TestCase $t, string $name, array $overrides = []): TypeDto
     );
 
     return $api->createType($write);
+}
+
+/**
+ * Create a StoryRef TriggerWarning through the public API for tests.
+ */
+function makeRefTriggerWarning(TestCase $t, string $name, array $overrides = []): TriggerWarningDto
+{
+    $admin = admin($t);
+    $t->actingAs($admin);
+
+    /** @var StoryRefPublicApi $api */
+    $api = app(StoryRefPublicApi::class);
+
+    $write = new TriggerWarningWriteDto(
+        slug: $overrides['slug'] ?? Str::slug($name),
+        name: $name,
+        description: $overrides['description'] ?? null,
+        is_active: $overrides['is_active'] ?? true,
+        order: $overrides['order'] ?? null,
+    );
+
+    return $api->createTriggerWarning($write);
 }
