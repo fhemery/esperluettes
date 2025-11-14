@@ -10,12 +10,14 @@ use App\Domains\StoryRef\Private\Models\StoryRefAudience;
 use App\Domains\StoryRef\Private\Models\StoryRefStatus;
 use App\Domains\StoryRef\Private\Models\StoryRefFeedback;
 use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
+use App\Domains\StoryRef\Private\Models\StoryRefCopyright;
 use App\Domains\StoryRef\Private\Services\TypeRefService;
 use App\Domains\StoryRef\Private\Services\GenreRefService;
 use App\Domains\StoryRef\Private\Services\AudienceRefService;
 use App\Domains\StoryRef\Private\Services\StatusRefService;
 use App\Domains\StoryRef\Private\Services\FeedbackRefService;
 use App\Domains\StoryRef\Private\Services\TriggerWarningRefService;
+use App\Domains\StoryRef\Private\Services\CopyrightRefService;
 use App\Domains\StoryRef\Public\Contracts\TypeDto;
 use App\Domains\StoryRef\Public\Contracts\TypeWriteDto;
 use App\Domains\StoryRef\Public\Contracts\GenreDto;
@@ -28,6 +30,8 @@ use App\Domains\StoryRef\Public\Contracts\FeedbackDto;
 use App\Domains\StoryRef\Public\Contracts\FeedbackWriteDto;
 use App\Domains\StoryRef\Public\Contracts\TriggerWarningDto;
 use App\Domains\StoryRef\Public\Contracts\TriggerWarningWriteDto;
+use App\Domains\StoryRef\Public\Contracts\CopyrightDto;
+use App\Domains\StoryRef\Public\Contracts\CopyrightWriteDto;
 use App\Domains\StoryRef\Public\Contracts\StoryRefFilterDto;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
@@ -42,6 +46,7 @@ class StoryRefPublicApi
         private readonly StatusRefService $statusRefService,
         private readonly FeedbackRefService $feedbackRefService,
         private readonly TriggerWarningRefService $triggerWarningRefService,
+        private readonly CopyrightRefService $copyrightRefService,
     ) {}
 
     /**
@@ -106,6 +111,72 @@ class StoryRefPublicApi
         $this->assertAdminOrTechAdmin();
 
         return $this->typeRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, CopyrightDto>
+     */
+    public function getAllCopyrights(?StoryRefFilterDto $filter = null): Collection
+    {
+        $dtos = $this->copyrightRefService->getAll()
+            ->map(fn (StoryRefCopyright $model) => CopyrightDto::fromModel($model));
+
+        $filter = $filter ?? new StoryRefFilterDto();
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (CopyrightDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getCopyrightById(int $id): ?CopyrightDto
+    {
+        $model = $this->copyrightRefService->getOneById($id);
+
+        return $model ? CopyrightDto::fromModel($model) : null;
+    }
+
+    public function getCopyrightBySlug(string $slug): ?CopyrightDto
+    {
+        $model = $this->copyrightRefService->getOneBySlug($slug);
+
+        return $model ? CopyrightDto::fromModel($model) : null;
+    }
+
+    public function createCopyright(CopyrightWriteDto $input): CopyrightDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->copyrightRefService->create([
+            'name' => $input->name,
+            'slug' => $input->slug,
+            'description' => $input->description,
+            'is_active' => $input->is_active,
+            'order' => $input->order,
+        ]);
+
+        return CopyrightDto::fromModel($model);
+    }
+
+    public function updateCopyright(int $id, CopyrightWriteDto $input): ?CopyrightDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->copyrightRefService->update($id, [
+            'name' => $input->name,
+            'slug' => $input->slug,
+            'description' => $input->description,
+            'is_active' => $input->is_active,
+            'order' => $input->order,
+        ]);
+
+        return $model ? CopyrightDto::fromModel($model) : null;
+    }
+
+    public function deleteCopyright(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->copyrightRefService->delete($id);
     }
 
     /**

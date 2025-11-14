@@ -13,6 +13,8 @@ use App\Domains\StoryRef\Public\Contracts\TypeDto;
 use App\Domains\StoryRef\Public\Contracts\TypeWriteDto;
 use App\Domains\StoryRef\Public\Contracts\TriggerWarningDto;
 use App\Domains\StoryRef\Public\Contracts\TriggerWarningWriteDto;
+use App\Domains\StoryRef\Public\Contracts\CopyrightDto;
+use App\Domains\StoryRef\Public\Contracts\CopyrightWriteDto;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -144,4 +146,26 @@ function makeRefTriggerWarning(TestCase $t, string $name, array $overrides = [])
     );
 
     return $api->createTriggerWarning($write);
+}
+
+/**
+ * Create a StoryRef Copyright through the public API for tests.
+ */
+function makeRefCopyright(TestCase $t, string $name, array $overrides = []): CopyrightDto
+{
+    $admin = admin($t);
+    $t->actingAs($admin);
+
+    /** @var StoryRefPublicApi $api */
+    $api = app(StoryRefPublicApi::class);
+
+    $write = new CopyrightWriteDto(
+        slug: $overrides['slug'] ?? Str::slug($name),
+        name: $name,
+        description: $overrides['description'] ?? null,
+        is_active: $overrides['is_active'] ?? true,
+        order: $overrides['order'] ?? null,
+    );
+
+    return $api->createCopyright($write);
 }
