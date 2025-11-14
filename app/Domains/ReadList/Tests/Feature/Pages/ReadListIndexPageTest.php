@@ -102,4 +102,70 @@ describe('ReadList page', function () {
             $this->assertEquals(3, $data['nextPage']);
         });
     });
+
+    describe('genre filter', function () {
+        it('shows the genre select next to the up-to-date checkbox', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            $response = $this->get(route('readlist.index'));
+            $response
+                ->assertOk()
+                ->assertSee('readlist::page.filters.genre.placeholder');
+        });
+
+        it('displays available genres inside the dropdown', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+            makeRefGenre('Fantasy');
+
+            $response = $this->get(route('readlist.index'));
+
+            $response
+                ->assertOk()
+                // Seeded StoryRef data contains a "Fantasy" genre
+                ->assertSee('Fantasy');
+        });
+
+        it('filters stories by the selected genre', function () {
+            $author = alice($this);
+            $reader = bob($this);
+
+            // Create two genres
+            $fantasy = makeRefGenre('Fantasy');
+            $romance = makeRefGenre('Romance');
+
+            setUserCredits($author->id, 10);
+
+            // Story with Fantasy genre
+            $this->actingAs($author);
+            $fantasyStory = publicStory('Fantasy Story', $author->id, [
+                'story_ref_genre_ids' => [$fantasy->id],
+            ]);
+            createPublishedChapter($this, $fantasyStory, $author);
+
+            // Story with Romance genre
+            $romanceStory = publicStory('Romance Story', $author->id, [
+                'story_ref_genre_ids' => [$romance->id],
+            ]);
+            createPublishedChapter($this, $romanceStory, $author);
+
+            // Add both stories to reader's readlist
+            $this->actingAs($reader);
+            addToReadList($this, $fantasyStory->id);
+            addToReadList($this, $romanceStory->id);
+
+            // Without genre filter, both stories should be visible
+            $this->get(route('readlist.index'))
+                ->assertOk()
+                ->assertSee('Fantasy Story')
+                ->assertSee('Romance Story');
+
+            // With genre filter set to Fantasy, only Fantasy Story should be visible
+            $this->get(route('readlist.index', ['genre_id' => $fantasy->id]))
+                ->assertOk()
+                ->assertSee('Fantasy Story')
+                ->assertDontSee('Romance Story');
+        });
+    });
 });

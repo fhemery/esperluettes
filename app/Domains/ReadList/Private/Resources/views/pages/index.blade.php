@@ -7,11 +7,22 @@
     {{-- Filter form --}}
     <form method="GET" action="{{ route('readlist.index') }}" class="mb-6">
         <div class="flex items-center gap-4 justify-end">
-            <input type="checkbox" name="hide_up_to_date" value="1"
-                {{ $hideUpToDate ? 'checked' : '' }}
-                onchange="this.form.submit()"
-                class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
-            <span>{{ __('readlist::page.filters.hide_up_to_date.label') }}</span>
+             <div class="flex items-center gap-2 w-64">
+                <x-shared::select-with-tooltips
+                    name="genre_id"
+                    :options="$vm->genres"
+                    :selected="request('genre_id')"
+                    :placeholder="__('readlist::page.filters.genre.placeholder')"
+                    x-on:selection-changed.window="$el.closest('form').submit()"
+                />
+            </div>
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="hide_up_to_date" value="1"
+                    {{ $hideUpToDate ? 'checked' : '' }}
+                    onchange="this.form.submit()"
+                    class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
+                <span>{{ __('readlist::page.filters.hide_up_to_date.label') }}</span>
+            </label>
         </div>
     </form>
 
@@ -58,6 +69,7 @@ function readListInfiniteScroll() {
         hasMore: true,
         isLoading: false,
         hideUpToDate: @json($hideUpToDate ?? false),
+        selectedGenreId: @json(request('genre_id')),
         
         init() {
             // Set initial hasMore based on pagination
@@ -78,6 +90,10 @@ function readListInfiniteScroll() {
                 // Add filter state if active
                 if (this.hideUpToDate) {
                     params.append('hide_up_to_date', '1');
+                }
+
+                if (this.selectedGenreId) {
+                    params.append('genre_id', this.selectedGenreId);
                 }
                 
                 const response = await fetch(`{{ route('readlist.load-more') }}?${params}`);

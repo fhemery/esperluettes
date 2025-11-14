@@ -529,6 +529,7 @@ deptrac:
       - EventsPublic
       - StoryPublic
       - NotificationPublic
+      - StoryRefPublic
 
     StaticPagePrivate:
       - Shared

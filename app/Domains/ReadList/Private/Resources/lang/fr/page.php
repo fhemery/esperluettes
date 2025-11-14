@@ -21,5 +21,8 @@ return [
         'hide_up_to_date' => [
             'label' => 'Cacher les histoires à jour',
         ],
+        'genre' => [
+            'placeholder' => 'Tous les genres',
+        ],
     ],
 ];

@@ -4,6 +4,7 @@ namespace App\Domains\ReadList\Private\Controllers;
 
 use App\Domains\ReadList\Private\Services\ReadListService;
 use App\Domains\Story\Public\Api\StoryPublicApi;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use App\Domains\Story\Public\Contracts\StoryQueryReadStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +20,8 @@ class ReadListController
 {
     public function __construct(
         private ReadListService $readListService,
-        private StoryPublicApi $storyApi
+        private StoryPublicApi $storyApi,
+        private StoryRefPublicApi $storyRefApi,
     ) {
     }
 
@@ -30,20 +32,35 @@ class ReadListController
 
         // Get filter state from request
         $hideUpToDate = request('hide_up_to_date') === '1';
+        $genreId = request('genre_id');
+        $genreIds = $genreId ? [(int) $genreId] : [];
 
         // Fetch user's readlist story IDs
         $storyIds = $this->readListService->getStoryIdsForUser($userId);
 
+        // Load active genres for the filter dropdown
+        $genres = $this->storyRefApi->getAllGenres();
+        $genreOptions = $genres
+            ->map(fn ($genre) => [
+                'id' => $genre->id,
+                'name' => $genre->name,
+                'description' => $genre->description ?? '',
+            ])
+            ->values()
+            ->all();
+
         // If user has no stories in readlist, return empty result
         if (empty($storyIds)) {
             $vm = ReadListIndexViewModel::empty();
+            $vm->genres = collect($genreOptions);
             return view('read-list::pages.index', compact('vm', 'hideUpToDate'));
         }
 
         // Build filter & pagination (defaults: page 1, perPage 10)
         $filter = new StoryQueryFilterDto(
             onlyStoryIds: $storyIds,
-            readStatus: $hideUpToDate ? StoryQueryReadStatus::UnreadOnly : StoryQueryReadStatus::All
+            readStatus: $hideUpToDate ? StoryQueryReadStatus::UnreadOnly : StoryQueryReadStatus::All,
+            genreIds: $genreIds,
         );
         $pagination = new StoryQueryPaginationDto(page: 1, pageSize: 10);
         // We need authors, genre ids and trigger warning ids to build names and links
@@ -58,6 +75,7 @@ class ReadListController
         // Query stories and build view model
         $result = $this->storyApi->listStories($filter, $pagination, $fields);
         $vm = ReadListIndexViewModel::fromPaginated($result);
+        $vm->genres = collect($genreOptions);
 
         return view('read-list::pages.index', compact('vm', 'hideUpToDate'));
     }
@@ -118,6 +136,8 @@ class ReadListController
         
         // Get filter state from request
         $hideUpToDate = request('hide_up_to_date') === '1';
+        $genreId = request('genre_id');
+        $genreIds = $genreId ? [(int) $genreId] : [];
 
         // Fetch user's readlist story IDs
         $storyIds = $this->readListService->getStoryIdsForUser($userId);
@@ -135,7 +155,8 @@ class ReadListController
         // Build filter & pagination
         $filter = new StoryQueryFilterDto(
             onlyStoryIds: $storyIds,
-            readStatus: $hideUpToDate ? StoryQueryReadStatus::UnreadOnly : StoryQueryReadStatus::All
+            readStatus: $hideUpToDate ? StoryQueryReadStatus::UnreadOnly : StoryQueryReadStatus::All,
+            genreIds: $genreIds,
         );
         $pagination = new StoryQueryPaginationDto(page: $page, pageSize: $perPage);
         
