@@ -411,6 +411,7 @@ deptrac:
     StoryRefPublic:
       - Shared
       - EventsPublic
+      - AuthPublic
       - StoryRefPrivate
 
     # ###################################################
@@ -640,6 +641,12 @@ deptrac:
       - ProfilePublic
       - StoryRefPublic
       - StoryRefPrivate
+
+    StoryRefTests:
+      - Shared
+      - TestHelpers
+      - StoryRefPrivate
+      - StoryRefPublic
 
     AdminTests:
       - Shared
