@@ -10,7 +10,7 @@
   'resizable' => true,
   ])
   
-<div {{ $attributes->merge(['class' => 'rich-content']) }}>
+<div {{ $attributes->merge(['class' => 'rich-content w-full']) }}>
     <div class="surface-read text-on-surface w-full {{ $indentParagraphs ? 'ql-indent' : '' }}">
       <div id="{{ $id }}" data-placeholder="{{ $placeholder }}" data-nb-lines="{{ $nbLines }}" data-is-mandatory="{{ $isMandatory ? 'true' : 'false' }}" data-clean-label="{{ __('shared::editor.clean') }}" data-resizable="{{ $resizable ? 'true' : 'false' }}" @if($min) data-min="{{ (int) $min }}" @endif @if($max) data-max="{{ (int) $max }}" @endif></div>
     </div>

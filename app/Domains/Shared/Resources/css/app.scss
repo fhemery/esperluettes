@@ -125,6 +125,8 @@ html {
 
 .rich-content p {
   padding-bottom: .75rem;
+  white-space-collapse: preserve;
+  word-break: break-word;
 
   &:last-of-type {
     padding-bottom: 0;
