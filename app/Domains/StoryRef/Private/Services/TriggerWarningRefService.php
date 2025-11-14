@@ -141,7 +141,7 @@ class TriggerWarningRefService
         return $deleted;
     }
 
-    private function clearCache(): void
+    public function clearCache(): void
     {
         $this->cache->forget('storyref:trigger_warnings:public:list');
     }

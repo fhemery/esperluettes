@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\StoryRef\FeedbackResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\StoryRef\FeedbackResource;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateFeedback extends CreateRecord
@@ -17,6 +17,6 @@ class CreateFeedback extends CreateRecord
 
     protected function afterCreate(): void
     {
-        app(StoryRefLookupService::class)->clearCache();
+        app(StoryRefPublicApi::class)->clearUiCache();
     }
 }

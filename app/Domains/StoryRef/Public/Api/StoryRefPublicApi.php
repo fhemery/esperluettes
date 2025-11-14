@@ -17,6 +17,7 @@ use App\Domains\StoryRef\Private\Services\AudienceRefService;
 use App\Domains\StoryRef\Private\Services\StatusRefService;
 use App\Domains\StoryRef\Private\Services\FeedbackRefService;
 use App\Domains\StoryRef\Private\Services\TriggerWarningRefService;
+use App\Domains\StoryRef\Private\Services\StoryRefCache;
 use App\Domains\StoryRef\Private\Services\CopyrightRefService;
 use App\Domains\StoryRef\Public\Contracts\TypeDto;
 use App\Domains\StoryRef\Public\Contracts\TypeWriteDto;
@@ -50,6 +51,20 @@ class StoryRefPublicApi
         private readonly TriggerWarningRefService $triggerWarningRefService,
         private readonly CopyrightRefService $copyrightRefService,
     ) {}
+
+    /**
+     * Method called by the admin module whenever it tampers with referential data
+     */
+    public function clearUiCache(): void
+    {
+        $this->typeRefService->clearCache();
+        $this->genreRefService->clearCache();
+        $this->audienceRefService->clearCache();
+        $this->statusRefService->clearCache();
+        $this->feedbackRefService->clearCache();
+        $this->triggerWarningRefService->clearCache();
+        $this->copyrightRefService->clearCache();
+    }
 
     public function getAllStoryReferentials(StoryRefFilterDto $filter = new StoryRefFilterDto()): StoryRefsDto
     {

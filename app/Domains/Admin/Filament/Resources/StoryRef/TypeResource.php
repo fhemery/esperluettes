@@ -4,7 +4,7 @@ namespace App\Domains\Admin\Filament\Resources\StoryRef;
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\StoryRef\Private\Models\StoryRefType;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -66,11 +66,11 @@ class TypeResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()->iconButton()->label(''),
                 Tables\Actions\DeleteAction::make()->iconButton()->label('')
-                    ->after(fn() => app(StoryRefLookupService::class)->clearCache()),
+                    ->after(fn() => app(StoryRefPublicApi::class)->clearUiCache()),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
-                    ->after(fn() => app(StoryRefLookupService::class)->clearCache()),
+                    ->after(fn() => app(StoryRefPublicApi::class)->clearUiCache()),
             ])
             ->defaultSort('order');
     }

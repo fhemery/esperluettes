@@ -141,7 +141,7 @@ class GenreRefService
         return $deleted;
     }
 
-    private function clearCache(): void
+    public function clearCache(): void
     {
         $this->cache->forget('storyref:genres:public:list');
     }
