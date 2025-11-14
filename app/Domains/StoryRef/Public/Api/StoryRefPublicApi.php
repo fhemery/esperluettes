@@ -33,6 +33,7 @@ use App\Domains\StoryRef\Public\Contracts\TriggerWarningWriteDto;
 use App\Domains\StoryRef\Public\Contracts\CopyrightDto;
 use App\Domains\StoryRef\Public\Contracts\CopyrightWriteDto;
 use App\Domains\StoryRef\Public\Contracts\StoryRefFilterDto;
+use App\Domains\StoryRef\Public\Contracts\StoryRefsDto;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
 
@@ -49,15 +50,26 @@ class StoryRefPublicApi
         private readonly CopyrightRefService $copyrightRefService,
     ) {}
 
+    public function getAllStoryReferentials(StoryRefFilterDto $filter = new StoryRefFilterDto()): StoryRefsDto
+    {
+        return new StoryRefsDto(
+            types: $this->getAllTypes($filter),
+            genres: $this->getAllGenres($filter),
+            audiences: $this->getAllAudiences($filter),
+            statuses: $this->getAllStatuses($filter),
+            triggerWarnings: $this->getAllTriggerWarnings($filter),
+            feedbacks: $this->getAllFeedbacks($filter),
+            copyrights: $this->getAllCopyrights($filter),
+        );
+    }
+
     /**
      * @return Collection<int, TypeDto>
      */
-    public function getAllTypes(?StoryRefFilterDto $filter = null): Collection
+    public function getAllTypes(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
     {
         $dtos = $this->typeRefService->getAll()
             ->map(fn (StoryRefType $model) => TypeDto::fromModel($model));
-
-        $filter = $filter ?? new StoryRefFilterDto();
 
         if ($filter->activeOnly) {
             $dtos = $dtos->filter(fn (TypeDto $dto) => $dto->is_active);
@@ -116,12 +128,10 @@ class StoryRefPublicApi
     /**
      * @return Collection<int, CopyrightDto>
      */
-    public function getAllCopyrights(?StoryRefFilterDto $filter = null): Collection
+    public function getAllCopyrights(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
     {
         $dtos = $this->copyrightRefService->getAll()
             ->map(fn (StoryRefCopyright $model) => CopyrightDto::fromModel($model));
-
-        $filter = $filter ?? new StoryRefFilterDto();
 
         if ($filter->activeOnly) {
             $dtos = $dtos->filter(fn (CopyrightDto $dto) => $dto->is_active);
@@ -182,12 +192,10 @@ class StoryRefPublicApi
     /**
      * @return Collection<int, GenreDto>
      */
-    public function getAllGenres(?StoryRefFilterDto $filter = null): Collection
+    public function getAllGenres(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
     {
         $dtos = $this->genreRefService->getAll()
             ->map(fn (StoryRefGenre $model) => GenreDto::fromModel($model));
-
-        $filter = $filter ?? new StoryRefFilterDto();
 
         if ($filter->activeOnly) {
             $dtos = $dtos->filter(fn (GenreDto $dto) => $dto->is_active);
@@ -247,12 +255,10 @@ class StoryRefPublicApi
     /**
      * @return Collection<int, AudienceDto>
      */
-    public function getAllAudiences(?StoryRefFilterDto $filter = null): Collection
+    public function getAllAudiences(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
     {
         $dtos = $this->audienceRefService->getAll()
             ->map(fn (StoryRefAudience $model) => AudienceDto::fromModel($model));
-
-        $filter = $filter ?? new StoryRefFilterDto();
 
         if ($filter->activeOnly) {
             $dtos = $dtos->filter(fn (AudienceDto $dto) => $dto->is_active);
@@ -311,12 +317,10 @@ class StoryRefPublicApi
     /**
      * @return Collection<int, StatusDto>
      */
-    public function getAllStatuses(?StoryRefFilterDto $filter = null): Collection
+    public function getAllStatuses(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
     {
         $dtos = $this->statusRefService->getAll()
             ->map(fn (StoryRefStatus $model) => StatusDto::fromModel($model));
-
-        $filter = $filter ?? new StoryRefFilterDto();
 
         if ($filter->activeOnly) {
             $dtos = $dtos->filter(fn (StatusDto $dto) => $dto->is_active);
@@ -377,12 +381,10 @@ class StoryRefPublicApi
     /**
      * @return Collection<int, FeedbackDto>
      */
-    public function getAllFeedbacks(?StoryRefFilterDto $filter = null): Collection
+    public function getAllFeedbacks(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
     {
         $dtos = $this->feedbackRefService->getAll()
             ->map(fn (StoryRefFeedback $model) => FeedbackDto::fromModel($model));
-
-        $filter = $filter ?? new StoryRefFilterDto();
 
         if ($filter->activeOnly) {
             $dtos = $dtos->filter(fn (FeedbackDto $dto) => $dto->is_active);
@@ -443,12 +445,10 @@ class StoryRefPublicApi
     /**
      * @return Collection<int, TriggerWarningDto>
      */
-    public function getAllTriggerWarnings(?StoryRefFilterDto $filter = null): Collection
+    public function getAllTriggerWarnings(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
     {
         $dtos = $this->triggerWarningRefService->getAll()
             ->map(fn (StoryRefTriggerWarning $model) => TriggerWarningDto::fromModel($model));
-
-        $filter = $filter ?? new StoryRefFilterDto();
 
         if ($filter->activeOnly) {
             $dtos = $dtos->filter(fn (TriggerWarningDto $dto) => $dto->is_active);
