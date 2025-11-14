@@ -7,6 +7,8 @@ use App\Domains\StoryRef\Public\Contracts\AudienceDto;
 use App\Domains\StoryRef\Public\Contracts\AudienceWriteDto;
 use App\Domains\StoryRef\Public\Contracts\StatusDto;
 use App\Domains\StoryRef\Public\Contracts\StatusWriteDto;
+use App\Domains\StoryRef\Public\Contracts\FeedbackDto;
+use App\Domains\StoryRef\Public\Contracts\FeedbackWriteDto;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -73,4 +75,26 @@ function makeRefStatus(TestCase $t, string $name, array $overrides = []): Status
     );
 
     return $api->createStatus($write);
+}
+
+/**
+ * Create a StoryRef Feedback through the public API for tests.
+ */
+function makeRefFeedback(TestCase $t, string $name, array $overrides = []): FeedbackDto
+{
+    $admin = admin($t);
+    $t->actingAs($admin);
+
+    /** @var StoryRefPublicApi $api */
+    $api = app(StoryRefPublicApi::class);
+
+    $write = new FeedbackWriteDto(
+        slug: $overrides['slug'] ?? Str::slug($name),
+        name: $name,
+        description: $overrides['description'] ?? null,
+        is_active: $overrides['is_active'] ?? true,
+        order: $overrides['order'] ?? null,
+    );
+
+    return $api->createFeedback($write);
 }
