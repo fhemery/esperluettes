@@ -19,10 +19,6 @@ return new class extends Migration {
             $table->foreign('story_id')
                 ->references('id')->on('stories')
                 ->onDelete('cascade');
-
-            $table->foreign('story_ref_trigger_warning_id', 'fk_story_trigwarn_ref_id')
-                ->references('id')->on('story_ref_trigger_warnings')
-                ->onDelete('cascade');
         });
     }
 

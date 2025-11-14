@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\StoryRef\TriggerWarningResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\StoryRef\TriggerWarningResource;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTriggerWarning extends EditRecord
@@ -12,6 +12,6 @@ class EditTriggerWarning extends EditRecord
 
     protected function afterSave(): void
     {
-        app(StoryRefLookupService::class)->clearCache();
+        app(StoryRefPublicApi::class)->clearUiCache();
     }
 }

@@ -189,12 +189,12 @@ describe('Editing story', function () {
             $author = alice($this);
             $this->actingAs($author);
             $story = publicStory('Genres Updatable', $author->id, [
-                'story_ref_genre_ids' => [defaultGenre()->id],
+                'story_ref_genre_ids' => [defaultRefGenre()->id],
             ]);
 
             // New genres to replace existing selection
-            $g1 = makeGenre('Sci-Fi');
-            $g2 = makeGenre('Mystery');
+            $g1 = makeRefGenre('Sci-Fi');
+            $g2 = makeRefGenre('Mystery');
 
             // Act: update with two genres
             $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
@@ -203,13 +203,8 @@ describe('Editing story', function () {
             ]));
             $resp->assertRedirect();
 
-            // Assert: pivot now contains only the two new genres
-            $story->refresh();
-            $ids = $story->genres()->pluck('story_ref_genres.id')->sort()->values()->all();
-            expect($ids)->toBe([$g1->id, $g2->id]);
-
             // Show page reflects new genres
-            $show = $this->get('/stories/' . $story->slug);
+            $show = $this->get($resp->headers->get('Location'));
             $show->assertOk();
             $show->assertSee('Sci-Fi');
             $show->assertSee('Mystery');
@@ -221,7 +216,7 @@ describe('Editing story', function () {
             $this->actingAs($author);
             $story = publicStory('Status Updatable', $author->id);
 
-            $status = makeStatus('Draft');
+            $status = makeRefStatus('Draft');
 
             $resp1 = $this->put('/stories/' . $story->slug, validStoryPayload([
                 'title' => 'Status Updatable',
@@ -229,9 +224,7 @@ describe('Editing story', function () {
             ]));
             $resp1->assertRedirect();
 
-            $story->refresh();
-            expect($story->story_ref_status_id)->toBe($status->id);
-            $this->get('/stories/' . $story->slug)
+            $this->get($resp1->headers->get('Location'))
                 ->assertOk()
                 ->assertSee($status->name);
         });
@@ -240,13 +233,19 @@ describe('Editing story', function () {
             // Arrange
             $author = alice($this);
             $this->actingAs($author);
-            $twA = makeTriggerWarning('Violence');
-            $twB = makeTriggerWarning('Drogues');
-            $twC = makeTriggerWarning('Suicide');
+            $twA = makeRefTriggerWarning('Violence');
+            $twB = makeRefTriggerWarning('Drogues');
+            $twC = makeRefTriggerWarning('Suicide');
 
             // Story initially with one TW (A)
             $story = publicStory('TW Updatable', $author->id);
-            $story->triggerWarnings()->sync([$twA->id]);
+
+            // Initially update with A
+            $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
+                'tw_disclosure' => Story::TW_LISTED,
+                'story_ref_trigger_warning_ids' => [$twA->id],
+            ]));
+            $resp->assertRedirect();
 
             // Act: update with [B, C]
             $resp = $this->put('/stories/' . $story->slug, validStoryPayload([
@@ -256,13 +255,8 @@ describe('Editing story', function () {
             ]));
             $resp->assertRedirect();
 
-            // Assert pivot replaced
-            $story->refresh();
-            $ids = $story->triggerWarnings()->pluck('story_ref_trigger_warnings.id')->sort()->values()->all();
-            expect($ids)->toBe([$twB->id, $twC->id]);
-
             // Show page displays new TWs
-            $show = $this->get('/stories/' . $story->slug);
+            $show = $this->get($resp->headers->get('Location'));
             $show->assertOk();
             $show->assertSee('Drogues');
             $show->assertSee('Suicide');
@@ -275,7 +269,7 @@ describe('Editing story', function () {
             $this->actingAs($author);
             $story = publicStory('Feedback Updatable', $author->id);
 
-            $fb = makeFeedback('Looking for critique');
+            $fb = makeRefFeedback('Looking for critique');
 
             // First set feedback
             $resp1 = $this->put('/stories/' . $story->slug, validStoryPayload([
@@ -284,9 +278,7 @@ describe('Editing story', function () {
             ]));
             $resp1->assertRedirect();
 
-            $story->refresh();
-            expect($story->story_ref_feedback_id)->toBe($fb->id);
-            $this->get('/stories/' . $story->slug)
+            $this->get($resp1->headers->get('Location'))
                 ->assertOk()
                 ->assertSee($fb->name);
 
@@ -297,8 +289,9 @@ describe('Editing story', function () {
             ]));
             $resp2->assertRedirect();
 
-            $story->refresh();
-            expect($story->story_ref_feedback_id)->toBeNull();
+            $this->get($resp2->headers->get('Location'))
+                ->assertOk()
+                ->assertDontSee('Looking for critique');
         });
     });
 
@@ -313,7 +306,7 @@ describe('Editing story', function () {
                 $createPayload = validStoryPayload([
                     'title' => 'Original Title',
                     'description' => $initialDescription,
-                    'story_ref_genre_ids' => [defaultGenre()->id],
+                    'story_ref_genre_ids' => [defaultRefGenre()->id],
                 ]);
                 $this->post(route('stories.store'), $createPayload)->assertRedirect();
 

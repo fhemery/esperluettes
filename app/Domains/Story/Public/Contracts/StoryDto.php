@@ -5,14 +5,12 @@ namespace App\Domains\Story\Public\Contracts;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Public\Api\StoryMapperHelper;
-use App\Domains\StoryRef\Private\Models\StoryRefGenre;
-use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 
 class StoryDto
 {
     /**
-     * @var StoryRefGenre[] $genres
-     * @var StoryRefTriggerWarning[] $triggerWarnings
+     * @var array<int,array> $genres
+     * @var array<int,array> $triggerWarnings
      * @var ProfileDto[] $authors
      * @var StoryChapterDto[] $chapters
      */
@@ -49,11 +47,11 @@ class StoryDto
         );
 
         if ($fieldsToReturn->includeGenreIds) {
-            $genreIds = $story->genres->pluck('id')->map(fn($v) => (int) $v)->all();
+            $genreIds = $story->genres->map(fn($v) => (int) $v->story_ref_genre_id)->all();
             $dto->genres = collect($helper->genres)->filter(fn($g) => in_array((int) $g['id'], $genreIds, true))->values()->all();
         }
         if ($fieldsToReturn->includeTriggerWarningIds) {
-            $twIds = $story->triggerWarnings->pluck('id')->map(fn($v) => (int) $v)->all();
+            $twIds = $story->triggerWarnings->map(fn($v) => (int) $v->story_ref_trigger_warning_id)->all();
             $dto->triggerWarnings = collect($helper->triggerWarnings)->filter(fn($tw) => in_array((int) $tw['id'], $twIds, true))->values()->all();
         }
         if ($fieldsToReturn->includeAuthors && $helper->profiles) {

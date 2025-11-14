@@ -237,10 +237,10 @@ it('validates genres are required and must be an array of 1 to 3', function () {
 it('validates genres max 3', function () {
     $user = alice($this);
     // Max 3
-    $g1 = makeGenre('G1');
-    $g2 = makeGenre('G2');
-    $g3 = makeGenre('G3');
-    $g4 = makeGenre('G4');
+    $g1 = makeRefGenre('G1');
+    $g2 = makeRefGenre('G2');
+    $g3 = makeRefGenre('G3');
+    $g4 = makeRefGenre('G4');
     $payloadMax = validStoryPayload([
         'story_ref_genre_ids' => [$g1->id, $g2->id, $g3->id, $g4->id],
     ]);

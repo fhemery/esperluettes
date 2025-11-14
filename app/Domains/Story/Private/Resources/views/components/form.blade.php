@@ -1,9 +1,9 @@
 @props(['story' => null, 'referentials' => []])
 
 @php($selectedTypeId = old('story_ref_type_id', $story?->story_ref_type_id ?? ''))
-@php($selectedGenreIds = collect(old('story_ref_genre_ids', $story?->genres?->pluck('id')->all() ?? []))->map(fn($v) => (string)$v)->all())
+@php($selectedGenreIds = collect(old('story_ref_genre_ids', $story?->genres?->pluck('story_ref_genre_id')->all() ?? []))->map(fn($v) => (string)$v)->all())
 @php($selectedAudienceId = old('story_ref_audience_id', $story?->story_ref_audience_id ?? ''))
-@php($selectedTriggerWarningIds = collect(old('story_ref_trigger_warning_ids', $story?->triggerWarnings?->pluck('id')->all() ?? []))->map(fn($v) => (string)$v)->all())
+@php($selectedTriggerWarningIds = collect(old('story_ref_trigger_warning_ids', $story?->triggerWarnings?->pluck('story_ref_trigger_warning_id')->all() ?? []))->map(fn($v) => (string)$v)->all())
 @php($selectedStatusId = old('story_ref_status_id', $story?->story_ref_status_id ?? ''))
 @php($selectedFeedbackId = old('story_ref_feedback_id', $story?->story_ref_feedback_id ?? ''))
 @php($selectedCopyrightId = old('story_ref_copyright_id', $story?->story_ref_copyright_id ?? ''))

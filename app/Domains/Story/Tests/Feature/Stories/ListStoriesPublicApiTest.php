@@ -268,8 +268,8 @@ describe('StoryPublicApi::listStories', function () {
         describe('filtering by genres', function () {
             it('should return stories that have all the specified genres', function () {
                 $alice = alice($this);
-                $genre1 = makeGenre('Genre 1');
-                $genre2 = makeGenre('Genre 2');
+                $genre1 = makeRefGenre('Genre 1');
+                $genre2 = makeRefGenre('Genre 2');
 
                 $story1 = publicStory('With Genres', $alice->id, ['story_ref_genre_ids' => [$genre1->id, $genre2->id]]);
                 $story2 = publicStory('Without Genres', $alice->id);
@@ -290,9 +290,9 @@ describe('StoryPublicApi::listStories', function () {
         describe('filtering by trigger warnings', function () {
             it('should exclude stories that have any of the specified trigger warnings', function () {
                 $alice = alice($this);
-                $triggerWarning1 = makeTriggerWarning('Trigger Warning 1');
-                $triggerWarning2 = makeTriggerWarning('Trigger Warning 2');
-                $triggerWarning3 = makeTriggerWarning('Trigger Warning 3');
+                $triggerWarning1 = makeRefTriggerWarning('Trigger Warning 1');
+                $triggerWarning2 = makeRefTriggerWarning('Trigger Warning 2');
+                $triggerWarning3 = makeRefTriggerWarning('Trigger Warning 3');
 
                 publicStory('With Trigger Warnings', $alice->id, ['tw_disclosure' => Story::TW_LISTED, 'story_ref_trigger_warning_ids' => [$triggerWarning1->id, $triggerWarning2->id]]);
                 $story2 = publicStory('Without Trigger Warnings', $alice->id);
@@ -313,8 +313,8 @@ describe('StoryPublicApi::listStories', function () {
 
             it('should only include stories without TW if specified', function () {
                 $alice = alice($this);
-                $triggerWarning1 = makeTriggerWarning('Trigger Warning 1');
-                $triggerWarning2 = makeTriggerWarning('Trigger Warning 2');
+                $triggerWarning1 = makeRefTriggerWarning('Trigger Warning 1');
+                $triggerWarning2 = makeRefTriggerWarning('Trigger Warning 2');
 
                 publicStory('With Trigger Warnings', $alice->id, ['tw_disclosure' => Story::TW_LISTED, 'story_ref_trigger_warning_ids' => [$triggerWarning1->id, $triggerWarning2->id]]);
                 $story2 = publicStory('Without Trigger Warnings', $alice->id, ['tw_disclosure' => Story::TW_NO_TW]);
@@ -335,8 +335,8 @@ describe('StoryPublicApi::listStories', function () {
         describe('filtering by story type', function () {
             it('should return stories that have any of the specified visibilities', function () {
                 $alice = alice($this);
-                $novelStoryType = makeStoryType('Novel');
-                $shortStoryType = makeStoryType('Short Story');
+                $novelStoryType = makeRefType('Novel');
+                $shortStoryType = makeRefType('Short Story');
                 $story1 = publicStory('Public Story', $alice->id, ['story_ref_type_id' => $novelStoryType->id]);
                 $story2 = privateStory('Private Story', $alice->id, ['story_ref_type_id' => $shortStoryType->id]);
                 $story3 = communityStory('Community Story', $alice->id);
@@ -358,9 +358,9 @@ describe('StoryPublicApi::listStories', function () {
         describe('filtering by age', function () {
             it('should return stories that have any of the specified age', function () {
                 $alice = alice($this);
-                $all = makeAudience('All');
-                $teens = makeAudience('Teens');
-                $adults = makeAudience('Adults');
+                $all = makeRefAudience('All');
+                $teens = makeRefAudience('Teens');
+                $adults = makeRefAudience('Adults');
 
                 $teenStory = publicStory('Teen Story', $alice->id, [
                     'story_ref_audience_id' => $teens->id,
@@ -489,8 +489,8 @@ describe('StoryPublicApi::listStories', function () {
             });
 
             it('returns mapped genres when requested', function () {
-                $g1 = makeGenre('Horror');
-                $g2 = makeGenre('Romance');
+                $g1 = makeRefGenre('Horror');
+                $g2 = makeRefGenre('Romance');
                 publicStory('With Genres', alice($this)->id, [
                     'story_ref_genre_ids' => [$g1->id, $g2->id],
                 ]);
@@ -539,8 +539,8 @@ describe('StoryPublicApi::listStories', function () {
 
 
             it('returns mapped trigger warnings when requested and includes tw_disclosure', function () {
-                $tw1 = makeTriggerWarning('Blood');
-                $tw2 = makeTriggerWarning('Death');
+                $tw1 = makeRefTriggerWarning('Blood');
+                $tw2 = makeRefTriggerWarning('Death');
                 $story = publicStory('With TWs', alice($this)->id, [
                     'story_ref_trigger_warning_ids' => [$tw1->id, $tw2->id],
                 ]);

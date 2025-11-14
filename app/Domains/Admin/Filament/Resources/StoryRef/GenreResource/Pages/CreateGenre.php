@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\StoryRef\GenreResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\StoryRef\GenreResource;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateGenre extends CreateRecord
@@ -17,6 +17,6 @@ class CreateGenre extends CreateRecord
 
     protected function afterCreate(): void
     {
-        app(StoryRefLookupService::class)->clearCache();
+        app(StoryRefPublicApi::class)->clearUiCache();
     }
 }

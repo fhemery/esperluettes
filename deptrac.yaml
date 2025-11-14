@@ -402,7 +402,6 @@ deptrac:
       - Shared
       - StoryPrivate
       - StoryRefPublic
-      - StoryRefPrivate
       - EventsPublic
       - AuthPublic
       - ModerationPublic
@@ -411,6 +410,7 @@ deptrac:
     StoryRefPublic:
       - Shared
       - EventsPublic
+      - AuthPublic
       - StoryRefPrivate
 
     # ###################################################
@@ -529,6 +529,7 @@ deptrac:
       - EventsPublic
       - StoryPublic
       - NotificationPublic
+      - StoryRefPublic
 
     StaticPagePrivate:
       - Shared
@@ -542,9 +543,9 @@ deptrac:
       - CommentPublic
       - ModerationPublic
       - ProfilePublic
-      - StoryRefPrivate
       - EventsPublic
       - StoryPublic
+      - StoryRefPublic
       - NotificationPublic
 
     StoryRefPrivate:
@@ -640,6 +641,12 @@ deptrac:
       - ProfilePublic
       - StoryRefPublic
       - StoryRefPrivate
+
+    StoryRefTests:
+      - Shared
+      - TestHelpers
+      - StoryRefPrivate
+      - StoryRefPublic
 
     AdminTests:
       - Shared

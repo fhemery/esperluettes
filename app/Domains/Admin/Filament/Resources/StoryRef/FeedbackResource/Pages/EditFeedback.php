@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\StoryRef\FeedbackResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\StoryRef\FeedbackResource;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use Filament\Resources\Pages\EditRecord;
 
 class EditFeedback extends EditRecord
@@ -12,6 +12,6 @@ class EditFeedback extends EditRecord
 
     protected function afterSave(): void
     {
-        app(StoryRefLookupService::class)->clearCache();
+        app(StoryRefPublicApi::class)->clearUiCache();
     }
 }

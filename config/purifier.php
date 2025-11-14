@@ -29,7 +29,7 @@ return [
             'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title|target|rel],ul,ol,li,p[style],br,span[style],img[width|height|alt|src]',
             'CSS.AllowedProperties' => 'font,font-size,font-weight,font-style,font-family,text-decoration,padding-left,color,background-color,text-align',
             'AutoFormat.AutoParagraph' => true,
-            'AutoFormat.RemoveEmpty' => true,
+            'AutoFormat.RemoveEmpty' => false,
         ],
         'strict' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
@@ -38,10 +38,10 @@ return [
             'CSS.AllowedProperties' => 'text-align',
             'Attr.AllowedClasses' => ['ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify'],
             'AutoFormat.AutoParagraph' => true,
-            'AutoFormat.RemoveEmpty' => true,
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,
             'Core.CollectErrors' => false,
+            'AutoFormat.RemoveEmpty' => false,
         ],
         // Shared strict profile for admin-managed rich content (News, Static Pages)
         'admin-content' => [
@@ -55,7 +55,7 @@ return [
             'CSS.AllowedProperties' => 'text-align,text-decoration',
             'URI.SafeIframeRegexp' => null,
             'AutoFormat.AutoParagraph' => true,
-            'AutoFormat.RemoveEmpty' => true,
+            'AutoFormat.RemoveEmpty' => false,
             // Security: disallow any event handlers
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,

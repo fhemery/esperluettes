@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Domains\StoryRef\Public\Contracts;
+
+use App\Domains\StoryRef\Private\Models\StoryRefType;
+
+class TypeDto
+{
+    public function __construct(
+        public readonly int $id,
+        public readonly string $slug,
+        public readonly string $name,
+        public readonly bool $is_active,
+        public readonly ?int $order,
+    ) {}
+
+    public static function fromModel(StoryRefType $model): self
+    {
+        return new self(
+            id: (int) $model->id,
+            slug: (string) $model->slug,
+            name: (string) $model->name,
+            is_active: (bool) $model->is_active,
+            order: $model->order !== null ? (int) $model->order : null,
+        );
+    }
+
+    /**
+     * @return array{id:int,slug:string,name:string,is_active:bool,order:?int}
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'slug' => $this->slug,
+            'name' => $this->name,
+            'is_active' => $this->is_active,
+            'order' => $this->order,
+        ];
+    }
+}

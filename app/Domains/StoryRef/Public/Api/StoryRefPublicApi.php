@@ -1,0 +1,508 @@
+<?php
+
+namespace App\Domains\StoryRef\Public\Api;
+
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\StoryRef\Private\Models\StoryRefType;
+use App\Domains\StoryRef\Private\Models\StoryRefGenre;
+use App\Domains\StoryRef\Private\Models\StoryRefAudience;
+use App\Domains\StoryRef\Private\Models\StoryRefStatus;
+use App\Domains\StoryRef\Private\Models\StoryRefFeedback;
+use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
+use App\Domains\StoryRef\Private\Models\StoryRefCopyright;
+use App\Domains\StoryRef\Private\Services\TypeRefService;
+use App\Domains\StoryRef\Private\Services\GenreRefService;
+use App\Domains\StoryRef\Private\Services\AudienceRefService;
+use App\Domains\StoryRef\Private\Services\StatusRefService;
+use App\Domains\StoryRef\Private\Services\FeedbackRefService;
+use App\Domains\StoryRef\Private\Services\TriggerWarningRefService;
+use App\Domains\StoryRef\Private\Services\StoryRefCache;
+use App\Domains\StoryRef\Private\Services\CopyrightRefService;
+use App\Domains\StoryRef\Public\Contracts\TypeDto;
+use App\Domains\StoryRef\Public\Contracts\TypeWriteDto;
+use App\Domains\StoryRef\Public\Contracts\GenreDto;
+use App\Domains\StoryRef\Public\Contracts\GenreWriteDto;
+use App\Domains\StoryRef\Public\Contracts\AudienceDto;
+use App\Domains\StoryRef\Public\Contracts\AudienceWriteDto;
+use App\Domains\StoryRef\Public\Contracts\StatusDto;
+use App\Domains\StoryRef\Public\Contracts\StatusWriteDto;
+use App\Domains\StoryRef\Public\Contracts\FeedbackDto;
+use App\Domains\StoryRef\Public\Contracts\FeedbackWriteDto;
+use App\Domains\StoryRef\Public\Contracts\TriggerWarningDto;
+use App\Domains\StoryRef\Public\Contracts\TriggerWarningWriteDto;
+use App\Domains\StoryRef\Public\Contracts\CopyrightDto;
+use App\Domains\StoryRef\Public\Contracts\CopyrightWriteDto;
+use App\Domains\StoryRef\Public\Contracts\StoryRefFilterDto;
+use App\Domains\StoryRef\Public\Contracts\StoryRefsDto;
+use App\Domains\StoryRef\Private\Support\SlugToIdMapper;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Collection;
+
+class StoryRefPublicApi
+{
+    public function __construct(
+        private readonly AuthPublicApi $auth,
+        private readonly TypeRefService $typeRefService,
+        private readonly GenreRefService $genreRefService,
+        private readonly AudienceRefService $audienceRefService,
+        private readonly StatusRefService $statusRefService,
+        private readonly FeedbackRefService $feedbackRefService,
+        private readonly TriggerWarningRefService $triggerWarningRefService,
+        private readonly CopyrightRefService $copyrightRefService,
+    ) {}
+
+    /**
+     * Method called by the admin module whenever it tampers with referential data
+     */
+    public function clearUiCache(): void
+    {
+        $this->typeRefService->clearCache();
+        $this->genreRefService->clearCache();
+        $this->audienceRefService->clearCache();
+        $this->statusRefService->clearCache();
+        $this->feedbackRefService->clearCache();
+        $this->triggerWarningRefService->clearCache();
+        $this->copyrightRefService->clearCache();
+    }
+
+    public function getAllStoryReferentials(StoryRefFilterDto $filter = new StoryRefFilterDto()): StoryRefsDto
+    {
+        return new StoryRefsDto(
+            types: $this->getAllTypes($filter),
+            genres: $this->getAllGenres($filter),
+            audiences: $this->getAllAudiences($filter),
+            statuses: $this->getAllStatuses($filter),
+            triggerWarnings: $this->getAllTriggerWarnings($filter),
+            feedbacks: $this->getAllFeedbacks($filter),
+            copyrights: $this->getAllCopyrights($filter),
+        );
+    }
+
+    public function getTypeIdBySlug(?string $slug): ?int
+    {
+        $normalized = $slug !== null ? trim(strtolower($slug)) : '';
+        if ($normalized === '') {
+            return null;
+        }
+
+        /** @var TypeDto|null $match */
+        $match = $this->getAllTypes()->first(
+            fn (TypeDto $dto) => strtolower($dto->slug) === $normalized
+        );
+
+        return $match?->id;
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function getAudienceIdsBySlugs(?array $slugs): array
+    {
+        return SlugToIdMapper::map(
+            $slugs,
+            $this->getAllAudiences(),
+            fn (AudienceDto $dto) => [$dto->slug, $dto->id],
+        );
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function getGenreIdsBySlugs(?array $slugs): array
+    {
+        return SlugToIdMapper::map(
+            $slugs,
+            $this->getAllGenres(),
+            fn (GenreDto $dto) => [$dto->slug, $dto->id],
+        );
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function getTriggerWarningIdsBySlugs(?array $slugs): array
+    {
+        return SlugToIdMapper::map(
+            $slugs,
+            $this->getAllTriggerWarnings(),
+            fn (TriggerWarningDto $dto) => [$dto->slug, $dto->id],
+        );
+    }
+
+    /**
+     * @return Collection<int, TypeDto>
+     */
+    public function getAllTypes(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
+    {
+        $dtos = $this->typeRefService->getAll()
+            ->map(fn (StoryRefType $model) => TypeDto::fromModel($model));
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (TypeDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getTypeById(int $id): ?TypeDto
+    {
+        $model = $this->typeRefService->getOneById($id);
+
+        return $model ? TypeDto::fromModel($model) : null;
+    }
+
+    public function getTypeBySlug(string $slug): ?TypeDto
+    {
+        $model = $this->typeRefService->getOneBySlug($slug);
+
+        return $model ? TypeDto::fromModel($model) : null;
+    }
+
+    public function createType(TypeWriteDto $input): TypeDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->typeRefService->create($input->toArray());
+
+        return TypeDto::fromModel($model);
+    }
+
+    public function updateType(int $id, TypeWriteDto $input): ?TypeDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->typeRefService->update($id, $input->toArray());
+
+        return $model ? TypeDto::fromModel($model) : null;
+    }
+
+    public function deleteType(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->typeRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, CopyrightDto>
+     */
+    public function getAllCopyrights(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
+    {
+        $dtos = $this->copyrightRefService->getAll()
+            ->map(fn (StoryRefCopyright $model) => CopyrightDto::fromModel($model));
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (CopyrightDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getCopyrightById(int $id): ?CopyrightDto
+    {
+        $model = $this->copyrightRefService->getOneById($id);
+
+        return $model ? CopyrightDto::fromModel($model) : null;
+    }
+
+    public function getCopyrightBySlug(string $slug): ?CopyrightDto
+    {
+        $model = $this->copyrightRefService->getOneBySlug($slug);
+
+        return $model ? CopyrightDto::fromModel($model) : null;
+    }
+
+    public function createCopyright(CopyrightWriteDto $input): CopyrightDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->copyrightRefService->create($input->toArray());
+
+        return CopyrightDto::fromModel($model);
+    }
+
+    public function updateCopyright(int $id, CopyrightWriteDto $input): ?CopyrightDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->copyrightRefService->update($id, $input->toArray());
+
+        return $model ? CopyrightDto::fromModel($model) : null;
+    }
+
+    public function deleteCopyright(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->copyrightRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, GenreDto>
+     */
+    public function getAllGenres(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
+    {
+        $dtos = $this->genreRefService->getAll()
+            ->map(fn (StoryRefGenre $model) => GenreDto::fromModel($model));
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (GenreDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+    public function getGenreById(int $id): ?GenreDto
+    {
+        $model = $this->genreRefService->getOneById($id);
+
+        return $model ? GenreDto::fromModel($model) : null;
+    }
+
+    public function getGenreBySlug(string $slug): ?GenreDto
+    {
+        $model = $this->genreRefService->getOneBySlug($slug);
+
+        return $model ? GenreDto::fromModel($model) : null;
+    }
+
+    public function createGenre(GenreWriteDto $input): GenreDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->genreRefService->create($input->toArray());
+
+        return GenreDto::fromModel($model);
+    }
+
+    public function updateGenre(int $id, GenreWriteDto $input): ?GenreDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->genreRefService->update($id, $input->toArray());
+
+        return $model ? GenreDto::fromModel($model) : null;
+    }
+
+    public function deleteGenre(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->genreRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, AudienceDto>
+     */
+    public function getAllAudiences(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
+    {
+        $dtos = $this->audienceRefService->getAll()
+            ->map(fn (StoryRefAudience $model) => AudienceDto::fromModel($model));
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (AudienceDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getAudienceById(int $id): ?AudienceDto
+    {
+        $model = $this->audienceRefService->getOneById($id);
+
+        return $model ? AudienceDto::fromModel($model) : null;
+    }
+
+    public function getAudienceBySlug(string $slug): ?AudienceDto
+    {
+        $model = $this->audienceRefService->getOneBySlug($slug);
+
+        return $model ? AudienceDto::fromModel($model) : null;
+    }
+
+    public function createAudience(AudienceWriteDto $input): AudienceDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->audienceRefService->create($input->toArray());
+
+        return AudienceDto::fromModel($model);
+    }
+
+    public function updateAudience(int $id, AudienceWriteDto $input): ?AudienceDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->audienceRefService->update($id, $input->toArray());
+
+        return $model ? AudienceDto::fromModel($model) : null;
+    }
+
+    public function deleteAudience(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->audienceRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, StatusDto>
+     */
+    public function getAllStatuses(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
+    {
+        $dtos = $this->statusRefService->getAll()
+            ->map(fn (StoryRefStatus $model) => StatusDto::fromModel($model));
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (StatusDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getStatusById(int $id): ?StatusDto
+    {
+        $model = $this->statusRefService->getOneById($id);
+
+        return $model ? StatusDto::fromModel($model) : null;
+    }
+
+    public function getStatusBySlug(string $slug): ?StatusDto
+    {
+        $model = $this->statusRefService->getOneBySlug($slug);
+
+        return $model ? StatusDto::fromModel($model) : null;
+    }
+
+    public function createStatus(StatusWriteDto $input): StatusDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->statusRefService->create($input->toArray());
+
+        return StatusDto::fromModel($model);
+    }
+
+    public function updateStatus(int $id, StatusWriteDto $input): ?StatusDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->statusRefService->update($id, $input->toArray());
+
+        return $model ? StatusDto::fromModel($model) : null;
+    }
+
+    public function deleteStatus(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->statusRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, FeedbackDto>
+     */
+    public function getAllFeedbacks(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
+    {
+        $dtos = $this->feedbackRefService->getAll()
+            ->map(fn (StoryRefFeedback $model) => FeedbackDto::fromModel($model));
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (FeedbackDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getFeedbackById(int $id): ?FeedbackDto
+    {
+        $model = $this->feedbackRefService->getOneById($id);
+
+        return $model ? FeedbackDto::fromModel($model) : null;
+    }
+
+    public function getFeedbackBySlug(string $slug): ?FeedbackDto
+    {
+        $model = $this->feedbackRefService->getOneBySlug($slug);
+
+        return $model ? FeedbackDto::fromModel($model) : null;
+    }
+
+    public function createFeedback(FeedbackWriteDto $input): FeedbackDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->feedbackRefService->create($input->toArray());
+
+        return FeedbackDto::fromModel($model);
+    }
+
+    public function updateFeedback(int $id, FeedbackWriteDto $input): ?FeedbackDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->feedbackRefService->update($id, $input->toArray());
+
+        return $model ? FeedbackDto::fromModel($model) : null;
+    }
+
+    public function deleteFeedback(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->feedbackRefService->delete($id);
+    }
+
+    /**
+     * @return Collection<int, TriggerWarningDto>
+     */
+    public function getAllTriggerWarnings(StoryRefFilterDto $filter = new StoryRefFilterDto()): Collection
+    {
+        $dtos = $this->triggerWarningRefService->getAll()
+            ->map(fn (StoryRefTriggerWarning $model) => TriggerWarningDto::fromModel($model));
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (TriggerWarningDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getTriggerWarningById(int $id): ?TriggerWarningDto
+    {
+        $model = $this->triggerWarningRefService->getOneById($id);
+
+        return $model ? TriggerWarningDto::fromModel($model) : null;
+    }
+
+    public function getTriggerWarningBySlug(string $slug): ?TriggerWarningDto
+    {
+        $model = $this->triggerWarningRefService->getOneBySlug($slug);
+
+        return $model ? TriggerWarningDto::fromModel($model) : null;
+    }
+
+    public function createTriggerWarning(TriggerWarningWriteDto $input): TriggerWarningDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->triggerWarningRefService->create($input->toArray());
+
+        return TriggerWarningDto::fromModel($model);
+    }
+
+    public function updateTriggerWarning(int $id, TriggerWarningWriteDto $input): ?TriggerWarningDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->triggerWarningRefService->update($id, $input->toArray());
+
+        return $model ? TriggerWarningDto::fromModel($model) : null;
+    }
+
+    public function deleteTriggerWarning(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->triggerWarningRefService->delete($id);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    private function assertAdminOrTechAdmin(): void
+    {
+        if (! $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+            throw new AuthorizationException('You are not authorized to manage story references.');
+        }
+    }
+}

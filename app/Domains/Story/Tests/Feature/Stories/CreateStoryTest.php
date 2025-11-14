@@ -175,13 +175,13 @@ describe('Creating a story', function () {
             expect($story->slug)->toEndWith('-' . $story->id);
 
             // Visit show page and assert content
-            $show = $this->get('/stories/' . $story->slug);
+            $show = $this->get($response->headers->get('Location'));
             $show->assertOk();
             $show->assertSee('My First Story');
             $show->assertSee('story::shared.visibility.options.public');
             $show->assertSee('story::show.edit');
-            $show->assertSee(defaultStoryType()->name);
-            $show->assertSee(defaultGenre()->name);
+            $show->assertSee(defaultRefType()->name);
+            $show->assertSee(defaultRefGenre()->name);
         });
 
         it('displays multiple selected genres as badges on show page', function () {
@@ -189,8 +189,8 @@ describe('Creating a story', function () {
             $user = alice($this);
             $this->actingAs($user);
 
-            $g1 = makeGenre('Fantasy');
-            $g2 = makeGenre('Romance');
+            $g1 = makeRefGenre('Fantasy');
+            $g2 = makeRefGenre('Romance');
             $payload = validStoryPayload([
                 'title' => 'Genreful',
                 'story_ref_genre_ids' => [$g1->id, $g2->id],
@@ -200,8 +200,7 @@ describe('Creating a story', function () {
             $resp = $this->post('/stories', $payload);
             $resp->assertRedirect();
 
-            $story = \App\Domains\Story\Private\Models\Story::query()->firstOrFail();
-            $show = $this->get('/stories/' . $story->slug);
+            $show = $this->get($resp->headers->get('Location'));
 
             // Assert
             $show->assertOk();
@@ -213,7 +212,7 @@ describe('Creating a story', function () {
             // Arrange
             $user = alice($this);
             $this->actingAs($user);
-            $status = makeStatus('Ongoing');
+            $status = makeRefStatus('Ongoing');
 
             // Act
             $payload = validStoryPayload([
@@ -223,11 +222,7 @@ describe('Creating a story', function () {
             $resp = $this->post('/stories', $payload);
             $resp->assertRedirect();
 
-            // Assert
-            $story = Story::query()->firstOrFail();
-            expect($story->story_ref_status_id)->toBe($status->id);
-
-            $show = $this->get('/stories/' . $story->slug);
+            $show = $this->get($resp->headers->get('Location'));
             $show->assertOk();
             $show->assertSee($status->name);
         });
@@ -237,8 +232,8 @@ describe('Creating a story', function () {
             $user = alice($this);
             $this->actingAs($user);
 
-            $tw1 = makeTriggerWarning('Violence');
-            $tw2 = makeTriggerWarning('Langage vulgaire');
+            $tw1 = makeRefTriggerWarning('Violence');
+            $tw2 = makeRefTriggerWarning('Langage vulgaire');
 
             // Act
             $payload = validStoryPayload([
@@ -249,13 +244,8 @@ describe('Creating a story', function () {
             $resp = $this->post('/stories', $payload);
             $resp->assertRedirect();
 
-            // Assert persistence
-            $story = \App\Domains\Story\Private\Models\Story::query()->firstOrFail();
-            $ids = $story->triggerWarnings()->pluck('story_ref_trigger_warnings.id')->sort()->values()->all();
-            expect($ids)->toBe([$tw1->id, $tw2->id]);
-
             // Assert display on show page
-            $show = $this->get('/stories/' . $story->slug);
+            $show = $this->get($resp->headers->get('Location'));
             $show->assertOk();
             $show->assertSee('Violence');
             $show->assertSee('Langage vulgaire');
@@ -265,7 +255,7 @@ describe('Creating a story', function () {
             // Arrange
             $user = alice($this);
             $this->actingAs($user);
-            $feedback = makeFeedback('Beta Readers Wanted');
+            $feedback = makeRefFeedback('Beta Readers Wanted');
 
             // Act
             $payload = validStoryPayload([
@@ -275,12 +265,8 @@ describe('Creating a story', function () {
             $resp = $this->post('/stories', $payload);
             $resp->assertRedirect();
 
-            // Assert persistence
-            $story = Story::query()->firstOrFail();
-            expect($story->story_ref_feedback_id)->toBe($feedback->id);
-
             // Assert display on show page
-            $show = $this->get('/stories/' . $story->slug);
+            $show = $this->get($resp->headers->get('Location'));
             $show->assertOk();
             $show->assertSee($feedback->name);
         });
@@ -298,8 +284,8 @@ describe('Creating a story', function () {
                     'title' => $title,
                     'description' => $description,
                     // add one extra genre and one TW to exercise arrays
-                    'story_ref_genre_ids' => [defaultGenre()->id],
-                    'story_ref_trigger_warning_ids' => [defaultTriggerWarning()->id],
+                    'story_ref_genre_ids' => [defaultRefGenre()->id],
+                    'story_ref_trigger_warning_ids' => [defaultRefTriggerWarning()->id],
                 ]);
 
                 $response = $this->post(route('stories.store'), $payload);

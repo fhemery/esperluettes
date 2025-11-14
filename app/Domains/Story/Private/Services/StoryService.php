@@ -101,7 +101,7 @@ class StoryService
             $genreIds = $request->input('story_ref_genre_ids', []);
             if (is_array($genreIds)) {
                 $ids = array_values(array_unique(array_map('intval', $genreIds)));
-                $story->genres()->sync($ids);
+                $this->syncGenres($story, $ids);
             }
 
             // 3b) Attach trigger warnings and persist tw_disclosure as selected
@@ -113,8 +113,8 @@ class StoryService
             }
             $twIds = is_array($twIds) ? array_values(array_unique(array_map('intval', $twIds))) : [];
             $story->tw_disclosure = $disclosure;
-            $story->triggerWarnings()->sync($twIds);
             $story->save();
+            $this->syncTriggerWarnings($story, $twIds);
 
             // 4) Seed collaborator row for creator
             DB::table('story_collaborators')->insert([
@@ -240,7 +240,7 @@ class StoryService
             $genreIds = $request->input('story_ref_genre_ids', []);
             if (is_array($genreIds)) {
                 $ids = array_values(array_unique(array_map('intval', $genreIds)));
-                $story->genres()->sync($ids);
+                $this->syncGenres($story, $ids);
             }
 
             // Sync trigger warnings and tw_disclosure
@@ -252,7 +252,7 @@ class StoryService
             }
             $twIds = is_array($twIds) ? array_values(array_unique(array_map('intval', $twIds))) : [];
             $story->tw_disclosure = $disclosure;
-            $story->triggerWarnings()->sync($twIds);
+            $this->syncTriggerWarnings($story, $twIds);
 
             // If title changed, regenerate slug base but keep -id suffix
             if ($story->title !== $oldTitle) {
@@ -504,5 +504,53 @@ class StoryService
                 }
             });
         });
+    }
+
+    /**
+     * Sync story_genres pivot rows for a story.
+     *
+     * @param array<int,int> $genreIds
+     */
+    private function syncGenres(Story $story, array $genreIds): void
+    {
+        DB::table('story_genres')->where('story_id', $story->id)->delete();
+
+        if ($genreIds === []) {
+            return;
+        }
+
+        $now = now();
+        DB::table('story_genres')->insert(
+            array_map(fn (int $id) => [
+                'story_id' => $story->id,
+                'story_ref_genre_id' => $id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ], $genreIds)
+        );
+    }
+
+    /**
+     * Sync story_trigger_warnings pivot rows for a story.
+     *
+     * @param array<int,int> $triggerWarningIds
+     */
+    private function syncTriggerWarnings(Story $story, array $triggerWarningIds): void
+    {
+        DB::table('story_trigger_warnings')->where('story_id', $story->id)->delete();
+
+        if ($triggerWarningIds === []) {
+            return;
+        }
+
+        $now = now();
+        DB::table('story_trigger_warnings')->insert(
+            array_map(fn (int $id) => [
+                'story_id' => $story->id,
+                'story_ref_trigger_warning_id' => $id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ], $triggerWarningIds)
+        );
     }
 }

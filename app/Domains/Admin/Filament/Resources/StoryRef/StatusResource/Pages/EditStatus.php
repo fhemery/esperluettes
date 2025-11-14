@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\StoryRef\StatusResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\StoryRef\StatusResource;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use Filament\Resources\Pages\EditRecord;
 
 class EditStatus extends EditRecord
@@ -12,6 +12,6 @@ class EditStatus extends EditRecord
 
     protected function afterSave(): void
     {
-        app(StoryRefLookupService::class)->clearCache();
+        app(StoryRefPublicApi::class)->clearUiCache();
     }
 }

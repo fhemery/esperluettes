@@ -12,10 +12,13 @@ class ReadListIndexViewModel
     public $pagination = null;
     /** @var Collection<int, ReadListStoryViewModel> */
     public Collection $stories;
+    /** @var Collection<int, array{id:int,name:string,description:?string}> */
+    public Collection $genres;
 
     public function __construct()
     {
         $this->stories = collect();
+        $this->genres = collect();
     }
 
     public static function fromPaginated(PaginatedStoryDto $paginated): self

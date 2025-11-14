@@ -18,10 +18,6 @@ return new class extends Migration {
             $table->foreign('story_id')
                 ->references('id')->on('stories')
                 ->onDelete('cascade');
-
-            $table->foreign('story_ref_genre_id')
-                ->references('id')->on('story_ref_genres')
-                ->onDelete('cascade');
         });
     }
 

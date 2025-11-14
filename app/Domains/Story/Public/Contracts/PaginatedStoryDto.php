@@ -3,7 +3,6 @@
 namespace App\Domains\Story\Public\Contracts;
 
 use App\Domains\Story\Public\Api\StoryMapperHelper;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PaginatedStoryDto

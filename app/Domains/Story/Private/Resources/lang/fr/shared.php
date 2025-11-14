@@ -59,7 +59,7 @@ return [
     'trigger_warnings' => [
         'label' => 'Avertissements de contenu',
         'placeholder' => '-- Sélectionnez au moins 1 avertissement --',
-        'help' => 'Sélectionnez les avertissements de contenu pertinents (facultatif) ou choisissez une option ci-dessous.',
+        'help' => 'Sélectionnez les avertissements de contenu pertinents (thèmes centraux OU scènes marquantes, longues et explicites) ou une des autres options ci-après.',
         'listed' => 'Avertissements listés',
         'listed_help' => "Sélectionnez et listez les avertissements pertinents",
         'no_tw' => 'Aucun avertissement',

@@ -3,7 +3,7 @@
 namespace App\Domains\Admin\Filament\Resources\StoryRef\CopyrightResource\Pages;
 
 use App\Domains\Admin\Filament\Resources\StoryRef\CopyrightResource;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use Filament\Resources\Pages\EditRecord;
 
 class EditCopyright extends EditRecord
@@ -13,6 +13,6 @@ class EditCopyright extends EditRecord
 
     protected function afterSave(): void
     {
-        app(StoryRefLookupService::class)->clearCache();
+        app(StoryRefPublicApi::class)->clearUiCache();
     }
 }

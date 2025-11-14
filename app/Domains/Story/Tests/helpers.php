@@ -2,20 +2,6 @@
 
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
-use App\Domains\StoryRef\Private\Models\StoryRefType;
-use App\Domains\StoryRef\Private\Models\StoryRefAudience;
-use App\Domains\StoryRef\Private\Models\StoryRefCopyright;
-use App\Domains\StoryRef\Private\Models\StoryRefGenre;
-use App\Domains\StoryRef\Private\Models\StoryRefStatus;
-use App\Domains\StoryRef\Private\Models\StoryRefFeedback;
-use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
-use App\Domains\StoryRef\Private\Services\TypeService;
-use App\Domains\StoryRef\Private\Services\AudienceService;
-use App\Domains\StoryRef\Private\Services\CopyrightService;
-use App\Domains\StoryRef\Private\Services\GenreService;
-use App\Domains\StoryRef\Private\Services\StatusService;
-use App\Domains\StoryRef\Private\Services\FeedbackService;
-use App\Domains\StoryRef\Private\Services\TriggerWarningService;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -38,9 +24,9 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
         'visibility' => $attributes['visibility'] ?? Story::VIS_PUBLIC,
         'tw_disclosure' => $attributes['tw_disclosure'] ?? Story::TW_NO_TW,
         'last_chapter_published_at' => $attributes['last_chapter_published_at'] ?? null,
-        'story_ref_type_id' => $attributes['story_ref_type_id'] ?? defaultStoryType()->id,
-        'story_ref_audience_id' => $attributes['story_ref_audience_id'] ?? defaultAudience()->id,
-        'story_ref_copyright_id' => $attributes['story_ref_copyright_id'] ?? defaultCopyright()->id,
+        'story_ref_type_id' => $attributes['story_ref_type_id'] ?? defaultRefType()->id,
+        'story_ref_audience_id' => $attributes['story_ref_audience_id'] ?? defaultRefAudience()->id,
+        'story_ref_copyright_id' => $attributes['story_ref_copyright_id'] ?? defaultRefCopyright()->id,
         'story_ref_status_id' => $attributes['story_ref_status_id'] ?? null,
         'story_ref_feedback_id' => $attributes['story_ref_feedback_id'] ?? null,
     ]);
@@ -50,15 +36,31 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
     $genreIds = $attributes['story_ref_genre_ids'] ?? [$attributes['story_ref_genre_id'] ?? null];
     $genreIds = array_values(array_filter(array_map(fn($v) => $v ? (int)$v : null, (array)$genreIds)));
     if (empty($genreIds)) {
-        $genreIds = [defaultGenre()->id];
+        $genreIds = [defaultRefGenre()->id];
     }
-    $story->genres()->sync($genreIds);
+    $now = now();
+    foreach ($genreIds as $gid) {
+        DB::table('story_genres')->insert([
+            'story_id' => $story->id,
+            'story_ref_genre_id' => $gid,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+    }
 
     // Attach default trigger warning(s) if provided in attributes, else attach one default to satisfy relational expectations in some tests
     $twIds = $attributes['story_ref_trigger_warning_ids'] ?? [$attributes['story_ref_trigger_warning_ids'] ?? null];
     $twIds = array_values(array_filter(array_map(fn($v) => $v ? (int)$v : null, (array)$twIds)));
     if (!empty($twIds)) {
-        $story->triggerWarnings()->sync($twIds);
+        $now = now();
+        foreach ($twIds as $tid) {
+            DB::table('story_trigger_warnings')->insert([
+                'story_id' => $story->id,
+                'story_ref_trigger_warning_id' => $tid,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
     }
 
     // Ensure slug ends with id suffix (same behavior as service/store)
@@ -101,135 +103,23 @@ function getStory(int $id): Story
 }
 
 /**
- * Ensure a Story Type exists for tests and return it.
- */
-function makeStoryType(string $name): StoryRefType
-{
-    // Use service to auto-generate slug and defaults
-    return app(TypeService::class)->create([
-        'name' => $name,
-        'slug' => Str::slug($name),
-        'is_active' => true,
-    ]);
-}
-
-function defaultStoryType(): StoryRefType
-{
-    return StoryRefType::firstOrCreate([
-        'name' => 'Default type',
-        'slug' => 'default-type',
-        'is_active' => true
-    ]);
-}
-
-function defaultAudience(): StoryRefAudience
-{
-    return StoryRefAudience::firstOrCreate([
-        'name' => 'DefaultAudience',
-        'slug' => 'default-audience',
-        'is_active' => true
-    ]);
-}
-
-/**
- * Ensure a Story Audience exists for tests and return it.
- */
-function makeAudience(string $name): StoryRefAudience
-{
-    return app(AudienceService::class)->create([
-        'name' => $name,
-        'slug' => Str::slug($name),
-        'is_active' => true,
-    ]);
-}
-
-function defaultCopyright(): StoryRefCopyright
-{
-    return StoryRefCopyright::firstOrCreate([
-        'name' => 'DefaultCopyright',
-        'slug' => 'default-copyright',
-        'is_active' => true
-    ]);
-}
-
-function makeCopyright(string $name, string $description = ''): StoryRefCopyright
-{
-    return app(CopyrightService::class)->create([
-        'name' => $name,
-        'slug' => Str::slug($name),
-        'description' => $description,
-        'is_active' => true,
-    ]);
-}
-
-function defaultGenre(): StoryRefGenre
-{
-    return StoryRefGenre::firstOrCreate([
-        'name' => 'DefaultGenre',
-        'slug' => 'default-genre',
-        'is_active' => true,
-    ]);
-}
-
-function makeGenre(string $name): StoryRefGenre
-{
-    return app(GenreService::class)->create([
-        'name' => $name,
-        'slug' => Str::slug($name),
-        'is_active' => true,
-    ]);
-}
-
-function makeStatus(string $name): StoryRefStatus
-{
-    return app(StatusService::class)->create([
-        'name' => $name,
-        'slug' => Str::slug($name),
-        'is_active' => true,
-    ]);
-}
-
-function makeFeedback(string $name): StoryRefFeedback
-{
-    return app(FeedbackService::class)->create([
-        'name' => $name,
-        'slug' => Str::slug($name),
-        'is_active' => true,
-    ]);
-}
-
-function defaultTriggerWarning(): StoryRefTriggerWarning
-{
-    return StoryRefTriggerWarning::firstOrCreate([
-        'name' => 'Violence',
-        'slug' => 'violence',
-        'is_active' => true,
-    ]);
-}
-
-function makeTriggerWarning(string $name, string $description = ''): StoryRefTriggerWarning
-{
-    return app(TriggerWarningService::class)->create([
-        'name' => $name,
-        'slug' => Str::slug($name),
-        'description' => $description,
-        'is_active' => true,
-    ]);
-}
-
-/**
  * Build a valid payload for story create/update; override any field to test specific validation scenarios.
  */
 function validStoryPayload(array $overrides = []): array
 {
+    $type = defaultRefType();
+    $audience = defaultRefAudience();
+    $copyright = defaultRefCopyright();
+    $genre = defaultRefGenre();
+
     return array_merge([
         'title' => 'Valid',
         'description' => generateDummyText(150),
         'visibility' => Story::VIS_PUBLIC,
-        'story_ref_type_id' => defaultStoryType()->id,
-        'story_ref_audience_id' => defaultAudience()->id,
-        'story_ref_copyright_id' => defaultCopyright()->id,
-        'story_ref_genre_ids' => [defaultGenre()->id],
+        'story_ref_type_id' => $type->id,
+        'story_ref_audience_id' => $audience->id,
+        'story_ref_copyright_id' => $copyright->id,
+        'story_ref_genre_ids' => [$genre->id],
         'story_ref_feedback_id' => null,
         'tw_disclosure' => Story::TW_NO_TW,
     ], $overrides);

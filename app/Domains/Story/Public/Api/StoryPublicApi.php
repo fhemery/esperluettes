@@ -16,7 +16,10 @@ use App\Domains\Story\Public\Contracts\StoryQueryFilterDto;
 use App\Domains\Story\Public\Contracts\StoryQueryPaginationDto;
 use App\Domains\Story\Public\Contracts\StoryQueryFieldsToReturnDto;
 use App\Domains\Story\Public\Contracts\PaginatedStoryDto;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
+use App\Domains\StoryRef\Public\Contracts\GenreDto;
+use App\Domains\StoryRef\Public\Contracts\StoryRefFilterDto;
+use App\Domains\StoryRef\Public\Contracts\TriggerWarningDto;
 
 class StoryMapperHelper {
     /**
@@ -39,7 +42,7 @@ class StoryPublicApi
         private readonly StorySearchService $search,
         private readonly StoryService $storyService,
         private readonly StoryAccessService $accessService,
-        private readonly StoryRefLookupService $storyRefService
+        private readonly StoryRefPublicApi $storyRefs,
     ) {
     }
 
@@ -106,8 +109,16 @@ class StoryPublicApi
         }
         
         $helper = new StoryMapperHelper(
-            genres: $fieldsToReturn->includeGenreIds ? $this->storyRefService->getGenres()->all() : [],
-            triggerWarnings: $fieldsToReturn->includeTriggerWarningIds ? $this->storyRefService->getTriggerWarnings()->all() : [],
+            genres: $fieldsToReturn->includeGenreIds
+                ? $this->storyRefs->getAllGenres(new StoryRefFilterDto(activeOnly: true))
+                    ->map(fn (GenreDto $dto) => $dto->toArray())
+                    ->all()
+                : [],
+            triggerWarnings: $fieldsToReturn->includeTriggerWarningIds
+                ? $this->storyRefs->getAllTriggerWarnings(new StoryRefFilterDto(activeOnly: true))
+                    ->map(fn (TriggerWarningDto $dto) => $dto->toArray())
+                    ->all()
+                : [],
             profiles: $profiles,
         );
 
