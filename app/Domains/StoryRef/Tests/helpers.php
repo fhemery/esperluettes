@@ -9,6 +9,8 @@ use App\Domains\StoryRef\Public\Contracts\StatusDto;
 use App\Domains\StoryRef\Public\Contracts\StatusWriteDto;
 use App\Domains\StoryRef\Public\Contracts\FeedbackDto;
 use App\Domains\StoryRef\Public\Contracts\FeedbackWriteDto;
+use App\Domains\StoryRef\Public\Contracts\TypeDto;
+use App\Domains\StoryRef\Public\Contracts\TypeWriteDto;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -97,4 +99,25 @@ function makeRefFeedback(TestCase $t, string $name, array $overrides = []): Feed
     );
 
     return $api->createFeedback($write);
+}
+
+/**
+ * Create a StoryRef Type through the public API for tests.
+ */
+function makeRefType(TestCase $t, string $name, array $overrides = []): TypeDto
+{
+    $admin = admin($t);
+    $t->actingAs($admin);
+
+    /** @var StoryRefPublicApi $api */
+    $api = app(StoryRefPublicApi::class);
+
+    $write = new TypeWriteDto(
+        slug: $overrides['slug'] ?? Str::slug($name),
+        name: $name,
+        is_active: $overrides['is_active'] ?? true,
+        order: $overrides['order'] ?? null,
+    );
+
+    return $api->createType($write);
 }

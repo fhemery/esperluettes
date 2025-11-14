@@ -4,14 +4,18 @@ namespace App\Domains\StoryRef\Public\Api;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\StoryRef\Private\Models\StoryRefType;
 use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 use App\Domains\StoryRef\Private\Models\StoryRefAudience;
 use App\Domains\StoryRef\Private\Models\StoryRefStatus;
 use App\Domains\StoryRef\Private\Models\StoryRefFeedback;
+use App\Domains\StoryRef\Private\Services\TypeRefService;
 use App\Domains\StoryRef\Private\Services\GenreRefService;
 use App\Domains\StoryRef\Private\Services\AudienceRefService;
 use App\Domains\StoryRef\Private\Services\StatusRefService;
 use App\Domains\StoryRef\Private\Services\FeedbackRefService;
+use App\Domains\StoryRef\Public\Contracts\TypeDto;
+use App\Domains\StoryRef\Public\Contracts\TypeWriteDto;
 use App\Domains\StoryRef\Public\Contracts\GenreDto;
 use App\Domains\StoryRef\Public\Contracts\GenreWriteDto;
 use App\Domains\StoryRef\Public\Contracts\AudienceDto;
@@ -28,11 +32,76 @@ class StoryRefPublicApi
 {
     public function __construct(
         private readonly AuthPublicApi $auth,
+        private readonly TypeRefService $typeRefService,
         private readonly GenreRefService $genreRefService,
         private readonly AudienceRefService $audienceRefService,
         private readonly StatusRefService $statusRefService,
         private readonly FeedbackRefService $feedbackRefService,
     ) {}
+
+    /**
+     * @return Collection<int, TypeDto>
+     */
+    public function getAllTypes(?StoryRefFilterDto $filter = null): Collection
+    {
+        $dtos = $this->typeRefService->getAll()
+            ->map(fn (StoryRefType $model) => TypeDto::fromModel($model));
+
+        $filter = $filter ?? new StoryRefFilterDto();
+
+        if ($filter->activeOnly) {
+            $dtos = $dtos->filter(fn (TypeDto $dto) => $dto->is_active);
+        }
+
+        return $dtos->values();
+    }
+
+    public function getTypeById(int $id): ?TypeDto
+    {
+        $model = $this->typeRefService->getOneById($id);
+
+        return $model ? TypeDto::fromModel($model) : null;
+    }
+
+    public function getTypeBySlug(string $slug): ?TypeDto
+    {
+        $model = $this->typeRefService->getOneBySlug($slug);
+
+        return $model ? TypeDto::fromModel($model) : null;
+    }
+
+    public function createType(TypeWriteDto $input): TypeDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->typeRefService->create([
+            'name' => $input->name,
+            'slug' => $input->slug,
+            'is_active' => $input->is_active,
+            'order' => $input->order,
+        ]);
+
+        return TypeDto::fromModel($model);
+    }
+
+    public function updateType(int $id, TypeWriteDto $input): ?TypeDto
+    {
+        $this->assertAdminOrTechAdmin();
+        $model = $this->typeRefService->update($id, [
+            'name' => $input->name,
+            'slug' => $input->slug,
+            'is_active' => $input->is_active,
+            'order' => $input->order,
+        ]);
+
+        return $model ? TypeDto::fromModel($model) : null;
+    }
+
+    public function deleteType(int $id): bool
+    {
+        $this->assertAdminOrTechAdmin();
+
+        return $this->typeRefService->delete($id);
+    }
 
     /**
      * @return Collection<int, GenreDto>
