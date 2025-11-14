@@ -48,19 +48,6 @@ export default class ToolbarEmoji extends Module {
       display: 'none',
     });
 
-    const search = document.createElement('input');
-    search.type = 'text';
-    search.placeholder = 'Search…';
-    Object.assign(search.style, {
-      width: '100%',
-      border: '1px solid #e5e7eb',
-      borderRadius: '0.375rem',
-      padding: '4px 8px',
-      marginBottom: '6px',
-      fontSize: '12px',
-    });
-    this.popover.appendChild(search);
-
     const grid = document.createElement('div');
     Object.assign(grid.style, {
       display: 'grid',
@@ -69,9 +56,9 @@ export default class ToolbarEmoji extends Module {
     });
     this.popover.appendChild(grid);
 
-    const render = (q = '') => {
+    const render = () => {
       grid.innerHTML = '';
-      const items = searchEmojis(q, this.options.maxResults);
+      const items = searchEmojis('', this.options.maxResults);
       items.forEach(item => {
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -90,17 +77,14 @@ export default class ToolbarEmoji extends Module {
           if (!range) return;
           this.quill.insertText(range.index, item.unicode, 'user');
           this.quill.setSelection(range.index + item.unicode.length, 0, 'user');
-          // Clear search so palette resets on next open and close popover
-          search.value = '';
-          render('');
+          // Close popover after inserting emoji
+          render();
           this.hide();
         });
         grid.appendChild(btn);
       });
     };
-    render('');
-
-    search.addEventListener('input', (e) => render(e.target.value));
+    render();
 
     // Toggle open/close
     this.button.addEventListener('click', (e) => {
