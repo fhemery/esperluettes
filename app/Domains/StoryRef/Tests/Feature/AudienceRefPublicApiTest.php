@@ -53,6 +53,28 @@ describe('StoryRefPublicApi audiences', function () {
         });
     });
 
+    describe('slug helpers', function () {
+        it('maps audience slugs to ids from DTO list', function () {
+            $aud1 = makeRefAudience($this, 'Adult', ['slug' => 'adult']);
+            $aud2 = makeRefAudience($this, 'Teen', ['slug' => 'teen']);
+
+            /** @var StoryRefPublicApi $api */
+            $api = app(StoryRefPublicApi::class);
+
+            $ids = $api->getAudienceIdsBySlugs(['adult', 'teen']);
+            expect($ids)->toContain($aud1->id, $aud2->id);
+
+            $idsMixed = $api->getAudienceIdsBySlugs([' ADULT ', 'ADULT', 'teen', 'unknown']);
+            sort($idsMixed);
+            $expected = [$aud1->id, $aud2->id];
+            sort($expected);
+            expect($idsMixed)->toBe($expected);
+
+            $idsNull = $api->getAudienceIdsBySlugs(null);
+            expect($idsNull)->toBe([]);
+        });
+    });
+
     describe('get one', function () {
         it('gets audience by id and slug', function () {
             $audienceDto = makeRefAudience($this, 'Young Adult');

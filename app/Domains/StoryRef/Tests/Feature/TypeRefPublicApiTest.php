@@ -53,6 +53,26 @@ describe('StoryRefPublicApi types', function () {
         });
     });
 
+    describe('slug helpers', function () {
+        it('resolves type id by slug from DTO list', function () {
+            $typeDto = makeRefType($this, 'My Type', [
+                'slug' => 'my-type',
+            ]);
+
+            /** @var StoryRefPublicApi $api */
+            $api = app(StoryRefPublicApi::class);
+
+            $id = $api->getTypeIdBySlug('my-type');
+            expect($id)->toBe($typeDto->id);
+
+            $idCase = $api->getTypeIdBySlug('MY-TYPE');
+            expect($idCase)->toBe($typeDto->id);
+
+            $idUnknown = $api->getTypeIdBySlug('unknown');
+            expect($idUnknown)->toBeNull();
+        });
+    });
+
     describe('get one', function () {
         it('gets type by id and slug', function () {
             $typeDto = makeRefType($this, 'My Type', [

@@ -55,6 +55,22 @@ describe('StoryRefPublicApi trigger warnings', function () {
         });
     });
 
+    describe('slug helpers', function () {
+        it('maps trigger warning slugs to ids from DTO list', function () {
+            $tw1 = makeRefTriggerWarning($this, 'Violence', ['slug' => 'violence']);
+            $tw2 = makeRefTriggerWarning($this, 'Abuse', ['slug' => 'abuse']);
+
+            /** @var StoryRefPublicApi $api */
+            $api = app(StoryRefPublicApi::class);
+
+            $ids = $api->getTriggerWarningIdsBySlugs(['violence', 'abuse']);
+            expect($ids)->toContain($tw1->id, $tw2->id);
+
+            $idsEmptyInput = $api->getTriggerWarningIdsBySlugs([]);
+            expect($idsEmptyInput)->toBe([]);
+        });
+    });
+
     describe('get one', function () {
         it('gets trigger warning by id and slug', function () {
             $twDto = makeRefTriggerWarning($this, 'Violence', [

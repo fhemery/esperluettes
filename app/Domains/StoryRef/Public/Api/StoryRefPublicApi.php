@@ -34,6 +34,7 @@ use App\Domains\StoryRef\Public\Contracts\CopyrightDto;
 use App\Domains\StoryRef\Public\Contracts\CopyrightWriteDto;
 use App\Domains\StoryRef\Public\Contracts\StoryRefFilterDto;
 use App\Domains\StoryRef\Public\Contracts\StoryRefsDto;
+use App\Domains\StoryRef\Private\Support\SlugToIdMapper;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
 
@@ -60,6 +61,60 @@ class StoryRefPublicApi
             triggerWarnings: $this->getAllTriggerWarnings($filter),
             feedbacks: $this->getAllFeedbacks($filter),
             copyrights: $this->getAllCopyrights($filter),
+        );
+    }
+
+    public function getTypeIdBySlug(?string $slug): ?int
+    {
+        $normalized = $slug !== null ? trim(strtolower($slug)) : '';
+        if ($normalized === '') {
+            return null;
+        }
+
+        /** @var TypeDto|null $match */
+        $match = $this->getAllTypes()->first(
+            fn (TypeDto $dto) => strtolower($dto->slug) === $normalized
+        );
+
+        return $match?->id;
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function getAudienceIdsBySlugs(?array $slugs): array
+    {
+        return SlugToIdMapper::map(
+            $slugs,
+            $this->getAllAudiences(),
+            fn (AudienceDto $dto) => [$dto->slug, $dto->id],
+        );
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function getGenreIdsBySlugs(?array $slugs): array
+    {
+        return SlugToIdMapper::map(
+            $slugs,
+            $this->getAllGenres(),
+            fn (GenreDto $dto) => [$dto->slug, $dto->id],
+        );
+    }
+
+    /**
+     * @param array<int,string>|null $slugs
+     * @return array<int,int>
+     */
+    public function getTriggerWarningIdsBySlugs(?array $slugs): array
+    {
+        return SlugToIdMapper::map(
+            $slugs,
+            $this->getAllTriggerWarnings(),
+            fn (TriggerWarningDto $dto) => [$dto->slug, $dto->id],
         );
     }
 

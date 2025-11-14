@@ -56,6 +56,19 @@ describe('StoryRefPublicApi genres', function () {
         });
     });
 
+    describe('slug helpers', function () {
+        it('maps genre slugs to ids from DTO list', function () {
+            $g1 = makeRefGenre($this, 'Fantasy', ['slug' => 'fantasy']);
+            $g2 = makeRefGenre($this, 'Sci-Fi', ['slug' => 'sci-fi']);
+
+            /** @var StoryRefPublicApi $api */
+            $api = app(StoryRefPublicApi::class);
+
+            $ids = $api->getGenreIdsBySlugs(['fantasy', 'sci-fi']);
+            expect($ids)->toContain($g1->id, $g2->id);
+        });
+    });
+
     describe('get one', function () {
         it('gets genre by id and slug', function () {
             $genreDto = makeRefGenre($this, 'Fantasy', [
