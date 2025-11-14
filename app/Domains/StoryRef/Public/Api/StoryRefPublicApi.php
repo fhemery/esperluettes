@@ -95,12 +95,7 @@ class StoryRefPublicApi
     public function createType(TypeWriteDto $input): TypeDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->typeRefService->create([
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->typeRefService->create($input->toArray());
 
         return TypeDto::fromModel($model);
     }
@@ -108,12 +103,7 @@ class StoryRefPublicApi
     public function updateType(int $id, TypeWriteDto $input): ?TypeDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->typeRefService->update($id, [
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->typeRefService->update($id, $input->toArray());
 
         return $model ? TypeDto::fromModel($model) : null;
     }
@@ -157,13 +147,7 @@ class StoryRefPublicApi
     public function createCopyright(CopyrightWriteDto $input): CopyrightDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->copyrightRefService->create([
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->copyrightRefService->create($input->toArray());
 
         return CopyrightDto::fromModel($model);
     }
@@ -171,13 +155,7 @@ class StoryRefPublicApi
     public function updateCopyright(int $id, CopyrightWriteDto $input): ?CopyrightDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->copyrightRefService->update($id, [
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->copyrightRefService->update($id, $input->toArray());
 
         return $model ? CopyrightDto::fromModel($model) : null;
     }
@@ -220,13 +198,7 @@ class StoryRefPublicApi
     public function createGenre(GenreWriteDto $input): GenreDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->genreRefService->create([
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->genreRefService->create($input->toArray());
 
         return GenreDto::fromModel($model);
     }
@@ -234,13 +206,7 @@ class StoryRefPublicApi
     public function updateGenre(int $id, GenreWriteDto $input): ?GenreDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->genreRefService->update($id, [
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->genreRefService->update($id, $input->toArray());
 
         return $model ? GenreDto::fromModel($model) : null;
     }
@@ -284,12 +250,7 @@ class StoryRefPublicApi
     public function createAudience(AudienceWriteDto $input): AudienceDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->audienceRefService->create([
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->audienceRefService->create($input->toArray());
 
         return AudienceDto::fromModel($model);
     }
@@ -297,12 +258,7 @@ class StoryRefPublicApi
     public function updateAudience(int $id, AudienceWriteDto $input): ?AudienceDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->audienceRefService->update($id, [
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->audienceRefService->update($id, $input->toArray());
 
         return $model ? AudienceDto::fromModel($model) : null;
     }
@@ -346,13 +302,7 @@ class StoryRefPublicApi
     public function createStatus(StatusWriteDto $input): StatusDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->statusRefService->create([
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->statusRefService->create($input->toArray());
 
         return StatusDto::fromModel($model);
     }
@@ -360,13 +310,7 @@ class StoryRefPublicApi
     public function updateStatus(int $id, StatusWriteDto $input): ?StatusDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->statusRefService->update($id, [
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->statusRefService->update($id, $input->toArray());
 
         return $model ? StatusDto::fromModel($model) : null;
     }
@@ -410,13 +354,7 @@ class StoryRefPublicApi
     public function createFeedback(FeedbackWriteDto $input): FeedbackDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->feedbackRefService->create([
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->feedbackRefService->create($input->toArray());
 
         return FeedbackDto::fromModel($model);
     }
@@ -424,13 +362,7 @@ class StoryRefPublicApi
     public function updateFeedback(int $id, FeedbackWriteDto $input): ?FeedbackDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->feedbackRefService->update($id, [
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->feedbackRefService->update($id, $input->toArray());
 
         return $model ? FeedbackDto::fromModel($model) : null;
     }
@@ -474,13 +406,7 @@ class StoryRefPublicApi
     public function createTriggerWarning(TriggerWarningWriteDto $input): TriggerWarningDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->triggerWarningRefService->create([
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->triggerWarningRefService->create($input->toArray());
 
         return TriggerWarningDto::fromModel($model);
     }
@@ -488,13 +414,7 @@ class StoryRefPublicApi
     public function updateTriggerWarning(int $id, TriggerWarningWriteDto $input): ?TriggerWarningDto
     {
         $this->assertAdminOrTechAdmin();
-        $model = $this->triggerWarningRefService->update($id, [
-            'name' => $input->name,
-            'slug' => $input->slug,
-            'description' => $input->description,
-            'is_active' => $input->is_active,
-            'order' => $input->order,
-        ]);
+        $model = $this->triggerWarningRefService->update($id, $input->toArray());
 
         return $model ? TriggerWarningDto::fromModel($model) : null;
     }
