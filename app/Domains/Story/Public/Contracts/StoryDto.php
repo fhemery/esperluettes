@@ -5,14 +5,12 @@ namespace App\Domains\Story\Public\Contracts;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Public\Api\StoryMapperHelper;
-use App\Domains\StoryRef\Private\Models\StoryRefGenre;
-use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 
 class StoryDto
 {
     /**
-     * @var StoryRefGenre[] $genres
-     * @var StoryRefTriggerWarning[] $triggerWarnings
+     * @var array<int,array> $genres
+     * @var array<int,array> $triggerWarnings
      * @var ProfileDto[] $authors
      * @var StoryChapterDto[] $chapters
      */

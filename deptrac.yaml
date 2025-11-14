@@ -402,7 +402,6 @@ deptrac:
       - Shared
       - StoryPrivate
       - StoryRefPublic
-      - StoryRefPrivate
       - EventsPublic
       - AuthPublic
       - ModerationPublic
@@ -543,9 +542,10 @@ deptrac:
       - CommentPublic
       - ModerationPublic
       - ProfilePublic
-      - StoryRefPrivate
       - EventsPublic
       - StoryPublic
+      - StoryRefPublic
+      - StoryRefPrivate
       - NotificationPublic
 
     StoryRefPrivate:

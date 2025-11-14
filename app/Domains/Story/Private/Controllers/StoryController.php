@@ -17,7 +17,7 @@ use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\ViewModels\StoryListViewModel;
 use App\Domains\Story\Private\ViewModels\StoryShowViewModel;
 use App\Domains\Story\Private\ViewModels\ChapterSummaryViewModel;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\ViewModels\RefViewModel;
@@ -36,7 +36,7 @@ class StoryController
         private readonly StoryService              $service,
         private readonly AuthPublicApi             $authApi,
         private readonly ProfilePublicApi          $profileApi,
-        private readonly StoryRefLookupService     $lookup,
+        private readonly StoryRefPublicApi         $storyRefs,
         private readonly ReadingProgressService    $progress,
         private readonly ChapterService            $chapters,
         private readonly ChapterCreditService      $credits,
@@ -50,7 +50,7 @@ class StoryController
     {
         $page = (int)request()->get('page', 1);
         $typeSlug = request()->get('type');
-        $typeId = $this->lookup->findTypeIdBySlug(is_string($typeSlug) ? $typeSlug : null);
+        $typeId = $this->storyRefs->getTypeIdBySlug(is_string($typeSlug) ? $typeSlug : null);
         // Audience multi-select: accept audiences[] or comma-separated 'audiences'
         $audiencesParam = request()->get('audiences');
         $audienceSlugs = [];
@@ -61,7 +61,7 @@ class StoryController
         }
         // Deduplicate to avoid repeated query params across submissions
         $audienceSlugs = array_values(array_unique($audienceSlugs));
-        $audienceIds = $this->lookup->findAudienceIdsBySlugs($audienceSlugs);
+        $audienceIds = $this->storyRefs->getAudienceIdsBySlugs($audienceSlugs);
 
         // Genres multi-select (AND semantics): accept genres[] or comma-separated 'genres'
         $genresParam = request()->get('genres');
@@ -72,7 +72,7 @@ class StoryController
             $genreSlugs = array_values(array_filter(array_map('trim', explode(',', $genresParam))));
         }
         $genreSlugs = array_values(array_unique($genreSlugs));
-        $genreIds = $this->lookup->findGenreIdsBySlugs($genreSlugs);
+        $genreIds = $this->storyRefs->getGenreIdsBySlugs($genreSlugs);
 
         // Trigger Warnings exclusion (OR semantics): accept exclude_tw[] or comma-separated 'exclude_tw'
         $twParam = request()->get('exclude_tw');
@@ -83,7 +83,7 @@ class StoryController
             $twSlugs = array_values(array_filter(array_map('trim', explode(',', $twParam))));
         }
         $twSlugs = array_values(array_unique($twSlugs));
-        $excludeTwIds = $this->lookup->findTriggerWarningIdsBySlugs($twSlugs);
+        $excludeTwIds = $this->storyRefs->getTriggerWarningIdsBySlugs($twSlugs);
         $vis = [Story::VIS_PUBLIC];
         if ($this->authApi->hasAnyRole([Roles::USER_CONFIRMED])) {
             $vis[] = Story::VIS_COMMUNITY;
@@ -104,7 +104,16 @@ class StoryController
         $paginator = $this->service->searchStories($filter, $fieldsToReturn);
 
         // Referentials lookup for display (types, ...)
-        $referentials = $this->lookup->getStoryReferentials();
+        $refsDto = $this->storyRefs->getAllStoryReferentials();
+        $referentials = [
+            'types' => $refsDto->types->map(fn ($dto) => $dto->toArray()),
+            'audiences' => $refsDto->audiences->map(fn ($dto) => $dto->toArray()),
+            'copyrights' => $refsDto->copyrights->map(fn ($dto) => $dto->toArray()),
+            'genres' => $refsDto->genres->map(fn ($dto) => $dto->toArray()),
+            'statuses' => $refsDto->statuses->map(fn ($dto) => $dto->toArray()),
+            'trigger_warnings' => $refsDto->triggerWarnings->map(fn ($dto) => $dto->toArray()),
+            'feedbacks' => $refsDto->feedbacks->map(fn ($dto) => $dto->toArray()),
+        ];
 
         $items = $this->vmBuilder->buildStorySummaryItems($paginator->items());
 
@@ -158,7 +167,16 @@ class StoryController
             abort(404);
         }
 
-        $referentials = $this->lookup->getStoryReferentials();
+        $refsDto = $this->storyRefs->getAllStoryReferentials();
+        $referentials = [
+            'types' => $refsDto->types->map(fn ($dto) => $dto->toArray()),
+            'audiences' => $refsDto->audiences->map(fn ($dto) => $dto->toArray()),
+            'copyrights' => $refsDto->copyrights->map(fn ($dto) => $dto->toArray()),
+            'genres' => $refsDto->genres->map(fn ($dto) => $dto->toArray()),
+            'statuses' => $refsDto->statuses->map(fn ($dto) => $dto->toArray()),
+            'trigger_warnings' => $refsDto->triggerWarnings->map(fn ($dto) => $dto->toArray()),
+            'feedbacks' => $refsDto->feedbacks->map(fn ($dto) => $dto->toArray()),
+        ];
         // Build PageViewModel with breadcrumbs: Home/Dashboard > Library > Story (link) > Edit (active)
         $trail = BreadcrumbViewModel::FromHome(Auth::check());
         $trail->push(__('shared::navigation.stories'), route('stories.index'));
@@ -284,63 +302,53 @@ class StoryController
             : array_values($this->profileApi->getPublicProfiles($authorUserIds));
 
         // Resolve type name for display
-        $typesById = $this->lookup->getTypes()->keyBy('id');
-        $typeArr = $typesById->get($story->story_ref_type_id);
-        $typeName = (string) (is_array($typeArr) ? ($typeArr['name'] ?? '') : '');
-        $typeDesc = is_array($typeArr) ? ($typeArr['description'] ?? null) : null;
-        $typeVm = new RefViewModel($typeName, $typeDesc);
+        $typesById = $this->storyRefs->getAllTypes()->keyBy('id');
+        $typeDto = $typesById->get($story->story_ref_type_id);
+        $typeName = $typeDto ? (string) $typeDto->name : '';
+        $typeVm = new RefViewModel($typeName);
 
         // Resolve audience name for display
-        $audiencesById = $this->lookup->getAudiences()->keyBy('id');
-        $audArr = $audiencesById->get($story->story_ref_audience_id);
-        $audienceName = (string) (is_array($audArr) ? ($audArr['name'] ?? '') : '');
-        $audienceDesc = is_array($audArr) ? ($audArr['description'] ?? null) : null;
-        $audienceVm = new RefViewModel($audienceName, $audienceDesc);
+        $audiencesById = $this->storyRefs->getAllAudiences()->keyBy('id');
+        $audDto = $audiencesById->get($story->story_ref_audience_id);
+        $audienceName = $audDto ? (string) $audDto->name : '';
+        $audienceVm = new RefViewModel($audienceName);
 
         // Resolve copyright name for display
-        $copyrightsById = $this->lookup->getCopyrights()->keyBy('id');
-        $crArr = $copyrightsById->get($story->story_ref_copyright_id);
-        $copyrightName = (string) (is_array($crArr) ? ($crArr['name'] ?? '') : '');
-        $copyrightDesc = is_array($crArr) ? ($crArr['description'] ?? null) : null;
+        $copyrightsById = $this->storyRefs->getAllCopyrights()->keyBy('id');
+        $crDto = $copyrightsById->get($story->story_ref_copyright_id);
+        $copyrightName = $crDto ? (string) $crDto->name : '';
+        $copyrightDesc = $crDto?->description;
         $copyrightVm = new RefViewModel($copyrightName, $copyrightDesc);
 
         // Resolve status name for display
-        $statusesById = $this->lookup->getStatuses()->keyBy('id');
-        $stArr = $statusesById->get($story->story_ref_status_id);
-        $statusName = is_array($stArr) ? ($stArr['name'] ?? null) : null;
-        $statusDesc = is_array($stArr) ? ($stArr['description'] ?? null) : null;
-        $statusVm = $statusName !== null ? new RefViewModel((string)$statusName, $statusDesc) : null;
+        $statusesById = $this->storyRefs->getAllStatuses()->keyBy('id');
+        $stDto = $statusesById->get($story->story_ref_status_id);
+        $statusVm = $stDto ? new RefViewModel((string) $stDto->name, $stDto->description) : null;
 
         // Resolve feedback name for display
-        $feedbacksById = $this->lookup->getFeedbacks()->keyBy('id');
-        $fbArr = $feedbacksById->get($story->story_ref_feedback_id);
-        $feedbackName = is_array($fbArr) ? ($fbArr['name'] ?? null) : null;
-        $feedbackDesc = is_array($fbArr) ? ($fbArr['description'] ?? null) : null;
-        $feedbackVm = $feedbackName !== null ? new RefViewModel((string)$feedbackName, $feedbackDesc) : null;
+        $feedbacksById = $this->storyRefs->getAllFeedbacks()->keyBy('id');
+        $fbDto = $feedbacksById->get($story->story_ref_feedback_id);
+        $feedbackVm = $fbDto ? new RefViewModel((string) $fbDto->name, $fbDto->description) : null;
 
         // Collect genres as RefViewModel using lookup service (service only loads IDs)
         $genreIds = $story->genres?->pluck('id')->filter()->values()->all() ?? [];
-        $genresById = $this->lookup->getGenres()->keyBy('id');
+        $genresById = $this->storyRefs->getAllGenres()->keyBy('id');
         $genreRefs = [];
         foreach ($genreIds as $gid) {
             $row = $genresById->get($gid);
-            if (is_array($row) && isset($row['name'])) {
-                $gName = (string)$row['name'];
-                $gDesc = $row['description'] ?? null;
-                $genreRefs[] = new RefViewModel($gName, is_string($gDesc) ? $gDesc : null);
+            if ($row) {
+                $genreRefs[] = new RefViewModel((string) $row->name, $row->description);
             }
         }
 
         // Collect trigger warnings as RefViewModel for display
         $twIds = $story->triggerWarnings?->pluck('id')->filter()->values()->all() ?? [];
-        $twById = $this->lookup->getTriggerWarnings()->keyBy('id');
+        $twById = $this->storyRefs->getAllTriggerWarnings()->keyBy('id');
         $triggerWarningRefs = [];
         foreach ($twIds as $tid) {
             $row = $twById->get($tid);
-            if (is_array($row) && isset($row['name'])) {
-                $twName = (string)$row['name'];
-                $twDesc = $row['description'] ?? null;
-                $triggerWarningRefs[] = new RefViewModel($twName, is_string($twDesc) ? $twDesc : null);
+            if ($row) {
+                $triggerWarningRefs[] = new RefViewModel((string) $row->name, $row->description);
             }
         }
 

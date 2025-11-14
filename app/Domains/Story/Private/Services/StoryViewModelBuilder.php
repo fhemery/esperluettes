@@ -5,13 +5,13 @@ namespace App\Domains\Story\Private\Services;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\ViewModels\StorySummaryViewModel;
-use App\Domains\StoryRef\Private\Services\StoryRefLookupService;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 
 class StoryViewModelBuilder
 {
     public function __construct(
         private readonly ProfilePublicApi $profileApi,
-        private readonly StoryRefLookupService $lookup,
+        private readonly StoryRefPublicApi $storyRefs,
     ) {}
 
     /**
@@ -37,8 +37,8 @@ class StoryViewModelBuilder
             : $this->profileApi->getPublicProfiles($authorIds); // [userId => ProfileDto]
 
         $items = [];
-        $genresById = $this->lookup->getGenres()->keyBy('id');
-        $twById = $this->lookup->getTriggerWarnings()->keyBy('id');
+        $genresById = $this->storyRefs->getAllGenres()->keyBy('id');
+        $twById = $this->storyRefs->getAllTriggerWarnings()->keyBy('id');
 
         foreach ($stories as $story) {
             // Map authors to public profile DTOs
@@ -55,8 +55,8 @@ class StoryViewModelBuilder
             $ids = $story->genres?->pluck('id')->all() ?? [];
             foreach ($ids as $gid) {
                 $row = $genresById->get($gid);
-                if (is_array($row) && isset($row['name'])) {
-                    $gNames[] = (string)$row['name'];
+                if ($row) {
+                    $gNames[] = (string) $row->name;
                 }
             }
 
@@ -65,8 +65,8 @@ class StoryViewModelBuilder
             $tids = $story->triggerWarnings?->pluck('id')->all() ?? [];
             foreach ($tids as $tid) {
                 $row = $twById->get($tid);
-                if (is_array($row) && isset($row['name'])) {
-                    $twNames[] = (string)$row['name'];
+                if ($row) {
+                    $twNames[] = (string) $row->name;
                 }
             }
 
