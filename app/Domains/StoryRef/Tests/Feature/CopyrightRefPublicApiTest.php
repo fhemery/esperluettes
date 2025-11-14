@@ -17,11 +17,11 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('StoryRefPublicApi copyrights', function () {
     describe('getAll', function () {
         it('lists all copyrights as DTOs', function () {
-            makeRefCopyright($this, 'CC BY', [
+            makeRefCopyright( 'CC BY', [
                 'description' => 'CC BY desc',
                 'order' => 1,
             ]);
-            makeRefCopyright($this, 'CC BY-SA', [
+            makeRefCopyright( 'CC BY-SA', [
                 'description' => 'CC BY-SA desc',
                 'order' => 2,
             ]);
@@ -36,10 +36,10 @@ describe('StoryRefPublicApi copyrights', function () {
         });
 
         it('filters by activeOnly flag in filter dto', function () {
-            makeRefCopyright($this, 'Active', [
+            makeRefCopyright( 'Active', [
                 'is_active' => true,
             ]);
-            makeRefCopyright($this, 'Inactive', [
+            makeRefCopyright( 'Inactive', [
                 'is_active' => false,
             ]);
 
@@ -57,7 +57,7 @@ describe('StoryRefPublicApi copyrights', function () {
 
     describe('get one', function () {
         it('gets copyright by id and slug', function () {
-            $copyrightDto = makeRefCopyright($this, 'CC BY', [
+            $copyrightDto = makeRefCopyright( 'CC BY', [
                 'slug' => 'cc-by',
             ]);
 
@@ -106,7 +106,7 @@ describe('StoryRefPublicApi copyrights', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $copyrightDto = makeRefCopyright($this, 'License A', [
+            $copyrightDto = makeRefCopyright( 'License A', [
                 'slug' => 'license-a',
             ]);
 
@@ -138,7 +138,7 @@ describe('StoryRefPublicApi copyrights', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $copyrightDto = makeRefCopyright($this, 'Temp');
+            $copyrightDto = makeRefCopyright( 'Temp');
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);

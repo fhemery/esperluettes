@@ -2,9 +2,9 @@
 
 namespace App\Domains\Story\Private\Models;
 
-use App\Domains\StoryRef\Private\Models\StoryRefGenre;
-use App\Domains\StoryRef\Private\Models\StoryRefTriggerWarning;
 use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Models\StoryGenre;
+use App\Domains\Story\Private\Models\StoryTriggerWarning;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -104,8 +104,7 @@ class Story extends Model
      */
     public function genres()
     {
-        return $this->belongsToMany(StoryRefGenre::class, 'story_genres', 'story_id', 'story_ref_genre_id')
-            ->withTimestamps();
+        return $this->hasMany(StoryGenre::class, 'story_id');
     }
 
     /**
@@ -113,8 +112,7 @@ class Story extends Model
      */
     public function triggerWarnings()
     {
-        return $this->belongsToMany(StoryRefTriggerWarning::class, 'story_trigger_warnings', 'story_id', 'story_ref_trigger_warning_id')
-            ->withTimestamps();
+        return $this->hasMany(StoryTriggerWarning::class, 'story_id');
     }
 
     /**

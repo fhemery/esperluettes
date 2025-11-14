@@ -19,13 +19,13 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('StoryRefPublicApi all refs', function () {
     it('returns all ref collections as DTOs', function () {
         // Seed one active item for each ref type
-        makeRefType($this, 'Type A');
-        makeRefGenre($this, 'Genre A');
-        makeRefAudience($this, 'Audience A');
-        makeRefStatus($this, 'Status A');
-        makeRefTriggerWarning($this, 'TW A');
-        makeRefFeedback($this, 'Feedback A');
-        makeRefCopyright($this, 'Copyright A');
+        makeRefType( 'Type A');
+        makeRefGenre( 'Genre A');
+        makeRefAudience( 'Audience A');
+        makeRefStatus( 'Status A');
+        makeRefTriggerWarning( 'TW A');
+        makeRefFeedback( 'Feedback A');
+        makeRefCopyright( 'Copyright A');
 
         /** @var StoryRefPublicApi $api */
         $api = app(StoryRefPublicApi::class);
@@ -59,26 +59,26 @@ describe('StoryRefPublicApi all refs', function () {
 
     it('applies activeOnly filtering to all collections', function () {
         // Each ref type: one active and one inactive
-        makeRefType($this, 'Type Active', ['is_active' => true]);
-        makeRefType($this, 'Type Inactive', ['is_active' => false]);
+        makeRefType( 'Type Active', ['is_active' => true]);
+        makeRefType( 'Type Inactive', ['is_active' => false]);
 
-        makeRefGenre($this, 'Genre Active', ['is_active' => true]);
-        makeRefGenre($this, 'Genre Inactive', ['is_active' => false]);
+        makeRefGenre( 'Genre Active', ['is_active' => true]);
+        makeRefGenre( 'Genre Inactive', ['is_active' => false]);
 
-        makeRefAudience($this, 'Audience Active', ['is_active' => true]);
-        makeRefAudience($this, 'Audience Inactive', ['is_active' => false]);
+        makeRefAudience( 'Audience Active', ['is_active' => true]);
+        makeRefAudience( 'Audience Inactive', ['is_active' => false]);
 
-        makeRefStatus($this, 'Status Active', ['is_active' => true]);
-        makeRefStatus($this, 'Status Inactive', ['is_active' => false]);
+        makeRefStatus( 'Status Active', ['is_active' => true]);
+        makeRefStatus( 'Status Inactive', ['is_active' => false]);
 
-        makeRefTriggerWarning($this, 'TW Active', ['is_active' => true]);
-        makeRefTriggerWarning($this, 'TW Inactive', ['is_active' => false]);
+        makeRefTriggerWarning( 'TW Active', ['is_active' => true]);
+        makeRefTriggerWarning( 'TW Inactive', ['is_active' => false]);
 
-        makeRefFeedback($this, 'Feedback Active', ['is_active' => true]);
-        makeRefFeedback($this, 'Feedback Inactive', ['is_active' => false]);
+        makeRefFeedback( 'Feedback Active', ['is_active' => true]);
+        makeRefFeedback( 'Feedback Inactive', ['is_active' => false]);
 
-        makeRefCopyright($this, 'Copyright Active', ['is_active' => true]);
-        makeRefCopyright($this, 'Copyright Inactive', ['is_active' => false]);
+        makeRefCopyright( 'Copyright Active', ['is_active' => true]);
+        makeRefCopyright( 'Copyright Inactive', ['is_active' => false]);
 
         /** @var StoryRefPublicApi $api */
         $api = app(StoryRefPublicApi::class);

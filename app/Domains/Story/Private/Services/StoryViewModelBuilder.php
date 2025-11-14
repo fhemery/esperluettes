@@ -52,7 +52,7 @@ class StoryViewModelBuilder
 
             // Map genre IDs to names for badges
             $gNames = [];
-            $ids = $story->genres?->pluck('id')->all() ?? [];
+            $ids = $story->genres?->pluck('story_ref_genre_id')->all() ?? [];
             foreach ($ids as $gid) {
                 $row = $genresById->get($gid);
                 if ($row) {
@@ -62,7 +62,7 @@ class StoryViewModelBuilder
 
             // Map trigger warning IDs to names for badges
             $twNames = [];
-            $tids = $story->triggerWarnings?->pluck('id')->all() ?? [];
+            $tids = $story->triggerWarnings?->pluck('story_ref_trigger_warning_id')->all() ?? [];
             foreach ($tids as $tid) {
                 $row = $twById->get($tid);
                 if ($row) {

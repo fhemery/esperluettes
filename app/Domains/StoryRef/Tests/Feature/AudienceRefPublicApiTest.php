@@ -17,10 +17,10 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('StoryRefPublicApi audiences', function () {
     describe('getAll', function () {
         it('lists all audiences as DTOs', function () {
-            makeRefAudience($this, 'Young Adult', [
+            makeRefAudience( 'Young Adult', [
                 'order' => 1,
             ]);
-            makeRefAudience($this, 'Adults', [
+            makeRefAudience( 'Adults', [
                 'order' => 2,
             ]);
 
@@ -34,10 +34,10 @@ describe('StoryRefPublicApi audiences', function () {
         });
 
         it('filters by activeOnly flag in filter dto', function () {
-            makeRefAudience($this, 'Active', [
+            makeRefAudience( 'Active', [
                 'is_active' => true,
             ]);
-            makeRefAudience($this, 'Inactive', [
+            makeRefAudience( 'Inactive', [
                 'is_active' => false,
             ]);
 
@@ -55,8 +55,8 @@ describe('StoryRefPublicApi audiences', function () {
 
     describe('slug helpers', function () {
         it('maps audience slugs to ids from DTO list', function () {
-            $aud1 = makeRefAudience($this, 'Adult', ['slug' => 'adult']);
-            $aud2 = makeRefAudience($this, 'Teen', ['slug' => 'teen']);
+            $aud1 = makeRefAudience( 'Adult', ['slug' => 'adult']);
+            $aud2 = makeRefAudience( 'Teen', ['slug' => 'teen']);
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);
@@ -77,7 +77,7 @@ describe('StoryRefPublicApi audiences', function () {
 
     describe('get one', function () {
         it('gets audience by id and slug', function () {
-            $audienceDto = makeRefAudience($this, 'Young Adult');
+            $audienceDto = makeRefAudience( 'Young Adult');
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);
@@ -123,7 +123,7 @@ describe('StoryRefPublicApi audiences', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $audienceDto = makeRefAudience($this, 'Adults', [
+            $audienceDto = makeRefAudience( 'Adults', [
                 'slug' => 'adults',
             ]);
 
@@ -154,7 +154,7 @@ describe('StoryRefPublicApi audiences', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $audienceDto = makeRefAudience($this, 'Temp');
+            $audienceDto = makeRefAudience( 'Temp');
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);

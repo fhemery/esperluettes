@@ -331,7 +331,7 @@ class StoryController
         $feedbackVm = $fbDto ? new RefViewModel((string) $fbDto->name, $fbDto->description) : null;
 
         // Collect genres as RefViewModel using lookup service (service only loads IDs)
-        $genreIds = $story->genres?->pluck('id')->filter()->values()->all() ?? [];
+        $genreIds = $story->genres?->pluck('story_ref_genre_id')->filter()->values()->all() ?? [];
         $genresById = $this->storyRefs->getAllGenres()->keyBy('id');
         $genreRefs = [];
         foreach ($genreIds as $gid) {
@@ -342,7 +342,7 @@ class StoryController
         }
 
         // Collect trigger warnings as RefViewModel for display
-        $twIds = $story->triggerWarnings?->pluck('id')->filter()->values()->all() ?? [];
+        $twIds = $story->triggerWarnings?->pluck('story_ref_trigger_warning_id')->filter()->values()->all() ?? [];
         $twById = $this->storyRefs->getAllTriggerWarnings()->keyBy('id');
         $triggerWarningRefs = [];
         foreach ($twIds as $tid) {

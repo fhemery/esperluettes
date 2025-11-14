@@ -17,11 +17,11 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('StoryRefPublicApi trigger warnings', function () {
     describe('getAll', function () {
         it('lists all trigger warnings as DTOs', function () {
-            makeRefTriggerWarning($this, 'Violence', [
+            makeRefTriggerWarning( 'Violence', [
                 'description' => 'Violence desc',
                 'order' => 1,
             ]);
-            makeRefTriggerWarning($this, 'Abuse', [
+            makeRefTriggerWarning( 'Abuse', [
                 'description' => 'Abuse desc',
                 'order' => 2,
             ]);
@@ -36,10 +36,10 @@ describe('StoryRefPublicApi trigger warnings', function () {
         });
 
         it('filters by activeOnly flag in filter dto', function () {
-            makeRefTriggerWarning($this, 'Active', [
+            makeRefTriggerWarning( 'Active', [
                 'is_active' => true,
             ]);
-            makeRefTriggerWarning($this, 'Inactive', [
+            makeRefTriggerWarning( 'Inactive', [
                 'is_active' => false,
             ]);
 
@@ -57,8 +57,8 @@ describe('StoryRefPublicApi trigger warnings', function () {
 
     describe('slug helpers', function () {
         it('maps trigger warning slugs to ids from DTO list', function () {
-            $tw1 = makeRefTriggerWarning($this, 'Violence', ['slug' => 'violence']);
-            $tw2 = makeRefTriggerWarning($this, 'Abuse', ['slug' => 'abuse']);
+            $tw1 = makeRefTriggerWarning( 'Violence', ['slug' => 'violence']);
+            $tw2 = makeRefTriggerWarning( 'Abuse', ['slug' => 'abuse']);
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);
@@ -73,7 +73,7 @@ describe('StoryRefPublicApi trigger warnings', function () {
 
     describe('get one', function () {
         it('gets trigger warning by id and slug', function () {
-            $twDto = makeRefTriggerWarning($this, 'Violence', [
+            $twDto = makeRefTriggerWarning( 'Violence', [
                 'slug' => 'violence',
             ]);
 
@@ -122,7 +122,7 @@ describe('StoryRefPublicApi trigger warnings', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $twDto = makeRefTriggerWarning($this, 'Violence', [
+            $twDto = makeRefTriggerWarning( 'Violence', [
                 'slug' => 'violence',
             ]);
 
@@ -154,7 +154,7 @@ describe('StoryRefPublicApi trigger warnings', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $twDto = makeRefTriggerWarning($this, 'Temp');
+            $twDto = makeRefTriggerWarning( 'Temp');
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);

@@ -17,11 +17,11 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('StoryRefPublicApi genres', function () {
     describe('getAll', function () {
         it('lists all genres as DTOs', function () {
-            makeRefGenre($this, 'Fantasy', [
+            makeRefGenre( 'Fantasy', [
                 'description' => 'Fantasy desc',
                 'order' => 1,
             ]);
-            makeRefGenre($this, 'SciFi', [
+            makeRefGenre( 'SciFi', [
                 'slug' => 'sci-fi',
                 'description' => null,
                 'order' => 2,
@@ -37,10 +37,10 @@ describe('StoryRefPublicApi genres', function () {
         });
 
         it('filters by activeOnly flag in filter dto', function () {
-            makeRefGenre($this, 'Active', [
+            makeRefGenre( 'Active', [
                 'is_active' => true,
             ]);
-            makeRefGenre($this, 'Inactive', [
+            makeRefGenre( 'Inactive', [
                 'is_active' => false,
             ]);
 
@@ -58,8 +58,8 @@ describe('StoryRefPublicApi genres', function () {
 
     describe('slug helpers', function () {
         it('maps genre slugs to ids from DTO list', function () {
-            $g1 = makeRefGenre($this, 'Fantasy', ['slug' => 'fantasy']);
-            $g2 = makeRefGenre($this, 'Sci-Fi', ['slug' => 'sci-fi']);
+            $g1 = makeRefGenre( 'Fantasy', ['slug' => 'fantasy']);
+            $g2 = makeRefGenre( 'Sci-Fi', ['slug' => 'sci-fi']);
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);
@@ -71,7 +71,7 @@ describe('StoryRefPublicApi genres', function () {
 
     describe('get one', function () {
         it('gets genre by id and slug', function () {
-            $genreDto = makeRefGenre($this, 'Fantasy', [
+            $genreDto = makeRefGenre( 'Fantasy', [
                 'description' => 'Fantasy desc',
                 'order' => 1,
             ]);
@@ -121,7 +121,7 @@ describe('StoryRefPublicApi genres', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $genreDto = makeRefGenre($this, 'SciFi', [
+            $genreDto = makeRefGenre( 'SciFi', [
                 'slug' => 'sci-fi',
                 'description' => null,
                 'order' => 1,
@@ -155,7 +155,7 @@ describe('StoryRefPublicApi genres', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $genreDto = makeRefGenre($this, 'Temp', [
+            $genreDto = makeRefGenre( 'Temp', [
                 'description' => null,
                 'order' => 1,
             ]);

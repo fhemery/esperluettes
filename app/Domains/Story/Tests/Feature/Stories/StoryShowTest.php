@@ -106,7 +106,7 @@ describe('Story details page', function () {
 
     it('shows the story type when available', function () {
         $author = alice($this);
-        $type = makeStoryType('Short Story');
+        $type = makeRefType('Short Story');
         $story = publicStory('Typed Story', $author->id, [
             'story_ref_type_id' => $type->id,
         ]);
@@ -117,7 +117,7 @@ describe('Story details page', function () {
 
     it('shows the audience when available', function () {
         $author = alice($this);
-        $aud = makeAudience('Teens');
+        $aud = makeRefAudience('Teens');
         $story = publicStory('Audience Story', $author->id, [
             'story_ref_audience_id' => $aud->id,
         ]);
@@ -129,7 +129,7 @@ describe('Story details page', function () {
 
     it('shows the copyright when available with its description', function () {
         $author = alice($this);
-        $cr = makeCopyright('Public Domain', 'Public domain description');
+        $cr = makeRefCopyright('Public Domain', ['description' => 'Public domain description']);
         $story = publicStory('Copyrighted Story', $author->id, [
             'story_ref_copyright_id' => $cr->id,
         ]);
@@ -143,7 +143,7 @@ describe('Story details page', function () {
 
     it('shows the feedback when available', function () {
         $author = alice($this);
-        $fb = makeFeedback('Open to feedback');
+        $fb = makeRefFeedback('Open to feedback');
         $story = publicStory('Feedback Visible', $author->id, [
             'story_ref_feedback_id' => $fb->id,
         ]);
@@ -156,8 +156,8 @@ describe('Story details page', function () {
     describe('trigger warnings', function () {
         it('shows trigger warning badges when disclosure is listed', function () {
             $author = alice($this);
-            $violence = makeTriggerWarning('Violence', 'Violence description');
-            $abuse = makeTriggerWarning('Abuse');
+            $violence = makeRefTriggerWarning('Violence', ['description' => 'Violence description']);
+            $abuse = makeRefTriggerWarning('Abuse');
 
             $story = publicStory('Listed TW Show', $author->id, [
                 'description' => '<p>Desc</p>',

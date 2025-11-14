@@ -136,8 +136,8 @@ describe('ReadListController index', function () {
             $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
 
             // Create explicit genre and trigger warning
-            $genre = makeGenre('Fantasy');
-            $tw = makeTriggerWarning('Violence');
+            $genre = makeRefGenre('Fantasy');
+            $tw = makeRefTriggerWarning('Violence');
             // Prepare story attributes: description and disclosure, assign created refs
             $attrs = [
                 'description' => '<p>Desc</p>',

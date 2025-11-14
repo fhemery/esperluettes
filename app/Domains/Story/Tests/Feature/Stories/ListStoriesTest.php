@@ -19,8 +19,8 @@ describe('Card display', function () {
     it('displays genre badges on list cards', function () {
         // Arrange
         $author = alice($this);
-        $fantasy = makeGenre('Fantasy');
-        $mystery = makeGenre('Mystery');
+        $fantasy = makeRefGenre('Fantasy');
+        $mystery = makeRefGenre('Mystery');
 
         $genreful = publicStory('Genreful Story', $author->id, [
             'description' => '<p>Desc</p>',
@@ -43,8 +43,8 @@ describe('Card display', function () {
         it('displays trigger warning badges on list cards', function () {
             // Arrange
             $author = alice($this);
-            $violence = makeTriggerWarning('Violence');
-            $abuse = makeTriggerWarning('Abuse');
+            $violence = makeRefTriggerWarning('Violence');
+            $abuse = makeRefTriggerWarning('Abuse');
 
             $twStory = publicStory('TW Story', $author->id, [
                 'description' => '<p>Desc</p>',
@@ -112,8 +112,8 @@ describe('Filtering', function () {
     it('filters stories by a single genre slug', function () {
         // Arrange
         $author = alice($this);
-        $romance = makeGenre('Romance');
-        $sciFi = makeGenre('Sci Fi');
+        $romance = makeRefGenre('Romance');
+        $sciFi = makeRefGenre('Sci Fi');
 
         $romanceStory = publicStory('Romance Tale', $author->id, [
             'description' => '<p>Desc</p>',
@@ -140,8 +140,8 @@ describe('Filtering', function () {
     it('excludes stories having a selected trigger warning via exclude_tw', function () {
         // Arrange
         $author = alice($this);
-        $violence = makeTriggerWarning('Violence');
-        $abuse = makeTriggerWarning('Abuse');
+        $violence = makeRefTriggerWarning('Violence');
+        $abuse = makeRefTriggerWarning('Abuse');
 
         $clean = publicStory('Clean Story', $author->id, [
             'description' => '<p>Desc</p>',
@@ -174,7 +174,7 @@ describe('Filtering', function () {
     it('filters to only explicit No TW stories when no_tw_only=1', function () {
         // Arrange
         $author = alice($this);
-        $violence = makeTriggerWarning('Violence');
+        $violence = makeRefTriggerWarning('Violence');
 
         // No TW story
         $noTw = publicStory('Only No TW', $author->id, [
@@ -216,9 +216,9 @@ describe('Filtering', function () {
     it('filters stories by multiple genre slugs (AND semantics)', function () {
         // Arrange
         $author = alice($this);
-        $horror = makeGenre('Horror');
-        $comedy = makeGenre('Comedy');
-        $drama = makeGenre('Drama');
+        $horror = makeRefGenre('Horror');
+        $comedy = makeRefGenre('Comedy');
+        $drama = makeRefGenre('Drama');
 
         // Matches both Horror AND Comedy
         $hc = publicStory('Horror Comedy', $author->id, [
@@ -260,8 +260,8 @@ describe('Filtering', function () {
         // Arrange
         $author = alice($this);
 
-        $theater = makeStoryType('Theater');
-        $poem = makeStoryType('Poem');
+        $theater = makeRefType('Theater');
+        $poem = makeRefType('Poem');
 
         $theaterStory = publicStory('Theater Story', $author->id, [
             'description' => '<p>Desc</p>',
@@ -291,8 +291,8 @@ describe('Filtering', function () {
         // Arrange
         $author = alice($this);
 
-        $teens = makeAudience('Teens');
-        $adults = makeAudience('Adults');
+        $teens = makeRefAudience('Teens');
+        $adults = makeRefAudience('Adults');
 
         $teenStory = publicStory('Teen Story', $author->id, [
             'description' => '<p>Desc</p>',

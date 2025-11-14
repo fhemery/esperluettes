@@ -44,8 +44,8 @@ final class StoryRepository
 
         $query = Story::query()
             ->when($options->includeAuthors, fn($q) => $q->with('authors'))
-            ->when($options->includeGenreIds, fn($q) => $q->with('genres:id'))
-            ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings:id'))
+            ->when($options->includeGenreIds, fn($q) => $q->with('genres'))
+            ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings'))
             ->when(
                 $options->includeChapters && !$options->includeReadingProgress,
                 fn($q) => $q->with(['chapters' => function ($c) {
@@ -115,7 +115,7 @@ final class StoryRepository
         if (!empty($filter->genreIds)) {
             foreach ($filter->genreIds as $gid) {
                 $query->whereHas('genres', function ($q) use ($gid) {
-                    $q->where('story_ref_genres.id', (int) $gid);
+                    $q->where('story_ref_genre_id', (int) $gid);
                 });
             }
         }
@@ -126,7 +126,7 @@ final class StoryRepository
         } else if (!empty($filter->excludeTriggerWarningIds)) {
             $ids = $filter->excludeTriggerWarningIds;
             $query->whereDoesntHave('triggerWarnings', function ($q) use ($ids) {
-                $q->whereIn('story_ref_trigger_warnings.id', $ids);
+                $q->whereIn('story_ref_trigger_warning_id', $ids);
             });
         }
 
@@ -194,8 +194,8 @@ final class StoryRepository
         $query = Story::query()
             ->when($options->includeAuthors, fn($q) => $q->with('authors'))
             ->when($options->includeCollaborators, fn($q) => $q->with('collaborators'))
-            ->when($options->includeGenreIds, fn($q) => $q->with('genres:id'))
-            ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings:id'))
+            ->when($options->includeGenreIds, fn($q) => $q->with('genres'))
+            ->when($options->includeTriggerWarningIds, fn($q) => $q->with('triggerWarnings'))
             ->when($options->includeChapters && !$options->includeReadingProgress, fn($q) => $q->with('chapters'))
             ->when($options->includeChapters && $options->includeReadingProgress, function ($q) {
                 $userId = Auth::id();

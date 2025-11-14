@@ -17,11 +17,11 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('StoryRefPublicApi feedbacks', function () {
     describe('getAll', function () {
         it('lists all feedbacks as DTOs', function () {
-            makeRefFeedback($this, 'Comments', [
+            makeRefFeedback( 'Comments', [
                 'description' => 'Comments desc',
                 'order' => 1,
             ]);
-            makeRefFeedback($this, 'Reviews', [
+            makeRefFeedback( 'Reviews', [
                 'description' => 'Reviews desc',
                 'order' => 2,
             ]);
@@ -36,10 +36,10 @@ describe('StoryRefPublicApi feedbacks', function () {
         });
 
         it('filters by activeOnly flag in filter dto', function () {
-            makeRefFeedback($this, 'Active', [
+            makeRefFeedback( 'Active', [
                 'is_active' => true,
             ]);
-            makeRefFeedback($this, 'Inactive', [
+            makeRefFeedback( 'Inactive', [
                 'is_active' => false,
             ]);
 
@@ -57,7 +57,7 @@ describe('StoryRefPublicApi feedbacks', function () {
 
     describe('get one', function () {
         it('gets feedback by id and slug', function () {
-            $feedbackDto = makeRefFeedback($this, 'Comments', [
+            $feedbackDto = makeRefFeedback( 'Comments', [
                 'slug' => 'comments',
             ]);
 
@@ -106,7 +106,7 @@ describe('StoryRefPublicApi feedbacks', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $feedbackDto = makeRefFeedback($this, 'Comments', [
+            $feedbackDto = makeRefFeedback( 'Comments', [
                 'slug' => 'comments',
             ]);
 
@@ -138,7 +138,7 @@ describe('StoryRefPublicApi feedbacks', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $feedbackDto = makeRefFeedback($this, 'Temp');
+            $feedbackDto = makeRefFeedback( 'Temp');
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);

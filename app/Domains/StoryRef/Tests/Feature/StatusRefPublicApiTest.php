@@ -17,11 +17,11 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('StoryRefPublicApi statuses', function () {
     describe('getAll', function () {
         it('lists all statuses as DTOs', function () {
-            makeRefStatus($this, 'Draft', [
+            makeRefStatus( 'Draft', [
                 'description' => 'Draft desc',
                 'order' => 1,
             ]);
-            makeRefStatus($this, 'Completed', [
+            makeRefStatus( 'Completed', [
                 'description' => 'Completed desc',
                 'order' => 2,
             ]);
@@ -36,10 +36,10 @@ describe('StoryRefPublicApi statuses', function () {
         });
 
         it('filters by activeOnly flag in filter dto', function () {
-            makeRefStatus($this, 'Active', [
+            makeRefStatus( 'Active', [
                 'is_active' => true,
             ]);
-            makeRefStatus($this, 'Inactive', [
+            makeRefStatus( 'Inactive', [
                 'is_active' => false,
             ]);
 
@@ -57,7 +57,7 @@ describe('StoryRefPublicApi statuses', function () {
 
     describe('get one', function () {
         it('gets status by id and slug', function () {
-            $statusDto = makeRefStatus($this, 'Ongoing', [
+            $statusDto = makeRefStatus( 'Ongoing', [
                 'slug' => 'ongoing',
             ]);
 
@@ -106,7 +106,7 @@ describe('StoryRefPublicApi statuses', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $statusDto = makeRefStatus($this, 'Draft', [
+            $statusDto = makeRefStatus( 'Draft', [
                 'slug' => 'draft',
             ]);
 
@@ -138,7 +138,7 @@ describe('StoryRefPublicApi statuses', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $statusDto = makeRefStatus($this, 'Temp');
+            $statusDto = makeRefStatus( 'Temp');
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);

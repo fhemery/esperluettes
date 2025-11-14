@@ -17,10 +17,10 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('StoryRefPublicApi types', function () {
     describe('getAll', function () {
         it('lists all types as DTOs', function () {
-            makeRefType($this, 'Short Story', [
+            makeRefType( 'Short Story', [
                 'order' => 1,
             ]);
-            makeRefType($this, 'Novel', [
+            makeRefType( 'Novel', [
                 'order' => 2,
             ]);
 
@@ -34,10 +34,10 @@ describe('StoryRefPublicApi types', function () {
         });
 
         it('filters by activeOnly flag in filter dto', function () {
-            makeRefType($this, 'Active', [
+            makeRefType( 'Active', [
                 'is_active' => true,
             ]);
-            makeRefType($this, 'Inactive', [
+            makeRefType( 'Inactive', [
                 'is_active' => false,
             ]);
 
@@ -55,7 +55,7 @@ describe('StoryRefPublicApi types', function () {
 
     describe('slug helpers', function () {
         it('resolves type id by slug from DTO list', function () {
-            $typeDto = makeRefType($this, 'My Type', [
+            $typeDto = makeRefType( 'My Type', [
                 'slug' => 'my-type',
             ]);
 
@@ -75,7 +75,7 @@ describe('StoryRefPublicApi types', function () {
 
     describe('get one', function () {
         it('gets type by id and slug', function () {
-            $typeDto = makeRefType($this, 'My Type', [
+            $typeDto = makeRefType( 'My Type', [
                 'slug' => 'my-type',
             ]);
 
@@ -123,7 +123,7 @@ describe('StoryRefPublicApi types', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $typeDto = makeRefType($this, 'Old', [
+            $typeDto = makeRefType( 'Old', [
                 'slug' => 'old',
             ]);
 
@@ -154,7 +154,7 @@ describe('StoryRefPublicApi types', function () {
             $user = admin($this);
             $this->actingAs($user);
 
-            $typeDto = makeRefType($this, 'Temp');
+            $typeDto = makeRefType( 'Temp');
 
             /** @var StoryRefPublicApi $api */
             $api = app(StoryRefPublicApi::class);

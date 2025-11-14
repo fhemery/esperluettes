@@ -47,11 +47,11 @@ class StoryDto
         );
 
         if ($fieldsToReturn->includeGenreIds) {
-            $genreIds = $story->genres->pluck('id')->map(fn($v) => (int) $v)->all();
+            $genreIds = $story->genres->map(fn($v) => (int) $v->story_ref_genre_id)->all();
             $dto->genres = collect($helper->genres)->filter(fn($g) => in_array((int) $g['id'], $genreIds, true))->values()->all();
         }
         if ($fieldsToReturn->includeTriggerWarningIds) {
-            $twIds = $story->triggerWarnings->pluck('id')->map(fn($v) => (int) $v)->all();
+            $twIds = $story->triggerWarnings->map(fn($v) => (int) $v->story_ref_trigger_warning_id)->all();
             $dto->triggerWarnings = collect($helper->triggerWarnings)->filter(fn($tw) => in_array((int) $tw['id'], $twIds, true))->values()->all();
         }
         if ($fieldsToReturn->includeAuthors && $helper->profiles) {
