@@ -26,144 +26,146 @@
             </form>
         </div>
 
-        @if (empty($page->notifications))
-            <div class="flex-1 surface-read text-on-surface p-4 min-h-[10rem] flex items-center justify-center">
-                {{ __('notifications::pages.index.empty') }}
+        <div class="flex-1 surface-read text-on-surface min-h-[10rem] px-8 py-12 framed-tight relative flex flex-col">
+            <div class="absolute top-[-2rem] right-[-2rem] ">
+                <x-shared::design-icon name="ladybug" size="md" color="accent" />
             </div>
-        @else
-            <div class="surface-read text-on-surface px-8 py-12 min-h-[10rem] relative framed-tight"
-                x-data="notificationList({
+            @if (empty($page->notifications))
+                <div class="flex-1 p-4 flex items-center justify-center">
+                    {{ __('notifications::pages.index.empty') }}
+                </div>
+            @else
+                <div class="flex-1" x-data="notificationList({
                     loadMoreUrl: '{{ route('notifications.loadMore') }}',
                     initialOffset: {{ count($page->notifications) }},
                     initialHasMore: {{ $page->hasMore ? 'true' : 'false' }},
                     csrf: '{{ csrf_token() }}',
                     showRead: {{ request()->boolean('show_read') ? 'true' : 'false' }}
                 })">
-                <div class="absolute top-[-2rem] right-[-2rem] ">
-                    <x-shared::design-icon name="ladybug" size="md" color="accent" />
-                </div>
-                <ul class="divide-y divide-fg" data-test-id="notifications-list" x-ref="notificationsList">
-                    @foreach ($page->notifications as $n)
-                        <x-notification::notification-item :notification="$n" />
-                    @endforeach
-                </ul>
 
-                {{-- Load More Button --}}
-                <div class="mt-4 flex flex-col items-center gap-2" x-show="hasMore">
-                    <x-shared::button color="accent" x-on:click="loadMore()" x-bind:disabled="loading"
-                        data-test-id="load-more-btn">
-                        <span x-show="!loading">{{ __('notifications::pages.index.load_more') }}</span>
-                        <span x-show="loading" x-cloak>{{ __('notifications::pages.index.loading') }}</span>
-                    </x-shared::button>
-                    <div x-show="error" x-cloak class="text-sm text-red-500" data-test-id="load-more-error">
-                        {{ __('notifications::pages.index.load_more_error') }}
+                    <ul class="divide-y divide-fg" data-test-id="notifications-list" x-ref="notificationsList">
+                        @foreach ($page->notifications as $n)
+                            <x-notification::notification-item :notification="$n" />
+                        @endforeach
+                    </ul>
+
+                    {{-- Load More Button --}}
+                    <div class="mt-4 flex flex-col items-center gap-2" x-show="hasMore">
+                        <x-shared::button color="accent" x-on:click="loadMore()" x-bind:disabled="loading"
+                            data-test-id="load-more-btn">
+                            <span x-show="!loading">{{ __('notifications::pages.index.load_more') }}</span>
+                            <span x-show="loading" x-cloak>{{ __('notifications::pages.index.loading') }}</span>
+                        </x-shared::button>
+                        <div x-show="error" x-cloak class="text-sm text-red-500" data-test-id="load-more-error">
+                            {{ __('notifications::pages.index.load_more_error') }}
+                        </div>
                     </div>
+
+                    @once
+
+                        <style>
+                            .notif-item a {
+                                color: rgb(var(--color-accent));
+                                font-weight: bold;
+                            }
+
+                            .notif-item a:hover {
+                                text-decoration: underline;
+                            }
+                        </style>
+
+                        <script>
+                            function notifPage({
+                                url,
+                                csrf
+                            }) {
+                                return {
+                                    async markAll() {
+                                        try {
+                                            await fetch(url, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': csrf,
+                                                    'Accept': 'application/json',
+                                                },
+                                                credentials: 'same-origin',
+                                            });
+                                            window.location.reload();
+                                        } catch (e) {
+                                            console.error('Failed to mark all as read', e);
+                                        }
+                                    }
+                                }
+                            }
+
+                            function notificationList({
+                                loadMoreUrl,
+                                initialOffset,
+                                initialHasMore,
+                                csrf,
+                                showRead
+                            }) {
+                                return {
+                                    currentOffset: initialOffset,
+                                    hasMore: initialHasMore,
+                                    loading: false,
+                                    error: false,
+                                    showRead: showRead,
+
+                                    async loadMore() {
+                                        if (this.loading || !this.hasMore) return;
+
+                                        this.loading = true;
+                                        this.error = false;
+
+                                        try {
+                                            const url = new URL(loadMoreUrl, window.location.origin);
+                                            url.searchParams.set('offset', this.currentOffset);
+                                            if (this.showRead) {
+                                                url.searchParams.set('show_read', '1');
+                                            }
+
+                                            const response = await fetch(url.toString(), {
+                                                method: 'GET',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': csrf,
+                                                    'Accept': 'text/html',
+                                                },
+                                                credentials: 'same-origin',
+                                            });
+
+                                            if (!response.ok) {
+                                                throw new Error('Failed to load more notifications');
+                                            }
+
+                                            const html = await response.text();
+                                            const hasMoreHeader = response.headers.get('X-Has-More');
+
+                                            // Append new items to the list
+                                            if (html.trim()) {
+                                                this.$refs.notificationsList.insertAdjacentHTML('beforeend', html);
+                                                // Count new items added (rough estimate)
+                                                const parser = new DOMParser();
+                                                const doc = parser.parseFromString(html, 'text/html');
+                                                const newItemsCount = doc.querySelectorAll('li.notif-item').length;
+                                                this.currentOffset += newItemsCount;
+                                            }
+
+                                            this.hasMore = hasMoreHeader === 'true';
+                                        } catch (e) {
+                                            console.error('Failed to load more notifications', e);
+                                            this.error = true;
+                                        } finally {
+                                            this.loading = false;
+                                        }
+                                    }
+                                }
+                            }
+                        </script>
+                    @endonce
                 </div>
-
-                @once
-
-                    <style>
-                        .notif-item a {
-                            color: rgb(var(--color-accent));
-                            font-weight: bold;
-                        }
-
-                        .notif-item a:hover {
-                            text-decoration: underline;
-                        }
-                    </style>
-
-                    <script>
-                        function notifPage({
-                            url,
-                            csrf
-                        }) {
-                            return {
-                                async markAll() {
-                                    try {
-                                        await fetch(url, {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRF-TOKEN': csrf,
-                                                'Accept': 'application/json',
-                                            },
-                                            credentials: 'same-origin',
-                                        });
-                                        window.location.reload();
-                                    } catch (e) {
-                                        console.error('Failed to mark all as read', e);
-                                    }
-                                }
-                            }
-                        }
-
-                        function notificationList({
-                            loadMoreUrl,
-                            initialOffset,
-                            initialHasMore,
-                            csrf,
-                            showRead
-                        }) {
-                            return {
-                                currentOffset: initialOffset,
-                                hasMore: initialHasMore,
-                                loading: false,
-                                error: false,
-                                showRead: showRead,
-
-                                async loadMore() {
-                                    if (this.loading || !this.hasMore) return;
-
-                                    this.loading = true;
-                                    this.error = false;
-
-                                    try {
-                                        const url = new URL(loadMoreUrl, window.location.origin);
-                                        url.searchParams.set('offset', this.currentOffset);
-                                        if (this.showRead) {
-                                            url.searchParams.set('show_read', '1');
-                                        }
-
-                                        const response = await fetch(url.toString(), {
-                                            method: 'GET',
-                                            headers: {
-                                                'X-CSRF-TOKEN': csrf,
-                                                'Accept': 'text/html',
-                                            },
-                                            credentials: 'same-origin',
-                                        });
-
-                                        if (!response.ok) {
-                                            throw new Error('Failed to load more notifications');
-                                        }
-
-                                        const html = await response.text();
-                                        const hasMoreHeader = response.headers.get('X-Has-More');
-
-                                        // Append new items to the list
-                                        if (html.trim()) {
-                                            this.$refs.notificationsList.insertAdjacentHTML('beforeend', html);
-                                            // Count new items added (rough estimate)
-                                            const parser = new DOMParser();
-                                            const doc = parser.parseFromString(html, 'text/html');
-                                            const newItemsCount = doc.querySelectorAll('li.notif-item').length;
-                                            this.currentOffset += newItemsCount;
-                                        }
-
-                                        this.hasMore = hasMoreHeader === 'true';
-                                    } catch (e) {
-                                        console.error('Failed to load more notifications', e);
-                                        this.error = true;
-                                    } finally {
-                                        this.loading = false;
-                                    }
-                                }
-                            }
-                        }
-                    </script>
-                @endonce
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 </x-app-layout>
