@@ -33,7 +33,7 @@
                 {{ __('notifications::pages.index.empty') }}
             </div>
         @else
-            <div class="surface-read text-on-surface px-8 py-12 min-h-[10rem] relative notification-list"
+            <div class="surface-read text-on-surface px-8 py-12 min-h-[10rem] relative framed-tight"
                 x-data="notificationList({
                     loadMoreUrl: '{{ route('notifications.loadMore') }}',
                     initialOffset: {{ count($page->notifications) }},
