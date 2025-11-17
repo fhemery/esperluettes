@@ -458,6 +458,36 @@ describe('Chapter display', function () {
                 $resp->assertSee('1');
             });
         });
+
+        describe('Requested feedback display', function () {
+            it('shows the requested feedback badge next to comments title when story has feedback configured', function () {
+                $author = alice($this);
+
+                // Create an active feedback ref and attach it to the story
+                $feedback = makeRefFeedback('Open to feedback', ['description' => 'Please focus on plot and pacing']);
+                $story = publicStory('Feedback Story', $author->id, [
+                    'story_ref_feedback_id' => $feedback->id,
+                ]);
+
+                $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Feedback Chap']);
+
+                $resp = $this->get(route('chapters.show', [
+                    'storySlug' => $story->slug,
+                    'chapterSlug' => $chapter->slug,
+                ]));
+
+                $resp->assertOk();
+
+                // Comments title is always visible
+                $resp->assertSee(__('comment::comments.list.title'));
+
+                // Feedback name should be rendered near the comments header
+                $resp->assertSee('Open to feedback');
+
+                // Description is rendered inside a popover tooltip, so we assert that it appears in the HTML
+                $resp->assertSee('Please focus on plot and pacing');
+            });
+        });
     });
 
     describe('regarding SEO', function () {

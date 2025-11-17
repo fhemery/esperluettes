@@ -7,6 +7,7 @@ use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
 use App\Domains\Shared\ViewModels\PageViewModel;
+use App\Domains\Shared\ViewModels\RefViewModel;
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Story\Private\Http\Requests\ChapterRequest;
 use App\Domains\Story\Private\Http\Requests\ReorderChaptersRequest;
@@ -18,6 +19,7 @@ use App\Domains\Story\Private\Services\ReadingProgressService;
 use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\ViewModels\ChapterViewModel;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,7 +33,8 @@ class ChapterController
         private ReadingProgressService $readingProgress,
         private ProfilePublicApi $profileApi,
         private AuthPublicApi $authApi,
-        private ChapterCreditService $chapterCreditService
+        private ChapterCreditService $chapterCreditService,
+        private StoryRefPublicApi $storyRefs,
     ) {
     }
 
@@ -134,6 +137,16 @@ class ChapterController
             $isReadByMe = $this->readingProgress->isChapterReadByUser($userId, (int) $chapter->id);
         }
 
+        // Resolve requested feedback (if any) from Story referentials
+        $feedbackVm = null;
+        if ($story->story_ref_feedback_id !== null) {
+            $feedbacksById = $this->storyRefs->getAllFeedbacks()->keyBy('id');
+            $fbDto = $feedbacksById->get($story->story_ref_feedback_id);
+            if ($fbDto) {
+                $feedbackVm = new RefViewModel((string) $fbDto->name, $fbDto->description);
+            }
+        }
+
         // Build ViewModel
         /** @var array<ProfileDto> $authors */
         $authors = $this->profileApi->getPublicProfiles($story->authors->pluck('user_id')->toArray());
@@ -141,7 +154,7 @@ class ChapterController
         foreach ($authors as $author) {
             $auth[] = $author;
         }
-        $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe, $auth);
+        $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe, $auth, $feedbackVm);
 
         // Build PageViewModel
         $trail = BreadcrumbViewModel::FromHome($user !== null);

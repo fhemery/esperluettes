@@ -4,6 +4,7 @@ namespace App\Domains\Story\Private\ViewModels;
 
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Shared\ViewModels\RefViewModel;
 use App\Domains\Shared\ViewModels\SeoViewModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -96,10 +97,11 @@ class ChapterViewModel
         public readonly int $wordCount,
         public readonly int $characterCount,
         public readonly SeoViewModel $seo,
+        public readonly ?RefViewModel $feedback = null,
     ) {
     }
 
-    public static function from(Story $story, Chapter $chapter, bool $isAuthor, bool $isReadByMe = false, array $authors): self
+    public static function from(Story $story, Chapter $chapter, bool $isAuthor, bool $isReadByMe = false, array $authors, ?RefViewModel $feedback = null): self
     {
         // Chapters should be eager-loaded and ordered by sort_order
         /** @var Collection<int, Chapter> $chapters */
@@ -134,7 +136,18 @@ class ChapterViewModel
             readsLogged: (int) $chapter->reads_logged_count,
             wordCount: (int) ($chapter->word_count ?? 0),
             characterCount: (int) ($chapter->character_count ?? 0),
-            seo: new SeoViewModel(title: $pageTitle, coverImage: $coverImage)
+            seo: new SeoViewModel(title: $pageTitle, coverImage: $coverImage),
+            feedback: $feedback,
         );
+    }
+
+    public function getFeedbackName(): ?string
+    {
+        return $this->feedback?->getName();
+    }
+
+    public function getFeedbackDescription(): ?string
+    {
+        return $this->feedback?->getDescription();
     }
 }

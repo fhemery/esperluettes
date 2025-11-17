@@ -250,6 +250,22 @@
 
             <!-- Comments -->
             <div class="mt-12 surface-read text-on-surface p-2 lg:p-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
+                        <x-shared::title tag="h2" id="comments">{{ __('comment::comments.list.title') }}</x-shared::title>
+                        @if($vm->getFeedbackName())
+                        <div class="self-end">
+                            <x-story::ref-badge
+                                name="{{ $vm->getFeedbackName() }}"
+                                description="{{ $vm->getFeedbackDescription() }}"
+                                color="neutral"
+                                :outline="true"
+                                :wrap="true"
+                                size="sm"
+                                icon="forum" />
+                                </div>
+                        @endif
+                </div>
+
                 <x-comment::comment-list-component entity-type="chapter" entity-id="{{ $vm->chapter->id }}" page="0" perPage="5" />
             </div>
         </div>

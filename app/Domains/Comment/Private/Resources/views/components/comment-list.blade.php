@@ -18,7 +18,6 @@
       }
     </style>
   @endpush
-  <x-shared::title tag="h2" id="comments">{{ __('comment::comments.list.title') }}</x-shared::title>
   @if($error === 'not_allowed')
     <div class="p-3 rounded border border-yellow-300 bg-yellow-50 text-yellow-900 text-sm flex items-center justify-between gap-4">
       <div>{{ __('comment::comments.errors.members_only') }}</div>
