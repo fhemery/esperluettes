@@ -54,18 +54,27 @@ class NotificationService
     }
 
     /**
-     * List notifications for a user ordered by notifications.created_at DESC.
-     * Returns simple arrays for blade consumption.
-     *
+     * List notifications for a user with pagination and optional read filter.
+     * 
+     * @param int $userId
+     * @param int $limit
+     * @param int $offset
+     * @param bool $showRead If false, only returns unread notifications
      * @return array<int,array<string,mixed>>
      */
-    public function listForUser(int $userId, int $limit = 20, int $offset = 0): array
+    public function listForUser(int $userId, int $limit = 20, int $offset = 0, bool $showRead = false): array
     {
-        $rows = DB::table('notification_reads as nr')
+        $query = DB::table('notification_reads as nr')
             ->join('notifications as n', 'n.id', '=', 'nr.notification_id')
             ->where('nr.user_id', (int) $userId)
-            ->orderByDesc('n.created_at')
-            ->limit($limit)
+            ->orderByDesc('n.created_at');
+
+        // Filter out read notifications if showRead is false
+        if (!$showRead) {
+            $query->whereNull('nr.read_at');
+        }
+
+        $rows = $query->limit($limit)
             ->offset($offset)
             ->get([
                 'n.id as id',
@@ -202,18 +211,6 @@ class NotificationService
         return DB::table('notifications')
             ->where('content_key', $contentKey)
             ->count();
-    }
-
-    /**
-     * Delete all read notification_reads rows for the given user.
-     * Returns the number of deleted rows.
-     */
-    public function deleteAllRead(int $userId): int
-    {
-        return DB::table('notification_reads')
-            ->where('user_id', (int) $userId)
-            ->whereNotNull('read_at')
-            ->delete();
     }
 
     /**

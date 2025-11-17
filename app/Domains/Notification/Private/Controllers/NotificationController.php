@@ -21,13 +21,15 @@ class NotificationController
     {
     }
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $userId = (int) Auth::id();
-        $rows = $this->notifications->listForUser($userId, self::PAGE_SIZE, 0);
+        $showRead = $request->boolean('show_read', false);
+        
+        $rows = $this->notifications->listForUser($userId, self::PAGE_SIZE, 0, $showRead);
 
         // Check if there are more notifications beyond this page
-        $hasMore = count($this->notifications->listForUser($userId, 1, self::PAGE_SIZE)) > 0;
+        $hasMore = count($this->notifications->listForUser($userId, 1, self::PAGE_SIZE, $showRead)) > 0;
 
         // Prepare actor profiles to let the ViewModel bind avatar URLs
         $actorIds = array_values(array_unique(array_filter(array_map(
@@ -63,28 +65,17 @@ class NotificationController
         return response()->noContent();
     }
 
-    public function deleteAllRead(): RedirectResponse
-    {
-        $userId = (int) Auth::id();
-        $deletedCount = $this->notifications->deleteAllRead($userId);
-        
-        return redirect()
-            ->route('notifications.index')
-            ->with('success', trans_choice('notifications::pages.index.delete_all_read_success', $deletedCount, [
-                'count' => $deletedCount
-            ]));
-    }
-
     public function loadMore(Request $request): Response
     {
         $userId = (int) Auth::id();
         $offset = (int) $request->query('offset', 0);
         $limit = self::PAGE_SIZE;
+        $showRead = $request->boolean('show_read', false);
 
-        $rows = $this->notifications->listForUser($userId, $limit, $offset);
+        $rows = $this->notifications->listForUser($userId, $limit, $offset, $showRead);
 
         // Check if there are more notifications beyond this batch
-        $hasMore = count($this->notifications->listForUser($userId, 1, $offset + $limit)) > 0;
+        $hasMore = count($this->notifications->listForUser($userId, 1, $offset + $limit, $showRead)) > 0;
 
         // Prepare actor profiles
         $actorIds = array_values(array_unique(array_filter(array_map(

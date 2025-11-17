@@ -1,23 +1,30 @@
 <x-app-layout size="md">
     <div class="p-4 flex-1 flex flex-col gap-8">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between">
-            <x-shared::title customIcon="leaf03">
-                {{ __('notifications::pages.index.title') }}
-            </x-shared::title>
-            @if (!empty($page->notifications))
-                <div class="mb-3 self-end flex gap-2">
-                    <div x-data="notifPage({ url: '{{ route('notifications.markAllRead') }}', csrf: '{{ csrf_token() }}' })">
-                        <x-shared::button color="accent" data-test-id="mark-all-read" x-on:click="markAll()">
-                            {{ __('notifications::pages.index.mark_all_read') }}
-                        </x-shared::button>
+        <!-- Header -->
+        <div class="flex flex-col gap-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between">
+                <x-shared::title customIcon="leaf03">
+                    {{ __('notifications::pages.index.title') }}
+                </x-shared::title>
+                @if (!empty($page->notifications))
+                    <div class="mb-3 self-end flex gap-2">
+                        <div x-data="notifPage({ url: '{{ route('notifications.markAllRead') }}', csrf: '{{ csrf_token() }}' })">
+                            <x-shared::button color="accent" data-test-id="mark-all-read" x-on:click="markAll()">
+                                {{ __('notifications::pages.index.mark_all_read') }}
+                            </x-shared::button>
+                        </div>
                     </div>
-                    <form action="{{ route('notifications.deleteAllRead') }}" method="POST">
-                        @csrf
-                        <x-shared::button color="warning" type="submit" data-test-id="delete-all-read">
-                            {{ __('notifications::pages.index.delete_all_read') }}
-                        </x-shared::button>
-                    </form>
-                </div>
+                @endif
+            </div>
+            @if (!empty($page->notifications))
+                <form method="GET" action="{{ route('notifications.index') }}" class="self-end">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="show_read" value="1"
+                            {{ request()->boolean('show_read') ? 'checked' : '' }} onchange="this.form.submit()"
+                            class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
+                        <span>{{ __('notifications::pages.index.show_read') }}</span>
+                    </label>
+                </form>
             @endif
         </div>
 
@@ -26,14 +33,16 @@
                 {{ __('notifications::pages.index.empty') }}
             </div>
         @else
-            <div class="surface-read text-on-surface px-8 py-12 min-h-[10rem] relative notification-list" x-data="notificationList({ 
-                loadMoreUrl: '{{ route('notifications.loadMore') }}',
-                initialOffset: {{ count($page->notifications) }},
-                initialHasMore: {{ $page->hasMore ? 'true' : 'false' }},
-                csrf: '{{ csrf_token() }}'
-            })">
+            <div class="surface-read text-on-surface px-8 py-12 min-h-[10rem] relative notification-list"
+                x-data="notificationList({
+                    loadMoreUrl: '{{ route('notifications.loadMore') }}',
+                    initialOffset: {{ count($page->notifications) }},
+                    initialHasMore: {{ $page->hasMore ? 'true' : 'false' }},
+                    csrf: '{{ csrf_token() }}',
+                    showRead: {{ request()->boolean('show_read') ? 'true' : 'false' }}
+                })">
                 <div class="absolute top-[-2rem] right-[-2rem] ">
-                    <x-shared::design-icon name="ladybug" size="md" color="accent"/>
+                    <x-shared::design-icon name="ladybug" size="md" color="accent" />
                 </div>
                 <ul class="divide-y divide-fg" data-test-id="notifications-list" x-ref="notificationsList">
                     @foreach ($page->notifications as $n)
@@ -43,10 +52,7 @@
 
                 {{-- Load More Button --}}
                 <div class="mt-4 flex flex-col items-center gap-2" x-show="hasMore">
-                    <x-shared::button 
-                        color="accent" 
-                        x-on:click="loadMore()"
-                        x-bind:disabled="loading"
+                    <x-shared::button color="accent" x-on:click="loadMore()" x-bind:disabled="loading"
                         data-test-id="load-more-btn">
                         <span x-show="!loading">{{ __('notifications::pages.index.load_more') }}</span>
                         <span x-show="loading" x-cloak>{{ __('notifications::pages.index.loading') }}</span>
@@ -98,13 +104,15 @@
                             loadMoreUrl,
                             initialOffset,
                             initialHasMore,
-                            csrf
+                            csrf,
+                            showRead
                         }) {
                             return {
                                 currentOffset: initialOffset,
                                 hasMore: initialHasMore,
                                 loading: false,
                                 error: false,
+                                showRead: showRead,
 
                                 async loadMore() {
                                     if (this.loading || !this.hasMore) return;
@@ -113,7 +121,13 @@
                                     this.error = false;
 
                                     try {
-                                        const response = await fetch(`${loadMoreUrl}?offset=${this.currentOffset}`, {
+                                        const url = new URL(loadMoreUrl, window.location.origin);
+                                        url.searchParams.set('offset', this.currentOffset);
+                                        if (this.showRead) {
+                                            url.searchParams.set('show_read', '1');
+                                        }
+
+                                        const response = await fetch(url.toString(), {
                                             method: 'GET',
                                             headers: {
                                                 'X-CSRF-TOKEN': csrf,
