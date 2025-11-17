@@ -1,5 +1,6 @@
 @props([
     'icon' => null,
+    'customIcon' => null,
     'tag' => 'h1',
 ])
 
@@ -18,6 +19,9 @@
         <span class="material-symbols-outlined {{ $classes }}">
             {{ $icon }}
         </span>
+    @endif
+    @if ($customIcon)
+        <x-shared::design-icon :name="$customIcon" size="sm" color="accent"/>
     @endif
     <{{ $tag }}>{{ $slot }}</{{ $tag }}>
     

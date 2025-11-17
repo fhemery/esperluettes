@@ -1,13 +1,11 @@
 <x-app-layout size="md">
-    <div class="p-4 flex-1 flex flex-col">
-
-
+    <div class="p-4 flex-1 flex flex-col gap-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between">
-            <x-shared::title icon="notifications">
+            <x-shared::title customIcon="leaf03">
                 {{ __('notifications::pages.index.title') }}
             </x-shared::title>
             @if (!empty($page->notifications))
-                <div class="mb-3 self-end flex flex-col sm:flex-row gap-2">
+                <div class="mb-3 self-end flex gap-2">
                     <div x-data="notifPage({ url: '{{ route('notifications.markAllRead') }}', csrf: '{{ csrf_token() }}' })">
                         <x-shared::button color="accent" data-test-id="mark-all-read" x-on:click="markAll()">
                             {{ __('notifications::pages.index.mark_all_read') }}
@@ -28,12 +26,15 @@
                 {{ __('notifications::pages.index.empty') }}
             </div>
         @else
-            <div class="surface-read text-on-surface p-4 min-h-[10rem]" x-data="notificationList({ 
+            <div class="surface-read text-on-surface px-8 py-12 min-h-[10rem] relative notification-list" x-data="notificationList({ 
                 loadMoreUrl: '{{ route('notifications.loadMore') }}',
                 initialOffset: {{ count($page->notifications) }},
                 initialHasMore: {{ $page->hasMore ? 'true' : 'false' }},
                 csrf: '{{ csrf_token() }}'
             })">
+                <div class="absolute top-[-2rem] right-[-2rem] ">
+                    <x-shared::design-icon name="ladybug" size="md" color="accent"/>
+                </div>
                 <ul class="divide-y divide-fg" data-test-id="notifications-list" x-ref="notificationsList">
                     @foreach ($page->notifications as $n)
                         <x-notification::notification-item :notification="$n" />
