@@ -16,16 +16,14 @@
                     </div>
                 @endif
             </div>
-            @if (!empty($page->notifications))
-                <form method="GET" action="{{ route('notifications.index') }}" class="self-end">
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" name="show_read" value="1"
-                            {{ request()->boolean('show_read') ? 'checked' : '' }} onchange="this.form.submit()"
-                            class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
-                        <span>{{ __('notifications::pages.index.show_read') }}</span>
-                    </label>
-                </form>
-            @endif
+            <form method="GET" action="{{ route('notifications.index') }}" class="self-end">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="show_read" value="1"
+                        {{ request()->boolean('show_read') ? 'checked' : '' }} onchange="this.form.submit()"
+                        class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
+                    <span>{{ __('notifications::pages.index.show_read') }}</span>
+                </label>
+            </form>
         </div>
 
         @if (empty($page->notifications))
