@@ -14,6 +14,7 @@ class ChapterCommentNotification implements NotificationContent
         public readonly string $storySlug,
         public readonly string $chapterSlug,
         public readonly bool $isReply,
+        public readonly ?string $storyName = null,
     ) {}
 
     public static function type(): string
@@ -31,6 +32,7 @@ class ChapterCommentNotification implements NotificationContent
             'story_slug' => $this->storySlug,
             'chapter_slug' => $this->chapterSlug,
             'is_reply' => $this->isReply,
+            'story_name' => $this->storyName,
         ];
     }
 
@@ -44,6 +46,7 @@ class ChapterCommentNotification implements NotificationContent
             storySlug: (string) ($data['story_slug'] ?? ''),
             chapterSlug: (string) ($data['chapter_slug'] ?? ''),
             isReply: (bool) ($data['is_reply'] ?? false),
+            storyName: (string) ($data['story_name'] ?? null) ?: null,
         );
     }
 
@@ -58,6 +61,24 @@ class ChapterCommentNotification implements NotificationContent
             ? route('profile.show', ['profile' => $this->authorSlug])
             : '';
 
+        // Use story-aware translations if story name is available, otherwise fallback to legacy
+        if ($this->storyName) {
+            $storyUrl = route('stories.show', ['slug' => $this->storySlug]);
+            $key = $this->isReply
+                ? 'story::notification.reply_comment.posted_with_story'
+                : 'story::notification.root_comment.posted_with_story';
+
+            return __($key, [
+                'author_name' => $this->authorName,
+                'author_url' => $authorUrl,
+                'chapter_name' => $this->chapterTitle,
+                'chapter_url_with_comment' => $chapterUrl,
+                'story_name' => $this->storyName,
+                'story_url' => $storyUrl,
+            ]);
+        }
+
+        // Legacy fallback for notifications without story name
         $key = $this->isReply
             ? 'story::notification.reply_comment.posted'
             : 'story::notification.root_comment.posted';
@@ -66,7 +87,7 @@ class ChapterCommentNotification implements NotificationContent
             'author_name' => $this->authorName,
             'author_url' => $authorUrl,
             'chapter_name' => $this->chapterTitle,
-            'chapter_url' => $chapterUrl,
+            'chapter_url_with_comment' => $chapterUrl,
         ]);
     }
 }

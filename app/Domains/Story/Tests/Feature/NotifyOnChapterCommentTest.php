@@ -84,7 +84,7 @@ describe('Notify authors chapter comment', function () {
             if (is_string($payload)) {
                 $payload = json_decode($payload, true) ?: [];
             }
-            expect($payload)->toHaveKeys(['comment_id', 'author_name', 'author_slug', 'chapter_title', 'story_slug', 'chapter_slug', 'is_reply']);
+            expect($payload)->toHaveKeys(['comment_id', 'author_name', 'author_slug', 'chapter_title', 'story_slug', 'chapter_slug', 'is_reply', 'story_name']);
             expect($payload['comment_id'])->toBe(12);
             expect($payload['author_name'])->toBe("Carol");
             expect($payload['author_slug'])->toBe('carol');

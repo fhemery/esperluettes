@@ -77,6 +77,7 @@ class NotifyOnChapterComment
                 storySlug: (string) $story->slug,
                 chapterSlug: (string) $chapter->slug,
                 isReply: true,
+                storyName: (string) $story->title,
             );
 
             $this->notifications->createNotification($recipients, $content, (int) $c->authorId, $eventDate);
@@ -98,6 +99,7 @@ class NotifyOnChapterComment
             storySlug: (string) $story->slug,
             chapterSlug: (string) $chapter->slug,
             isReply: false,
+            storyName: (string) $story->title,
         );
 
         $this->notifications->createNotification($recipients, $content, (int) $c->authorId, $eventDate);
