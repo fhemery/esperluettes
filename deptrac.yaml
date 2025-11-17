@@ -514,6 +514,7 @@ deptrac:
       - Shared
       - NotificationPublic
       - EventsPublic
+      - AuthPublic
 
     ProfilePrivate:
       - Shared

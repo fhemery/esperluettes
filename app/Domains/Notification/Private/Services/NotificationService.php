@@ -215,4 +215,26 @@ class NotificationService
             ->whereNotNull('read_at')
             ->delete();
     }
+
+    /**
+     * Delete all notification_reads rows for the given user.
+     * Returns the number of deleted rows.
+     */
+    public function deleteAllNotificationReadsForUser(int $userId): int
+    {
+        return DB::table('notification_reads')
+            ->where('user_id', (int) $userId)
+            ->delete();
+    }
+
+    /**
+     * Delete all notifications where the user was the source.
+     * Returns the number of deleted notifications.
+     */
+    public function deleteNotificationsBySourceUser(int $sourceUserId): int
+    {
+        return DB::table('notifications')
+            ->where('source_user_id', (int) $sourceUserId)
+            ->delete();
+    }
 }

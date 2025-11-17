@@ -129,3 +129,14 @@ function countNotificationsByKey(string $contentKey): int
     $api = app(NotificationPublicApi::class);
     return $api->countNotificationsByType($contentKey);
 }
+
+/**
+ * Check if a notification exists by ID.
+ * Returns true if the notification exists, false otherwise.
+ */
+function notificationExists(int $notificationId): bool
+{
+    return \Illuminate\Support\Facades\DB::table('notifications')
+        ->where('id', $notificationId)
+        ->exists();
+}

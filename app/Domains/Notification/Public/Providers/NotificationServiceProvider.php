@@ -3,7 +3,9 @@
 namespace App\Domains\Notification\Public\Providers;
 
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Notification\Private\Console\CleanupOldNotificationsCommand;
+use App\Domains\Notification\Private\Listeners\CleanNotificationsOnUserDeleted;
 use App\Domains\Notification\Public\Events\NotificationsCleanedUp;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use Illuminate\Support\Facades\Blade;
@@ -47,5 +49,8 @@ class NotificationServiceProvider extends ServiceProvider
             NotificationsCleanedUp::name(),
             NotificationsCleanedUp::class
         );
+
+        // Subscribe to cross-domain events
+        $eventBus->subscribe(UserDeleted::class, [app(CleanNotificationsOnUserDeleted::class), 'handle']);
     }
 }
