@@ -203,4 +203,16 @@ class NotificationService
             ->where('content_key', $contentKey)
             ->count();
     }
+
+    /**
+     * Delete all read notification_reads rows for the given user.
+     * Returns the number of deleted rows.
+     */
+    public function deleteAllRead(int $userId): int
+    {
+        return DB::table('notification_reads')
+            ->where('user_id', (int) $userId)
+            ->whereNotNull('read_at')
+            ->delete();
+    }
 }

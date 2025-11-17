@@ -7,10 +7,18 @@
                 {{ __('notifications::pages.index.title') }}
             </x-shared::title>
             @if (!empty($page->notifications))
-                <div class="mb-3 self-end" x-data="notifPage({ url: '{{ route('notifications.markAllRead') }}', csrf: '{{ csrf_token() }}' })">
-                    <x-shared::button color="accent" data-test-id="mark-all-read" x-on:click="markAll()">
-                        {{ __('notifications::pages.index.mark_all_read') }}
-                    </x-shared::button>
+                <div class="mb-3 self-end flex flex-col sm:flex-row gap-2">
+                    <div x-data="notifPage({ url: '{{ route('notifications.markAllRead') }}', csrf: '{{ csrf_token() }}' })">
+                        <x-shared::button color="accent" data-test-id="mark-all-read" x-on:click="markAll()">
+                            {{ __('notifications::pages.index.mark_all_read') }}
+                        </x-shared::button>
+                    </div>
+                    <form action="{{ route('notifications.deleteAllRead') }}" method="POST">
+                        @csrf
+                        <x-shared::button color="warning" type="submit" data-test-id="delete-all-read">
+                            {{ __('notifications::pages.index.delete_all_read') }}
+                        </x-shared::button>
+                    </form>
                 </div>
             @endif
         </div>

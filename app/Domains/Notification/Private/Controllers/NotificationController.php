@@ -8,6 +8,7 @@ use App\Domains\Notification\Private\Services\NotificationService;
 use App\Domains\Notification\Private\ViewModels\NotificationPageViewModel;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 
 class NotificationController
 {
@@ -60,6 +61,18 @@ class NotificationController
         $userId = (int) Auth::id();
         $this->notifications->markAllAsRead($userId);
         return response()->noContent();
+    }
+
+    public function deleteAllRead(): RedirectResponse
+    {
+        $userId = (int) Auth::id();
+        $deletedCount = $this->notifications->deleteAllRead($userId);
+        
+        return redirect()
+            ->route('notifications.index')
+            ->with('success', trans_choice('notifications::pages.index.delete_all_read_success', $deletedCount, [
+                'count' => $deletedCount
+            ]));
     }
 
     public function loadMore(Request $request): Response
