@@ -1,4 +1,7 @@
-<div x-data="userManagement()" x-init="init()">
+<x-admin::layout>
+    <x-shared::title>{{ __('moderation::admin.user_management.title') }}</x-shared::title>
+    
+    <div x-data="userManagement()" x-init="init()">
     <div class="mb-6">
         <input
             type="text"
@@ -34,3 +37,5 @@
         };
     }
 </script>
+
+</x-admin::layout>

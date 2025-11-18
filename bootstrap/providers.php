@@ -10,6 +10,7 @@ return [
     
     // Domain-specific providers
     App\Domains\Admin\Providers\AdminServiceProvider::class,
+    App\Domains\Administration\Public\Providers\AdministrationServiceProvider::class,
     App\Domains\News\Public\Providers\NewsServiceProvider::class,
     App\Domains\Home\Public\Providers\HomeServiceProvider::class,
     App\Domains\Dashboard\Public\Providers\DashboardServiceProvider::class,

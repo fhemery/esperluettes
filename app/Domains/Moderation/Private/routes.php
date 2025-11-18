@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Moderation\Private\Controllers\ModerationAdminController;
 use App\Domains\Moderation\Private\Controllers\ModerationReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,5 +15,13 @@ Route::middleware('web')->group(function () {
         // Submit a report (AJAX, returns JSON)
         Route::post('report', [ModerationReportController::class, 'store'])
             ->name('report.store');
+    });
+
+    Route::middleware(['auth', 'role:' . Roles::MODERATOR . ',' . Roles::ADMIN. ','.Roles::TECH_ADMIN])->prefix('moderation/admin')->name('moderation.admin.')->group(function () {
+        Route::get('user-management', [ModerationAdminController::class, 'userManagementPage'])
+            ->name('user-management');
+        // Get report form with reasons for a specific topic (AJAX, returns HTML)
+        Route::get('search', [ModerationAdminController::class, 'search'])
+            ->name('search');
     });
 });
