@@ -84,4 +84,30 @@ class UserService
             ->where('user_id', $user->id)
             ->delete();
     }
+
+    /**
+     * Get users by ID with email and active status.
+     *
+     * @param array<int> $userIds
+     * @return array<int,array{email:string,isActive:bool}>
+     */
+    public function getUsersById(array $userIds): array
+    {
+        $users = User::query()
+            ->whereIn('id', $userIds)
+            ->select(['id', 'email', 'is_active'])
+            ->get()
+            ->keyBy('id');
+
+        $result = [];
+        foreach ($userIds as $userId) {
+            $user = $users->get($userId);
+            $result[$userId] = [
+                'email' => $user?->email ?? '',
+                'isActive' => $user?->is_active ?? false,
+            ];
+        }
+
+        return $result;
+    }
 }
