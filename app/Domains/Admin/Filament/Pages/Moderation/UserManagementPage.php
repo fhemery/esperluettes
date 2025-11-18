@@ -29,6 +29,12 @@ class UserManagementPage extends Page
         return __('admin::moderation.user_management.title');
     }
 
+    public function mount(): void
+    {
+        // Redirect to the new custom admin user management page
+        redirect()->route('moderation.admin.user-management');
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         $user = Auth::user();

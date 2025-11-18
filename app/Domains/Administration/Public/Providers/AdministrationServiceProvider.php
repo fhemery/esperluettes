@@ -18,7 +18,7 @@ class AdministrationServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Load translations
-        $this->loadTranslationsFrom(app_path('Domains/Administration/Private/Resources/lang'), 'admin');
+        $this->loadTranslationsFrom(app_path('Domains/Administration/Private/Resources/lang'), 'administration');
         // Load Administration domain views
         $this->loadViewsFrom(app_path('Domains/Administration/Private/Resources/views'), 'administration');
 
