@@ -1,6 +1,8 @@
 <?php
 
 use App\Domains\Moderation\Private\Models\ModerationReason;
+use App\Domains\Moderation\Private\Models\ModerationReport;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * Create a ModerationReason for a topic.
@@ -47,4 +49,25 @@ function defaultReason(string $topicKey): ModerationReason
     }
 
     return createReason($topicKey, 'Other');
+}
+
+/**
+ * Create a moderation report for a specific user using direct model creation.
+ * This bypasses authentication and service requirements for testing.
+ */
+function createReportForUser(Authenticatable $user, string $status = 'pending'): int
+{
+    $reason = createReason('comment', 'Test Reason');
+    
+    return ModerationReport::create([
+        'reported_user_id' => $user->id,
+        'reported_by_user_id' => $user->id, // Use same user for simplicity
+        'reason_id' => $reason->id,
+        'topic_key' => 'comment',
+        'entity_id' => rand(1000, 9999),
+        'status' => $status,
+        'description' => 'Test report for user',
+        'content_snapshot' => [],
+        'content_url' => '/',
+    ])->id;
 }

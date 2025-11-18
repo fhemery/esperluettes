@@ -47,6 +47,18 @@ class ModerationPublicApi
         $this->service->deleteReport($reportId);
     }
 
+    /**
+     * Get report counts by user IDs.
+     *
+     * @param array<int> $userIds
+     * @return array<int,array{confirmed:int,rejected:int}>
+     */
+    public function getReportCountsByUserIds(array $userIds): array
+    {
+        $this->authorize();
+        return $this->service->getReportCountsByUserIds($userIds);
+    }
+
     private function authorize(): void
     {
         $ok = $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]);
