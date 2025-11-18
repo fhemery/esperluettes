@@ -58,5 +58,10 @@ return [
                 'confirm' => 'Êtes-vous sûr de vouloir supprimer ce signalement ?',
             ],
         ],
-    ]
+    ],
+
+    'user_management' => [
+        'nav_label' => 'Gestion des utilisateurs',
+        'title' => 'Gestion des utilisateurs',
+    ],
 ];

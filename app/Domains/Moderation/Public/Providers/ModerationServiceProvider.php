@@ -33,7 +33,13 @@ class ModerationServiceProvider extends ServiceProvider
         $this->loadViewsFrom(app_path('Domains/Moderation/Private/Resources/views'), 'moderation');
 
         // Register PHP and anonymous components
+        // Private components (e.g. moderation icon)
         Blade::componentNamespace('App\\Domains\\Moderation\\Private\\View\\Components', 'moderation');
+        // Public components are registered individually because of namespace collision (admin user management)
+        Blade::component(
+            \App\Domains\Moderation\Public\View\Components\AdminUserManagementComponent::class,
+            'moderation::admin-user-management-component'
+        );
         Blade::anonymousComponentPath(app_path('Domains/Moderation/Private/Resources/views/components'), 'moderation');
 
         // Register Moderation domain events
