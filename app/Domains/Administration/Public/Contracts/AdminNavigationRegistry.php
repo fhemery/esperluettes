@@ -41,7 +41,6 @@ final class AdminNavigationRegistry
      * @param string $icon Icon identifier (Material Symbols, Heroicons)
      * @param array<string> $permissions Required permissions/roles
      * @param int $sortOrder Sort order within group
-     * @param 'filament'|'custom' $type Page type
      */
     public function registerPage(
         string $key,
@@ -51,7 +50,6 @@ final class AdminNavigationRegistry
         string $icon = '',
         array $permissions = [],
         int $sortOrder = 100,
-        string $type = 'custom'
     ): void {
         $this->pages[$key] = [
             'group' => $group,
@@ -60,7 +58,6 @@ final class AdminNavigationRegistry
             'icon' => $icon,
             'permissions' => $permissions,
             'sort_order' => $sortOrder,
-            'type' => $type,
         ];
     }
 

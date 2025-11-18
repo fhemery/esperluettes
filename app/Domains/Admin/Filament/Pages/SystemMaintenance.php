@@ -3,9 +3,6 @@
 namespace App\Domains\Admin\Filament\Pages;
 
 use Filament\Pages\Page;
-use Filament\Actions;
-use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 
 class SystemMaintenance extends Page
@@ -51,29 +48,16 @@ class SystemMaintenance extends Page
         return $user?->hasRole('tech-admin') ?? false;
     }
 
+    public function mount(): void
+    {
+        // Redirect to the new custom admin maintenance page
+        redirect()->route('administration.maintenance');
+    }
+
     public static function canAccess(): bool
     {
         /** @var \App\Domains\Auth\Private\Models\User|null $user */
         $user = Auth::user();
         return $user?->hasRole('tech-admin') ?? false;
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\Action::make('clearCache')
-                ->label(__('admin::pages.system_maintenance.actions.clear_cache'))
-                ->icon('heroicon-o-bolt')
-                ->requiresConfirmation()
-                ->action(function () {
-                    // Single call that clears config, route, view caches, etc.
-                    Artisan::call('optimize:clear');
-
-                    Notification::make()
-                        ->title(__('admin::pages.system_maintenance.notifications.cache_cleared'))
-                        ->success()
-                        ->send();
-                }),
-        ];
-    }
+    }  
 }
