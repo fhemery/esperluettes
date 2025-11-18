@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\Private\Controllers\AuthenticatedSessionController;
+use App\Domains\Auth\Private\Controllers\AuthAdminUserController;
 use App\Domains\Auth\Private\Controllers\ConfirmablePasswordController;
 use App\Domains\Auth\Private\Controllers\EmailVerificationNotificationController;
 use App\Domains\Auth\Private\Controllers\EmailVerificationPromptController;
@@ -11,6 +12,7 @@ use App\Domains\Auth\Private\Controllers\RegisteredUserController;
 use App\Domains\Auth\Private\Controllers\VerifyEmailController;
 use App\Domains\Auth\Private\Controllers\UserAccountController;
 use App\Domains\Auth\Private\Controllers\RoleLookupController;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->group(function () {
@@ -93,5 +95,15 @@ Route::middleware('web')->group(function () {
         Route::get('/auth/roles/by-slugs', [RoleLookupController::class, 'bySlugs'])
             ->middleware(['throttle:60,1'])
             ->name('auth.roles.by_slugs');
+
+        // Admin user activation endpoints (web, not API)
+        // Authorization (roles) is enforced inside AuthPublicApi methods.
+        Route::middleware('role:'.Roles::ADMIN.', '.Roles::MODERATOR.', '.Roles::TECH_ADMIN)->prefix('auth/admin')->name('auth.admin.')->group(function () {
+            Route::post('users/{user}/deactivate', [AuthAdminUserController::class, 'deactivate'])
+                ->name('users.deactivate');
+
+            Route::post('users/{user}/reactivate', [AuthAdminUserController::class, 'reactivate'])
+                ->name('users.reactivate');
+        });
     });
 });
