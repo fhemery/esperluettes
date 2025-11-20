@@ -135,3 +135,12 @@ function deleteUser(TestCase $t, User $user, string $password = 'secret-password
 
     $response->assertRedirect('/');
 }
+
+/**
+ * Deactivate a user in tests.
+ */
+function deactivateUser(User $user): void
+{
+    $user->is_active = false;
+    $user->save();
+}

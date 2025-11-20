@@ -4,8 +4,8 @@ return [
     'user_management' => [
         'title' => 'Gestion des utilisateurs',
         'search_instruction' => "Tapez le nom d'une Esperluette pour chercher",
-        'min_chars_instruction' => 'Minimum 2 caractères requis',
-        'no_results' => 'Aucun résultat trouvé',
+        'min_chars_instruction' => 'Saisissez au moins 2 caractères pour chercher',
+        'no_results' => 'Pas de résultat',
         'error' => 'Erreur',
 
         'headers' => [
@@ -26,6 +26,8 @@ return [
         'actions' => [
             'ban' => 'Bannir',
             'reactivate' => 'Réactiver',
+            'copy_email' => "Copier l'email",
+            'deactivate' => 'Désactiver',
         ],
     ],
 ];
