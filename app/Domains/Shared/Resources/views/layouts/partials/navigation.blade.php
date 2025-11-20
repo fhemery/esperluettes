@@ -37,8 +37,8 @@
                     </x-nav-link>
                     @endif
                     @if (Auth::user() && Auth::user()->hasRole(['admin','tech-admin','moderator']))
-                    <x-nav-link :href="route('filament.admin.pages.dashboard')"
-                        :active="request()->routeIs('filament.admin.*')">
+                    <x-nav-link :href="route('administration.dashboard')"
+                        :active="request()->routeIs('administration.*')">
                         {{ __('shared::navigation.admin') }}
                     </x-nav-link>
                     @endif
@@ -105,8 +105,8 @@
                 </x-responsive-nav-link>
                 @endif
                 @if (Auth::user() && Auth::user()->hasRole(['admin','tech-admin','moderator']))
-                <x-responsive-nav-link :href="route('filament.admin.pages.dashboard')"
-                    :active="request()->routeIs('filament.admin.*')">
+                <x-responsive-nav-link :href="route('administration.dashboard')"
+                    :active="request()->routeIs('administration.*')">
                     {{ __('shared::navigation.admin') }}
                 </x-responsive-nav-link>
                 @endif

@@ -2,4 +2,5 @@
 
 return [
     'back-to-site' => 'Retour au site',
+    'title' => 'Admin',
 ];
