@@ -21,6 +21,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\Support\Facades\DB;
+use Filament\Navigation\NavigationItem;
 
 // Specific extension to use Filament
 class AdminServiceProvider extends PanelProvider
@@ -92,6 +93,30 @@ class AdminServiceProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 CheckRole::class . ':' . Roles::ADMIN . ',' . Roles::TECH_ADMIN . ',' . Roles::MODERATOR,
+            ])
+            ->navigationItems([
+                // Here, we can use neither translations nor route primitive
+                // because none of them are already loaded.
+                NavigationItem::make('Maintenance')
+                    ->url('/administration/maintenance')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->group('Tech')
+                    ->sort(-2)
+                    ->visible(fn (): bool => auth()->user()?->hasRole('tech-admin') ?? false),
+                    
+                NavigationItem::make('Logs')
+                    ->url('/administration/logs')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->group('Tech')
+                    ->sort(-1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole('tech-admin') ?? false),
+                    
+                NavigationItem::make('Gestion des utilisateurs')
+                    ->url('/admin/moderation/user-management')
+                    ->icon('heroicon-o-users')
+                    ->group('Modération')
+                    ->sort(10)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]) ?? false),
             ])
             ->renderHook('panels::body.end', fn () => view('admin::partials.format-dates'));
     }

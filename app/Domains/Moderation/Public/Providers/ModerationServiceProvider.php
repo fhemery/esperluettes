@@ -2,6 +2,9 @@
 
 namespace App\Domains\Moderation\Public\Providers;
 
+use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Moderation\Public\Events\ReportSubmitted;
 use App\Domains\Moderation\Public\Events\ReportApproved;
@@ -33,7 +36,9 @@ class ModerationServiceProvider extends ServiceProvider
         $this->loadViewsFrom(app_path('Domains/Moderation/Private/Resources/views'), 'moderation');
 
         // Register PHP and anonymous components
+        // Private components (e.g. moderation icon)
         Blade::componentNamespace('App\\Domains\\Moderation\\Private\\View\\Components', 'moderation');
+ 
         Blade::anonymousComponentPath(app_path('Domains/Moderation/Private/Resources/views/components'), 'moderation');
 
         // Register Moderation domain events
@@ -41,5 +46,24 @@ class ModerationServiceProvider extends ServiceProvider
         $eventBus->registerEvent(ReportSubmitted::name(), ReportSubmitted::class);
         $eventBus->registerEvent(ReportApproved::name(), ReportApproved::class);
         $eventBus->registerEvent(ReportRejected::name(), ReportRejected::class);
+
+        $this->registerAdminNavigation();
+    }
+
+    protected function registerAdminNavigation(): void
+    {
+        $registry = app(AdminNavigationRegistry::class);
+        
+        // For now, the moderation group is registered in AdministrationServiceProvider
+        //$registry->registerGroup('moderation', __('admin::moderation.navigation_group'), 70);
+        $registry->registerPage(
+            'moderation.admin.user-management',
+            'moderation',
+            __('moderation::admin.user_management.title'),
+            AdminRegistryTarget::route('moderation.admin.user-management'),
+            'groups',
+            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
+            1,
+        );
     }
 }

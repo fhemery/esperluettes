@@ -145,4 +145,15 @@ class AuthPublicApi
         $user = User::query()->findOrFail($userId);
         $this->userService->activateUser($user);
     }
+
+    /**
+     * Get users by ID with email and active status.
+     *
+     * @param array<int> $userIds
+     * @return array<int,array{email:string,isActive:bool}>
+     */
+    public function getUsersById(array $userIds): array
+    {
+        return $this->userService->getUsersById($userIds);
+    }
 }

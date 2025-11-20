@@ -102,25 +102,25 @@ class ProfileApi implements ProfilePublicApiContract
         return $dtos;
     }
 
-    public function searchDisplayNames(string $query, int $limit = 50): array
+    public function searchDisplayNames(string $query, int $limit = 50, bool $includeInactive = false): array
     {
         $q = trim($query);
         if ($q === '') {
             return [];
         }
         $perPage = max(1, (int) $limit);
-        $page = $this->profiles->listProfiles(search: $q, page: 1, perPage: $perPage);
+        $page = $this->profiles->listProfiles(search: $q, page: 1, perPage: $perPage, includeInactive: $includeInactive);
         return collect($page->items())->pluck('display_name', 'user_id')->toArray();
     }
 
-    public function searchPublicProfiles(string $query, int $limit = 25): array
+    public function searchPublicProfiles(string $query, int $limit = 25, bool $includeInactive = false): array
     {
         $q = trim($query);
         if ($q === '') {
             return ['items' => [], 'total' => 0];
         }
         $cap = max(1, min(25, (int) $limit));
-        $page = $this->profiles->listProfiles(search: $q, page: 1, perPage: $cap);
+        $page = $this->profiles->listProfiles(search: $q, page: 1, perPage: $cap, includeInactive: $includeInactive);
 
         $items = [];
         foreach ($page->items() as $p) {

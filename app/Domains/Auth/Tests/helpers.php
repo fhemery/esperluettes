@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Private\Services\UserService;
 use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
@@ -134,4 +135,15 @@ function deleteUser(TestCase $t, User $user, string $password = 'secret-password
     ]);
 
     $response->assertRedirect('/');
+}
+
+/**
+ * Deactivate a user in tests.
+ * 
+ * It does go through the service, which means it sends all the needed events
+ */
+function deactivateUser(User $user): void
+{
+    $service = app(UserService::class);
+    $service->deactivateUser($user);
 }

@@ -59,7 +59,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.account_deactivated.message') . ' ' . trans('auth.account_deactivated.contact_info'),
+                'email' => trans('auth::login.error.account_deactivated.message') . ' ' . trans('auth::login.error.account_deactivated.contact_info'),
             ]);
         }
 

@@ -167,4 +167,35 @@ class ModerationService
             return ModerationReport::where('status', 'pending')->count();
         });
     }
+
+    /**
+     * Get report counts by user IDs.
+     *
+     * @param array<int> $userIds
+     * @return array<int,array{confirmed:int,rejected:int}>
+     */
+    public function getReportCountsByUserIds(array $userIds): array
+    {
+        if (empty($userIds)) {
+            return [];
+        }
+
+        $counts = ModerationReport::query()
+            ->whereIn('reported_user_id', $userIds)
+            ->selectRaw('reported_user_id, status, COUNT(*) as count')
+            ->groupBy('reported_user_id', 'status')
+            ->get()
+            ->groupBy('reported_user_id');
+
+        $result = [];
+        foreach ($userIds as $userId) {
+            $userCounts = $counts->get($userId, collect());
+            $result[$userId] = [
+                'confirmed' => $userCounts->where('status', 'confirmed')->sum('count'),
+                'rejected' => $userCounts->where('status', 'dismissed')->sum('count'),
+            ];
+        }
+
+        return $result;
+    }
 }
