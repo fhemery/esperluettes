@@ -3,13 +3,12 @@
     
     <div x-data="userManagement()" x-init="init()">
     <div class="mb-6">
-        <input
-            type="text"
+        <x-shared::input-label>{{ __('moderation::admin.user_management.search.label') }}</x-shared::input-label>
+        <x-shared::text-input
+            x-on:input.debounce.300ms="onSearchInput()"
+            placeholder="{{ __('moderation::admin.user_management.search.placeholder') }}"
             x-model="searchQuery"
-            @input.debounce.300ms="onSearchInput()"
-            placeholder="{{ __('moderation::admin.user_management.search_instruction') }}"
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-        >
+            ></x-shared::text-input>
     </div>
 
     <div x-html="resultsHtml"></div>

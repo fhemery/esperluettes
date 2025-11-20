@@ -29,7 +29,7 @@ class ModerationAdminController extends Controller
         $trimmed = trim($query);
 
         if (mb_strlen($trimmed) < 2) {
-            return view('moderation::partials.admin-user-management-results', [
+            return view('moderation::partials.admin.user-management-results', [
                 'message' => __('moderation::admin.user_management.min_chars_instruction'),
                 'users' => [],
             ]);
@@ -38,7 +38,7 @@ class ModerationAdminController extends Controller
         $displayNames = $this->profileApi->searchDisplayNames($trimmed, 20, true);
 
         if (empty($displayNames)) {
-            return view('moderation::partials.admin-user-management-results', [
+            return view('moderation::partials.admin.user-management-results', [
                 'message' => __('moderation::admin.user_management.no_results'),
                 'users' => [],
             ]);
@@ -74,7 +74,7 @@ class ModerationAdminController extends Controller
 
         $rows = array_slice($rows, 0, 20);
 
-        return view('moderation::partials.admin-user-management-results', [
+        return view('moderation::partials.admin.user-management-results', [
             'message' => null,
             'users' => $rows,
         ]);
