@@ -1,16 +1,26 @@
 <?php
 
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
 
+/**
+ * @property AdminNavigationRegistry $registry
+ * @property \App\Domains\Auth\Private\Models\User $adminUser
+ * @method \Illuminate\Testing\TestResponse actingAs(\Illuminate\Contracts\Auth\Authenticatable $user)
+ */
 uses(TestCase::class, RefreshDatabase::class);
 
 describe('AdminNavigationRegistry sorting', function () {
     beforeEach(function () {
         $this->registry = app(AdminNavigationRegistry::class);
         $this->registry->clear();
+        
+        // Create and authenticate a tech admin user for layout rendering
+        $this->adminUser = alice($this, [], true, [Roles::TECH_ADMIN]);
+        $this->actingAs($this->adminUser);
     });
 
     it('sorts groups by sort_order correctly', function () {

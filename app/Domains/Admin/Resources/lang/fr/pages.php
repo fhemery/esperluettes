@@ -3,6 +3,7 @@
 return [
     'groups' => [
         'tech' => 'Tech',
+        'moderation' => 'Modération',
     ],
     'system_maintenance' => [
         'nav_label' => 'Admin site tech.',

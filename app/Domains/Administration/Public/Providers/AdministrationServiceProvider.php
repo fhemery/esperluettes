@@ -48,6 +48,16 @@ class AdministrationServiceProvider extends ServiceProvider
             'settings',
             [Roles::TECH_ADMIN],
             1,
+        );
+
+        $registry->registerPage(
+            'logs',
+            $techDomain,
+            __('administration::logs.title'),
+            '/administration/logs',
+            'description',
+            [Roles::TECH_ADMIN],
+            2,
         );   
     }
 }
