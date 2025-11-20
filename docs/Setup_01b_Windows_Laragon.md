@@ -33,7 +33,13 @@ In the Laragon Panel, right click, then go to `MySQL > Create Database` and give
 
 6. Copy `.env.example` to `.env` and configure your .env file with the MySQL database name (the one you just created), user (root) and password (empty).
 
-7. In project directory, run :
+7. Activate SSL
+
+In the Laragon Panel, right click, then go to `Apache > SSL` and check `SSL`.
+Or directly click on the lock icon on the home screen :
+![SSL](./Images/SSL-Windows-Laragon.png)
+
+8. In project directory, run :
 
 ```bash
 composer install
@@ -46,7 +52,8 @@ php artisan db:seed
 php artisan storage:link
 ```
 
-You are up and running on the domain you configured in step 2 (for example, http://esperluettes.test).
+You are up and running on the domain you configured in step 2 (for example, http://esperluettes.test). 
+System might redirect you to https://esperluettes.test and tell you the site is not secure. Simply tell your browser everything is ok.
 
 From that point one, you can basically replace all `sail` command by `php` :
 - You can use `composer` directly
