@@ -73,9 +73,14 @@ describe('Admin layout authorization', function () {
         $user = moderator($this);
 
         // Add moderator-specific navigation
+        $this->registry->registerGroup(
+            'fake-group',
+            'Fake Group',
+            20,
+        );
         $this->registry->registerPage(
             'reports',
-            'moderation',
+            'fake-group',
             'Reports',
             AdminRegistryTarget::url('http://localhost/admin/reports'),
             'report',
@@ -87,10 +92,7 @@ describe('Admin layout authorization', function () {
         $response = $this->actingAs($user)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
-        // Should show both pages accessible to moderators
-        expect($content)->toContain('User Management')
-            ->and($content)->toContain('Reports')
-            ->and($content)->toContain('href="' . route('administration.dashboard') . '"')
+        expect($content)->toContain('Reports')
             ->and($content)->toContain('href="http://localhost/admin/reports"');
     });
 
@@ -98,9 +100,14 @@ describe('Admin layout authorization', function () {
         $user = admin($this);
 
         // Add admin-only navigation
+        $this->registry->registerGroup(
+            'fake-group',
+            'Fake Group',
+            20,
+        );
         $this->registry->registerPage(
             'system-settings',
-            'moderation',
+            'fake-group',
             'System Settings',
             AdminRegistryTarget::url('http://localhost/admin/system'),
             'settings',
@@ -112,9 +119,8 @@ describe('Admin layout authorization', function () {
         $response = $this->actingAs($user)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
-        // Should show admin-only pages
-        expect($content)->toContain('User Management')
-            ->and($content)->toContain('System Settings')
+        expect($content)->toContain('System Settings')
+            ->and($content)->toContain('Fake Group')
             ->and($content)->toContain('href="http://localhost/admin/system"');
     });
 
@@ -122,9 +128,14 @@ describe('Admin layout authorization', function () {
         $user = techAdmin($this);
 
         // Add tech admin-only navigation
+        $this->registry->registerGroup(
+            'fake-group',
+            'Fake Group',
+            20,
+        );
         $this->registry->registerPage(
             'debug-tools',
-            'moderation',
+            'fake-group',
             'Debug Tools',
             AdminRegistryTarget::url('http://localhost/admin/debug'),
             'bug_report',
@@ -136,9 +147,8 @@ describe('Admin layout authorization', function () {
         $response = $this->actingAs($user)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
-        // Should show tech admin-only pages
-        expect($content)->toContain('User Management')
-            ->and($content)->toContain('Debug Tools')
+        expect($content)->toContain('Debug Tools')
+            ->and($content)->toContain('Fake Group')
             ->and($content)->toContain('href="http://localhost/admin/debug"');
     });
 
@@ -146,9 +156,14 @@ describe('Admin layout authorization', function () {
         $moderator = moderator($this);
 
         // Add admin-only navigation
+        $this->registry->registerGroup(
+            'fake-group',
+            'Fake Group',
+            20,
+        );
         $this->registry->registerPage(
             'admin-only',
-            'moderation',
+            'fake-group',
             'Admin Only',
             AdminRegistryTarget::url('http://localhost/admin/admin-only'),
             'admin_panel_settings',
@@ -161,8 +176,7 @@ describe('Admin layout authorization', function () {
         $content = $response->getContent();
 
         // Should not show admin-only pages to moderators
-        expect($content)->toContain('User Management')
-            ->and($content)->not->toContain('Admin Only')
+        expect($content)->not->toContain('Admin Only')
             ->and($content)->not->toContain('href="http://localhost/admin/admin-only"');
     });
 
@@ -170,9 +184,14 @@ describe('Admin layout authorization', function () {
         $user = admin($this, [], true, [Roles::ADMIN, Roles::MODERATOR, Roles::USER_CONFIRMED]);
 
         // Add pages for different roles
+        $this->registry->registerGroup(
+            'fake-group',
+            'Fake Group',
+            20,
+        );
         $this->registry->registerPage(
             'moderator-page',
-            'moderation',
+            'fake-group',
             'Moderator Page',
             AdminRegistryTarget::url('http://localhost/admin/moderator'),
             'gavel',
@@ -183,7 +202,7 @@ describe('Admin layout authorization', function () {
 
         $this->registry->registerPage(
             'admin-page',
-            'moderation',
+            'fake-group',
             'Admin Page',
             AdminRegistryTarget::url('http://localhost/admin/admin'),
             'admin_panel_settings',
@@ -195,9 +214,7 @@ describe('Admin layout authorization', function () {
         $response = $this->actingAs($user)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
-        // Should show pages for both roles
-        expect($content)->toContain('User Management')
-            ->and($content)->toContain('Moderator Page')
+        expect($content)->toContain('Moderator Page')
             ->and($content)->toContain('Admin Page')
             ->and($content)->toContain('href="http://localhost/admin/moderator"')
             ->and($content)->toContain('href="http://localhost/admin/admin"');

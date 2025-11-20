@@ -132,19 +132,21 @@ describe('LogsController', function () {
         $response->assertHeader('Content-Disposition', 'attachment; filename=test1.log');
     });
 
-    it('download returns 404 for non existent file', function () {
-        $user = alice($this, [], true, [Roles::TECH_ADMIN]);
+    describe('download', function () {
+        it('returns 404 for non existent file', function () {
+            $user = alice($this, [], true, [Roles::TECH_ADMIN]);
 
-        $response = $this->actingAs($user)->get(route('administration.logs.download', ['file' => 'nonexistent.log']));
+            $response = $this->actingAs($user)->get(route('administration.logs.download', ['file' => 'nonexistent.log']));
 
-        $response->assertStatus(404);
-    });
+            $response->assertStatus(404);
+        });
 
-    it('download prevents directory traversal attack', function () {
-        $user = alice($this, [], true, [Roles::TECH_ADMIN]);
+        it('prevents directory traversal attack', function () {
+            $user = alice($this, [], true, [Roles::TECH_ADMIN]);
 
-        $response = $this->actingAs($user)->get(route('administration.logs.download', ['file' => '../../../etc/passwd']));
+            $response = $this->actingAs($user)->get(route('administration.logs.download', ['file' => '../../../etc/passwd']));
 
-        $response->assertStatus(404);
+            $response->assertStatus(404);
+        });
     });
 });
