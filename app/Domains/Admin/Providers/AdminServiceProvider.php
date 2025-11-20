@@ -112,7 +112,7 @@ class AdminServiceProvider extends PanelProvider
                     ->visible(fn (): bool => auth()->user()?->hasRole('tech-admin') ?? false),
                     
                 NavigationItem::make('Gestion des utilisateurs')
-                    ->url('/moderation/admin/user-management')
+                    ->url('/admin/moderation/user-management')
                     ->icon('heroicon-o-users')
                     ->group('Modération')
                     ->sort(10)

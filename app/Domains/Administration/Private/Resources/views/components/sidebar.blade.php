@@ -5,11 +5,26 @@
     $currentUrl = request()->url();
 @endphp
 
-<div class="p-4 flex flex-col gap-8">
+<div class="p-4 flex flex-col gap-4">
+    <x-administration::navigation-item
+        href="{{route('administration.dashboard')}}"
+        label="{{ __('administration::dashboard.title') }}"
+        icon="dashboard"
+        active="{{ $currentUrl === route('administration.dashboard') }}"
+        class="text-md"
+    />
+    <x-administration::navigation-item
+        href="{{route('dashboard')}}"
+        label="{{ __('administration::navigation.back-to-site') }}"
+        icon="undo"
+        active="{{ $currentUrl === route('dashboard') }}"
+        class="text-md"
+    />
     @foreach ($navigation as $groupKey => $group)
         <div>
-
-            <x-shared::collapsible :title="$group['label']" :open="true" color="neutral" textColor="fg">
+            <x-shared::collapsible :title="$group['label']" :open="true" 
+                color="transparent" textColor="fg" containerClasses="py-0 sm:py-0"
+                headerClasses="font-bold">
                 <!-- Group pages -->
                 <div class="flex flex-col gap-2">
                     @foreach ($group['pages'] as $page)
@@ -18,24 +33,12 @@
                             $isActive = $pageUrl === $currentUrl;
                         @endphp
 
-                        <a href="{{ $pageUrl }}"
-                            class="group flex items-center px-3
-                              {{ $isActive
-                                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
-                                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
-
-                            <!-- Icon -->
-                            <span class="flex-shrink-0 w-5 mr-2">
-                                @if ($page['icon'])
-                                    <span class="material-symbols-outlined text-lg">
-                                        {{ $page['icon'] }}
-                                    </span>
-                                @endif
-                            </span>
-
-                            <!-- Label -->
-                            <span class="flex-1">{{ $page['label'] }}</span>
-                        </a>
+                        <x-administration::navigation-item
+                            :href="$pageUrl"
+                            :label="$page['label']"
+                            :icon="$page['icon']"
+                            :active="$isActive"
+                        />
                     @endforeach
                 </div>
 

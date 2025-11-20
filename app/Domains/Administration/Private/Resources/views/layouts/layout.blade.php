@@ -9,9 +9,9 @@
 
     @include('shared::layouts.partials.head')
 </head>
-<body class="min-h-screen bg-gray-50 dark:bg-gray-900">
+<body class="min-h-screen">
     <x-shared::flash-block />
-    <div class="min-h-screen w-full bg-bg text-fg h-full grid md:grid-cols-[250px_1fr] md:grid-rows-[auto_1fr]">
+    <div class="min-h-screen w-full bg-bg text-fg h-full grid md:grid-cols-[300px_1fr] md:grid-rows-[auto_1fr]">
         <div class="col-span-2">
             <x-administration::navbar />
         </div>

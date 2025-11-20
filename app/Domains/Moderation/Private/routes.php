@@ -17,7 +17,7 @@ Route::middleware('web')->group(function () {
             ->name('report.store');
     });
 
-    Route::middleware(['auth', 'role:' . Roles::MODERATOR . ',' . Roles::ADMIN. ','.Roles::TECH_ADMIN])->prefix('moderation/admin')->name('moderation.admin.')->group(function () {
+    Route::middleware(['auth', 'role:' . Roles::MODERATOR . ',' . Roles::ADMIN. ','.Roles::TECH_ADMIN])->prefix('admin/moderation')->name('moderation.admin.')->group(function () {
         Route::get('user-management', [ModerationAdminController::class, 'userManagementPage'])
             ->name('user-management');
         // Get report form with reasons for a specific topic (AJAX, returns HTML)
