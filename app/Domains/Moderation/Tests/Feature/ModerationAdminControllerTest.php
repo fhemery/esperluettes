@@ -18,7 +18,8 @@ describe('ModerationAdminController', function () {
 
             $response->assertOk();
             $response->assertSee(__('moderation::admin.user_management.title'));
-            $response->assertSee(__('moderation::admin.user_management.search_instruction'));
+            $response->assertSee(__('moderation::admin.user_management.search.label'));
+            $response->assertSee(__('moderation::admin.user_management.search.placeholder'));
         });
 
         it('requires moderator role', function () {
@@ -88,7 +89,7 @@ describe('ModerationAdminController', function () {
             // Status labels and action buttons
             expect($html)->toContain(__('moderation::admin.user_management.status.active'));
             expect($html)->toContain(__('moderation::admin.user_management.status.inactive'));
-            expect($html)->toContain(__('moderation::admin.user_management.actions.copy_email'));
+            expect($html)->toContain('content_copy');
             expect($html)->toContain(__('moderation::admin.user_management.actions.deactivate'));
             expect($html)->toContain(__('moderation::admin.user_management.actions.reactivate'));
 

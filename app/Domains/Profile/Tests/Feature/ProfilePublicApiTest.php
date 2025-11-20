@@ -85,7 +85,7 @@ describe('Profile public API', function () {
             
             // Deactivate bob
             $this->actingAs($activeUser);
-            $inactiveUser->update(['is_active' => false]);
+            deactivateUser($inactiveUser);
             
             // Search for 'b' which should match Bob, but Bob is inactive so should be excluded
             $results = $api->searchPublicProfiles('b', 25);
@@ -101,7 +101,7 @@ describe('Profile public API', function () {
             
             // Deactivate bob
             $this->actingAs($activeUser);
-            $inactiveUser->update(['is_active' => false]);
+            deactivateUser($inactiveUser);
             
             // Search for 'b' which should match Bob, and includeInactive=true should show Bob
             $results = $api->searchPublicProfiles('b', 25, true);
@@ -118,7 +118,7 @@ describe('Profile public API', function () {
             
             // Deactivate bob
             $this->actingAs($activeUser);
-            $inactiveUser->update(['is_active' => false]);
+            deactivateUser($inactiveUser);
             
             // Search for 'b' which should match Bob, but Bob is inactive so should be excluded
             $results = $api->searchDisplayNames('b', 25);
