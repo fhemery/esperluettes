@@ -31,7 +31,8 @@ function countFilamentSidebarLinks(string $html): int
  */
 function countNewAdminSidebarLinks(string $html): int
 {
-    return substr_count($html, 'data-test-id="admin-sidebar-link"');
+    // We divide by 2 because the links are duplicated : mobile and desktop
+    return (int) (substr_count($html, 'data-test-id="admin-sidebar-link"') / 2);
 }
 
 describe('Admin navigation', function () {
