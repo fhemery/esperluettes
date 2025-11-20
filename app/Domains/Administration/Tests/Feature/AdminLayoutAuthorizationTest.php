@@ -2,8 +2,9 @@
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
-use App\Domains\Auth\Private\Models\User;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -11,20 +12,7 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('Admin layout authorization', function () {
     beforeEach(function () {
         $this->registry = app(AdminNavigationRegistry::class);
-        $this->registry->clear();
-        
-        // Register a test navigation item for the layout
-        $this->registry->registerGroup('moderation', 'Moderation', 10);
-        $this->registry->registerPage(
-            'user-management',
-            'moderation',
-            'User Management',
-            route('moderation.admin.user-management'),
-            'people',
-            [Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN],
-            10,
-            'custom'
-        );
+
     });
 
     it('throws error for unauthenticated users', function () {
@@ -89,20 +77,20 @@ describe('Admin layout authorization', function () {
             'reports',
             'moderation',
             'Reports',
-            'http://localhost/admin/reports',
+            AdminRegistryTarget::url('http://localhost/admin/reports'),
             'report',
             [Roles::MODERATOR],
             20,
             'custom'
         );
 
-        $response = $this->actingAs($user)->get(route('moderation.admin.user-management'));
+        $response = $this->actingAs($user)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
         // Should show both pages accessible to moderators
         expect($content)->toContain('User Management')
             ->and($content)->toContain('Reports')
-            ->and($content)->toContain('href="' . route('moderation.admin.user-management') . '"')
+            ->and($content)->toContain('href="' . route('administration.dashboard') . '"')
             ->and($content)->toContain('href="http://localhost/admin/reports"');
     });
 
@@ -114,14 +102,14 @@ describe('Admin layout authorization', function () {
             'system-settings',
             'moderation',
             'System Settings',
-            'http://localhost/admin/system',
+            AdminRegistryTarget::url('http://localhost/admin/system'),
             'settings',
             [Roles::ADMIN],
             30,
             'custom'
         );
 
-        $response = $this->actingAs($user)->get(route('moderation.admin.user-management'));
+        $response = $this->actingAs($user)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
         // Should show admin-only pages
@@ -138,14 +126,14 @@ describe('Admin layout authorization', function () {
             'debug-tools',
             'moderation',
             'Debug Tools',
-            'http://localhost/admin/debug',
+            AdminRegistryTarget::url('http://localhost/admin/debug'),
             'bug_report',
             [Roles::TECH_ADMIN],
             40,
             'custom'
         );
 
-        $response = $this->actingAs($user)->get(route('moderation.admin.user-management'));
+        $response = $this->actingAs($user)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
         // Should show tech admin-only pages
@@ -162,14 +150,14 @@ describe('Admin layout authorization', function () {
             'admin-only',
             'moderation',
             'Admin Only',
-            'http://localhost/admin/admin-only',
+            AdminRegistryTarget::url('http://localhost/admin/admin-only'),
             'admin_panel_settings',
             [Roles::ADMIN],
             50,
             'custom'
         );
 
-        $response = $this->actingAs($moderator)->get(route('moderation.admin.user-management'));
+        $response = $this->actingAs($moderator)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
         // Should not show admin-only pages to moderators
@@ -186,7 +174,7 @@ describe('Admin layout authorization', function () {
             'moderator-page',
             'moderation',
             'Moderator Page',
-            'http://localhost/admin/moderator',
+            AdminRegistryTarget::url('http://localhost/admin/moderator'),
             'gavel',
             [Roles::MODERATOR],
             20,
@@ -197,14 +185,14 @@ describe('Admin layout authorization', function () {
             'admin-page',
             'moderation',
             'Admin Page',
-            'http://localhost/admin/admin',
+            AdminRegistryTarget::url('http://localhost/admin/admin'),
             'admin_panel_settings',
             [Roles::ADMIN],
             30,
             'custom'
         );
 
-        $response = $this->actingAs($user)->get(route('moderation.admin.user-management'));
+        $response = $this->actingAs($user)->get(route('administration.dashboard'));
         $content = $response->getContent();
 
         // Should show pages for both roles

@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
@@ -31,10 +32,10 @@ describe('AdminNavigationRegistry sorting', function () {
         $this->registry->registerGroup('analytics', 'Analytics', 40);
 
         // Add one page to each group so they appear in navigation
-        $this->registry->registerPage('dashboard', 'system', 'Dashboard', 'http://localhost/admin/dashboard', 'dashboard', [], 10, 'custom');
-        $this->registry->registerPage('stories', 'content', 'Stories', 'http://localhost/admin/stories', 'book', [], 10, 'custom');
-        $this->registry->registerPage('reports', 'moderation', 'Reports', 'http://localhost/admin/reports', 'report', [], 10, 'custom');
-        $this->registry->registerPage('stats', 'analytics', 'Statistics', 'http://localhost/admin/stats', 'analytics', [], 10, 'custom');
+        $this->registry->registerPage('dashboard', 'system', 'Dashboard', AdminRegistryTarget::url('http://localhost/admin/dashboard'), 'dashboard', [], 10, 'custom');
+        $this->registry->registerPage('stories', 'content', 'Stories', AdminRegistryTarget::url('http://localhost/admin/stories'), 'book', [], 10, 'custom');
+        $this->registry->registerPage('reports', 'moderation', 'Reports', AdminRegistryTarget::url('http://localhost/admin/reports'), 'report', [], 10, 'custom');
+        $this->registry->registerPage('stats', 'analytics', 'Statistics', AdminRegistryTarget::url('http://localhost/admin/stats'), 'analytics', [], 10, 'custom');
 
         // Render the admin layout to get actual HTML
         $render = Blade::render('<x-admin::layout></x-admin::layout>');
@@ -55,10 +56,10 @@ describe('AdminNavigationRegistry sorting', function () {
         $this->registry->registerGroup('system', 'System', 10);
 
         // Register pages out of order with different sort orders
-        $this->registry->registerPage('users', 'system', 'Users', 'http://localhost/admin/users', 'people', [], 40, 'custom');
-        $this->registry->registerPage('dashboard', 'system', 'Dashboard', 'http://localhost/admin/dashboard', 'dashboard', [], 10, 'custom');
-        $this->registry->registerPage('settings', 'system', 'Settings', 'http://localhost/admin/settings', 'settings', [], 30, 'custom');
-        $this->registry->registerPage('logs', 'system', 'Logs', 'http://localhost/admin/logs', 'description', [], 20, 'custom');
+        $this->registry->registerPage('users', 'system', 'Users', AdminRegistryTarget::url('http://localhost/admin/users'), 'people', [], 40, 'custom');
+        $this->registry->registerPage('dashboard', 'system', 'Dashboard', AdminRegistryTarget::url('http://localhost/admin/dashboard'), 'dashboard', [], 10, 'custom');
+        $this->registry->registerPage('settings', 'system', 'Settings', AdminRegistryTarget::url('http://localhost/admin/settings'), 'settings', [], 30, 'custom');
+        $this->registry->registerPage('logs', 'system', 'Logs', AdminRegistryTarget::url('http://localhost/admin/logs'), 'description', [], 20, 'custom');
 
         // Render the admin layout to get actual HTML
         $render = Blade::render('<x-admin::layout></x-admin::layout>');
@@ -81,14 +82,14 @@ describe('AdminNavigationRegistry sorting', function () {
         $this->registry->registerGroup('system', 'System', 20);
 
         // Add pages to Content group out of order
-        $this->registry->registerPage('chapters', 'content', 'Chapters', 'http://localhost/admin/chapters', 'book', [], 30, 'custom');
-        $this->registry->registerPage('stories', 'content', 'Stories', 'http://localhost/admin/stories', 'book', [], 10, 'custom');
-        $this->registry->registerPage('tags', 'content', 'Tags', 'http://localhost/admin/tags', 'label', [], 20, 'custom');
+        $this->registry->registerPage('chapters', 'content', 'Chapters', AdminRegistryTarget::url('http://localhost/admin/chapters'), 'book', [], 30, 'custom');
+        $this->registry->registerPage('stories', 'content', 'Stories', AdminRegistryTarget::url('http://localhost/admin/stories'), 'book', [], 10, 'custom');
+        $this->registry->registerPage('tags', 'content', 'Tags', AdminRegistryTarget::url('http://localhost/admin/tags'), 'label', [], 20, 'custom');
 
         // Add pages to System group out of order
-        $this->registry->registerPage('users', 'system', 'Users', 'http://localhost/admin/users', 'people', [], 30, 'custom');
-        $this->registry->registerPage('dashboard', 'system', 'Dashboard', 'http://localhost/admin/dashboard', 'dashboard', [], 10, 'custom');
-        $this->registry->registerPage('settings', 'system', 'Settings', 'http://localhost/admin/settings', 'settings', [], 20, 'custom');
+        $this->registry->registerPage('users', 'system', 'Users', AdminRegistryTarget::url('http://localhost/admin/users'), 'people', [], 30, 'custom');
+        $this->registry->registerPage('dashboard', 'system', 'Dashboard', AdminRegistryTarget::url('http://localhost/admin/dashboard'), 'dashboard', [], 10, 'custom');
+        $this->registry->registerPage('settings', 'system', 'Settings', AdminRegistryTarget::url('http://localhost/admin/settings'), 'settings', [], 20, 'custom');
 
         // Render the admin layout to get actual HTML
         $render = Blade::render('<x-admin::layout></x-admin::layout>');
@@ -121,9 +122,9 @@ describe('AdminNavigationRegistry sorting', function () {
         $this->registry->registerGroup('second', 'Second Group');
 
         // Register pages without explicit sort_order (should default to 100)
-        $this->registry->registerPage('page1', 'first', 'Page 1', 'http://localhost/admin/page1', 'page', []);
-        $this->registry->registerPage('page2', 'first', 'Page 2', 'http://localhost/admin/page2', 'page', []);
-        $this->registry->registerPage('page3', 'second', 'Page 3', 'http://localhost/admin/page3', 'page', []);
+        $this->registry->registerPage('page1', 'first', 'Page 1', AdminRegistryTarget::url('http://localhost/admin/page1'), 'page', []);
+        $this->registry->registerPage('page2', 'first', 'Page 2', AdminRegistryTarget::url('http://localhost/admin/page2'), 'page', []);
+        $this->registry->registerPage('page3', 'second', 'Page 3', AdminRegistryTarget::url('http://localhost/admin/page3'), 'page', []);
 
         // Get navigation structure directly from registry
         $navigation = $this->registry->getNavigation();

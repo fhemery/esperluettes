@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'key' => 'maintenance',
     'title' => 'Maintenance',
     'empty-cache' => [
         'title' => 'Vider le cache',

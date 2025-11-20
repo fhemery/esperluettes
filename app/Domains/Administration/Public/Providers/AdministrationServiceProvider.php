@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Administration\Public\Providers;
 
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
 use Closure;
 use Illuminate\Support\Facades\Blade;
@@ -41,10 +42,20 @@ class AdministrationServiceProvider extends ServiceProvider
         $registry->registerGroup($techDomain, $techDomain, 10);
 
         $registry->registerPage(
+            'dashboard',
+            $techDomain,
+            __('administration::dashboard.title'),
+            AdminRegistryTarget::route('administration.dashboard'),
+            'dashboard',
+            [Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN],
+            0,
+        );
+
+        $registry->registerPage(
             __('administration::maintenance.key'),
             $techDomain,
             __('administration::maintenance.title'),
-            '/administration/maintenance',
+            AdminRegistryTarget::route('administration.maintenance'),
             'settings',
             [Roles::TECH_ADMIN],
             1,
@@ -54,7 +65,7 @@ class AdministrationServiceProvider extends ServiceProvider
             'logs',
             $techDomain,
             __('administration::logs.title'),
-            '/administration/logs',
+            AdminRegistryTarget::route('administration.logs'),
             'description',
             [Roles::TECH_ADMIN],
             2,

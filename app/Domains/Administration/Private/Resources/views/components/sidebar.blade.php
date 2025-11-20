@@ -14,10 +14,11 @@
                 <div class="flex flex-col gap-2">
                     @foreach ($group['pages'] as $page)
                         @php
-                            $isActive = $page['url'] === $currentUrl;
+                            $pageUrl = $page['target']->getTargetUrl();
+                            $isActive = $pageUrl === $currentUrl;
                         @endphp
 
-                        <a href="{{ $page['url'] }}"
+                        <a href="{{ $pageUrl }}"
                             class="group flex items-center px-3
                               {{ $isActive
                                   ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'

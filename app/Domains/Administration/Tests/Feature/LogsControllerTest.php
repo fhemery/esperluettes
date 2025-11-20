@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -46,7 +47,7 @@ describe('LogsController', function () {
             'logs',
             'system',
             'Logs',
-            route('administration.logs'),
+            AdminRegistryTarget::route('administration.logs'),
             'description',
             [Roles::TECH_ADMIN],
             20,

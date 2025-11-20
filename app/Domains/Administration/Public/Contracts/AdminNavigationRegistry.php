@@ -13,7 +13,7 @@ final class AdminNavigationRegistry
     /** @var array<string, array{label: string, sort_order: int}> */
     private array $groups = [];
 
-    /** @var array<string, array{group: string, label: string, url: string, icon: string, permissions: array<string>, sort_order: int, type: 'filament'|'custom'}> */
+    /** @var array<string, array{group: string, label: string, target: AdminRegistryTarget, icon: string, permissions: array<string>, sort_order: int, type: 'filament'|'custom'}> */
     private array $pages = [];
 
     /**
@@ -37,7 +37,7 @@ final class AdminNavigationRegistry
      * @param string $key Unique page identifier
      * @param string $group Group key this page belongs to
      * @param string $label Display label (translatable)
-     * @param string $url URL (resolved route name or direct URL)
+     * @param AdminRegistryTarget $target URL target (resolved route name or direct URL)
      * @param string $icon Icon identifier (Material Symbols, Heroicons)
      * @param array<string> $permissions Required permissions/roles
      * @param int $sortOrder Sort order within group
@@ -46,7 +46,7 @@ final class AdminNavigationRegistry
         string $key,
         string $group,
         string $label,
-        string $url,
+        AdminRegistryTarget $target,
         string $icon = '',
         array $permissions = [],
         int $sortOrder = 100,
@@ -54,7 +54,7 @@ final class AdminNavigationRegistry
         $this->pages[$key] = [
             'group' => $group,
             'label' => $label,
-            'url' => $url,
+            'target' => $target,
             'icon' => $icon,
             'permissions' => $permissions,
             'sort_order' => $sortOrder,
@@ -138,7 +138,7 @@ final class AdminNavigationRegistry
     /**
      * Get all registered pages
      *
-     * @return array<string, array{group: string, label: string, url: string, icon: string, permissions: array<string>, sort_order: int, type: 'filament'|'custom'}>
+     * @return array<string, array{group: string, label: string, target: AdminRegistryTarget, icon: string, permissions: array<string>, sort_order: int, type: 'filament'|'custom'}>
      */
     public function getPages(): array
     {

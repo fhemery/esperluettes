@@ -9,24 +9,6 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 describe('MaintenanceController', function () {
-    beforeEach(function () {
-        $this->registry = app(AdminNavigationRegistry::class);
-        $this->registry->clear();
-        
-        // Register maintenance page in navigation for layout tests
-        $this->registry->registerGroup('system', 'System', 10);
-        $this->registry->registerPage(
-            'maintenance',
-            'system',
-            'Maintenance',
-            route('administration.maintenance'),
-            'build',
-            [Roles::TECH_ADMIN],
-            10,
-            'custom'
-        );
-    });
-
     it('redirects unauthenticated users', function () {
         $response = $this->get(route('administration.maintenance'));
 
@@ -148,9 +130,9 @@ describe('MaintenanceController', function () {
         $content = $response->getContent();
 
         // Verify navigation shows the maintenance page
-        expect($content)->toContain('Maintenance')
+        expect($content)->toContain(__('administration::maintenance.title'))
             ->and($content)->toContain('href="' . route('administration.maintenance') . '"')
-            ->and($content)->toContain('build'); // icon
+            ->and($content)->toContain('settings'); // icon
     });
 
     it('hides maintenance navigation from non-tech admins', function () {

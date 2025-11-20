@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Private\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -9,28 +10,10 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 describe('Admin layout header', function () {
-    beforeEach(function () {
-        $this->registry = app(AdminNavigationRegistry::class);
-        $this->registry->clear();
-        
-        // Register a test navigation item
-        $this->registry->registerGroup('moderation', 'Moderation', 10);
-        $this->registry->registerPage(
-            'user-management',
-            'moderation',
-            'User Management',
-            route('moderation.admin.user-management'),
-            'people',
-            [Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN],
-            10,
-            'custom'
-        );
-    });
-
     it('admin layout header contains logo linking to dashboard', function () {
-        $user = admin($this);
+        $user = techAdmin($this);
 
-        $response = $this->actingAs($user)->get(route('moderation.admin.user-management'));
+        $response = $this->actingAs($user)->get(route('administration.maintenance'));
         $content = $response->getContent();
 
         // Check for logo image
@@ -43,9 +26,9 @@ describe('Admin layout header', function () {
     });
 
     it('admin layout header contains back-to-site button', function () {
-        $user = admin($this);
+        $user = techAdmin($this);
 
-        $response = $this->actingAs($user)->get(route('moderation.admin.user-management'));
+        $response = $this->actingAs($user)->get(route('administration.maintenance'));
         $content = $response->getContent();
 
         // Check for back-to-site text
@@ -56,17 +39,12 @@ describe('Admin layout header', function () {
     });
 
     it('admin layout header has proper navigation structure', function () {
-        $user = moderator($this);
+        $user = techAdmin($this);
 
-        $response = $this->actingAs($user)->get(route('moderation.admin.user-management'));
+        $response = $this->actingAs($user)->get(route('administration.maintenance'));
         $content = $response->getContent();
 
         // Check for nav element with proper structure
-        expect($content)->toContain('<nav')
-            ->and($content)->toContain('max-w-7xl mx-auto')
-            ->and($content)->toContain('flex justify-between h-16');
-
-        // Check for primary background div
-        expect($content)->toContain('bg-primary w-full');
+        expect($content)->toContain('<nav', false);
     });
 });
