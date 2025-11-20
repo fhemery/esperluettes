@@ -366,8 +366,9 @@ class ProfileService
      *
      * - Search applies to display_name and slug (case-insensitive LIKE)
      * - Results are ordered by display_name ASC
+     * - By default, only includes profiles of active users
      */
-    public function listProfiles(?string $search = null, int $page = 1, int $perPage = 50): LengthAwarePaginator
+    public function listProfiles(?string $search = null, int $page = 1, int $perPage = 50, bool $includeInactive = false): LengthAwarePaginator
     {
         $q = is_string($search) ? trim($search) : '';
 
@@ -380,6 +381,10 @@ class ProfileService
                 });
             })
             ->orderBy('display_name');
+
+        if($includeInactive) {
+            $builder = $builder->withTrashed();
+        }
 
         return $builder->paginate(perPage: max(1, (int) $perPage), page: max(1, (int) $page));
     }

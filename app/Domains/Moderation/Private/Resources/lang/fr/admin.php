@@ -5,6 +5,13 @@ return [
         'title' => 'Gestion des utilisateurs',
         'search_instruction' => "Tapez le nom d'une Esperluette pour chercher",
         'min_chars_instruction' => 'Saisissez au moins 2 caractères pour chercher',
+        'confirm_deactivate' => 'Confirmer la désactivation de ce compte ?',
+        'deactivated_success' => 'Le compte a été désactivé avec succès',
+        'deactivated_error' => 'Une erreur est survenue lors de la désactivation du compte',
+        'confirm_reactivate' => 'Confirmer la réactivation de ce compte ?',
+        'activated_success' => 'Le compte a été réactivé avec succès',
+        'activated_error' => 'Une erreur est survenue lors de la réactivation du compte',
+        'network_error' => 'Une erreur est survenue lors de la requête',
         'no_results' => 'Pas de résultat',
         'error' => 'Erreur',
 

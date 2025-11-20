@@ -27,15 +27,15 @@
                     <td class="px-4 py-2 text-sm text-gray-900">{{ $user['confirmed'] }}</td>
                     <td class="px-4 py-2 text-sm text-gray-900">{{ $user['rejected'] }}</td>
                     <td class="px-4 py-2 text-sm text-gray-900 space-x-2">
-                        <button type="button" class="px-2 py-1 text-xs border border-gray-300 rounded" @click="navigator.clipboard.writeText('{{ $user['email'] }}')">
+                        <button type="button" class="px-2 py-1 text-xs border border-gray-300 rounded" x-on:click="navigator.clipboard.writeText('{{ $user['email'] }}')">
                             {{ __('moderation::admin.user_management.actions.copy_email') }}
                         </button>
                         @if ($user['is_active'])
-                            <button type="button" class="px-2 py-1 text-xs text-red-700 border border-red-300 rounded">
+                            <button type="button" class="px-2 py-1 text-xs text-red-700 border border-red-300 rounded" x-on:click="deactivateUser('{{ route('auth.admin.users.deactivate', ['user' => $user['id']]) }}')">
                                 {{ __('moderation::admin.user_management.actions.deactivate') }}
                             </button>
                         @else
-                            <button type="button" class="px-2 py-1 text-xs text-green-700 border border-green-300 rounded">
+                            <button type="button" class="px-2 py-1 text-xs text-green-700 border border-green-300 rounded" x-on:click="activateUser('{{ route('auth.admin.users.reactivate', ['user' => $user['id']]) }}')">
                                 {{ __('moderation::admin.user_management.actions.reactivate') }}
                             </button>
                         @endif

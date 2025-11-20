@@ -75,4 +75,70 @@ describe('Profile public API', function () {
             expect($profile2->display_name)->toBe('Bob');
         });
     });
+
+    describe('Search functionality', function() {
+        it('should exclude inactive users from searchPublicProfiles by default', function () {
+            $api = app(ProfileApi::class);
+            
+            $activeUser = alice($this);
+            $inactiveUser = bob($this);
+            
+            // Deactivate bob
+            $this->actingAs($activeUser);
+            $inactiveUser->update(['is_active' => false]);
+            
+            // Search for 'b' which should match Bob, but Bob is inactive so should be excluded
+            $results = $api->searchPublicProfiles('b', 25);
+            expect($results['items'])->toHaveCount(0);
+            expect($results['total'])->toBe(0);
+        });
+
+        it('should include inactive users when includeInactive=true in searchPublicProfiles', function () {
+            $api = app(ProfileApi::class);
+            
+            $activeUser = alice($this);
+            $inactiveUser = bob($this);
+            
+            // Deactivate bob
+            $this->actingAs($activeUser);
+            $inactiveUser->update(['is_active' => false]);
+            
+            // Search for 'b' which should match Bob, and includeInactive=true should show Bob
+            $results = $api->searchPublicProfiles('b', 25, true);
+            expect($results['items'])->toHaveCount(1);
+            expect($results['items'][0]->display_name)->toBe('Bob');
+            expect($results['total'])->toBe(1);
+        });
+
+        it('should exclude inactive users from searchDisplayNames by default', function () {
+            $api = app(ProfileApi::class);
+            
+            $activeUser = alice($this);
+            $inactiveUser = bob($this);
+            
+            // Deactivate bob
+            $this->actingAs($activeUser);
+            $inactiveUser->update(['is_active' => false]);
+            
+            // Search for 'b' which should match Bob, but Bob is inactive so should be excluded
+            $results = $api->searchDisplayNames('b', 25);
+            expect($results)->toHaveCount(0);
+        });
+
+        it('should include inactive users when includeInactive=true in searchDisplayNames', function () {
+            $api = app(ProfileApi::class);
+            
+            $activeUser = alice($this);
+            $inactiveUser = bob($this);
+            
+            // Deactivate bob
+            $this->actingAs($activeUser);
+            $inactiveUser->update(['is_active' => false]);
+            
+            // Search for 'b' which should match Bob, and includeInactive=true should show Bob
+            $results = $api->searchDisplayNames('b', 25, true);
+            expect($results)->toHaveCount(1);
+            expect($results[$inactiveUser->id])->toBe('Bob');
+        });
+    });
 });
