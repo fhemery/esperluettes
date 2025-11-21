@@ -1,5 +1,5 @@
 <div class="p-4 gap-8 flex flex-col">
-    <div class="sm:framed-large sm:p-32 flex flex-col gap-8">
+    <div class="framed-large sm:p-32 flex flex-col gap-8">
         <div class="max-w-[800px] mx-auto">
             <div class="text-lg rich-content max-w-none text-fg">
                 @if($profile->description)

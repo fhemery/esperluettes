@@ -364,16 +364,19 @@ p.ql-align-center { text-indent: 0; }
   }
 }
 
+
 .framed-tight {
   background-image: var(--frame-corner-tl), var(--frame-corner-tr), var(--frame-corner-bl), var(--frame-corner-br);
   background-position: top -1rem left -1rem, top -1rem right -1rem, bottom -1rem left -1rem, bottom -1rem right -1rem;
   background-repeat: no-repeat;
 }
 
-.framed-large {
-  background-image: var(--frame-corner-tl), var(--frame-corner-tr), var(--frame-corner-bl), var(--frame-corner-br);
-  background-position: top left, top right, bottom left, bottom right;
-  background-repeat: no-repeat;
+@media (min-width: 640px) {
+  .framed-large {
+    background-image: var(--frame-corner-tl), var(--frame-corner-tr), var(--frame-corner-bl), var(--frame-corner-br);
+    background-position: top left, top right, bottom left, bottom right;
+    background-repeat: no-repeat;
+  }
 }
 
 table.admin {
