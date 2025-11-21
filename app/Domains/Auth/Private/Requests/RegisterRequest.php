@@ -18,7 +18,7 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'name' => ['required', 'string', 'max:255', new UniqueProfileDisplayName(null)],
+            'name' => ['required', 'string', 'min:2', 'max:255', new UniqueProfileDisplayName(null)],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Password::defaults()],
         ];
@@ -44,6 +44,7 @@ class RegisterRequest extends FormRequest
         return [
             'name.required' => __('auth::register.form.name.required'),
             'name.string' => __('auth::register.form.name.string'),
+            'name.min' => __('auth::register.form.name.min'),
             'name.max' => __('auth::register.form.name.max'),
 
             'email.required' => __('auth::register.form.email.required'),

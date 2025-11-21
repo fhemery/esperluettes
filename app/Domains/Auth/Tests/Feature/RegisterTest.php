@@ -85,6 +85,44 @@ describe('Register', function () {
             // Ensure user not created for the second attempt
             $this->assertDatabaseMissing('users', ['email' => 'alice2@example.com']);
         });
+
+        it('rejects registration when name is empty', function () {
+            $response = $this->from('/register')->post('/register', [
+                'name' => '',
+                'email' => 'empty@example.com',
+                'password' => 'secret-password',
+                'password_confirmation' => 'secret-password',
+            ]);
+
+            $response->assertRedirect('/register');
+            $response->assertSessionHasErrors(['name']);
+            $this->assertDatabaseMissing('users', ['email' => 'empty@example.com']);
+        });
+
+        it('rejects registration when name is only 1 character', function () {
+            $response = $this->from('/register')->post('/register', [
+                'name' => 'A',
+                'email' => 'single@example.com',
+                'password' => 'secret-password',
+                'password_confirmation' => 'secret-password',
+            ]);
+
+            $response->assertRedirect('/register');
+            $response->assertSessionHasErrors(['name']);
+            $this->assertDatabaseMissing('users', ['email' => 'single@example.com']);
+        });
+
+        it('allows registration when name is exactly 2 characters', function () {
+            $response = $this->post('/register', [
+                'name' => 'AB',
+                'email' => 'two@example.com',
+                'password' => 'secret-password',
+                'password_confirmation' => 'secret-password',
+            ]);
+
+            $response->assertRedirect();
+            $this->assertDatabaseHas('users', ['email' => 'two@example.com']);
+        });
     });
 
     describe('Events', function () {

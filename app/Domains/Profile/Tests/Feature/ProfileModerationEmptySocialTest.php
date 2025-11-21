@@ -48,6 +48,7 @@ describe('Profile moderation - Empty Social', function () {
             $this->actingAs($this->owner)
                 ->from('/profile/edit')
                 ->put('/profile', [
+                    'display_name' => $this->profile->display_name,
                     'facebook_url' => 'https://facebook.com/alice',
                     'x_url' => 'https://x.com/alice',
                     'instagram_url' => 'https://instagram.com/alice',

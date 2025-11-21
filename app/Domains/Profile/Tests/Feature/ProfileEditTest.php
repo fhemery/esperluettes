@@ -112,6 +112,67 @@ describe('Editing profile', function () {
             $response->assertSessionHas('success', __('profile::edit.updated'));
             $response->assertSessionHasNoErrors();
         });
+
+        it('rejects display name with only 1 character', function () {
+            $user = registerUserThroughForm($this, [
+                'name' => 'Original Name',
+                'email' => 'original@example.com',
+            ]);
+
+            $response = $this->actingAs($user)
+                ->from('/profile/edit')
+                ->put('/profile', [
+                    'display_name' => 'A',
+                ]);
+
+            $response->assertRedirect('/profile/edit');
+            $response->assertSessionHasErrors(['display_name']);
+
+            // Ensure display name was not updated
+            $updated = app(ProfileApi::class)->getPublicProfile($user->id);
+            expect($updated->display_name)->toBe('Original Name');
+        });
+
+        it('allows display name with exactly 2 characters', function () {
+            $user = registerUserThroughForm($this, [
+                'name' => 'Original Name',
+                'email' => 'original2@example.com',
+            ]);
+
+            $response = $this->actingAs($user)
+                ->from('/profile/edit')
+                ->put('/profile', [
+                    'display_name' => 'AB',
+                ]);
+
+            $response->assertRedirect('/profile');
+            $response->assertSessionHas('success', __('profile::edit.updated'));
+            $response->assertSessionHasNoErrors();
+
+            // Ensure display name was updated
+            $updated = app(ProfileApi::class)->getPublicProfile($user->id);
+            expect($updated->display_name)->toBe('AB');
+        });
+
+        it('rejects empty display name (required field)', function () {
+            $user = registerUserThroughForm($this, [
+                'name' => 'Original Name',
+                'email' => 'original3@example.com',
+            ]);
+
+            $response = $this->actingAs($user)
+                ->from('/profile/edit')
+                ->put('/profile', [
+                    'display_name' => '',
+                ]);
+
+            $response->assertRedirect('/profile/edit');
+            $response->assertSessionHasErrors(['display_name']);
+
+            // Ensure display name was not changed (kept existing value)
+            $updated = app(ProfileApi::class)->getPublicProfile($user->id);
+            expect($updated->display_name)->toBe('Original Name');
+        });
     });
 
     describe('Events', function () {
@@ -148,6 +209,7 @@ describe('Editing profile', function () {
             $file = UploadedFile::fake()->image('avatar.jpg', 300, 300);
     
             $response = $this->from('/profile/edit')->put('/profile', [
+                'display_name' => 'Alice', // Required field
                 'profile_picture' => $file,
             ]);
             $response->assertRedirect('/profile');
@@ -165,10 +227,11 @@ describe('Editing profile', function () {
     
             // First upload to ensure there is an avatar to remove
             $file = UploadedFile::fake()->image('avatar.jpg', 300, 300);
-            $this->put('/profile', ['profile_picture' => $file])->assertRedirect('/profile');
+            $this->put('/profile', ['display_name' => 'Alice', 'profile_picture' => $file])->assertRedirect('/profile');
     
             // Then remove
             $response = $this->from('/profile/edit')->put('/profile', [
+                'display_name' => 'Alice', // Required field
                 'remove_profile_picture' => true,
             ]);
             $response->assertRedirect('/profile');
@@ -186,6 +249,7 @@ describe('Editing profile', function () {
 
             // Update only the description
             $response = $this->from('/profile/edit')->put('/profile', [
+                'display_name' => 'Alice', // Required field
                 'description' => '<b>Hello</b> world',
             ]);
             $response->assertRedirect('/profile');
@@ -203,6 +267,7 @@ describe('Editing profile', function () {
             $this->actingAs($user);
 
             $response = $this->from('/profile/edit')->put('/profile', [
+                'display_name' => 'Alice', // Required field
                 'facebook_url' => 'facebook.com/someone',
                 'x_url' => 'twitter.com/someone',
                 'instagram_url' => 'https://instagram.com/someone',

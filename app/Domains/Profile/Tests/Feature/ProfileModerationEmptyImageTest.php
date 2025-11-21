@@ -49,7 +49,7 @@ describe('Profile moderation', function () {
             // Upload a custom avatar for Alice
             $file = \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg', 300, 300);
             $this->actingAs($this->owner)
-                ->put('/profile', ['profile_picture' => $file])
+                ->put('/profile', ['display_name' => $this->profile->display_name, 'profile_picture' => $file])
                 ->assertRedirect('/profile');
 
             // Verify the picture was uploaded
@@ -78,7 +78,7 @@ describe('Profile moderation', function () {
             // Upload a custom avatar for Alice
             $file = \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg', 300, 300);
             $this->actingAs($this->owner)
-                ->put('/profile', ['profile_picture' => $file])
+                ->put('/profile', ['display_name' => $this->profile->display_name, 'profile_picture' => $file])
                 ->assertRedirect('/profile');
 
             $this->profile->refresh();
@@ -126,7 +126,7 @@ describe('Profile moderation', function () {
             // Upload a custom avatar for Alice first
             $file = \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg', 300, 300);
             $this->actingAs($this->owner)
-                ->put('/profile', ['profile_picture' => $file])
+                ->put('/profile', ['display_name' => $this->profile->display_name,'profile_picture' => $file])
                 ->assertRedirect('/profile');
 
             $this->profile->refresh();

@@ -48,7 +48,7 @@ describe('Profile moderation - Empty About', function () {
             $bio = 'This is a sample bio that should be removed by moderation.';
             $this->actingAs($this->owner)
                 ->from('/profile/edit')
-                ->put('/profile', ['description' => $bio])
+                ->put('/profile', ['display_name' => $this->profile->display_name, 'description' => $bio])
                 ->assertRedirect('/profile');
 
             $response = $this->get("/profile/{$this->slug}");

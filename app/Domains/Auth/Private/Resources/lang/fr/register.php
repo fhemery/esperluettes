@@ -21,6 +21,7 @@ return [
     'form' => [
         'name' => [
             'required' => 'Veuillez saisir votre nom.',
+            'min' => 'Le nom doit faire minimum 2 caractères',
             'string' => 'Le nom doit être une chaîne de caractères valide.',
             'max' => 'Le nom ne peut pas dépasser :max caractères.',
         ],

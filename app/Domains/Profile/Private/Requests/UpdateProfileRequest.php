@@ -24,7 +24,7 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'display_name' => ['nullable', 'string', 'max:100', new UniqueProfileDisplayName(Auth::id())],
+            'display_name' => ['required', 'string', 'min:2', 'max:100', new UniqueProfileDisplayName(Auth::id())],
             'facebook_url' => ['nullable', 'string', 'max:255'],
             'x_url' => ['nullable', 'string', 'max:255'],
             'instagram_url' => ['nullable', 'string', 'max:255'],
@@ -60,16 +60,17 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'display_name.max' => __('The display name may not be greater than :max characters.'),
-            'facebook_url.max' => __('The Facebook URL may not be greater than 255 characters.'),
-            'x_url.max' => __('The X URL may not be greater than 255 characters.'),
-            'instagram_url.max' => __('The Instagram URL may not be greater than 255 characters.'),
-            'youtube_url.max' => __('The YouTube URL may not be greater than 255 characters.'),
-            // Custom rule uses this generic message, already translated above
-            'profile_picture.image' => __('The file must be an image.'),
-            'profile_picture.mimes' => __('The profile picture must be a file of type: jpeg, jpg, png, gif, webp.'),
-            'profile_picture.max' => __('The profile picture may not be greater than 2MB.'),
-            'profile_picture.dimensions' => __('The profile picture must be at least 100x100 pixels and no larger than 2000x2000 pixels.'),
+            'display_name.required' => __('profile::validation.display_name_required'),
+            'display_name.min' => __('profile::validation.display_name_min'),
+            'display_name.max' => __('profile::validation.display_name_max'),
+            'facebook_url.max' => __('profile::validation.facebook_url_max'),
+            'x_url.max' => __('profile::validation.x_url_max'),
+            'instagram_url.max' => __('profile::validation.instagram_url_max'),
+            'youtube_url.max' => __('profile::validation.youtube_url_max'),
+            'profile_picture.image' => __('profile::validation.profile_picture_image'),
+            'profile_picture.mimes' => __('profile::validation.profile_picture_mimes'),
+            'profile_picture.max' => __('profile::validation.profile_picture_max'),
+            'profile_picture.dimensions' => __('profile::validation.profile_picture_dimensions'),
         ];
     }
 
@@ -79,14 +80,14 @@ class UpdateProfileRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'display_name' => __('display name'),
-            'facebook_url' => __('Facebook URL'),
-            'x_url' => __('X URL'),
-            'instagram_url' => __('Instagram URL'),
-            'youtube_url' => __('YouTube URL'),
-            'description' => __('description'),
-            'profile_picture' => __('profile picture'),
-            'remove_profile_picture' => __('remove profile picture'),
+            'display_name' => __('profile::fields.display name'),
+            'facebook_url' => __('profile::fields.Facebook URL'),
+            'x_url' => __('profile::fields.X URL'),
+            'instagram_url' => __('profile::fields.Instagram URL'),
+            'youtube_url' => __('profile::fields.YouTube URL'),
+            'description' => __('profile::fields.description'),
+            'profile_picture' => __('profile::fields.profile picture'),
+            'remove_profile_picture' => __('profile::fields.remove profile picture'),
         ];
     }
 }
