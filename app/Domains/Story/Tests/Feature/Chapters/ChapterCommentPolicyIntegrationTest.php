@@ -1,6 +1,10 @@
 <?php
 
+use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Story\Private\Services\ChapterCommentPolicy;
+use App\Domains\Story\Private\Services\ChapterService;
+use App\Domains\Story\Private\Services\StoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -31,6 +35,34 @@ describe('Chapter comment policy integration (min length = 140)', function () {
 
         $commentId = createComment('chapter', 123, generateDummyText(140), null);
         expect($commentId)->toBeGreaterThan(0);
+    });
+});
+
+describe('URL generation for chapter comments', function () {
+    it('should generate correct URL for chapter comment with story and chapter slugs', function () {
+        $author = alice($this);
+        $story = publicStory('Public Story', $author->id, ['slug' => 'test-story']);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Test Chapter', 'slug' => 'test-chapter']);
+        
+        $policy = new ChapterCommentPolicy(
+            app(ChapterService::class),
+            app(StoryService::class),
+            app(CommentPublicApi::class)
+        );
+        
+        $url = $policy->getUrl($chapter->id, 123);
+        expect($url)->toBe(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]) . '?comment=123');
+    });
+    
+    it('should return null when chapter does not exist', function () {
+        $policy = new ChapterCommentPolicy(
+            app(ChapterService::class),
+            app(StoryService::class),
+            app(CommentPublicApi::class)
+        );
+        
+        $url = $policy->getUrl(999999, 123);
+        expect($url)->toBeNull();
     });
 });
 

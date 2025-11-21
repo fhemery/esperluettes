@@ -4,9 +4,14 @@ namespace App\Domains\Comment\Private\Support\Moderation;
 
 use App\Domains\Moderation\Public\Contracts\SnapshotFormatterInterface;
 use App\Domains\Comment\Private\Models\Comment;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 
 class CommentSnapshotFormatter implements SnapshotFormatterInterface
 {
+    public function __construct(
+        private readonly CommentPolicyRegistry $policyRegistry,
+    ) {}
+
     public function capture(int $entityId): array
     {
         /** @var Comment|null $comment */
@@ -41,9 +46,8 @@ class CommentSnapshotFormatter implements SnapshotFormatterInterface
         if (! $comment) {
             return '/';
         }
-        return route('comments.fragments', [
-            'entity_type' => $comment->commentable_type,
-            'entity_id' => $comment->commentable_id,
-        ]);
+        
+        $url = $this->policyRegistry->getUrl($comment->commentable_type, $comment->commentable_id, $entityId);
+        return $url ?? '/';
     }
 }

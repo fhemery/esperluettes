@@ -48,4 +48,9 @@ class DefaultCommentPolicy implements CommentPolicy
     {
         return null;
     }
+
+    public function getUrl(int $entityId, int $commentId): ?string
+    {
+        return null;
+    }
 }

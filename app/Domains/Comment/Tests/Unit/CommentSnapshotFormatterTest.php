@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Comment\Private\Support\Moderation\CommentSnapshotFormatter;
-use App\Domains\Comment\Private\Models\Comment;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,7 +19,8 @@ describe('CommentSnapshotFormatter', function () {
         $text = generateDummyText(150);
         $commentId = createComment($this->entityType, $this->entityId, $text);
 
-        $formatter = new CommentSnapshotFormatter();
+        $policyRegistry = new CommentPolicyRegistry();
+        $formatter = new CommentSnapshotFormatter($policyRegistry);
         $snapshot = $formatter->capture($commentId);
 
         expect($snapshot)
@@ -32,7 +33,8 @@ describe('CommentSnapshotFormatter', function () {
         $long = generateDummyText(500) . 'TAIL';
         $commentId = createComment($this->entityType, $this->entityId, $long);
 
-        $formatter = new CommentSnapshotFormatter();    
+        $policyRegistry = new CommentPolicyRegistry();
+        $formatter = new CommentSnapshotFormatter($policyRegistry);    
         $snapshot = $formatter->capture($commentId);
         $html = $formatter->render($snapshot);
 
@@ -49,19 +51,57 @@ describe('CommentSnapshotFormatter', function () {
         $this->actingAs($this->author);
         $commentId = createComment($this->entityType, $this->entityId, generateDummyText(150));
 
-        $formatter = new CommentSnapshotFormatter();
+        $policyRegistry = new CommentPolicyRegistry();
+        $formatter = new CommentSnapshotFormatter($policyRegistry);
         expect($formatter->getReportedUserId($commentId))->toBe($this->author->id);
     });
 
-    it('getContentUrl returns the comments fragment route for the target', function () {
+    it('getContentUrl returns "/" for unknown entity types (default policy)', function () {
         $this->actingAs($this->author);
-        $commentId = createComment($this->entityType, $this->entityId, generateDummyText(150));
-        /** @var Comment $comment */
-        $comment = Comment::query()->findOrFail($commentId);
+        $commentId = createComment('unknown_type', $this->entityId, generateDummyText(150));
 
-        $formatter = new CommentSnapshotFormatter();
+        $policyRegistry = new CommentPolicyRegistry();
+        $formatter = new CommentSnapshotFormatter($policyRegistry);
         $url = $formatter->getContentUrl($commentId);
 
-        expect($url)->toBe(route('comments.fragments', ['entity_type' => $comment->commentable_type, 'entity_id' => $comment->commentable_id]));
+        expect($url)->toBe('/');
+    });
+
+    it('getContentUrl returns "/" when comment does not exist', function () {
+        $policyRegistry = new CommentPolicyRegistry();
+        $formatter = new CommentSnapshotFormatter($policyRegistry);
+        
+        $url = $formatter->getContentUrl(999999);
+        expect($url)->toBe('/');
+    });
+
+    it('getContentUrl returns proper chapter URL when ChapterCommentPolicy is registered', function () {
+        $this->actingAs($this->author);
+        
+        // Create a fake comment policy for testing
+        $fakePolicy = new class implements \App\Domains\Comment\Public\Api\Contracts\CommentPolicy {
+            public function validateCreate(\App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto $dto): void {}
+            public function canCreateRoot(int $entityId, int $userId): bool { return true; }
+            public function canReply(\App\Domains\Comment\Public\Api\Contracts\CommentDto $parentComment, int $userId): bool { return true; }
+            public function canEditOwn(\App\Domains\Comment\Public\Api\Contracts\CommentDto $comment, int $userId): bool { return true; }
+            public function validateEdit(\App\Domains\Comment\Public\Api\Contracts\CommentDto $comment, int $userId, string $newBody): void {}
+            public function getRootCommentMinLength(): ?int { return null; }
+            public function getRootCommentMaxLength(): ?int { return null; }
+            public function getReplyCommentMinLength(): ?int { return null; }
+            public function getReplyCommentMaxLength(): ?int { return null; }
+            public function getUrl(int $entityId, int $commentId): ?string {
+                return 'http://localhost/fake-entity/' . $entityId . '?comment=' . $commentId;
+            }
+        };
+        
+        $commentId = createComment('fake', 123, generateDummyText(150));
+
+        $policyRegistry = new CommentPolicyRegistry();
+        $policyRegistry->register('fake', $fakePolicy);
+        
+        $formatter = new CommentSnapshotFormatter($policyRegistry);
+        $url = $formatter->getContentUrl($commentId);
+
+        expect($url)->toBe('http://localhost/fake-entity/123?comment=' . $commentId);
     });
 });

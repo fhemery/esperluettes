@@ -57,4 +57,10 @@ interface CommentPolicy
      * Default implementation should return null (no limit).
      */
     public function getReplyCommentMaxLength(): ?int;
+
+    /**
+     * Generate URL to view the comment in context.
+     * Should return null if entity doesn't exist or URL cannot be generated.
+     */
+    public function getUrl(int $entityId, int $commentId): ?string;
 }

@@ -98,6 +98,14 @@ class CommentPolicyRegistry
         return $this->getPolicy($entityType)->getReplyCommentMaxLength();
     }
 
+    /**
+     * Generate URL to view the comment in context. Default: null (no URL)
+     */
+    public function getUrl(string $entityType, int $entityId, int $commentId): ?string
+    {
+        return $this->getPolicy($entityType)->getUrl($entityId, $commentId);
+    }
+
 
     private function getPolicy(string $entityType): CommentPolicy
     {

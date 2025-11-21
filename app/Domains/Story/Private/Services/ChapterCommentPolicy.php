@@ -70,4 +70,22 @@ class ChapterCommentPolicy implements CommentPolicy
     {
         return null;
     }
+
+    public function getUrl(int $entityId, int $commentId): ?string
+    {
+        $chapter = $this->chapters->getChapterById($entityId);
+        if (!$chapter) {
+            return null;
+        }
+
+        $story = $this->stories->getStoryById($chapter->story_id);
+        if (!$story) {
+            return null;
+        }
+
+        return route('chapters.show', [
+            'storySlug' => $story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]) . '?comment=' . $commentId;
+    }
 }
