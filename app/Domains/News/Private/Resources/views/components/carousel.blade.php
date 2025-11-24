@@ -39,7 +39,7 @@ $items = $items ?? collect();
                                 src="{{ $base }}"
                                 srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
                                 sizes="(max-width: 640px) 100vw, 800px"
-                                alt="{{ $item->title }}"
+                                alt=""
                                 loading="eager">
                         </picture>
                         <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pl-16 text-white">
@@ -58,7 +58,7 @@ $items = $items ?? collect();
                                 src="{{ $base }}"
                                 srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
                                 sizes="(max-width: 640px) 100vw, 800px"
-                                alt="{{ $item->title }}"
+                                alt=""
                                 loading="eager">
                         </picture>
                     </a>
