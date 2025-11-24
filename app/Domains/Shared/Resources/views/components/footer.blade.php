@@ -35,6 +35,9 @@
 
         <div class="w-full flex items-center justify-center text-xs text-fg/70 mt-4">
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}</p>
+            <p>
+                Version <a href="{{ route('versions') }}" class="underline hover:text-primary">{{ getAppVersion() }}</a>
+            </p>
         </div>
     </div>
 </footer>

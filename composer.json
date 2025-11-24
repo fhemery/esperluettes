@@ -40,6 +40,9 @@
         },
         "exclude-from-classmap": [
             "app/Domains/*/Tests/"
+        ],
+        "files": [
+            "app/Domains/Shared/Helpers/helpers.php"
         ]
     },
     "autoload-dev": {
