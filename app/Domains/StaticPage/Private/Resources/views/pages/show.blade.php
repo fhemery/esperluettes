@@ -26,7 +26,7 @@
                     src="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }}"
                     srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
                     sizes="(max-width: 640px) 100vw, 800px"
-                    alt="{{ $page->title }}"
+                    alt=""
                     loading="lazy">
             </picture>
         </figure>

@@ -29,7 +29,7 @@
                                 src="{{ asset('storage/'.$news->header_image_path) }}"
                                 srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
                                 sizes="(max-width: 640px) 100vw, 400px"
-                                alt="{{ $news->title }}"
+                                alt=""
                                 loading="lazy">
                         </picture>
                     </a>
