@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Private\Controllers\AuthenticatedSessionController;
 use App\Domains\Auth\Private\Controllers\AuthAdminUserController;
+use App\Domains\Auth\Private\Controllers\ComplianceController;
 use App\Domains\Auth\Private\Controllers\ConfirmablePasswordController;
 use App\Domains\Auth\Private\Controllers\EmailVerificationNotificationController;
 use App\Domains\Auth\Private\Controllers\EmailVerificationPromptController;
@@ -16,8 +17,6 @@ use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->group(function () {
-
-    
     Route::middleware('guest')->group(function () {
         Route::get('register', [RegisteredUserController::class, 'create'])
             ->name('register');
@@ -49,7 +48,17 @@ Route::middleware('web')->group(function () {
         })->name('login.with_intended');
     });
 
+    // Compliance routes (terms acceptance and parental authorization)
     Route::middleware('auth')->group(function () {
+        Route::prefix('compliance')->name('compliance.')->group(function () {
+            Route::get('terms', [ComplianceController::class, 'showTerms'])->name('terms.show');
+            Route::post('terms', [ComplianceController::class, 'acceptTerms'])->name('terms.accept');
+            Route::get('parental-authorization', [ComplianceController::class, 'showParentalAuthorization'])->name('parental.show');
+            Route::post('parental-authorization', [ComplianceController::class, 'uploadParentalAuthorization'])->name('parental.upload');
+        });
+    });
+
+    Route::middleware(['auth','compliant'])->group(function () {
         // Lightweight heartbeat to keep the session alive and reduce CSRF timeouts.
         Route::get('/session/heartbeat', function () {
             return response()->noContent();
@@ -60,7 +69,6 @@ Route::middleware('web')->group(function () {
             // Return the current CSRF token for this session without forcing regeneration
             return response()->json(['token' => csrf_token()]);
         })->middleware(['throttle:120,1'])->name('session.csrf');
-
 
         Route::get('verify-email', EmailVerificationPromptController::class)
             ->name('verification.notice');

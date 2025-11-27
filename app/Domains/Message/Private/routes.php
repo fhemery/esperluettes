@@ -4,7 +4,7 @@ use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Route;
 use App\Domains\Message\Private\Controllers\MessageController;
 
-Route::middleware(['web', 'auth'])
+Route::middleware(['web', 'auth', 'compliant'])
     ->prefix('messages')
     ->name('messages.')
     ->group(function () {

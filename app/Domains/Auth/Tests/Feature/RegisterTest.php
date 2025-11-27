@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\Private\Models\User;
 use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Auth\Public\Events\UserRegistered;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,6 +18,8 @@ describe('Register', function () {
                 'email' => 'unique@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ]);
 
             $response->assertRedirect();
@@ -33,6 +36,8 @@ describe('Register', function () {
                 'email' => 'me1@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ]);
             $first->assertRedirect();
 
@@ -45,6 +50,8 @@ describe('Register', function () {
                 'email' => 'me2@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ]);
 
             // Expect validation error on name and redirect back to /register
@@ -62,6 +69,8 @@ describe('Register', function () {
                 'email' => 'alice@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ]);
             $first->assertRedirect();
 
@@ -77,6 +86,8 @@ describe('Register', function () {
                 'email' => 'alice2@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ]);
 
             $second->assertRedirect('/register');
@@ -92,6 +103,8 @@ describe('Register', function () {
                 'email' => 'empty@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ]);
 
             $response->assertRedirect('/register');
@@ -105,6 +118,8 @@ describe('Register', function () {
                 'email' => 'single@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ]);
 
             $response->assertRedirect('/register');
@@ -118,10 +133,99 @@ describe('Register', function () {
                 'email' => 'two@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ]);
 
             $response->assertRedirect();
             $this->assertDatabaseHas('users', ['email' => 'two@example.com']);
+        });
+
+        describe('Compliance validation', function () {
+            it('rejects registration when terms are not accepted', function () {
+                $response = $this->from('/register')->post('/register', [
+                    'name' => 'Test User',
+                    'email' => 'noterms@example.com',
+                    'password' => 'secret-password',
+                    'password_confirmation' => 'secret-password',
+                    'is_under_15' => false,
+                    // accept_terms is missing
+                ]);
+
+                $response->assertRedirect('/register');
+                $response->assertSessionHasErrors(['accept_terms']);
+                $this->assertDatabaseMissing('users', ['email' => 'noterms@example.com']);
+            });
+
+            it('allows registration when underage checkbox is checked', function () {
+                $response = $this->post('/register', [
+                    'name' => 'Underage User',
+                    'email' => 'underage@example.com',
+                    'password' => 'secret-password',
+                    'password_confirmation' => 'secret-password',
+                    'is_under_15' => true,
+                    'accept_terms' => '1',
+                ]);
+
+                $response->assertRedirect();
+                $this->assertDatabaseHas('users', [
+                    'email' => 'underage@example.com',
+                    'is_under_15' => true,
+                ]);
+                
+                // Verify terms were accepted
+                $user = User::where('email', 'underage@example.com')->first();
+                expect($user->terms_accepted_at)->not->toBeNull();
+            });
+
+            it('redirects underage user to parental authorization after registration', function () {
+                $response = $this->post('/register', [
+                    'name' => 'Underage User',
+                    'email' => 'underage2@example.com',
+                    'password' => 'secret-password',
+                    'password_confirmation' => 'secret-password',
+                    'is_under_15' => true,
+                    'accept_terms' => '1',
+                ]);
+
+                // Should redirect to parental authorization due to middleware
+                $response->assertRedirect(route('compliance.parental.show'));
+                
+                // Verify user was created with correct compliance data
+                $this->assertDatabaseHas('users', [
+                    'email' => 'underage2@example.com',
+                    'is_under_15' => true,
+                    'parental_authorization_verified_at' => null,
+                ]);
+                
+                // Verify terms were accepted
+                $user = User::where('email', 'underage2@example.com')->first();
+                expect($user->terms_accepted_at)->not->toBeNull();
+            });
+
+            it('allows adult user to access dashboard after registration', function () {
+                $response = $this->post('/register', [
+                    'name' => 'Adult User',
+                    'email' => 'adult@example.com',
+                    'password' => 'secret-password',
+                    'password_confirmation' => 'secret-password',
+                    'is_under_15' => false,
+                    'accept_terms' => '1',
+                ]);
+
+                // Should redirect to dashboard (user is compliant)
+                $response->assertRedirect(route('dashboard'));
+                
+                // Verify user was created with correct compliance data
+                $this->assertDatabaseHas('users', [
+                    'email' => 'adult@example.com',
+                    'is_under_15' => false,
+                ]);
+                
+                // Verify terms were accepted
+                $user = \App\Domains\Auth\Private\Models\User::where('email', 'adult@example.com')->first();
+                expect($user->terms_accepted_at)->not->toBeNull();
+            });
         });
     });
 
@@ -132,6 +236,8 @@ describe('Register', function () {
                 'email' => 'eventtester@example.com',
                 'password' => 'secret-password',
                 'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
             ])->assertRedirect();
 
             /* @var UserRegistered $dto */

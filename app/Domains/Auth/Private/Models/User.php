@@ -21,6 +21,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'is_active',
+        'terms_accepted_at',
+        'is_under_15',
+        'parental_authorization_verified_at',
     ];
 
     /**
@@ -49,6 +52,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'terms_accepted_at' => 'datetime',
+            'is_under_15' => 'boolean',
+            'parental_authorization_verified_at' => 'datetime',
         ];
     }
 
@@ -159,5 +165,55 @@ class User extends Authenticatable implements MustVerifyEmail
     public function deactivate(): void
     {
         $this->update(['is_active' => false]);
+    }
+
+    /**
+     * Check if the user has accepted the terms and conditions.
+     *
+     * @return bool
+     */
+    public function hasAcceptedTerms(): bool
+    {
+        return $this->terms_accepted_at !== null;
+    }
+
+    /**
+     * Mark the terms as accepted.
+     *
+     * @return void
+     */
+    public function acceptTerms(): void
+    {
+        $this->update(['terms_accepted_at' => now()]);
+    }
+
+    /**
+     * Check if parental authorization is required.
+     *
+     * @return bool
+     */
+    public function needsParentalAuthorization(): bool
+    {
+        return $this->is_under_15 && $this->parental_authorization_verified_at === null;
+    }
+
+    /**
+     * Mark parental authorization as verified.
+     *
+     * @return void
+     */
+    public function verifyParentalAuthorization(): void
+    {
+        $this->update(['parental_authorization_verified_at' => now()]);
+    }
+
+    /**
+     * Check if the user is fully compliant (terms accepted and parental auth if needed).
+     *
+     * @return bool
+     */
+    public function isCompliant(): bool
+    {
+        return $this->hasAcceptedTerms() && !$this->needsParentalAuthorization();
     }
 }
