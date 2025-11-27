@@ -37,7 +37,7 @@
             <p>
                 &copy; {{ date('Y') }} {{ config('app.name') }}
                 @if ($version = \App\Domains\Shared\Helpers\VersionHelper::get())
-                    | Version {{ $version }}
+                    | <a href="/versions" class="hover:text-primary">{{ __('shared::footer.version') }} {{ $version }}</a>
                 @endif
             </p>
         </div>
