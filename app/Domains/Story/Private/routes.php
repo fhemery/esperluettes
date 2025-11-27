@@ -51,7 +51,7 @@ Route::middleware(['web'])->group(function () {
             ->name('chapters.edit');
         // Reading progress & stats endpoints (CSRF-protected)
         // Logged users: toggle read/unread
-        Route::middleware(['auth'])->group(function () {
+        Route::middleware(['auth', 'compliant'])->group(function () {
             Route::post('/stories/{storySlug}/chapters/{chapterSlug}/read', [ReadingProgressController::class, 'markRead'])
                 ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
                 ->name('chapters.read.mark');
@@ -96,7 +96,7 @@ Route::middleware(['web'])->group(function () {
 
         // Reading progress & stats endpoints (CSRF-protected)
         // Logged users: toggle read/unread
-        Route::middleware(['auth'])->group(function () {
+        Route::middleware(['auth', 'compliant'])->group(function () {
             Route::post('/stories/{storySlug}/chapters/{chapterSlug}/read', [ReadingProgressController::class, 'markRead'])
                 ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
                 ->name('chapters.read.mark');

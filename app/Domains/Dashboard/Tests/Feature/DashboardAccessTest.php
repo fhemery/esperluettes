@@ -17,7 +17,7 @@ it('redirects guests to login when accessing dashboard', function () {
 });
 
 it('redirects unverified users to verification notice', function () {
-    $user = alice($this, [], false);
+    $user = alice($this, isVerified: false);
 
     $this->actingAs($user);
 

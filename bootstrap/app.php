@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\Public\Middleware\CheckRole;
+use App\Domains\Auth\Public\Middleware\EnsureUserCompliance;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => CheckRole::class,
+            'compliant' => EnsureUserCompliance::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

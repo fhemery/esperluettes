@@ -37,6 +37,8 @@ class RegisteredUserController extends Controller
             'name' => $data['name'] ?? null,
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'is_under_15' => $data['is_under_15'] ?? false,
+            'terms_accepted_at' => now(), // Terms are accepted if validation passes (checkbox checked)
         ]);
 
         // Mark activation code as used if provided
@@ -52,6 +54,11 @@ class RegisteredUserController extends Controller
         app(EventBus::class)->emitSync(new UserRegistered(userId: $user->id, displayName: $data['name'] ?? null));
 
         Auth::login($user);
+
+        // Redirect underage users to parental authorization if needed
+        if ($user->needsParentalAuthorization()) {
+            return redirect(route('compliance.parental.show', absolute: false));
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

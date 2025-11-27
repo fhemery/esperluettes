@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Domains\Comment\Private\Controllers\CommentController;
 use App\Domains\Comment\Private\Controllers\CommentModerationController;
 
-Route::middleware(['web', 'auth'])
+Route::middleware(['web', 'auth', 'compliant'])
     ->prefix('comments')
     ->name('comments.')
     ->group(function () {

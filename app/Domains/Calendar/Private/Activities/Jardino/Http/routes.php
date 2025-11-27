@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Domains\Calendar\Private\Activities\Jardino\Http\Controllers\JardinoDashboardController;
 use App\Domains\Calendar\Private\Activities\Jardino\Http\Controllers\JardinoFlowerController;
 
-Route::middleware(['web', 'auth', 'verified'])
+Route::middleware(['web', 'auth', 'verified', 'compliant'])
     ->prefix('calendar/activities/{activity}')
     ->group(function () {
         Route::post('/jardino/goal', [JardinoDashboardController::class, 'createGoal'])

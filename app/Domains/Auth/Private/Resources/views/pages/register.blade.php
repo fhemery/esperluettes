@@ -59,6 +59,36 @@
         </div>
         @endif
 
+        <!-- Under 15 checkbox -->
+        <div class="mt-4">
+            <label for="is_under_15" class="inline-flex items-center text-on-surface">
+                <input id="is_under_15" 
+                       type="checkbox" 
+                       name="is_under_15" 
+                       value="1"
+                       {{ old('is_under_15') ? 'checked' : '' }}
+                       class="rounded border-accent/90 text-on-surface/90 shadow-sm focus:ring-accent">
+                <span class="ms-2 text-sm">J'ai moins de 15 ans</span>
+            </label>
+            <x-input-error :messages="$errors->get('is_under_15')" class="mt-2 error-on-surface" />
+        </div>
+
+        <!-- Terms acceptance checkbox -->
+        <div class="mt-4">
+            <label for="accept_terms" class="inline-flex items-center text-on-surface">
+                <input id="accept_terms" 
+                       type="checkbox" 
+                       name="accept_terms" 
+                       value="1"
+                       required
+                       class="rounded border-accent/90 text-on-surface/90 shadow-sm focus:ring-accent">
+                <span class="ms-2 text-sm">
+                   {!! __('auth::shared.accept_terms.label') !!}
+                </span>
+            </label>
+            <x-input-error :messages="$errors->get('accept_terms')" class="mt-2 error-on-surface" />
+        </div>
+
         <div class="flex items-center justify-end mt-4 gap-1">
             <a class="text-on-surface underline text-sm hover:text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('auth::register.links.already_registered') }}

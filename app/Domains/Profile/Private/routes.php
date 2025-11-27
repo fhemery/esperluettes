@@ -33,7 +33,7 @@ Route::middleware('web')->prefix('profile')->group(function () {
     });
    
     // Auth protected small lookup endpoints for UI components
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'compliant'])->group(function () {
         Route::get('/lookup', [ProfileLookupController::class, 'search'])
             ->middleware(['throttle:60,1'])
             ->name('profiles.lookup');

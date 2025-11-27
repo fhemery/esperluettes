@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Domains\Auth\Public\Api\Roles;
 
 // ReadList routes - auth required
-Route::middleware(['web', 'auth', 'role:' . Roles::USER_CONFIRMED . ',' . Roles::USER ])->group(function () {
+Route::middleware(['web', 'auth', 'compliant', 'role:' . Roles::USER_CONFIRMED . ',' . Roles::USER ])->group(function () {
     Route::get('/readlist', [ReadListController::class, 'index'])
         ->name('readlist.index');
     Route::post('/readlist/{storyId}', [ReadListController::class, 'add'])

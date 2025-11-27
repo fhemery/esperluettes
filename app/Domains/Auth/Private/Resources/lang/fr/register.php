@@ -49,5 +49,12 @@ return [
             'string' => "Le code d'activation doit être une chaîne de caractères.",
             'invalid' => "Le code d'activation est invalide, expiré ou déjà utilisé.",
         ],
+        'under_15' => [
+            'label' => 'J\'ai moins de 15 ans',
+        ],
+        'accept_terms' => [
+            'label' => 'J\'accepte les <a href="/mentions-legales-et-cgu" target="_blank">conditions d\'utilisation</a> et le <a href="/reglement" target="_blank">règlement</a>',
+            'required' => 'Vous devez accepter les conditions d\'utilisation.',
+        ]
     ],
 ];

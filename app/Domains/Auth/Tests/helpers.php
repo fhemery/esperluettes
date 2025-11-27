@@ -91,7 +91,8 @@ function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVer
         'email' => 'john@example.com',
         'password' => 'secret-password',
         'password_confirmation' => 'secret-password',
-        'is_active'=>true
+        'is_active'=>true,
+        'accept_terms'=>true
     ], $overrides);
 
     if (Auth::check()) {
