@@ -10,6 +10,7 @@ describe('CsrfTokenManagementTest', function () {
 
     describe('when not logged', function() {
         it('should return an error', function () {
+            Auth::logout();
             $response = $this->getJson('/auth/csrf-token');
             $response->assertStatus(401);
         });

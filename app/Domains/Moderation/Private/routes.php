@@ -5,9 +5,9 @@ use App\Domains\Moderation\Private\Controllers\ModerationAdminController;
 use App\Domains\Moderation\Private\Controllers\ModerationReportController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('web')->group(function () {
+Route::middleware(['web', 'auth', 'compliant'])->group(function () {
     // Moderation routes - require authentication and verified email
-    Route::middleware(['auth', 'role:' . Roles::USER . ',' . Roles::USER_CONFIRMED])->prefix('moderation')->name('moderation.')->group(function () {
+    Route::middleware(['role:' . Roles::USER . ',' . Roles::USER_CONFIRMED])->prefix('moderation')->name('moderation.')->group(function () {
         // Get report form with reasons for a specific topic (AJAX, returns HTML)
         Route::get('report-form/{topicKey}/{entityId}', [ModerationReportController::class, 'form'])
             ->name('report.form');
@@ -17,7 +17,7 @@ Route::middleware('web')->group(function () {
             ->name('report.store');
     });
 
-    Route::middleware(['auth', 'role:' . Roles::MODERATOR . ',' . Roles::ADMIN. ','.Roles::TECH_ADMIN])->prefix('admin/moderation')->name('moderation.admin.')->group(function () {
+    Route::middleware(['role:' . Roles::MODERATOR . ',' . Roles::ADMIN. ','.Roles::TECH_ADMIN])->prefix('admin/moderation')->name('moderation.admin.')->group(function () {
         Route::get('user-management', [ModerationAdminController::class, 'userManagementPage'])
             ->name('user-management');
         // Get report form with reasons for a specific topic (AJAX, returns HTML)

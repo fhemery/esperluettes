@@ -21,6 +21,8 @@ class RegisterRequest extends FormRequest
             'name' => ['required', 'string', 'min:2', 'max:255', new UniqueProfileDisplayName(null)],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'is_under_15' => ['boolean'],
+            'accept_terms' => ['required', 'accepted'],
         ];
 
         if (config('app.require_activation_code', false)) {
@@ -64,6 +66,9 @@ class RegisterRequest extends FormRequest
             'password.numbers' => __('auth::register.form.password.numbers'),
             'password.symbols' => __('auth::register.form.password.symbols'),
             'password.uncompromised' => __('auth::register.form.password.uncompromised'),
+
+            'accept_terms.required' => __('auth::shared.accept_terms.required'),
+            'accept_terms.accepted' => __('auth::shared.accept_terms.required'),
 
             'activation_code.required' => __('auth::register.form.activation_code.required'),
             'activation_code.string' => __('auth::register.form.activation_code.string'),
