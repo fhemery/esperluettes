@@ -9,7 +9,7 @@ class VersionHelper
     public static function get(): ?string
     {
         return Cache::remember('app_version', 3600, function () {
-            $path = base_path('versions.json');
+            $path = base_path('version.json');
             if (! file_exists($path)) {
                 return null;
             }
