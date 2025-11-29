@@ -34,7 +34,12 @@
         </div>
 
         <div class="w-full flex items-center justify-center text-xs text-fg/70 mt-4">
-            <p>&copy; {{ date('Y') }} {{ config('app.name') }}</p>
+            <p>
+                &copy; {{ date('Y') }} {{ config('app.name') }}
+                @if ($version = \App\Domains\Shared\Helpers\VersionHelper::get())
+                    | <a href="/versions" class="hover:text-primary">{{ __('shared::footer.version') }} {{ $version }}</a>
+                @endif
+            </p>
         </div>
     </div>
 </footer>

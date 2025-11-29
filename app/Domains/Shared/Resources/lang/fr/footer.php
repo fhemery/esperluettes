@@ -38,4 +38,6 @@ return [
         'label' => 'L\'association',
         'url' => '/lassociation'
     ],
+
+    'version' => 'Version',
 ];
