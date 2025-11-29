@@ -26,15 +26,15 @@
                     <x-nav-link :href="route('news.index')" :active="request()->routeIs('news.index')">
                         {{ __('shared::navigation.news') }}
                     </x-nav-link>
-                    @if (Auth::user())
+                    @if (Auth::user()->hasVerifiedEmail() && Auth::user()->isCompliant())
                     <x-nav-link :href="route('readlist.index')" :active="request()->routeIs('readlist.*')">
                         {{ __('shared::navigation.readlist') }}
                     </x-nav-link>
-                    @endif
-                    @if (Auth::user() && Auth::user()->isConfirmed())
-                    <x-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
-                        {{ __('shared::navigation.my-stories') }}
-                    </x-nav-link>
+                        @if (Auth::user()->hasRole(['user-confirmed']))
+                        <x-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
+                            {{ __('shared::navigation.my-stories') }}
+                        </x-nav-link>
+                        @endif
                     @endif
                     @if (Auth::user() && Auth::user()->hasRole(['admin','tech-admin','moderator']))
                     <x-nav-link :href="route('administration.dashboard')"
@@ -94,15 +94,15 @@
                 <x-responsive-nav-link :href="route('stories.index')" :active="request()->routeIs('stories.index')">
                     {{ __('shared::navigation.stories') }}
                 </x-responsive-nav-link>
-                @if (Auth::user())
+                @if (Auth::user()->hasVerifiedEmail() && Auth::user()->isCompliant())
                 <x-responsive-nav-link :href="route('readlist.index')" :active="request()->routeIs('readlist.*')">
                     {{ __('shared::navigation.readlist') }}
                 </x-responsive-nav-link>
-                @endif
-                @if (Auth::user() && Auth::user()->isConfirmed())
-                <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
-                    {{ __('shared::navigation.my-stories') }}
-                </x-responsive-nav-link>
+                    @if (Auth::user()->hasRole(['user-confirmed']))
+                    <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
+                        {{ __('shared::navigation.my-stories') }}
+                    </x-responsive-nav-link>
+                    @endif
                 @endif
                 @if (Auth::user() && Auth::user()->hasRole(['admin','tech-admin','moderator']))
                 <x-responsive-nav-link :href="route('administration.dashboard')"
@@ -113,7 +113,7 @@
             </div>
 
             <div class="space-y-1 mt-2">
-                @if (Auth::user()->hasVerifiedEmail())
+                @if (Auth::user()->hasVerifiedEmail() && Auth::user()->isCompliant())
                 <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
                     {{ __('shared::navigation.profile') }}
                 </x-responsive-nav-link>
