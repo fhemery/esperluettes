@@ -39,22 +39,10 @@
         <x-shared::input-error :messages="$errors->get('slug')" class="mt-1" />
     </div>
 
-    <!-- Order -->
-    <div>
-        <x-shared::input-label for="order" :required="true">
-            {{ __('story_ref::admin.audiences.form.order') }}
-        </x-shared::input-label>
-        <x-shared::text-input
-            type="number"
-            id="order"
-            name="order"
-            class="mt-1 block w-32 rounded-md"
-            :value="old('order', $audience?->order ?? $nextOrder ?? 0)"
-            required
-            min="0"
-        />
-        <x-shared::input-error :messages="$errors->get('order')" class="mt-1" />
-    </div>
+    <!-- Order (hidden - managed via reorderable table) -->
+    @if(!$isEdit)
+        <input type="hidden" name="order" value="{{ $nextOrder ?? 0 }}" />
+    @endif
 
     <!-- Threshold Age -->
     <div>

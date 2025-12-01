@@ -1,15 +1,38 @@
 <x-admin::layout>
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-6" x-data="{ reordering: false }" @reorder-cancel.window="reordering = false">
         <div class="flex justify-between items-center">
             <x-shared::title>{{ __('story_ref::admin.audiences.title') }}</x-shared::title>
-            <a href="{{ route('story_ref.admin.audiences.create') }}">
-                <x-shared::button color="primary" icon="add">
-                    {{ __('story_ref::admin.audiences.create_button') }}
-                </x-shared::button>
-            </a>
+            <div class="flex items-center gap-2">
+                @if(count($audiences) > 1)
+                    <x-shared::button 
+                        color="neutral" 
+                        :outline="true" 
+                        x-show="!reordering"
+                        x-on:click="reordering = true"
+                    >
+                        <span class="material-symbols-outlined text-[18px] leading-none">swap_vert</span>
+                        {{ __('administration::reorder.button') }}
+                    </x-shared::button>
+                @endif
+                <a href="{{ route('story_ref.admin.audiences.create') }}">
+                    <x-shared::button color="primary" icon="add">
+                        {{ __('story_ref::admin.audiences.create_button') }}
+                    </x-shared::button>
+                </a>
+            </div>
         </div>
 
-        <div class="surface-bg p-4 overflow-x-auto">
+        <!-- Reorderable list (shown when reordering) -->
+        <div x-show="reordering" x-cloak>
+            <x-administration::reorderable-table 
+                :items="$audiences" 
+                :reorderUrl="route('story_ref.admin.audiences.reorder')"
+                eventName="reorder"
+            />
+        </div>
+
+        <!-- Full details table (hidden when reordering) -->
+        <div x-show="!reordering" class="surface-read text-on-surface p-4 overflow-x-auto">
             <table class="w-full text-sm admin">
                 <thead>
                     <tr class="border-b border-border text-left">

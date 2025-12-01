@@ -226,6 +226,62 @@ describe('Audience Admin Controller', function () {
         });
     });
 
+    describe('reorder', function () {
+        it('reorders audiences via PUT request', function () {
+            $user = admin($this);
+            $audience1 = StoryRefAudience::create([
+                'name' => 'First',
+                'slug' => 'first',
+                'order' => 1,
+                'is_active' => true,
+                'is_mature_audience' => false,
+                'threshold_age' => null,
+            ]);
+            $audience2 = StoryRefAudience::create([
+                'name' => 'Second',
+                'slug' => 'second',
+                'order' => 2,
+                'is_active' => true,
+                'is_mature_audience' => false,
+                'threshold_age' => null,
+            ]);
+            $audience3 = StoryRefAudience::create([
+                'name' => 'Third',
+                'slug' => 'third',
+                'order' => 3,
+                'is_active' => true,
+                'is_mature_audience' => false,
+                'threshold_age' => null,
+            ]);
+
+            // Reorder: Third -> First -> Second
+            $response = $this->actingAs($user)
+                ->putJson(route('story_ref.admin.audiences.reorder'), [
+                    'ordered_ids' => [$audience3->id, $audience1->id, $audience2->id],
+                ]);
+
+            $response->assertOk();
+            $response->assertJson(['success' => true]);
+
+            // Verify new order
+            expect($audience3->fresh()->order)->toBe(1);
+            expect($audience1->fresh()->order)->toBe(2);
+            expect($audience2->fresh()->order)->toBe(3);
+        });
+
+        it('validates ordered_ids array', function () {
+            $user = admin($this);
+
+            $response = $this->actingAs($user)
+                ->putJson(route('story_ref.admin.audiences.reorder'), [
+                    'ordered_ids' => 'not-an-array',
+                ]);
+
+            $response->assertUnprocessable();
+            $response->assertJsonValidationErrors('ordered_ids');
+        });
+    });
+
     describe('destroy', function () {
         it('deletes an unused audience', function () {
             $user = admin($this);

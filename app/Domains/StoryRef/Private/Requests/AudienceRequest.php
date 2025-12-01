@@ -15,6 +15,7 @@ class AudienceRequest extends FormRequest
     public function rules(): array
     {
         $audienceId = $this->route('audience')?->id;
+        $isUpdate = $audienceId !== null;
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -25,7 +26,8 @@ class AudienceRequest extends FormRequest
                 'regex:/^[a-z0-9\-]+$/',
                 Rule::unique('story_ref_audiences', 'slug')->ignore($audienceId),
             ],
-            'order' => ['required', 'integer', 'min:0'],
+            // Order is only required on create; on update it's managed via reorder
+            'order' => $isUpdate ? ['sometimes', 'integer', 'min:0'] : ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
             'is_mature_audience' => ['boolean'],
             'threshold_age' => ['nullable', 'integer', 'min:1', 'max:99'],
