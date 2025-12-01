@@ -2,11 +2,14 @@
 
 namespace App\Domains\StoryRef\Public\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\StoryRef\Public\Events\StoryRefAdded;
-use App\Domains\StoryRef\Public\Events\StoryRefUpdated;
 use App\Domains\StoryRef\Public\Events\StoryRefRemoved;
+use App\Domains\StoryRef\Public\Events\StoryRefUpdated;
+use Illuminate\Support\ServiceProvider;
 
 class StoryServiceRefProvider extends ServiceProvider
 {
@@ -19,6 +22,13 @@ class StoryServiceRefProvider extends ServiceProvider
     {
         // Load migrations from the StoryRef domain root
         $this->loadMigrationsFrom(__DIR__ . '/../../Database/Migrations');
+
+        // Load routes
+        $this->loadRoutesFrom(__DIR__ . '/../../Private/routes.php');
+
+        // Load views
+        $this->loadViewsFrom(__DIR__ . '/../../Private/Resources/views', 'story_ref');
+
         // PHP translations (namespaced)
         $this->loadTranslationsFrom(__DIR__ . '/../../Private/Resources/lang', 'story_ref');
 
@@ -27,5 +37,23 @@ class StoryServiceRefProvider extends ServiceProvider
         $eventBus->registerEvent(StoryRefAdded::name(), StoryRefAdded::class);
         $eventBus->registerEvent(StoryRefUpdated::name(), StoryRefUpdated::class);
         $eventBus->registerEvent(StoryRefRemoved::name(), StoryRefRemoved::class);
+
+        $this->registerAdminNavigation();
+    }
+
+    protected function registerAdminNavigation(): void
+    {
+        $registry = app(AdminNavigationRegistry::class);
+
+        // Register audience admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.audiences',
+            'story',
+            __('story_ref::admin.audiences.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.audiences.index'),
+            'group',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            1,
+        );
     }
 }

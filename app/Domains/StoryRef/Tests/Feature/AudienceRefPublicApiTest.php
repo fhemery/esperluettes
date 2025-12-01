@@ -105,6 +105,8 @@ describe('StoryRefPublicApi audiences', function () {
                 name: 'Young Adult',
                 is_active: true,
                 order: 1,
+                threshold_age: null,
+                is_mature_audience: false,
             );
 
             $created = $api->createAudience($write);
@@ -135,6 +137,8 @@ describe('StoryRefPublicApi audiences', function () {
                 name: 'All Audiences',
                 is_active: true,
                 order: 1,
+                threshold_age: null,
+                is_mature_audience: false,
             );
 
             $updated = $api->updateAudience($audienceDto->id, $write);
@@ -183,6 +187,8 @@ describe('StoryRefPublicApi audiences', function () {
                 name: 'Young Adult',
                 is_active: true,
                 order: 1,
+                threshold_age: null,
+                is_mature_audience: false,
             );
 
             expect(fn () => $api->createAudience($write))->toThrow(AuthorizationException::class);

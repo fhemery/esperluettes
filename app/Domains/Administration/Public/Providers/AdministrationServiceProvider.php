@@ -219,15 +219,7 @@ class AdministrationServiceProvider extends ServiceProvider
         );
 
         // Story references
-        $registry->registerPage(
-            'story.audiences',
-            'story',
-            __('admin::story.audience.navigation_label'),
-            AdminRegistryTarget::url('/admin/story/audiences'),
-            'group',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            1,
-        );
+        // NOTE: story.audiences is now registered in StoryServiceRefProvider (custom admin page)
 
         $registry->registerPage(
             'story.copyrights',

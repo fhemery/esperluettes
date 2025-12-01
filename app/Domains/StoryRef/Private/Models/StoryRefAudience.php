@@ -13,11 +13,13 @@ class StoryRefAudience extends Model
     use HasSlugAndOrder;
 
     protected $fillable = [
-        'name', 'slug', 'order', 'is_active',
+        'name', 'slug', 'order', 'is_active', 'threshold_age', 'is_mature_audience',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'order' => 'integer',
+        'threshold_age' => 'integer',
+        'is_mature_audience' => 'boolean',
     ];
 }
