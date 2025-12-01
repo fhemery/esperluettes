@@ -380,6 +380,8 @@ p.ql-align-center { text-indent: 0; }
 }
 
 table.admin {
+  background-color: rgb(var(--color-read-bg));
+ 
   th {
     padding: .25rem .5rem;
     text-align: left;
@@ -395,7 +397,7 @@ table.admin {
   }
 
   tr {
-    background-color: rgb(var(--color-read-bg));
+    
     border-bottom: 1px solid rgb(var(--color-fg));
   }
 }

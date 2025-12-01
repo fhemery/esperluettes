@@ -102,6 +102,20 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
 
+                NavigationItem::make('Actualités')
+                    ->url('/admin/news')
+                    ->icon('heroicon-o-newspaper')
+                    ->group('Actualités')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+
+                NavigationItem::make('Actualités épinglées')
+                    ->url('/admin/news/pinned')
+                    ->icon('heroicon-o-bars-3')
+                    ->group('Actualités')
+                    ->sort(2)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+
                 // Here, we can use neither translations nor route primitive
                 // because none of them are already loaded.
                 NavigationItem::make('Maintenance')

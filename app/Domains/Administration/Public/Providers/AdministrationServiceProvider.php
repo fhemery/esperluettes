@@ -73,7 +73,6 @@ class AdministrationServiceProvider extends ServiceProvider
         $registry->registerGroup('calendar', __('admin::calendar.navigation.group'), 20);
         $registry->registerGroup('config', __('admin::config.group'), 30);
         $registry->registerGroup('moderation', __('admin::moderation.navigation_group'), 40);
-        $registry->registerGroup('news', __('admin::news.navigation.group'), 50);
         $registry->registerGroup('static', __('admin::static.navigation.group'), 60);
         $registry->registerGroup('story', __('admin::story.group'), 70);
         $registry->registerGroup('auth', __('admin::auth.user_management'), 80);
@@ -81,7 +80,6 @@ class AdministrationServiceProvider extends ServiceProvider
         $registry->registerGroup('events', __('admin::domain_events.navigation_group'), 100);
 
         // Auth resources
-
         $registry->registerPage(
             'auth.users',
             'auth',
@@ -184,27 +182,6 @@ class AdministrationServiceProvider extends ServiceProvider
             AdminRegistryTarget::url('/admin/moderation/moderation-reports'),
             'report',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
-            2,
-        );
-
-        // News
-        $registry->registerPage(
-            'news.news',
-            'news',
-            __('admin::news.navigation.news'),
-            AdminRegistryTarget::url('/admin/news/news'),
-            'campaign',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            1,
-        );
-
-        $registry->registerPage(
-            'news.pinned',
-            'news',
-            __('admin::news.navigation.pinned_order'),
-            AdminRegistryTarget::url('/admin/news/pinned-news'),
-            'push_pin',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
             2,
         );
 

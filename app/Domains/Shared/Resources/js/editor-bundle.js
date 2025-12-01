@@ -26,7 +26,7 @@ function prepareHtmlForQuill(html) {
   });
 }
 
-export function initQuillEditor(id) {
+export function initQuillEditor(id, options = {}) {
   const run = () => {
     const container = document.getElementById(id);
     if (!container || typeof window.Quill === 'undefined') return;
@@ -36,17 +36,38 @@ export function initQuillEditor(id) {
     let placeholder = container ? container.dataset.placeholder : '';
     // Fix: The single quote character is encoded as &#039; in HTML attributes
     placeholder = placeholder.replace(/&#039;/g, "'");
+
+    // Read optional features from data attributes or options
+    const withHeadings = options.withHeadings ?? container.dataset.withHeadings === 'true';
+    const withLinks = options.withLinks ?? container.dataset.withLinks === 'true';
+
+    // Build allowed formats dynamically
     const allowedFormats = ['bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'align'];
+    if (withHeadings) {
+      allowedFormats.push('header');
+    }
+    if (withLinks) {
+      allowedFormats.push('link');
+    }
+
+    // Build toolbar dynamically
+    const toolbar = [];
+    toolbar.push(['bold', 'italic', 'underline', 'strike']);
+    if (withHeadings) {
+      toolbar.push([{ header: [2, 3, false] }]);
+    }
+    toolbar.push(['blockquote']);
+    toolbar.push([{ align: [] }]);
+    toolbar.push([{ list: 'ordered' }, { list: 'bullet' }]);
+    if (withLinks) {
+      toolbar.push(['link']);
+    }
+    toolbar.push(['clean']);
+
     const editor = new window.Quill(container, {
       theme: 'snow',
       modules: {
-        toolbar: [
-          ['bold', 'italic', 'underline', 'strike'],
-          ['blockquote'],
-          [{ align: [] }],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          ['clean'],
-        ],
+        toolbar,
         'emoji-toolbar': true,
         'emoji-textarea': true,
         // No image module registered, so user cannot insert images via toolbar
