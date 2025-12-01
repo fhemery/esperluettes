@@ -21,7 +21,7 @@
                         accept=".pdf,.jpg,.jpeg,.png" required
                         class="mt-1 block w-full text-sm text-on-surface
                                   file:mr-4 file:py-2 file:px-4
-                                  file:rounded-md file:border-0
+                                  file:border-0
                                   file:text-sm file:font-semibold
                                   file:bg-accent file:text-white
                                   hover:file:bg-accent/90
@@ -29,19 +29,21 @@
                     <x-input-error :messages="$errors->get('parental_authorization')" class="mt-2 error-on-surface" />
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <form method="POST" action="{{ route('logout') }}" class="inline">
-                        @csrf
-                        <button type="submit" class="text-on-surface underline text-sm hover:text-on-surface/90">
-                            {{ __('auth::compliance.logout_button_text') }}
-                        </button>
-                    </form>
-
+                <div class="flex justify-center">
                     <x-shared::button color="accent" type="submit">
                         {{ __('auth::compliance.upload_button_text') }}
                     </x-shared::button>
                 </div>
             </form>
+
+            <div class="flex justify-center">
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                    @csrf
+                    <button type="submit" class="text-on-surface underline text-sm hover:text-on-surface/90">
+                        {{ __('auth::compliance.logout_button_text') }}
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </x-app-layout>
