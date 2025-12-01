@@ -12,6 +12,8 @@ class AudienceDto
         public readonly string $name,
         public readonly bool $is_active,
         public readonly ?int $order,
+        public readonly ?int $threshold_age,
+        public readonly bool $is_mature_audience,
     ) {}
 
     public static function fromModel(StoryRefAudience $model): self
@@ -22,11 +24,13 @@ class AudienceDto
             name: (string) $model->name,
             is_active: (bool) $model->is_active,
             order: $model->order !== null ? (int) $model->order : null,
+            threshold_age: $model->threshold_age !== null ? (int) $model->threshold_age : null,
+            is_mature_audience: (bool) $model->is_mature_audience,
         );
     }
 
     /**
-     * @return array{id:int,slug:string,name:string,is_active:bool,order:?int}
+     * @return array{id:int,slug:string,name:string,is_active:bool,order:?int,threshold_age:?int,is_mature_audience:bool}
      */
     public function toArray(): array
     {
@@ -36,6 +40,8 @@ class AudienceDto
             'name' => $this->name,
             'is_active' => $this->is_active,
             'order' => $this->order,
+            'threshold_age' => $this->threshold_age,
+            'is_mature_audience' => $this->is_mature_audience,
         ];
     }
 }

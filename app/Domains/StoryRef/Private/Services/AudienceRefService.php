@@ -62,7 +62,7 @@ class AudienceRefService
     }
 
     /**
-     * @param array{name?:string,slug?:string,is_active?:bool,order?:int|null} $data
+     * @param array{name?:string,slug?:string,is_active?:bool,order?:int|null,threshold_age?:int|null,is_mature_audience?:bool} $data
      */
     public function create(array $data): StoryRefAudience
     {
@@ -83,7 +83,7 @@ class AudienceRefService
     }
 
     /**
-     * @param array{name?:string,slug?:string,is_active?:bool,order?:int|null} $data
+     * @param array{name?:string,slug?:string,is_active?:bool,order?:int|null,threshold_age?:int|null,is_mature_audience?:bool} $data
      */
     public function update(int $id, array $data): ?StoryRefAudience
     {
