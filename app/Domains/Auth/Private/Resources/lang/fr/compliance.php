@@ -23,5 +23,6 @@ return [
         'min' => 'Le fichier ne peut pas être vide.',
         'max' => 'Le fichier ne doit pas dépasser 5 Mo.',
         'uploaded' => 'Le téléversement du fichier a échoué. Veuillez réessayer.',
+        'upload_success' => 'Le téléversement du fichier a été effectué avec succès.',
     ],
 ];

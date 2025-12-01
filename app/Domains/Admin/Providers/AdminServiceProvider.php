@@ -95,6 +95,13 @@ class AdminServiceProvider extends PanelProvider
                 CheckRole::class . ':' . Roles::ADMIN . ',' . Roles::TECH_ADMIN . ',' . Roles::MODERATOR,
             ])
             ->navigationItems([
+                NavigationItem::make('Utilisateurs')
+                    ->url('/admin/auth/users')
+                    ->icon('heroicon-o-users')
+                    ->group('Gestion des utilisateurs')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+
                 // Here, we can use neither translations nor route primitive
                 // because none of them are already loaded.
                 NavigationItem::make('Maintenance')

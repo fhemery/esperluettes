@@ -478,6 +478,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - AdministrationPublic
 
     CalendarPrivate:
       - Shared

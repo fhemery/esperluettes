@@ -109,7 +109,8 @@ describe('ComplianceController', function () {
                 ->not->toBeNull();
             
             // Verify file was stored
-            Storage::disk('private')->assertExists('parental_authorizations/' . $file->hashName());
+            $fileName = 'authorization-' . $this->user->id . '.pdf';
+            Storage::disk('private')->assertExists('parental_authorizations/' . $fileName);
         });
 
         it('accepts upload when PDF file is exactly 5MB', function () {

@@ -1,7 +1,8 @@
 <?php
 
 use App\Domains\Auth\Private\Controllers\AuthenticatedSessionController;
-use App\Domains\Auth\Private\Controllers\AuthAdminUserController;
+use App\Domains\Auth\Private\Controllers\Admin\AuthAdminUserController;
+use App\Domains\Auth\Private\Controllers\Admin\UserController;
 use App\Domains\Auth\Private\Controllers\ComplianceController;
 use App\Domains\Auth\Private\Controllers\ConfirmablePasswordController;
 use App\Domains\Auth\Private\Controllers\EmailVerificationNotificationController;
@@ -107,11 +108,27 @@ Route::middleware('web')->group(function () {
         // Admin user activation endpoints (web, not API)
         // Authorization (roles) is enforced inside AuthPublicApi methods.
         Route::middleware('role:'.Roles::ADMIN.', '.Roles::MODERATOR.', '.Roles::TECH_ADMIN)->prefix('auth/admin')->name('auth.admin.')->group(function () {
-            Route::post('users/{user}/deactivate', [AuthAdminUserController::class, 'deactivate'])
+            Route::post('users/{user}/deactivate', [UserController::class, 'deactivate'])
                 ->name('users.deactivate');
 
-            Route::post('users/{user}/reactivate', [AuthAdminUserController::class, 'reactivate'])
+            Route::post('users/{user}/reactivate', [UserController::class, 'reactivate'])
                 ->name('users.reactivate');
         });
+
+        // Admin user management (custom admin system - replaces Filament UserResource)
+        // Use /administration prefix to avoid conflict with Filament's /admin routes
+        Route::middleware('role:'.Roles::ADMIN.','.Roles::TECH_ADMIN)
+            ->prefix('admin/auth/users')
+            ->name('auth.admin.users.')
+            ->group(function () {
+                Route::get('/', [UserController::class, 'index'])->name('index');
+                Route::get('/export', [UserController::class, 'export'])->name('export');
+                Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+                Route::put('/{user}', [UserController::class, 'update'])->name('update');
+                Route::post('/{user}/promote', [UserController::class, 'promote'])->name('promote');
+                Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+                Route::get('/{user}/download-authorization', [UserController::class, 'downloadAuthorization'])->name('download-authorization');
+                Route::post('/{user}/clear-authorization', [UserController::class, 'clearAuthorization'])->name('clear-authorization');
+            });
     });
 });

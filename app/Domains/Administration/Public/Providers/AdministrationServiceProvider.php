@@ -81,11 +81,12 @@ class AdministrationServiceProvider extends ServiceProvider
         $registry->registerGroup('events', __('admin::domain_events.navigation_group'), 100);
 
         // Auth resources
+
         $registry->registerPage(
             'auth.users',
             'auth',
             __('admin::auth.users.navigation_label'),
-            AdminRegistryTarget::url('/admin/auth/users'),
+            AdminRegistryTarget::route('auth.admin.users.index'),
             'groups',
             [Roles::ADMIN, Roles::TECH_ADMIN],
             1,

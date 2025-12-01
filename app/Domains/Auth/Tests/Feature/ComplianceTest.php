@@ -91,7 +91,8 @@ describe('Compliance at login', function () {
                 ->assertRedirect(route('dashboard'));
 
             expect($user->fresh()->parental_authorization_verified_at)->not->toBeNull();
-            Storage::disk('private')->assertExists('parental_authorizations/' . $file->hashName());
+            $fileName = 'authorization-' . $user->id . '.pdf';
+            Storage::disk('private')->assertExists('parental_authorizations/' . $fileName);
         });
 
         test('parental authorization upload validates file type', function () {

@@ -3,6 +3,7 @@
 namespace App\Domains\Auth\Private\Controllers;
 
 use App\Domains\Auth\Private\Requests\ParentalAuthorizationRequest;
+use App\Domains\Auth\Private\Services\ComplianceService;
 use App\Domains\Shared\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,6 +12,9 @@ use Illuminate\View\View;
 
 class ComplianceController extends Controller
 {
+    public function __construct(
+        private readonly ComplianceService $complianceService,
+    ) {}
     /**
      * Show the terms and conditions acceptance page.
      */
@@ -70,7 +74,6 @@ class ComplianceController extends Controller
      */
     public function uploadParentalAuthorization(ParentalAuthorizationRequest $request): RedirectResponse
     {
-
         /** @var \App\Domains\Auth\Private\Models\User $user */
         $user = Auth::user();
 
@@ -78,22 +81,17 @@ class ComplianceController extends Controller
             return redirect()->route('dashboard');
         }
 
-        // Store the file
-        $path = $request->file('parental_authorization')->store('parental_authorizations', 'private');
+        // Store the file using the compliance service
+        $this->complianceService->storeParentalAuthorization($user->id, $request->file('parental_authorization'));
 
-        // TODO: Store the file path in a separate table or user metadata
-        // For now, we just mark it as verified (you may want to add admin verification)
-        
-        // Only mark as verified for underage users
-        if ($user->is_under_15) {
-            $user->verifyParentalAuthorization();
-        }
+        // Mark as verified for underage users
+        $this->complianceService->verifyParentalAuthorization($user);
 
         // Clear the compliance check cache
         session()->forget('user_compliance_checked_' . $user->id);
 
         // Redirect to intended URL or dashboard
         return redirect()->intended(route('dashboard'))
-            ->with('success', 'Parental authorization uploaded successfully. Your account is now fully active.');
+            ->with('success', __('auth::compliance.parental_authorization.upload_success'));
     }
 }
