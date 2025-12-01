@@ -10,8 +10,9 @@ Route::middleware(['web', 'auth', 'compliant'])->group(function () {
         ->prefix('admin/story-ref')
         ->name('story_ref.admin.')
         ->group(function () {
-            // Audiences - reorder must come before resource to avoid conflict with {audience} parameter
+            // Audiences - custom routes must come before resource to avoid conflict with {audience} parameter
             Route::put('audiences/reorder', [AudienceController::class, 'reorder'])->name('audiences.reorder');
+            Route::get('audiences/export', [AudienceController::class, 'export'])->name('audiences.export');
             Route::resource('audiences', AudienceController::class)->except(['show']);
         });
 });

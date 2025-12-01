@@ -3,6 +3,12 @@
         <div class="flex justify-between items-center">
             <x-shared::title>{{ __('story_ref::admin.audiences.title') }}</x-shared::title>
             <div class="flex items-center gap-2">
+                <a href="{{ route('story_ref.admin.audiences.export') }}" x-show="!reordering">
+                    <x-shared::button color="neutral" :outline="true">
+                        <span class="material-symbols-outlined text-[18px] leading-none">download</span>
+                        {{ __('story_ref::admin.audiences.export_button') }}
+                    </x-shared::button>
+                </a>
                 @if(count($audiences) > 1)
                     <x-shared::button 
                         color="neutral" 

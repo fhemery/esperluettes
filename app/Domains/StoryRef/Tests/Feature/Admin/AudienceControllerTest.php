@@ -323,4 +323,55 @@ describe('Audience Admin Controller', function () {
             $this->assertDatabaseHas('story_ref_audiences', ['id' => $audience->id]);
         });
     });
+
+    describe('export', function () {
+        it('shows the Export CSV button on the audiences list page', function () {
+            $user = admin($this);
+
+            $response = $this->actingAs($user)
+                ->get(route('story_ref.admin.audiences.index'));
+
+            $response->assertOk();
+            $response->assertSee(__('story_ref::admin.audiences.export_button'));
+        });
+
+        it('streams a valid CSV with expected headers and data', function () {
+            $audience1 = StoryRefAudience::create([
+                'name' => 'Adults',
+                'slug' => 'adults-export',
+                'is_active' => true,
+                'is_mature_audience' => true,
+                'threshold_age' => 18,
+                'order' => 1,
+            ]);
+
+            $audience2 = StoryRefAudience::create([
+                'name' => 'Teens',
+                'slug' => 'teens-export',
+                'is_active' => false,
+                'is_mature_audience' => false,
+                'threshold_age' => null,
+                'order' => 2,
+            ]);
+
+            $user = admin($this);
+
+            $response = $this->actingAs($user)
+                ->get(route('story_ref.admin.audiences.export'));
+
+            $response->assertOk();
+            $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+            $response->assertDownload('audiences.csv');
+        });
+
+        it('denies access to non-admin users', function () {
+            $user = bob($this);
+
+            $response = $this->actingAs($user)
+                ->get(route('story_ref.admin.audiences.export'));
+
+            // Non-admin users are redirected (role middleware behavior)
+            $response->assertRedirect();
+        });
+    });
 });

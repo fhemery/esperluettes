@@ -5,12 +5,14 @@ namespace App\Domains\StoryRef\Private\Controllers\Admin;
 use App\Domains\StoryRef\Private\Models\StoryRefAudience;
 use App\Domains\StoryRef\Private\Requests\AudienceRequest;
 use App\Domains\StoryRef\Private\Services\AudienceRefService;
+use App\Domains\Administration\Public\Support\ExportCsv;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AudienceController extends Controller
 {
@@ -102,5 +104,26 @@ class AudienceController extends Controller
         $this->audienceService->clearCache();
 
         return response()->json(['success' => true]);
+    }
+
+    public function export(): StreamedResponse
+    {
+        $columns = [
+            'id' => 'ID',
+            'name' => __('story_ref::admin.audiences.table.name'),
+            'slug' => __('story_ref::admin.audiences.table.slug'),
+            'is_mature_audience' => __('story_ref::admin.audiences.table.mature'),
+            'threshold_age' => __('story_ref::admin.audiences.table.threshold'),
+            'is_active' => __('story_ref::admin.audiences.table.active'),
+            'order' => __('story_ref::admin.audiences.table.order'),
+            'created_at' => __('story_ref::admin.audiences.table.created_at'),
+            'updated_at' => __('story_ref::admin.audiences.table.updated_at'),
+        ];
+
+        return ExportCsv::streamFromQuery(
+            StoryRefAudience::query(),
+            $columns,
+            'audiences.csv'
+        );
     }
 }

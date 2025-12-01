@@ -10,6 +10,7 @@ return [
         'create_button' => 'Nouveau public',
         'edit_button' => 'Modifier',
         'delete_button' => 'Supprimer',
+        'export_button' => 'Export CSV',
 
         'created' => 'Public cible créé avec succès.',
         'updated' => 'Public cible mis à jour avec succès.',
@@ -26,6 +27,8 @@ return [
             'threshold' => 'Âge requis',
             'active' => 'Actif',
             'actions' => 'Actions',
+            'created_at' => 'Créé le',
+            'updated_at' => 'Mis à jour le',
         ],
 
         'mature_yes' => 'Mature',

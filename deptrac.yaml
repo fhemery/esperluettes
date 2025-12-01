@@ -33,6 +33,23 @@ deptrac:
         - type: directory
           value: 'app/Domains/Admin/Tests/'
 
+    # Administration Domain
+    # This is the domain that will replace admin (Filament) on the long run
+    - name: AdministrationPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Administration/Public/'
+
+    - name: AdministrationPrivate
+      collectors:
+        - type: directory
+          value: 'app/Domains/Administration/Private/'
+
+    - name: AdministrationTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Administration/Tests/'
+
     # Auth Domain
     - name: AuthPublic
       collectors:
@@ -313,6 +330,11 @@ deptrac:
     # ###################################################
     # Public APIs - can only depend on Shared and their own domain
     # ###################################################
+    AdministrationPublic:
+      - Shared
+      - AdministrationPrivate
+      - AuthPublic
+
     AuthPublic:
       - Shared
       - AuthPrivate
@@ -363,6 +385,7 @@ deptrac:
       - ModerationPrivate
       - EventsPublic
       - AuthPublic
+      - AdministrationPublic
 
     NewsPublic:
       - AuthPublic
@@ -412,6 +435,7 @@ deptrac:
       - EventsPublic
       - AuthPublic
       - StoryRefPrivate
+      - AdministrationPublic
 
     # ###################################################
     # Private domains - can access Shared + other domain Public APIs + events
@@ -445,6 +469,10 @@ deptrac:
       - FaqPrivate
       - CalendarPublic
       - CalendarPrivate
+
+    AdministrationPrivate:
+      - Shared
+      - AdministrationPublic
 
     AuthPrivate:
       - Shared
@@ -553,10 +581,17 @@ deptrac:
       - Shared
       - EventsPublic
       - StoryRefPublic
+      - AdministrationPublic
 
     # ###################################################
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
     # ###################################################
+    AdministrationTests:
+      - Shared
+      - TestHelpers
+      - AdministrationPrivate
+      - AdministrationPublic
+
     AuthTests:
       - Shared
       - TestHelpers
