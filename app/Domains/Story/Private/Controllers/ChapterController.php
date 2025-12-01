@@ -166,6 +166,18 @@ class ChapterController
             ->withTitle($chapter->title)
             ->withBreadcrumbs($trail);
 
+        // Get audience maturity info for content gate
+        $audienceInfo = null;
+        if ($story->story_ref_audience_id !== null) {
+            $audienceDto = $this->storyRefs->getAudienceById($story->story_ref_audience_id);
+            if ($audienceDto && $audienceDto->is_mature_audience && $audienceDto->threshold_age !== null) {
+                $audienceInfo = [
+                    'is_mature' => true,
+                    'threshold_age' => $audienceDto->threshold_age,
+                ];
+            }
+        }
+
         return view('story::chapters.show', [
             'vm' => $vm,
             'page' => $page,
@@ -175,6 +187,7 @@ class ChapterController
                 Roles::TECH_ADMIN,
             ]),
             'canCreateChapter' => $isAuthor && $this->chapterCreditService->availableForUser($userId) > 0,
+            'audienceInfo' => $audienceInfo,
         ]);
     }
 

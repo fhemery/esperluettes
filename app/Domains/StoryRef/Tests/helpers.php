@@ -42,6 +42,8 @@ function makeRefGenre(string $name, array $overrides = []): GenreDto
 
 /**
  * Create a StoryRef Audience through the underlying service for tests.
+ * 
+ * @param array $overrides Supports: slug, is_active, order, is_mature_audience, threshold_age
  */
 function makeRefAudience(string $name, array $overrides = []): AudienceDto
 {
@@ -58,6 +60,8 @@ function makeRefAudience(string $name, array $overrides = []): AudienceDto
         'name' => $name,
         'is_active' => $overrides['is_active'] ?? true,
         'order' => $overrides['order'] ?? null,
+        'is_mature_audience' => $overrides['is_mature_audience'] ?? false,
+        'threshold_age' => $overrides['threshold_age'] ?? null,
     ]);
 
     return AudienceDto::fromModel($model);

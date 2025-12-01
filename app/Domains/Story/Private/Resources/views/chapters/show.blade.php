@@ -9,10 +9,19 @@
 @endpush
 
 <x-app-layout :display-ribbon="true" :page="$page">
+    {{-- Mature content gate overlay --}}
+    @if(!empty($audienceInfo) && $audienceInfo['is_mature'])
+        <x-story::mature-content-gate 
+            :thresholdAge="$audienceInfo['threshold_age']"
+            :storiesUrl="route('stories.index')"
+        />
+    @endif
+
     <div
         x-data="chapterPage()"
         x-init="init()"
         @resize.window="handleResize()"
+        @if(!empty($audienceInfo) && $audienceInfo['is_mature']) data-mature-content @endif
         class="w-full grid md:grid-cols-[230px_1fr] lg:grid-cols-[230px_1fr_230px] gap-4">
         <aside class="hidden md:block">
             <div id="chapter-nav-host-desktop"></div>

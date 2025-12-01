@@ -307,5 +307,5 @@ story.mature_gate.leave_link
 | Specification | ✅ Complete |
 | Migration | ✅ Complete |
 | Admin UI (US-MCG-004) | ✅ Complete |
-| Frontend Overlay (US-MCG-001/002/003) | ⏳ Pending |
-| Tests | ✅ Admin tests complete |
+| Frontend Overlay (US-MCG-001/002/003) | ✅ Complete |
+| Tests | ✅ All tests complete |
