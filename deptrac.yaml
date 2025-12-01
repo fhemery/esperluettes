@@ -392,6 +392,7 @@ deptrac:
       - Shared
       - NewsPrivate
       - EventsPublic
+      - AdministrationPublic
 
     NotificationPublic:
       - Shared

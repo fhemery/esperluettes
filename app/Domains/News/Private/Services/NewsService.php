@@ -2,14 +2,16 @@
 
 namespace App\Domains\News\Private\Services;
 
-use App\Domains\News\Private\Models\News;
-use App\Domains\Shared\Services\ImageService;
-use Illuminate\Http\UploadedFile;
-use Mews\Purifier\Facades\Purifier;
-use Illuminate\Support\Facades\Cache;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\News\Private\Models\News;
 use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUnpublished;
+use App\Domains\Shared\Services\ImageService;
+use App\Domains\Shared\Support\HtmlLinkUtils;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Mews\Purifier\Facades\Purifier;
 
 class NewsService
 {
@@ -19,7 +21,86 @@ class NewsService
 
     public function sanitizeContent(string $html): string
     {
-        return Purifier::clean($html, 'admin-content');
+        // Purify HTML then add target="_blank" to external links
+        $clean = Purifier::clean($html, 'admin-content');
+        return HtmlLinkUtils::addTargetBlankToExternalLinks($clean) ?? $clean;
+    }
+
+    /**
+     * Create a new news article.
+     */
+    public function create(array $data): News
+    {
+        // Sanitize content
+        $data['content'] = $this->sanitizeContent($data['content'] ?? '');
+
+        // Process header image if uploaded
+        if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
+            $data['header_image_path'] = $this->processHeaderImage($data['header_image']);
+        }
+        unset($data['header_image'], $data['header_image_remove']);
+
+        // Set creator
+        $data['created_by'] = Auth::id();
+
+        // Handle published_at if publishing
+        if (($data['status'] ?? 'draft') === 'published' && empty($data['published_at'])) {
+            $data['published_at'] = now();
+        }
+
+        return News::create($data);
+    }
+
+    /**
+     * Update an existing news article.
+     */
+    public function update(News $news, array $data): News
+    {
+        // Sanitize content
+        $data['content'] = $this->sanitizeContent($data['content'] ?? '');
+
+        // Handle header image removal
+        if (!empty($data['header_image_remove'])) {
+            $this->deleteHeaderImage($news->header_image_path);
+            $data['header_image_path'] = null;
+        }
+
+        // Process new header image if uploaded
+        if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
+            // Delete old image first
+            if ($news->header_image_path) {
+                $this->deleteHeaderImage($news->header_image_path);
+            }
+            $data['header_image_path'] = $this->processHeaderImage($data['header_image']);
+        }
+        unset($data['header_image'], $data['header_image_remove']);
+
+        // Handle published_at if transitioning to published
+        if (($data['status'] ?? 'draft') === 'published' && !$news->published_at) {
+            $data['published_at'] = now();
+        }
+
+        $news->update($data);
+
+        return $news;
+    }
+
+    /**
+     * Delete a news article and its associated resources.
+     */
+    public function delete(News $news): void
+    {
+        // Delete header image if exists
+        if ($news->header_image_path) {
+            $this->deleteHeaderImage($news->header_image_path);
+        }
+
+        // Bust cache if it was pinned
+        if ($news->is_pinned) {
+            $this->bustCarouselCache();
+        }
+
+        $news->delete();
     }
 
     public function processHeaderImage(UploadedFile|string|null $file): ?string

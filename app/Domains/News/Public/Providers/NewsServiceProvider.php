@@ -2,18 +2,21 @@
 
 namespace App\Domains\News\Public\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Blade;
+use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
+use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\News\Private\Listeners\RemoveCreatorOnUserDeleted;
 use App\Domains\News\Private\Models\News;
 use App\Domains\News\Private\Observers\NewsObserver;
-use App\Domains\Events\Public\Api\EventBus;
-use App\Domains\News\Public\Events\NewsPublished;
-use App\Domains\News\Public\Events\NewsUpdated;
 use App\Domains\News\Public\Events\NewsDeleted;
+use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUnpublished;
-use App\Domains\Auth\Public\Events\UserDeleted;
-use App\Domains\News\Private\Listeners\RemoveCreatorOnUserDeleted;
+use App\Domains\News\Public\Events\NewsUpdated;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class NewsServiceProvider extends ServiceProvider
 {
@@ -46,5 +49,36 @@ class NewsServiceProvider extends ServiceProvider
         
         // Subscribe to user deletion to nullify creator id on news
         $eventBus->subscribe(UserDeleted::name(), [RemoveCreatorOnUserDeleted::class, 'handle']);
+
+        $this->registerAdminNavigation();
+    }
+
+    protected function registerAdminNavigation(): void
+    {
+        $registry = app(AdminNavigationRegistry::class);
+
+        $registry->registerGroup('news', __('news::admin.nav.group'), 50);
+
+        // Register News management page
+        $registry->registerPage(
+            'news.management',
+            'news',
+            __('news::admin.nav.news'),
+            AdminRegistryTarget::route('news.admin.index'),
+            'newspaper',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            10,
+        );
+
+        // Register Pinned news (carousel) ordering page
+        $registry->registerPage(
+            'news.pinned',
+            'news',
+            __('news::admin.nav.pinned'),
+            AdminRegistryTarget::route('news.admin.pinned.index'),
+            'push_pin',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            11,
+        );
     }
 }
