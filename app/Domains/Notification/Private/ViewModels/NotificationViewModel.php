@@ -12,10 +12,11 @@ class NotificationViewModel
         public string $createdAt,
         public ?string $readAt = null,
         public ?string $avatarUrl = null,
+        public bool $isSystem = false,
     ) {}
 
     /**
-     * @param array{id:int,content_key:string,content_data:array|mixed,rendered_content:string,created_at:string,read_at:?string,avatar_url?:?string} $row
+     * @param array{id:int,content_key:string,content_data:array|mixed,rendered_content:string,created_at:string,read_at:?string,avatar_url?:?string,is_system?:bool} $row
      */
     public static function fromRow(array $row): self
     {
@@ -27,6 +28,7 @@ class NotificationViewModel
             createdAt: (string) $row['created_at'],
             readAt: $row['read_at'] ?? null,
             avatarUrl: $row['avatar_url'] ?? null,
+            isSystem: (bool) ($row['is_system'] ?? false),
         );
     }
 }

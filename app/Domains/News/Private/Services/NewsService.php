@@ -6,6 +6,8 @@ use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\News\Private\Models\News;
 use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUnpublished;
+use App\Domains\News\Public\Notifications\NewsPublishedNotification;
+use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Shared\Services\ImageService;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Http\UploadedFile;
@@ -17,6 +19,7 @@ class NewsService
 {
     public function __construct(
         private readonly EventBus $eventBus,
+        private readonly NotificationPublicApi $notificationApi,
     ) {}
 
     public function sanitizeContent(string $html): string
@@ -125,6 +128,7 @@ class NewsService
         }
         $news->save();
         $this->bustCarouselCache();
+
         // Emit domain event
         $this->eventBus->emit(new NewsPublished(
             newsId: (int) $news->id,
@@ -132,6 +136,16 @@ class NewsService
             title: (string) $news->title,
             publishedAt: optional($news->published_at)->toISOString(),
         ));
+
+        // Broadcast notification to all users (system notification)
+        $this->notificationApi->createBroadcastNotification(
+            new NewsPublishedNotification(
+                newsTitle: (string) $news->title,
+                newsSlug: (string) $news->slug,
+            ),
+            sourceUserId: null, // System notification
+        );
+
         return $news;
     }
 

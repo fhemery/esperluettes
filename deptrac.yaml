@@ -393,6 +393,7 @@ deptrac:
       - NewsPrivate
       - EventsPublic
       - AdministrationPublic
+      - NotificationPublic
 
     NotificationPublic:
       - Shared
@@ -540,6 +541,7 @@ deptrac:
       - AuthPublic
       - EventsPublic
       - NewsPublic
+      - NotificationPublic
 
     NotificationPrivate:
       - Shared

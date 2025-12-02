@@ -14,6 +14,8 @@ use App\Domains\News\Public\Events\NewsDeleted;
 use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUnpublished;
 use App\Domains\News\Public\Events\NewsUpdated;
+use App\Domains\News\Public\Notifications\NewsPublishedNotification;
+use App\Domains\Notification\Public\Services\NotificationFactory;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -49,6 +51,12 @@ class NewsServiceProvider extends ServiceProvider
         
         // Subscribe to user deletion to nullify creator id on news
         $eventBus->subscribe(UserDeleted::name(), [RemoveCreatorOnUserDeleted::class, 'handle']);
+
+        // Register notification types
+        app(NotificationFactory::class)->register(
+            NewsPublishedNotification::type(),
+            NewsPublishedNotification::class
+        );
 
         $this->registerAdminNavigation();
     }

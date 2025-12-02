@@ -98,6 +98,12 @@ html {
   --frame-corner-tr:url('/images/themes/autumn/design/frame-corner-tr.png');
   --frame-corner-bl:url('/images/themes/autumn/design/frame-corner-bl.png');
   --frame-corner-br:url('/images/themes/autumn/design/frame-corner-br.png');
+
+  .logo {
+    background-image: url('/images/themes/autumn/logo.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
 }
 
 /* Rich content defaults (for sanitized HTML display) */

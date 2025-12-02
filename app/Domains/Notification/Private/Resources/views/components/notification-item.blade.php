@@ -14,6 +14,9 @@
     <div class="col-span-1 row-span-2 self-center">
         @if (!empty($notification->avatarUrl))
             <x-shared::avatar class="h-10 w-10 sm:h-16 sm:w-16" :src="$notification->avatarUrl" borderColor="accent" />
+        @elseif ($notification->isSystem)
+            <div class="logo h-10 w-10 sm:h-16 sm:w-16 flex items-center justify-center rounded-full bg-primary/10 border-2 border-primary">
+            </div>
         @endif
     </div>
 

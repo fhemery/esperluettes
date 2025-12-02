@@ -23,6 +23,10 @@ class NotificationPageViewModel
         $self = new self();
         $self->notifications = array_values(array_filter(array_map(function ($r) use ($profilesById, $factory) {
             $sid = $r['source_user_id'] ?? null;
+            
+            // System notification when source_user_id is null
+            $r['is_system'] = ($sid === null);
+            
             if ($sid !== null) {
                 $profile = $profilesById[(int) $sid] ?? null;
                 if ($profile && isset($profile->avatar_url)) {
