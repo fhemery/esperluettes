@@ -225,7 +225,7 @@ describe('Mature Content Gate', function () {
             $resp->assertSee('-18');
         });
 
-        it('shows overlay to author of the story as well', function () {
+        it('does not show overlay to author of the story', function () {
             $author = alice($this);
             
             $matureAudience = makeRefAudience('Adults Author View', [
@@ -240,7 +240,7 @@ describe('Mature Content Gate', function () {
             
             $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Own Mature Chapter']);
 
-            // Author should also see the gate (consistent experience)
+            // Author should NOT see the gate - they created this content
             $resp = $this->actingAs($author)
                 ->get(route('chapters.show', [
                     'storySlug' => $story->slug,
@@ -248,7 +248,38 @@ describe('Mature Content Gate', function () {
                 ]));
 
             $resp->assertOk();
-            $resp->assertSee('matureContentGate', false);
+            $resp->assertDontSee('matureContentGate', false);
+            $resp->assertDontSee('data-mature-content', false);
+        });
+
+        it('does not show overlay to credited co-author of the story', function () {
+            $mainAuthor = alice($this);
+            $coAuthor = bob($this);
+            
+            $matureAudience = makeRefAudience('Adults CoAuthor View', [
+                'slug' => 'adults-coauthor-view',
+                'is_mature_audience' => true,
+                'threshold_age' => 18,
+            ]);
+            
+            $story = publicStory('Mature Story CoAuthor', $mainAuthor->id, [
+                'story_ref_audience_id' => $matureAudience->id,
+            ]);
+            
+            // Add co-author credit
+            addCollaborator($story->id, $coAuthor->id, 'author');
+            
+            $chapter = createPublishedChapter($this, $story, $mainAuthor, ['title' => 'CoAuthor Mature Chapter']);
+
+            // Co-author should NOT see the gate
+            $resp = $this->actingAs($coAuthor)
+                ->get(route('chapters.show', [
+                    'storySlug' => $story->slug,
+                    'chapterSlug' => $chapter->slug,
+                ]));
+
+            $resp->assertOk();
+            $resp->assertDontSee('matureContentGate', false);
         });
     });
 });
