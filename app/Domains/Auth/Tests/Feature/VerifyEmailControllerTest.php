@@ -159,4 +159,103 @@ describe('Email verification process', function () {
         });
     
     });
+
+    describe('Under-15 users email verification', function () {
+
+        it('does not assign roles when under-15 user verifies email without parental authorization', function () {
+            // Arrange: under-15 user without parental authorization
+            config(['app.require_activation_code' => false]);
+
+            /** @var User $user */
+            $user = registerUserThroughForm($this, [
+                'email' => 'minor@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'is_under_15' => true,
+            ], false, []); // not verified, no roles
+
+            $this->actingAs($user);
+
+            // Act: verify email
+            $response = $this->get(verificationUrlFor($user));
+
+            // Assert: email verified but NO roles assigned
+            $response->assertRedirect();
+            $user->refresh();
+            expect($user->hasVerifiedEmail())->toBeTrue();
+            expect($user->isOnProbation())->toBeFalse();
+            expect($user->isConfirmed())->toBeFalse();
+            expect($user->roles)->toBeEmpty();
+        });
+
+        it('assigns roles when under-15 user verifies email with parental authorization already provided', function () {
+            // Arrange: under-15 user WITH parental authorization already verified
+            config(['app.require_activation_code' => false]);
+
+            /** @var User $user */
+            $user = registerUserThroughForm($this, [
+                'email' => 'minor-with-auth@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'is_under_15' => true,
+            ], false, []); // not verified, no roles
+
+            // Simulate parental authorization already provided
+            $user->update(['parental_authorization_verified_at' => now()]);
+
+            $this->actingAs($user);
+
+            // Act: verify email
+            $response = $this->get(verificationUrlFor($user));
+
+            // Assert: email verified AND role assigned
+            $response->assertRedirect();
+            $user->refresh();
+            expect($user->hasVerifiedEmail())->toBeTrue();
+            expect($user->isConfirmed())->toBeTrue();
+            expect($user->isOnProbation())->toBeFalse();
+        });
+
+        it('assigns roles when under-15 user with activation code verifies email with parental authorization', function () {
+            // Arrange: register without activation code requirement first
+            config(['app.require_activation_code' => false]);
+
+            /** @var User $user */
+            $user = registerUserThroughForm($this, [
+                'email' => 'minor-code@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'is_under_15' => true,
+            ], false, []); // not verified, no roles
+
+            // Simulate activation code used by this user
+            ActivationCode::create([
+                'code' => (string) Str::uuid(),
+                'sponsor_user_id' => null,
+                'used_by_user_id' => $user->id,
+                'comment' => null,
+                'expires_at' => null,
+                'used_at' => now(),
+            ]);
+
+            // Simulate parental authorization already provided
+            $user->update(['parental_authorization_verified_at' => now()]);
+
+            // Now require activation code for verification logic
+            config(['app.require_activation_code' => true]);
+
+            $this->actingAs($user);
+
+            // Act: verify email
+            $response = $this->get(verificationUrlFor($user));
+
+            // Assert: email verified AND confirmed role assigned
+            $response->assertRedirect();
+            $user->refresh();
+            expect($user->hasVerifiedEmail())->toBeTrue();
+            expect($user->isConfirmed())->toBeTrue();
+        });
+
+    });
+
 });

@@ -20,6 +20,9 @@ class EnsureUserCompliance
         'compliance.parental.upload',
         'session.heartbeat',
         'session.csrf',
+        'verification.notice',
+        'verification.verify',
+        'verification.send',
     ];
 
     /**

@@ -6,8 +6,6 @@ use App\Domains\Shared\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
-use App\Domains\Auth\Private\Models\ActivationCode;
-use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Public\Events\EmailVerified as EmailVerifiedEvent;
 use App\Domains\Auth\Private\Services\RoleCacheService;
@@ -50,35 +48,12 @@ class VerifyEmailController extends Controller
     public function assignRoleUponVerification(EmailVerificationRequest $request): void
     {
         $user = $request->user();
-        $requireActivation = config('app.require_activation_code', false);
-        $usedActivation = ActivationCode::where('used_by_user_id', $user->id)->exists();
 
-        if (!$requireActivation) {
-            // Feature disabled: confirmed by default
-            if ($user->isOnProbation()) {
-                $this->roles->revoke($user, Roles::USER);
-            }
-            if (!$user->isConfirmed()) {
-                $this->roles->grant($user, Roles::USER_CONFIRMED);
-            }
-        } else {
-            if ($usedActivation) {
-                // Used a code: promote to confirmed
-                if ($user->isOnProbation()) {
-                    $this->roles->revoke($user, Roles::USER);
-                }
-                if (!$user->isConfirmed()) {
-                    $this->roles->grant($user, Roles::USER_CONFIRMED);
-                }
-            } else {
-                // No code used: keep as user only
-                if ($user->isConfirmed()) {
-                    $this->roles->revoke($user, Roles::USER_CONFIRMED);
-                }
-                if (!$user->isOnProbation()) {
-                    $this->roles->grant($user, Roles::USER);
-                }
-            }
+        // Under-15 users must have parental authorization before getting roles
+        if ($user->needsParentalAuthorization()) {
+            return;
         }
+
+        $this->roles->assignRolesBasedOnActivationCode($user);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Private\Services;
 
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Private\Models\Role;
+use App\Domains\Auth\Private\Models\ActivationCode;
 use App\Domains\Auth\Private\Services\RoleCacheService;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Events\Public\Api\EventBus;
@@ -138,5 +139,43 @@ class RoleService
             ->orderBy('name')
             ->get()
             ->all();
+    }
+
+    /**
+     * Assign roles to a user based on activation code configuration.
+     * Used when a user completes all requirements (email verification + parental auth if under-15).
+     */
+    public function assignRolesBasedOnActivationCode(User $user): void
+    {
+        $requireActivation = config('app.require_activation_code', false);
+        $usedActivation = ActivationCode::where('used_by_user_id', $user->id)->exists();
+
+        if (!$requireActivation) {
+            // Feature disabled: confirmed by default
+            if ($user->isOnProbation()) {
+                $this->revoke($user, Roles::USER);
+            }
+            if (!$user->isConfirmed()) {
+                $this->grant($user, Roles::USER_CONFIRMED);
+            }
+        } else {
+            if ($usedActivation) {
+                // Used a code: promote to confirmed
+                if ($user->isOnProbation()) {
+                    $this->revoke($user, Roles::USER);
+                }
+                if (!$user->isConfirmed()) {
+                    $this->grant($user, Roles::USER_CONFIRMED);
+                }
+            } else {
+                // No code used: keep as user only
+                if ($user->isConfirmed()) {
+                    $this->revoke($user, Roles::USER_CONFIRMED);
+                }
+                if (!$user->isOnProbation()) {
+                    $this->grant($user, Roles::USER);
+                }
+            }
+        }
     }
 }

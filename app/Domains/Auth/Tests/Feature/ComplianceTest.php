@@ -166,4 +166,64 @@ describe('Compliance at login', function () {
             $this->assertGuest();
         });
     });
+
+    describe('Role assignment for underage users', function () {
+
+        test('underage user with verified email gets roles upon parental auth upload', function () {
+            config(['app.require_activation_code' => false]);
+
+            // Create verified under-15 user without roles
+            $user = registerUserThroughForm($this, [
+                'email' => 'minor-verified@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'is_under_15' => true,
+            ], true, []); // verified, no roles
+
+            // Sanity check: no roles yet
+            expect($user->isConfirmed())->toBeFalse();
+            expect($user->isOnProbation())->toBeFalse();
+
+            $file = UploadedFile::fake()->create('parental_auth.pdf', 1024);
+
+            $this->actingAs($user)
+                ->post(route('compliance.parental.upload'), [
+                    'parental_authorization' => $file,
+                ])
+                ->assertRedirect(route('dashboard'));
+
+            // Should now have confirmed role
+            $user->refresh();
+            expect($user->parental_authorization_verified_at)->not->toBeNull();
+            expect($user->isConfirmed())->toBeTrue();
+        });
+
+        test('underage user without verified email does not get roles upon parental auth upload', function () {
+            config(['app.require_activation_code' => false]);
+
+            // Create unverified under-15 user without roles
+            $user = registerUserThroughForm($this, [
+                'email' => 'minor-unverified@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'is_under_15' => true,
+            ], false, []); // not verified, no roles
+
+            $file = UploadedFile::fake()->create('parental_auth.pdf', 1024);
+
+            $this->actingAs($user)
+                ->post(route('compliance.parental.upload'), [
+                    'parental_authorization' => $file,
+                ])
+                ->assertRedirect(route('dashboard'));
+
+            // Should NOT have roles (waiting for email verification)
+            $user->refresh();
+            expect($user->parental_authorization_verified_at)->not->toBeNull();
+            expect($user->isConfirmed())->toBeFalse();
+            expect($user->isOnProbation())->toBeFalse();
+            expect($user->roles)->toBeEmpty();
+        });
+
+    });
 });

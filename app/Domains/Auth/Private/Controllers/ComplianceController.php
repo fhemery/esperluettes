@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Private\Controllers;
 
 use App\Domains\Auth\Private\Requests\ParentalAuthorizationRequest;
 use App\Domains\Auth\Private\Services\ComplianceService;
+use App\Domains\Auth\Private\Services\RoleService;
 use App\Domains\Shared\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ class ComplianceController extends Controller
 {
     public function __construct(
         private readonly ComplianceService $complianceService,
+        private readonly RoleService $roleService,
     ) {}
     /**
      * Show the terms and conditions acceptance page.
@@ -86,6 +88,11 @@ class ComplianceController extends Controller
 
         // Mark as verified for underage users
         $this->complianceService->verifyParentalAuthorization($user);
+
+        // Assign roles if email is already verified (both conditions now met)
+        if ($user->hasVerifiedEmail()) {
+            $this->roleService->assignRolesBasedOnActivationCode($user);
+        }
 
         // Clear the compliance check cache
         session()->forget('user_compliance_checked_' . $user->id);
