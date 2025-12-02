@@ -19,7 +19,7 @@
         <div class="hidden md:block col-span-1">
             <x-administration::sidebar />
         </div>
-        <main class="col-span-1 p-4">
+        <main class="col-span-1 p-4 max-w-7xl w-full mx-auto">
             {{ $slot }}
         </main>
     </div>

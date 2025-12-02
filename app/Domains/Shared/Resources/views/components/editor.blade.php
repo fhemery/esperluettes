@@ -16,7 +16,7 @@
     <div class="surface-read text-on-surface w-full {{ $indentParagraphs ? 'ql-indent' : '' }}">
       <div id="{{ $id }}" data-placeholder="{{ $placeholder }}" data-nb-lines="{{ $nbLines }}" data-is-mandatory="{{ $isMandatory ? 'true' : 'false' }}" data-clean-label="{{ __('shared::editor.clean') }}" data-resizable="{{ $resizable ? 'true' : 'false' }}" data-with-headings="{{ $withHeadings ? 'true' : 'false' }}" data-with-links="{{ $withLinks ? 'true' : 'false' }}" @if($min) data-min="{{ (int) $min }}" @endif @if($max) data-max="{{ (int) $max }}" @endif></div>
     </div>
-    <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $id }}" value="{!! $defaultValue !!}" />
+    <input type="hidden" name="{{ $name }}" id="quill-editor-area-{{ $id }}" value="{{ $defaultValue }}" />
     <div class="mt-2 text-xs text-right " id="quill-counter-wrap-{{ $id }}">
         <span id="quill-counter-{{ $id }}">0</span>
         @if($max)
