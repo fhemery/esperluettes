@@ -146,6 +146,13 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
                     
+                NavigationItem::make('Copyrights')
+                    ->url('/admin/story-ref/copyrights')
+                    ->icon('heroicon-o-key')
+                    ->group('Histoires - Référentiels')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+                    
                 NavigationItem::make('Gestion des utilisateurs')
                     ->url('/admin/moderation/user-management')
                     ->icon('heroicon-o-users')

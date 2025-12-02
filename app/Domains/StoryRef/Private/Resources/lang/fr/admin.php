@@ -19,6 +19,13 @@ return [
         'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer ce public cible ?',
         'no_audiences' => 'Aucun public cible défini.',
 
+        'delete_modal' => [
+            'title' => 'Confirmer la suppression',
+            'message' => 'Êtes-vous sûr de vouloir supprimer',
+            'cancel' => 'Annuler',
+            'confirm' => 'Supprimer',
+        ],
+
         'table' => [
             'order' => 'Ordre',
             'name' => 'Nom',
@@ -66,6 +73,69 @@ return [
             'threshold_integer' => 'L\'âge doit être un nombre entier.',
             'threshold_min' => 'L\'âge minimum doit être d\'au moins 1 an.',
             'threshold_max' => 'L\'âge maximum ne peut pas dépasser 99 ans.',
+        ],
+    ],
+
+    'copyrights' => [
+        'nav_label' => 'Droits d\'auteur',
+        'title' => 'Gestion des droits d\'auteur',
+        'create_title' => 'Créer un droit d\'auteur',
+        'edit_title' => 'Modifier le droit :name',
+
+        'create_button' => 'Nouveau droit',
+        'edit_button' => 'Modifier',
+        'delete_button' => 'Supprimer',
+        'export_button' => 'Export CSV',
+
+        'created' => 'Droit d\'auteur créé avec succès.',
+        'updated' => 'Droit d\'auteur mis à jour avec succès.',
+        'deleted' => 'Droit d\'auteur supprimé avec succès.',
+        'cannot_delete_in_use' => 'Impossible de supprimer ce droit d\'auteur : il est utilisé par :count histoire(s).',
+        'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer ce droit d\'auteur ?',
+        'no_copyrights' => 'Aucun droit d\'auteur défini.',
+
+        'delete_modal' => [
+            'title' => 'Confirmer la suppression',
+            'message' => 'Êtes-vous sûr de vouloir supprimer',
+            'cancel' => 'Annuler',
+            'confirm' => 'Supprimer',
+        ],
+
+        'table' => [
+            'order' => 'Ordre',
+            'name' => 'Nom',
+            'slug' => 'Slug',
+            'description' => 'Description',
+            'active' => 'Actif',
+            'actions' => 'Actions',
+            'created_at' => 'Créé le',
+            'updated_at' => 'Mis à jour le',
+        ],
+
+        'active_yes' => 'Actif',
+        'active_no' => 'Inactif',
+
+        'form' => [
+            'name' => 'Nom',
+            'slug' => 'Slug (identifiant URL)',
+            'slug_help' => 'Lettres minuscules, chiffres et tirets uniquement (ex: tous-droits-reserves, creative-commons)',
+            'description' => 'Description',
+            'is_active' => 'Droit actif (visible dans les formulaires)',
+
+            'create' => 'Créer le droit',
+            'update' => 'Mettre à jour',
+            'cancel' => 'Annuler',
+        ],
+
+        'validation' => [
+            'name_required' => 'Le nom est obligatoire.',
+            'name_max' => 'Le nom ne peut pas dépasser 255 caractères.',
+            'slug_required' => 'Le slug est obligatoire.',
+            'slug_format' => 'Le slug ne peut contenir que des lettres minuscules, des chiffres et des tirets.',
+            'slug_unique' => 'Ce slug est déjà utilisé par un autre droit d\'auteur.',
+            'order_required' => 'L\'ordre d\'affichage est obligatoire.',
+            'order_integer' => 'L\'ordre doit être un nombre entier.',
+            'description_max' => 'La description ne peut pas dépasser 1000 caractères.',
         ],
     ],
 ];

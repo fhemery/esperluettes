@@ -55,5 +55,16 @@ class StoryServiceRefProvider extends ServiceProvider
             [Roles::ADMIN, Roles::TECH_ADMIN],
             1,
         );
+
+        // Register copyright admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.copyrights',
+            'story',
+            __('story_ref::admin.copyrights.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.copyrights.index'),
+            'copyright',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            2,
+        );
     }
 }
