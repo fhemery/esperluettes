@@ -77,5 +77,16 @@ class StoryServiceRefProvider extends ServiceProvider
             [Roles::ADMIN, Roles::TECH_ADMIN],
             3,
         );
+
+        // Register genre admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.genres',
+            'story',
+            __('story_ref::admin.genres.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.genres.index'),
+            'menu_book',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            4,
+        );
     }
 }

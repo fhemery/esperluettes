@@ -4,6 +4,7 @@ use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\StoryRef\Private\Controllers\Admin\AudienceController;
 use App\Domains\StoryRef\Private\Controllers\Admin\CopyrightController;
 use App\Domains\StoryRef\Private\Controllers\Admin\FeedbackController;
+use App\Domains\StoryRef\Private\Controllers\Admin\GenreController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth', 'compliant'])->group(function () {
@@ -26,5 +27,10 @@ Route::middleware(['web', 'auth', 'compliant'])->group(function () {
             Route::put('feedbacks/reorder', [FeedbackController::class, 'reorder'])->name('feedbacks.reorder');
             Route::get('feedbacks/export', [FeedbackController::class, 'export'])->name('feedbacks.export');
             Route::resource('feedbacks', FeedbackController::class)->except(['show']);
+
+            // Genres
+            Route::put('genres/reorder', [GenreController::class, 'reorder'])->name('genres.reorder');
+            Route::get('genres/export', [GenreController::class, 'export'])->name('genres.export');
+            Route::resource('genres', GenreController::class)->except(['show']);
         });
 });

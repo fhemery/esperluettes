@@ -160,6 +160,13 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
                     
+                NavigationItem::make('Genres')
+                    ->url('/admin/story-ref/genres')
+                    ->icon('heroicon-o-book-open')
+                    ->group('Histoires - Référentiels')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+                    
                 NavigationItem::make('Gestion des utilisateurs')
                     ->url('/admin/moderation/user-management')
                     ->icon('heroicon-o-users')
