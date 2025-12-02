@@ -57,25 +57,17 @@
                             <td class="p-3 font-mono text-xs">{{ $status->slug }}</td>
                             <td class="p-3 text-fg/70 max-w-xs truncate">{{ $status->description ?? '-' }}</td>
                             <td class="p-3">
-                                @if ($status->is_active)
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-success/20 text-success">{{ __('story_ref::admin.statuses.active_yes') }}</span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-fg/10 text-fg/50">{{ __('story_ref::admin.statuses.active_no') }}</span>
-                                @endif
+                                <x-administration::active-badge :active="$status->is_active" />
                             </td>
                             <td class="p-3">
                                 <div class="flex gap-2">
                                     <a href="{{ route('story_ref.admin.statuses.edit', $status) }}" class="text-primary hover:text-primary/80" title="{{ __('story_ref::admin.statuses.edit_button') }}">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
-                                    @php($confirm = str_replace("'", "\\'", __('story_ref::admin.statuses.confirm_delete')))
-                                    <form method="POST" action="{{ route('story_ref.admin.statuses.destroy', $status) }}" onsubmit="return confirm('{{ $confirm }}')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-error hover:text-error/80" title="{{ __('story_ref::admin.statuses.delete_button') }}">
-                                            <span class="material-symbols-outlined">delete</span>
-                                        </button>
-                                    </form>
+                                    <x-administration::delete-button 
+                                        :action="route('story_ref.admin.statuses.destroy', $status)"
+                                        :confirm="__('story_ref::admin.statuses.confirm_delete')"
+                                        :title="__('story_ref::admin.statuses.delete_button')" />
                                 </div>
                             </td>
                         </tr>

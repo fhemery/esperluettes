@@ -59,15 +59,7 @@
                             <td class="p-3 font-mono text-xs">{{ $genre->slug }}</td>
                             <td class="p-3 text-fg/70 max-w-xs truncate">{{ $genre->description ?? '-' }}</td>
                             <td class="p-3">
-                                @if ($genre->is_active)
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-success/20 text-success">
-                                        {{ __('story_ref::admin.genres.active_yes') }}
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-fg/10 text-fg/50">
-                                        {{ __('story_ref::admin.genres.active_no') }}
-                                    </span>
-                                @endif
+                                <x-administration::active-badge :active="$genre->is_active" />
                             </td>
                             <td class="p-3">
                                 <div class="flex gap-2">
@@ -76,19 +68,10 @@
                                        title="{{ __('story_ref::admin.genres.edit_button') }}">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
-                                    @php($confirm = str_replace("'", "\\'", __('story_ref::admin.genres.confirm_delete')))
-                                    <form method="POST" 
-                                          action="{{ route('story_ref.admin.genres.destroy', $genre) }}" 
-                                          onsubmit="return confirm('{{ $confirm }}')"
-                                          class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="text-error hover:text-error/80"
-                                                title="{{ __('story_ref::admin.genres.delete_button') }}">
-                                            <span class="material-symbols-outlined">delete</span>
-                                        </button>
-                                    </form>
+                                    <x-administration::delete-button 
+                                        :action="route('story_ref.admin.genres.destroy', $genre)"
+                                        :confirm="__('story_ref::admin.genres.confirm_delete')"
+                                        :title="__('story_ref::admin.genres.delete_button')" />
                                 </div>
                             </td>
                         </tr>

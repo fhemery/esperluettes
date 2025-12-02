@@ -57,25 +57,17 @@
                             <td class="p-3 font-mono text-xs">{{ $triggerWarning->slug }}</td>
                             <td class="p-3 text-fg/70 max-w-xs truncate">{{ $triggerWarning->description ?? '-' }}</td>
                             <td class="p-3">
-                                @if ($triggerWarning->is_active)
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-success/20 text-success">{{ __('story_ref::admin.trigger_warnings.active_yes') }}</span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-fg/10 text-fg/50">{{ __('story_ref::admin.trigger_warnings.active_no') }}</span>
-                                @endif
+                                <x-administration::active-badge :active="$triggerWarning->is_active" />
                             </td>
                             <td class="p-3">
                                 <div class="flex gap-2">
                                     <a href="{{ route('story_ref.admin.trigger-warnings.edit', $triggerWarning) }}" class="text-primary hover:text-primary/80" title="{{ __('story_ref::admin.trigger_warnings.edit_button') }}">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
-                                    @php($confirm = str_replace("'", "\\'", __('story_ref::admin.trigger_warnings.confirm_delete')))
-                                    <form method="POST" action="{{ route('story_ref.admin.trigger-warnings.destroy', $triggerWarning) }}" onsubmit="return confirm('{{ $confirm }}')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-error hover:text-error/80" title="{{ __('story_ref::admin.trigger_warnings.delete_button') }}">
-                                            <span class="material-symbols-outlined">delete</span>
-                                        </button>
-                                    </form>
+                                    <x-administration::delete-button 
+                                        :action="route('story_ref.admin.trigger-warnings.destroy', $triggerWarning)"
+                                        :confirm="__('story_ref::admin.trigger_warnings.confirm_delete')"
+                                        :title="__('story_ref::admin.trigger_warnings.delete_button')" />
                                 </div>
                             </td>
                         </tr>

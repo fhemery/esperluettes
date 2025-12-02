@@ -59,15 +59,7 @@
                             <td class="p-3 font-mono text-xs">{{ $copyright->slug }}</td>
                             <td class="p-3 text-fg/70 max-w-xs truncate">{{ $copyright->description ?? '-' }}</td>
                             <td class="p-3">
-                                @if ($copyright->is_active)
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-success/20 text-success">
-                                        {{ __('story_ref::admin.copyrights.active_yes') }}
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-fg/10 text-fg/50">
-                                        {{ __('story_ref::admin.copyrights.active_no') }}
-                                    </span>
-                                @endif
+                                <x-administration::active-badge :active="$copyright->is_active" />
                             </td>
                             <td class="p-3">
                                 <div class="flex gap-2">
@@ -76,19 +68,10 @@
                                        title="{{ __('story_ref::admin.copyrights.edit_button') }}">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
-                                    @php($confirm = str_replace("'", "\\'", __('story_ref::admin.copyrights.confirm_delete')))
-                                    <form method="POST" 
-                                          action="{{ route('story_ref.admin.copyrights.destroy', $copyright) }}" 
-                                          onsubmit="return confirm('{{ $confirm }}')"
-                                          class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="text-error hover:text-error/80"
-                                                title="{{ __('story_ref::admin.copyrights.delete_button') }}">
-                                            <span class="material-symbols-outlined">delete</span>
-                                        </button>
-                                    </form>
+                                    <x-administration::delete-button 
+                                        :action="route('story_ref.admin.copyrights.destroy', $copyright)"
+                                        :confirm="__('story_ref::admin.copyrights.confirm_delete')"
+                                        :title="__('story_ref::admin.copyrights.delete_button')" />
                                 </div>
                             </td>
                         </tr>
