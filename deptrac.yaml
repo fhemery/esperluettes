@@ -420,6 +420,7 @@ deptrac:
       - Shared
       - StaticPagePrivate
       - EventsPublic
+      - AdministrationPublic
 
     StoryPublic:
       - CommentPublic

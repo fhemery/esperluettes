@@ -109,6 +109,13 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
 
+                NavigationItem::make('Pages statiques')
+                    ->url('/admin/static-pages')
+                    ->icon('heroicon-o-document-text')
+                    ->group('Contenu')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+
                 NavigationItem::make('Actualités épinglées')
                     ->url('/admin/news/pinned')
                     ->icon('heroicon-o-bars-3')

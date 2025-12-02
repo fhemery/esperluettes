@@ -12,7 +12,10 @@ use App\Domains\StaticPage\Public\Events\StaticPageUnpublished;
 use App\Domains\StaticPage\Public\Events\StaticPageUpdated;
 use App\Domains\StaticPage\Public\Events\StaticPageDeleted;
 use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\StaticPage\Private\Listeners\RemoveCreatorOnUserDeleted;
+use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 
 class StaticPageServiceProvider extends ServiceProvider
 {
@@ -41,5 +44,25 @@ class StaticPageServiceProvider extends ServiceProvider
         $eventBus->registerEvent(StaticPageDeleted::name(), StaticPageDeleted::class);
         // Subscribe to user deletion to nullify creator id
         $eventBus->subscribe(UserDeleted::name(), [RemoveCreatorOnUserDeleted::class, 'handle']);
+
+        // Register admin navigation
+        $this->registerAdminPages();
+    }
+
+    private function registerAdminPages(): void
+    {
+        $registry = app(AdminNavigationRegistry::class);
+
+        $registry->registerGroup('static', __('static::admin.nav.group'), 60);
+
+        $registry->registerPage(
+            'static.pages',
+            'static',
+            __('static::admin.nav.pages'),
+            AdminRegistryTarget::route('static.admin.index'),
+            'description',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            1,
+        );
     }
 }
