@@ -133,6 +133,10 @@ html {
   }
 }
 
+.rich-content h2, h3 {
+  color: rgb(var(--color-accent));
+}
+
 
 /* Quill alignment classes on read-only pages (no .ql-editor wrapper) */
 .ql-align-left { text-align: left; }
