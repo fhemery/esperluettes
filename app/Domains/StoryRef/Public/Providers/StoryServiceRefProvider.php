@@ -88,5 +88,38 @@ class StoryServiceRefProvider extends ServiceProvider
             [Roles::ADMIN, Roles::TECH_ADMIN],
             4,
         );
+
+        // Register status admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.statuses',
+            'story',
+            __('story_ref::admin.statuses.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.statuses.index'),
+            'flag',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            5,
+        );
+
+        // Register trigger warning admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.trigger_warnings',
+            'story',
+            __('story_ref::admin.trigger_warnings.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.trigger-warnings.index'),
+            'warning',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            6,
+        );
+
+        // Register type admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.types',
+            'story',
+            __('story_ref::admin.types.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.types.index'),
+            'category',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            7,
+        );
     }
 }
