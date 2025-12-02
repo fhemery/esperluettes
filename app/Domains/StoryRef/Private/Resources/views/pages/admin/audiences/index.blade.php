@@ -3,30 +3,13 @@
     @reorder-cancel.window="reordering = false">
         <div class="flex justify-between items-center">
             <x-shared::title>{{ __('story_ref::admin.audiences.title') }}</x-shared::title>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('story_ref.admin.audiences.export') }}" x-show="!reordering">
-                    <x-shared::button color="neutral" :outline="true">
-                        <span class="material-symbols-outlined text-[18px] leading-none">download</span>
-                        {{ __('story_ref::admin.audiences.export_button') }}
-                    </x-shared::button>
-                </a>
-                @if(count($audiences) > 1)
-                    <x-shared::button 
-                        color="neutral" 
-                        :outline="true" 
-                        x-show="!reordering"
-                        x-on:click="reordering = true"
-                    >
-                        <span class="material-symbols-outlined text-[18px] leading-none">swap_vert</span>
-                        {{ __('administration::reorder.button') }}
-                    </x-shared::button>
-                @endif
-                <a href="{{ route('story_ref.admin.audiences.create') }}">
-                    <x-shared::button color="primary" icon="add">
-                        {{ __('story_ref::admin.audiences.create_button') }}
-                    </x-shared::button>
-                </a>
-            </div>
+            <x-story_ref::admin.index-actions
+                :exportRoute="route('story_ref.admin.audiences.export')"
+                :exportLabel="__('story_ref::admin.audiences.export_button')"
+                :createRoute="route('story_ref.admin.audiences.create')"
+                :createLabel="__('story_ref::admin.audiences.create_button')"
+                :itemCount="count($audiences)"
+            />
         </div>
 
         <!-- Reorderable list (shown when reordering) -->
