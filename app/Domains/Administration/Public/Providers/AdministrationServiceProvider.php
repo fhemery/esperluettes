@@ -73,7 +73,6 @@ class AdministrationServiceProvider extends ServiceProvider
         $registry->registerGroup('calendar', __('admin::calendar.navigation.group'), 20);
         $registry->registerGroup('config', __('admin::config.group'), 30);
         $registry->registerGroup('moderation', __('admin::moderation.navigation_group'), 40);
-        $registry->registerGroup('static', __('admin::static.navigation.group'), 60);
         $registry->registerGroup('story', __('admin::story.group'), 70);
         $registry->registerGroup('auth', __('admin::auth.user_management'), 80);
         $registry->registerGroup('faq', __('admin::faq.navigation.group'), 90);
@@ -183,17 +182,6 @@ class AdministrationServiceProvider extends ServiceProvider
             'report',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
             2,
-        );
-
-        // Static pages
-        $registry->registerPage(
-            'static.pages',
-            'static',
-            __('admin::static.navigation.pages'),
-            AdminRegistryTarget::url('/admin/static-page/static-pages'),
-            'description',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            1,
         );
 
         // Story references
