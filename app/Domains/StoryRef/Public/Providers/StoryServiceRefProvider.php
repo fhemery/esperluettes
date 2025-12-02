@@ -66,5 +66,16 @@ class StoryServiceRefProvider extends ServiceProvider
             [Roles::ADMIN, Roles::TECH_ADMIN],
             2,
         );
+
+        // Register feedback admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.feedbacks',
+            'story',
+            __('story_ref::admin.feedbacks.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.feedbacks.index'),
+            'forum',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            3,
+        );
     }
 }

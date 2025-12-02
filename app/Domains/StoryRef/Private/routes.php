@@ -3,6 +3,7 @@
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\StoryRef\Private\Controllers\Admin\AudienceController;
 use App\Domains\StoryRef\Private\Controllers\Admin\CopyrightController;
+use App\Domains\StoryRef\Private\Controllers\Admin\FeedbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth', 'compliant'])->group(function () {
@@ -20,5 +21,10 @@ Route::middleware(['web', 'auth', 'compliant'])->group(function () {
             Route::put('copyrights/reorder', [CopyrightController::class, 'reorder'])->name('copyrights.reorder');
             Route::get('copyrights/export', [CopyrightController::class, 'export'])->name('copyrights.export');
             Route::resource('copyrights', CopyrightController::class)->except(['show']);
+
+            // Feedbacks
+            Route::put('feedbacks/reorder', [FeedbackController::class, 'reorder'])->name('feedbacks.reorder');
+            Route::get('feedbacks/export', [FeedbackController::class, 'export'])->name('feedbacks.export');
+            Route::resource('feedbacks', FeedbackController::class)->except(['show']);
         });
 });

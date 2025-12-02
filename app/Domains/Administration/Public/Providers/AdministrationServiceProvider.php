@@ -185,17 +185,7 @@ class AdministrationServiceProvider extends ServiceProvider
         );
 
         // Story references
-        // NOTE: story.audiences and story.copyrights are now registered in StoryServiceRefProvider (custom admin pages)
-
-        $registry->registerPage(
-            'story.feedbacks',
-            'story',
-            __('admin::story.feedback.navigation_label'),
-            AdminRegistryTarget::url('/admin/story/feedbacks'),
-            'forum',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            3,
-        );
+        // NOTE: story.audiences, story.copyrights, and story.feedbacks are now registered in StoryServiceRefProvider (custom admin pages)
 
         $registry->registerPage(
             'story.genres',

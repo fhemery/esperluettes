@@ -1,15 +1,6 @@
 <x-admin::layout>
-    <div class="flex flex-col gap-6" x-data="{ 
-        reordering: false,
-        deleteModalOpen: false,
-        deleteUrl: '',
-        deleteItemName: '',
-        confirmDelete(url, name) {
-            this.deleteUrl = url;
-            this.deleteItemName = name;
-            this.deleteModalOpen = true;
-        }
-    }" @reorder-cancel.window="reordering = false">
+    <div class="flex flex-col gap-6" x-data="{ reordering: false }" 
+    @reorder-cancel.window="reordering = false">
         <div class="flex justify-between items-center">
             <x-shared::title>{{ __('story_ref::admin.audiences.title') }}</x-shared::title>
             <div class="flex items-center gap-2">
@@ -104,12 +95,20 @@
                                        title="{{ __('story_ref::admin.audiences.edit_button') }}">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
-                                    <button type="button"
-                                            class="text-error hover:text-error/80"
-                                            title="{{ __('story_ref::admin.audiences.delete_button') }}"
-                                            @click="confirmDelete('{{ route('story_ref.admin.audiences.destroy', $audience) }}', '{{ addslashes($audience->name) }}')">
-                                        <span class="material-symbols-outlined">delete</span>
-                                    </button>
+                                    
+                                    @php($confirm = str_replace("'", "\\'", __('story_ref::admin.audiences.confirm_delete')))
+                                    <form method="POST" 
+                                          action="{{ route('story_ref.admin.audiences.destroy', $audience) }}" 
+                                          onsubmit="return confirm('{{ $confirm }}')"
+                                          class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="text-error hover:text-error/80"
+                                                title="{{ __('story_ref::admin.audiences.delete_button') }}">
+                                            <span class="material-symbols-outlined">delete</span>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -124,43 +123,5 @@
             </table>
         </div>
 
-        <!-- Delete Confirmation Modal -->
-        <div x-show="deleteModalOpen" 
-             x-cloak
-             class="fixed inset-0 z-50 flex items-center justify-center"
-             @keydown.escape.window="deleteModalOpen = false">
-            <!-- Backdrop -->
-            <div class="absolute inset-0 bg-black/50" @click="deleteModalOpen = false"></div>
-            <!-- Modal -->
-            <div class="relative surface-bg rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition ease-in duration-150"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-95">
-                <h3 class="text-lg font-semibold text-fg flex items-center gap-2">
-                    <span class="material-symbols-outlined text-error">warning</span>
-                    {{ __('story_ref::admin.audiences.delete_modal.title') }}
-                </h3>
-                <p class="mt-3 text-fg/70">
-                    {{ __('story_ref::admin.audiences.delete_modal.message') }}
-                    <strong x-text="deleteItemName"></strong> ?
-                </p>
-                <div class="mt-6 flex justify-end gap-3">
-                    <x-shared::button type="button" color="neutral" @click="deleteModalOpen = false">
-                        {{ __('story_ref::admin.audiences.delete_modal.cancel') }}
-                    </x-shared::button>
-                    <form :action="deleteUrl" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <x-shared::button type="submit" color="error">
-                            <span class="material-symbols-outlined text-[18px]">delete</span>
-                            {{ __('story_ref::admin.audiences.delete_modal.confirm') }}
-                        </x-shared::button>
-                    </form>
-                </div>
             </div>
-        </div>
-    </div>
 </x-admin::layout>

@@ -19,13 +19,6 @@ return [
         'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer ce public cible ?',
         'no_audiences' => 'Aucun public cible défini.',
 
-        'delete_modal' => [
-            'title' => 'Confirmer la suppression',
-            'message' => 'Êtes-vous sûr de vouloir supprimer',
-            'cancel' => 'Annuler',
-            'confirm' => 'Supprimer',
-        ],
-
         'table' => [
             'order' => 'Ordre',
             'name' => 'Nom',
@@ -94,13 +87,6 @@ return [
         'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer ce droit d\'auteur ?',
         'no_copyrights' => 'Aucun droit d\'auteur défini.',
 
-        'delete_modal' => [
-            'title' => 'Confirmer la suppression',
-            'message' => 'Êtes-vous sûr de vouloir supprimer',
-            'cancel' => 'Annuler',
-            'confirm' => 'Supprimer',
-        ],
-
         'table' => [
             'order' => 'Ordre',
             'name' => 'Nom',
@@ -133,6 +119,62 @@ return [
             'slug_required' => 'Le slug est obligatoire.',
             'slug_format' => 'Le slug ne peut contenir que des lettres minuscules, des chiffres et des tirets.',
             'slug_unique' => 'Ce slug est déjà utilisé par un autre droit d\'auteur.',
+            'order_required' => 'L\'ordre d\'affichage est obligatoire.',
+            'order_integer' => 'L\'ordre doit être un nombre entier.',
+            'description_max' => 'La description ne peut pas dépasser 1000 caractères.',
+        ],
+    ],
+
+    'feedbacks' => [
+        'nav_label' => 'Retours attendus',
+        'title' => 'Gestion des retours attendus',
+        'create_title' => 'Créer un type de retour',
+        'edit_title' => 'Modifier le retour :name',
+
+        'create_button' => 'Nouveau type',
+        'edit_button' => 'Modifier',
+        'delete_button' => 'Supprimer',
+        'export_button' => 'Export CSV',
+
+        'created' => 'Type de retour créé avec succès.',
+        'updated' => 'Type de retour mis à jour avec succès.',
+        'deleted' => 'Type de retour supprimé avec succès.',
+        'cannot_delete_in_use' => 'Impossible de supprimer ce type de retour : il est utilisé par :count histoire(s).',
+        'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer ce type de retour ?',
+        'no_feedbacks' => 'Aucun type de retour défini.',
+
+        'table' => [
+            'order' => 'Ordre',
+            'name' => 'Nom',
+            'slug' => 'Slug',
+            'description' => 'Description',
+            'active' => 'Actif',
+            'actions' => 'Actions',
+            'created_at' => 'Créé le',
+            'updated_at' => 'Mis à jour le',
+        ],
+
+        'active_yes' => 'Actif',
+        'active_no' => 'Inactif',
+
+        'form' => [
+            'name' => 'Nom',
+            'slug' => 'Slug (identifiant URL)',
+            'slug_help' => 'Lettres minuscules, chiffres et tirets uniquement (ex: commentaires, corrections)',
+            'description' => 'Description',
+            'is_active' => 'Type actif (visible dans les formulaires)',
+
+            'create' => 'Créer le type',
+            'update' => 'Mettre à jour',
+            'cancel' => 'Annuler',
+        ],
+
+        'validation' => [
+            'name_required' => 'Le nom est obligatoire.',
+            'name_max' => 'Le nom ne peut pas dépasser 255 caractères.',
+            'slug_required' => 'Le slug est obligatoire.',
+            'slug_format' => 'Le slug ne peut contenir que des lettres minuscules, des chiffres et des tirets.',
+            'slug_unique' => 'Ce slug est déjà utilisé par un autre type de retour.',
             'order_required' => 'L\'ordre d\'affichage est obligatoire.',
             'order_integer' => 'L\'ordre doit être un nombre entier.',
             'description_max' => 'La description ne peut pas dépasser 1000 caractères.',
