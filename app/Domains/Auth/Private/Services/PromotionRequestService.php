@@ -8,8 +8,16 @@ use App\Domains\Auth\Public\Api\Dto\PromotionEligibilityDto;
 use App\Domains\Auth\Public\Api\Dto\PromotionRequestResultDto;
 use App\Domains\Auth\Public\Api\Dto\PromotionStatusDto;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Public\Events\PromotionAccepted;
+use App\Domains\Auth\Public\Events\PromotionRejected;
+use App\Domains\Auth\Public\Events\PromotionRequested;
+use App\Domains\Auth\Public\Notifications\PromotionAcceptedNotification;
+use App\Domains\Auth\Public\Notifications\PromotionRejectedNotification;
 use App\Domains\Auth\Public\Support\AuthConfigKeys;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
+use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Notification\Public\Api\NotificationPublicApi;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Carbon\Carbon;
 
 class PromotionRequestService
@@ -17,6 +25,21 @@ class PromotionRequestService
     public function __construct(
         private readonly RoleService $roleService,
     ) {}
+
+    private function eventBus(): EventBus
+    {
+        return app(EventBus::class);
+    }
+
+    private function notificationApi(): NotificationPublicApi
+    {
+        return app(NotificationPublicApi::class);
+    }
+
+    private function profileApi(): ProfilePublicApi
+    {
+        return app(ProfilePublicApi::class);
+    }
 
     /**
      * Lazy resolution of ConfigPublicApi to avoid circular dependency.
@@ -102,6 +125,9 @@ class PromotionRequestService
             'requested_at' => now(),
         ]);
 
+        // Emit event
+        $this->eventBus()->emit(new PromotionRequested($userId));
+
         return PromotionRequestResultDto::success();
     }
 
@@ -149,6 +175,12 @@ class PromotionRequestService
         // Promote user: revoke USER, grant USER_CONFIRMED
         $this->roleService->promoteToConfirmed($user, Roles::USER, Roles::USER_CONFIRMED);
 
+        // Emit event
+        $this->eventBus()->emit(new PromotionAccepted($request->user_id, $decidedBy));
+
+        // Send notification
+        $this->sendAcceptedNotification($request->user_id);
+
         return true;
     }
 
@@ -164,7 +196,45 @@ class PromotionRequestService
 
         $request->reject($decidedBy, $reason);
 
+        // Emit event
+        $this->eventBus()->emit(new PromotionRejected($request->user_id, $decidedBy, $reason));
+
+        // Send notification (without the reason - user sees it on dashboard)
+        $this->sendRejectedNotification($request->user_id);
+
         return true;
+    }
+
+    /**
+     * Send acceptance notification to user.
+     */
+    private function sendAcceptedNotification(int $userId): void
+    {
+        try {
+            $profile = $this->profileApi()->getPublicProfile($userId);
+            $this->notificationApi()->createNotification(
+                [$userId],
+                new PromotionAcceptedNotification($profile?->display_name ?? ''),
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Send rejection notification to user.
+     */
+    private function sendRejectedNotification(int $userId): void
+    {
+        try {
+            $profile = $this->profileApi()->getPublicProfile($userId);
+            $this->notificationApi()->createNotification(
+                [$userId],
+                new PromotionRejectedNotification($profile?->display_name ?? ''),
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**
@@ -216,5 +286,34 @@ class PromotionRequestService
         }
 
         return $query->get();
+    }
+
+    /**
+     * Get paginated promotion requests with optional filters.
+     *
+     * @param array{status?: string|null, search?: string|null} $filters
+     * @param int $perPage
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getPaginatedRequests(array $filters, int $perPage = 20)
+    {
+        $query = PromotionRequest::query()
+            ->join('users', 'user_promotion_request.user_id', '=', 'users.id')
+            ->select('user_promotion_request.*')
+            ->orderByDesc('user_promotion_request.requested_at');
+
+        // Status filter (default to pending if not specified)
+        $status = $filters['status'] ?? 'pending';
+        if ($status && $status !== 'all') {
+            $query->where('user_promotion_request.status', $status);
+        }
+
+        // Search filter (by user email)
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where('users.email', 'like', "%{$search}%");
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
 }

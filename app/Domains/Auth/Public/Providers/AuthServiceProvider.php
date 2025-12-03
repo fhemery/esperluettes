@@ -2,9 +2,15 @@
 
 namespace App\Domains\Auth\Public\Providers;
 
+use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Public\Events\EmailVerified;
 use App\Domains\Auth\Public\Events\PasswordChanged;
 use App\Domains\Auth\Public\Events\PasswordResetRequested;
+use App\Domains\Auth\Public\Events\PromotionAccepted;
+use App\Domains\Auth\Public\Events\PromotionRejected;
+use App\Domains\Auth\Public\Events\PromotionRequested;
 use App\Domains\Auth\Public\Events\UserDeactivated;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Auth\Public\Events\UserLoggedIn;
@@ -13,12 +19,15 @@ use App\Domains\Auth\Public\Events\UserReactivated;
 use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Auth\Public\Events\UserRoleGranted;
 use App\Domains\Auth\Public\Events\UserRoleRevoked;
+use App\Domains\Auth\Public\Notifications\PromotionAcceptedNotification;
+use App\Domains\Auth\Public\Notifications\PromotionRejectedNotification;
 use App\Domains\Auth\Public\Support\AuthConfigKeys;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\ConfigParameterType;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Notification\Public\Services\NotificationFactory;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -49,11 +58,11 @@ class AuthServiceProvider extends ServiceProvider
         // Register domain-specific migrations
         $this->loadMigrationsFrom(app_path('Domains/Auth/Database/Migrations'));
 
-        // Register JSON translations (kept as-is for now)
-        $this->loadJsonTranslationsFrom(app_path('Domains/Auth/Private/Resources/lang'));
-
         // Keep PHP translations namespace in case files exist later
         $this->loadTranslationsFrom(app_path('Domains/Auth/Private/Resources/lang'), 'auth');
+
+        // Register JSON translations (kept as-is for now)
+        $this->loadJsonTranslationsFrom(app_path('Domains/Auth/Private/Resources/lang'));
 
         // Register auth views namespace
         $this->loadViewsFrom(app_path('Domains/Auth/Private/Resources/views'), 'auth');
@@ -79,9 +88,25 @@ class AuthServiceProvider extends ServiceProvider
         $eventBus->registerEvent(UserDeactivated::name(), UserDeactivated::class);
         $eventBus->registerEvent(UserReactivated::name(), UserReactivated::class);
         $eventBus->registerEvent(UserDeleted::name(), UserDeleted::class);
+        $eventBus->registerEvent(PromotionRequested::name(), PromotionRequested::class);
+        $eventBus->registerEvent(PromotionAccepted::name(), PromotionAccepted::class);
+        $eventBus->registerEvent(PromotionRejected::name(), PromotionRejected::class);
 
         // Register configuration parameters
         $this->registerConfigParameters();
+
+        // Register notification content types
+        $notificationFactory = app(NotificationFactory::class);
+        $notificationFactory->register(
+            type: PromotionAcceptedNotification::type(),
+            class: PromotionAcceptedNotification::class
+        );
+        $notificationFactory->register(
+            type: PromotionRejectedNotification::type(),
+            class: PromotionRejectedNotification::class
+        );
+
+        $this->registerAdminNavigation();
     }
 
     protected function registerConfigParameters(): void
@@ -113,5 +138,19 @@ class AuthServiceProvider extends ServiceProvider
             constraints: ['min' => 0],
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
+    }
+
+    protected function registerAdminNavigation(): void
+    {
+        $registry = app(AdminNavigationRegistry::class);
+        $registry->registerPage(
+            'auth.promotion_requests',
+            'auth',
+            __('auth::admin.promotion.nav_label'),
+            AdminRegistryTarget::route('auth.admin.promotion-requests.index'),
+            'upgrade',
+            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
+            4,
+        );
     }
 }
