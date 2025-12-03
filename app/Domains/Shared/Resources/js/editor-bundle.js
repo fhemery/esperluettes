@@ -58,7 +58,7 @@ export function initQuillEditor(id, options = {}) {
     }
     toolbar.push(['blockquote']);
     toolbar.push([{ align: [] }]);
-    toolbar.push([{ list: 'ordered' }, { list: 'bullet' }]);
+    toolbar.push([{ list: 'bullet' }, { list: 'ordered' }]);
     if (withLinks) {
       toolbar.push(['link']);
     }
@@ -188,7 +188,7 @@ export function initQuillEditor(id, options = {}) {
 
     // Sync Quill with the hidden input
     const updateCount = () => {
-      let text = editor.getText() || '';
+      let text = editor.getSemanticHTML() || '';
       if (text.endsWith('\n')) text = text.slice(0, -1); // Quill ends with a trailing newline
       const count = text.length;
       if (counterEl) {
@@ -220,7 +220,7 @@ export function initQuillEditor(id, options = {}) {
     };
 
     editor.on('text-change', function () {
-      if (quillEditor) quillEditor.value = editor.root.innerHTML;
+      if (quillEditor) quillEditor.value = editor.getSemanticHTML();
       updateCount();
     });
 

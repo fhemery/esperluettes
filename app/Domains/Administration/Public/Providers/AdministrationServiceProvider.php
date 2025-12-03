@@ -185,66 +185,6 @@ class AdministrationServiceProvider extends ServiceProvider
         );
 
         // Story references
-        // NOTE: story.audiences is now registered in StoryServiceRefProvider (custom admin page)
-
-        $registry->registerPage(
-            'story.copyrights',
-            'story',
-            __('admin::story.copyright.navigation_label'),
-            AdminRegistryTarget::url('/admin/story/copyrights'),
-            'copyright',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            2,
-        );
-
-        $registry->registerPage(
-            'story.feedbacks',
-            'story',
-            __('admin::story.feedback.navigation_label'),
-            AdminRegistryTarget::url('/admin/story/feedbacks'),
-            'forum',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            3,
-        );
-
-        $registry->registerPage(
-            'story.genres',
-            'story',
-            __('admin::story.genre.navigation_label'),
-            AdminRegistryTarget::url('/admin/story/genres'),
-            'menu_book',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            4,
-        );
-
-        $registry->registerPage(
-            'story.statuses',
-            'story',
-            __('admin::story.status.navigation_label'),
-            AdminRegistryTarget::url('/admin/story/statuses'),
-            'flag',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            5,
-        );
-
-        $registry->registerPage(
-            'story.trigger_warnings',
-            'story',
-            __('admin::story.trigger_warning.navigation_label'),
-            AdminRegistryTarget::url('/admin/story/trigger-warnings'),
-            'warning',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            6,
-        );
-
-        $registry->registerPage(
-            'story.types',
-            'story',
-            __('admin::story.type.navigation_label'),
-            AdminRegistryTarget::url('/admin/story/types'),
-            'category',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            7,
-        );
+        // NOTE: All StoryRef admin pages are now registered in StoryServiceRefProvider (custom admin pages)
     }
 }

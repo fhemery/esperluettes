@@ -146,6 +146,48 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
                     
+                NavigationItem::make('Copyrights')
+                    ->url('/admin/story-ref/copyrights')
+                    ->icon('heroicon-o-key')
+                    ->group('Histoires - Référentiels')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+                    
+                NavigationItem::make('Feedbacks')
+                    ->url('/admin/story-ref/feedbacks')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->group('Histoires - Référentiels')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+                    
+                NavigationItem::make('Genres')
+                    ->url('/admin/story-ref/genres')
+                    ->icon('heroicon-o-book-open')
+                    ->group('Histoires - Référentiels')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+                    
+                NavigationItem::make('Statuts')
+                    ->url('/admin/story-ref/statuses')
+                    ->icon('heroicon-o-flag')
+                    ->group('Histoires - Référentiels')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+                    
+                NavigationItem::make('Avertissements')
+                    ->url('/admin/story-ref/trigger-warnings')
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->group('Histoires - Référentiels')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+                    
+                NavigationItem::make('Types')
+                    ->url('/admin/story-ref/types')
+                    ->icon('heroicon-o-bars-3')
+                    ->group('Histoires - Référentiels')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+                    
                 NavigationItem::make('Gestion des utilisateurs')
                     ->url('/admin/moderation/user-management')
                     ->icon('heroicon-o-users')

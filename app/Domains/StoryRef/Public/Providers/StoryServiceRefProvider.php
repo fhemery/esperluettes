@@ -55,5 +55,71 @@ class StoryServiceRefProvider extends ServiceProvider
             [Roles::ADMIN, Roles::TECH_ADMIN],
             1,
         );
+
+        // Register copyright admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.copyrights',
+            'story',
+            __('story_ref::admin.copyrights.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.copyrights.index'),
+            'copyright',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            2,
+        );
+
+        // Register feedback admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.feedbacks',
+            'story',
+            __('story_ref::admin.feedbacks.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.feedbacks.index'),
+            'forum',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            3,
+        );
+
+        // Register genre admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.genres',
+            'story',
+            __('story_ref::admin.genres.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.genres.index'),
+            'menu_book',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            4,
+        );
+
+        // Register status admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.statuses',
+            'story',
+            __('story_ref::admin.statuses.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.statuses.index'),
+            'flag',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            5,
+        );
+
+        // Register trigger warning admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.trigger_warnings',
+            'story',
+            __('story_ref::admin.trigger_warnings.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.trigger-warnings.index'),
+            'warning',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            6,
+        );
+
+        // Register type admin page (replaces Filament resource)
+        $registry->registerPage(
+            'story_ref.types',
+            'story',
+            __('story_ref::admin.types.nav_label'),
+            AdminRegistryTarget::route('story_ref.admin.types.index'),
+            'category',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            7,
+        );
     }
 }

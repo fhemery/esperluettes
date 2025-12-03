@@ -4,7 +4,23 @@
     $isEdit = $audience !== null;
 @endphp
 
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6" x-data="{
+    name: '{{ old('name', $audience?->name ?? '') }}',
+    slug: '{{ old('slug', $audience?->slug ?? '') }}',
+    slugManuallyEdited: {{ $isEdit || old('slug') ? 'true' : 'false' }},
+    generateSlug() {
+        if (!this.slugManuallyEdited) {
+            this.slug = this.name
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+        }
+    }
+}">
     <!-- Name -->
     <div>
         <x-shared::input-label for="name" :required="true">
@@ -15,7 +31,8 @@
             id="name"
             name="name"
             class="mt-1 block w-full rounded-md"
-            :value="old('name', $audience?->name ?? '')"
+            x-model="name"
+            @blur="generateSlug()"
             required
         />
         <x-shared::input-error :messages="$errors->get('name')" class="mt-1" />
@@ -31,7 +48,8 @@
             id="slug"
             name="slug"
             class="mt-1 block w-full rounded-md font-mono"
-            :value="old('slug', $audience?->slug ?? '')"
+            x-model="slug"
+            @input="slugManuallyEdited = true"
             required
             pattern="[a-z0-9\-]+"
         />

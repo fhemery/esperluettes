@@ -1,31 +1,15 @@
 <x-admin::layout>
-    <div class="flex flex-col gap-6" x-data="{ reordering: false }" @reorder-cancel.window="reordering = false">
+    <div class="flex flex-col gap-6" x-data="{ reordering: false }" 
+    @reorder-cancel.window="reordering = false">
         <div class="flex justify-between items-center">
             <x-shared::title>{{ __('story_ref::admin.audiences.title') }}</x-shared::title>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('story_ref.admin.audiences.export') }}" x-show="!reordering">
-                    <x-shared::button color="neutral" :outline="true">
-                        <span class="material-symbols-outlined text-[18px] leading-none">download</span>
-                        {{ __('story_ref::admin.audiences.export_button') }}
-                    </x-shared::button>
-                </a>
-                @if(count($audiences) > 1)
-                    <x-shared::button 
-                        color="neutral" 
-                        :outline="true" 
-                        x-show="!reordering"
-                        x-on:click="reordering = true"
-                    >
-                        <span class="material-symbols-outlined text-[18px] leading-none">swap_vert</span>
-                        {{ __('administration::reorder.button') }}
-                    </x-shared::button>
-                @endif
-                <a href="{{ route('story_ref.admin.audiences.create') }}">
-                    <x-shared::button color="primary" icon="add">
-                        {{ __('story_ref::admin.audiences.create_button') }}
-                    </x-shared::button>
-                </a>
-            </div>
+            <x-story_ref::admin.index-actions
+                :exportRoute="route('story_ref.admin.audiences.export')"
+                :exportLabel="__('story_ref::admin.audiences.export_button')"
+                :createRoute="route('story_ref.admin.audiences.create')"
+                :createLabel="__('story_ref::admin.audiences.create_button')"
+                :itemCount="count($audiences)"
+            />
         </div>
 
         <!-- Reorderable list (shown when reordering) -->
@@ -77,15 +61,7 @@
                                 @endif
                             </td>
                             <td class="p-3">
-                                @if ($audience->is_active)
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-success/20 text-success">
-                                        {{ __('story_ref::admin.audiences.active_yes') }}
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-1 text-xs bg-fg/10 text-fg/50">
-                                        {{ __('story_ref::admin.audiences.active_no') }}
-                                    </span>
-                                @endif
+                                <x-administration::active-badge :active="$audience->is_active" />
                             </td>
                             <td class="p-3">
                                 <div class="flex gap-2">
@@ -94,18 +70,11 @@
                                        title="{{ __('story_ref::admin.audiences.edit_button') }}">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
-                                    <form action="{{ route('story_ref.admin.audiences.destroy', $audience) }}" 
-                                          method="POST" 
-                                          class="inline"
-                                          onsubmit="return confirm('{{ __('story_ref::admin.audiences.confirm_delete') }}')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="text-error hover:text-error/80"
-                                                title="{{ __('story_ref::admin.audiences.delete_button') }}">
-                                            <span class="material-symbols-outlined">delete</span>
-                                        </button>
-                                    </form>
+                                    
+                                    <x-administration::delete-button 
+                                        :action="route('story_ref.admin.audiences.destroy', $audience)"
+                                        :confirm="__('story_ref::admin.audiences.confirm_delete')"
+                                        :title="__('story_ref::admin.audiences.delete_button')" />
                                 </div>
                             </td>
                         </tr>
@@ -119,5 +88,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
+
+            </div>
 </x-admin::layout>
