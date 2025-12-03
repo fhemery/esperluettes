@@ -48,6 +48,10 @@ return [
             'required' => "Le code d'activation est requis.",
             'string' => "Le code d'activation doit être une chaîne de caractères.",
             'invalid' => "Le code d'activation est invalide, expiré ou déjà utilisé.",
+            'tooltip_mandatory' => "Le code d'activation est obligatoire pour accéder à la communauté.",
+            'tooltip_optional' => "Le code d'activation est un lien de parrainage qui vous permet de passer la phase de Graine et d'écrire directement vos propres histoires.",
+            'more_info' => "Plus d'infos",
+            'optional' => "(optionnel)",
         ],
         'under_15' => [
             'label' => 'J\'ai moins de 15 ans',

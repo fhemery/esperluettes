@@ -14,9 +14,13 @@
             <x-dashboard::welcome-component />
         </div>
 
-        <!-- Keep writing -->
+        <!-- Keep writing / Promotion status -->
         <div class="col-span-1">
-            <x-story::keep-writing-component />
+            @if($isConfirmed)
+                <x-story::keep-writing-component />
+            @else
+                <x-dashboard::promotion-status-component />
+            @endif
         </div>
 
         <!-- Keep reading -->

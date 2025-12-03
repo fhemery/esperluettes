@@ -12,10 +12,10 @@ class PromotionEligibilityDto
         public bool $eligible,
         /** Whether user already has a pending request */
         public bool $hasPendingRequest,
-        /** Number of days required to be registered */
-        public int $daysRequired,
-        /** Number of days elapsed since registration or last rejection */
-        public int $daysElapsed,
+        /** Number of days required to be registered (float for sub-day precision) */
+        public float $daysRequired,
+        /** Number of days elapsed since registration or last rejection (float for sub-day precision) */
+        public float $daysElapsed,
         /** Number of comments required */
         public int $commentsRequired,
         /** Number of comments the user has posted (passed by caller) */

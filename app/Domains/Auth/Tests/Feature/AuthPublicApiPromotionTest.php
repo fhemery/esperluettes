@@ -2,13 +2,13 @@
 
 use App\Domains\Auth\Private\Models\PromotionRequest;
 use App\Domains\Auth\Private\Models\User;
-use App\Domains\Auth\Private\Services\PromotionRequestService;
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Dto\PromotionEligibilityDto;
 use App\Domains\Auth\Public\Api\Dto\PromotionRequestResultDto;
 use App\Domains\Auth\Public\Api\Dto\PromotionStatusDto;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Public\Support\AuthConfigKeys;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -78,8 +78,8 @@ describe('AuthPublicApi: Promotions', function () {
 
             expect($result->eligible)->toBeFalse();
             expect($result->meetsTimeRequirement())->toBeFalse();
-            expect($result->daysRequired)->toBe(7);
-            expect($result->daysElapsed)->toBeLessThan(7);
+            expect($result->daysRequired)->toEqual(7.0);
+            expect($result->daysElapsed)->toBeLessThan(7.0);
         });
 
         it('returns ineligible when user has pending request', function () {
@@ -89,12 +89,7 @@ describe('AuthPublicApi: Promotions', function () {
             $user = createProbationUser($this);
 
             // Create pending request
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_PENDING,
-                'comment_count' => 5,
-                'requested_at' => now(),
-            ]);
+            createPromotionRequest($user, commentCount: 5);
 
             $api = getAuthApi();
             $result = $api->canRequestPromotion($user->id, commentCount: 100);
@@ -111,15 +106,8 @@ describe('AuthPublicApi: Promotions', function () {
             $admin = admin($this);
 
             // Create rejected request
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_REJECTED,
-                'comment_count' => 5,
-                'requested_at' => now()->subDays(2),
-                'decided_at' => now()->subDay(),
-                'decided_by' => $admin->id,
-                'rejection_reason' => 'Comments were low quality',
-            ]);
+            $request = createPromotionRequest($user, commentCount: 5);
+            rejectPromotionRequest($request, $admin, 'Comments were low quality');
 
             $api = getAuthApi();
             $result = $api->canRequestPromotion($user->id, commentCount: 100);
@@ -140,22 +128,22 @@ describe('AuthPublicApi: Promotions', function () {
             $admin = admin($this);
 
             // Create recent rejection (2 days ago)
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_REJECTED,
-                'comment_count' => 5,
-                'requested_at' => now()->subDays(3),
-                'decided_at' => now()->subDays(2),
-                'decided_by' => $admin->id,
-                'rejection_reason' => 'Try again later',
-            ]);
+            $request = createPromotionRequest(
+                $user,
+                commentCount: 5,
+                requestedAt: now()->subDays(3),
+            );
+
+            Carbon::setTestNow(now()->subDays(2));
+            rejectPromotionRequest($request, $admin, 'Try again later');
+            Carbon::setTestNow();
 
             $api = getAuthApi();
             $result = $api->canRequestPromotion($user->id, commentCount: 100);
 
             // Even though user was created 30 days ago, countdown resets from rejection
             expect($result->meetsTimeRequirement())->toBeFalse();
-            expect($result->daysElapsed)->toBe(2);
+            expect((int) floor($result->daysElapsed))->toBe(2);
         });
     });
 
@@ -207,12 +195,7 @@ describe('AuthPublicApi: Promotions', function () {
             $user = createProbationUser($this);
 
             // Create existing pending request
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_PENDING,
-                'comment_count' => 5,
-                'requested_at' => now(),
-            ]);
+            createPromotionRequest($user, commentCount: 5);
 
             $api = getAuthApi();
             $result = $api->requestPromotion($user->id, commentCount: 100);
@@ -242,15 +225,15 @@ describe('AuthPublicApi: Promotions', function () {
             $admin = admin($this);
 
             // Create rejected request
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_REJECTED,
-                'comment_count' => 5,
-                'requested_at' => now()->subDays(10),
-                'decided_at' => now()->subDays(9),
-                'decided_by' => $admin->id,
-                'rejection_reason' => 'Not ready',
-            ]);
+            $request = createPromotionRequest(
+                $user,
+                commentCount: 5,
+                requestedAt: now()->subDays(10),
+            );
+
+            Carbon::setTestNow(now()->subDays(9));
+            rejectPromotionRequest($request, $admin, 'Not ready');
+            Carbon::setTestNow();
 
             $api = getAuthApi();
             $result = $api->requestPromotion($user->id, commentCount: 20);
@@ -283,12 +266,7 @@ describe('AuthPublicApi: Promotions', function () {
 
             $user = createProbationUser($this);
 
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_PENDING,
-                'comment_count' => 5,
-                'requested_at' => now(),
-            ]);
+            createPromotionRequest($user, commentCount: 5);
 
             $api = getAuthApi();
             $result = $api->getPromotionStatus($user->id);
@@ -300,15 +278,8 @@ describe('AuthPublicApi: Promotions', function () {
             $user = createProbationUser($this);
             $admin = admin($this);
 
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_REJECTED,
-                'comment_count' => 5,
-                'requested_at' => now()->subDays(2),
-                'decided_at' => now()->subDay(),
-                'decided_by' => $admin->id,
-                'rejection_reason' => 'Low quality comments',
-            ]);
+            $request = createPromotionRequest($user, commentCount: 5);
+            rejectPromotionRequest($request, $admin, 'Low quality comments');
 
             $api = getAuthApi();
             $result = $api->getPromotionStatus($user->id);
@@ -323,23 +294,18 @@ describe('AuthPublicApi: Promotions', function () {
             $admin = admin($this);
 
             // Old rejection
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_REJECTED,
-                'comment_count' => 5,
-                'requested_at' => now()->subDays(10),
-                'decided_at' => now()->subDays(9),
-                'decided_by' => $admin->id,
-                'rejection_reason' => 'Old rejection',
-            ]);
+            $oldRequest = createPromotionRequest(
+                $user,
+                commentCount: 5,
+                requestedAt: now()->subDays(10),
+            );
+
+            Carbon::setTestNow(now()->subDays(9));
+            rejectPromotionRequest($oldRequest, $admin, 'Old rejection');
+            Carbon::setTestNow();
 
             // New pending request
-            PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_PENDING,
-                'comment_count' => 15,
-                'requested_at' => now(),
-            ]);
+            createPromotionRequest($user, commentCount: 15);
 
             $api = getAuthApi();
             $result = $api->getPromotionStatus($user->id);
@@ -366,29 +332,12 @@ describe('AuthPublicApi: Promotions', function () {
             $admin = admin($this);
 
             // 2 pending requests
-            PromotionRequest::create([
-                'user_id' => $user1->id,
-                'status' => PromotionRequest::STATUS_PENDING,
-                'comment_count' => 5,
-                'requested_at' => now(),
-            ]);
-            PromotionRequest::create([
-                'user_id' => $user2->id,
-                'status' => PromotionRequest::STATUS_PENDING,
-                'comment_count' => 8,
-                'requested_at' => now(),
-            ]);
+            createPromotionRequest($user1, commentCount: 5);
+            createPromotionRequest($user2, commentCount: 8);
 
             // 1 rejected (should not be counted)
-            PromotionRequest::create([
-                'user_id' => $user3->id,
-                'status' => PromotionRequest::STATUS_REJECTED,
-                'comment_count' => 3,
-                'requested_at' => now()->subDay(),
-                'decided_at' => now(),
-                'decided_by' => $admin->id,
-                'rejection_reason' => 'Denied',
-            ]);
+            $rejectedRequest = createPromotionRequest($user3, commentCount: 3);
+            rejectPromotionRequest($rejectedRequest, $admin, 'Denied');
 
             $api = getAuthApi();
             $count = $api->getPendingPromotionCount();
@@ -478,15 +427,9 @@ describe('AuthPublicApi: Promotions', function () {
             $admin = admin($this);
 
             // Create and accept request
-            $request = PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_PENDING,
-                'comment_count' => 10,
-                'requested_at' => now(),
-            ]);
+            $request = createPromotionRequest($user, commentCount: 10);
 
-            $service = app(PromotionRequestService::class);
-            $result = $service->acceptRequest($request->id, $admin->id);
+            $result = acceptPromotionRequest($request, $admin);
 
             expect($result)->toBeTrue();
 
@@ -509,15 +452,9 @@ describe('AuthPublicApi: Promotions', function () {
             $user = createProbationUser($this);
             $admin = admin($this);
 
-            $request = PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_PENDING,
-                'comment_count' => 10,
-                'requested_at' => now(),
-            ]);
+            $request = createPromotionRequest($user, commentCount: 10);
 
-            $service = app(PromotionRequestService::class);
-            $result = $service->rejectRequest($request->id, $admin->id, 'Comments need improvement');
+            $result = rejectPromotionRequest($request, $admin, 'Comments need improvement');
 
             expect($result)->toBeTrue();
 
@@ -538,18 +475,10 @@ describe('AuthPublicApi: Promotions', function () {
             $user = createProbationUser($this);
             $admin = admin($this);
 
-            $request = PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_REJECTED,
-                'comment_count' => 10,
-                'requested_at' => now()->subDay(),
-                'decided_at' => now(),
-                'decided_by' => $admin->id,
-                'rejection_reason' => 'Already decided',
-            ]);
+            $request = createPromotionRequest($user, commentCount: 10);
+            rejectPromotionRequest($request, $admin, 'Already decided');
 
-            $service = app(PromotionRequestService::class);
-            $result = $service->acceptRequest($request->id, $admin->id);
+            $result = acceptPromotionRequest($request, $admin);
 
             expect($result)->toBeFalse();
         });
@@ -558,27 +487,23 @@ describe('AuthPublicApi: Promotions', function () {
             $user = createProbationUser($this);
             $admin = admin($this);
 
-            $request = PromotionRequest::create([
-                'user_id' => $user->id,
-                'status' => PromotionRequest::STATUS_ACCEPTED,
-                'comment_count' => 10,
-                'requested_at' => now()->subDay(),
-                'decided_at' => now(),
-                'decided_by' => $admin->id,
-            ]);
+            $request = createPromotionRequest($user, commentCount: 10);
+            acceptPromotionRequest($request, $admin);
 
-            $service = app(PromotionRequestService::class);
-            $result = $service->rejectRequest($request->id, $admin->id, 'Too late');
+            $result = rejectPromotionRequest($request, $admin, 'Too late');
 
             expect($result)->toBeFalse();
         });
 
         it('returns false for non-existent request', function () {
             $admin = admin($this);
-            $service = app(PromotionRequestService::class);
 
-            expect($service->acceptRequest(999999, $admin->id))->toBeFalse();
-            expect($service->rejectRequest(999999, $admin->id, 'reason'))->toBeFalse();
+            // Create fake request objects with non-existent IDs
+            $fakeRequest = new PromotionRequest();
+            $fakeRequest->id = 999999;
+
+            expect(acceptPromotionRequest($fakeRequest, $admin))->toBeFalse();
+            expect(rejectPromotionRequest($fakeRequest, $admin, 'reason'))->toBeFalse();
         });
     });
 });

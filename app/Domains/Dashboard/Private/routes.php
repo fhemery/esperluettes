@@ -8,4 +8,8 @@ Route::middleware('web')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware(['auth', 'verified', 'compliant', 'role:'.Roles::USER.','.Roles::USER_CONFIRMED.','.Roles::ADMIN])
         ->name('dashboard');
+
+    Route::post('/dashboard/promotion/request', [DashboardController::class, 'requestPromotion'])
+        ->middleware(['auth', 'verified', 'compliant', 'role:'.Roles::USER])
+        ->name('dashboard.promotion.request');
 });

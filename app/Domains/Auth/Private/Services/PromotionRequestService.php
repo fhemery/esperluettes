@@ -36,7 +36,8 @@ class PromotionRequestService
 
         $commentsRequired = (int) $this->configApi()->getParameterValue(AuthConfigKeys::NON_CONFIRMED_COMMENT_THRESHOLD, AuthConfigKeys::DOMAIN);
         $timespanSeconds = (int) $this->configApi()->getParameterValue(AuthConfigKeys::NON_CONFIRMED_TIMESPAN, AuthConfigKeys::DOMAIN);
-        $daysRequired = (int) ceil($timespanSeconds / 86400);
+        // Keep as float for sub-day precision (e.g., 1 hour = 0.0417 days)
+        $daysRequired = $timespanSeconds / 86400;
 
         // Check for pending request
         $pendingRequest = $this->getPendingRequest($userId);
@@ -47,9 +48,9 @@ class PromotionRequestService
         $lastRejectionReason = $lastRejection?->rejection_reason;
         $lastRejectionDate = $lastRejection?->decided_at?->toDateTime();
 
-        // Compute days elapsed since registration or last rejection
+        // Compute days elapsed since registration or last rejection (float for precision)
         $countdownStart = $lastRejection?->decided_at ?? ($user?->created_at ?? now());
-        $daysElapsed = (int) Carbon::parse($countdownStart)->diffInDays(now());
+        $daysElapsed = Carbon::parse($countdownStart)->floatDiffInDays(now());
 
         $meetsTime = $daysElapsed >= $daysRequired;
         $meetsComments = $commentCount >= $commentsRequired;
