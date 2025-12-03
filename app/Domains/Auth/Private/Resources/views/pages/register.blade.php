@@ -42,7 +42,7 @@
         </div>
 
         <!-- Activation Code -->
-        @if(config('app.require_activation_code', false))
+        @if($requireActivationCode)
         <div class="mt-4">
             <x-input-label for="activation_code" :value="__('auth::register.activation.label')" class="text-on-surface" />
             <x-text-input id="activation_code" class="block mt-1 w-full" 

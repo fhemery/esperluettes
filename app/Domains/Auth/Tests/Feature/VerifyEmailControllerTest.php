@@ -15,26 +15,23 @@ uses(TestCase::class, RefreshDatabase::class);
 
 describe('Email verification process', function () {
 
-    it('assigns ' . Roles::USER . ' role when activation is required and no activation code was used', function () {
-        // Arrange: allow registration without activation code, then require it at verification time
-        config(['app.require_activation_code' => false]);
+    it('assigns ' . Roles::USER . ' role when activation code is optional and no code was used', function () {
+        // Arrange: activation code is optional
+        setActivationCodeRequired(false);
 
         /** @var User $user */
         $user = registerUserThroughForm($this, [
             'email' => 'need-code@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
-        ], false); // not verified yet
-
-        // Now require activation code for verification logic
-        config(['app.require_activation_code' => true]);
+        ], false); // not verified yet, no activation code
 
         $this->actingAs($user);
 
         // Act
         $response = $this->get(verificationUrlFor($user));
 
-        // Assert
+        // Assert: unsponsored user gets USER role, not USER_CONFIRMED
         $response->assertRedirect();
         $user->refresh();
         expect($user->hasVerifiedEmail())->toBeTrue();
@@ -44,7 +41,7 @@ describe('Email verification process', function () {
 
     it('assigns ' . Roles::USER_CONFIRMED . ' role when activation is required and an activation code was used', function () {
         // Arrange: allow registration without activation code, then require it at verification time
-        config(['app.require_activation_code' => false]);
+        setActivationCodeRequired(false);
 
         /** @var User $user */
         $user = registerUserThroughForm($this, [
@@ -64,7 +61,7 @@ describe('Email verification process', function () {
         ]);
 
         // Now require activation code for verification logic
-        config(['app.require_activation_code' => true]);
+        setActivationCodeRequired(true);
 
         $this->actingAs($user);
 
@@ -79,23 +76,33 @@ describe('Email verification process', function () {
         expect($user->isOnProbation())->toBeFalse();
     });
 
-    it('assigns ' . Roles::USER_CONFIRMED . ' role when activation is not required', function () {
-        // Arrange
-        config(['app.require_activation_code' => false]);
+    it('assigns ' . Roles::USER_CONFIRMED . ' role when activation code is optional and user has one', function () {
+        // Arrange: activation code is optional but user provides one
+        setActivationCodeRequired(false);
 
         /** @var User $user */
         $user = registerUserThroughForm($this, [
-            'email' => 'no-code-required@example.com',
+            'email' => 'sponsored-user@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
         ], false); // not verified yet
+
+        // Simulate activation code used by this user (sponsored)
+        ActivationCode::create([
+            'code' => (string) Str::uuid(),
+            'sponsor_user_id' => null,
+            'used_by_user_id' => $user->id,
+            'comment' => null,
+            'expires_at' => null,
+            'used_at' => now(),
+        ]);
 
         $this->actingAs($user);
 
         // Act
         $response = $this->get(verificationUrlFor($user));
 
-        // Assert
+        // Assert: sponsored user gets CONFIRMED
         $response->assertRedirect();
         $user->refresh();
         expect($user->hasVerifiedEmail())->toBeTrue();
@@ -106,7 +113,7 @@ describe('Email verification process', function () {
     describe('Events', function () {
         it('emits Auth.EmailVerified with display name when user verifies email', function () {
             // Arrange
-            config(['app.require_activation_code' => false]);
+            setActivationCodeRequired(false);
 
             /** @var User $user */
             $user = registerUserThroughForm($this, [
@@ -135,12 +142,22 @@ describe('Email verification process', function () {
         });
 
         describe('email verification events', function () {
-            it('emits role events on verification when promotion occurs (no activation code required)', function () {
-                // Explicitly disable activation code requirement to trigger promotion to confirmed
-                config()->set('app.require_activation_code', false);
+            it('emits role events on verification when promotion to USER_CONFIRMED occurs (sponsored user)', function () {
+                // Activation code is optional
+                setActivationCodeRequired(false);
     
-                // Unverified user on probation (role: user)
+                // Unverified user (no roles yet)
                 $user = alice($this, roles: [], isVerified: false);
+
+                // Make user sponsored with activation code
+                ActivationCode::create([
+                    'code' => (string) Str::uuid(),
+                    'sponsor_user_id' => null,
+                    'used_by_user_id' => $user->id,
+                    'comment' => null,
+                    'expires_at' => null,
+                    'used_at' => now(),
+                ]);
     
                 // Build signed verification URL
                 $verificationUrl = verificationUrlFor($user);
@@ -148,7 +165,7 @@ describe('Email verification process', function () {
                 $response = $this->actingAs($user)->get($verificationUrl);
                 $response->assertRedirect();
     
-                // As the actor is the same user and user is not admin, summary should be system variant
+                // Sponsored user gets USER_CONFIRMED
                 /** @var UserRoleGranted|null $granted */
                 $granted = latestEventOf(UserRoleGranted::name(), UserRoleGranted::class);
                 expect($granted)->not->toBeNull();
@@ -164,7 +181,7 @@ describe('Email verification process', function () {
 
         it('does not assign roles when under-15 user verifies email without parental authorization', function () {
             // Arrange: under-15 user without parental authorization
-            config(['app.require_activation_code' => false]);
+            setActivationCodeRequired(false);
 
             /** @var User $user */
             $user = registerUserThroughForm($this, [
@@ -188,9 +205,9 @@ describe('Email verification process', function () {
             expect($user->roles)->toBeEmpty();
         });
 
-        it('assigns roles when under-15 user verifies email with parental authorization already provided', function () {
-            // Arrange: under-15 user WITH parental authorization already verified
-            config(['app.require_activation_code' => false]);
+        it('assigns USER role when unsponsored under-15 user verifies email with parental authorization', function () {
+            // Arrange: unsponsored under-15 user WITH parental authorization already verified
+            setActivationCodeRequired(false);
 
             /** @var User $user */
             $user = registerUserThroughForm($this, [
@@ -198,7 +215,7 @@ describe('Email verification process', function () {
                 'password' => 'password',
                 'password_confirmation' => 'password',
                 'is_under_15' => true,
-            ], false, []); // not verified, no roles
+            ], false, []); // not verified, no roles, no activation code
 
             // Simulate parental authorization already provided
             $user->update(['parental_authorization_verified_at' => now()]);
@@ -208,17 +225,17 @@ describe('Email verification process', function () {
             // Act: verify email
             $response = $this->get(verificationUrlFor($user));
 
-            // Assert: email verified AND role assigned
+            // Assert: email verified AND USER role assigned (unsponsored user)
             $response->assertRedirect();
             $user->refresh();
             expect($user->hasVerifiedEmail())->toBeTrue();
-            expect($user->isConfirmed())->toBeTrue();
-            expect($user->isOnProbation())->toBeFalse();
+            expect($user->isOnProbation())->toBeTrue();
+            expect($user->isConfirmed())->toBeFalse();
         });
 
         it('assigns roles when under-15 user with activation code verifies email with parental authorization', function () {
             // Arrange: register without activation code requirement first
-            config(['app.require_activation_code' => false]);
+            setActivationCodeRequired(false);
 
             /** @var User $user */
             $user = registerUserThroughForm($this, [
@@ -242,7 +259,7 @@ describe('Email verification process', function () {
             $user->update(['parental_authorization_verified_at' => now()]);
 
             // Now require activation code for verification logic
-            config(['app.require_activation_code' => true]);
+            setActivationCodeRequired(true);
 
             $this->actingAs($user);
 

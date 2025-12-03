@@ -7,6 +7,8 @@ use App\Domains\Auth\Private\Models\Role;
 use App\Domains\Auth\Private\Models\ActivationCode;
 use App\Domains\Auth\Private\Services\RoleCacheService;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Public\Support\AuthConfigKeys;
+use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Public\Events\UserRoleGranted;
 use App\Domains\Auth\Public\Events\UserRoleRevoked;
@@ -18,6 +20,15 @@ class RoleService
         private readonly RoleCacheService $roleCache,
         private readonly EventBus $eventBus,
     ) {}
+
+    /**
+     * Lazy resolution of ConfigPublicApi to avoid circular dependency.
+     * (Auth → Config → FeatureToggle → Auth)
+     */
+    private function configApi(): ConfigPublicApi
+    {
+        return app(ConfigPublicApi::class);
+    }
 
     /**
      * Grant a role to the user (idempotent) and clear role cache.
@@ -144,38 +155,56 @@ class RoleService
     /**
      * Assign roles to a user based on activation code configuration.
      * Used when a user completes all requirements (email verification + parental auth if under-15).
+     *
+     * Logic:
+     * - require_activation_code = true: Code is MANDATORY, user always provided one → USER_CONFIRMED
+     * - require_activation_code = false: Code is OPTIONAL
+     *   - With activation code → USER_CONFIRMED (sponsored user)
+     *   - Without activation code → USER (unsponsored user, needs promotion later)
      */
     public function assignRolesBasedOnActivationCode(User $user): void
     {
-        $requireActivation = config('app.require_activation_code', false);
+        $requireActivation = (bool) $this->configApi()->getParameterValue(AuthConfigKeys::REQUIRE_ACTIVATION_CODE, AuthConfigKeys::DOMAIN);
         $usedActivation = ActivationCode::where('used_by_user_id', $user->id)->exists();
 
-        if (!$requireActivation) {
-            // Feature disabled: confirmed by default
-            if ($user->isOnProbation()) {
-                $this->revoke($user, Roles::USER);
-            }
-            if (!$user->isConfirmed()) {
-                $this->grant($user, Roles::USER_CONFIRMED);
-            }
+        if ($requireActivation) {
+            // Activation code is mandatory: user always has one → USER_CONFIRMED
+            $this->promoteToConfirmedRole($user);
         } else {
+            // Activation code is optional
             if ($usedActivation) {
-                // Used a code: promote to confirmed
-                if ($user->isOnProbation()) {
-                    $this->revoke($user, Roles::USER);
-                }
-                if (!$user->isConfirmed()) {
-                    $this->grant($user, Roles::USER_CONFIRMED);
-                }
+                // Sponsored user (used a code) → USER_CONFIRMED
+                $this->promoteToConfirmedRole($user);
             } else {
-                // No code used: keep as user only
-                if ($user->isConfirmed()) {
-                    $this->revoke($user, Roles::USER_CONFIRMED);
-                }
-                if (!$user->isOnProbation()) {
-                    $this->grant($user, Roles::USER);
-                }
+                // Unsponsored user (no code) → USER only
+                $this->assignUserRole($user);
             }
+        }
+    }
+
+    /**
+     * Promote user to USER_CONFIRMED role (removing USER if present).
+     */
+    private function promoteToConfirmedRole(User $user): void
+    {
+        if ($user->isOnProbation()) {
+            $this->revoke($user, Roles::USER);
+        }
+        if (!$user->isConfirmed()) {
+            $this->grant($user, Roles::USER_CONFIRMED);
+        }
+    }
+
+    /**
+     * Assign USER role only (for unsponsored users).
+     */
+    private function assignUserRole(User $user): void
+    {
+        if ($user->isConfirmed()) {
+            $this->revoke($user, Roles::USER_CONFIRMED);
+        }
+        if (!$user->isOnProbation()) {
+            $this->grant($user, Roles::USER);
         }
     }
 }

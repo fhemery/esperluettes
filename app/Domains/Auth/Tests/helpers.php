@@ -3,9 +3,19 @@
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Private\Services\UserService;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Public\Support\AuthConfigKeys;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
+
+/**
+ * Set whether activation code is required for registration.
+ * Convenience wrapper around setParameterValue for Auth domain.
+ */
+function setActivationCodeRequired(bool $required): void
+{
+    setParameterValue(AuthConfigKeys::REQUIRE_ACTIVATION_CODE, AuthConfigKeys::DOMAIN, $required);
+}
 
 function alice(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER_CONFIRMED]): User
 {
@@ -84,8 +94,9 @@ function verificationUrlFor(User $user): string
  * If $isVerified is true (default), the user's email will be marked as verified.
  * If $ensureGuest is true (default), we'll log out any existing session before registering.
  */
-function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER]): User
+function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER], bool $activationCodeRequired = false): User
 {
+    setActivationCodeRequired($activationCodeRequired);
     $payload = array_merge([
         'name' => 'John Doe',
         'email' => 'john@example.com',

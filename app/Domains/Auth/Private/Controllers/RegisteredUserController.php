@@ -7,6 +7,8 @@ use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Auth\Private\Services\ActivationCodeService;
 use App\Domains\Auth\Private\Requests\RegisterRequest;
+use App\Domains\Auth\Public\Support\AuthConfigKeys;
+use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +23,13 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth::pages.register');
+        $configApi = app(ConfigPublicApi::class);
+        $requireActivationCode = (bool) $configApi->getParameterValue(
+            AuthConfigKeys::REQUIRE_ACTIVATION_CODE,
+            AuthConfigKeys::DOMAIN
+        );
+
+        return view('auth::pages.register', compact('requireActivationCode'));
     }
 
     /**
@@ -41,8 +49,9 @@ class RegisteredUserController extends Controller
             'terms_accepted_at' => now(), // Terms are accepted if validation passes (checkbox checked)
         ]);
 
-        // Mark activation code as used if provided
-        if (config('app.require_activation_code', false) && ($data['activation_code'] ?? null)) {
+        // Mark activation code as used if provided (regardless of whether required)
+        // This ensures sponsored users get USER_CONFIRMED role even when code is optional
+        if ($data['activation_code'] ?? null) {
             $activationCodeService = app(ActivationCodeService::class);
             $activationCodeService->validateAndUseCode($data['activation_code'], $user);
         }

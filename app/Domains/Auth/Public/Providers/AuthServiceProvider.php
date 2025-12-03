@@ -2,21 +2,26 @@
 
 namespace App\Domains\Auth\Public\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Route;
-use App\Domains\Events\Public\Api\EventBus;
-use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Auth\Public\Events\EmailVerified;
 use App\Domains\Auth\Public\Events\PasswordChanged;
 use App\Domains\Auth\Public\Events\PasswordResetRequested;
+use App\Domains\Auth\Public\Events\UserDeactivated;
+use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Auth\Public\Events\UserLoggedIn;
 use App\Domains\Auth\Public\Events\UserLoggedOut;
+use App\Domains\Auth\Public\Events\UserReactivated;
+use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Auth\Public\Events\UserRoleGranted;
 use App\Domains\Auth\Public\Events\UserRoleRevoked;
-use App\Domains\Auth\Public\Events\UserDeactivated;
-use App\Domains\Auth\Public\Events\UserReactivated;
-use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Auth\Public\Support\AuthConfigKeys;
+use App\Domains\Config\Public\Api\ConfigPublicApi;
+use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
+use App\Domains\Config\Public\Contracts\ConfigParameterType;
+use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
+use App\Domains\Events\Public\Api\EventBus;
+use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -74,5 +79,39 @@ class AuthServiceProvider extends ServiceProvider
         $eventBus->registerEvent(UserDeactivated::name(), UserDeactivated::class);
         $eventBus->registerEvent(UserReactivated::name(), UserReactivated::class);
         $eventBus->registerEvent(UserDeleted::name(), UserDeleted::class);
+
+        // Register configuration parameters
+        $this->registerConfigParameters();
+    }
+
+    protected function registerConfigParameters(): void
+    {
+        $configApi = app(ConfigPublicApi::class);
+
+        $configApi->registerParameter(new ConfigParameterDefinition(
+            domain: AuthConfigKeys::DOMAIN,
+            key: AuthConfigKeys::REQUIRE_ACTIVATION_CODE,
+            type: ConfigParameterType::BOOL,
+            default: true,
+            visibility: ConfigParameterVisibility::ALL_ADMINS,
+        ));
+
+        $configApi->registerParameter(new ConfigParameterDefinition(
+            domain: AuthConfigKeys::DOMAIN,
+            key: AuthConfigKeys::NON_CONFIRMED_COMMENT_THRESHOLD,
+            type: ConfigParameterType::INT,
+            default: 5,
+            constraints: ['min' => 0],
+            visibility: ConfigParameterVisibility::ALL_ADMINS,
+        ));
+
+        $configApi->registerParameter(new ConfigParameterDefinition(
+            domain: AuthConfigKeys::DOMAIN,
+            key: AuthConfigKeys::NON_CONFIRMED_TIMESPAN,
+            type: ConfigParameterType::TIME,
+            default: 604800, // 7 days in seconds
+            constraints: ['min' => 0],
+            visibility: ConfigParameterVisibility::ALL_ADMINS,
+        ));
     }
 }

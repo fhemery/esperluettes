@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\Private\Models\ActivationCode;
 use App\Domains\Auth\Private\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -170,17 +171,26 @@ describe('Compliance at login', function () {
     describe('Role assignment for underage users', function () {
 
         test('underage user with verified email gets roles upon parental auth upload', function () {
-            config(['app.require_activation_code' => false]);
+            // Activation code is optional
+            setActivationCodeRequired(false);
 
-            // Create verified under-15 user without roles
+            // Create an activation code for a sponsored user
+            $code = ActivationCode::create([
+                'code' => 'TEST-CODE-123',
+                'sponsor_user_id' => null,
+                'expires_at' => now()->addDays(7),
+            ]);
+
+            // Create verified under-15 user without roles (sponsored with activation code)
             $user = registerUserThroughForm($this, [
                 'email' => 'minor-verified@example.com',
                 'password' => 'password',
                 'password_confirmation' => 'password',
                 'is_under_15' => true,
+                'activation_code' => 'TEST-CODE-123',
             ], true, []); // verified, no roles
 
-            // Sanity check: no roles yet
+            // Sanity check: no roles yet (underage user waits for parental auth)
             expect($user->isConfirmed())->toBeFalse();
             expect($user->isOnProbation())->toBeFalse();
 
@@ -192,14 +202,15 @@ describe('Compliance at login', function () {
                 ])
                 ->assertRedirect(route('dashboard'));
 
-            // Should now have confirmed role
+            // Should now have confirmed role (sponsored user)
             $user->refresh();
             expect($user->parental_authorization_verified_at)->not->toBeNull();
             expect($user->isConfirmed())->toBeTrue();
         });
 
         test('underage user without verified email does not get roles upon parental auth upload', function () {
-            config(['app.require_activation_code' => false]);
+            // Activation code is optional
+            setActivationCodeRequired(false);
 
             // Create unverified under-15 user without roles
             $user = registerUserThroughForm($this, [
@@ -223,6 +234,38 @@ describe('Compliance at login', function () {
             expect($user->isConfirmed())->toBeFalse();
             expect($user->isOnProbation())->toBeFalse();
             expect($user->roles)->toBeEmpty();
+        });
+
+        test('unsponsored underage user gets USER role upon parental auth upload (no activation code)', function () {
+            // Activation code is optional
+            setActivationCodeRequired(false);
+
+            // Create verified under-15 user WITHOUT activation code (unsponsored)
+            $user = registerUserThroughForm($this, [
+                'email' => 'minor-unsponsored@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'is_under_15' => true,
+                // NO activation_code provided
+            ], true, []); // verified, no roles
+
+            // Sanity check: no roles yet (underage user waits for parental auth)
+            expect($user->isConfirmed())->toBeFalse();
+            expect($user->isOnProbation())->toBeFalse();
+
+            $file = UploadedFile::fake()->create('parental_auth.pdf', 1024);
+
+            $this->actingAs($user)
+                ->post(route('compliance.parental.upload'), [
+                    'parental_authorization' => $file,
+                ])
+                ->assertRedirect(route('dashboard'));
+
+            // Should have USER role (probation), not USER_CONFIRMED
+            $user->refresh();
+            expect($user->parental_authorization_verified_at)->not->toBeNull();
+            expect($user->isOnProbation())->toBeTrue();
+            expect($user->isConfirmed())->toBeFalse();
         });
 
     });
