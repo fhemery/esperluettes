@@ -159,7 +159,7 @@ class AdminServiceProvider extends PanelProvider
                     ->group('Histoires - Référentiels')
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
-                    
+                                       
                 NavigationItem::make('Genres')
                     ->url('/admin/story-ref/genres')
                     ->icon('heroicon-o-book-open')
@@ -194,6 +194,14 @@ class AdminServiceProvider extends PanelProvider
                     ->group('Modération')
                     ->sort(10)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]) ?? false),
+
+                NavigationItem::make('Paramètres')
+                    ->url('/admin/config/parameters')
+                    ->icon('heroicon-o-adjustments-vertical')
+                    ->group('Configuration')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+ 
             ])
             ->renderHook('panels::body.end', fn () => view('admin::partials.format-dates'));
     }
