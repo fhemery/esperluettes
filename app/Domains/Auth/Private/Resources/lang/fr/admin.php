@@ -62,7 +62,7 @@ return [
 
         'filter' => [
             'search' => 'Recherche',
-            'search_placeholder' => 'Email...',
+            'search_placeholder' => 'Nom du profil...',
             'status' => 'Statut',
             'all' => 'Tous',
             'apply' => 'Filtrer',

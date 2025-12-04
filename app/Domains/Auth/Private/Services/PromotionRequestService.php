@@ -291,27 +291,24 @@ class PromotionRequestService
     /**
      * Get paginated promotion requests with optional filters.
      *
-     * @param array{status?: string|null, search?: string|null} $filters
+     * @param array{status?: string|null, user_ids?: int[]|null} $filters
      * @param int $perPage
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function getPaginatedRequests(array $filters, int $perPage = 20)
     {
         $query = PromotionRequest::query()
-            ->join('users', 'user_promotion_request.user_id', '=', 'users.id')
-            ->select('user_promotion_request.*')
-            ->orderByDesc('user_promotion_request.requested_at');
+            ->orderByDesc('requested_at');
 
         // Status filter (default to pending if not specified)
         $status = $filters['status'] ?? 'pending';
         if ($status && $status !== 'all') {
-            $query->where('user_promotion_request.status', $status);
+            $query->where('status', $status);
         }
 
-        // Search filter (by user email)
-        if (!empty($filters['search'])) {
-            $search = $filters['search'];
-            $query->where('users.email', 'like', "%{$search}%");
+        // Filter by user IDs (from profile search)
+        if (!empty($filters['user_ids'])) {
+            $query->whereIn('user_id', $filters['user_ids']);
         }
 
         return $query->paginate($perPage)->withQueryString();

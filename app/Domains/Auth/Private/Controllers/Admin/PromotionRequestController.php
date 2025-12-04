@@ -22,21 +22,35 @@ class PromotionRequestController extends Controller
 
     public function index(Request $request): View
     {
+        $search = $request->input('search');
+        
+        // If searching, first find matching profiles by display name
+        $userIds = null;
+        if (!empty($search)) {
+            $matchingProfiles = $this->profileApi->searchDisplayNames($search, 100);
+            $userIds = array_keys($matchingProfiles);
+            
+            // If no profiles match, return empty results
+            if (empty($userIds)) {
+                $userIds = [0]; // Force no results
+            }
+        }
+
         $filters = [
             'status' => $request->input('status', 'pending'),
-            'search' => $request->input('search'),
+            'user_ids' => $userIds,
         ];
 
         $requests = $this->promotionService->getPaginatedRequests($filters, 20);
 
         // Enrich with profile data
-        $userIds = $requests->pluck('user_id')->unique()->toArray();
-        $profiles = $this->profileApi->getPublicProfiles($userIds);
+        $resultUserIds = $requests->pluck('user_id')->unique()->toArray();
+        $profiles = $this->profileApi->getPublicProfiles($resultUserIds);
 
         return view('auth::pages.admin.promotion-requests.index', [
             'requests' => $requests,
             'profiles' => $profiles,
-            'filters' => $filters,
+            'filters' => ['status' => $filters['status'], 'search' => $search],
         ]);
     }
 
