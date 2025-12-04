@@ -62,9 +62,6 @@ class AuthServiceProvider extends ServiceProvider
         // Keep PHP translations namespace in case files exist later
         $this->loadTranslationsFrom(app_path('Domains/Auth/Private/Resources/lang'), 'auth');
 
-        // Register JSON translations (kept as-is for now)
-        $this->loadJsonTranslationsFrom(app_path('Domains/Auth/Private/Resources/lang'));
-
         // Register auth views namespace
         $this->loadViewsFrom(app_path('Domains/Auth/Private/Resources/views'), 'auth');
 
