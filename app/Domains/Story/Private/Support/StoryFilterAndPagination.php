@@ -56,6 +56,10 @@ class StoryFilterAndPagination
          * Unread means at least one unread chapter. The rest is considered Read.
          */
         public StoryQueryReadStatus $readStatus = StoryQueryReadStatus::All,
+        /**
+         * When true, only include stories marked as complete.
+         */
+        public bool $completeOnly = false,
     ) {
         // Normalize visibilities: ensure values and not empty
         $this->visibilities = array_values($this->visibilities);
@@ -78,6 +82,7 @@ class StoryFilterAndPagination
 
         // Normalize booleans
         $this->noTwOnly = (bool) $this->noTwOnly;
+        $this->completeOnly = (bool) $this->completeOnly;
 
         // Normalize story ids
         $this->onlyStoryIds = $this->onlyStoryIds ? array_values(array_unique(array_map('intval', $this->onlyStoryIds))) : null;

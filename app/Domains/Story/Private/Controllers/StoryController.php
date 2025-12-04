@@ -90,6 +90,8 @@ class StoryController
         }
         // Parse "No TW only" checkbox
         $noTwOnly = request()->boolean('no_tw_only', false);
+        // Parse "Complete only" checkbox
+        $completeOnly = request()->boolean('complete_only', false);
 
         $filter = new StoryFilterAndPagination(page: $page, 
             perPage: 12, 
@@ -98,7 +100,8 @@ class StoryController
             audienceIds: $audienceIds, 
             genreIds: $genreIds, 
             excludeTriggerWarningIds: $excludeTwIds, 
-            noTwOnly: $noTwOnly
+            noTwOnly: $noTwOnly,
+            completeOnly: $completeOnly
         );
         $fieldsToReturn = GetStoryOptions::ForCardDisplay();
         $paginator = $this->service->searchStories($filter, $fieldsToReturn);
@@ -134,6 +137,9 @@ class StoryController
         if ($noTwOnly) {
             $appends['no_tw_only'] = 1;
         }
+        if ($completeOnly) {
+            $appends['complete_only'] = 1;
+        }
 
         $viewModel = new StoryListViewModel($paginator, $items, $appends);
 
@@ -145,6 +151,7 @@ class StoryController
             'currentGenres' => $genreSlugs,
             'currentExcludeTw' => $twSlugs,
             'currentNoTwOnly' => $noTwOnly,
+            'currentCompleteOnly' => $completeOnly,
         ]);
     }
 

@@ -213,6 +213,35 @@ describe('Filtering', function () {
         $resp->assertDontSee('Unspoiled');
     });
 
+    it('filters to only complete stories when complete_only=1', function () {
+        // Arrange
+        $author = alice($this);
+
+        // Complete story
+        $complete = publicStory('Complete Story', $author->id, [
+            'description' => '<p>Desc</p>',
+        ]);
+        $complete->is_complete = true;
+        $complete->saveQuietly();
+        createPublishedChapter($this, $complete, $author);
+
+        // Incomplete story
+        $incomplete = publicStory('Ongoing Story', $author->id, [
+            'description' => '<p>Desc</p>',
+        ]);
+        $incomplete->is_complete = false;
+        $incomplete->saveQuietly();
+        createPublishedChapter($this, $incomplete, $author);
+
+        // Act
+        $resp = $this->get('/stories?complete_only=1');
+
+        // Assert: only the complete story is visible
+        $resp->assertOk();
+        $resp->assertSee('Complete Story');
+        $resp->assertDontSee('Ongoing Story');
+    });
+
     it('filters stories by multiple genre slugs (AND semantics)', function () {
         // Arrange
         $author = alice($this);

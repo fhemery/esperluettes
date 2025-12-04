@@ -14,6 +14,8 @@
 ['value' => 'private', 'label' => __('story::shared.visibility.options.private'), 'description' => __('story::shared.visibility.help.private')],
 ])
 @php($twDisclosureOld = old('tw_disclosure', $story?->tw_disclosure ?? ''))
+@php($isCompleteOld = old('is_complete', $story?->is_complete ?? false))
+@php($isExcludedFromEventsOld = old('is_excluded_from_events', $story?->is_excluded_from_events ?? false))
 @php($twDisclosureOptions = [
 ['value' => 'listed', 'label' => __('story::shared.trigger_warnings.form_options.listed'), 'description' => __('story::shared.trigger_warnings.listed_help')],
 ['value' => 'no_tw', 'label' => __('story::shared.trigger_warnings.form_options.no_tw'), 'description' => __('story::shared.trigger_warnings.no_tw_help')],
@@ -112,6 +114,15 @@
                     :placeholder="__('story::shared.status.placeholder')" valueField="id" labelField="name" descriptionField="description"
                     color="accent" />
                 <x-input-error :messages="$errors->get('story_ref_status_id')" class="mt-2" />
+
+                <!-- Is Complete checkbox -->
+                <label class="inline-flex items-center gap-2 text-sm text-fg mt-2">
+                    <input type="hidden" name="is_complete" value="0" />
+                    <input type="checkbox" name="is_complete" value="1"
+                        {{ $isCompleteOld ? 'checked' : '' }}
+                        class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
+                    <span>{{ __('story::shared.is_complete.label') }}</span>
+                </label>
             </div>
 
             <!-- Summary -->
@@ -179,17 +190,33 @@
 
     <!-- Panel 4: Miscellaneous -->
     <x-shared::collapsible :title="__('story::shared.panels.misc')" :open="true">
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <x-input-label for="story_ref_feedback_id" :value="__('story::shared.feedback.label')" />
+                    <x-shared::tooltip type="help" :title="__('story::shared.feedback.label')" placement="right">
+                        {{ __('story::shared.feedback.help') }}
+                    </x-shared::tooltip>
+                </div>
+                <x-shared::select-with-tooltips name="story_ref_feedback_id" :options="$referentials['feedbacks'] ?? []" :selected="$selectedFeedbackId"
+                    :placeholder="__('story::shared.feedback.placeholder')" valueField="id" labelField="name" descriptionField="description"
+                    color="accent" />
+                <x-input-error :messages="$errors->get('story_ref_feedback_id')" />
+            </div>
+
+            <!-- Exclude from events checkbox -->
             <div class="flex items-center gap-2">
-                <x-input-label for="story_ref_feedback_id" :value="__('story::shared.feedback.label')" />
-                <x-shared::tooltip type="help" :title="__('story::shared.feedback.label')" placement="right">
-                    {{ __('story::shared.feedback.help') }}
+                <input type="hidden" name="is_excluded_from_events" value="0" />
+                <input type="checkbox" name="is_excluded_from_events" value="1" id="is_excluded_from_events"
+                    {{ $isExcludedFromEventsOld ? 'checked' : '' }}
+                    class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
+                <label for="is_excluded_from_events" class="text-sm text-fg">
+                    {{ __('story::shared.is_excluded_from_events.label') }}
+                </label>
+                <x-shared::tooltip type="help" :title="__('story::shared.is_excluded_from_events.label')" placement="right">
+                    {{ __('story::shared.is_excluded_from_events.help') }}
                 </x-shared::tooltip>
             </div>
-            <x-shared::select-with-tooltips name="story_ref_feedback_id" :options="$referentials['feedbacks'] ?? []" :selected="$selectedFeedbackId"
-                :placeholder="__('story::shared.feedback.placeholder')" valueField="id" labelField="name" descriptionField="description"
-                color="accent" />
-            <x-input-error :messages="$errors->get('story_ref_feedback_id')" />
         </div>
     </x-shared::collapsible>
 </div>

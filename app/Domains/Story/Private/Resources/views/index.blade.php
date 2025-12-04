@@ -12,7 +12,7 @@
 @endpush
 
 <x-app-layout>
-    @php($hasFilters = !empty($currentType) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw) || !empty($currentNoTwOnly))
+    @php($hasFilters = !empty($currentType) || !empty($currentAudiences) || !empty($currentGenres) || !empty($currentExcludeTw) || !empty($currentNoTwOnly) || !empty($currentCompleteOnly))
 
     <div class="w-full flex flex-col gap-4">
         <x-shared::title icon="nest_eco_leaf">{{ __('story::index.title') }}</x-shared::title>
@@ -40,6 +40,14 @@
                             <div class="mt-2">
                                 <x-shared::searchable-multi-select name="genres[]" :options="$referentials['genres'] ?? []" :selected="$currentGen"
                                     :empty-text="__('story::shared.no_results')" :placeholder="__('story::index.filters.genres.placeholder')" color="accent" />
+                            </div>
+                            <div class="mt-4">
+                                <label class="inline-flex flex-wrap items-center gap-2 text-sm text-fg">
+                                    <input type="checkbox" name="complete_only" value="1"
+                                        {{ !empty($currentCompleteOnly) ? 'checked' : '' }}
+                                        class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
+                                    <span>{{ __('story::index.filters.complete_only.label') }}</span>
+                                </label>
                             </div>
                         </div>
 

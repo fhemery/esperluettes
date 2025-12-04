@@ -21,12 +21,32 @@
 
             <!-- Title -->
             <div class="col-span-2 lg:col-start-1 lg:col-end-4 flex items-center justify-between">
-                <x-shared::title>
-                    <span>{{ $viewModel->getTitle() }}</span>
+                <div class="flex flex-1 items-center gap-2">
+                    <x-shared::title>
+                        <span>{{ $viewModel->getTitle() }}</span>
+                    </x-shared::title>
                     <span class="ml-2">
                         <x-story::story-visibility-display :visibility="$viewModel->getVisibility()" />
                     </span>
-                </x-shared::title>
+                @if ($viewModel->story->is_complete)
+                    <x-shared::popover placement="top">
+                        <x-slot name="trigger">
+                            <x-shared::badge color="success" size="sm" icon="done_all">
+                            </x-shared::badge>
+                        </x-slot>
+                        <div>{{ __('story::show.is_complete.tooltip') }}</div>
+                    </x-shared::popover>
+                @endif
+                @if ($viewModel->story->is_excluded_from_events)
+                    <x-shared::popover placement="top">
+                        <x-slot name="trigger">
+                            <x-shared::badge color="error" size="sm" icon="do_not_disturb_on">
+                            </x-shared::badge>
+                        </x-slot>
+                        <div>{{ __('story::show.is_excluded_from_events.tooltip') }}</div>
+                    </x-shared::popover>
+                @endif
+                </div>
 
                 @if ($viewModel->isAuthor())
                     <div class="flex items-center gap-2">

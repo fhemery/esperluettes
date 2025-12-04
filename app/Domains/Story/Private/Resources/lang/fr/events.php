@@ -46,4 +46,7 @@ return [
     'chapter_comment_notifications_backfilled' => [
         'summary' => "Remplissage des notifications de commentaires de chapitres : :processed événements traités, :created notifications créées, :deleted supprimées, :skipped ignorées.",
     ],
+    'story_excluded_from_events' => [
+        'summary' => "Histoire :title (id: :id) exclue des évènements et activités.",
+    ],
 ];

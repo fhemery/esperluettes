@@ -31,6 +31,9 @@ class StoryRequest extends FormRequest
             'story_ref_trigger_warning_ids.*' => ['integer', 'exists:story_ref_trigger_warnings,id'],
             // TW disclosure: listed | no_tw | unspoiled (required)
             'tw_disclosure' => ['required', 'in:' . implode(',', Story::twDisclosureOptions())],
+            // Story completion and event exclusion flags
+            'is_complete' => ['nullable', 'boolean'],
+            'is_excluded_from_events' => ['nullable', 'boolean'],
         ];
     }
 

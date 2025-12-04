@@ -43,6 +43,7 @@ use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
 use App\Domains\Story\Public\Events\ChapterCommentNotificationsBackfilled;
+use App\Domains\Story\Public\Events\StoryExcludedFromEvents;
 use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 use App\Domains\Notification\Public\Services\NotificationFactory;
@@ -107,6 +108,7 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->registerEvent(ChapterUnpublishedByModeration::name(), ChapterUnpublishedByModeration::class);
         $eventBus->registerEvent(ChapterContentModerated::name(), ChapterContentModerated::class);
         $eventBus->registerEvent(ChapterCommentNotificationsBackfilled::name(), ChapterCommentNotificationsBackfilled::class);
+        $eventBus->registerEvent(StoryExcludedFromEvents::name(), StoryExcludedFromEvents::class);
 
         // Subscribe to cross-domain events (after-commit listeners)
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);

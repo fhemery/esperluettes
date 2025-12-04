@@ -23,6 +23,7 @@ use App\Domains\Story\Private\Models\StoryWithNextChapter;
 use App\Domains\Story\Private\Repositories\StoryRepository;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
+use App\Domains\Story\Public\Events\StoryExcludedFromEvents;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -91,6 +92,9 @@ class StoryService
             $story->story_ref_status_id = $statusId !== null ? (int)$statusId : null;
             $feedbackId = $request->input('story_ref_feedback_id');
             $story->story_ref_feedback_id = $feedbackId !== null ? (int)$feedbackId : null;
+            // Set boolean flags (defaults to false on create)
+            $story->is_complete = (bool) $request->input('is_complete', false);
+            $story->is_excluded_from_events = (bool) $request->input('is_excluded_from_events', false);
             $story->save();
 
             // 2) Update slug with id suffix
@@ -223,6 +227,7 @@ class StoryService
             $before = StorySnapshot::fromModel($story, (int) $story->created_by_user_id);
 
             $oldTitle = (string) $story->title;
+            $wasExcludedFromEvents = (bool) $story->is_excluded_from_events;
 
             // Core fields
             $story->title = (string)$request->input('title');
@@ -254,6 +259,10 @@ class StoryService
             $story->tw_disclosure = $disclosure;
             $this->syncTriggerWarnings($story, $twIds);
 
+            // Boolean flags
+            $story->is_complete = (bool) $request->input('is_complete', false);
+            $story->is_excluded_from_events = (bool) $request->input('is_excluded_from_events', false);
+
             // If title changed, regenerate slug base but keep -id suffix
             if ($story->title !== $oldTitle) {
                 $slugBase = Story::generateSlugBase($story->title);
@@ -273,6 +282,14 @@ class StoryService
                     title: (string) $story->title,
                     oldVisibility: (string) $before->visibility,
                     newVisibility: (string) $story->visibility,
+                ));
+            }
+
+            // Emit Story.ExcludedFromEvents if the flag changed from false to true
+            if (!$wasExcludedFromEvents && $story->is_excluded_from_events) {
+                $this->eventBus->emit(new StoryExcludedFromEvents(
+                    storyId: (int) $story->id,
+                    title: (string) $story->title,
                 ));
             }
 

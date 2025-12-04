@@ -30,7 +30,9 @@ return [
         'no_tw_only' => [
             'label' => 'Histoires sans avertissement',
             'help' => 'Ne retourne que les histoires où l\'auteurice a explicitement dit qu\'il n\'y a pas de contenu à risque',
-        ],        
-        
+        ],
+        'complete_only' => [
+            'label' => 'Uniquement les histoires complètes',
+        ],
     ],
 ];

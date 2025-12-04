@@ -20,4 +20,10 @@ return [
     'trigger_warnings' => [
         'label' => 'Avertissements de contenu :',
     ],
+    'is_complete' => [
+        'tooltip' => 'Cette histoire est terminée',
+    ],
+    'is_excluded_from_events' => [
+        'tooltip' => 'Cette histoire ne peut pas être utilisée dans les évènements du site ou les activités du Discord',
+    ],
 ];

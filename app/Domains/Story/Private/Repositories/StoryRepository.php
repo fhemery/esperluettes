@@ -154,6 +154,11 @@ final class StoryRepository
             });
         }
 
+        // Filter by complete status
+        if ($filter->completeOnly) {
+            $query->where('is_complete', true);
+        }
+
         // Read status filtering (based on published chapters only)
         if ($filter->readStatus === StoryQueryReadStatus::UnreadOnly) {
             $query->whereHas('chapters', function ($q) use ($viewerId) {

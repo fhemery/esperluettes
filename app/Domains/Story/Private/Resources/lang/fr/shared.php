@@ -98,8 +98,14 @@ return [
     ],
     'filters' => [
         'header' => 'Filtres'
-    ]
-    ,
+    ],
     'no_results' => 'Aucun résultat',
-    'coming_soon' => 'À venir'
+    'coming_soon' => 'À venir',
+    'is_complete' => [
+        'label' => 'Cette histoire est terminée',
+    ],
+    'is_excluded_from_events' => [
+        'label' => 'Exclure cette histoire des activités et évènements',
+        'help' => 'Si vous cochez cette case, votre histoire ne pourra être sélectionnée dans les futurs évènements du site, ni être utilisée sur le Discord pour des jeux ou activités. Les citations courtes restent autorisées.',
+    ],
 ];

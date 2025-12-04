@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
+use App\Domains\Story\Public\Events\StoryExcludedFromEvents;
 
 uses(TestCase::class, RefreshDatabase::class);
 
@@ -390,6 +391,93 @@ describe('Editing story', function () {
                 expect($event->title)->toBe('Visibility Tale');
                 expect($event->oldVisibility)->toBe(\App\Domains\Story\Private\Models\Story::VIS_PUBLIC);
                 expect($event->newVisibility)->toBe(\App\Domains\Story\Private\Models\Story::VIS_PRIVATE);
+            });
+        });
+
+        describe('Story.ExcludedFromEvents event', function () {
+            it('is emitted when is_excluded_from_events changes from false to true', function () {
+                $user = alice($this);
+                $this->actingAs($user);
+
+                // Create story with is_excluded_from_events = false (default)
+                $payload = validStoryPayload([
+                    'title' => 'Event Exclusion Test',
+                    'is_excluded_from_events' => false,
+                ]);
+                $this->post(route('stories.store'), $payload)->assertRedirect();
+
+                /** @var Story $story */
+                $story = Story::query()->latest('id')->firstOrFail();
+                expect($story->is_excluded_from_events)->toBeFalse();
+
+                // Update to is_excluded_from_events = true
+                $update = array_merge($payload, [
+                    'is_excluded_from_events' => true,
+                ]);
+                $this->put('/stories/' . $story->slug, $update)->assertRedirect();
+
+                /** @var StoryExcludedFromEvents|null $event */
+                $event = latestEventOf(StoryExcludedFromEvents::name(), StoryExcludedFromEvents::class);
+                expect($event)->not->toBeNull();
+                expect($event->storyId)->toBe($story->id);
+                expect($event->title)->toBe('Event Exclusion Test');
+            });
+
+            it('is not emitted when is_excluded_from_events stays true', function () {
+                $user = alice($this);
+                $this->actingAs($user);
+
+                // Create story with is_excluded_from_events = true
+                $payload = validStoryPayload([
+                    'title' => 'Already Excluded',
+                    'is_excluded_from_events' => true,
+                ]);
+                $this->post(route('stories.store'), $payload)->assertRedirect();
+
+                /** @var Story $story */
+                $story = Story::query()->latest('id')->firstOrFail();
+
+                // Count events after create (should be 0 since create doesn't emit this event)
+                $countAfterCreate = countEvents(StoryExcludedFromEvents::name());
+
+                // Update without changing is_excluded_from_events
+                $update = array_merge($payload, [
+                    'title' => 'Still Excluded',
+                    'is_excluded_from_events' => true,
+                ]);
+                $this->put('/stories/' . $story->slug, $update)->assertRedirect();
+
+                // Event count should remain the same (already was excluded)
+                $countAfterUpdate = countEvents(StoryExcludedFromEvents::name());
+                expect($countAfterUpdate)->toBe($countAfterCreate);
+            });
+
+            it('is not emitted when is_excluded_from_events changes from true to false', function () {
+                $user = alice($this);
+                $this->actingAs($user);
+
+                // Create story with is_excluded_from_events = true
+                $payload = validStoryPayload([
+                    'title' => 'Was Excluded',
+                    'is_excluded_from_events' => true,
+                ]);
+                $this->post(route('stories.store'), $payload)->assertRedirect();
+
+                /** @var Story $story */
+                $story = Story::query()->latest('id')->firstOrFail();
+
+                // Count events after create
+                $countAfterCreate = countEvents(StoryExcludedFromEvents::name());
+
+                // Update to is_excluded_from_events = false
+                $update = array_merge($payload, [
+                    'is_excluded_from_events' => false,
+                ]);
+                $this->put('/stories/' . $story->slug, $update)->assertRedirect();
+
+                // Event count should remain the same (only emitted when going from false to true)
+                $countAfterUpdate = countEvents(StoryExcludedFromEvents::name());
+                expect($countAfterUpdate)->toBe($countAfterCreate);
             });
         });
     });
