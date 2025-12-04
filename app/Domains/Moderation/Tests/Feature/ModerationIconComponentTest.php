@@ -18,34 +18,31 @@ describe('ModerationIconComponent', function () {
         expect($rendered)->toBe('');
     });
 
-    it('displays the icon for admins even with zero pending reports', function () {
+    it('does not display the icon for admins when there are no pending reports', function () {
         $admin = admin($this);
         $this->actingAs($admin);
 
         $rendered = Blade::render('<x-moderation::moderation-icon-component />');
 
-        expect($rendered)->toContain('href="/admin/moderation/moderation-reports"');
-        expect($rendered)->not->toContain('pending-badge');
+        expect($rendered)->toBe('');
     });
 
-    it('displays the icon for tech-admins even with zero pending reports', function () {
+    it('does not display the icon for tech-admins when there are no pending reports', function () {
         $user = techAdmin($this);
         $this->actingAs($user);
 
         $rendered = Blade::render('<x-moderation::moderation-icon-component />');
 
-        expect($rendered)->toContain('href="/admin/moderation/moderation-reports"');
-        expect($rendered)->not->toContain('pending-badge');
+        expect($rendered)->toBe('');
     });
 
-    it('displays the icon for moderators even with zero pending reports', function () {
+    it('does not display the icon for moderators when there are no pending reports', function () {
         $user = moderator($this);
         $this->actingAs($user);
 
         $rendered = Blade::render('<x-moderation::moderation-icon-component />');
 
-        expect($rendered)->toContain('href="/admin/moderation/moderation-reports"');
-        expect($rendered)->not->toContain('pending-badge');
+        expect($rendered)->toBe('');
     });
 
     it('does not display the icon for regular users even if there are pending reports', function () {
@@ -109,7 +106,7 @@ describe('ModerationIconComponent', function () {
         expect($rendered)->toMatch('/bg-accent[^>]*>\s*3\s*</');
     });
 
-    it('does not show badge when pending count is zero', function () {
+    it('does not show icon when pending count is zero (only dismissed reports)', function () {
         $admin = admin($this);
 
         $reason = ModerationReason::create([
@@ -132,7 +129,32 @@ describe('ModerationIconComponent', function () {
 
         $rendered = Blade::render('<x-moderation::moderation-icon-component />');
 
+        expect($rendered)->toBe('');
+    });
+
+    it('displays the icon for admins when there are pending reports', function () {
+        $admin = admin($this);
+
+        $reason = ModerationReason::create([
+            'topic_key' => 'comment',
+            'label' => 'Inappropriate',
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        ModerationReport::create([
+            'topic_key' => 'comment',
+            'entity_id' => 1,
+            'reported_by_user_id' => $admin->id,
+            'reason_id' => $reason->id,
+            // status defaults to 'pending'
+        ]);
+
+        $this->actingAs($admin);
+
+        $rendered = Blade::render('<x-moderation::moderation-icon-component />');
+
         expect($rendered)->toContain('href="/admin/moderation/moderation-reports"');
-        expect($rendered)->not->toContain('pending-badge');
+        expect($rendered)->toContain('pending-badge');
     });
 });

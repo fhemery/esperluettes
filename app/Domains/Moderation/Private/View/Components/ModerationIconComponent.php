@@ -24,12 +24,14 @@ class ModerationIconComponent extends Component
         }
 
         $isPrivileged = $this->authPublicApi->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]);
-        if (! $isPrivileged) {
+        if (!$isPrivileged) {
             return;
         }
 
-        $this->shouldDisplay = true;
         $this->pendingCount = $this->moderationService->getPendingReportsCount();
+        
+        // Only display if there are pending reports
+        $this->shouldDisplay = $this->pendingCount > 0;
     }
 
     public function render()
