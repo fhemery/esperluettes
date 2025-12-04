@@ -192,6 +192,47 @@ describe('Top navbar', function () {
                 ->assertDontSee(__('shared::navigation.readlist'));
         });
 
+        describe('Promotion icon', function () {
+            it('shows promotion icon for admin when there are pending requests', function () {
+                $admin = admin($this);
+                
+                // Create a pending promotion request
+                $user = registerUserThroughForm($this, [
+                    'name' => 'NavPromoUser',
+                    'email' => 'navpromo@example.com',
+                ], true, [Roles::USER]);
+                createPromotionRequest($user, commentCount: 5);
+
+                $this->actingAs($admin);
+
+                $html = $this->get(route('dashboard'))
+                    ->assertOk()
+                    ->getContent();
+
+                expect($html)->toContain('psychiatry');
+                expect($html)->toContain(route('auth.admin.promotion-requests.index'));
+            });
+
+            it('does not show promotion icon for regular users', function () {
+                $user = alice($this);
+                
+                // Create a pending promotion request
+                $otherUser = registerUserThroughForm($this, [
+                    'name' => 'NavPromoUser4',
+                    'email' => 'navpromo4@example.com',
+                ], true, [Roles::USER]);
+                createPromotionRequest($otherUser, commentCount: 5);
+
+                $this->actingAs($user);
+
+                $html = $this->get(route('dashboard'))
+                    ->assertOk()
+                    ->getContent();
+
+                expect($html)->not->toContain('psychiatry');
+            });
+        });
+
         describe('Regarding discord', function() {
             it('should show discord link when configured', function () {
                 $user = alice($this);

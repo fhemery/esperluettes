@@ -29,6 +29,7 @@ use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -66,6 +67,9 @@ class AuthServiceProvider extends ServiceProvider
 
         // Register auth views namespace
         $this->loadViewsFrom(app_path('Domains/Auth/Private/Resources/views'), 'auth');
+
+        // Register PHP components
+        Blade::componentNamespace('App\\Domains\\Auth\\Private\\View\\Components', 'auth');
 
         // Register domain routes within the web middleware group
         Route::middleware(['web'])->group(app_path('Domains/Auth/Private/routes.php'));
