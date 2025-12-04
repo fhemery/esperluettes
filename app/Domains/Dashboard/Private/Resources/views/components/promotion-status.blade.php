@@ -13,15 +13,37 @@
             <div class="flex-1">&nbsp;</div>
         @endif
         @if ($status && $status->status === 'rejected')
+            <p>{!! __('dashboard::promotion.rejection_description') !!}</p>
             @if ($status->rejectionReason)
-                <div class="w-full p-3 bg-error/10 border border-error rounded text-sm">
-                    <p class="font-medium">{{ __('dashboard::promotion.rejection_title') }}</p>
-                    <p>{{ $status->rejectionReason }}</p>
-                </div>
+                @if (strlen($status->rejectionReason) > 100)
+                    <x-shared::popover :content="$status->rejectionReason">
+                         <x-slot name="trigger">
+                            <p class="text-accent w-full p-3 border border-error text-sm">
+                                {{ substr($status->rejectionReason, 0, 100) }}...
+                            </p>
+                         </x-slot>
+                        <div class="text-accent w-full p-3 border border-error text-sm">
+                            <p>{{ $status->rejectionReason }}</p>
+                        </div>
+                    </x-shared::popover>
+                @else
+                    <p class="text-accent w-full p-3 border border-error text-sm">
+                        {{ $status->rejectionReason }}
+                    </p>
+                @endif
+                
             @endif
-        @endif
 
-        @if ($eligibility && (!$status || $status->status !== 'pending'))
+            @if($eligibility)
+                @php      
+                    $nextRequestInDays = ceil($eligibility->daysRequired - $eligibility->daysElapsed);
+                @endphp
+                @if($nextRequestInDays > 0)
+                    {{ trans_choice('dashboard::promotion.rejection_next', $nextRequestInDays, ['days' => $nextRequestInDays]) }}</p>
+                @endif
+            @endif
+            
+        @elseif ($eligibility && (!$status || $status->status !== 'pending'))
             <p class="text-center">{{ __('dashboard::promotion.requirements_intro') }}</p>
             <ul class="list-disc list-inside text-left">
                 <li>{{ __('dashboard::promotion.requirement_days', ['days' => (int) ceil($eligibility->daysRequired)]) }}</li>
@@ -51,17 +73,7 @@
             </div>
         @endif
 
-        @if ($status && $status->status === 'rejected')
-
-            @if ($status->rejectionReason)
-                <div class="w-full p-3 bg-error/10 border border-error rounded text-sm">
-                    <p class="font-medium">{{ __('dashboard::promotion.rejection_title') }}</p>
-                    <p>{{ $status->rejectionReason }}</p>
-                </div>
-            @endif
-        @endif
-
-        <form action="{{ route('dashboard.promotion.request') }}" method="POST">
+        <form class="flex-1 flex flex-col justify-end" action="{{ route('dashboard.promotion.request') }}" method="POST">
             @csrf
             <x-shared::button type="submit" color="accent" :disabled="!$eligibility->eligible">
                 @if ($status && $status->status === 'pending')

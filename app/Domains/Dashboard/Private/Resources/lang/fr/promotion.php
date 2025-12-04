@@ -16,10 +16,11 @@ return [
     'success_message' => 'Demande prise en compte',
     'pending_message' => 'Ta demande de promotion est en cours de traitement.',
     
-    'rejection_title' => 'Demande précédente refusée :',
-    
+    'rejection_next' => '{0,1}Prochaine demande possible dans :days jour|{2,99}Prochaine demande possible dans :days jours',
+    'rejection_description' => 'Oups !<br/>Notre équipe a détecté un problème avec ta demande :',
+
     'errors' => [
-        'not_authenticated' => 'Vous devez être connecté pour voir cette section.',
+        'not_authenticated' => 'Tu dois être connecté pour voir cette section.',
         'data_unavailable' => 'Impossible de charger les données de promotion.',
         'request_failed' => 'Impossible de soumettre la demande de promotion.',
     ],

@@ -91,7 +91,7 @@ describe('PromotionStatusComponent', function () {
         $html = Blade::render('<x-dashboard::promotion-status-component />');
 
         expect($html)
-            ->toContain(__('dashboard::promotion.rejection_title'))
+            ->toContain(__('dashboard::promotion.rejection_description'))
             ->toContain('Comments need more substance')
             ->toContain(__('dashboard::promotion.button_request'));
     });
