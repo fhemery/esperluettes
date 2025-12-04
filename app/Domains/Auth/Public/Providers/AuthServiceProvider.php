@@ -24,7 +24,7 @@ use App\Domains\Auth\Public\Notifications\PromotionRejectedNotification;
 use App\Domains\Auth\Public\Support\AuthConfigKeys;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
-use App\Domains\Config\Public\Contracts\ConfigParameterType;
+use App\Domains\Shared\Contracts\ParameterType;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Notification\Public\Services\NotificationFactory;
@@ -117,7 +117,7 @@ class AuthServiceProvider extends ServiceProvider
         $configApi->registerParameter(new ConfigParameterDefinition(
             domain: AuthConfigKeys::DOMAIN,
             key: AuthConfigKeys::REQUIRE_ACTIVATION_CODE,
-            type: ConfigParameterType::BOOL,
+            type: ParameterType::BOOL,
             default: true,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -125,7 +125,7 @@ class AuthServiceProvider extends ServiceProvider
         $configApi->registerParameter(new ConfigParameterDefinition(
             domain: AuthConfigKeys::DOMAIN,
             key: AuthConfigKeys::NON_CONFIRMED_COMMENT_THRESHOLD,
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 5,
             constraints: ['min' => 0],
             visibility: ConfigParameterVisibility::ALL_ADMINS,
@@ -134,7 +134,7 @@ class AuthServiceProvider extends ServiceProvider
         $configApi->registerParameter(new ConfigParameterDefinition(
             domain: AuthConfigKeys::DOMAIN,
             key: AuthConfigKeys::NON_CONFIRMED_TIMESPAN,
-            type: ConfigParameterType::TIME,
+            type: ParameterType::TIME,
             default: 604800, // 7 days in seconds
             constraints: ['min' => 0],
             visibility: ConfigParameterVisibility::ALL_ADMINS,

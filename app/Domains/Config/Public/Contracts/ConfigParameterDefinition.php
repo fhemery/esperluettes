@@ -2,6 +2,7 @@
 
 namespace App\Domains\Config\Public\Contracts;
 
+use App\Domains\Shared\Contracts\ParameterType;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -14,7 +15,7 @@ final class ConfigParameterDefinition
     /**
      * @param string $domain Owning domain (e.g., 'story', 'calendar')
      * @param string $key Unique identifier within domain (e.g., 'max_chapter_length')
-     * @param ConfigParameterType $type Value type
+     * @param ParameterType $type Value type
      * @param mixed $default Default value when no override exists
      * @param array $constraints Type-specific validation constraints
      * @param ConfigParameterVisibility $visibility Admin visibility level
@@ -22,7 +23,7 @@ final class ConfigParameterDefinition
     public function __construct(
         public readonly string $domain,
         public readonly string $key,
-        public readonly ConfigParameterType $type,
+        public readonly ParameterType $type,
         public readonly mixed $default,
         public readonly array $constraints = [],
         public readonly ConfigParameterVisibility $visibility = ConfigParameterVisibility::TECH_ADMINS_ONLY,
@@ -91,12 +92,18 @@ final class ConfigParameterDefinition
         $rules = ['required'];
 
         match ($this->type) {
-            ConfigParameterType::INT, ConfigParameterType::TIME => $this->addIntRules($rules),
-            ConfigParameterType::STRING => $this->addStringRules($rules),
-            ConfigParameterType::BOOL => $this->addBoolRules($rules),
+            ParameterType::INT, ParameterType::TIME, ParameterType::RANGE => $this->addIntRules($rules),
+            ParameterType::STRING, ParameterType::ENUM => $this->addStringRules($rules),
+            ParameterType::BOOL => $this->addBoolRules($rules),
+            ParameterType::MULTI_SELECT => $this->addMultiSelectRules($rules),
         };
 
         return $rules;
+    }
+
+    private function addMultiSelectRules(array &$rules): void
+    {
+        $rules[] = 'array';
     }
 
     private function addIntRules(array &$rules): void

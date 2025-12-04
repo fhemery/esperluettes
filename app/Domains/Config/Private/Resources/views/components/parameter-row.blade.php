@@ -49,16 +49,16 @@
     <div class="w-full md:w-64 shrink-0">
         @switch($definition->type->value)
             @case('bool')
-                <x-config::fields.bool-field />
+                <x-shared::fields.bool-field />
                 @break
             @case('int')
-                <x-config::fields.int-field :constraints="$definition->constraints" />
+                <x-shared::fields.int-field :constraints="$definition->constraints" />
                 @break
             @case('string')
-                <x-config::fields.string-field :constraints="$definition->constraints" />
+                <x-shared::fields.string-field :constraints="$definition->constraints" />
                 @break
             @case('time')
-                <x-config::fields.time-field />
+                <x-shared::fields.time-field />
                 @break
         @endswitch
     </div>

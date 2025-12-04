@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
-use App\Domains\Config\Public\Contracts\ConfigParameterType;
+use App\Domains\Shared\Contracts\ParameterType;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
 use App\Domains\Config\Public\Events\ConfigParameterUpdated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,7 +35,7 @@ describe('ConfigParameterController - index', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -60,14 +60,14 @@ describe('ConfigParameterController - index', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'story',
             key: 'max_chapters',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 50,
         ));
 
         registerParameter(new ConfigParameterDefinition(
             domain: 'calendar',
             key: 'event_duration',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 30,
         ));
 
@@ -87,7 +87,7 @@ describe('ConfigParameterController - index', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'tech_only',
-            type: ConfigParameterType::BOOL,
+            type: ParameterType::BOOL,
             default: false,
             visibility: ConfigParameterVisibility::TECH_ADMINS_ONLY,
         ));
@@ -95,7 +95,7 @@ describe('ConfigParameterController - index', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'all_admins',
-            type: ConfigParameterType::BOOL,
+            type: ParameterType::BOOL,
             default: true,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -115,7 +115,7 @@ describe('ConfigParameterController - index', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'tech_only',
-            type: ConfigParameterType::BOOL,
+            type: ParameterType::BOOL,
             default: false,
             visibility: ConfigParameterVisibility::TECH_ADMINS_ONLY,
         ));
@@ -123,7 +123,7 @@ describe('ConfigParameterController - index', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'all_admins',
-            type: ConfigParameterType::BOOL,
+            type: ParameterType::BOOL,
             default: true,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -173,7 +173,7 @@ describe('ConfigParameterController - update', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             constraints: ['min' => 1, 'max' => 1000],
             visibility: ConfigParameterVisibility::ALL_ADMINS,
@@ -195,7 +195,7 @@ describe('ConfigParameterController - update', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'feature_enabled',
-            type: ConfigParameterType::BOOL,
+            type: ParameterType::BOOL,
             default: false,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -214,7 +214,7 @@ describe('ConfigParameterController - update', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'site_name',
-            type: ConfigParameterType::STRING,
+            type: ParameterType::STRING,
             default: 'Default',
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -233,7 +233,7 @@ describe('ConfigParameterController - update', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             constraints: ['min' => 10, 'max' => 1000],
             visibility: ConfigParameterVisibility::ALL_ADMINS,
@@ -252,7 +252,7 @@ describe('ConfigParameterController - update', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             constraints: ['min' => 10, 'max' => 1000],
             visibility: ConfigParameterVisibility::ALL_ADMINS,
@@ -271,7 +271,7 @@ describe('ConfigParameterController - update', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -293,7 +293,7 @@ describe('ConfigParameterController - update', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'tech_setting',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             visibility: ConfigParameterVisibility::TECH_ADMINS_ONLY,
         ));
@@ -312,7 +312,7 @@ describe('ConfigParameterController - update', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'tech_setting',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             visibility: ConfigParameterVisibility::TECH_ADMINS_ONLY,
         ));
@@ -356,7 +356,7 @@ describe('ConfigParameterController - reset', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -384,7 +384,7 @@ describe('ConfigParameterController - reset', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));

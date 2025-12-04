@@ -1,7 +1,7 @@
 <?php
 
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
-use App\Domains\Config\Public\Contracts\ConfigParameterType;
+use App\Domains\Shared\Contracts\ParameterType;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
 use App\Domains\Config\Public\Services\ConfigParameterService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,7 +18,7 @@ describe('ConfigPublicApi - registerParameter', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
         ));
 
@@ -30,7 +30,7 @@ describe('ConfigPublicApi - registerParameter', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'site_name',
-            type: ConfigParameterType::STRING,
+            type: ParameterType::STRING,
             default: 'My Site',
         ));
 
@@ -42,7 +42,7 @@ describe('ConfigPublicApi - registerParameter', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'feature_enabled',
-            type: ConfigParameterType::BOOL,
+            type: ParameterType::BOOL,
             default: true,
         ));
 
@@ -54,14 +54,14 @@ describe('ConfigPublicApi - registerParameter', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'story',
             key: 'max_chapters',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 50,
         ));
 
         registerParameter(new ConfigParameterDefinition(
             domain: 'calendar',
             key: 'event_duration',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 30,
         ));
 
@@ -73,14 +73,14 @@ describe('ConfigPublicApi - registerParameter', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'story',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
         ));
 
         registerParameter(new ConfigParameterDefinition(
             domain: 'calendar',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 200,
         ));
 
@@ -99,7 +99,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
         ));
 
@@ -111,7 +111,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'Test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
         ));
 
@@ -124,7 +124,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'MaxItems',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
         ));
 
@@ -137,7 +137,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             constraints: ['min' => 1, 'max' => 1000],
             visibility: ConfigParameterVisibility::ALL_ADMINS,
@@ -156,7 +156,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'max_items',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 100,
             constraints: ['min' => 1, 'max' => 1000],
             visibility: ConfigParameterVisibility::ALL_ADMINS,
@@ -177,7 +177,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'count',
-            type: ConfigParameterType::INT,
+            type: ParameterType::INT,
             default: 10,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -195,7 +195,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'enabled',
-            type: ConfigParameterType::BOOL,
+            type: ParameterType::BOOL,
             default: false,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -213,7 +213,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'title',
-            type: ConfigParameterType::STRING,
+            type: ParameterType::STRING,
             default: 'Default',
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));
@@ -231,7 +231,7 @@ describe('ConfigPublicApi - getParameterValue', function () {
         registerParameter(new ConfigParameterDefinition(
             domain: 'test',
             key: 'duration',
-            type: ConfigParameterType::TIME,
+            type: ParameterType::TIME,
             default: 3600, // 1 hour
             visibility: ConfigParameterVisibility::ALL_ADMINS,
         ));

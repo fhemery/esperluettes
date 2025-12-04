@@ -1,3 +1,10 @@
+{{--
+    Boolean field component - renders as a toggle switch.
+    
+    Expected Alpine.js context:
+    - currentValue: boolean
+    - saving: boolean
+--}}
 <label class="inline-flex items-center cursor-pointer select-none">
     <input
         type="checkbox"
@@ -11,5 +18,5 @@
         after:bg-white after:shadow after:transition-transform
         peer-checked:after:translate-x-5
         peer-checked:bg-accent peer-focus:ring-accent/80"></span>
-    <span class="ml-3 text-sm" x-text="currentValue ? '{{ __('config::admin.parameters.enabled') }}' : '{{ __('config::admin.parameters.disabled') }}'"></span>
+    <span class="ml-3 text-sm" x-text="currentValue ? '{{ __('shared::fields.enabled') }}' : '{{ __('shared::fields.disabled') }}'"></span>
 </label>

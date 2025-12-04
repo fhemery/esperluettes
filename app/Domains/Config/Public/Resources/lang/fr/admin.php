@@ -12,13 +12,5 @@ return [
         'saved' => 'Paramètre enregistré avec succès.',
         'reset_tooltip' => 'Rétablir la valeur par défaut',
         'reset_success' => 'Paramètre réinitialisé à sa valeur par défaut.',
-        'enabled' => 'Activé',
-        'disabled' => 'Désactivé',
-        'time_units' => [
-            'seconds' => 'secondes',
-            'minutes' => 'minutes',
-            'hours' => 'heures',
-            'days' => 'jours',
-        ],
     ],
 ];
