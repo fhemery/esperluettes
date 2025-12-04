@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Private\Controllers\AuthenticatedSessionController;
 use App\Domains\Auth\Private\Controllers\Admin\AuthAdminUserController;
+use App\Domains\Auth\Private\Controllers\Admin\PromotionRequestController;
 use App\Domains\Auth\Private\Controllers\Admin\UserController;
 use App\Domains\Auth\Private\Controllers\ComplianceController;
 use App\Domains\Auth\Private\Controllers\ConfirmablePasswordController;
@@ -129,6 +130,16 @@ Route::middleware('web')->group(function () {
                 Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
                 Route::get('/{user}/download-authorization', [UserController::class, 'downloadAuthorization'])->name('download-authorization');
                 Route::post('/{user}/clear-authorization', [UserController::class, 'clearAuthorization'])->name('clear-authorization');
+            });
+
+        // Admin promotion request management
+        Route::middleware('role:'.Roles::ADMIN.','.Roles::TECH_ADMIN.','.Roles::MODERATOR)
+            ->prefix('admin/auth/promotion-requests')
+            ->name('auth.admin.promotion-requests.')
+            ->group(function () {
+                Route::get('/', [PromotionRequestController::class, 'index'])->name('index');
+                Route::post('/{promotionRequest}/accept', [PromotionRequestController::class, 'accept'])->name('accept');
+                Route::post('/{promotionRequest}/reject', [PromotionRequestController::class, 'reject'])->name('reject');
             });
     });
 });

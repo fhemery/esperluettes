@@ -42,14 +42,25 @@
         </div>
 
         <!-- Activation Code -->
-        @if(config('app.require_activation_code', false))
         <div class="mt-4">
-            <x-input-label for="activation_code" :value="__('auth::register.activation.label')" class="text-on-surface" />
+            <div class="flex items-center gap-1">
+                <x-input-label for="activation_code" class="text-on-surface">
+                    {{ __('auth::register.activation.label') }}@if(!$requireActivationCode) {{ __('auth::register.form.activation_code.optional') }}@endif
+                </x-input-label>
+                <x-shared::tooltip type="info" placement="top" maxWidth="18rem" class="text-on-surface hover:text-white/80">
+                    @if($requireActivationCode)
+                        {{ __('auth::register.form.activation_code.tooltip_mandatory') }}
+                    @else
+                        {{ __('auth::register.form.activation_code.tooltip_optional') }}
+                    @endif
+                    <a href="/faq/statuts" class="text-accent underline block mt-2">{{ __('auth::register.form.activation_code.more_info') }}</a>
+                </x-shared::tooltip>
+            </div>
             <x-text-input id="activation_code" class="block mt-1 w-full" 
                           type="text" 
                           name="activation_code" 
                           :value="old('activation_code')" 
-                          required 
+                          :required="$requireActivationCode"
                           placeholder="XYZT-ABCDEFGH-IJKL"
                           autocomplete="off" />
             <x-input-error :messages="$errors->get('activation_code')" class="mt-2 error-on-surface" />
@@ -57,7 +68,6 @@
             <p class="mt-1 text-sm opacity-80 text-on-surface">{{ __('auth::register.activation.help') }}</p>
             @endif
         </div>
-        @endif
 
         <!-- Under 15 checkbox -->
         <div class="mt-4">

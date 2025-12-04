@@ -6,6 +6,8 @@ use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Private\Services\ActivationCodeService;
 use App\Domains\Shared\Validation\Rules\UniqueProfileDisplayName;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Domains\Auth\Public\Support\AuthConfigKeys;
+use App\Domains\Config\Public\Api\ConfigPublicApi;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
@@ -25,20 +27,36 @@ class RegisterRequest extends FormRequest
             'accept_terms' => ['required', 'accepted'],
         ];
 
-        if (config('app.require_activation_code', false)) {
-            $rules['activation_code'] = [
-                'required',
-                'string',
-                function ($attribute, $value, $fail) {
-                    $activationCodeService = app(ActivationCodeService::class);
-                    if (!$activationCodeService->isCodeValid($value)) {
-                        $fail(__('auth::register.form.activation_code.invalid'));
-                    }
-                },
-            ];
-        }
+        // Activation code validation:
+        // - Required when require_activation_code is true
+        // - Optional but validated when provided if require_activation_code is false
+        $configApi = app(ConfigPublicApi::class);
+        $isRequired = (bool) $configApi->getParameterValue(
+            AuthConfigKeys::REQUIRE_ACTIVATION_CODE,
+            AuthConfigKeys::DOMAIN
+        );
+        $rules['activation_code'] = [
+            $isRequired ? 'required' : 'nullable',
+            'string',
+            $this->activationCodeValidationRule(),
+        ];
 
         return $rules;
+    }
+
+    /**
+     * Validation closure for activation code.
+     */
+    private function activationCodeValidationRule(): \Closure
+    {
+        return function ($attribute, $value, $fail) {
+            if ($value) {
+                $activationCodeService = app(ActivationCodeService::class);
+                if (!$activationCodeService->isCodeValid($value)) {
+                    $fail(__('auth::register.form.activation_code.invalid'));
+                }
+            }
+        };
     }
 
     public function messages(): array

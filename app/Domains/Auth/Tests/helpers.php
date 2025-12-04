@@ -1,11 +1,81 @@
 <?php
 
+use App\Domains\Auth\Private\Models\ActivationCode;
+use App\Domains\Auth\Private\Models\PromotionRequest;
 use App\Domains\Auth\Private\Models\User;
+use App\Domains\Auth\Private\Services\PromotionRequestService;
 use App\Domains\Auth\Private\Services\UserService;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Auth\Public\Support\AuthConfigKeys;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Tests\TestCase;
+
+/**
+ * Set whether activation code is required for registration.
+ * Convenience wrapper around setParameterValue for Auth domain.
+ */
+function setActivationCodeRequired(bool $required): void
+{
+    setParameterValue(AuthConfigKeys::REQUIRE_ACTIVATION_CODE, AuthConfigKeys::DOMAIN, $required);
+}
+
+/**
+ * Create an activation code for testing.
+ *
+ * @param int|null $sponsorUserId The sponsor user ID (optional)
+ * @param int|null $usedByUserId If set, marks the code as used by this user
+ * @param Carbon|null $expiresAt Expiration date (default: 30 days from now)
+ * @return ActivationCode
+ */
+function createActivationCode(?int $sponsorUserId = null, ?int $usedByUserId = null, ?Carbon $expiresAt = null): ActivationCode
+{
+    $code = ActivationCode::create([
+        'code' => strtoupper(Str::random(4) . '-' . Str::random(8) . '-' . Str::random(4)),
+        'sponsor_user_id' => $sponsorUserId,
+        'expires_at' => $expiresAt ?? now()->addDays(30),
+    ]);
+
+    if ($usedByUserId !== null) {
+        $code->update([
+            'used_by_user_id' => $usedByUserId,
+            'used_at' => now(),
+        ]);
+    }
+
+    return $code;
+}
+
+/**
+ * Create a pending promotion request for a user.
+ */
+function createPromotionRequest(User $user, int $commentCount = 10, ?Carbon $requestedAt = null): PromotionRequest
+{
+    return PromotionRequest::create([
+        'user_id' => $user->id,
+        'status' => PromotionRequest::STATUS_PENDING,
+        'comment_count' => $commentCount,
+        'requested_at' => $requestedAt ?? now(),
+    ]);
+}
+
+/**
+ * Accept a promotion request.
+ */
+function acceptPromotionRequest(PromotionRequest $request, User $decidedBy): bool
+{
+    return app(PromotionRequestService::class)->acceptRequest($request->id, $decidedBy->id);
+}
+
+/**
+ * Reject a promotion request.
+ */
+function rejectPromotionRequest(PromotionRequest $request, User $decidedBy, string $reason = 'Rejected'): bool
+{
+    return app(PromotionRequestService::class)->rejectRequest($request->id, $decidedBy->id, $reason);
+}
 
 function alice(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER_CONFIRMED]): User
 {
@@ -84,8 +154,9 @@ function verificationUrlFor(User $user): string
  * If $isVerified is true (default), the user's email will be marked as verified.
  * If $ensureGuest is true (default), we'll log out any existing session before registering.
  */
-function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER]): User
+function registerUserThroughForm(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER], bool $activationCodeRequired = false): User
 {
+    setActivationCodeRequired($activationCodeRequired);
     $payload = array_merge([
         'name' => 'John Doe',
         'email' => 'john@example.com',

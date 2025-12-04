@@ -56,7 +56,7 @@ describe('AuthPublicApi', function () {
                 
                 $roles2 = $api->getRolesByUserIds([$user->id]);
                 expect($roles2[$user->id])->toBeArray();
-                expect($roles2[$user->id][0]->slug)->toBe(Roles::USER_CONFIRMED);
+                expect($roles2[$user->id][0]->slug)->toBe(Roles::USER);
             });
         });
     });

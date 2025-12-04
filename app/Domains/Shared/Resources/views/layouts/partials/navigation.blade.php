@@ -49,6 +49,8 @@
             <x-message::message-icon-component />
             <!-- Notifications Icon -->
             <x-notification::notification-icon-component />
+            <!-- Promotion Requests Icon -->
+            <x-auth::promotion-icon-component />
             <!-- Moderation Icon -->
             <x-moderation::moderation-icon-component />
 

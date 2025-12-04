@@ -53,4 +53,52 @@ return [
             'clear_confirm' => 'Êtes-vous sûr de vouloir supprimer l\'autorisation parentale ? L\'utilisateur devra en soumettre une nouvelle.',
         ],
     ],
+
+    'promotion' => [
+        'title' => 'Demandes de promotion',
+        'nav_label' => 'Demandes de promotion',
+        'no_requests' => 'Aucune demande de promotion.',
+        'unknown_user' => 'Utilisateur inconnu',
+
+        'filter' => [
+            'search' => 'Recherche',
+            'search_placeholder' => 'Nom du profil...',
+            'status' => 'Statut',
+            'all' => 'Tous',
+            'apply' => 'Filtrer',
+            'reset' => 'Réinitialiser',
+        ],
+
+        'table' => [
+            'user' => 'Utilisateur',
+            'requested_at' => 'Demandé le',
+            'waiting' => 'Attente',
+            'comments' => 'Commentaires',
+            'status' => 'Statut',
+            'actions' => 'Actions',
+        ],
+
+        'status' => [
+            'pending' => 'En attente',
+            'accepted' => 'Acceptée',
+            'rejected' => 'Refusée',
+        ],
+
+        'days_waiting' => '{0} Aujourd\'hui|{1} 1 jour|[2,*] :count jours',
+
+        'accept_button' => 'Accepter',
+        'accept_confirm' => 'Êtes-vous sûr de vouloir accepter cette demande de promotion ?',
+        'accepted' => 'La demande de promotion a été acceptée.',
+        'accept_error' => 'Impossible d\'accepter la demande de promotion.',
+
+        'reject_button' => 'Refuser',
+        'reject_title' => 'Refuser la demande de promotion',
+        'reject_reason_label' => 'Motif du refus',
+        'reject_reason_placeholder' => 'Expliquez brièvement pourquoi la demande est refusée...',
+        'reject_confirm' => 'Refuser',
+        'rejected' => 'La demande de promotion a été refusée.',
+        'reject_error' => 'Impossible de refuser la demande de promotion.',
+
+        'cancel' => 'Annuler',
+    ],
 ];

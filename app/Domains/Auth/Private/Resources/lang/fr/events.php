@@ -40,4 +40,13 @@ return [
     'user_deleted' => [
         'summary' => "Utilisateur supprimé (id=:id)",
     ],
+    'promotion_requested' => [
+        'summary' => "Promotion demandée par l'utilisateur id=:id",
+    ],
+    'promotion_accepted' => [
+        'summary' => "Promotion acceptée pour l'utilisateur id=:id",
+    ],
+    'promotion_rejected' => [
+        'summary' => "Promotion refusée pour l'utilisateur id=:id",
+    ],
 ];

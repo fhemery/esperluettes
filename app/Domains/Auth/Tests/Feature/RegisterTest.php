@@ -10,9 +10,13 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 describe('Register', function () {
+    beforeEach(function() {
+        setActivationCodeRequired(false);
+    });
 
     describe('Data validation', function () {
         it('allows registration when name is unique', function () {
+            
             $response = $this->post('/register', [
                 'name' => 'Unique Person',
                 'email' => 'unique@example.com',
@@ -139,6 +143,22 @@ describe('Register', function () {
 
             $response->assertRedirect();
             $this->assertDatabaseHas('users', ['email' => 'two@example.com']);
+        });
+
+        it('rejects registration when activation code is mandatory', function () {
+            setActivationCodeRequired(true);
+            $response = $this->from('/register')->post('/register', [
+                'name' => 'John',
+                'email' => 'empty@example.com',
+                'password' => 'secret-password',
+                'password_confirmation' => 'secret-password',
+                'is_under_15' => false,
+                'accept_terms' => '1',
+            ]);
+
+            $response->assertRedirect('/register');
+            $response->assertSessionHasErrors(['activation_code']);
+            $this->assertDatabaseMissing('users', ['email' => 'empty@example.com']);
         });
 
         describe('Compliance validation', function () {

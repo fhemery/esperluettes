@@ -2,7 +2,11 @@
 
 namespace App\Domains\Auth\Public\Api;
 
+use App\Domains\Auth\Public\Api\Dto\PromotionEligibilityDto;
+use App\Domains\Auth\Public\Api\Dto\PromotionRequestResultDto;
+use App\Domains\Auth\Public\Api\Dto\PromotionStatusDto;
 use App\Domains\Auth\Public\Api\Dto\RoleDto;
+use App\Domains\Auth\Private\Services\PromotionRequestService;
 use App\Domains\Auth\Private\Services\RoleCacheService;
 use App\Domains\Auth\Private\Services\UserQueryService;
 use App\Domains\Auth\Private\Services\RoleService;
@@ -19,6 +23,7 @@ class AuthPublicApi
         private UserQueryService $userQuery,
         private RoleService $roleService,
         private UserService $userService,
+        private PromotionRequestService $promotionService,
     ) {}
 
     /**
@@ -155,5 +160,45 @@ class AuthPublicApi
     public function getUsersById(array $userIds): array
     {
         return $this->userService->getUsersById($userIds);
+    }
+
+    // =========================================================================
+    // Promotion Request Methods
+    // =========================================================================
+
+    /**
+     * Check if a user can request promotion.
+     * Dashboard provides the comment count since Auth cannot access Comment domain.
+     */
+    public function canRequestPromotion(int $userId, int $commentCount): PromotionEligibilityDto
+    {
+        return $this->promotionService->checkEligibility($userId, $commentCount);
+    }
+
+    /**
+     * Submit a promotion request.
+     * Dashboard provides the comment count since Auth cannot access Comment domain.
+     */
+    public function requestPromotion(int $userId, int $commentCount): PromotionRequestResultDto
+    {
+        return $this->promotionService->requestPromotion($userId, $commentCount);
+    }
+
+    /**
+     * Get the current promotion status for a user.
+     * Returns pending, rejected (with reason), or none.
+     */
+    public function getPromotionStatus(int $userId): PromotionStatusDto
+    {
+        return $this->promotionService->getPromotionStatus($userId);
+    }
+
+    /**
+     * Get count of pending promotion requests.
+     * Used by navbar icon for admins/moderators.
+     */
+    public function getPendingPromotionCount(): int
+    {
+        return $this->promotionService->getPendingCount();
     }
 }

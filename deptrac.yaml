@@ -483,6 +483,8 @@ deptrac:
       - AuthPublic
       - EventsPublic
       - AdministrationPublic
+      - ConfigPublic        # This dependency is necessary, but should always be lazy-loaded
+      - NotificationPublic
 
     CalendarPrivate:
       - Shared

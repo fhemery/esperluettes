@@ -188,7 +188,7 @@ export function initQuillEditor(id, options = {}) {
 
     // Sync Quill with the hidden input
     const updateCount = () => {
-      let text = editor.getSemanticHTML() || '';
+      let text = editor.getText() || '';
       if (text.endsWith('\n')) text = text.slice(0, -1); // Quill ends with a trailing newline
       const count = text.length;
       if (counterEl) {
