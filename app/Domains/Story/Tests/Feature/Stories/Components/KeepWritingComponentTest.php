@@ -121,6 +121,50 @@ describe('Keep Writing Component', function () {
             ->toContain(route('chapters.create', ['storySlug' => $newer->slug]));
     });
 
+    it('shows empty state when the only authored story is completed', function () {
+        $author = alice($this);
+        $this->actingAs($author);
+
+        $story = publicStory('Completed Draft', $author->id);
+        $story->is_complete = true;
+        $story->saveQuietly();
+
+        $html = Blade::render('<x-story::keep-writing-component />');
+
+        expect($html)
+            ->toContain(__('story::keep-writing.title'))
+            ->toContain(__('story::keep-writing.empty'))
+            ->toContain(__('story::keep-writing.new_story'))
+            ->toContain(route('stories.create'))
+            ->not->toContain('Completed Draft');
+    });
+
+    it('skips completed latest story and shows the next incomplete one', function () {
+        $author = alice($this);
+        $this->actingAs($author);
+
+        // Older, incomplete story with activity in the past
+        $incomplete = publicStory('Ongoing Draft', $author->id);
+        $chapterOld = createPublishedChapter($this, $incomplete, $author, ['title' => 'Old']);
+        Chapter::whereKey($chapterOld->id)->update(['last_edited_at' => now()->subDays(3)]);
+
+        // More recent story marked as complete
+        $complete = publicStory('Finished Saga', $author->id);
+        $chapterNew = createPublishedChapter($this, $complete, $author, ['title' => 'Final']);
+        Chapter::whereKey($chapterNew->id)->update(['last_edited_at' => now()->subDay()]);
+        $complete->is_complete = true;
+        $complete->saveQuietly();
+
+        $html = Blade::render('<x-story::keep-writing-component />');
+
+        expect($html)
+            ->toContain(__('story::keep-writing.title'))
+            ->toContain('Ongoing Draft')
+            ->toContain(__('story::keep-writing.new_chapter'))
+            ->toContain(route('chapters.create', ['storySlug' => $incomplete->slug]))
+            ->not->toContain('Finished Saga');
+    });
+
     it('should show an error if the user is not confirmed', function () {
         $user = bob($this, roles: [Roles::USER]);
         $this->actingAs($user);

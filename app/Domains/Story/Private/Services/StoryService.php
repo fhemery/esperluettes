@@ -353,22 +353,24 @@ class StoryService
      */
     public function getLatestStoryForKeepWriting(int $userId): ?Story
     {
-        // Latest activity by chapter edit
+        // Latest activity by chapter edit, restricted to authored & incomplete stories
         $latestChapter = Chapter::query()
             ->with('story')
             ->whereHas('story', function ($q) use ($userId) {
                 $q->whereHas('authors', function ($q) use ($userId) {
                     $q->where('user_id', $userId);
-                });
+                })
+                ->where('is_complete', false);
             })
             ->orderByDesc('last_edited_at')
             ->first();
 
-        // Latest story by creation date authored by the user
+        // Latest story by creation date authored by the user and not completed
         $latestStory = Story::query()
             ->whereHas('authors', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             })
+            ->where('is_complete', false)
             ->orderByDesc('created_at')
             ->first();
 
