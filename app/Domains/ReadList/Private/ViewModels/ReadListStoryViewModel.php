@@ -26,6 +26,7 @@ class ReadListStoryViewModel
         public readonly int $progressPercent = 0,
         public readonly ?string $keepReadingUrl = null,
         public readonly ?\DateTime $lastModified = null,
+        public readonly bool $isComplete = false,
     ) {}
 
     public function hasChapters(): bool
@@ -77,6 +78,8 @@ class ReadListStoryViewModel
         
         // Compute last modified date: use lastChapterPublishedAt if exists, otherwise createdAt
         $lastModified = $dto->lastChapterPublishedAt ?? $dto->createdAt;
+
+        $isComplete = (bool) ($dto->isComplete ?? false);
         
         return new self(
             id: (int) $dto->id,
@@ -94,6 +97,7 @@ class ReadListStoryViewModel
             progressPercent: $percent,
             keepReadingUrl: $keepReadingUrl,
             lastModified: $lastModified,
+            isComplete: $isComplete,
         );
     }
 }

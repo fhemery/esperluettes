@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domains\ReadList\Private\Models\ReadListEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -40,7 +41,7 @@ describe('ReadList page', function () {
             // Create two stories: one with unread chapters, one fully read
             $storyWithUnread = publicStory('Story with unread chapters', $author->id);
             createPublishedChapter($this, $storyWithUnread, $author);
-                
+
             $fullyReadStory = publicStory('Fully read story', $author->id);
             $readChapter = createPublishedChapter($this, $fullyReadStory, $author);
 
@@ -72,12 +73,12 @@ describe('ReadList page', function () {
             for ($i = 1; $i <= 25; $i++) {
                 $storyWithUnread = publicStory('Story with unread chapters', $user->id);
                 $readChapter = createPublishedChapter($this, $storyWithUnread, $user);
- 
+
                 $reader = bob($this);
                 $this->actingAs($reader);
                 addToReadList($this, $storyWithUnread->id);
 
-                if ($i % 3 == 0){
+                if ($i % 3 == 0) {
                     markAsRead($this, $readChapter);
                 }
             }
@@ -166,6 +167,35 @@ describe('ReadList page', function () {
                 ->assertOk()
                 ->assertSee('Fantasy Story')
                 ->assertDontSee('Romance Story');
+        });
+    });
+
+    describe('Complete stories', function () {
+        it('shows completed badge only for completed stories in readlist', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+
+            $complete = publicStory('Complete On Readlist', $user->id);
+            $complete->is_complete = true;
+            $complete->saveQuietly();
+
+            $ongoing = publicStory('Ongoing On Readlist', $user->id);
+            $ongoing->is_complete = false;
+            $ongoing->saveQuietly();
+
+            ReadListEntry::create(['user_id' => $user->id, 'story_id' => $complete->id]);
+            ReadListEntry::create(['user_id' => $user->id, 'story_id' => $ongoing->id]);
+
+            $resp = $this->get(route('readlist.index'));
+            $resp->assertOk();
+
+            $resp->assertSee('Complete On Readlist');
+            $resp->assertSee('Ongoing On Readlist');
+
+            // Badge icon appears for completed story
+            $resp->assertSee('done_all');
+            // Tooltip text from story show translations should be present
+            $resp->assertSee(trans('story::show.is_complete.tooltip'));
         });
     });
 });

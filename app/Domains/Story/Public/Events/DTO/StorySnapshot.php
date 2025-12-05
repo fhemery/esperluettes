@@ -22,6 +22,8 @@ final class StorySnapshot
         public readonly ?int $feedbackId,
         /** @var int[] */ public readonly array $genreIds,
         /** @var int[] */ public readonly array $triggerWarningIds,
+        public readonly ?bool $isComplete = null,
+        public readonly ?bool $isExcludedFromEvents = null,
     ) {}
 
     public static function fromModel(Story $story, int $createdByUserId): self
@@ -48,6 +50,8 @@ final class StorySnapshot
             feedbackId: $story->story_ref_feedback_id ? (int) $story->story_ref_feedback_id : null,
             genreIds: $genreIds,
             triggerWarningIds: $triggerWarningIds,
+            isComplete: isset($story->is_complete) ? (bool) $story->is_complete : null,
+            isExcludedFromEvents: isset($story->is_excluded_from_events) ? (bool) $story->is_excluded_from_events : null,
         );
     }
 
@@ -68,6 +72,8 @@ final class StorySnapshot
             'feedbackId' => $this->feedbackId,
             'genreIds' => array_values($this->genreIds),
             'triggerWarningIds' => array_values($this->triggerWarningIds),
+            'isComplete' => $this->isComplete,
+            'isExcludedFromEvents' => $this->isExcludedFromEvents,
         ];
     }
 
@@ -88,6 +94,8 @@ final class StorySnapshot
             feedbackId: isset($payload['feedbackId']) ? (int) $payload['feedbackId'] : null,
             genreIds: array_map('intval', (array) ($payload['genreIds'] ?? [])),
             triggerWarningIds: array_map('intval', (array) ($payload['triggerWarningIds'] ?? [])),
+            isComplete: array_key_exists('isComplete', $payload) ? (bool) $payload['isComplete'] : null,
+            isExcludedFromEvents: array_key_exists('isExcludedFromEvents', $payload) ? (bool) $payload['isExcludedFromEvents'] : null,
         );
     }
 }

@@ -15,13 +15,22 @@
     </div>
 
     <div class="col-start-2 col-span-1 row-span-3 flex flex-col gap-4">
-        {{-- Title + summary tooltip icon --}}
+        {{-- Title + completed badge + summary tooltip icon --}}
         <div class="flex flex-col">
             <div class="flex items-center gap-1">
                 <a href="{{ url('/stories/' . $item->slug) }}" class="block">
                     <x-shared::title tag="h2" class="hover:underline">{{ $item->title }}</x-shared::title>
-
                 </a>
+
+                @if ($item->isComplete)
+                    <x-shared::popover placement="top">
+                        <x-slot name="trigger">
+                            <x-shared::badge color="success" size="sm" icon="done_all"></x-shared::badge>
+                        </x-slot>
+                        <div>{{ __('story::show.is_complete.tooltip') }}</div>
+                    </x-shared::popover>
+                @endif
+
                 @if (trim($item->description) !== '')
                     <div class="mb-1">
                         <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" maxWidth="20rem"

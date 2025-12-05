@@ -29,7 +29,8 @@ class StoryDto
         public ?\DateTime $createdAt = null,
         public ?\DateTime $lastChapterPublishedAt = null,
         public ?int $publishedChaptersCount = null,
-        public ?int $wordCount = null
+        public ?int $wordCount = null,
+        public ?bool $isComplete = null,
     ) {
     }
 
@@ -44,6 +45,7 @@ class StoryDto
             description: $story->description,
             createdAt: $story->created_at,
             lastChapterPublishedAt: $story->last_chapter_published_at,
+            isComplete: isset($story->is_complete) ? (bool) $story->is_complete : null,
         );
 
         if ($fieldsToReturn->includeGenreIds) {
