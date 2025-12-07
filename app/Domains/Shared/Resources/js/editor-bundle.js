@@ -12,18 +12,12 @@ window.Delta = Delta;
 Quill.register('modules/emoji-toolbar', ToolbarEmoji);
 Quill.register('modules/emoji-textarea', TextAreaEmoji);
 
-// Normalize HTML before injecting into Quill so that multiple consecutive
-// spaces are preserved. The browser collapses normal spaces when parsing
-// HTML, so we convert runs of 2+ spaces into a sequence of non-breaking
-// spaces followed by a normal space. Example: "He    llo" -> "He&nbsp;&nbsp; llo".
-function prepareHtmlForQuill(html) {
+// Normalize HTML output from Quill: convert the first &nbsp; of each sequence
+// to a regular space so text can wrap naturally. Single &nbsp; becomes " ",
+// "&nbsp;&nbsp;&nbsp;" becomes " &nbsp;&nbsp;".
+function normalizeHtmlFromQuill(html) {
   if (!html) return '';
-  return html.replace(/ {2,}/g, (match) => {
-    const len = match.length;
-    // n spaces -> (n-1) &nbsp; + 1 normal space to keep DOM parsing from
-    // collapsing them while still allowing wrapping.
-    return '&nbsp;'.repeat(len - 1) + ' ';
-  });
+  return html.replace(/&nbsp;((?:&nbsp;)*)/g, ' $1');
 }
 
 export function initQuillEditor(id, options = {}) {
@@ -143,9 +137,8 @@ export function initQuillEditor(id, options = {}) {
     const min = container.dataset.min ? parseInt(container.dataset.min, 10) : null;
 
     // Set default value if it's not empty
-    let defaultValue = (quillEditor?.value || '');
+    const defaultValue = (quillEditor?.value || '');
     if (defaultValue) {
-      defaultValue = prepareHtmlForQuill(defaultValue);
       editor.clipboard.dangerouslyPasteHTML(defaultValue);
     }
 
@@ -220,7 +213,7 @@ export function initQuillEditor(id, options = {}) {
     };
 
     editor.on('text-change', function () {
-      if (quillEditor) quillEditor.value = editor.getSemanticHTML();
+      if (quillEditor) quillEditor.value = normalizeHtmlFromQuill(editor.getSemanticHTML());
       updateCount();
     });
 
