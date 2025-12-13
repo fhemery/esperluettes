@@ -7,6 +7,7 @@
     - name: Input name for the file upload
     - id: Unique identifier
     - currentPath: Path to current image (relative to storage disk)
+    - currentUrl: Direct URL to current image (overrides currentPath URL generation)
     - disk: Storage disk (default: 'public')
     - recommendedWidth: Suggested width in pixels (for guidance)
     - recommendedHeight: Suggested height in pixels (for guidance)
@@ -21,6 +22,7 @@
     'name',
     'id' => null,
     'currentPath' => null,
+    'currentUrl' => null,
     'disk' => 'public',
     'recommendedWidth' => null,
     'recommendedHeight' => null,
@@ -34,8 +36,9 @@
 
 @php
     $inputId = $id ?? 'image-upload-' . Str::random(8);
-    $hasCurrentImage = !empty($currentPath);
-    $currentUrl = $hasCurrentImage ? asset('storage/' . $currentPath) : null;
+    $hasCurrentImage = !empty($currentPath) || !empty($currentUrl);
+    // Use provided URL directly, or construct from path for public disk
+    $resolvedUrl = $currentUrl ?? ($currentPath ? asset('storage/' . $currentPath) : null);
     
     // Build dimension guidance text
     $dimensionGuide = null;
@@ -56,7 +59,7 @@
 <div 
     x-data="imageUpload({ 
         hasCurrentImage: @js($hasCurrentImage), 
-        currentUrl: @js($currentUrl),
+        currentUrl: @js($resolvedUrl),
         inputId: @js($inputId)
     })"
     {{ $attributes->merge(['class' => 'flex flex-col gap-2']) }}
