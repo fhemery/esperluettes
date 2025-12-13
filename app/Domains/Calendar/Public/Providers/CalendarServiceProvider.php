@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Calendar\Public\Providers;
 
 use App\Domains\Calendar\Private\Activities\Jardino\JardinoRegistration;
+use App\Domains\Calendar\Private\Activities\SecretGift\SecretGiftRegistration;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Calendar\Public\Api\CalendarRegistry;
 use Illuminate\Support\Facades\Blade;
@@ -16,6 +17,7 @@ class CalendarServiceProvider extends ServiceProvider
         $this->app->singleton(CalendarRegistry::class, fn () => new CalendarRegistry());
         // Register activity-specific providers (per-activity assets)
         $this->app->register(\App\Domains\Calendar\Private\Activities\Jardino\JardinoServiceProvider::class);
+        $this->app->register(\App\Domains\Calendar\Private\Activities\SecretGift\SecretGiftServiceProvider::class);
     }
 
     public function boot(): void
@@ -40,5 +42,6 @@ class CalendarServiceProvider extends ServiceProvider
 
         $registry = app(CalendarRegistry::class);
         $registry->register(JardinoRegistration::ACTIVITY_TYPE, new JardinoRegistration());
+        $registry->register(SecretGiftRegistration::ACTIVITY_TYPE, new SecretGiftRegistration());
     }
 }
