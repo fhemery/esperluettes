@@ -23,21 +23,13 @@
     ];
 
     $sizeClass = $sizeMap[$size] ?? $sizeMap['md'];
-
     $colorClass = $colorMap[$color] ?? $colorMap['accent'];
 
-    $iconFiles = [
-        'butterfly' => public_path('images/icons/plant-icon-butterfly.svg'),
-        'ladybug' => public_path('images/icons/plant-icon-ladybug.svg'),
-        'leaf01' => public_path('images/icons/plant-icon-leaf01.svg'),
-        'leaf02' => public_path('images/icons/plant-icon-leaf02.svg'),
-        'leaf03' => public_path('images/icons/plant-icon-leaf03.svg'),
-        'leaf04' => public_path('images/icons/plant-icon-leaf04.svg'),
-        'mushroom' => public_path('images/icons/plant-icon-mushroom.svg'),
-    ];
-
-    $path = $iconFiles[$name] ?? null;
-    $svg = $path && file_exists($path) ? file_get_contents($path) : null;
+    // Seasonal icons: use numbered format (01-07)
+    // $theme is injected by ResolveThemeMiddleware
+    $themeName = $theme->value ?? 'autumn';
+    $path = public_path("images/themes/{$themeName}/icons/design-{$name}.svg");
+    $svg = file_exists($path) ? file_get_contents($path) : null;
 @endphp
 
 @if($svg)
