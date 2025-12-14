@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- Guest layout: minimal chrome, no navigation -->
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-season="autumn" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-season="{{ $theme->value }}" class="h-full">
 
 <head>
     <meta charset="utf-8">

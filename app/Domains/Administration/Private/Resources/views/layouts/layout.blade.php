@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- Season hardcoded by default, we'll improve after -->
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-season="autumn">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-season="{{ $theme->value }}">
 
 <head>
     <meta charset="utf-8">

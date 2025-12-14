@@ -1,1 +1,0 @@
-<img src="{{ asset('images/themes/autumn/logo.png') }}" alt="Esperluettes Logo" class="h-16 w-12 rounded-full" {{ $attributes }} />

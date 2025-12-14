@@ -7,7 +7,7 @@
             <!-- Logo + Admin mention -->
             <div class="shrink-0 flex items-center gap-4">
                 <a href="{{ route('dashboard') }}">
-                    <img src="{{ asset('images/themes/autumn/logo.png') }}" alt="{{config('app.name')}}" class="h-14" id="header-logo">
+                    <x-shared::themed-logo class="h-14" id="header-logo" />
                 </a>
                 <span class="text-2xl font-bold text-primary">{{__('administration::navigation.title')}}</span>
             </div>

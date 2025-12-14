@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- Season hardcoded by default, we'll improve after -->
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-season="autumn">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-season="{{ $theme->value }}">
 
 <head>
     <meta charset="utf-8">
@@ -19,7 +18,7 @@
     <div class="min-h-screen bg-bg text-fg h-full flex flex-col">
         @include('shared::layouts.partials.navigation')
         @if ($displayRibbon)
-        <div class="w-full h-10 bg-[url('/images/themes/autumn/top-ribbon.png')] bg-repeat-x"></div>
+        <div class="w-full h-10 bg-theme-ribbon"></div>
         @endif
 
         <x-shared::flash-block />

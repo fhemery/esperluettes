@@ -4,9 +4,7 @@
         <div class="col-span-1 sm:col-span-2 lg:col-span-4">
             <x-news::carousel size="compact" />
             <!-- Add the ribbon -->
-            <div class="h-10 bg-[url('/images/themes/autumn/top-ribbon.png')] bg-repeat-x">
-
-            </div>
+            <div class="h-10 bg-theme-ribbon"></div>
         </div>
 
         <!-- Bienvenue panel -->

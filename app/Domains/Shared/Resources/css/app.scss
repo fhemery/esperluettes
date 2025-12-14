@@ -93,17 +93,64 @@ html {
   --home-bg-image: url('/images/themes/autumn/background.png');
   --profile-bg-image-small: url('/images/themes/autumn/profile-bg-640.jpg');
   --profile-bg-image-big: url('/images/themes/autumn/profile-bg-1280.jpg');
+  --theme-ribbon: url('/images/themes/autumn/top-ribbon.png');
 
   --frame-corner-tl:url('/images/themes/autumn/design/frame-corner-tl.png');
   --frame-corner-tr:url('/images/themes/autumn/design/frame-corner-tr.png');
   --frame-corner-bl:url('/images/themes/autumn/design/frame-corner-bl.png');
   --frame-corner-br:url('/images/themes/autumn/design/frame-corner-br.png');
+}
 
-  .logo {
-    background-image: url('/images/themes/autumn/logo.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-  }
+:root[data-season="winter"] {
+  --color-bg: 232 240 243;        
+  --color-primary: 107 152 170;    
+  --color-secondary: 114 221 218;
+  --color-accent: 181 55 98;      
+  --color-tertiary: 181 144 49;
+  /* Public web root is /, so image path should not include /public */
+  --home-bg-image: url('/images/themes/winter/background.png');
+  --profile-bg-image-small: url('/images/themes/winter/profile-bg-640.jpg');
+  --profile-bg-image-big: url('/images/themes/winter/profile-bg-1280.jpg');
+  --theme-ribbon: url('/images/themes/winter/top-ribbon.png');
+
+  --frame-corner-tl:url('/images/themes/winter/design/frame-corner-tl.png');
+  --frame-corner-tr:url('/images/themes/winter/design/frame-corner-tr.png');
+  --frame-corner-bl:url('/images/themes/winter/design/frame-corner-bl.png');
+  --frame-corner-br:url('/images/themes/winter/design/frame-corner-br.png');
+}
+
+:root[data-season="spring"] {
+  --color-bg: 247 234 223;        // Placeholder: same as autumn
+  --color-primary: 201 129 41;
+  --color-secondary: 65 37 10;
+  --color-accent: 164 52 92;
+  --color-tertiary: 99 157 165;
+  --home-bg-image: url('/images/themes/spring/background.png');
+  --profile-bg-image-small: url('/images/themes/spring/profile-bg-640.jpg');
+  --profile-bg-image-big: url('/images/themes/spring/profile-bg-1280.jpg');
+  --theme-ribbon: url('/images/themes/spring/top-ribbon.png');
+
+  --frame-corner-tl:url('/images/themes/spring/design/frame-corner-tl.png');
+  --frame-corner-tr:url('/images/themes/spring/design/frame-corner-tr.png');
+  --frame-corner-bl:url('/images/themes/spring/design/frame-corner-bl.png');
+  --frame-corner-br:url('/images/themes/spring/design/frame-corner-br.png');
+}
+
+:root[data-season="summer"] {
+  --color-bg: 247 234 223;        // Placeholder: same as autumn
+  --color-primary: 201 129 41;
+  --color-secondary: 65 37 10;
+  --color-accent: 164 52 92;
+  --color-tertiary: 99 157 165;
+  --home-bg-image: url('/images/themes/summer/background.png');
+  --profile-bg-image-small: url('/images/themes/summer/profile-bg-640.jpg');
+  --profile-bg-image-big: url('/images/themes/summer/profile-bg-1280.jpg');
+  --theme-ribbon: url('/images/themes/summer/top-ribbon.png');
+
+  --frame-corner-tl:url('/images/themes/summer/design/frame-corner-tl.png');
+  --frame-corner-tr:url('/images/themes/summer/design/frame-corner-tr.png');
+  --frame-corner-bl:url('/images/themes/summer/design/frame-corner-bl.png');
+  --frame-corner-br:url('/images/themes/summer/design/frame-corner-br.png');
 }
 
 /* Rich content defaults (for sanitized HTML display) */
@@ -199,6 +246,11 @@ p.ql-align-center { text-indent: 0; }
     background-image: var(--profile-bg-image-big);
     background-repeat: no-repeat;
     background-size: cover;
+  }
+
+  .bg-theme-ribbon {
+    background-image: var(--theme-ribbon);
+    background-repeat: repeat-x;
   }
 
   /* Surface system: season-agnostic light/dark panels */
