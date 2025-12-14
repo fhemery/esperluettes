@@ -14,10 +14,7 @@
 
     <div class="w-[230px] h-[306px] mx-auto overflow-hidden">
         <a href="{{ url('/stories/' . $item->getSlug()) }}" class="block">
-            <img
-                src="{{ asset('images/story/default-cover.svg') }}"
-                alt="{{ $item->getTitle() }}"
-                class="w-[230px] object-contain">
+            <x-shared::default-cover class="w-[230px] object-contain" />
         </a>
     </div>
 

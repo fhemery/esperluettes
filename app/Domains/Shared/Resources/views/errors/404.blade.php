@@ -35,7 +35,7 @@
 
         <!-- Image -->
         <div class="flex items-center justify-center">
-            <img src="{{ asset('images/errors/404.png') }}" alt="404" class="w-full">
+            <img src="{{ asset("images/themes/{$theme->value}/errors/404.png") }}" alt="404" class="w-full">
         </div>
     </div>
 

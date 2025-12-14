@@ -28,7 +28,7 @@
 
         <div class="flex-1 surface-read text-on-surface min-h-[10rem] px-8 py-12 framed-tight relative flex flex-col">
             <div class="absolute top-[-2rem] right-[-2rem] ">
-                <x-shared::design-icon name="ladybug" size="md" color="accent" />
+                <x-shared::design-icon name="02" size="md" color="accent" />
             </div>
             @if (empty($page->notifications))
                 <div class="flex-1 p-4 flex items-center justify-center">

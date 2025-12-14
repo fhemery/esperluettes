@@ -32,7 +32,7 @@
         </div>
 
         <div class="flex items-center justify-center">
-            <img src="{{ asset('images/errors/500.png') }}" alt="500" class="w-full">
+            <img src="{{ asset("images/themes/{$theme->value}/errors/500.png") }}" alt="500" class="w-full">
         </div>
     </div>
 
