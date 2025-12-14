@@ -47,7 +47,7 @@ class SecretGiftComponent extends Component
             if ($assignmentAsGiver) {
                 $recipientParticipant = $this->service->getParticipant(
                     $this->activity->id,
-                    $assignmentAsGiver->recipient_user_id
+                    (int) $assignmentAsGiver->recipient_user_id
                 );
                 $profiles = $this->profileApi->getPublicProfiles([$assignmentAsGiver->recipient_user_id]);
                 $recipientProfile = $profiles[$assignmentAsGiver->recipient_user_id] ?? null;
@@ -69,7 +69,7 @@ class SecretGiftComponent extends Component
             'assignmentAsRecipient' => $assignmentAsRecipient,
             'recipientProfile' => $recipientProfile,
             'recipientPreferences' => $assignmentAsGiver 
-                ? $this->service->getParticipant($this->activity->id, $assignmentAsGiver->recipient_user_id)?->preferences 
+                ? $this->service->getParticipant($this->activity->id, (int) $assignmentAsGiver->recipient_user_id)?->preferences 
                 : null,
             'giverProfile' => $giverProfile,
         ]);
