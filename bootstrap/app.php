@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Public\Middleware\CheckRole;
 use App\Domains\Auth\Public\Middleware\EnsureUserCompliance;
+use App\Domains\Shared\Http\Middleware\ResolveThemeMiddleware;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('notifications:cleanup')->daily();
     })
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            ResolveThemeMiddleware::class,
+        ]);
+
         $middleware->alias([
             'role' => CheckRole::class,
             'compliant' => EnsureUserCompliance::class,

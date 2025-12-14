@@ -1,7 +1,7 @@
 <footer class="bg-bg text-fg/90">
     <div class="min-h-4 bg-primary w-full"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
-        <img src="{{ asset('images/themes/autumn/logo-full.png') }}" alt="{{config('app.name')}}" class="h-24">
+        <x-shared::themed-logo variant="full" class="h-24" />
         <div class="grid grid-cols-3 md:grid-cols-5 gap-8 md:-mt-4">
            <div class="col-span-3 md:col-span-2 md:pl-24">
                 {{ __('shared::footer.brand_description') }}
