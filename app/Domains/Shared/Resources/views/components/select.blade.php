@@ -7,7 +7,7 @@
     'labelField' => 'name',
     'required' => false,
     'chevron' => false,
-    'selectClass' => 'w-full appearance-none bg-transparent text-transparent caret-transparent pr-8 py-2',
+    'selectClass' => 'w-full appearance-none bg-transparent text-transparent caret-transparent pr-8 py-2 [&_option]:text-fg',
 ])
 
 @php
