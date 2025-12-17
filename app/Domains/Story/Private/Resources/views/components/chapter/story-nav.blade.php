@@ -6,7 +6,7 @@
 <div class="flex flex-col items-center gap-2">
     <!-- Cover -->
     <div>
-        <img src="{{ $story->cover_url ?? asset('images/story/default-cover.svg') }}" alt="{{ $story->title }}" class="w-[230px] object-cover">
+        <x-shared::default-cover class="w-[230px] object-cover"/>
     </div>
     <!-- Title -->
     <div>

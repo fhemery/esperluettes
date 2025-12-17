@@ -22,7 +22,7 @@
               @if($s->cover_url)
                 <img src="{{ $s->cover_url }}" alt="" class="w-10 h-10 object-cover rounded" />
               @else
-                <img src="{{ asset('images/story/default-cover.svg') }}" alt="" class="w-10 h-10 object-cover rounded" />
+                <x-shared::default-cover class="w-10 h-10 object-cover" :title="$s->title" />
               @endif
               <div class="min-w-0">
                 <div class="text-sm font-medium">{!! $s->title !!}</div>

@@ -67,8 +67,7 @@
             <div
                 class="col-start-1 col-span-1 row-start-2 row-span-3
                     flex flex-col gap-2 items-center justify-center">
-                <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $viewModel->getTitle() }}"
-                    class="w-[150px] h-[200px] md:w-full md:h-full object-cover">
+                <x-shared::default-cover class="w-[150px] h-[200px] md:w-full md:h-full object-cover" />
                 <x-read-list::read-list-toggle-component :story-id="$viewModel->getId()" :is-author="$viewModel->isAuthor()" />
             </div>
 

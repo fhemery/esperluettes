@@ -19,7 +19,7 @@ class ReadListStoryViewModel
         public readonly array $genreNames,
         /** @var array<int,string> */
         public readonly array $triggerWarningNames,
-        public readonly ?string $coverUrl = '/images/story/default-cover.svg',
+        public readonly ?string $coverUrl,
         public readonly int $totalWordCount = 0,
         public readonly int $totalChaptersCount = 0,
         public readonly int $readChaptersCount = 0,
@@ -90,7 +90,7 @@ class ReadListStoryViewModel
             authors: is_array($dto->authors) ? $dto->authors : [],
             genreNames: $genreNames,
             triggerWarningNames: $twNames,
-            coverUrl: '/images/story/default-cover.svg',
+            coverUrl: null,
             totalWordCount: $words,
             totalChaptersCount: $total,
             readChaptersCount: $read,

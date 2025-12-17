@@ -37,7 +37,7 @@
                     {{ __('dashboard::index.placeholder_title') }}
                 </x-shared::title>
                 <div class="flex-1">
-                    <img src="{{ asset('images/errors/not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto">
+                    <img src="{{ $theme->asset('not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto">
                 </div>
                 <p class="text-sm text-muted">{{ __('dashboard::index.placeholder_text') }}</p>
             </div>

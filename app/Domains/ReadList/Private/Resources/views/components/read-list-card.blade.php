@@ -9,8 +9,7 @@
     {{-- Cover --}}
     <div class="col-start-1 row-start-1 row-span-3 w-[115px] h-[153px] md:w-[230px] md:h-[306px] mx-auto overflow-hidden">
         <a href="{{ url('/stories/' . $item->slug) }}" class="block">
-            <img src="{{ asset('images/story/default-cover.svg') }}" alt="{{ $item->title }}"
-                class="w-[115px] md:w-[230px] object-contain">
+            <x-shared::default-cover class="w-[115px] md:w-[230px] object-contain" :title="$item->title" />
         </a>
     </div>
 
