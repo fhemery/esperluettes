@@ -42,6 +42,16 @@ enum Theme: string
     }
 
     /**
+     * Get the full asset URL for a themed resource.
+     *
+     * @param  string  $path  Relative path within the theme folder (e.g., 'favicons/favicon.ico')
+     */
+    public function asset(string $path): string
+    {
+        return asset($this->basePath().'/'.$path);
+    }
+
+    /**
      * Get the current seasonal theme based on astronomical seasons.
      * Winter: Dec 21 - Mar 20
      * Spring: Mar 21 - Jun 20

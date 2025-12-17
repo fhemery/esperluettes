@@ -7,7 +7,7 @@
 
 
         <p class="text-center">{{ __('dashboard::promotion.current_status') }}</p>
-        <img src="{{ asset('images/icons/seed.png') }}" alt="" class="w-32" />
+        <img src="{{ $theme->asset('icons/seed.png') }}" alt="" class="w-32" />
         @if ($status && $status->status === 'pending')
             <p class="text-center font-medium">{{ __('dashboard::promotion.pending_message') }}</p>
             <div class="flex-1">&nbsp;</div>

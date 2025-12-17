@@ -189,7 +189,7 @@ describe('ReadListController index', function () {
             expect($s->triggerWarningNames)->toContain($tw->name);
 
             // Default cover
-            expect($s->coverUrl)->toBe('/images/story/default-cover.svg');
+            expect($s->coverUrl)->toBeNull();
         });
 
         it('computes read/total chapters and progress percentage', function () {
