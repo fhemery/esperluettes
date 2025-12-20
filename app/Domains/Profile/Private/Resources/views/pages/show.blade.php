@@ -2,8 +2,8 @@
 <x-app-layout>
     <div class="overflow-hidden">
         <!-- Profile Header -->
-        <div class="bg-profile-seasonal sm:bg-profile-seasonal-big px-2 sm:px-8 py-4 sm:py-8">
-            <div class="flex items-center gap-2 sm:gap-4">
+        <div class="bg-profile-seasonal sm:bg-profile-seasonal-big">
+            <div class="bg-read/30 px-2 sm:px-8 py-4 sm:py-8 flex items-center gap-2 sm:gap-4">
                 <!-- Profile Picture -->
                 <div class="flex-shrink-0">
                     <x-shared::avatar :src="$profile->profile_picture_path"
@@ -14,7 +14,7 @@
                 <!-- User Info -->
                 <div class="flex-1 flex flex-col flex-start gap-2">
                     <div class="flex items-center">
-                        <x-shared::title class="text-2xl sm:text-4xl text-secondary">{{ $profile->display_name }}</x-shared::title>
+                        <x-shared::title class="text-2xl sm:text-4xl text-secondary p-4">{{ $profile->display_name }}</x-shared::title>
                     </div>
 
                     @if($isOwn)
