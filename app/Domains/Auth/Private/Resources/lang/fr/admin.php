@@ -20,6 +20,10 @@ return [
         ],
 
         'table' => [
+            'name' => 'Nom',
+            'email' => 'Email',
+            'roles' => 'Rôles',
+            'is_active' => 'Actif ?',
             'status' => 'Statut',
             'is_minor' => 'Mineur',
             'minor_status' => 'Statut mineur',
