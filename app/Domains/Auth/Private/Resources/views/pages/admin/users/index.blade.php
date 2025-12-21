@@ -53,10 +53,10 @@
                 <thead>
                     <tr class="border-b border-border text-left">
                         <th class="p-3">ID</th>
-                        <th class="p-3">{{ __('auth::admin.users.name_header') }}</th>
-                        <th class="p-3">{{ __('auth::admin.users.email_header') }}</th>
-                        <th class="p-3">{{ __('auth::admin.users.roles_header') }}</th>
-                        <th class="p-3">{{ __('auth::admin.users.is_active_header') }}</th>
+                        <th class="p-3">{{ __('auth::admin.users.table.name') }}</th>
+                        <th class="p-3">{{ __('auth::admin.users.table.email') }}</th>
+                        <th class="p-3">{{ __('auth::admin.users.table.roles') }}</th>
+                        <th class="p-3">{{ __('auth::admin.users.table.is_active') }}</th>
                         <th class="p-3">{{ __('auth::admin.users.table.status') }}</th>
                         <th class="p-3">{{ __('auth::admin.users.table.actions') }}</th>
                     </tr>

@@ -5,7 +5,7 @@
     $currentUrl = request()->url();
 @endphp
 
-<div class="p-4 flex flex-col gap-4">
+<div class="p-4 flex flex-col gap-4 overflow-y-auto h-full">
     <x-administration::navigation-item
         href="{{route('administration.dashboard')}}"
         label="{{ __('administration::dashboard.title') }}"

@@ -10,15 +10,15 @@
 </head>
 <body class="min-h-screen" x-data="{ adminSidebarOpen: false }">
     <x-shared::flash-block />
-    <div class="min-h-screen w-full bg-bg text-fg h-full grid md:grid-cols-[300px_1fr] md:grid-rows-[auto_1fr]">
+    <div class="min-h-screen max-h-screen w-full bg-bg text-fg h-full grid md:grid-cols-[300px_1fr] md:grid-rows-[auto_1fr]">
         <div class="col-span-2">
             <x-administration::navbar />
         </div>
         <!-- Desktop sidebar -->
-        <div class="hidden md:block col-span-1">
+        <div class="hidden md:block col-span-1 overflow-y-auto">
             <x-administration::sidebar />
         </div>
-        <main class="col-span-1 p-4 max-w-7xl w-full mx-auto">
+        <main class="col-span-1 p-4 max-w-7xl w-full mx-auto overflow-y-auto">
             {{ $slot }}
         </main>
     </div>

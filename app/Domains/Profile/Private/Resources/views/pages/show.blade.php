@@ -3,7 +3,7 @@
     <div class="overflow-hidden">
         <!-- Profile Header -->
         <div class="bg-profile-seasonal sm:bg-profile-seasonal-big">
-            <div class="bg-read/30 px-2 sm:px-8 py-4 sm:py-8 flex items-center gap-2 sm:gap-4">
+            <div class="px-2 sm:px-8 py-4 sm:py-8 flex items-center gap-2 sm:gap-4">
                 <!-- Profile Picture -->
                 <div class="flex-shrink-0">
                     <x-shared::avatar :src="$profile->profile_picture_path"
