@@ -18,6 +18,7 @@ class SecretGiftAssignment extends Model
         'recipient_user_id',
         'gift_text',
         'gift_image_path',
+        'gift_sound_path',
     ];
 
     public function activity(): BelongsTo
@@ -27,6 +28,6 @@ class SecretGiftAssignment extends Model
 
     public function hasGift(): bool
     {
-        return $this->gift_text !== null || $this->gift_image_path !== null;
+        return $this->gift_text !== null || $this->gift_image_path !== null || $this->gift_sound_path !== null;
     }
 }

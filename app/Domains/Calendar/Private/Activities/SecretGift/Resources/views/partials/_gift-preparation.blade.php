@@ -55,7 +55,7 @@
             action="{{ route('secret-gift.save-gift', $activity) }}" 
             method="POST" 
             enctype="multipart/form-data"
-            x-data="{ giftMode: '{{ $assignment->gift_text ? 'text' : ($assignment->gift_image_path ? 'image' : 'text') }}' }"
+            x-data="{ giftMode: '{{ $assignment->gift_text ? 'text' : ($assignment->gift_image_path ? 'image' : ($assignment->gift_sound_path ? 'sound' : 'text')) }}' }"
         >
             @csrf
 
@@ -78,6 +78,15 @@
                 >
                     <span class="material-symbols-outlined align-middle mr-1">image</span>
                     {{ __('secret-gift::secret-gift.mode_image') }}
+                </button>
+                <button 
+                    type="button" 
+                    @click="giftMode = 'sound'"
+                    :class="giftMode === 'sound' ? 'bg-primary text-on-primary' : 'surface-neutral'"
+                    class="px-4 py-2 rounded-lg transition-colors"
+                >
+                    <span class="material-symbols-outlined align-middle mr-1">audio_file</span>
+                    {{ __('secret-gift::secret-gift.mode_sound') }}
                 </button>
             </div>
 
@@ -102,6 +111,19 @@
                     :maxSize="5120"
                     accept="image/jpeg,image/png"
                     :helpText="__('secret-gift::secret-gift.image_help')"
+                />
+            </div>
+
+            {{-- Sound Upload --}}
+            <div x-show="giftMode === 'sound'" x-cloak class="mb-6">
+                <x-shared::sound-upload
+                    name="gift_sound"
+                    :label="__('secret-gift::secret-gift.upload_sound')"
+                    :currentUrl="$assignment->gift_sound_path ? route('secret-gift.sound', [$activity, $assignment]) : null"
+                    :currentPath="$assignment->gift_sound_path"
+                    :maxSize="10240"
+                    accept="audio/mp3"
+                    :helpText="__('secret-gift::secret-gift.sound_help')"
                 />
             </div>
 

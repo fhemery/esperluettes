@@ -22,6 +22,13 @@ class SaveGiftRequest extends FormRequest
                 'gift_image_remove' => filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
             ]);
         }
+        
+        if ($this->has('gift_sound_remove')) {
+            $value = $this->input('gift_sound_remove');
+            $this->merge([
+                'gift_sound_remove' => filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            ]);
+        }
     }
 
     public function rules(): array
@@ -30,6 +37,8 @@ class SaveGiftRequest extends FormRequest
             'gift_text' => ['nullable', 'string', 'max:65535'],
             'gift_image' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
             'gift_image_remove' => ['nullable', 'boolean'],
+            'gift_sound' => ['nullable', 'file', 'mimes:mp3', 'max:10240'],
+            'gift_sound_remove' => ['nullable', 'boolean'],
         ];
     }
 
@@ -39,6 +48,8 @@ class SaveGiftRequest extends FormRequest
             'gift_text.max' => __('secret-gift::secret-gift.validation.gift_text_max'),
             'gift_image.mimes' => __('secret-gift::secret-gift.validation.gift_image_mimes'),
             'gift_image.max' => __('secret-gift::secret-gift.validation.gift_image_max'),
+            'gift_sound.mimes' => __('secret-gift::secret-gift.validation.gift_sound_mimes'),
+            'gift_sound.max' => __('secret-gift::secret-gift.validation.gift_sound_max'),
         ];
     }
 }

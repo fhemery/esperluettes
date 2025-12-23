@@ -77,10 +77,48 @@ class SecretGiftService
         // Recipient can see after activity ends
         $state = $activity->state;
         $isEnded = $state === ActivityState::ENDED || $state === ActivityState::ARCHIVED;
-        if ($assignment->recipient_user_id === $userId && $isEnded) {
+
+        return $assignment->recipient_user_id === $userId && $isEnded;
+    }
+
+    public function saveGiftSound(SecretGiftAssignment $assignment, UploadedFile $file): string
+    {
+        // Delete old sound if exists
+        if ($assignment->gift_sound_path) {
+            Storage::disk('local')->delete($assignment->gift_sound_path);
+        }
+
+        $extension = $file->getClientOriginalExtension();
+        $path = "calendar/secret-gift/{$assignment->activity_id}/sound-{$assignment->giver_user_id}-" . time() . ".{$extension}";
+
+        Storage::disk('local')->put($path, file_get_contents($file->getRealPath()));
+
+        $assignment->gift_sound_path = $path;
+        $assignment->save();
+
+        return $path;
+    }
+
+    public function removeGiftSound(SecretGiftAssignment $assignment): void
+    {
+        if ($assignment->gift_sound_path) {
+            Storage::disk('local')->delete($assignment->gift_sound_path);
+            $assignment->gift_sound_path = null;
+            $assignment->save();
+        }
+    }
+
+    public function canViewSound(SecretGiftAssignment $assignment, int $userId, Activity $activity): bool
+    {
+        // Giver can always see their own sound
+        if ($assignment->giver_user_id === $userId) {
             return true;
         }
 
-        return false;
+        // Recipient can see after activity ends
+        $state = $activity->state;
+        $isEnded = $state === ActivityState::ENDED || $state === ActivityState::ARCHIVED;
+
+        return $assignment->recipient_user_id === $userId && $isEnded;
     }
 }

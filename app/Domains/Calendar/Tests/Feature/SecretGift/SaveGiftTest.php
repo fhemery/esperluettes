@@ -168,4 +168,148 @@ describe('SecretGift - Save Gift', function () {
         expect($assignment->gift_text)->toContain('poem');
         expect($assignment->gift_image_path)->not->toBeNull();
     });
+
+    it('allows a participant to upload a sound gift', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $file = UploadedFile::fake()->create('gift.mp3', 5000, 'audio/mpeg');
+
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_sound' => $file,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        expect($assignment->gift_sound_path)->not->toBeNull();
+        Storage::disk('local')->assertExists($assignment->gift_sound_path);
+    });
+
+    it('validates sound file type', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $file = UploadedFile::fake()->create('gift.wav', 1000, 'audio/wav');
+
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_sound' => $file,
+        ]);
+
+        $response->assertSessionHasErrors('gift_sound');
+    });
+
+    it('validates sound file size', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $file = UploadedFile::fake()->create('gift.mp3', 12000, 'audio/mpeg'); // 12MB > 10MB limit
+
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_sound' => $file,
+        ]);
+
+        $response->assertSessionHasErrors('gift_sound');
+    });
+
+    it('allows removing a sound gift', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        // First upload a sound
+        $file = UploadedFile::fake()->create('gift.mp3', 1000, 'audio/mpeg');
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_sound' => $file,
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        $originalPath = $assignment->gift_sound_path;
+        Storage::disk('local')->assertExists($originalPath);
+
+        // Then remove it
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_sound_remove' => true,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $assignment->refresh();
+        expect($assignment->gift_sound_path)->toBeNull();
+        Storage::disk('local')->assertMissing($originalPath);
+    });
+
+    it('replaces sound file when uploading a new one', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        // First upload
+        $file1 = UploadedFile::fake()->create('gift1.mp3', 1000, 'audio/mpeg');
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_sound' => $file1,
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        $originalPath = $assignment->gift_sound_path;
+        Storage::disk('local')->assertExists($originalPath);
+
+        // Upload new file
+        sleep(1); // Ensure different timestamp
+        $file2 = UploadedFile::fake()->create('gift2.mp3', 2000, 'audio/mpeg');
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_sound' => $file2,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $assignment->refresh();
+        expect($assignment->gift_sound_path)->not->toBe($originalPath);
+        Storage::disk('local')->assertMissing($originalPath);
+        Storage::disk('local')->assertExists($assignment->gift_sound_path);
+    });
+
+    it('allows saving text and sound together', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $file = UploadedFile::fake()->create('message.mp3', 3000, 'audio/mpeg');
+
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_text' => '<p>Listen to this song!</p>',
+            'gift_sound' => $file,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        expect($assignment->gift_text)->toContain('Listen');
+        expect($assignment->gift_sound_path)->not->toBeNull();
+    });
 });
