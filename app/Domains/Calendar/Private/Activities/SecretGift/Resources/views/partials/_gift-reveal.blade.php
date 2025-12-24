@@ -52,6 +52,46 @@
                         alt="{{ __('secret-gift::secret-gift.gift_image') }}"
                         class="max-w-full rounded-lg shadow-lg"
                     />
+                    <div class="mt-3">
+                        <a 
+                            href="{{ route('secret-gift.download-image', [$activity, $assignment]) }}" 
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg hover:bg-primary/90 transition-colors"
+                            download
+                        >
+                            <span class="material-symbols-outlined text-[20px]">download</span>
+                            {{ __('secret-gift::secret-gift.download_image') }}
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Sound Gift --}}
+            @if($assignment->gift_sound_path)
+                <div class="mt-4">
+                    <div class="bg-surface border border-border rounded-lg p-4 shadow-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-[24px] text-primary">audio_file</span>
+                                <span class="font-medium">{{ __('secret-gift::secret-gift.gift_sound') }}</span>
+                            </div>
+                            <a 
+                                href="{{ route('secret-gift.download-sound', [$activity, $assignment]) }}" 
+                                class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary text-on-primary rounded-lg hover:bg-primary/90 transition-colors text-sm"
+                                download
+                            >
+                                <span class="material-symbols-outlined text-[18px]">download</span>
+                                {{ __('secret-gift::secret-gift.download_sound') }}
+                            </a>
+                        </div>
+                        <audio 
+                            controls 
+                            src="{{ route('secret-gift.sound', [$activity, $assignment]) }}"
+                            class="w-full"
+                            preload="metadata"
+                        >
+                            {{ __('secret-gift::secret-gift.browser_no_support') }}
+                        </audio>
+                    </div>
                 </div>
             @endif
         @endif
