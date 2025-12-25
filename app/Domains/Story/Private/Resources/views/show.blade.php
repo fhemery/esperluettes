@@ -50,6 +50,16 @@
 
                 @if ($viewModel->isAuthor())
                     <div class="flex items-center gap-2">
+                        <a href="{{ route('stories.collaborators.index', ['slug' => $viewModel->getSlug()]) }}"
+                            aria-label="{{ __('story::collaborators.manage') }}" title="{{ __('story::collaborators.manage') }}"
+                            class="relative">
+                            <span class="material-symbols-outlined text-accent/80 hover:text-accent">group</span>
+                            @if ($collaboratorCount > 1)
+                                <span class="absolute -top-1 -right-1 bg-tertiary text-on-tertiary text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                                    {{ $collaboratorCount }}
+                                </span>
+                            @endif
+                        </a>
                         <a href="{{ url('/stories/' . $viewModel->getSlug() . '/edit') }}"
                             aria-label="{{ __('story::show.edit') }}" title="{{ __('story::show.edit') }}">
                             <span class="material-symbols-outlined text-accent/80 hover:text-accent">edit</span>
@@ -60,6 +70,8 @@
                             <span class="material-symbols-outlined text-error/80 hover:text-error">delete</span>
                         </button>
                     </div>
+                @elseif ($betaReaderRole)
+                    <x-story::collaborator-badge :role="$betaReaderRole" :story-slug="$viewModel->getSlug()" />
                 @endif
             </div>
 

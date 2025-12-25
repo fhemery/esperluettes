@@ -211,7 +211,7 @@ describe('Story details page', function () {
             });
         });
 
-        it('should show the Readlist counter with tooltip and count to everyone', function(){
+        it('should show the Readlist counter with tooltip and count to everyone', function () {
             $author = alice($this);
             $story = publicStory('Story', $author->id);
 
@@ -230,8 +230,8 @@ describe('Story details page', function () {
         });
     });
 
-    describe('ReadList related content', function() {
-        it('should show the Readlist button', function(){
+    describe('ReadList related content', function () {
+        it('should show the Readlist button', function () {
             $author = alice($this);
             $story = publicStory('Story', $author->id);
 
@@ -242,7 +242,7 @@ describe('Story details page', function () {
             $response->assertSee(__('readlist::button.add_button'));
         });
     });
-    
+
     describe('Moderation', function () {
         beforeEach(function () {
             createFeatureToggle($this, new FeatureToggle(
@@ -281,6 +281,123 @@ describe('Story details page', function () {
                 ->get('/stories/' . $story->slug)
                 ->assertOk()
                 ->assertSee('id="story-moderator-btn"', false);
+        });
+    });
+
+    describe('Display collaborator management icon', function () {
+        it('shows collaborator icon for authors on story show page', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $story = publicStory('My Story', $author->id);
+
+            $response = $this->actingAs($author)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            $response->assertSee('group'); // material icon name
+            $response->assertSee(route('stories.collaborators.index', ['slug' => $story->slug]));
+        });
+
+        it('does not show collaborator icon for non-authors', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+            $story = publicStory('My Story', $author->id);
+
+            $response = $this->actingAs($reader)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            $response->assertDontSee(route('stories.collaborators.index', ['slug' => $story->slug]));
+        });
+
+        it('shows badge with count when more than 1 collaborator', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $coauthor = bob($this, roles: [Roles::USER_CONFIRMED]);
+            $story = publicStory('My Story', $author->id);
+            addCollaborator($story->id, $coauthor->id, 'author');
+
+            $response = $this->actingAs($author)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            $response->assertSee('bg-tertiary'); // badge class
+        });
+
+        it('does not show badge when only 1 collaborator', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $story = publicStory('My Story', $author->id);
+
+            $response = $this->actingAs($author)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            // Should not have the badge with count
+            $response->assertDontSee('bg-tertiary text-on-tertiary text-xs rounded-full h-4 w-4');
+        });
+
+        it('shows collaborator badge for beta-readers (US-COLLAB-06)', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $betaReader = bob($this, roles: [Roles::USER]);
+            $story = privateStory('Private Story', $author->id);
+            addCollaborator($story->id, $betaReader->id, 'beta-reader');
+
+            $response = $this->actingAs($betaReader)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            $response->assertSee(__('story::collaborators.roles.beta_reader'));
+            $response->assertSee(route('stories.collaborators.leave', ['slug' => $story->slug]));
+        });
+
+        it('does not show collaborator badge for regular readers', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $reader = bob($this, roles: [Roles::USER_CONFIRMED]);
+            $story = publicStory('Public Story', $author->id);
+
+            $response = $this->actingAs($reader)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            $response->assertDontSee(__('story::collaborators.roles.beta_reader'));
+        });
+    });
+
+    describe('Beta-reader chapter visibility', function () {
+        it('shows published chapters to beta-readers on private story', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $betaReader = bob($this, roles: [Roles::USER]);
+            $story = privateStory('Private Story', $author->id);
+            addCollaborator($story->id, $betaReader->id, 'beta-reader');
+
+            $publishedChapter = createPublishedChapter($this, $story, $author, ['title' => 'Published Chapter']);
+
+            $response = $this->actingAs($betaReader)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            $response->assertSee('Published Chapter');
+        });
+
+        it('does not show unpublished chapters to beta-readers', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $betaReader = bob($this, roles: [Roles::USER]);
+            $story = privateStory('Private Story', $author->id);
+            addCollaborator($story->id, $betaReader->id, 'beta-reader');
+
+            createPublishedChapter($this, $story, $author, ['title' => 'Published Chapter']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'Draft Chapter']);
+
+            $response = $this->actingAs($betaReader)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            $response->assertSee('Published Chapter');
+            $response->assertDontSee('Draft Chapter');
+        });
+
+        it('shows all chapters (including drafts) to authors', function () {
+            $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $story = privateStory('Private Story', $author->id);
+
+            createPublishedChapter($this, $story, $author, ['title' => 'Published Chapter']);
+            createUnpublishedChapter($this, $story, $author, ['title' => 'Draft Chapter']);
+
+            $response = $this->actingAs($author)->get('/stories/' . $story->slug);
+
+            $response->assertOk();
+            $response->assertSee('Published Chapter');
+            $response->assertSee('Draft Chapter');
         });
     });
 
@@ -459,7 +576,7 @@ describe('Story details page', function () {
                 assertHasIconBadge($this, 'comment', '1', $resp->getContent());
             });
 
-            it('shows comments count on chapter list for authors, with no pending replies', function() {
+            it('shows comments count on chapter list for authors, with no pending replies', function () {
                 $author = alice($this);
                 $reader = bob($this);
                 $story = publicStory('Comments Story', $author->id);
@@ -479,7 +596,7 @@ describe('Story details page', function () {
                 $resp->assertDontSee(__('story::chapters.comments.tooltip_unreplied'));
             });
 
-            it('shows comments count on chapter list for authors, with pending replies', function() {
+            it('shows comments count on chapter list for authors, with pending replies', function () {
                 $author = alice($this);
                 $reader = bob($this);
                 $story = publicStory('Comments Story', $author->id);
