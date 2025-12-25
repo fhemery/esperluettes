@@ -57,7 +57,7 @@ class StoryService
         // Filter out unpublished chapters for non-authors
         if ($options->includeChapters) {
             foreach ($stories as $story) {
-                $isAuthor = $story->authors->contains('id', Auth::id());
+                $isAuthor = $story->authors->contains('user_id', Auth::id());
                 // if user is not author, filter out unpublished chapters
                 if (!$isAuthor) {
                     $story->chapters = $story->chapters->filter(fn($chapter) => $chapter->status === Chapter::STATUS_PUBLISHED);
@@ -153,7 +153,7 @@ class StoryService
         $opts = $options ?? GetStoryOptions::Full();
 
         $story = $this->storiesRepository->getStoryById($storyId, Auth::id(), $opts);
-        if ($story && $opts->includeChapters && !$story->collaborators()->where('user_id', Auth::id())->exists()) {
+        if ($story && $opts->includeChapters && !$story->isAuthor(Auth::id())) {
             $story->chapters = $story->chapters->filter(fn($chapter) => $chapter->status === Chapter::STATUS_PUBLISHED);
         }
 

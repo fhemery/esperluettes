@@ -708,6 +708,51 @@ describe('StoryPublicApi::listStories', function () {
                 $chapter = $dto->chapters[0];
                 expect($chapter->title)->toBe('Chapter 1');
             });
+
+            it('should not return unpublished chapters to beta-readers', function () {
+                $author = alice($this, roles: [\App\Domains\Auth\Public\Api\Roles::USER_CONFIRMED]);
+                $betaReader = bob($this, roles: [\App\Domains\Auth\Public\Api\Roles::USER]);
+                $story = privateStory('Private Story', $author->id);
+                addCollaborator($story->id, $betaReader->id, 'beta-reader');
+
+                createPublishedChapter($this, $story, $author, ['title' => 'Published Chapter']);
+                createUnpublishedChapter($this, $story, $author, ['title' => 'Draft Chapter']);
+
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeChapters: true,
+                );
+
+                // Beta-reader should only see published chapters via listStories
+                $this->actingAs($betaReader);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories(fieldsToReturn: $fields);
+
+                expect($result->data)->toHaveCount(1);
+                $dto = $result->data[0];
+                expect($dto->chapters)->toHaveCount(1);
+                expect($dto->chapters[0]->title)->toBe('Published Chapter');
+            });
+
+            it('should return all chapters (including unpublished) to authors', function () {
+                $author = alice($this);
+                $story = publicStory('My Story', $author->id);
+
+                createPublishedChapter($this, $story, $author, ['title' => 'Published Chapter']);
+                createUnpublishedChapter($this, $story, $author, ['title' => 'Draft Chapter']);
+
+                $fields = new StoryQueryFieldsToReturnDto(
+                    includeChapters: true,
+                );
+
+                // Author should see all chapters including drafts
+                $this->actingAs($author);
+                /** @var PaginatedStoryDto $result */
+                $result = $this->api->listStories(fieldsToReturn: $fields);
+
+                expect($result->data)->toHaveCount(1);
+                $dto = $result->data[0];
+                expect($dto->chapters)->toHaveCount(2);
+            });
         });
 
         describe('Regarding reading progress', function () {

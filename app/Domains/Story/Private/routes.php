@@ -8,6 +8,7 @@ use App\Domains\Story\Private\Controllers\ChapterController;
 use App\Domains\Story\Private\Controllers\ChapterModerationController;
 use App\Domains\Story\Private\Controllers\ReadingProgressController;
 use App\Domains\Story\Private\Controllers\StoryModerationController;
+use App\Domains\Story\Private\Controllers\CollaboratorController;
 
 Route::middleware(['web'])->group(function () {
     Route::get('/stories', [StoryController::class, 'index'])
@@ -64,6 +65,19 @@ Route::middleware(['web'])->group(function () {
         Route::match(['put', 'patch'], '/stories/{storySlug}/chapters/{chapterSlug}', [ChapterController::class, 'update'])
             ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
             ->name('chapters.update');
+
+        // Collaborator management (authors only; controller enforces 404 on unauthorized)
+        Route::get('/stories/{slug}/collaborators', [CollaboratorController::class, 'index'])
+            ->where('slug', '.*')
+            ->name('stories.collaborators.index');
+
+        Route::post('/stories/{slug}/collaborators', [CollaboratorController::class, 'store'])
+            ->where('slug', '.*')
+            ->name('stories.collaborators.store');
+
+        Route::delete('/stories/{slug}/collaborators/{targetUserId}', [CollaboratorController::class, 'destroy'])
+            ->where('slug', '.*')
+            ->name('stories.collaborators.destroy');
 
         // Edit/update own stories (authors only)
         Route::get('/stories/{slug}/edit', [StoryController::class, 'edit'])
@@ -122,4 +136,11 @@ Route::middleware(['web'])->group(function () {
     Route::get('/profiles/{slug}/stories', [StoryController::class, 'profileStories'])
         ->where('slug', '.*')
         ->name('stories.for-profile');
+
+    // Collaborator leave route - accessible by both USER and USER_CONFIRMED (beta-readers can be USER only)
+    Route::middleware(['auth', 'compliant'])->group(function () {
+        Route::post('/stories/{slug}/collaborators/leave', [CollaboratorController::class, 'leave'])
+            ->where('slug', '.*')
+            ->name('stories.collaborators.leave');
+    });
 });

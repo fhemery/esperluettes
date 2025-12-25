@@ -2,9 +2,11 @@
     // Initial selections for preload
     'initialUserIds' => [], // array<int>
     'initialRoleSlugs' => [], // array<string>
+    // If true, only search profiles (no roles)
+    'profilesOnly' => false,
 ])
 
-<div x-data="profileRolePicker()" x-init="init({ initialUserIds: @js($initialUserIds), initialRoleSlugs: @js($initialRoleSlugs) })" class="w-full">
+<div x-data="profileRolePicker()" x-init="init({ initialUserIds: @js($initialUserIds), initialRoleSlugs: @js($initialRoleSlugs), profilesOnly: @js($profilesOnly) })" class="w-full">
     <div class="relative">
         <input
             type="search"
@@ -42,7 +44,7 @@
                     </div>
                 </template>
 
-                <template x-if="results.roles.length">
+                <template x-if="!profilesOnly && results.roles.length">
                     <div>
                         <div class="px-3 py-2 text-xs font-semibold text-gray-500">{{ __('profile::picker.section_roles') }}</div>
                         <ul>
@@ -70,12 +72,14 @@
                 <input type="hidden" name="target_users[]" x-bind:value="u.id" />
             </span>
         </template>
-        <template x-for="r in selected.roles" :key="'selr-'+r.slug">
-            <span class="inline-flex items-center gap-2 bg-accent/10 text-neutral-800 px-2 py-1 rounded-full">
-                <span x-text="r.name" class="text-sm"></span>
-                <button type="button" class="text-neutral-500 hover:text-neutral-800" @click="removeRole(r.slug)" aria-label="{{ __('profile::picker.remove') }}">×</button>
-                <input type="hidden" name="target_roles[]" x-bind:value="r.slug" />
-            </span>
+        <template x-if="!profilesOnly">
+            <template x-for="r in selected.roles" :key="'selr-'+r.slug">
+                <span class="inline-flex items-center gap-2 bg-accent/10 text-neutral-800 px-2 py-1 rounded-full">
+                    <span x-text="r.name" class="text-sm"></span>
+                    <button type="button" class="text-neutral-500 hover:text-neutral-800" @click="removeRole(r.slug)" aria-label="{{ __('profile::picker.remove') }}">×</button>
+                    <input type="hidden" name="target_roles[]" x-bind:value="r.slug" />
+                </span>
+            </template>
         </template>
     </div>
 
@@ -89,8 +93,10 @@
                 selected: { users: [], roles: [] },
                 highlightIndex: -1,
                 counts: { profiles: 0, roles: 0 },
+                profilesOnly: false,
 
-                init({ initialUserIds = [], initialRoleSlugs = [] } = {}) {
+                init({ initialUserIds = [], initialRoleSlugs = [], profilesOnly = false } = {}) {
+                    this.profilesOnly = profilesOnly;
                     // Preload existing selections
                     this.preload(initialUserIds, initialRoleSlugs);
                     this.$watch('q', (value) => {
@@ -122,15 +128,18 @@
                 async fetchResults(q) {
                     this.loading = true;
                     try {
-                        const [pRes, rRes] = await Promise.all([
+                        const fetches = [
                             fetch(`/profile/lookup?q=${encodeURIComponent(q)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }),
-                            fetch(`/auth/roles/lookup?q=${encodeURIComponent(q)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }),
-                        ]);
-                        const pJson = await pRes.json();
-                        const rJson = await rRes.json();
+                        ];
+                        if (!this.profilesOnly) {
+                            fetches.push(fetch(`/auth/roles/lookup?q=${encodeURIComponent(q)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }));
+                        }
+                        const responses = await Promise.all(fetches);
+                        const pJson = await responses[0].json();
+                        const rJson = this.profilesOnly ? { roles: [] } : await responses[1].json();
                         this.results = {
                             profiles: (pJson.profiles || []).filter(p => !this.selected.users.some(u => u.id === p.id)),
-                            roles: (rJson.roles || []).filter(r => !this.selected.roles.some(x => x.slug === r.slug)),
+                            roles: this.profilesOnly ? [] : (rJson.roles || []).filter(r => !this.selected.roles.some(x => x.slug === r.slug)),
                         };
                         this.counts = { profiles: this.results.profiles.length, roles: this.results.roles.length };
                         this.open = (this.counts.profiles + this.counts.roles) > 0;

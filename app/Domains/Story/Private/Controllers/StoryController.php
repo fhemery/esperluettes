@@ -417,12 +417,28 @@ class StoryController
             ->withTitle($viewModel->getTitle())
             ->withBreadcrumbs($trail);
 
+        // Load collaborators once and derive count + current user's role
+        $collaborators = $story->collaborators()->get();
+        $collaboratorCount = $collaborators->count();
+
+        // Check if current user is a non-author collaborator (beta-reader)
+        $currentUserId = Auth::id();
+        $betaReaderRole = null;
+        if ($currentUserId && !$story->isAuthor($currentUserId)) {
+            $collaborator = $collaborators->firstWhere('user_id', $currentUserId);
+            if ($collaborator) {
+                $betaReaderRole = $collaborator->role;
+            }
+        }
+
         return view('story::show', [
             'viewModel' => $viewModel,
             'metaDescription' => $metaDescription,
             'availableChapterCredits' => $availableChapterCredits,
             'page' => $page,
             'isModerator' => $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]),
+            'collaboratorCount' => $collaboratorCount,
+            'betaReaderRole' => $betaReaderRole,
         ]);
     }
 

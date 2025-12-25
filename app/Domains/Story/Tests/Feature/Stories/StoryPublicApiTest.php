@@ -145,5 +145,6 @@ describe('Story public API', function () {
             expect($resp)->toBeInstanceOf(StorySummaryDto::class);
             expect($resp->word_count)->toBe(4);
         });
+
     });
 });

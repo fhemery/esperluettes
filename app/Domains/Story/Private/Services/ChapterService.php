@@ -4,6 +4,7 @@ namespace App\Domains\Story\Private\Services;
 
 use App\Domains\Shared\Support\SlugWithId;
 use App\Domains\Shared\Support\SparseReorder;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Http\Requests\ChapterRequest;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
@@ -15,7 +16,11 @@ use App\Domains\Story\Public\Events\ChapterUnpublished;
 use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
 use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
+use App\Domains\Story\Public\Notifications\CoAuthorChapterCreatedNotification;
+use App\Domains\Story\Public\Notifications\CoAuthorChapterUpdatedNotification;
+use App\Domains\Story\Public\Notifications\CoAuthorChapterDeletedNotification;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
+use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -26,6 +31,8 @@ class ChapterService
         private readonly CommentMaintenancePublicApi $comments,
         private readonly EventBus $eventBus,
         private readonly ChapterCreditService $credits,
+        private readonly NotificationPublicApi $notifications,
+        private readonly ProfilePublicApi $profiles,
     ) {}
 
     public function createChapter(Story $story, ChapterRequest $request, int $userId): Chapter
@@ -86,6 +93,9 @@ class ChapterService
 
             // Record spend after successful creation
             $this->credits->spendOne((int)$userId);
+
+            // Notify co-authors about the new chapter
+            $this->notifyCoAuthorsOfChapterChange($story, $userId, 'created', $title, $chapter->slug);
 
             return $chapter;
         });
@@ -192,14 +202,14 @@ class ChapterService
         });
     }
 
-    public function updateChapter(Story $story, Chapter $chapter, ChapterRequest $request): Chapter
+    public function updateChapter(Story $story, Chapter $chapter, ChapterRequest $request, int $userId): Chapter
     {
         $title = (string) $request->input('title');
         $authorNoteHtml = $request->input('author_note'); // purified or null
         $contentHtml = (string) $request->input('content'); // purified
         $published = (bool)($request->boolean('published', false));
 
-        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published) {
+        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published, $userId) {
             // Snapshot BEFORE changes
             $before = ChapterSnapshot::fromModel($chapter);
             $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
@@ -256,6 +266,9 @@ class ChapterService
                 after: $after,
             ));
 
+            // Notify co-authors about the chapter update
+            $this->notifyCoAuthorsOfChapterChange($story, $userId, 'updated', $title, $chapter->slug);
+
             return $chapter;
         });
     }
@@ -295,9 +308,9 @@ class ChapterService
     /**
      * Hard delete a chapter. Do not recompute story.last_chapter_published_at (immutability per US-032/US-043).
      */
-    public function deleteChapter(Story $story, Chapter $chapter): void
+    public function deleteChapter(Story $story, Chapter $chapter, int $userId): void
     {
-        DB::transaction(function () use ($story, $chapter) {
+        DB::transaction(function () use ($story, $chapter, $userId) {
             // Safety: ensure chapter belongs to the story
             if ((int)$chapter->story_id !== (int)$story->id) {
                 throw new \InvalidArgumentException('Chapter does not belong to given story');
@@ -305,6 +318,7 @@ class ChapterService
 
             // Capture snapshot before deletion for event payload
             $snapshot = ChapterSnapshot::fromModel($chapter);
+            $chapterTitle = (string) $chapter->title;
 
             // Purge comments for this chapter (hard delete via maintenance API)
             $this->comments->deleteFor('chapter', (int) $chapter->id);
@@ -319,6 +333,9 @@ class ChapterService
                 storyId: (int) $story->id,
                 chapter: $snapshot,
             ));
+
+            // Notify co-authors about the chapter deletion
+            $this->notifyCoAuthorsOfChapterChange($story, $userId, 'deleted', $chapterTitle);
         });
     }
 
@@ -337,5 +354,61 @@ class ChapterService
                 $q->where('user_id', $userId);
             })
             ->exists();
+    }
+
+    /**
+     * Notify all co-authors (except the acting user) about a chapter change.
+     */
+    private function notifyCoAuthorsOfChapterChange(
+        Story $story,
+        int $actingUserId,
+        string $action,
+        string $chapterTitle,
+        ?string $chapterSlug = null
+    ): void {
+        // Get all author user IDs except the acting user
+        $authorIds = $story->authors()->pluck('user_id')->map(fn($id) => (int)$id)->all();
+        $recipientIds = array_values(array_filter($authorIds, fn($id) => $id !== $actingUserId));
+
+        if (empty($recipientIds)) {
+            return;
+        }
+
+        // Get acting user's profile
+        $actingProfile = $this->profiles->getPublicProfile($actingUserId);
+        if (!$actingProfile) {
+            return;
+        }
+
+        $notification = match ($action) {
+            'created' => new CoAuthorChapterCreatedNotification(
+                userName: $actingProfile->display_name,
+                userSlug: $actingProfile->slug,
+                storyTitle: (string) $story->title,
+                storySlug: (string) $story->slug,
+                chapterTitle: $chapterTitle,
+                chapterSlug: $chapterSlug ?? '',
+            ),
+            'updated' => new CoAuthorChapterUpdatedNotification(
+                userName: $actingProfile->display_name,
+                userSlug: $actingProfile->slug,
+                storyTitle: (string) $story->title,
+                storySlug: (string) $story->slug,
+                chapterTitle: $chapterTitle,
+                chapterSlug: $chapterSlug ?? '',
+            ),
+            'deleted' => new CoAuthorChapterDeletedNotification(
+                userName: $actingProfile->display_name,
+                userSlug: $actingProfile->slug,
+                storyTitle: (string) $story->title,
+                storySlug: (string) $story->slug,
+                chapterTitle: $chapterTitle,
+            ),
+            default => null,
+        };
+
+        if ($notification) {
+            $this->notifications->createNotification($recipientIds, $notification, $actingUserId);
+        }
     }
 }

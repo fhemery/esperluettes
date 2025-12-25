@@ -9,6 +9,10 @@ class StoryCollaborator extends Model
 {
     protected $table = 'story_collaborators';
 
+    public $timestamps = false;
+    public $incrementing = false;
+    protected $primaryKey = null;
+
     protected $fillable = [
         'story_id',
         'user_id',
