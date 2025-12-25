@@ -20,6 +20,7 @@ use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\ViewModels\ChapterViewModel;
 use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -234,7 +235,7 @@ class ChapterController
         }
 
         try {
-            $chapter = $this->service->updateChapter($story, $chapter, $request);
+            $chapter = $this->service->updateChapter($story, $chapter, $request, (int) Auth::id());
         } catch (\Illuminate\Validation\ValidationException $ve) {
             return back()->withErrors($ve->errors())->withInput();
         }
@@ -259,7 +260,7 @@ class ChapterController
         }
 
         // Hard delete chapter. Per US-032/043, do NOT recompute story.last_chapter_published_at
-        $this->service->deleteChapter($story, $chapter);
+        $this->service->deleteChapter($story, $chapter, (int) Auth::id());
 
         return redirect()->route('stories.show', ['slug' => $story->slug])
             ->with('status', __('story::chapters.deleted_success'));

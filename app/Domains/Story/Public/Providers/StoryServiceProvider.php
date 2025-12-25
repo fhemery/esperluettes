@@ -48,6 +48,12 @@ use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Story\Public\Notifications\ChapterCommentNotification;
+use App\Domains\Story\Public\Notifications\CoAuthorChapterCreatedNotification;
+use App\Domains\Story\Public\Notifications\CoAuthorChapterUpdatedNotification;
+use App\Domains\Story\Public\Notifications\CoAuthorChapterDeletedNotification;
+use App\Domains\Story\Public\Notifications\CollaboratorRoleGivenNotification;
+use App\Domains\Story\Public\Notifications\CollaboratorRemovedNotification;
+use App\Domains\Story\Public\Notifications\CollaboratorLeftNotification;
 use App\Domains\Story\Private\Console\BackfillChapterCommentNotificationsCommand;
 
 class StoryServiceProvider extends ServiceProvider
@@ -139,6 +145,30 @@ class StoryServiceProvider extends ServiceProvider
         $notificationFactory->register(
             type: ChapterCommentNotification::type(),
             class: ChapterCommentNotification::class
+        );
+        $notificationFactory->register(
+            type: CoAuthorChapterCreatedNotification::type(),
+            class: CoAuthorChapterCreatedNotification::class
+        );
+        $notificationFactory->register(
+            type: CoAuthorChapterUpdatedNotification::type(),
+            class: CoAuthorChapterUpdatedNotification::class
+        );
+        $notificationFactory->register(
+            type: CoAuthorChapterDeletedNotification::type(),
+            class: CoAuthorChapterDeletedNotification::class
+        );
+        $notificationFactory->register(
+            type: CollaboratorRoleGivenNotification::type(),
+            class: CollaboratorRoleGivenNotification::class
+        );
+        $notificationFactory->register(
+            type: CollaboratorRemovedNotification::type(),
+            class: CollaboratorRemovedNotification::class
+        );
+        $notificationFactory->register(
+            type: CollaboratorLeftNotification::type(),
+            class: CollaboratorLeftNotification::class
         );
     }
 }

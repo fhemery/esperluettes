@@ -4,9 +4,13 @@ namespace App\Domains\Story\Private\Services;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\StoryCollaborator;
+use App\Domains\Story\Public\Notifications\CollaboratorRoleGivenNotification;
+use App\Domains\Story\Public\Notifications\CollaboratorRemovedNotification;
+use App\Domains\Story\Public\Notifications\CollaboratorLeftNotification;
 use Illuminate\Support\Facades\DB;
 
 class CollaboratorService
@@ -17,6 +21,7 @@ class CollaboratorService
     public function __construct(
         private readonly AuthPublicApi $authApi,
         private readonly ProfilePublicApi $profileApi,
+        private readonly NotificationPublicApi $notifications,
     ) {}
 
     /**
@@ -70,6 +75,10 @@ class CollaboratorService
                         'invited_at' => now(),
                         'accepted_at' => now(),
                     ]);
+
+                // Notify target user about the role upgrade
+                $this->notifyRoleGiven($story, $targetUserId, $invitedByUserId, self::ROLE_AUTHOR);
+
                 return 'upgraded';
             }
             // Downgrade or same role = no-op
@@ -85,6 +94,9 @@ class CollaboratorService
             'invited_at' => now(),
             'accepted_at' => now(),
         ]);
+
+        // Notify target user about the new role
+        $this->notifyRoleGiven($story, $targetUserId, $invitedByUserId, $role);
 
         return 'added';
     }
@@ -110,6 +122,10 @@ class CollaboratorService
             ->where('story_id', $story->id)
             ->where('user_id', $targetUserId)
             ->delete();
+
+        // Notify the removed user
+        $this->notifyCollaboratorRemoved($story, $targetUserId, $removedByUserId);
+
         return true;
     }
 
@@ -132,6 +148,10 @@ class CollaboratorService
                 ->where('story_id', $story->id)
                 ->where('user_id', $userId)
                 ->delete();
+
+            // Notify remaining authors that user left
+            $this->notifyCollaboratorLeft($story, $userId);
+
             return true;
         }
 
@@ -145,6 +165,10 @@ class CollaboratorService
             ->where('story_id', $story->id)
             ->where('user_id', $userId)
             ->delete();
+
+        // Notify remaining authors that user left
+        $this->notifyCollaboratorLeft($story, $userId);
+
         return true;
     }
 
@@ -207,5 +231,73 @@ class CollaboratorService
                 throw new \InvalidArgumentException('User must be a registered user to become a beta-reader.');
             }
         }
+    }
+
+    /**
+     * Notify target user that they have been given a role on a story.
+     */
+    private function notifyRoleGiven(Story $story, int $targetUserId, int $initiatorUserId, string $role): void
+    {
+        $initiatorProfile = $this->profileApi->getPublicProfile($initiatorUserId);
+        if (!$initiatorProfile) {
+            return;
+        }
+
+        $notification = new CollaboratorRoleGivenNotification(
+            userName: $initiatorProfile->display_name,
+            userSlug: $initiatorProfile->slug,
+            storyTitle: (string) $story->title,
+            storySlug: (string) $story->slug,
+            role: $role,
+        );
+
+        $this->notifications->createNotification([$targetUserId], $notification, $initiatorUserId);
+    }
+
+    /**
+     * Notify target user that they have been removed from a story.
+     */
+    private function notifyCollaboratorRemoved(Story $story, int $targetUserId, int $removedByUserId): void
+    {
+        $removerProfile = $this->profileApi->getPublicProfile($removedByUserId);
+        if (!$removerProfile) {
+            return;
+        }
+
+        $notification = new CollaboratorRemovedNotification(
+            userName: $removerProfile->display_name,
+            userSlug: $removerProfile->slug,
+            storyTitle: (string) $story->title,
+            storySlug: (string) $story->slug,
+        );
+
+        $this->notifications->createNotification([$targetUserId], $notification, $removedByUserId);
+    }
+
+    /**
+     * Notify remaining authors that a collaborator has left the story.
+     */
+    private function notifyCollaboratorLeft(Story $story, int $leavingUserId): void
+    {
+        // Get remaining author user IDs (the leaving user has already been removed)
+        $authorIds = $story->authors()->pluck('user_id')->map(fn($id) => (int)$id)->all();
+
+        if (empty($authorIds)) {
+            return;
+        }
+
+        $leavingProfile = $this->profileApi->getPublicProfile($leavingUserId);
+        if (!$leavingProfile) {
+            return;
+        }
+
+        $notification = new CollaboratorLeftNotification(
+            userName: $leavingProfile->display_name,
+            userSlug: $leavingProfile->slug,
+            storyTitle: (string) $story->title,
+            storySlug: (string) $story->slug,
+        );
+
+        $this->notifications->createNotification($authorIds, $notification, $leavingUserId);
     }
 }
