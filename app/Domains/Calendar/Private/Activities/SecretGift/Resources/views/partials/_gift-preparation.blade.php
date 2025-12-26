@@ -13,6 +13,11 @@
     <div class="surface-read p-6 rounded-lg">
         <h3 class="text-lg font-bold mb-4">{{ __('secret-gift::secret-gift.your_recipient') }}</h3>
         
+        <div class="flex gap-2">
+        {{ __('secret-gift::secret-gift.time_remaining') }} 
+        <x-shared::countdown-timer-component :end-time="$activity->active_ends_at->toIso8601String()" class="block mb-4" />
+        </div>
+
         <div class="flex items-center gap-4 mb-6">
             @if($recipientProfile)
                 <x-shared::avatar 
