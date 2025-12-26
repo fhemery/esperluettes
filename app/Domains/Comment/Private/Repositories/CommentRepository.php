@@ -205,4 +205,44 @@ class CommentRepository
             ->where('author_id', $userId)
             ->restore();
     }
+
+    /**
+     * Get all entity IDs where the author has at least one root comment.
+     * @return array<int> List of entity IDs
+     */
+    public function getEntityIdsWithRootCommentsByAuthor(string $entityType, int $authorId): array
+    {
+        return Comment::query()
+            ->where('commentable_type', $entityType)
+            ->where('author_id', $authorId)
+            ->whereNull('parent_comment_id')
+            ->distinct()
+            ->pluck('commentable_id')
+            ->map(fn($id) => (int) $id)
+            ->all();
+    }
+
+    /**
+     * Get root comments by author for specific entities.
+     * @return array<int, Comment> [entityId => Comment]
+     */
+    public function getRootCommentsByAuthorAndEntities(string $entityType, int $authorId, array $entityIds): array
+    {
+        if (empty($entityIds)) {
+            return [];
+        }
+
+        $comments = Comment::query()
+            ->where('commentable_type', $entityType)
+            ->where('author_id', $authorId)
+            ->whereNull('parent_comment_id')
+            ->whereIn('commentable_id', $entityIds)
+            ->get();
+
+        $result = [];
+        foreach ($comments as $comment) {
+            $result[(int) $comment->commentable_id] = $comment;
+        }
+        return $result;
+    }
 }
