@@ -107,53 +107,45 @@
             </div>
         </div>
 
-        @php $initialTab = $isOwn ? 'stories' : 'about'; @endphp
-        <!-- Profile Content -->
+        <!-- Profile Content - Route-based tabs -->
         <div class="w-full">
             <div class="lg:col-span-2">
-                <x-shared::tabs :tabs="[
-                        ...(Auth::check() ? [[ 'key' => 'about', 'label' => __('profile::show.about') ]] : []),
-                        [ 'key' => 'stories', 'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories') ],
-                    ]" :tracking="true" :initial="$initialTab" color="primary" navClass="text-2xl font-semibold">
-                    <div x-data="{
-                                storiesLoaded: false,
-                                loading: false,
-                                async loadStories() {
-                                    if (this.storiesLoaded) return;
-                                    this.loading = true;
-                                    try {
-                                        const res = await fetch('/profiles/{{ $profile->slug }}/stories');
-                                        const html = await res.text();
-                                        this.$refs.stories.innerHTML = html;
-                                        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-                                            window.Alpine.initTree(this.$refs.stories);
-                                        }
-                                        this.storiesLoaded = true;
-                                    } catch (e) {
-                                        this.$refs.stories.innerHTML = '<div class=\'text-sm text-red-600\'>{{ __('profile::show.failed_to_load_stories') }}</div>';
-                                    } finally {
-                                        this.loading = false;
-                                    }
-                                }
-                            }"
-                        x-init="if (tab === 'stories') loadStories()"
-                        x-effect="if (tab === 'stories') loadStories()">
-                        @if(Auth::check())
-                        <div x-show="tab==='about'" x-cloak>
-                            <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
-                                <x-profile::about-panel :profile="$profile" />
-                            </div>
-                        </div>
-                        @endif
+                @php
+                    $tabs = [];
+                    if (Auth::check()) {
+                        $tabs[] = [
+                            'key' => 'about',
+                            'label' => __('profile::show.about'),
+                            'url' => route('profile.show.about', $profile),
+                        ];
+                    }
+                    $tabs[] = [
+                        'key' => 'stories',
+                        'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories'),
+                        'url' => route('profile.show.stories', $profile),
+                    ];
+                @endphp
 
-                        <div x-show="tab==='stories'" x-cloak>
-                            <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
-                                <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
-                                <div x-ref="stories" class="mt-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                </x-shared::tabs>
+                <!-- Tab Navigation -->
+                <nav class="surface-primary text-on-surface flex w-full gap-4 text-2xl font-semibold" role="tablist" aria-label="Profile tabs">
+                    @foreach($tabs as $tab)
+                        <a href="{{ $tab['url'] }}"
+                            role="tab"
+                            aria-selected="{{ $activeTab === $tab['key'] ? 'true' : 'false' }}"
+                            class="flex-1 whitespace-nowrap py-3 px-1 border-b-2 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 {{ $activeTab === $tab['key'] ? 'selected border-none font-extrabold' : 'border-transparent' }}">
+                            {{ $tab['label'] }}
+                        </a>
+                    @endforeach
+                </nav>
+
+                <!-- Tab Content -->
+                <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
+                    @if($activeTab === 'about' && Auth::check())
+                        <x-profile::about-panel :profile="$profile" />
+                    @elseif($activeTab === 'stories')
+                        <x-story::profile-stories-component :user-id="$profile->user_id" />
+                    @endif
+                </div>
             </div>
         </div>
     </div>

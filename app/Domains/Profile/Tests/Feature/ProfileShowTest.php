@@ -157,14 +157,44 @@ describe('Profile page', function () {
             $bob = bob($this);
 
             $this->actingAs($bob)->get("/profile/alice")
-                ->assertSee("tab: 'about'", false);
+                ->assertSee('aria-selected="true"', false)
+                ->assertSee(__('profile::show.about'));
         });
 
         it('should select the "Stories" tab by default if user is current user', function () {
             $user = alice($this);
 
             $this->actingAs($user)->get('/profile')
-                ->assertSee("tab: 'stories'", false);
+                ->assertSee('aria-selected="true"', false)
+                ->assertSee(__('profile::show.my-stories'));
+        });
+
+        it('displays stories component on own profile default view', function () {
+            $user = alice($this);
+
+            $this->actingAs($user)->get('/profile')
+                ->assertOk()
+                ->assertSee(__('story::profile.stories'));
+        });
+
+        it('displays stories component on explicit stories tab', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $profile = Profile::where('user_id', $alice->id)->firstOrFail();
+
+            $this->actingAs($bob)->get("/profile/{$profile->slug}/stories")
+                ->assertOk()
+                ->assertSee(__('story::profile.stories'));
+        });
+
+        it('does not display stories component on about tab', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $profile = Profile::where('user_id', $alice->id)->firstOrFail();
+
+            $this->actingAs($bob)->get("/profile/{$profile->slug}/about")
+                ->assertOk()
+                ->assertDontSee(__('story::profile.stories'));
         });
     });
 

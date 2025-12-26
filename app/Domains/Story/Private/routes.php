@@ -132,10 +132,6 @@ Route::middleware(['web'])->group(function () {
         ->where('slug', '.*')
         ->name('stories.show');
 
-    // Profile-owned stories partial (expects ?user_id=, optional &showPrivate=true)
-    Route::get('/profiles/{slug}/stories', [StoryController::class, 'profileStories'])
-        ->where('slug', '.*')
-        ->name('stories.for-profile');
 
     // Collaborator leave route - accessible by both USER and USER_CONFIRMED (beta-readers can be USER only)
     Route::middleware(['auth', 'compliant'])->group(function () {

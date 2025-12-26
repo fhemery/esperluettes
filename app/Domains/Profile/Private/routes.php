@@ -42,7 +42,14 @@ Route::middleware('web')->prefix('profile')->group(function () {
             ->name('profiles.lookup.by_ids');
     });
 
-     // Public profile page (by slug) - accessible to guests
+    // Public profile pages (by slug) - tab-based routes
+    // Default route redirects to about tab for authenticated, shows about for guests
     Route::get('/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/{profile:slug}/about', [ProfileController::class, 'showAbout'])->name('profile.show.about');
+    
+    // Stories tab - accessible to authenticated users
+    Route::middleware(['auth', 'compliant'])->group(function () {
+        Route::get('/{profile:slug}/stories', [ProfileController::class, 'showStories'])->name('profile.show.stories');
+    });
 
 });
