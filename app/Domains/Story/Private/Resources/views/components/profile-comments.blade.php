@@ -7,12 +7,20 @@
 @else
 <div class="flex flex-col gap-4">
     @foreach($authorGroups as $authorGroup)
-    {{-- Author collapsible --}}
+    {{-- Author(s) collapsible --}}
     <x-shared::collapsible color="secondary">
         <x-slot:header>
             <div class="flex items-center gap-3">
-                <x-shared::avatar :src="$authorGroup->author->avatar_url" :alt="$authorGroup->author->display_name" class="h-8 w-8" />
-                <span class="font-semibold">{{ $authorGroup->author->display_name }}</span>
+                {{-- Display all author avatars --}}
+                <div class="flex -space-x-2">
+                    @foreach($authorGroup->authors as $author)
+                        <x-shared::avatar :src="$author->avatar_url" :alt="$author->display_name" class="h-8 w-8 ring-2 ring-white" />
+                    @endforeach
+                </div>
+                {{-- Display all author names separated by commas --}}
+                <span class="font-semibold">
+                    @foreach($authorGroup->authors as $index => $author){{ $index > 0 ? ', ' : '' }}{{ $author->display_name }}@endforeach
+                </span>
                 <span class="text-gray-500 text-sm">({{ trans_choice('story::profile.comments-count', $authorGroup->totalCommentCount, ['count' => $authorGroup->totalCommentCount]) }})</span>
             </div>
         </x-slot:header>

@@ -89,30 +89,45 @@ class ProfileCommentsComponent extends Component
         // Step 4: Fetch author profiles in batch
         $profilesByUserId = $this->profileApi->getPublicProfiles(array_unique($authorUserIds));
 
-        // Step 5: Group stories by author (duplicate co-authored stories under each author)
-        // Structure: authorUserId => [storyId => storyData]
-        $authorStoriesMap = [];
+        // Step 5: Group stories by author set (co-authored stories grouped together)
+        // Key: sorted author user IDs joined by dash (e.g., "1-5-12")
+        // Value: [authorUserIds => [...], stories => [storyId => storyData]]
+        $authorSetStoriesMap = [];
         foreach ($storiesMap as $storyId => $data) {
-            foreach ($data['authorUserIds'] as $authorUserId) {
-                if (!isset($profilesByUserId[$authorUserId])) {
-                    continue;
-                }
-                if (!isset($authorStoriesMap[$authorUserId])) {
-                    $authorStoriesMap[$authorUserId] = [];
-                }
-                $authorStoriesMap[$authorUserId][$storyId] = $data;
+            // Filter to only authors with valid profiles
+            $validAuthorIds = array_filter($data['authorUserIds'], fn($id) => isset($profilesByUserId[$id]));
+            if (empty($validAuthorIds)) {
+                continue;
             }
+            
+            // Create a unique key for this author set (sorted IDs)
+            $sortedIds = $validAuthorIds;
+            sort($sortedIds);
+            $authorSetKey = implode('-', $sortedIds);
+            
+            if (!isset($authorSetStoriesMap[$authorSetKey])) {
+                $authorSetStoriesMap[$authorSetKey] = [
+                    'authorUserIds' => $validAuthorIds,
+                    'stories' => [],
+                ];
+            }
+            $authorSetStoriesMap[$authorSetKey]['stories'][$storyId] = $data;
         }
 
-        // Step 6: Build author view models sorted by display_name
+        // Step 6: Build author group view models
         $this->authorGroups = [];
-        foreach ($authorStoriesMap as $authorUserId => $stories) {
-            $authorProfile = $profilesByUserId[$authorUserId];
+        foreach ($authorSetStoriesMap as $authorSetKey => $groupData) {
+            // Build author profiles array sorted by display_name
+            $authorProfiles = [];
+            foreach ($groupData['authorUserIds'] as $authorUserId) {
+                $authorProfiles[] = $profilesByUserId[$authorUserId];
+            }
+            usort($authorProfiles, fn($a, $b) => strcasecmp($a->display_name, $b->display_name));
 
             // Build story view models sorted by title
             $storyViewModels = [];
             $totalCommentCount = 0;
-            foreach ($stories as $storyId => $storyData) {
+            foreach ($groupData['stories'] as $storyId => $storyData) {
                 $story = $storyData['story'];
                 $storyViewModels[] = new ProfileCommentsStoryViewModel(
                     id: (int) $story->id,
@@ -127,14 +142,14 @@ class ProfileCommentsComponent extends Component
             usort($storyViewModels, fn($a, $b) => strcasecmp($a->title, $b->title));
 
             $this->authorGroups[] = new ProfileCommentsAuthorViewModel(
-                author: $authorProfile,
+                authors: $authorProfiles,
                 totalCommentCount: $totalCommentCount,
                 stories: $storyViewModels,
             );
         }
 
-        // Sort authors by display_name
-        usort($this->authorGroups, fn($a, $b) => strcasecmp($a->author->display_name, $b->author->display_name));
+        // Sort author groups by first author's display_name
+        usort($this->authorGroups, fn($a, $b) => strcasecmp($a->authors[0]->display_name, $b->authors[0]->display_name));
 
         $this->hasComments = !empty($this->authorGroups);
     }

@@ -131,6 +131,142 @@ describe('ProfileCommentsComponent', function () {
         });
     });
 
+    describe('Co-authored stories', function () {
+        it('groups co-authored stories under a single collapsible with both authors', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $commenter = registerUserThroughForm($this, ['name' => 'Commenter', 'email' => 'commenter@example.com'], true, [Roles::USER_CONFIRMED]);
+
+            // Create a co-authored story
+            $coAuthoredStory = publicStory('Co-Authored Story', $alice->id);
+            addCollaborator($coAuthoredStory->id, $bob->id, 'author');
+            $chapter = createPublishedChapter($this, $coAuthoredStory, $alice, ['title' => 'Co-Authored Chapter']);
+
+            $this->actingAs($commenter);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+
+            // Both author names should appear in the same collapsible header
+            expect($html)
+                ->toContain('Alice')
+                ->toContain('Bob')
+                ->toContain('Co-Authored Story');
+
+            // Story should only appear once (not duplicated under each author)
+            $storyCount = substr_count($html, 'Co-Authored Story');
+            expect($storyCount)->toBe(1);
+        });
+
+        it('displays multiple co-authored stories by same authors in one group', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $commenter = registerUserThroughForm($this, ['name' => 'Commenter', 'email' => 'commenter@example.com'], true, [Roles::USER_CONFIRMED]);
+
+            // Create two co-authored stories by the same pair
+            $story1 = publicStory('First Co-Authored', $alice->id);
+            addCollaborator($story1->id, $bob->id, 'author');
+            $chapter1 = createPublishedChapter($this, $story1, $alice, ['title' => 'Chapter 1']);
+
+            $story2 = publicStory('Second Co-Authored', $alice->id);
+            addCollaborator($story2->id, $bob->id, 'author');
+            $chapter2 = createPublishedChapter($this, $story2, $alice, ['title' => 'Chapter 2']);
+
+            $this->actingAs($commenter);
+            createComment('chapter', $chapter1->id, generateDummyText(150));
+            createComment('chapter', $chapter2->id, generateDummyText(150));
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+
+            // Both stories should appear
+            expect($html)
+                ->toContain('First Co-Authored')
+                ->toContain('Second Co-Authored');
+
+            // Each story should appear exactly once (both under the same author group)
+            expect(substr_count($html, 'First Co-Authored'))->toBe(1);
+            expect(substr_count($html, 'Second Co-Authored'))->toBe(1);
+        });
+
+        it('separates stories with different co-author sets into different groups', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $charlie = registerUserThroughForm($this, ['name' => 'Charlie', 'email' => 'charlie@example.com'], true, [Roles::USER_CONFIRMED]);
+            $commenter = registerUserThroughForm($this, ['name' => 'Commenter', 'email' => 'commenter@example.com'], true, [Roles::USER_CONFIRMED]);
+
+            // Story by Alice alone
+            $aliceStory = publicStory('Alice Solo Story', $alice->id);
+            $aliceChapter = createPublishedChapter($this, $aliceStory, $alice, ['title' => 'Alice Chapter']);
+
+            // Story by Alice + Bob
+            $aliceBobStory = publicStory('Alice Bob Story', $alice->id);
+            addCollaborator($aliceBobStory->id, $bob->id, 'author');
+            $aliceBobChapter = createPublishedChapter($this, $aliceBobStory, $alice, ['title' => 'Alice Bob Chapter']);
+
+            // Story by Alice + Charlie
+            $aliceCharlieStory = publicStory('Alice Charlie Story', $alice->id);
+            addCollaborator($aliceCharlieStory->id, $charlie->id, 'author');
+            $aliceCharlieChapter = createPublishedChapter($this, $aliceCharlieStory, $alice, ['title' => 'Alice Charlie Chapter']);
+
+            $this->actingAs($commenter);
+            createComment('chapter', $aliceChapter->id, generateDummyText(150));
+            createComment('chapter', $aliceBobChapter->id, generateDummyText(150));
+            createComment('chapter', $aliceCharlieChapter->id, generateDummyText(150));
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+
+            // All three stories should appear
+            expect($html)
+                ->toContain('Alice Solo Story')
+                ->toContain('Alice Bob Story')
+                ->toContain('Alice Charlie Story');
+
+            // Each story should appear exactly once
+            expect(substr_count($html, 'Alice Solo Story'))->toBe(1);
+            expect(substr_count($html, 'Alice Bob Story'))->toBe(1);
+            expect(substr_count($html, 'Alice Charlie Story'))->toBe(1);
+        });
+
+        it('displays co-author names separated by commas', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $commenter = registerUserThroughForm($this, ['name' => 'Commenter', 'email' => 'commenter@example.com'], true, [Roles::USER_CONFIRMED]);
+
+            $coAuthoredStory = publicStory('Comma Test Story', $alice->id);
+            addCollaborator($coAuthoredStory->id, $bob->id, 'author');
+            $chapter = createPublishedChapter($this, $coAuthoredStory, $alice, ['title' => 'Test Chapter']);
+
+            $this->actingAs($commenter);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+
+            // Authors should be comma-separated (Alice, Bob or Bob, Alice depending on sort)
+            expect($html)->toMatch('/Alice.*,.*Bob|Bob.*,.*Alice/');
+        });
+
+        it('sorts co-authors alphabetically within a group', function () {
+            $zara = registerUserThroughForm($this, ['name' => 'Zara', 'email' => 'zara@example.com'], true, [Roles::USER_CONFIRMED]);
+            $alice = alice($this);
+            $commenter = registerUserThroughForm($this, ['name' => 'Commenter', 'email' => 'commenter@example.com'], true, [Roles::USER_CONFIRMED]);
+
+            // Create story with Zara as primary author, Alice as co-author
+            $story = publicStory('Alphabetical Test', $zara->id);
+            addCollaborator($story->id, $alice->id, 'author');
+            $chapter = createPublishedChapter($this, $story, $zara, ['title' => 'Test Chapter']);
+
+            $this->actingAs($commenter);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+
+            // Alice should appear before Zara (alphabetical)
+            $alicePos = strpos($html, 'Alice');
+            $zaraPos = strpos($html, 'Zara');
+            expect($alicePos)->toBeLessThan($zaraPos);
+        });
+    });
+
     describe('Visibility filtering', function () {
         it('excludes comments on private stories', function () {
             $author = alice($this);
