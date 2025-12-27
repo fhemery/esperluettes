@@ -26,12 +26,18 @@ class ProfileController extends Controller
 
     /**
      * Display the specified user's profile (default tab based on context).
-     * For own profile: shows stories tab. For others: shows about tab.
+     * For own profile: shows stories tab.
+     * For logged-in users viewing others: shows about tab.
+     * For non-logged users: shows stories tab (about is not visible).
      */
     public function show(Profile $profile): View
     {
-        $isOwn = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
-        $activeTab = $isOwn ? 'stories' : 'about';
+        if (!Auth::check()) {
+            $activeTab = 'stories';
+        } else {
+            $isOwn = $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
+            $activeTab = $isOwn ? 'stories' : 'about';
+        }
         
         return $this->renderProfile($profile, $activeTab);
     }

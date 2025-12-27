@@ -12,28 +12,29 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('Profile tab routing', function () {
 
     describe('Route accessibility', function () {
-        it('allows guests to access the default profile route', function () {
+        it('allows guests to access the default profile route and defaults to stories tab', function () {
             $user = alice($this);
             $profile = Profile::where('user_id', $user->id)->firstOrFail();
 
             $this->get("/profile/{$profile->slug}")
-                ->assertOk();
-        });
-
-        it('allows guests to access the about route but shows stories tab (no about for guests)', function () {
-            $user = alice($this);
-            $profile = Profile::where('user_id', $user->id)->firstOrFail();
-
-            $this->get("/profile/{$profile->slug}/about")
                 ->assertOk()
                 ->assertSee(__('profile::show.stories'));
         });
 
-        it('requires authentication for stories tab route', function () {
+        it('allows guests to access the stories tab route', function () {
             $user = alice($this);
             $profile = Profile::where('user_id', $user->id)->firstOrFail();
 
             $this->get("/profile/{$profile->slug}/stories")
+                ->assertOk()
+                ->assertSee(__('profile::show.stories'));
+        });
+
+        it('requires authentication for about tab route', function () {
+            $user = alice($this);
+            $profile = Profile::where('user_id', $user->id)->firstOrFail();
+
+            $this->get("/profile/{$profile->slug}/about")
                 ->assertRedirect('/login');
         });
 
@@ -55,6 +56,17 @@ describe('Profile tab routing', function () {
 
             $this->actingAs($bob)
                 ->get("/profile/{$profile->slug}/about")
+                ->assertOk()
+                ->assertSee(__('profile::show.about'));
+        });
+
+        it('defaults to about tab for authenticated users viewing others profile', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $profile = Profile::where('user_id', $alice->id)->firstOrFail();
+
+            $this->actingAs($bob)
+                ->get("/profile/{$profile->slug}")
                 ->assertOk()
                 ->assertSee(__('profile::show.about'));
         });

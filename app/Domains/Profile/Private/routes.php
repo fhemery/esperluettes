@@ -43,13 +43,15 @@ Route::middleware('web')->prefix('profile')->group(function () {
     });
 
     // Public profile pages (by slug) - tab-based routes
-    // Default route redirects to about tab for authenticated, shows about for guests
+    // Default route shows stories for guests, about for authenticated users viewing others
     Route::get('/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/{profile:slug}/about', [ProfileController::class, 'showAbout'])->name('profile.show.about');
     
-    // Stories tab - accessible to authenticated users
+    // Stories tab - publicly accessible (anonymous users can view)
+    Route::get('/{profile:slug}/stories', [ProfileController::class, 'showStories'])->name('profile.show.stories');
+    
+    // About tab - accessible to authenticated users only
     Route::middleware(['auth', 'compliant'])->group(function () {
-        Route::get('/{profile:slug}/stories', [ProfileController::class, 'showStories'])->name('profile.show.stories');
+        Route::get('/{profile:slug}/about', [ProfileController::class, 'showAbout'])->name('profile.show.about');
     });
 
     // Comments tab - accessible only to USER_CONFIRMED
