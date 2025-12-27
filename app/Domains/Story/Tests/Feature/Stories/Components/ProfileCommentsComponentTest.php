@@ -39,7 +39,7 @@ describe('ProfileCommentsComponent', function () {
     });
 
     describe('Comment display', function () {
-        it('displays story card with comment count badge', function () {
+        it('displays author collapsible with story inside', function () {
             $author = alice($this);
             $commenter = bob($this);
 
@@ -51,10 +51,10 @@ describe('ProfileCommentsComponent', function () {
 
             $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
 
-            // Should show story title and grid layout
+            // Should show author name, story title, and comment count
             expect($html)
+                ->toContain('Alice') // Author display name
                 ->toContain('Test Story')
-                ->toContain('grid') // Grid layout
                 ->toContain('story::profile.comments-count'); // Comment count translation key
         });
 
@@ -72,13 +72,14 @@ describe('ProfileCommentsComponent', function () {
 
             $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
 
-            // Story should appear once with comment count
+            // Story should appear once with comment count under author
             expect($html)
+                ->toContain('Alice')
                 ->toContain('Multi Chapter Story')
                 ->toContain('story::profile.comments-count'); // Comment count translation key
         });
 
-        it('shows multiple story cards for comments on different stories', function () {
+        it('shows multiple stories under same author', function () {
             $author = alice($this);
             $commenter = bob($this);
 
@@ -93,9 +94,40 @@ describe('ProfileCommentsComponent', function () {
 
             $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
 
+            // Both stories should appear under the same author
             expect($html)
+                ->toContain('Alice')
                 ->toContain('First Story')
                 ->toContain('Second Story');
+        });
+
+        it('groups stories by author and sorts authors alphabetically', function () {
+            $alice = alice($this);
+            $bob = bob($this);
+            $commenter = registerUserThroughForm($this, ['name' => 'Commenter', 'email' => 'commenter@example.com'], true, [Roles::USER_CONFIRMED]);
+
+            $aliceStory = publicStory('Alice Story', $alice->id);
+            $bobStory = publicStory('Bob Story', $bob->id);
+            $aliceChapter = createPublishedChapter($this, $aliceStory, $alice, ['title' => 'Alice Chapter']);
+            $bobChapter = createPublishedChapter($this, $bobStory, $bob, ['title' => 'Bob Chapter']);
+
+            $this->actingAs($commenter);
+            createComment('chapter', $aliceChapter->id, generateDummyText(150));
+            createComment('chapter', $bobChapter->id, generateDummyText(150));
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+
+            // Both authors should appear with their stories
+            expect($html)
+                ->toContain('Alice')
+                ->toContain('Alice Story')
+                ->toContain('Bob')
+                ->toContain('Bob Story');
+
+            // Alice should appear before Bob (alphabetical order)
+            $alicePos = strpos($html, 'Alice');
+            $bobPos = strpos($html, 'Bob');
+            expect($alicePos)->toBeLessThan($bobPos);
         });
     });
 

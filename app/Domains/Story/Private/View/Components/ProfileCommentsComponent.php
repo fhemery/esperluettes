@@ -7,14 +7,15 @@ use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Services\ChapterService;
-use App\Domains\Story\Private\ViewModels\StorySummaryViewModel;
+use App\Domains\Story\Private\ViewModels\ProfileCommentsAuthorViewModel;
+use App\Domains\Story\Private\ViewModels\ProfileCommentsStoryViewModel;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\Component;
 
 class ProfileCommentsComponent extends Component
 {
-    /** @var array<int, array{item: StorySummaryViewModel, commentCount: int, storyId: int}> */
-    public array $storiesWithCommentCounts = [];
+    /** @var ProfileCommentsAuthorViewModel[] */
+    public array $authorGroups = [];
     public bool $hasComments = false;
     public bool $isAllowed = false;
     public int $profileUserId;
@@ -88,44 +89,60 @@ class ProfileCommentsComponent extends Component
         // Step 4: Fetch author profiles in batch
         $profilesByUserId = $this->profileApi->getPublicProfiles(array_unique($authorUserIds));
 
-        // Step 5: Build view models
-        $this->storiesWithCommentCounts = [];
+        // Step 5: Group stories by author (duplicate co-authored stories under each author)
+        // Structure: authorUserId => [storyId => storyData]
+        $authorStoriesMap = [];
         foreach ($storiesMap as $storyId => $data) {
-            $story = $data['story'];
-            // Map author user IDs to ProfileDto objects
-            $authors = [];
             foreach ($data['authorUserIds'] as $authorUserId) {
-                $profile = $profilesByUserId[$authorUserId] ?? null;
-                if ($profile !== null) {
-                    $authors[] = $profile;
+                if (!isset($profilesByUserId[$authorUserId])) {
+                    continue;
                 }
+                if (!isset($authorStoriesMap[$authorUserId])) {
+                    $authorStoriesMap[$authorUserId] = [];
+                }
+                $authorStoriesMap[$authorUserId][$storyId] = $data;
             }
+        }
 
-            $this->storiesWithCommentCounts[] = [
-                'item' => new StorySummaryViewModel(
+        // Step 6: Build author view models sorted by display_name
+        $this->authorGroups = [];
+        foreach ($authorStoriesMap as $authorUserId => $stories) {
+            $authorProfile = $profilesByUserId[$authorUserId];
+
+            // Build story view models sorted by title
+            $storyViewModels = [];
+            $totalCommentCount = 0;
+            foreach ($stories as $storyId => $storyData) {
+                $story = $storyData['story'];
+                $storyViewModels[] = new ProfileCommentsStoryViewModel(
                     id: (int) $story->id,
                     title: $story->title,
                     slug: $story->slug,
-                    description: $story->description,
-                    readsLoggedTotal: 0,
-                    chaptersCount: 0,
-                    wordsTotal: 0,
-                    authors: $authors,
-                    genreNames: [],
-                    triggerWarningNames: [],
-                ),
-                'commentCount' => $data['commentCount'],
-                'storyId' => $storyId,
-            ];
+                    commentCount: $storyData['commentCount'],
+                );
+                $totalCommentCount += $storyData['commentCount'];
+            }
+
+            // Sort stories by title
+            usort($storyViewModels, fn($a, $b) => strcasecmp($a->title, $b->title));
+
+            $this->authorGroups[] = new ProfileCommentsAuthorViewModel(
+                author: $authorProfile,
+                totalCommentCount: $totalCommentCount,
+                stories: $storyViewModels,
+            );
         }
 
-        $this->hasComments = !empty($this->storiesWithCommentCounts);
+        // Sort authors by display_name
+        usort($this->authorGroups, fn($a, $b) => strcasecmp($a->author->display_name, $b->author->display_name));
+
+        $this->hasComments = !empty($this->authorGroups);
     }
 
     public function render(): ViewContract
     {
         return view('story::components.profile-comments', [
-            'storiesWithCommentCounts' => $this->storiesWithCommentCounts,
+            'authorGroups' => $this->authorGroups,
             'hasComments' => $this->hasComments,
             'isAllowed' => $this->isAllowed,
             'profileUserId' => $this->profileUserId,
