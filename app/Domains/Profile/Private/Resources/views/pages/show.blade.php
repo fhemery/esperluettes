@@ -124,6 +124,15 @@
                         'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories'),
                         'url' => route('profile.show.stories', $profile),
                     ];
+                    // Comments tab only visible to USER_CONFIRMED
+                    $viewerIsConfirmed = Auth::check() && app(\App\Domains\Auth\Public\Api\AuthPublicApi::class)->hasAnyRole([\App\Domains\Auth\Public\Api\Roles::USER_CONFIRMED]);
+                    if ($viewerIsConfirmed) {
+                        $tabs[] = [
+                            'key' => 'comments',
+                            'label' => $isOwn ? __('story::profile.my-comments') : __('story::profile.comments'),
+                            'url' => route('profile.show.comments', $profile),
+                        ];
+                    }
                 @endphp
 
                 <!-- Tab Navigation -->
@@ -144,6 +153,8 @@
                         <x-profile::about-panel :profile="$profile" />
                     @elseif($activeTab === 'stories')
                         <x-story::profile-stories-component :user-id="$profile->user_id" />
+                    @elseif($activeTab === 'comments')
+                        <x-story::profile-comments-component :user-id="$profile->user_id" />
                     @endif
                 </div>
             </div>

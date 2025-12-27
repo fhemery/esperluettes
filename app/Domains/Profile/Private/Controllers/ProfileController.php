@@ -53,6 +53,14 @@ class ProfileController extends Controller
     }
 
     /**
+     * Display the comments tab of a user's profile.
+     */
+    public function showComments(Profile $profile): View
+    {
+        return $this->renderProfile($profile, 'comments');
+    }
+
+    /**
      * Render the profile page with the specified active tab.
      */
     private function renderProfile(Profile $profile, string $activeTab): View

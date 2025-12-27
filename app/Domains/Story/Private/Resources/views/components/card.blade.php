@@ -2,12 +2,13 @@
 // App\Domains\Story\ViewModels\StorySummaryViewModel
 'item',
 'displayAuthors' => true,
+'light' => false,
 ])
 
 @php
-    $genres = $item->getGenreNames();
-    $tws = $item->getTriggerWarningNames();
-    $twDisclosure = $item->getTwDisclosure();
+    $genres = $light ? [] : $item->getGenreNames();
+    $tws = $light ? [] : $item->getTriggerWarningNames();
+    $twDisclosure = $light ? null : $item->getTwDisclosure();
 @endphp
 
 <div class="flex-1 group flex flex-col overflow-hidden w-[230px]">
@@ -19,7 +20,7 @@
     </div>
 
     <div class="pb-1 pt-2 flex-1 flex flex-col gap-1">
-        @if(!empty($genres))
+        @if(!$light && !empty($genres))
             <x-shared::badge-overflow>
                 @foreach($genres as $g)
                     <x-shared::badge color="accent" size="xs">{{ $g }}</x-shared::badge>
@@ -50,7 +51,8 @@
         @endif
     </div>
 
-    {{-- Bottom meta row: chapters and words + TW icon/tooltip --}}
+    {{-- Bottom meta row: chapters and words + TW icon/tooltip (hidden in light mode) --}}
+    @if(!$light)
     <div class="pb-1 border-b border-gray-700">
         <div class="flex items-center justify-between text-sm font-bold">
             <div class="flex items-center gap-2 text-gray-600">
@@ -64,4 +66,5 @@
             <x-story::trigger-warnings :items="$tws" :disclosure="$twDisclosure" />
         </div>
     </div>
+    @endif
 </div>

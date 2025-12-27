@@ -9,10 +9,19 @@ use App\Domains\Story\Private\Controllers\ChapterModerationController;
 use App\Domains\Story\Private\Controllers\ReadingProgressController;
 use App\Domains\Story\Private\Controllers\StoryModerationController;
 use App\Domains\Story\Private\Controllers\CollaboratorController;
+use App\Domains\Story\Private\Controllers\ProfileCommentsApiController;
 
 Route::middleware(['web'])->group(function () {
     Route::get('/stories', [StoryController::class, 'index'])
         ->name('stories.index');
+
+    // Profile comments API - fetch comments for a story by user (for async loading)
+    // MUST be defined before routes with greedy {slug} patterns
+    Route::middleware(['auth', 'compliant', 'role:' . Roles::USER_CONFIRMED])->group(function () {
+        Route::get('/stories/{storyId}/profile-comments/{userId}', [ProfileCommentsApiController::class, 'getCommentsForStory'])
+            ->where(['storyId' => '[0-9]+', 'userId' => '[0-9]+'])
+            ->name('profile.comments.api');
+    });
 
     Route::middleware(['role:' . Roles::MODERATOR . ',' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])->group(function () {
         Route::post('/stories/{slug}/moderation/make-private', [StoryModerationController::class, 'makePrivate'])
@@ -139,4 +148,5 @@ Route::middleware(['web'])->group(function () {
             ->where('slug', '.*')
             ->name('stories.collaborators.leave');
     });
+
 });

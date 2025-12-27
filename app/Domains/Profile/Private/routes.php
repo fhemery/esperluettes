@@ -52,4 +52,9 @@ Route::middleware('web')->prefix('profile')->group(function () {
         Route::get('/{profile:slug}/stories', [ProfileController::class, 'showStories'])->name('profile.show.stories');
     });
 
+    // Comments tab - accessible only to USER_CONFIRMED
+    Route::middleware(['auth', 'compliant', 'role:' . Roles::USER_CONFIRMED])->group(function () {
+        Route::get('/{profile:slug}/comments', [ProfileController::class, 'showComments'])->name('profile.show.comments');
+    });
+
 });
