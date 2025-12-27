@@ -14,7 +14,7 @@
                 <!-- User Info -->
                 <div class="flex-1 flex flex-col flex-start gap-2">
                     <div class="flex items-center">
-                        <x-shared::title class="text-2xl sm:text-4xl text-secondary p-4">{{ $profile->display_name }}</x-shared::title>
+                        <x-shared::title class="text-2xl sm:text-4xl text-secondary">{{ $profile->display_name }}</x-shared::title>
                     </div>
 
                     @if($isOwn)
