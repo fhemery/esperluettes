@@ -25,9 +25,51 @@ class ProfileController extends Controller
     }
 
     /**
-     * Display the specified user's profile.
+     * Display the specified user's profile (default tab based on context).
+     * For own profile: shows stories tab.
+     * For logged-in users viewing others: shows about tab.
+     * For non-logged users: shows stories tab (about is not visible).
      */
     public function show(Profile $profile): View
+    {
+        if (!Auth::check()) {
+            $activeTab = 'stories';
+        } else {
+            $isOwn = $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
+            $activeTab = $isOwn ? 'stories' : 'about';
+        }
+        
+        return $this->renderProfile($profile, $activeTab);
+    }
+
+    /**
+     * Display the about tab of a user's profile.
+     */
+    public function showAbout(Profile $profile): View
+    {
+        return $this->renderProfile($profile, 'about');
+    }
+
+    /**
+     * Display the stories tab of a user's profile.
+     */
+    public function showStories(Profile $profile): View
+    {
+        return $this->renderProfile($profile, 'stories');
+    }
+
+    /**
+     * Display the comments tab of a user's profile.
+     */
+    public function showComments(Profile $profile): View
+    {
+        return $this->renderProfile($profile, 'comments');
+    }
+
+    /**
+     * Render the profile page with the specified active tab.
+     */
+    private function renderProfile(Profile $profile, string $activeTab): View
     {
         $isOwn = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
         $isModerator = $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]);
@@ -35,7 +77,7 @@ class ProfileController extends Controller
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
 
-        return view('profile::pages.show', compact('profile', 'isOwn', 'isModerator'));
+        return view('profile::pages.show', compact('profile', 'isOwn', 'isModerator', 'activeTab'));
     }
 
     /**

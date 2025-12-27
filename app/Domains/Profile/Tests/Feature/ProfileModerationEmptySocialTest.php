@@ -56,7 +56,7 @@ describe('Profile moderation - Empty Social', function () {
                 ])
                 ->assertRedirect('/profile');
 
-            $response = $this->get("/profile/{$this->slug}");
+            $response = $this->actingAs($this->owner)->get("/profile/{$this->slug}/about");
             $response->assertSee('facebook-link', false);
             $response->assertSee('instagram-link', false);
             $response->assertSee('youtube-link', false);
@@ -69,7 +69,7 @@ describe('Profile moderation - Empty Social', function () {
                 ->assertRedirect($this->referer);
 
             // Assert: DB and UI
-            $response = $this->get("/profile/{$this->slug}");
+            $response = $this->actingAs($this->owner)->get("/profile/{$this->slug}/about");
             $response->assertDontSee('facebook-link', false);
             $response->assertDontSee('instagram-link', false);
             $response->assertDontSee('youtube-link', false);

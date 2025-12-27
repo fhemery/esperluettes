@@ -51,7 +51,7 @@ describe('Profile moderation - Empty About', function () {
                 ->put('/profile', ['display_name' => $this->profile->display_name, 'description' => $bio])
                 ->assertRedirect('/profile');
 
-            $response = $this->get("/profile/{$this->slug}");
+            $response = $this->actingAs($this->owner)->get("/profile/{$this->slug}/about");
             $response->assertSee('This is a sample bio', false);
 
             // Act: moderator empties the about section
@@ -61,7 +61,7 @@ describe('Profile moderation - Empty About', function () {
                 ->post($this->targetUrl)
                 ->assertRedirect($this->referer);
 
-            $response = $this->get("/profile/{$this->slug}");
+            $response = $this->actingAs($this->owner)->get("/profile/{$this->slug}/about");
             $response->assertDontSee($bio, false);
         });
 

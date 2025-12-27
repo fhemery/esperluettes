@@ -33,6 +33,7 @@ return [
     'sound_help' => 'MP3, 10 Mo maximum',
     'save_gift' => 'Enregistrer',
     'gift_saved' => 'Votre cadeau a bien été enregistré !',
+    'time_remaining' => 'Temps restant : ',
 
     // Gift Reveal
     'gift_from' => 'Cadeau de la part de...',

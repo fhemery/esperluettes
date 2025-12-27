@@ -176,4 +176,22 @@ class CommentService
             ));
         });
     }
+
+    /**
+     * Get all entity IDs where the author has at least one root comment.
+     * @return array<int> List of entity IDs
+     */
+    public function getEntityIdsWithRootCommentsByAuthor(string $entityType, int $authorId): array
+    {
+        return $this->repository->getEntityIdsWithRootCommentsByAuthor($entityType, $authorId);
+    }
+
+    /**
+     * Get root comments by author for specific entities.
+     * @return array<int, Comment> [entityId => Comment]
+     */
+    public function getRootCommentsByAuthorAndEntities(string $entityType, int $authorId, array $entityIds): array
+    {
+        return $this->repository->getRootCommentsByAuthorAndEntities($entityType, $authorId, $entityIds);
+    }
 }

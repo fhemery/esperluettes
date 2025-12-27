@@ -5,6 +5,7 @@ import * as DateUtils from './date-utils.js';
 import {BadgeOverflow} from './badge-overflow.js';
 import '../../../Moderation/Private/Resources/js/moderation.js';
 import intersect from '@alpinejs/intersect'
+import './countdown-timer.js';
  
 window.Alpine = Alpine;
 

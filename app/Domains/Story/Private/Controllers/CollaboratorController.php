@@ -42,7 +42,7 @@ class CollaboratorController
         $canLeave = $authorCount > 1;
 
         $trail = BreadcrumbViewModel::FromHome(true);
-        $trail->push(__('story::shared.stories'), route('stories.index'));
+        $trail->push(__('shared::navigation.stories'), route('stories.index'));
         $trail->push($story->title, route('stories.show', ['slug' => $story->slug]));
         $trail->push(__('story::collaborators.breadcrumb'));
 

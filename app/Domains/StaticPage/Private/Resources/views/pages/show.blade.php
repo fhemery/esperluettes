@@ -1,11 +1,21 @@
 <x-app-layout>
     <article class=" max-w-[800px] mx-auto">
         <header class="mb-6 md:mb-10">
+            <div class="flex gap-2 items-baseline">
             <x-shared::title>{{ $page->title }}</x-shared::title>
+            @if(Auth::user() && Auth::user()->hasRole(['admin', 'tech-admin']))
+            <a href="{{ route('static.admin.edit', $page) }}">
+                <x-shared::button icon="edit" size="xs" color="accent" :outline="true">
+                </x-shared::button>
+            </a>
+            @endif
+</div>  
+
             @if($page->published_at)
             <p class="text-fg/80 text-sm">{{ $page->published_at->format('Y-m-d') }}</p>
             @endif
         </header>
+
 
         @if($page->status === 'draft')
         <x-shared::badge color="warning">

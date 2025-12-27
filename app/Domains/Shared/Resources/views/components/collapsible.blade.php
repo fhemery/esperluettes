@@ -14,7 +14,11 @@
     <button type="button"
         class="w-full flex items-center justify-between px-4 py-2 text-left"
         x-on:click="open = !open">
-        <span class="text-{{ $textColor }} {{ $headerClasses }}" x-ref="title">{{ $title }}</span>
+        @if(isset($header))
+            <div class="flex-1 {{ $headerClasses }}">{{ $header }}</div>
+        @else
+            <span class="text-{{ $textColor }} {{ $headerClasses }}" x-ref="title">{{ $title }}</span>
+        @endif
         <span class="material-symbols-outlined text-{{ $iconColor }} transition-transform duration-200" 
               :class="open ? 'rotate-180' : ''" 
               x-text="'expand_less' "></span>

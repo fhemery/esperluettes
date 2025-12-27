@@ -42,7 +42,21 @@ Route::middleware('web')->prefix('profile')->group(function () {
             ->name('profiles.lookup.by_ids');
     });
 
-     // Public profile page (by slug) - accessible to guests
+    // Public profile pages (by slug) - tab-based routes
+    // Default route shows stories for guests, about for authenticated users viewing others
     Route::get('/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
+    
+    // Stories tab - publicly accessible (anonymous users can view)
+    Route::get('/{profile:slug}/stories', [ProfileController::class, 'showStories'])->name('profile.show.stories');
+    
+    // About tab - accessible to authenticated users only
+    Route::middleware(['auth', 'compliant'])->group(function () {
+        Route::get('/{profile:slug}/about', [ProfileController::class, 'showAbout'])->name('profile.show.about');
+    });
+
+    // Comments tab - accessible only to USER_CONFIRMED
+    Route::middleware(['auth', 'compliant', 'role:' . Roles::USER_CONFIRMED])->group(function () {
+        Route::get('/{profile:slug}/comments', [ProfileController::class, 'showComments'])->name('profile.show.comments');
+    });
 
 });

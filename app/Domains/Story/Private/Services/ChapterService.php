@@ -411,4 +411,27 @@ class ChapterService
             $this->notifications->createNotification($recipientIds, $notification, $actingUserId);
         }
     }
+
+    /**
+     * Get published chapters by IDs with their stories (public/community only).
+     * Returns only chapters whose story matches the visibility filter.
+     *
+     * @param array<int> $chapterIds
+     * @return \Illuminate\Support\Collection<int, Chapter>
+     */
+    public function getPublishedChaptersWithPublicStories(array $chapterIds): \Illuminate\Support\Collection
+    {
+        if (empty($chapterIds)) {
+            return collect();
+        }
+
+        return Chapter::query()
+            ->whereIn('id', $chapterIds)
+            ->where('status', Chapter::STATUS_PUBLISHED)
+            ->with(['story' => function ($query) {
+                $query->whereIn('visibility', [Story::VIS_PUBLIC, Story::VIS_COMMUNITY]);
+            }])
+            ->get()
+            ->filter(fn(Chapter $c) => $c->story !== null);
+    }
 }

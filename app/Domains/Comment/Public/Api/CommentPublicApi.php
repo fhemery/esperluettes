@@ -286,5 +286,36 @@ class CommentPublicApi
         $updatedDto->canEditOwn = $this->policies->canEditOwn($updated->commentable_type, $updatedDto, $userId);
         return $updatedDto;
     }
+
+    /**
+     * Get all entity IDs where the author has at least one root comment.
+     * @return array<int> List of entity IDs (e.g., chapter IDs)
+     */
+    public function getEntityIdsWithRootCommentsByAuthor(string $entityType, int $authorId): array
+    {
+        return $this->service->getEntityIdsWithRootCommentsByAuthor($entityType, $authorId);
+    }
+
+    /**
+     * Get root comments by author for specific entities.
+     * @return array<int, CommentDto> [entityId => CommentDto]
+     */
+    public function getRootCommentsByAuthorAndEntities(string $entityType, int $authorId, array $entityIds): array
+    {
+        $models = $this->service->getRootCommentsByAuthorAndEntities($entityType, $authorId, $entityIds);
+        
+        if (empty($models)) {
+            return [];
+        }
+
+        // Get author profile once (all comments are from the same author)
+        $profile = $this->profiles->getPublicProfile($authorId);
+
+        $result = [];
+        foreach ($models as $entityId => $model) {
+            $result[$entityId] = CommentDto::fromModel($model, $profile);
+        }
+        return $result;
+    }
 }
 

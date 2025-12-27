@@ -14,7 +14,7 @@
                 <!-- User Info -->
                 <div class="flex-1 flex flex-col flex-start gap-2">
                     <div class="flex items-center">
-                        <x-shared::title class="text-2xl sm:text-4xl text-secondary p-4">{{ $profile->display_name }}</x-shared::title>
+                        <x-shared::title class="text-2xl sm:text-4xl text-secondary">{{ $profile->display_name }}</x-shared::title>
                     </div>
 
                     @if($isOwn)
@@ -107,53 +107,97 @@
             </div>
         </div>
 
-        @php $initialTab = $isOwn ? 'stories' : 'about'; @endphp
-        <!-- Profile Content -->
+        <!-- Profile Content - Route-based tabs -->
         <div class="w-full">
             <div class="lg:col-span-2">
-                <x-shared::tabs :tabs="[
-                        ...(Auth::check() ? [[ 'key' => 'about', 'label' => __('profile::show.about') ]] : []),
-                        [ 'key' => 'stories', 'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories') ],
-                    ]" :tracking="true" :initial="$initialTab" color="primary" navClass="text-2xl font-semibold">
-                    <div x-data="{
-                                storiesLoaded: false,
-                                loading: false,
-                                async loadStories() {
-                                    if (this.storiesLoaded) return;
-                                    this.loading = true;
-                                    try {
-                                        const res = await fetch('/profiles/{{ $profile->slug }}/stories');
-                                        const html = await res.text();
-                                        this.$refs.stories.innerHTML = html;
-                                        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-                                            window.Alpine.initTree(this.$refs.stories);
-                                        }
-                                        this.storiesLoaded = true;
-                                    } catch (e) {
-                                        this.$refs.stories.innerHTML = '<div class=\'text-sm text-red-600\'>{{ __('profile::show.failed_to_load_stories') }}</div>';
-                                    } finally {
-                                        this.loading = false;
-                                    }
-                                }
-                            }"
-                        x-init="if (tab === 'stories') loadStories()"
-                        x-effect="if (tab === 'stories') loadStories()">
-                        @if(Auth::check())
-                        <div x-show="tab==='about'" x-cloak>
-                            <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
-                                <x-profile::about-panel :profile="$profile" />
-                            </div>
-                        </div>
-                        @endif
+                @php
+                    $tabs = [];
+                    if (Auth::check()) {
+                        $tabs[] = [
+                            'key' => 'about',
+                            'label' => __('profile::show.about'),
+                            'url' => route('profile.show.about', $profile),
+                        ];
+                    }
+                    $tabs[] = [
+                        'key' => 'stories',
+                        'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories'),
+                        'url' => route('profile.show.stories', $profile),
+                    ];
+                    // Comments tab only visible to USER_CONFIRMED
+                    $viewerIsConfirmed = Auth::check() && app(\App\Domains\Auth\Public\Api\AuthPublicApi::class)->hasAnyRole([\App\Domains\Auth\Public\Api\Roles::USER_CONFIRMED]);
+                    if ($viewerIsConfirmed) {
+                        $tabs[] = [
+                            'key' => 'comments',
+                            'label' => $isOwn ? __('story::profile.my-comments') : __('story::profile.comments'),
+                            'url' => route('profile.show.comments', $profile),
+                        ];
+                    }
+                @endphp
 
-                        <div x-show="tab==='stories'" x-cloak>
-                            <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
-                                <div x-show="loading" class="text-sm text-gray-500">{{ __('profile::show.loading') }}</div>
-                                <div x-ref="stories" class="mt-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                </x-shared::tabs>
+                <!-- Tab Navigation -->
+                <div class="relative" x-data="{
+                    el: null,
+                    canPrev: false,
+                    canNext: false,
+                    updateBounds() {
+                        if (!this.el) return;
+                        const maxLeft = this.el.scrollWidth - this.el.clientWidth;
+                        this.canPrev = this.el.scrollLeft > 0;
+                        this.canNext = this.el.scrollLeft < (maxLeft - 1);
+                    },
+                    scrollByAmount(dir = 1) {
+                        if (!this.el) return;
+                        const w = this.el.clientWidth * 0.8;
+                        this.el.scrollBy({ left: dir * w, behavior: 'smooth' });
+                        setTimeout(() => this.updateBounds(), 150);
+                    }
+                }" x-init="el = $refs.tabScroller; updateBounds(); el?.addEventListener('scroll', () => updateBounds()); window.addEventListener('resize', () => updateBounds())">
+                    {{-- Left scroll button --}}
+                    <button type="button"
+                        x-show="canPrev"
+                        x-on:click="scrollByAmount(-1)"
+                        aria-label="Précédent"
+                        class="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
+                        <span class="material-symbols-outlined text-lg">chevron_left</span>
+                    </button>
+
+                    <nav x-ref="tabScroller" class="surface-primary text-on-surface flex w-full gap-4 text-2xl font-semibold overflow-x-auto tabs-scroll-hide px-8" role="tablist" aria-label="Profile tabs">
+                        @foreach($tabs as $tab)
+                            <a href="{{ $tab['url'] }}"
+                                role="tab"
+                                aria-selected="{{ $activeTab === $tab['key'] ? 'true' : 'false' }}"
+                                class="shrink-0 flex-1 whitespace-nowrap py-3 px-1 border-b-2 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 {{ $activeTab === $tab['key'] ? 'selected border-none font-extrabold' : 'border-transparent' }}">
+                                {{ $tab['label'] }}
+                            </a>
+                        @endforeach
+                    </nav>
+
+                    {{-- Right scroll button --}}
+                    <button type="button"
+                        x-show="canNext"
+                        x-on:click="scrollByAmount(1)"
+                        aria-label="Suivant"
+                        class="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
+                        <span class="material-symbols-outlined text-lg">chevron_right</span>
+                    </button>
+                </div>
+
+                <style>
+                    .tabs-scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+                    .tabs-scroll-hide::-webkit-scrollbar { display: none; }
+                </style>
+
+                <!-- Tab Content -->
+                <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
+                    @if($activeTab === 'about' && Auth::check())
+                        <x-profile::about-panel :profile="$profile" />
+                    @elseif($activeTab === 'stories')
+                        <x-story::profile-stories-component :user-id="$profile->user_id" />
+                    @elseif($activeTab === 'comments')
+                        <x-story::profile-comments-component :user-id="$profile->user_id" />
+                    @endif
+                </div>
             </div>
         </div>
     </div>
