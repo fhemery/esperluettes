@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // Settings domain (must be early so other domains can register settings)
+    App\Domains\Settings\Public\Providers\SettingsServiceProvider::class,
+    
     // Shared services
     App\Domains\Shared\Providers\SharedServiceProvider::class,
     // Events domain

@@ -7,6 +7,7 @@ return [
     'profile' => 'Profil',
     'my-stories' => 'Mes histoires',
     'account' => 'Gestion du compte',
+    'settings' => 'Préférences',
     'logout' => 'Déconnexion',
     'verify-email' => 'Vérifier l\'adresse e-mail',
     'register' => 'Inscription',
