@@ -144,7 +144,7 @@ describe('SecretGift - Serve Files', function () {
         });
     });
 
-    describe('Serve Image (existing tests for reference)', function () {
+    describe('Serve Image', function () {
         it('allows giver to view their own image', function () {
             $user1 = alice($this);
             $user2 = bob($this);
@@ -165,6 +165,78 @@ describe('SecretGift - Serve Files', function () {
 
             $response->assertStatus(200);
             $response->assertHeader('Content-Type', 'image/jpeg');
+        });
+
+        it('prevents recipient from viewing image before activity ends', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            // Upload an image file
+            $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => $file,
+            ]);
+
+            $assignment = getSecretGiftAssignmentAsRecipient($result->id, $user2->id);
+
+            // Recipient tries to view before activity ends
+            $this->actingAs($user2);
+            $response = $this->get(route('secret-gift.image', [$result->activity, $assignment]));
+
+            $response->assertStatus(403);
+        });
+
+        it('allows recipient to view image after activity ends', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            // Upload an image file
+            $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => $file,
+            ]);
+
+            $assignment = getSecretGiftAssignmentAsRecipient($result->id, $user2->id);
+
+            // End the activity by setting active_ends_at to past
+            $result->activity->update(['active_ends_at' => now()->subHour()]);
+            $result->activity->refresh();
+
+            // Recipient can now view
+            $this->actingAs($user2);
+            $response = $this->get(route('secret-gift.image', [$result->activity, $assignment]));
+
+            $response->assertStatus(200);
+            $response->assertHeader('Content-Type', 'image/jpeg');
+        });
+
+        it('prevents non-participants from viewing image', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+            $outsider = carol($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            // Upload an image file
+            $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => $file,
+            ]);
+
+            $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+
+            // Outsider tries to view
+            $this->actingAs($outsider);
+            $response = $this->get(route('secret-gift.image', [$result->activity, $assignment]));
+
+            $response->assertStatus(403);
         });
     });
 });

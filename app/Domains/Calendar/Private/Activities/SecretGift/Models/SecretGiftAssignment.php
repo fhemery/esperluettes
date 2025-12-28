@@ -21,6 +21,12 @@ class SecretGiftAssignment extends Model
         'gift_sound_path',
     ];
 
+    protected $casts = [
+        'activity_id' => 'integer',
+        'giver_user_id' => 'integer',
+        'recipient_user_id' => 'integer',
+    ];
+
     public function activity(): BelongsTo
     {
         return $this->belongsTo(Activity::class);
