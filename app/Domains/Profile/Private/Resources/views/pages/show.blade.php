@@ -136,57 +136,7 @@
                 @endphp
 
                 <!-- Tab Navigation -->
-                <div class="relative" x-data="{
-                    el: null,
-                    canPrev: false,
-                    canNext: false,
-                    updateBounds() {
-                        if (!this.el) return;
-                        const maxLeft = this.el.scrollWidth - this.el.clientWidth;
-                        this.canPrev = this.el.scrollLeft > 0;
-                        this.canNext = this.el.scrollLeft < (maxLeft - 1);
-                    },
-                    scrollByAmount(dir = 1) {
-                        if (!this.el) return;
-                        const w = this.el.clientWidth * 0.8;
-                        this.el.scrollBy({ left: dir * w, behavior: 'smooth' });
-                        setTimeout(() => this.updateBounds(), 150);
-                    }
-                }" x-init="el = $refs.tabScroller; updateBounds(); el?.addEventListener('scroll', () => updateBounds()); window.addEventListener('resize', () => updateBounds())">
-                    {{-- Left scroll button --}}
-                    <button type="button"
-                        x-show="canPrev"
-                        x-on:click="scrollByAmount(-1)"
-                        aria-label="Précédent"
-                        class="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
-                        <span class="material-symbols-outlined text-lg">chevron_left</span>
-                    </button>
-
-                    <nav x-ref="tabScroller" class="surface-primary text-on-surface flex w-full gap-4 text-2xl font-semibold overflow-x-auto tabs-scroll-hide px-8" role="tablist" aria-label="Profile tabs">
-                        @foreach($tabs as $tab)
-                            <a href="{{ $tab['url'] }}"
-                                role="tab"
-                                aria-selected="{{ $activeTab === $tab['key'] ? 'true' : 'false' }}"
-                                class="shrink-0 flex-1 whitespace-nowrap py-3 px-1 border-b-2 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 {{ $activeTab === $tab['key'] ? 'selected border-none font-extrabold' : 'border-transparent' }}">
-                                {{ $tab['label'] }}
-                            </a>
-                        @endforeach
-                    </nav>
-
-                    {{-- Right scroll button --}}
-                    <button type="button"
-                        x-show="canNext"
-                        x-on:click="scrollByAmount(1)"
-                        aria-label="Suivant"
-                        class="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
-                        <span class="material-symbols-outlined text-lg">chevron_right</span>
-                    </button>
-                </div>
-
-                <style>
-                    .tabs-scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
-                    .tabs-scroll-hide::-webkit-scrollbar { display: none; }
-                </style>
+                <x-shared::scrollable-tabs :tabs="$tabs" :active-tab="$activeTab" mode="link" />
 
                 <!-- Tab Content -->
                 <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">

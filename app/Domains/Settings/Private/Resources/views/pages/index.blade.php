@@ -7,48 +7,25 @@
             <p class="text-fg/50">{{ __('settings::settings.no_settings') }}</p>
         </div>
     @else
-        <div class="mt-6 flex flex-col md:flex-row gap-6" x-data="settingsPage('{{ $activeTab?->id }}')">
-            {{-- Tabs navigation --}}
-            {{-- Mobile: horizontal scrollable tabs --}}
-            <div class="md:hidden overflow-x-auto">
-                <div class="flex gap-2 pb-2">
-                    @foreach($tabs as $tab)
-                        <button
-                            type="button"
-                            @click="switchTab('{{ $tab->id }}')"
-                            :class="activeTab === '{{ $tab->id }}' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-fg hover:bg-surface-alt/80'"
-                            class="px-4 py-2 rounded-lg whitespace-nowrap flex items-center gap-2 transition-colors"
-                        >
-                            @if($tab->icon)
-                                <span class="material-symbols-outlined text-sm">{{ $tab->icon }}</span>
-                            @endif
-                            <span>{{ __($tab->nameKey) }}</span>
-                        </button>
-                    @endforeach
-                </div>
-            </div>
+        @php
+            $tabsArray = collect($tabs)->map(fn($tab) => [
+                'key' => $tab->id,
+                'label' => __($tab->nameKey),
+                'icon' => $tab->icon,
+            ])->toArray();
+        @endphp
 
-            {{-- Desktop: vertical tabs sidebar --}}
-            <div class="hidden md:block w-64 shrink-0">
-                <div class="surface-read rounded-lg overflow-hidden">
-                    @foreach($tabs as $tab)
-                        <button
-                            type="button"
-                            @click="switchTab('{{ $tab->id }}')"
-                            :class="activeTab === '{{ $tab->id }}' ? 'bg-primary text-on-primary' : 'text-fg hover:bg-surface-alt'"
-                            class="w-full px-4 py-3 text-left flex items-center gap-3 transition-colors"
-                        >
-                            @if($tab->icon)
-                                <span class="material-symbols-outlined">{{ $tab->icon }}</span>
-                            @endif
-                            <span>{{ __($tab->nameKey) }}</span>
-                        </button>
-                    @endforeach
-                </div>
-            </div>
+        <div class="mt-6" x-data="settingsPage('{{ $activeTab?->id }}')">
+            {{-- Scrollable tabs navigation --}}
+            <x-shared::scrollable-tabs 
+                :tabs="$tabsArray" 
+                :active-tab="$activeTab?->id" 
+                mode="button"
+                on-tab-click="switchTab"
+            />
 
             {{-- Tab content area --}}
-            <div class="flex-1 min-w-0">
+            <div class="mt-4">
                 <div id="settings-content" class="surface-read text-on-surface rounded-lg">
                     {{-- Initial content loaded server-side --}}
                     @include('settings::partials.tab-content', ['tab' => $activeTab, 'sections' => $sections])

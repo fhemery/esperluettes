@@ -2,6 +2,11 @@
 
 namespace App\Domains\Shared\Providers;
 
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
+use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
+use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
+use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
+use App\Domains\Shared\Contracts\ParameterType;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Views\Layouts\AppLayout;
 use App\Domains\Shared\Validation\CustomValidators;
@@ -13,6 +18,10 @@ use Illuminate\Support\ServiceProvider;
 
 class SharedServiceProvider extends ServiceProvider
 {
+    public const TAB_GENERAL = 'general';
+    public const SECTION_APPEARANCE = 'appearance';
+    public const KEY_THEME = 'theme';
+
     public function register()
     {
     }
@@ -88,7 +97,58 @@ class SharedServiceProvider extends ServiceProvider
         // Register custom validators in a dedicated place
         $this->registerValidators();
 
+        // Register settings after all providers have booted
+        $this->app->booted(function () {
+            $this->registerSettings();
+        });
+
         // Domain-specific breadcrumb builders are registered in their own ServiceProviders.
+    }
+
+    private function registerSettings(): void
+    {
+        $settingsApi = app(SettingsPublicApi::class);
+
+        // Skip if already registered (idempotent for testing)
+        if ($settingsApi->getTab(self::TAB_GENERAL) !== null) {
+            return;
+        }
+
+        // Register "General" tab
+        $settingsApi->registerTab(new SettingsTabDefinition(
+            id: self::TAB_GENERAL,
+            order: 10,
+            nameKey: 'shared::settings.tabs.general',
+            icon: 'settings',
+        ));
+
+        // Register "Appearance" section
+        $settingsApi->registerSection(new SettingsSectionDefinition(
+            tabId: self::TAB_GENERAL,
+            id: self::SECTION_APPEARANCE,
+            order: 10,
+            nameKey: 'shared::settings.sections.appearance.name',
+            descriptionKey: 'shared::settings.sections.appearance.description',
+        ));
+
+        // Register "Theme" parameter
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_GENERAL,
+            sectionId: self::SECTION_APPEARANCE,
+            key: self::KEY_THEME,
+            type: ParameterType::ENUM,
+            default: 'seasonal',
+            order: 10,
+            nameKey: 'shared::settings.params.theme.name',
+            descriptionKey: 'shared::settings.params.theme.description',
+            constraints: [
+                'options' => [
+                    'seasonal' => 'shared::settings.params.theme.options.seasonal',
+                    'autumn' => 'shared::settings.params.theme.options.autumn',
+                    'winter' => 'shared::settings.params.theme.options.winter',
+                ],
+            ],
+        ));
     }
 
     private function registerValidators(): void
