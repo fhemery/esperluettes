@@ -21,6 +21,7 @@ class SharedServiceProvider extends ServiceProvider
     public const TAB_GENERAL = 'general';
     public const SECTION_APPEARANCE = 'appearance';
     public const KEY_THEME = 'theme';
+    public const KEY_FONT = 'font';
 
     public function register()
     {
@@ -146,6 +147,24 @@ class SharedServiceProvider extends ServiceProvider
                     'seasonal' => 'shared::settings.params.theme.options.seasonal',
                     'autumn' => 'shared::settings.params.theme.options.autumn',
                     'winter' => 'shared::settings.params.theme.options.winter',
+                ],
+            ],
+        ));
+
+        // Register "Font" parameter
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_GENERAL,
+            sectionId: self::SECTION_APPEARANCE,
+            key: self::KEY_FONT,
+            type: ParameterType::ENUM,
+            default: 'aptos',
+            order: 20,
+            nameKey: 'shared::settings.params.font.name',
+            descriptionKey: 'shared::settings.params.font.description',
+            constraints: [
+                'options' => [
+                    'aptos' => 'shared::settings.params.font.options.aptos',
+                    'times' => 'shared::settings.params.font.options.times',
                 ],
             ],
         ));

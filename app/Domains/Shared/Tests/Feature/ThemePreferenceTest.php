@@ -3,6 +3,7 @@
 use App\Domains\Settings\Private\Services\SettingsRegistryService;
 use App\Domains\Shared\Contracts\Theme;
 use App\Domains\Shared\Providers\SharedServiceProvider;
+use App\Domains\Shared\Services\FontService;
 use App\Domains\Shared\Services\ThemeService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -239,5 +240,117 @@ describe('ThemeService - settings page integration', function () {
 
         $themeService = app(ThemeService::class);
         expect($themeService->resolve($user->id))->toBe(Theme::WINTER);
+    });
+});
+
+describe('FontService - user preference', function () {
+    it('returns aptos font for guests', function () {
+        $fontService = app(FontService::class);
+
+        expect($fontService->resolve(null))->toBe(FontService::FONT_APTOS);
+    });
+
+    it('returns aptos font when user has no preference', function () {
+        $user = alice($this);
+
+        $fontService = app(FontService::class);
+
+        expect($fontService->resolve($user->id))->toBe(FontService::FONT_APTOS);
+    });
+
+    it('returns times font when user selects times', function () {
+        $user = alice($this);
+
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_FONT,
+            'times'
+        );
+
+        $fontService = app(FontService::class);
+
+        expect($fontService->resolve($user->id))->toBe(FontService::FONT_TIMES);
+    });
+
+    it('returns aptos font for invalid preference value', function () {
+        $user = alice($this);
+
+        // First set a valid value, then corrupt it directly in the database
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_FONT,
+            'times'
+        );
+
+        // Now corrupt the value directly
+        \Illuminate\Support\Facades\DB::table('settings')
+            ->where('user_id', $user->id)
+            ->where('domain', SharedServiceProvider::TAB_GENERAL)
+            ->where('key', SharedServiceProvider::KEY_FONT)
+            ->update(['value' => 'invalid_font']);
+
+        // Clear cache to force re-read
+        \Illuminate\Support\Facades\Cache::forget("user_settings:{$user->id}");
+
+        $fontService = app(FontService::class);
+
+        expect($fontService->resolve($user->id))->toBe(FontService::FONT_APTOS);
+    });
+});
+
+describe('FontService - settings registration', function () {
+    it('registers font parameter with correct options', function () {
+        $settingsApi = app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class);
+
+        $params = $settingsApi->getParametersForSection(
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::SECTION_APPEARANCE
+        );
+
+        $fontParam = collect($params)->firstWhere('key', SharedServiceProvider::KEY_FONT);
+
+        expect($fontParam)->not->toBeNull();
+        expect($fontParam->type)->toBe(\App\Domains\Shared\Contracts\ParameterType::ENUM);
+        expect($fontParam->default)->toBe('aptos');
+        expect($fontParam->constraints['options'])->toHaveKeys(['aptos', 'times']);
+    });
+});
+
+describe('FontService - settings page integration', function () {
+    it('can update font preference via settings page', function () {
+        $user = alice($this);
+
+        $response = $this->actingAs($user)
+            ->putJson(route('settings.update', [
+                'tab' => SharedServiceProvider::TAB_GENERAL,
+                'key' => SharedServiceProvider::KEY_FONT,
+            ]), [
+                'value' => 'times',
+            ]);
+
+        $response->assertOk();
+        $response->assertJson(['success' => true]);
+
+        $fontService = app(FontService::class);
+        expect($fontService->resolve($user->id))->toBe(FontService::FONT_TIMES);
+    });
+
+    it('applies font to HTML data attribute', function () {
+        $user = alice($this);
+
+        // Set font preference
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_FONT,
+            'times'
+        );
+
+        $response = $this->actingAs($user)->get(route('settings.index'));
+
+        $response->assertOk();
+        $response->assertSee('data-font="times"', false);
     });
 });

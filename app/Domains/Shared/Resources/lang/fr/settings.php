@@ -22,5 +22,13 @@ return [
                 'winter' => 'Hiver',
             ],
         ],
+        'font' => [
+            'name' => 'Police des textes',
+            'description' => 'Choisissez la police utilisée pour le contenu textuel.',
+            'options' => [
+                'aptos' => 'Aptos (défaut)',
+                'times' => 'Times New Roman',
+            ],
+        ],
     ],
 ];
