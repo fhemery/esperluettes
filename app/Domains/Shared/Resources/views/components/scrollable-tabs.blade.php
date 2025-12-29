@@ -50,6 +50,7 @@
     <button type="button"
         x-show="canPrev"
         x-on:click="scrollByAmount(-1)"
+        x-cloak
         aria-label="{{ __('shared::components.scrollable_tabs.previous') }}"
         class="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
         <span class="material-symbols-outlined text-lg">chevron_left</span>
@@ -89,6 +90,7 @@
     <button type="button"
         x-show="canNext"
         x-on:click="scrollByAmount(1)"
+        x-cloak
         aria-label="{{ __('shared::components.scrollable_tabs.next') }}"
         class="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
         <span class="material-symbols-outlined text-lg">chevron_right</span>

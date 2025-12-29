@@ -133,6 +133,10 @@
                             'url' => route('profile.show.comments', $profile),
                         ];
                     }
+
+                    // Check if viewer can see comments content (privacy setting)
+                    $privacyService = app(\App\Domains\Profile\Private\Services\ProfilePrivacyService::class);
+                    $canViewComments = $privacyService->canViewComments($profile->user_id, Auth::id());
                 @endphp
 
                 <!-- Tab Navigation -->
@@ -145,7 +149,11 @@
                     @elseif($activeTab === 'stories')
                         <x-story::profile-stories-component :user-id="$profile->user_id" />
                     @elseif($activeTab === 'comments')
-                        <x-story::profile-comments-component :user-id="$profile->user_id" />
+                        @if($canViewComments)
+                            <x-story::profile-comments-component :user-id="$profile->user_id" />
+                        @else
+                            <p class="text-center text-gray-500 py-8">{{ __('profile::settings.privacy.comments-hidden') }}</p>
+                        @endif
                     @endif
                 </div>
             </div>
