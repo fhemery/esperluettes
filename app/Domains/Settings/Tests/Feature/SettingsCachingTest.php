@@ -11,6 +11,9 @@ uses(TestCase::class, RefreshDatabase::class);
 beforeEach(function () {
     clearSettingsRegistry();
 });
+afterEach(function () {
+    clearSettingsRegistry();
+});
 
 describe('Settings caching', function () {
     it('caches user settings after first access', function () {

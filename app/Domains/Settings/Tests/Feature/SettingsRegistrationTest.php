@@ -14,6 +14,10 @@ beforeEach(function () {
     clearSettingsRegistry();
 });
 
+afterEach(function () {
+    clearSettingsRegistry();
+});
+
 describe('SettingsPublicApi - registerTab', function () {
     it('registers a tab successfully', function () {
         registerSettingsTab(new SettingsTabDefinition(

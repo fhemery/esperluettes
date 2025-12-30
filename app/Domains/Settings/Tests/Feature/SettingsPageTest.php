@@ -10,6 +10,9 @@ uses(TestCase::class, RefreshDatabase::class);
 beforeEach(function () {
     clearSettingsRegistry();
 });
+afterEach(function () {
+    clearSettingsRegistry();
+});
 
 describe('Settings page - index', function () {
     it('requires authentication', function () {

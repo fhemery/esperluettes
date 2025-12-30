@@ -10,6 +10,9 @@ uses(TestCase::class, RefreshDatabase::class);
 beforeEach(function () {
     clearSettingsRegistry();
 });
+afterEach(function () {
+    clearSettingsRegistry();
+});
 
 describe('SettingsPublicApi - getValue', function () {
     it('returns default value when no override exists', function () {

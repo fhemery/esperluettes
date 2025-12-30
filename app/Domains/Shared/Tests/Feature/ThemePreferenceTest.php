@@ -11,14 +11,6 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-beforeEach(function () {
-    // Ensure settings are registered (may have been cleared by other tests)
-    $provider = new SharedServiceProvider(app());
-    $reflection = new \ReflectionMethod($provider, 'registerSettings');
-    $reflection->setAccessible(true);
-    $reflection->invoke($provider);
-});
-
 afterEach(function () {
     Carbon::setTestNow();
 });
@@ -190,10 +182,20 @@ describe('ThemeService - settings page integration', function () {
     it('displays theme parameter on settings page', function () {
         $user = alice($this);
 
+        // Verify settings are registered
+        $settingsApi = app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class);
+        $tab = $settingsApi->getTab(SharedServiceProvider::TAB_GENERAL);
+        expect($tab)->not->toBeNull('General tab should be registered');
+
+        $sections = $settingsApi->getSectionsForTab(SharedServiceProvider::TAB_GENERAL);
+        expect($sections)->not->toBeEmpty('General tab should have sections');
+
+        $params = $settingsApi->getParametersForSection(SharedServiceProvider::TAB_GENERAL, SharedServiceProvider::SECTION_APPEARANCE);
+        expect($params)->not->toBeEmpty('Appearance section should have parameters');
+
         $response = $this->actingAs($user)->get(route('settings.index'));
 
         $response->assertOk();
-        // Verify the theme parameter name is displayed
         $response->assertSee(__('shared::settings.params.theme.name'));
     });
 
