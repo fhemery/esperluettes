@@ -122,6 +122,9 @@
                 <x-responsive-nav-link :href="route('account.edit')" :active="request()->routeIs('account.edit')">
                     {{ __('shared::navigation.account') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.*')">
+                    {{ __('shared::navigation.settings') }}
+                </x-responsive-nav-link>
                 @else
                 <x-responsive-nav-link :href="route('verification.notice')" :active="request()->routeIs('verification.notice')">
                     {{ __('shared::navigation.verify-email') }}

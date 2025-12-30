@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-season="{{ $theme->value }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-season="{{ $theme->value }}" data-font="{{ $userFont ?? 'aptos' }}">
 
 <head>
     <meta charset="utf-8">

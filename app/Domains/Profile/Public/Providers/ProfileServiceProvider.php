@@ -2,6 +2,11 @@
 
 namespace App\Domains\Profile\Public\Providers;
 
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
+use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
+use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
+use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
+use App\Domains\Shared\Contracts\ParameterType;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
@@ -29,6 +34,10 @@ use App\Domains\Profile\Private\Support\Moderation\ProfileSnapshotFormatter;
 
 class ProfileServiceProvider extends ServiceProvider
 {
+    public const TAB_PROFILE = 'profile';
+    public const SECTION_PRIVACY = 'privacy';
+    public const KEY_HIDE_COMMENTS_SECTION = 'hide-comments-section';
+
     /**
      * Register services.
      */
@@ -86,5 +95,49 @@ class ProfileServiceProvider extends ServiceProvider
             displayName: __('profile::moderation.topic_name'),
             formatterClass: ProfileSnapshotFormatter::class
         );
+
+        // Register settings after all providers have booted
+        $this->app->booted(function () {
+            $this->registerSettings();
+        });
+    }
+
+    private function registerSettings(): void
+    {
+        $settingsApi = app(SettingsPublicApi::class);
+
+        // Skip if already registered (idempotent for testing)
+        if ($settingsApi->getTab(self::TAB_PROFILE) !== null) {
+            return;
+        }
+
+        // Register "Profile" tab
+        $settingsApi->registerTab(new SettingsTabDefinition(
+            id: self::TAB_PROFILE,
+            order: 30,
+            nameKey: 'profile::settings.tabs.profile',
+            icon: 'face',
+        ));
+
+        // Register "Privacy" section
+        $settingsApi->registerSection(new SettingsSectionDefinition(
+            tabId: self::TAB_PROFILE,
+            id: self::SECTION_PRIVACY,
+            order: 10,
+            nameKey: 'profile::settings.sections.privacy.name',
+            descriptionKey: 'profile::settings.sections.privacy.description',
+        ));
+
+        // Register "Hide comments section" parameter
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_PROFILE,
+            sectionId: self::SECTION_PRIVACY,
+            key: self::KEY_HIDE_COMMENTS_SECTION,
+            type: ParameterType::BOOL,
+            default: false,
+            order: 10,
+            nameKey: 'profile::settings.params.hide-comments-section.name',
+            descriptionKey: 'profile::settings.params.hide-comments-section.description',
+        ));
     }
 }

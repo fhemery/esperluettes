@@ -9,5 +9,10 @@ return [
     'read_toggle' => [
         'marked_read' => 'Marquer comme non lu',
         'mark_as_read' => 'Marquer comme lu',
-    ]
+    ],
+
+    'scrollable_tabs' => [
+        'previous' => 'Précédent',
+        'next' => 'Suivant',
+    ],
 ];

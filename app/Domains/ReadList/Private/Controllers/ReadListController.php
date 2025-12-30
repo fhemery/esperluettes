@@ -3,6 +3,8 @@
 namespace App\Domains\ReadList\Private\Controllers;
 
 use App\Domains\ReadList\Private\Services\ReadListService;
+use App\Domains\ReadList\Public\Providers\ReadListServiceProvider;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 use App\Domains\Story\Public\Contracts\StoryQueryReadStatus;
@@ -22,6 +24,7 @@ class ReadListController
         private ReadListService $readListService,
         private StoryPublicApi $storyApi,
         private StoryRefPublicApi $storyRefApi,
+        private SettingsPublicApi $settingsApi,
     ) {
     }
 
@@ -30,8 +33,8 @@ class ReadListController
         $user = Auth::user();
         $userId = (int) $user->id;
 
-        // Get filter state from request
-        $hideUpToDate = request('hide_up_to_date') === '1';
+        // Get filter state from request, falling back to user's setting default
+        $hideUpToDate = $this->resolveHideUpToDate($userId);
         $genreId = request('genre_id');
         $genreIds = $genreId ? [(int) $genreId] : [];
 
@@ -134,8 +137,8 @@ class ReadListController
         $page = (int) request('page', 2); // Default to page 2 for load more
         $perPage = (int) request('perPage', 10);
         
-        // Get filter state from request
-        $hideUpToDate = request('hide_up_to_date') === '1';
+        // Get filter state from request, falling back to user's setting default
+        $hideUpToDate = $this->resolveHideUpToDate($userId);
         $genreId = request('genre_id');
         $genreIds = $genreId ? [(int) $genreId] : [];
 
@@ -238,5 +241,24 @@ class ReadListController
             'count' => $chaptersViewModel->count(),
             'isEmpty' => $chaptersViewModel->isEmpty(),
         ]);
+    }
+
+    /**
+     * Resolve the hide_up_to_date filter value.
+     * If explicitly set in request, use that. Otherwise, use user's setting default.
+     */
+    private function resolveHideUpToDate(int $userId): bool
+    {
+        // If explicitly set in request (either '1' or '0'), use that value
+        if (request()->has('hide_up_to_date')) {
+            return request('hide_up_to_date') === '1';
+        }
+
+        // Otherwise, use user's setting default
+        return (bool) $this->settingsApi->getValue(
+            $userId,
+            ReadListServiceProvider::TAB_READLIST,
+            ReadListServiceProvider::KEY_HIDE_UP_TO_DATE
+        );
     }
 }

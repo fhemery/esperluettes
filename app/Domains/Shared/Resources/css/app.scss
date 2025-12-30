@@ -153,9 +153,23 @@ html {
   --frame-corner-br:url('/images/themes/summer/design/frame-corner-br.png');
 }
 
+/* Font selection based on user preference */
+:root[data-font="aptos"] {
+  --content-font: "Aptos", Manrope, system-ui, sans-serif;
+}
+
+:root[data-font="times"] {
+  --content-font: "Times New Roman", Times, serif;
+}
+
+/* Default font if no preference set */
+:root:not([data-font]) {
+  --content-font: "Aptos", Manrope, system-ui, sans-serif;
+}
+
 /* Rich content defaults (for sanitized HTML display) */
 .rich-content {
-  font-family: "Aptos", Manrope, system-ui, sans-serif;
+  font-family: var(--content-font);
   /* Avoid synthetic styles when a face is missing */
   font-synthesis-weight: none;
   font-synthesis-style: none;

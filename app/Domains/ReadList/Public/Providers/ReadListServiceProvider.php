@@ -3,6 +3,11 @@
 namespace App\Domains\ReadList\Public\Providers;
 
 use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
+use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
+use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
+use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
+use App\Domains\Shared\Contracts\ParameterType;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Notification\Public\Services\NotificationFactory;
@@ -31,6 +36,10 @@ use App\Domains\Story\Public\Events\StoryUpdated;
 
 class ReadListServiceProvider extends ServiceProvider
 {
+    public const TAB_READLIST = 'readlist';
+    public const SECTION_GENERAL = 'general';
+    public const KEY_HIDE_UP_TO_DATE = 'hide-up-to-date';
+
     public function boot(): void
     {
         // Load domain migrations
@@ -98,5 +107,49 @@ class ReadListServiceProvider extends ServiceProvider
 
         // Subscribe to Auth events
         $eventBus->subscribe(UserDeleted::class, [app(HandleUserDeletedForReadList::class), 'handle']);
+
+        // Register settings after all providers have booted
+        $this->app->booted(function () {
+            $this->registerSettings();
+        });
+    }
+
+    private function registerSettings(): void
+    {
+        $settingsApi = app(SettingsPublicApi::class);
+
+        // Skip if already registered (idempotent for testing)
+        if ($settingsApi->getTab(self::TAB_READLIST) !== null) {
+            return;
+        }
+
+        // Register "Readlist" tab
+        $settingsApi->registerTab(new SettingsTabDefinition(
+            id: self::TAB_READLIST,
+            order: 20,
+            nameKey: 'readlist::settings.tabs.readlist',
+            icon: 'book',
+        ));
+
+        // Register "General" section
+        $settingsApi->registerSection(new SettingsSectionDefinition(
+            tabId: self::TAB_READLIST,
+            id: self::SECTION_GENERAL,
+            order: 10,
+            nameKey: 'readlist::settings.sections.general.name',
+            descriptionKey: 'readlist::settings.sections.general.description',
+        ));
+
+        // Register "Hide up to date" parameter
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_READLIST,
+            sectionId: self::SECTION_GENERAL,
+            key: self::KEY_HIDE_UP_TO_DATE,
+            type: ParameterType::BOOL,
+            default: false,
+            order: 10,
+            nameKey: 'readlist::settings.params.hide-up-to-date.name',
+            descriptionKey: 'readlist::settings.params.hide-up-to-date.description',
+        ));
     }
 }
