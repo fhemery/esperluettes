@@ -27,7 +27,7 @@
                 :value="$ch->commentCount"
                 size="xs"
                 :label="__('story::chapters.comments.label')"
-                :tooltip="$ch->hasUnrepliedByAuthors ? __('story::chapters.comments.tooltip_unreplied') : ''"
+                :tooltip="$ch->hasUnrepliedByAuthors ? __('story::chapters.comments.tooltip_unreplied', ['link' => route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]). '#comments']) : ''"
                 :color="$ch->hasUnrepliedByAuthors ? 'accent' : 'neutral'"
                 :outline="$ch->hasUnrepliedByAuthors" />
             <x-shared::metric-badge
