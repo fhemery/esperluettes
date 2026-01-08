@@ -13,4 +13,5 @@ return [
     'register' => 'Inscription',
     'login' => 'Connexion',
     'readlist' => 'Ma PAL',
+    'dashboard' => 'Tableau de bord'
 ];
