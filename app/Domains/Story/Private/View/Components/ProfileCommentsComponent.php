@@ -2,14 +2,13 @@
 
 namespace App\Domains\Story\Private\View\Components;
 
-use App\Domains\Auth\Public\Api\AuthPublicApi;
-use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\ViewModels\ProfileCommentsAuthorViewModel;
 use App\Domains\Story\Private\ViewModels\ProfileCommentsStoryViewModel;
 use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
 
 class ProfileCommentsComponent extends Component
@@ -22,7 +21,6 @@ class ProfileCommentsComponent extends Component
 
     public function __construct(
         private CommentPublicApi $commentApi,
-        private AuthPublicApi $authApi,
         private ChapterService $chapterService,
         private ProfilePublicApi $profileApi,
         int $userId,
@@ -33,18 +31,9 @@ class ProfileCommentsComponent extends Component
 
     private function hydrate(int $userId): void
     {
-        // Check if the profile user has USER_CONFIRMED role
-        $rolesById = $this->authApi->getRolesByUserIds([$userId]);
-        $roles = $rolesById[$userId] ?? [];
-        $isConfirmed = false;
-        foreach ($roles as $r) {
-            if (isset($r->slug) && (string) $r->slug === (string) Roles::USER_CONFIRMED) {
-                $isConfirmed = true;
-                break;
-            }
-        }
-
-        if (!$isConfirmed) {
+        // Check if comments are viewable using the Profile API
+        $viewerUserId = Auth::check() ? Auth::id() : null;
+        if (!$this->profileApi->canViewComments($userId, $viewerUserId)) {
             $this->isAllowed = false;
             return;
         }

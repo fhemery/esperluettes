@@ -23,19 +23,7 @@ class ProfilePrivacyService
      */
     public function canViewComments(int $profileUserId, ?int $viewerUserId): bool
     {
-        // Check if the profile owner has hidden their comments section
-        $isHidden = (bool) $this->settingsApi->getValue(
-            $profileUserId,
-            ProfileServiceProvider::TAB_PROFILE,
-            ProfileServiceProvider::KEY_HIDE_COMMENTS_SECTION
-        );
-
-        // If not hidden, everyone can see
-        if (!$isHidden) {
-            return true;
-        }
-
-        // If hidden, check if viewer has special access
+        // If no viewer, comments are not visible
         if ($viewerUserId === null) {
             return false;
         }
@@ -45,15 +33,51 @@ class ProfilePrivacyService
             return true;
         }
 
-        // Moderators, Admins, and Tech Admins can always see
+        // Get viewer roles
+        $rolesById = $this->authApi->getRolesByUserIds([$viewerUserId]);
+        $viewerRoles = $rolesById[$viewerUserId] ?? [];
+
+        // Check if viewer is confirmed (has USER_CONFIRMED role)
+        $isConfirmed = false;
+        foreach ($viewerRoles as $roleDto) {
+            if ($roleDto->slug === Roles::USER_CONFIRMED) {
+                $isConfirmed = true;
+                break;
+            }
+        }
+
+        // If viewer is not confirmed and not privileged, they cannot see others' comments
+        if (!$isConfirmed && !$this->hasPrivilegedRole($viewerRoles)) {
+            return false;
+        }
+
+        // Check if the profile owner has hidden their comments section
+        $isHidden = (bool) $this->settingsApi->getValue(
+            $profileUserId,
+            ProfileServiceProvider::TAB_PROFILE,
+            ProfileServiceProvider::KEY_HIDE_COMMENTS_SECTION
+        );
+
+        // If not hidden, confirmed/privileged users can see
+        if (!$isHidden) {
+            return true;
+        }
+
+        // If hidden, only privileged users can see
+        if ($this->hasPrivilegedRole($viewerRoles)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function hasPrivilegedRole(array $viewerRoles): bool
+    {
         $privilegedRoles = [
             Roles::MODERATOR,
             Roles::ADMIN,
             Roles::TECH_ADMIN,
         ];
-
-        $rolesById = $this->authApi->getRolesByUserIds([$viewerUserId]);
-        $viewerRoles = $rolesById[$viewerUserId] ?? [];
 
         foreach ($viewerRoles as $roleDto) {
             if (in_array($roleDto->slug, $privilegedRoles, true)) {

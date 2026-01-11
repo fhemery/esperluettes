@@ -19,21 +19,177 @@ beforeEach(function () {
 describe('ProfileCommentsComponent', function () {
 
     describe('Role restrictions', function () {
-        it('renders nothing for non-confirmed users', function () {
-            $user = alice($this, roles: [Roles::USER]);
+        it('renders empty when viewer is not authenticated', function () {
+            $profileUser = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $author = bob($this);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $user->id]);
+            $story = publicStory('Test Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
 
-            // Should render empty (isAllowed = false)
-            expect($html)->not->toContain(__('story::profile.no-comments'));
-            expect($html)->not->toContain('grid');
+            $this->actingAs($profileUser);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            // Logout the user to simulate unauthenticated viewer
+            auth()->logout();
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+
+            // Should render empty (no content) when viewer is not authenticated
+            expect($html)->toBe('');
+        });
+
+        it('renders empty when viewer is not confirmed', function () {
+            $profileUser = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $author = bob($this);
+
+            $story = publicStory('Test Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
+
+            $this->actingAs($profileUser);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            // Switch to non-confirmed viewer
+            $nonConfirmedViewer = carol($this, roles: [Roles::USER]);
+            $this->actingAs($nonConfirmedViewer);
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+
+            // Should render empty (no content) when viewer is not confirmed
+            expect($html)->toBe('');
+        });
+
+        it('renders comments for confirmed viewers', function () {
+            $profileUser = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $author = bob($this);
+
+            $story = publicStory('Test Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
+
+            $this->actingAs($profileUser);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            // Confirmed viewer
+            $confirmedViewer = carol($this, roles: [Roles::USER_CONFIRMED]);
+            $this->actingAs($confirmedViewer);
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+
+            // Should show the comment when viewer is confirmed
+            expect($html)
+                ->toContain('Bob') // Author display name
+                ->toContain('Test Story')
+                ->toContain('story::profile.comments-count'); // Comment count translation key
+        });
+
+        it('renders comments for moderators viewing any profile', function () {
+            $profileUser = alice($this, roles: [Roles::USER]); // Not confirmed
+            $author = bob($this);
+
+            $story = publicStory('Test Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
+
+            $this->actingAs($profileUser);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            // Moderator viewer should see comments regardless of profile user's role
+            $moderatorViewer = carol($this, roles: [Roles::MODERATOR]);
+            $this->actingAs($moderatorViewer);
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+
+            // Should show the comment when viewer is moderator
+            expect($html)
+                ->toContain('Bob') // Author display name
+                ->toContain('Test Story')
+                ->toContain('story::profile.comments-count'); // Comment count translation key
+        });
+
+        it('renders comments for admins viewing any profile', function () {
+            $profileUser = alice($this, roles: [Roles::USER]); // Not confirmed
+            $author = bob($this);
+
+            $story = publicStory('Test Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
+
+            $this->actingAs($profileUser);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            // Admin viewer should see comments regardless of profile user's role
+            $adminViewer = carol($this, roles: [Roles::ADMIN]);
+            $this->actingAs($adminViewer);
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+
+            // Should show the comment when viewer is admin
+            expect($html)
+                ->toContain('Bob') // Author display name
+                ->toContain('Test Story')
+                ->toContain('story::profile.comments-count'); // Comment count translation key
+        });
+
+        it('renders comments for tech admins viewing any profile', function () {
+            $profileUser = alice($this, roles: [Roles::USER]); // Not confirmed
+            $author = bob($this);
+
+            $story = publicStory('Test Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
+
+            $this->actingAs($profileUser);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            // Tech admin viewer should see comments regardless of profile user's role
+            $techAdminViewer = carol($this, roles: [Roles::TECH_ADMIN]);
+            $this->actingAs($techAdminViewer);
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+
+            // Should show the comment when viewer is tech admin
+            expect($html)
+                ->toContain('Bob') // Author display name
+                ->toContain('Test Story')
+                ->toContain('story::profile.comments-count'); // Comment count translation key
+        });
+
+        it('renders comments when user views their own profile', function () {
+            $profileUser = alice($this, roles: [Roles::USER]); // Not confirmed
+            $author = bob($this);
+
+            $story = publicStory('Test Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
+
+            $this->actingAs($profileUser);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            // User should always see their own comments
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+
+            // Should show the comment when viewing own profile
+            expect($html)
+                ->toContain('Bob') // Author display name
+                ->toContain('Test Story')
+                ->toContain('story::profile.comments-count'); // Comment count translation key
         });
 
         it('renders empty state for confirmed user with no comments', function () {
-            $user = alice($this); // USER_CONFIRMED by default
+            $user = alice($this, roles: [Roles::USER_CONFIRMED]); // Explicitly confirmed
+
+            // Make sure the viewer is also confirmed
+            $this->actingAs($user);
 
             $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $user->id]);
 
+            expect($html)->toContain(__('story::profile.no-comments'));
+        });
+
+        it('renders empty when non-confirmed user has no comments', function () {
+            $user = alice($this, roles: [Roles::USER]); // Not confirmed
+
+            // User should see their own profile (even with no comments)
+            $this->actingAs($user);
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $user->id]);
+
+            // Should show "no comments" when viewing own profile, even if not confirmed
             expect($html)->toContain(__('story::profile.no-comments'));
         });
     });

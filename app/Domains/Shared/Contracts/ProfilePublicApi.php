@@ -41,4 +41,13 @@ interface ProfilePublicApi
      *  - total: int (total matches, uncapped)
      */
     public function searchPublicProfiles(string $query, int $limit = 25, bool $includeInactive = false): array;
+
+    /**
+     * Check if the comments section should be visible for a given profile.
+     * 
+     * @param int $profileUserId The user ID of the profile being viewed
+     * @param int|null $viewerUserId The user ID of the viewer (null for guests)
+     * @return bool True if comments should be visible
+     */
+    public function canViewComments(int $profileUserId, ?int $viewerUserId = null): bool;
 }
