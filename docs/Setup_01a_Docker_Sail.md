@@ -96,3 +96,17 @@ Or on every change (very useful for development):
 - Create user: `sail artisan make:filament-user`
 - Create page: `sail artisan make:filament-page PageName`
 
+## Database Backup and Restore
+
+### Create a Database Backup
+```bash
+# Create backup with timestamp in docs/backup folder
+./vendor/bin/sail exec mysql mysqldump -u root -ppassword -h mysql laravel > docs/backup/database_backup.sql
+```
+
+### Restore a Database Backup
+```bash
+# Restore from backup file 
+./vendor/bin/sail mysql -u root -ppassword laravel < docs/backup/database_backup.sql
+```
+

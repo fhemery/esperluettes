@@ -10,3 +10,5 @@ Therefore, choose your option, and come back to this page to continue:
 
 Once setup is done, you can go to [First steps](./Setup_02_FirstSteps_AfterInstall.md)
 
+When reloading the database, you have access to a [list of users](./Setup_users.md)
+

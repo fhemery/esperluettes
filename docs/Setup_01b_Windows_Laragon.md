@@ -92,3 +92,21 @@ Or on every change (very useful for development):
 - Create resource: `php artisan make:filament-resource ModelName`
 - Create user: `php artisan make:filament-user`
 - Create page: `php artisan make:filament-page PageName`
+
+## Database Backup and Restore
+
+### Create a Database Backup
+```bash
+# Create backup with timestamp in docs/backup folder
+mysqldump -u root -p laravel > docs/backup/database_backup.sql
+```
+
+### Restore a Database Backup
+```bash
+# Restore from backup file (replace with your backup file name)
+mysql -u root -p laravel < docs/backup/database_backup.sql
+
+# You'll be prompted for the MySQL password (empty by default for Laragon)
+```
+
+**Note**: For Laragon, the default MySQL password is empty, so when prompted for password during restore, just press Enter.
