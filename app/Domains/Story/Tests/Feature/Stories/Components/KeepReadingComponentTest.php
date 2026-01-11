@@ -141,7 +141,7 @@ describe('KeepReadingComponent', function () {
         // Non-confirmed cannot progress => component should not show
         $nonConfirmed = bob($this, roles: [Roles::USER]);
         $this->actingAs($nonConfirmed);
-        markAsRead($this, $c1)->assertRedirect('/dashboard');
+        markAsRead($this, $c1)->assertNotFound();
         $html = Blade::render('<x-story::keep-reading-component />');
         expect($html)->not->toContain('Community Read');
 

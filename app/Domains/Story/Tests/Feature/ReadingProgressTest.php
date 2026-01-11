@@ -1,8 +1,6 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Story\Private\Models\Chapter;
-use App\Domains\Story\Private\Models\ReadingProgress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -45,8 +43,8 @@ describe('Reading Progress - Errors', function () {
 
         $reader = bob($this, roles:[Roles::USER]);
         $this->actingAs($reader);
-        markAsRead($this, $chapter)->assertRedirect('/dashboard');
-        markAsUnread($this, $chapter)->assertRedirect('/dashboard');
+        markAsRead($this, $chapter)->assertNotFound(); // 404 because story is not viewable by unconfirmed users
+        markAsUnread($this, $chapter)->assertNotFound(); // 404 because story is not viewable by unconfirmed users
     });
 
     it('should forbid non collaborators from toggling private story chapter reading status', function () {
@@ -58,6 +56,21 @@ describe('Reading Progress - Errors', function () {
         $this->actingAs($reader);
         markAsRead($this, $chapter)->assertNotFound();
         markAsUnread($this, $chapter)->assertNotFound();
+    });
+
+    it('should allow USER role users to toggle reading status of public story chapters', function () {
+        $author = alice($this);
+        $story = publicStory('Public Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Public Chapter']);
+
+        $reader = bob($this, roles: [Roles::USER]); // USER role only, not USER_CONFIRMED
+        $this->actingAs($reader);
+
+        // Should be able to mark as read
+        markAsRead($this, $chapter)->assertNoContent();
+
+        // Should be able to unmark
+        markAsUnread($this, $chapter)->assertNoContent();
     });
 });
 

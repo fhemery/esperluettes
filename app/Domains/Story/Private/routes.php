@@ -41,6 +41,18 @@ Route::middleware(['web'])->group(function () {
             ->name('chapters.moderation.empty-content');
     });
 
+    // Reading progress & stats endpoints (CSRF-protected)
+    // Available to all authenticated users (both USER and USER_CONFIRMED roles)
+    Route::middleware(['auth', 'compliant'])->group(function () {
+        Route::post('/stories/{storySlug}/chapters/{chapterSlug}/read', [ReadingProgressController::class, 'markRead'])
+            ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
+            ->name('chapters.read.mark');
+
+        Route::delete('/stories/{storySlug}/chapters/{chapterSlug}/read', [ReadingProgressController::class, 'unmarkRead'])
+            ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
+            ->name('chapters.read.unmark');
+    });
+
     Route::middleware(['role:' . Roles::USER_CONFIRMED])->group(function () {
         Route::get('/stories/create', [StoryCreateController::class, 'create'])
             ->name('stories.create');
@@ -59,17 +71,6 @@ Route::middleware(['web'])->group(function () {
         Route::get('/stories/{storySlug}/chapters/{chapterSlug}/edit', [ChapterController::class, 'edit'])
             ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
             ->name('chapters.edit');
-        // Reading progress & stats endpoints (CSRF-protected)
-        // Logged users: toggle read/unread
-        Route::middleware(['auth', 'compliant'])->group(function () {
-            Route::post('/stories/{storySlug}/chapters/{chapterSlug}/read', [ReadingProgressController::class, 'markRead'])
-                ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
-                ->name('chapters.read.mark');
-
-            Route::delete('/stories/{storySlug}/chapters/{chapterSlug}/read', [ReadingProgressController::class, 'unmarkRead'])
-                ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
-                ->name('chapters.read.unmark');
-        });
 
         Route::match(['put', 'patch'], '/stories/{storySlug}/chapters/{chapterSlug}', [ChapterController::class, 'update'])
             ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
@@ -116,18 +117,6 @@ Route::middleware(['web'])->group(function () {
         Route::post('/stories/{storySlug}/chapters', [ChapterController::class, 'store'])
             ->where('storySlug', '.*')
             ->name('chapters.store');
-
-        // Reading progress & stats endpoints (CSRF-protected)
-        // Logged users: toggle read/unread
-        Route::middleware(['auth', 'compliant'])->group(function () {
-            Route::post('/stories/{storySlug}/chapters/{chapterSlug}/read', [ReadingProgressController::class, 'markRead'])
-                ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
-                ->name('chapters.read.mark');
-
-            Route::delete('/stories/{storySlug}/chapters/{chapterSlug}/read', [ReadingProgressController::class, 'unmarkRead'])
-                ->where(['storySlug' => '.*', 'chapterSlug' => '.*'])
-                ->name('chapters.read.unmark');
-        });
     });
 
     // Chapter public show route (US-039 path with /chapters segment)
