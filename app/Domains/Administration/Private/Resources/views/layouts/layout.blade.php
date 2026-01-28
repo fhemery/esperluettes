@@ -10,17 +10,19 @@
 </head>
 <body class="min-h-screen" x-data="{ adminSidebarOpen: false }">
     <x-shared::flash-block />
-    <div class="min-h-screen max-h-screen w-full bg-bg text-fg h-full grid md:grid-cols-[300px_1fr] md:grid-rows-[auto_1fr]">
-        <div class="col-span-2">
-            <x-administration::navbar />
+    <div class="min-h-screen w-full bg-bg text-fg">
+        <div class="md:grid md:grid-cols-[300px_1fr] md:grid-rows-[auto_1fr] md:max-h-screen">
+            <div class="md:col-span-2">
+                <x-administration::navbar />
+            </div>
+            <!-- Desktop sidebar -->
+            <div class="hidden md:block md:col-span-1 overflow-y-auto">
+                <x-administration::sidebar />
+            </div>
+            <main class="p-4 max-w-7xl w-full mx-auto overflow-y-auto">
+                {{ $slot }}
+            </main>
         </div>
-        <!-- Desktop sidebar -->
-        <div class="hidden md:block col-span-1 overflow-y-auto">
-            <x-administration::sidebar />
-        </div>
-        <main class="col-span-1 p-4 max-w-7xl w-full mx-auto overflow-y-auto">
-            {{ $slot }}
-        </main>
     </div>
 
     <!-- Mobile slide-in sidebar -->
@@ -30,11 +32,11 @@
         x-transition.opacity
     >
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-black/40" @click="adminSidebarOpen = false"></div>
+        <div class="fixed inset-0 bg-black/40" x-on:click="adminSidebarOpen = false"></div>
 
         <!-- Panel -->
         <div
-            class="relative bg-bg w-72 max-w-full h-full shadow-xl z-50"
+            class="relative bg-bg w-72 max-w-full h-full z-50 flex flex-col"
             x-transition:enter="transition transform ease-out duration-200"
             x-transition:enter-start="-translate-x-full"
             x-transition:enter-end="translate-x-0"
@@ -42,17 +44,19 @@
             x-transition:leave-start="translate-x-0"
             x-transition:leave-end="-translate-x-full"
         >
-            <div class="p-2 border-b border-border flex justify-end">
+            <div class="p-2 border-b border-border flex justify-end flex-shrink-0">
                 <button
                     type="button"
                     class="p-1 text-fg"
-                    @click="adminSidebarOpen = false"
+                    x-on:click="adminSidebarOpen = false"
                 >
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
-            <x-administration::sidebar />
+            <div class="flex-1 overflow-y-auto">
+                <x-administration::sidebar />
+            </div>
         </div>
     </div>
 
