@@ -102,6 +102,57 @@ describe('ReadList page', function () {
             $this->assertFalse($data['hasMore']);
             $this->assertEquals(3, $data['nextPage']);
         });
+
+        it('shows all stories when hide_up_to_date parameter is explicitly set to 0', function () {
+            // Create a user with stories in readlist
+            $author = alice($this);
+
+            // Create two stories: one with unread chapters, one fully read
+            $storyWithUnread = publicStory('Story with unread chapters', $author->id);
+            createPublishedChapter($this, $storyWithUnread, $author);
+
+            $fullyReadStory = publicStory('Fully read story', $author->id);
+            $readChapter = createPublishedChapter($this, $fullyReadStory, $author);
+
+            $reader = bob($this);
+            $this->actingAs($reader);
+            markAsRead($this, $readChapter);
+            addToReadList($this, $storyWithUnread->id);
+            addToReadList($this, $fullyReadStory->id);
+
+            // Test with explicit hide_up_to_date=0 parameter - should show both stories
+            $this->get(route('readlist.index', ['hide_up_to_date' => '0']))
+                ->assertOk()
+                ->assertSee('Story with unread chapters')
+                ->assertSee('Fully read story');
+        });
+
+        it('shows all stories when user unchecks hide_up_to_date checkbox', function () {
+            // Create a user with stories in readlist
+            $author = alice($this);
+
+            // Create two stories: one with unread chapters, one fully read
+            $storyWithUnread = publicStory('Story with unread chapters', $author->id);
+            createPublishedChapter($this, $storyWithUnread, $author);
+
+            $fullyReadStory = publicStory('Fully read story', $author->id);
+            $readChapter = createPublishedChapter($this, $fullyReadStory, $author);
+
+            $reader = bob($this);
+            $this->actingAs($reader);
+            markAsRead($this, $readChapter);
+            addToReadList($this, $storyWithUnread->id);
+            addToReadList($this, $fullyReadStory->id);
+
+            // Set user's preference to hide up-to-date stories (simulating they checked it before)
+            setSettingsValue($reader->id, 'readlist', 'hide-up-to-date', true);
+
+            // Now simulate unchecking the checkbox - this would submit hide_up_to_date=0
+            $this->get(route('readlist.index', ['hide_up_to_date' => '0']))
+                ->assertOk()
+                ->assertSee('Story with unread chapters')
+                ->assertSee('Fully read story'); // This now works correctly with the fix
+        });
     });
 
     describe('genre filter', function () {

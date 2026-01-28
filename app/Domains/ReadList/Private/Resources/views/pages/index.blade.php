@@ -19,7 +19,7 @@
             <label class="flex items-center gap-2">
                 <input type="checkbox" name="hide_up_to_date" value="1"
                     {{ $hideUpToDate ? 'checked' : '' }}
-                    onchange="this.form.submit()"
+                    onchange="updateHideUpToDateFilter(this)"
                     class="rounded border-accent text-accent shadow-sm focus:border-accent focus:ring-accent/10" />
                 <span>{{ __('readlist::page.filters.hide_up_to_date.label') }}</span>
             </label>
@@ -63,6 +63,25 @@
 </x-shared::app-layout>
 
 <script>
+function updateHideUpToDateFilter(checkbox) {
+    const form = checkbox.form;
+    const url = new URL(form.action);
+    
+    // Add all form parameters
+    const formData = new FormData(form);
+    for (const [key, value] of formData.entries()) {
+        if (key !== 'hide_up_to_date') {
+            url.searchParams.append(key, value);
+        }
+    }
+    
+    // Always add hide_up_to_date with the correct value
+    url.searchParams.append('hide_up_to_date', checkbox.checked ? '1' : '0');
+    
+    // Navigate to the new URL
+    window.location.href = url.toString();
+}
+
 function readListInfiniteScroll() {
     return {
         currentPage: 1,

@@ -245,7 +245,7 @@ class ReadListController
 
     /**
      * Resolve the hide_up_to_date filter value.
-     * If explicitly set in request, use that. Otherwise, use user's setting default.
+     * If explicitly set in request (either '1' or '0'), use that. Otherwise, use user's setting default.
      */
     private function resolveHideUpToDate(int $userId): bool
     {
