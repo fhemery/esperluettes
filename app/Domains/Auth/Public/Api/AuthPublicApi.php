@@ -201,4 +201,12 @@ class AuthPublicApi
     {
         return $this->promotionService->getPendingCount();
     }
+
+    /**
+     * Count all users (active and inactive).
+     */
+    public function countUsers(): int
+    {
+        return $this->userQuery->countUsers();
+    }
 }

@@ -59,7 +59,18 @@ class EventPublicApi
      */
     public function getEventsByName(string $name): array
     {
-        $events = $this->eventService->getEventsByName($name);
+        return $this->getEventsByNames([$name]);
+    }
+
+    /**
+     * Get all events by names, ordered by ID descending (most recent first).
+     *
+     * @param array<string> $names
+     * @return array<StoredDomainEventDto>
+     */
+    public function getEventsByNames(array $names): array
+    {
+        $events = $this->eventService->getEventsByNames($names);
 
         return collect($events)->map(function (StoredDomainEvent $e) {
             $domainEvent = null;

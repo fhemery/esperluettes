@@ -46,4 +46,12 @@ class UserQueryService
             ->pluck('id')
             ->toArray();
     }
+
+    /**
+     * Count all users (active and inactive).
+     */
+    public function countUsers(): int
+    {
+        return User::query()->count();
+    }
 }

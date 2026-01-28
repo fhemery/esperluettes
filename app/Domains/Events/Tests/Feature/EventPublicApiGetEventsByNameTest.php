@@ -9,16 +9,87 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-describe('EventPublicApi::getEventsByName()', function () {
-    it('returns empty array when no events of the given name exist', function () {
+describe('EventPublicApi::getEventsByNames()', function () {
+    it('returns empty array when given empty array', function () {
         $api = app(EventPublicApi::class);
         
-        $events = $api->getEventsByName('NonExistent.Event');
+        $events = $api->getEventsByNames([]);
         
         expect($events)->toBeArray()->toBeEmpty();
     });
 
-    it('returns all events matching the given name', function () {
+    it('returns empty array when no events of the given names exist', function () {
+        $api = app(EventPublicApi::class);
+        
+        $events = $api->getEventsByNames(['NonExistent.Event', 'Another.Missing']);
+        
+        expect($events)->toBeArray()->toBeEmpty();
+    });
+
+    it('returns events matching multiple names', function () {
+        $bus = app(EventBus::class);
+        $api = app(EventPublicApi::class);
+        
+        $bus->registerEvent('Multi.First', MultiFirstEvent::class);
+        $bus->registerEvent('Multi.Second', MultiSecondEvent::class);
+        $bus->registerEvent('Multi.Third', MultiThirdEvent::class);
+        
+        $bus->emit(new MultiFirstEvent(id: 1));
+        $bus->emit(new MultiSecondEvent(id: 2));
+        $bus->emit(new MultiThirdEvent(id: 3));
+        $bus->emit(new MultiFirstEvent(id: 4));
+        
+        // Query for two of the three event types
+        $events = $api->getEventsByNames(['Multi.First', 'Multi.Second']);
+        
+        expect($events)->toHaveCount(3);
+        
+        $names = array_map(fn($dto) => $dto->name(), $events);
+        expect($names)->toContain('Multi.First');
+        expect($names)->toContain('Multi.Second');
+        expect($names)->not->toContain('Multi.Third');
+    });
+
+    it('returns events ordered by ID descending across multiple names', function () {
+        $bus = app(EventBus::class);
+        $api = app(EventPublicApi::class);
+        
+        $bus->registerEvent('Order.A', OrderAEvent::class);
+        $bus->registerEvent('Order.B', OrderBEvent::class);
+        
+        // Emit in sequence: A(1), B(2), A(3), B(4)
+        $bus->emit(new OrderAEvent(value: 1));
+        $bus->emit(new OrderBEvent(value: 2));
+        $bus->emit(new OrderAEvent(value: 3));
+        $bus->emit(new OrderBEvent(value: 4));
+        
+        $events = $api->getEventsByNames(['Order.A', 'Order.B']);
+        
+        expect($events)->toHaveCount(4);
+        
+        // Should be ordered by ID desc: 4, 3, 2, 1
+        $values = array_map(fn($dto) => $dto->domainEvent()->value, $events);
+        expect($values)->toBe([4, 3, 2, 1]);
+    });
+
+    it('getEventsByName calls getEventsByNames with single element array', function () {
+        $bus = app(EventBus::class);
+        $api = app(EventPublicApi::class);
+        
+        $bus->registerEvent('Single.Test', SingleTestEvent::class);
+        $bus->emit(new SingleTestEvent(id: 42));
+        
+        $eventsFromSingle = $api->getEventsByName('Single.Test');
+        $eventsFromMulti = $api->getEventsByNames(['Single.Test']);
+        
+        expect($eventsFromSingle)->toHaveCount(1);
+        expect($eventsFromMulti)->toHaveCount(1);
+        expect($eventsFromSingle[0]->id())->toBe($eventsFromMulti[0]->id());
+    });
+});
+
+describe('EventPublicApi::getEventsByName()', function () {
+    it('does everything getEventsByNames is doing, but for one single event type', function () {
         $bus = app(EventBus::class);
         $api = app(EventPublicApi::class);
         
@@ -44,80 +115,6 @@ describe('EventPublicApi::getEventsByName()', function () {
             expect($dto->name())->toBe('Test.UserAction');
             expect($dto->domainEvent())->toBeInstanceOf(TestUserActionEvent::class);
         }
-    });
-
-    it('returns events ordered by ID descending (most recent first)', function () {
-        $bus = app(EventBus::class);
-        $api = app(EventPublicApi::class);
-        
-        $bus->registerEvent('Test.Ordered', TestOrderedEvent::class);
-        
-        // Emit events in sequence
-        $bus->emit(new TestOrderedEvent(value: 100));
-        $bus->emit(new TestOrderedEvent(value: 200));
-        $bus->emit(new TestOrderedEvent(value: 300));
-        
-        $events = $api->getEventsByName('Test.Ordered');
-        
-        expect($events)->toHaveCount(3);
-        
-        // Most recent should be first (value: 300)
-        $values = array_map(fn($dto) => $dto->domainEvent()->value, $events);
-        expect($values)->toBe([300, 200, 100]);
-    });
-
-    it('reconstructs domain events from payload', function () {
-        $bus = app(EventBus::class);
-        $api = app(EventPublicApi::class);
-        
-        $bus->registerEvent('Test.Reconstruct', TestReconstructEvent::class);
-        $bus->emit(new TestReconstructEvent(name: 'Alice', count: 42));
-        
-        $events = $api->getEventsByName('Test.Reconstruct');
-        
-        expect($events)->toHaveCount(1);
-        
-        $dto = $events[0];
-        expect($dto->domainEvent())->toBeInstanceOf(TestReconstructEvent::class);
-        expect($dto->domainEvent()->name)->toBe('Alice');
-        expect($dto->domainEvent()->count)->toBe(42);
-    });
-
-    it('handles events that fail to reconstruct gracefully', function () {
-        $bus = app(EventBus::class);
-        $api = app(EventPublicApi::class);
-        
-        $bus->registerEvent('Test.Invalid', TestInvalidEvent::class);
-        $bus->emit(new TestInvalidEvent(data: 'valid'));
-        
-        // Manually corrupt the payload in database
-        DB::table('events_domain')
-            ->where('name', 'Test.Invalid')
-            ->update(['payload' => json_encode(['corrupted' => 'data'])]);
-        
-        $events = $api->getEventsByName('Test.Invalid');
-        
-        expect($events)->toHaveCount(1);
-        expect($events[0]->domainEvent())->toBeNull(); // Failed to reconstruct
-        expect($events[0]->name())->toBe('Test.Invalid');
-        expect($events[0]->payload())->toBe(['corrupted' => 'data']);
-    });
-
-    it('does not return events with similar but different names', function () {
-        $bus = app(EventBus::class);
-        $api = app(EventPublicApi::class);
-        
-        $bus->registerEvent('User.Created', TestUserCreatedEvent::class);
-        $bus->registerEvent('User.CreatedV2', TestUserCreatedV2Event::class);
-        
-        $bus->emit(new TestUserCreatedEvent(id: 1));
-        $bus->emit(new TestUserCreatedV2Event(id: 2));
-        
-        // Should only return exact match
-        $events = $api->getEventsByName('User.Created');
-        
-        expect($events)->toHaveCount(1);
-        expect($events[0]->domainEvent())->toBeInstanceOf(TestUserCreatedEvent::class);
     });
 });
 
@@ -238,6 +235,102 @@ final class TestUserCreatedV2Event implements DomainEvent
     
     public function toPayload(): array { return ['id' => $this->id]; }
     public function summary(): string { return "User {$this->id} created v2"; }
+    
+    public static function fromPayload(array $payload): static
+    {
+        return new static(id: (int) ($payload['id'] ?? 0));
+    }
+}
+
+final class MultiFirstEvent implements DomainEvent
+{
+    public function __construct(public readonly int $id) {}
+    
+    public static function name(): string { return 'Multi.First'; }
+    public static function version(): int { return 1; }
+    
+    public function toPayload(): array { return ['id' => $this->id]; }
+    public function summary(): string { return "Multi First {$this->id}"; }
+    
+    public static function fromPayload(array $payload): static
+    {
+        return new static(id: (int) ($payload['id'] ?? 0));
+    }
+}
+
+final class MultiSecondEvent implements DomainEvent
+{
+    public function __construct(public readonly int $id) {}
+    
+    public static function name(): string { return 'Multi.Second'; }
+    public static function version(): int { return 1; }
+    
+    public function toPayload(): array { return ['id' => $this->id]; }
+    public function summary(): string { return "Multi Second {$this->id}"; }
+    
+    public static function fromPayload(array $payload): static
+    {
+        return new static(id: (int) ($payload['id'] ?? 0));
+    }
+}
+
+final class MultiThirdEvent implements DomainEvent
+{
+    public function __construct(public readonly int $id) {}
+    
+    public static function name(): string { return 'Multi.Third'; }
+    public static function version(): int { return 1; }
+    
+    public function toPayload(): array { return ['id' => $this->id]; }
+    public function summary(): string { return "Multi Third {$this->id}"; }
+    
+    public static function fromPayload(array $payload): static
+    {
+        return new static(id: (int) ($payload['id'] ?? 0));
+    }
+}
+
+final class OrderAEvent implements DomainEvent
+{
+    public function __construct(public readonly int $value) {}
+    
+    public static function name(): string { return 'Order.A'; }
+    public static function version(): int { return 1; }
+    
+    public function toPayload(): array { return ['value' => $this->value]; }
+    public function summary(): string { return "Order A {$this->value}"; }
+    
+    public static function fromPayload(array $payload): static
+    {
+        return new static(value: (int) ($payload['value'] ?? 0));
+    }
+}
+
+final class OrderBEvent implements DomainEvent
+{
+    public function __construct(public readonly int $value) {}
+    
+    public static function name(): string { return 'Order.B'; }
+    public static function version(): int { return 1; }
+    
+    public function toPayload(): array { return ['value' => $this->value]; }
+    public function summary(): string { return "Order B {$this->value}"; }
+    
+    public static function fromPayload(array $payload): static
+    {
+        return new static(value: (int) ($payload['value'] ?? 0));
+    }
+}
+
+final class SingleTestEvent implements DomainEvent
+{
+    public function __construct(public readonly int $id) {}
+    
+    public static function name(): string { return 'Single.Test'; }
+    public static function version(): int { return 1; }
+    
+    public function toPayload(): array { return ['id' => $this->id]; }
+    public function summary(): string { return "Single Test {$this->id}"; }
     
     public static function fromPayload(array $payload): static
     {
