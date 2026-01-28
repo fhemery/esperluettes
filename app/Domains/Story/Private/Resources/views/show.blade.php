@@ -21,10 +21,11 @@
 
             <!-- Title -->
             <div class="col-span-2 lg:col-start-1 lg:col-end-4 flex items-center justify-between">
-                <div class="flex flex-1 items-center gap-2">
-                    <x-shared::title>
+                <div class="flex flex-wrap sm:flex-no-wrap flex-1 items-center gap-2">
+                    <x-shared::title class="mb-0">
                         <span>{{ $viewModel->getTitle() }}</span>
                     </x-shared::title>
+                    <div class="flex">
                     <span class="ml-2">
                         <x-story::story-visibility-display :visibility="$viewModel->getVisibility()" />
                     </span>
@@ -47,9 +48,10 @@
                     </x-shared::popover>
                 @endif
                 </div>
+                </div>
 
                 @if ($viewModel->isAuthor())
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 sm:mt-0">
                         <a href="{{ route('stories.collaborators.index', ['slug' => $viewModel->getSlug()]) }}"
                             aria-label="{{ __('story::collaborators.manage') }}" title="{{ __('story::collaborators.manage') }}"
                             class="relative">
