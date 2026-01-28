@@ -46,14 +46,19 @@ class EventService
     }
 
     /**
-     * Get all events by name, ordered by ID descending (most recent first).
+     * Get all events by names, ordered by ID descending (most recent first).
      *
+     * @param array<string> $names
      * @return array<StoredDomainEvent>
      */
-    public function getEventsByName(string $name): array
+    public function getEventsByNames(array $names): array
     {
+        if (empty($names)) {
+            return [];
+        }
+
         $events = StoredDomainEvent::query()
-            ->where('name', $name)
+            ->whereIn('name', $names)
             ->orderBy('id', 'desc')
             ->get([
                 'id',
