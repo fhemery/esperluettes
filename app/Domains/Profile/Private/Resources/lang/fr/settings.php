@@ -13,7 +13,7 @@ return [
     'params' => [
         'hide-comments-section' => [
             'name' => 'Cacher l\'onglet commentaire',
-            'description' => 'Si cette option est activée, seuls vous, les Cadratins et les Majuscules pourront accéder à la liste de vos commentaires sur votre profil.',
+            'description' => 'Si cette option est activée, seul·e·s vous, les Cadratins et les Majuscules pourront accéder à la liste de vos commentaires sur votre profil.',
         ],
     ],
     'privacy' => [
