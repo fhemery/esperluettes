@@ -162,6 +162,21 @@ function createUnpublishedChapter(TestCase $t, Story $story, Authenticatable $au
 }
 
 /**
+ * Update a chapter through the real HTTP endpoint.
+ * Returns the test response for further assertions.
+ */
+function updateChapter(TestCase $t, Story $story, Chapter $chapter, array $overrides = []): \Illuminate\Testing\TestResponse
+{
+    $payload = array_merge([
+        'title' => $chapter->title,
+        'author_note' => $chapter->author_note,
+        'content' => $chapter->content,
+        'published' => $chapter->status === Chapter::STATUS_PUBLISHED ? '1' : '0',
+    ], $overrides);
+    return $t->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
+}
+
+/**
  * Helpers to toggle logged reading state through real HTTP endpoints in tests.
  */
 function markAsRead($test, Chapter $chapter)

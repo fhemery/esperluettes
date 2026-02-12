@@ -2,6 +2,7 @@
 
 namespace App\Domains\Story\Private\Http\Requests;
 
+use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Foundation\Http\FormRequest;
 use Mews\Purifier\Facades\Purifier;
 
@@ -38,8 +39,12 @@ class ChapterRequest extends FormRequest
 
         $this->merge([
             'title' => $title,
-            'author_note' => $authorNote !== null ? Purifier::clean((string) $authorNote, 'strict') : null,
-            'content' => Purifier::clean((string) ($content ?? ''), 'strict'),
+            'author_note' => $authorNote !== null
+                ? HtmlLinkUtils::stripExternalLinks(Purifier::clean((string) $authorNote, 'strict-with-links'))
+                : null,
+            'content' => HtmlLinkUtils::stripExternalLinks(
+                Purifier::clean((string) ($content ?? ''), 'strict-with-links')
+            ),
         ]);
     }
 

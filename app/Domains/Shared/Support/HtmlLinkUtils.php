@@ -50,4 +50,59 @@ class HtmlLinkUtils
         libxml_use_internal_errors($internalErrors);
         return $result;
     }
+
+    /**
+     * Strip external links: remove <a> tags pointing to external domains but keep their text content.
+     * Internal links (same host as app.url), relative links and anchors are preserved.
+     */
+    public static function stripExternalLinks(?string $html): ?string
+    {
+        if ($html === null || $html === '') {
+            return $html;
+        }
+
+        $appUrl = config('app.url');
+        $appHost = $appUrl ? parse_url($appUrl, PHP_URL_HOST) : null;
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $internalErrors = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $links = $dom->getElementsByTagName('a');
+        // Collect nodes to remove (modifying during iteration is unsafe)
+        $toUnwrap = [];
+        /** @var \DOMElement $a */
+        foreach ($links as $a) {
+            $href = $a->getAttribute('href');
+            if (!$href) {
+                $toUnwrap[] = $a;
+                continue;
+            }
+
+            // Relative URLs and anchors are considered internal — keep them
+            if (!preg_match('/^https?:\/\//i', $href)) {
+                continue;
+            }
+
+            $host = parse_url($href, PHP_URL_HOST);
+            $isExternal = $appHost && $host ? strcasecmp($host, $appHost) !== 0 : true;
+
+            if ($isExternal) {
+                $toUnwrap[] = $a;
+            }
+        }
+
+        // Replace each external <a> with its child nodes (text content preserved)
+        foreach ($toUnwrap as $a) {
+            $parent = $a->parentNode;
+            while ($a->firstChild) {
+                $parent->insertBefore($a->firstChild, $a);
+            }
+            $parent->removeChild($a);
+        }
+
+        $result = str_replace('<?xml encoding="utf-8" ?>', '', $dom->saveHTML());
+        libxml_use_internal_errors($internalErrors);
+        return $result;
+    }
 }

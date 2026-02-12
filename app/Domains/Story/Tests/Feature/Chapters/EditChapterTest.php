@@ -47,13 +47,12 @@ describe('Editing a chapter', function () {
         $oldId = $chapter->id;
 
         $this->actingAs($author);
-        $payload = [
+        $resp = updateChapter($this, $story, $chapter, [
             'title' => 'New Title',
             'author_note' => '<script>alert(1)</script><p>Note</p>',
             'content' => '<h1>  New <em>Content</em></h1>',
             'published' => '1',
-        ];
-        $resp = $this->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
+        ]);
         $resp->assertRedirect();
 
         $chapterRefreshed = Chapter::query()->findOrFail($oldId);
@@ -75,13 +74,12 @@ describe('Editing a chapter', function () {
 
         $this->actingAs($author);
         // content with only empty block
-        $payload = [
+        $this->from('/stories/' . $story->slug . '/chapters/' . $chapter->slug . '/edit');
+        $resp = updateChapter($this, $story, $chapter, [
             'title' => 'Still Title',
             'author_note' => null,
             'content' => '   ',
-        ];
-        $resp = $this->from('/stories/' . $story->slug . '/chapters/' . $chapter->slug . '/edit')
-            ->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
+        ]);
 
         $resp->assertRedirect();
         $resp->assertSessionHasErrors(['content']);
@@ -94,13 +92,12 @@ describe('Editing a chapter', function () {
 
         $this->actingAs($author);
         $long = str_repeat('a', 1001);
-        $payload = [
+        $this->from('/stories/' . $story->slug . '/chapters/' . $chapter->slug . '/edit');
+        $resp = updateChapter($this, $story, $chapter, [
             'title' => 'T',
             'author_note' => '<p>' . $long . '</p>',
             'content' => '<p>Ok</p>',
-        ];
-        $resp = $this->from('/stories/' . $story->slug . '/chapters/' . $chapter->slug . '/edit')
-            ->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
+        ]);
 
         $resp->assertRedirect();
         $resp->assertSessionHasErrors(['author_note']);
@@ -112,14 +109,12 @@ describe('Editing a chapter', function () {
         $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Ch 6']);
 
         $this->actingAs($author);
-        $payload = [
+        $resp = updateChapter($this, $story, $chapter, [
             'title' => 'New Title',
             'author_note' => '<script>alert(1)</script><p>Note</p>',
             'content' => '<h1>  New <em>Content</em></h1>',
             'published' => '0',
-        ];
-        $resp = $this->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
-
+        ]);
         $resp->assertRedirect();
 
         $storyRefreshed = getStory($story->id);
@@ -132,24 +127,20 @@ describe('Editing a chapter', function () {
         $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Ch 6']);
 
         $this->actingAs($author);
-        $payload = [
+        $resp = updateChapter($this, $story, $chapter, [
             'title' => 'New Title',
             'author_note' => '<script>alert(1)</script><p>Note</p>',
             'content' => '<h1>  New <em>Content</em></h1>',
             'published' => '0',
-        ];
-        $resp = $this->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
-
+        ]);
         $resp->assertRedirect();
 
-        $payload = [
+        $resp = updateChapter($this, $story, $chapter, [
             'title' => 'New Title',
             'author_note' => '<script>alert(1)</script><p>Note</p>',
             'content' => '<h1>  New <em>Content</em></h1>',
             'published' => '1',
-        ];
-        $resp = $this->put('/stories/' . $story->slug . '/chapters/' . $chapter->slug, $payload);
-
+        ]);
         $resp->assertRedirect();
 
         $storyRefreshed = getStory($story->id);
@@ -168,13 +159,12 @@ describe('Editing a chapter', function () {
                 'content' => '<p>Old content</p>',
             ]);
 
-            $resp = $this->from('/stories/' . $story->slug . '/chapters/' . $chapter->slug . '/edit')
-                ->put(route('chapters.update', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]), [
-                    'title' => 'New Title',
-                    'author_note' => null,
-                    'content' => '<p>New content</p>',
-                    'published' => '0',
-                ]);
+            $resp = updateChapter($this, $story, $chapter, [
+                'title' => 'New Title',
+                'author_note' => null,
+                'content' => '<p>New content</p>',
+                'published' => '0',
+            ]);
             $resp->assertRedirect();
 
             /** @var ChapterUpdated|null $event */
@@ -199,7 +189,7 @@ describe('Editing a chapter', function () {
                 'published' => '0',
             ]);
 
-            $resp = $this->put(route('chapters.update', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]), [
+            $resp = updateChapter($this, $story, $chapter, [
                 'title' => 'To Publish',
                 'author_note' => null,
                 'content' => '<p>Published content</p>',
@@ -225,7 +215,7 @@ describe('Editing a chapter', function () {
                 'content' => '<p>Some content</p>',
             ]);
 
-            $resp = $this->put(route('chapters.update', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]), [
+            $resp = updateChapter($this, $story, $chapter, [
                 'title' => 'To Unpublish',
                 'author_note' => null,
                 'content' => '<p>Some content</p>',
@@ -239,6 +229,67 @@ describe('Editing a chapter', function () {
             expect($event->storyId)->toBe($story->id);
             expect($event->chapter->id)->toBe($chapter->id);
             expect($event->chapter->status)->toBe(Chapter::STATUS_NOT_PUBLISHED);
+        });
+    });
+
+    describe('Link handling', function () {
+        it('preserves internal links in chapter content', function () {
+            config(['app.url' => config('app.url') ?: 'http://localhost']);
+            $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+
+            $author = alice($this);
+            $story = publicStory('Link Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Link Ch']);
+
+            $this->actingAs($author);
+            $internalUrl = config('app.url') . '/stories/some-story-1';
+            $resp = updateChapter($this, $story, $chapter, [
+                'content' => '<p>See <a href="' . $internalUrl . '">this story</a> for details.</p>',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter->refresh();
+            expect($chapter->content)->toContain('<a href="' . $internalUrl . '">');
+            expect($chapter->content)->toContain('this story</a>');
+        });
+
+        it('strips external links but keeps their text in chapter content', function () {
+            config(['app.url' => config('app.url') ?: 'http://localhost']);
+
+            $author = alice($this);
+            $story = publicStory('Ext Link Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Ext Ch']);
+
+            $this->actingAs($author);
+            $resp = updateChapter($this, $story, $chapter, [
+                'content' => '<p>Check <a href="https://evil.com/phish">this link</a> out.</p>',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter->refresh();
+            expect($chapter->content)->not->toContain('evil.com');
+            expect($chapter->content)->not->toContain('<a ');
+            expect($chapter->content)->toContain('this link');
+        });
+
+        it('strips external links but keeps their text in author note', function () {
+            config(['app.url' => config('app.url') ?: 'http://localhost']);
+
+            $author = alice($this);
+            $story = publicStory('Note Link Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Note Ch']);
+
+            $this->actingAs($author);
+            $resp = updateChapter($this, $story, $chapter, [
+                'author_note' => '<p>See <a href="https://external.org">here</a></p>',
+                'content' => '<p>Content</p>',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter->refresh();
+            expect($chapter->author_note)->not->toContain('external.org');
+            expect($chapter->author_note)->not->toContain('<a ');
+            expect($chapter->author_note)->toContain('here');
         });
     });
 

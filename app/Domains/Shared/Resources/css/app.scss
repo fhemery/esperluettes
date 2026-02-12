@@ -200,7 +200,11 @@ html {
   }
 }
 
-.rich-content h2, h3 {
+.rich-content a {
+  text-decoration: underline;
+}
+
+.rich-content h2, .rich-content h3 {
   color: rgb(var(--color-accent));
 }
 
