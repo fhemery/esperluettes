@@ -22,8 +22,7 @@ use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\ViewModels\RefViewModel;
 use App\Domains\Story\Private\Models\Chapter;
-use App\Domains\Story\Private\Services\ChapterService;
-use App\Domains\Story\Private\Services\ReadingProgressService;
+use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Private\Services\StoryViewModelBuilder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -37,11 +36,10 @@ class StoryController
         private readonly AuthPublicApi             $authApi,
         private readonly ProfilePublicApi          $profileApi,
         private readonly StoryRefPublicApi         $storyRefs,
-        private readonly ReadingProgressService    $progress,
-        private readonly ChapterService            $chapters,
-        private readonly ChapterCreditService      $credits,
+       private readonly ChapterCreditService      $credits,
         private readonly CommentPublicApi          $comments,
         private readonly StoryViewModelBuilder     $vmBuilder,
+        private readonly CoverService               $coverService,
     )
     {
     }
@@ -338,6 +336,9 @@ class StoryController
             $feedbackVm,
             $triggerWarningRefs,
             (string) $story->tw_disclosure,
+            coverType: (string) ($story->cover_type ?? Story::COVER_DEFAULT),
+            coverUrl: $this->coverService->getCoverUrl($story),
+            coverHdUrl: $this->coverService->getCoverHdUrl($story),
         );
 
         // Credits state for current user (to drive UI for Add Chapter button)

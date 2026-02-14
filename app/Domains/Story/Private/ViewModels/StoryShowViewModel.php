@@ -24,6 +24,9 @@ class StoryShowViewModel
     /** @var array<int,RefViewModel> */
     public readonly array $triggerWarningRefs;
     public readonly string $twDisclosure;
+    public readonly string $coverType;
+    public readonly string $coverUrl;
+    public readonly ?string $coverHdUrl;
 
     public function __construct(
         Story $story,
@@ -38,6 +41,9 @@ class StoryShowViewModel
         ?RefViewModel $feedback = null,
         array $triggerWarningRefs = [],
         string $twDisclosure = Story::TW_UNSPOILED,
+        string $coverType = Story::COVER_DEFAULT,
+        string $coverUrl = '',
+        ?string $coverHdUrl = null,
     ) {
         $this->story = $story;
         /** @var ProfileDto[] $authors */
@@ -54,6 +60,9 @@ class StoryShowViewModel
         $this->feedback = $feedback;
         $this->triggerWarningRefs = array_values(array_filter($triggerWarningRefs, fn($v) => $v instanceof RefViewModel));
         $this->twDisclosure = (string)$twDisclosure;
+        $this->coverType = $coverType;
+        $this->coverUrl = $coverUrl;
+        $this->coverHdUrl = $coverHdUrl;
     }
 
     /**

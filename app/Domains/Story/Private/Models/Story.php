@@ -27,6 +27,8 @@ class Story extends Model
         'tw_disclosure',
         'is_complete',
         'is_excluded_from_events',
+        'cover_type',
+        'cover_data',
     ];
 
     protected $casts = [
@@ -40,7 +42,17 @@ class Story extends Model
         'tw_disclosure' => 'string',
         'is_complete' => 'boolean',
         'is_excluded_from_events' => 'boolean',
+        'cover_type' => 'string',
     ];
+
+    public const COVER_DEFAULT = 'default';
+    public const COVER_THEMED = 'themed';
+    public const COVER_CUSTOM = 'custom';
+
+    public static function coverTypeOptions(): array
+    {
+        return [self::COVER_DEFAULT, self::COVER_THEMED, self::COVER_CUSTOM];
+    }
 
     public const VIS_PUBLIC = 'public';
     public const VIS_COMMUNITY = 'community';

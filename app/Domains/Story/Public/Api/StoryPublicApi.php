@@ -4,6 +4,7 @@ namespace App\Domains\Story\Public\Api;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\StorySearchResultDto;
+use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Private\Services\StorySearchService;
 use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Services\StoryAccessService;
@@ -31,6 +32,7 @@ class StoryMapperHelper {
         public readonly array $genres,
         public readonly array $triggerWarnings,
         public readonly array $profiles,
+        public readonly CoverService $coverService,
     ) {
     }
 }
@@ -43,6 +45,7 @@ class StoryPublicApi
         private readonly StoryService $storyService,
         private readonly StoryAccessService $accessService,
         private readonly StoryRefPublicApi $storyRefs,
+        private readonly CoverService $coverService,
     ) {
     }
 
@@ -120,6 +123,7 @@ class StoryPublicApi
                     ->all()
                 : [],
             profiles: $profiles,
+            coverService: $this->coverService,
         );
 
         return PaginatedStoryDto::from($paginator, $fieldsToReturn, $helper);

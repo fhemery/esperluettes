@@ -4,6 +4,7 @@ namespace App\Domains\Story\Private\Services;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Private\ViewModels\StorySummaryViewModel;
 use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
 
@@ -12,6 +13,7 @@ class StoryViewModelBuilder
     public function __construct(
         private readonly ProfilePublicApi $profileApi,
         private readonly StoryRefPublicApi $storyRefs,
+        private readonly CoverService $coverService,
     ) {}
 
     /**
@@ -86,6 +88,8 @@ class StoryViewModelBuilder
                 genreNames: $gNames,
                 triggerWarningNames: $twNames,
                 twDisclosure: (string) $story->tw_disclosure,
+                coverType: (string) ($story->cover_type ?? Story::COVER_DEFAULT),
+                coverUrl: $this->coverService->getCoverUrl($story),
             );
         }
 
