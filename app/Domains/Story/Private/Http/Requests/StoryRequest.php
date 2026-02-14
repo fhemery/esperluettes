@@ -34,6 +34,8 @@ class StoryRequest extends FormRequest
             // Story completion and event exclusion flags
             'is_complete' => ['nullable', 'boolean'],
             'is_excluded_from_events' => ['nullable', 'boolean'],
+            'cover_type' => ['nullable', 'in:' . implode(',', Story::coverTypeOptions())],
+            'cover_data' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -60,10 +62,19 @@ class StoryRequest extends FormRequest
             $twIds = [];
         }
 
+        // Normalize cover_data: clear it if cover_type is 'default'
+        $coverType = $this->input('cover_type') ?: 'default';
+        $coverData = $this->input('cover_data');
+        if ($coverType === 'default') {
+            $coverData = null;
+        }
+
         $this->merge([
             'title' => $title,
             'description' => $description,
             'story_ref_trigger_warning_ids' => $twIds,
+            'cover_type' => $coverType,
+            'cover_data' => $coverData,
         ]);
     }
 

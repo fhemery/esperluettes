@@ -16,13 +16,27 @@
 @php($twDisclosureOld = old('tw_disclosure', $story?->tw_disclosure ?? ''))
 @php($isCompleteOld = old('is_complete', $story?->is_complete ?? false))
 @php($isExcludedFromEventsOld = old('is_excluded_from_events', $story?->is_excluded_from_events ?? false))
+@php($coverTypeOld = old('cover_type', $story?->cover_type ?? 'default'))
+@php($coverDataOld = old('cover_data', $story?->cover_data ?? ''))
 @php($twDisclosureOptions = [
 ['value' => 'listed', 'label' => __('story::shared.trigger_warnings.form_options.listed'), 'description' => __('story::shared.trigger_warnings.listed_help')],
 ['value' => 'no_tw', 'label' => __('story::shared.trigger_warnings.form_options.no_tw'), 'description' => __('story::shared.trigger_warnings.no_tw_help')],
 ['value' => 'unspoiled', 'label' => __('story::shared.trigger_warnings.form_options.unspoiled'), 'description' => __('story::shared.trigger_warnings.unspoiled_help')],
 ])
 
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-4"
+    x-data="coverForm({
+        coverType: @js($coverTypeOld),
+        coverData: @js($coverDataOld),
+        defaultCoverUrl: @js(asset('images/story/default-cover.svg')),
+        genres: @js(collect($referentials['genres'] ?? [])->map(fn($g) => ['id' => (string)($g['id'] ?? $g['slug'] ?? ''), 'slug' => (string)($g['slug'] ?? ''), 'name' => (string)($g['name'] ?? '')])->values()->all()),
+        selectedGenreIds: @js($selectedGenreIds),
+    })">
+
+    <!-- Hidden inputs for cover selection -->
+    <input type="hidden" name="cover_type" :value="coverType">
+    <input type="hidden" name="cover_data" :value="coverData">
+
     <!-- Panel 1: General info -->
     <x-shared::collapsible :title="__('story::shared.panels.general')" :open="true">
         <div class="grid grid-cols-4 gap-6">
@@ -54,38 +68,6 @@
                 <x-input-error :messages="$errors->get('story_ref_type_id')" class="mt-2" />
             </div>
 
-            <!-- Visibility -->
-            <div class="col-span-4 md:col-span-2 flex flex-col gap-2">
-                <div class="flex items-center gap-2">
-                    <x-input-label :required="true" for="visibility" :value="__('story::shared.visibility.label')" />
-                    <x-shared::tooltip type="help" :title="__('story::shared.visibility.label')" placement="right">
-                        {{ __('story::shared.visibility.help.intro') }}
-                    </x-shared::tooltip>
-                </div>
-                <x-shared::select-with-tooltips name="visibility" :options="$visibilityOptions" :selected="$visOld"
-                    valueField="value" labelField="label" descriptionField="description" color="accent" />
-                <x-input-error :messages="$errors->get('visibility')" class="mt-2" />
-            </div>
-
-            <!-- Copyright -->
-            <div class="col-span-4 md:col-span-2 flex flex-col gap-2">
-                <div class="flex items-center gap-2">
-                    <x-input-label :required="true" for="story_ref_copyright_id" :value="__('story::shared.copyright.label')" />
-                    <x-shared::tooltip type="help" :title="__('story::shared.copyright.label')" placement="right">
-                        {{ __('story::shared.copyright.help') }}
-                    </x-shared::tooltip>
-                </div>
-                <x-shared::select-with-tooltips name="story_ref_copyright_id" :options="$referentials['copyrights'] ?? []" :selected="$selectedCopyrightId"
-                    :placeholder="__('story::shared.copyright.placeholder')" valueField="id" labelField="name" descriptionField="description"
-                    :required="true" color="accent" />
-                <x-input-error :messages="$errors->get('story_ref_copyright_id')" class="mt-2" />
-            </div>
-        </div>
-    </x-shared::collapsible>
-
-    <!-- Panel 2: Details -->
-    <x-shared::collapsible :title="__('story::shared.panels.details')" :open="true">
-        <div class="grid grid-cols-4 gap-6">
             <!-- Genres -->
             <div class="col-span-4 md:col-span-2 flex flex-col gap-2">
                 <div class="flex items-center gap-2">
@@ -125,8 +107,61 @@
                 </label>
             </div>
 
+            <!-- Visibility -->
+            <div class="col-span-4 md:col-span-2 flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <x-input-label :required="true" for="visibility" :value="__('story::shared.visibility.label')" />
+                    <x-shared::tooltip type="help" :title="__('story::shared.visibility.label')" placement="right">
+                        {{ __('story::shared.visibility.help.intro') }}
+                    </x-shared::tooltip>
+                </div>
+                <x-shared::select-with-tooltips name="visibility" :options="$visibilityOptions" :selected="$visOld"
+                    valueField="value" labelField="label" descriptionField="description" color="accent" />
+                <x-input-error :messages="$errors->get('visibility')" class="mt-2" />
+            </div>
+
+            <!-- Copyright -->
+            <div class="col-span-4 md:col-span-2 flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <x-input-label :required="true" for="story_ref_copyright_id" :value="__('story::shared.copyright.label')" />
+                    <x-shared::tooltip type="help" :title="__('story::shared.copyright.label')" placement="right">
+                        {{ __('story::shared.copyright.help') }}
+                    </x-shared::tooltip>
+                </div>
+                <x-shared::select-with-tooltips name="story_ref_copyright_id" :options="$referentials['copyrights'] ?? []" :selected="$selectedCopyrightId"
+                    :placeholder="__('story::shared.copyright.placeholder')" valueField="id" labelField="name" descriptionField="description"
+                    :required="true" color="accent" />
+                <x-input-error :messages="$errors->get('story_ref_copyright_id')" class="mt-2" />
+            </div>
+        </div>
+    </x-shared::collapsible>
+
+    <!-- Panel 2: Présentation -->
+    <x-shared::collapsible :title="__('story::shared.panels.presentation')" :open="true">
+        <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
+            <!-- Cover preview -->
+            <div class="flex flex-col items-center gap-3">
+                <x-input-label :value="__('story::shared.cover.label')" />
+                <div class="relative">
+                    <template x-if="coverType === 'default'">
+                        <x-shared::default-cover class="w-[150px] object-contain" />
+                    </template>
+                    <template x-if="coverType !== 'default'">
+                        <img :src="coverPreviewUrl" alt="" class="w-[150px] object-contain" loading="lazy" />
+                    </template>
+                </div>
+                <button type="button"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md border border-accent text-accent hover:bg-accent/10 transition-colors"
+                    @click="$dispatch('open-modal', 'cover-selector')">
+                    <span class="material-symbols-outlined text-[18px]">image</span>
+                    {{ __('story::shared.cover.change') }}
+                </button>
+                <x-input-error :messages="$errors->get('cover_type')" />
+                <x-input-error :messages="$errors->get('cover_data')" />
+            </div>
+
             <!-- Summary -->
-            <div class="col-span-4">
+            <div class="flex flex-col gap-2">
                 <div class="flex items-center gap-2">
                     <x-input-label for="description" :value="__('story::shared.description.label')" />
                     <span class="text-red-600" aria-hidden="true">*</span>
@@ -219,4 +254,92 @@
             </div>
         </div>
     </x-shared::collapsible>
+
+    <x-story::cover-selector-modal />
 </div>
+
+@once
+@push('scripts')
+<script>
+if (!window.coverForm) {
+    window.coverForm = function ({ coverType, coverData, defaultCoverUrl, genres, selectedGenreIds }) {
+        return {
+            coverType: coverType || 'default',
+            coverData: coverData || '',
+            defaultCoverUrl: defaultCoverUrl,
+            allGenres: genres || [],
+            selectedGenreIds: selectedGenreIds || [],
+            modalPreviewSlug: '',
+
+            get coverPreviewUrl() {
+                if (this.coverType === 'themed' && this.coverData) {
+                    return this.themedUrl(this.coverData);
+                }
+                return this.defaultCoverUrl;
+            },
+
+            get availableGenres() {
+                return this.allGenres.filter(g => this.selectedGenreIds.includes(g.id));
+            },
+
+            themedUrl(slug) {
+                if (!slug) return this.defaultCoverUrl;
+                const base = this.defaultCoverUrl.replace(/\/images\/story\/.*$/, '');
+                return base + '/images/story/' + slug + '.jpg';
+            },
+
+            syncSelectedGenreIds() {
+                const inputs = document.querySelectorAll('input[name="story_ref_genre_ids[]"]');
+                this.selectedGenreIds = Array.from(inputs).map(i => String(i.value)).filter(Boolean);
+            },
+
+            selectDefault() {
+                this.coverType = 'default';
+                this.coverData = '';
+            },
+
+            selectThemed(slug) {
+                if (!slug) return;
+                this.coverType = 'themed';
+                this.coverData = slug;
+            },
+
+            init() {
+                this.$watch('availableGenres', (genres) => {
+                    if (this.coverType === 'themed' && this.coverData) {
+                        const stillAvailable = genres.some(g => g.slug === this.coverData);
+                        if (!stillAvailable) {
+                            this.selectDefault();
+                        }
+                    }
+                });
+
+                this.$el.addEventListener('open-modal', (e) => {
+                    if (e.detail === 'cover-selector') {
+                        this.syncSelectedGenreIds();
+                        const avail = this.availableGenres;
+                        if (this.coverType === 'themed' && this.coverData) {
+                            this.modalPreviewSlug = this.coverData;
+                        } else if (avail.length > 0) {
+                            this.modalPreviewSlug = avail[0].slug;
+                        } else {
+                            this.modalPreviewSlug = '';
+                        }
+                    }
+                });
+
+                const observer = new MutationObserver(() => {
+                    this.syncSelectedGenreIds();
+                });
+
+                const form = this.$el.closest('form');
+                if (form) {
+                    observer.observe(form, { childList: true, subtree: true });
+                }
+            },
+        };
+    };
+}
+</script>
+@endpush
+@endonce

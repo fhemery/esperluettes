@@ -329,32 +329,6 @@ Development is split into three phases, each building on the previous. Stories a
 - Genre list shows cover status column
 - Tests verify toggle saves correctly
 
----
-
-### P2-US3: Seed has_cover for existing genres
-**As a** developer  
-**I want to** set `has_cover = true` for genres with existing cover files  
-**So that** themed covers are immediately available
-
-**Acceptance Criteria:**
-- Migration or seeder checks file existence for each genre
-- Sets `has_cover = true` where `public/images/story/{slug}.jpg` exists
-- Logs which genres were updated
-
----
-
-### P2-US4: Add cover_genre_slug field to Story
-**As a** developer  
-**I want to** store the selected genre slug for themed covers  
-**So that** we know which genre cover to display
-
-**Acceptance Criteria:**
-- Migration adds nullable `cover_genre_slug` string field
-- Story model has field in fillable
-- Tests verify field storage
-
----
-
 ### P2-US5: CoverService handles themed covers
 **As a** developer  
 **I want to** extend CoverService to resolve themed cover URLs  

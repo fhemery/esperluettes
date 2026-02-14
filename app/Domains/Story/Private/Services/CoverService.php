@@ -12,6 +12,7 @@ class CoverService
     public function getCoverUrl(Story $story): string
     {
         return match ($story->cover_type) {
+            Story::COVER_THEMED => $this->themedCoverUrl($story->cover_data),
             default => asset('images/story/default-cover.svg'),
         };
     }
@@ -22,6 +23,7 @@ class CoverService
     public function getCoverHdUrl(Story $story): ?string
     {
         return match ($story->cover_type) {
+            Story::COVER_THEMED => $this->themedCoverHdUrl($story->cover_data),
             default => null,
         };
     }
@@ -35,5 +37,27 @@ class CoverService
             Story::COVER_DEFAULT => false,
             default => true,
         };
+    }
+
+    /**
+     * Get the themed cover URL for a given genre slug.
+     */
+    public function themedCoverUrl(?string $genreSlug): string
+    {
+        if (!$genreSlug) {
+            return asset('images/story/default-cover.svg');
+        }
+        return asset("images/story/{$genreSlug}.jpg");
+    }
+
+    /**
+     * Get the themed HD cover URL for a given genre slug.
+     */
+    public function themedCoverHdUrl(?string $genreSlug): ?string
+    {
+        if (!$genreSlug) {
+            return null;
+        }
+        return asset("images/story/{$genreSlug}-hd.jpg");
     }
 }

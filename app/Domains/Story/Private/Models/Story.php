@@ -31,6 +31,10 @@ class Story extends Model
         'cover_data',
     ];
 
+    protected $attributes = [
+        'cover_type' => self::COVER_DEFAULT,
+    ];
+
     protected $casts = [
         'created_by_user_id' => 'integer',
         'story_ref_type_id' => 'integer',

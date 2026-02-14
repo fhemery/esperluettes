@@ -95,6 +95,9 @@ class StoryService
             // Set boolean flags (defaults to false on create)
             $story->is_complete = (bool) $request->input('is_complete', false);
             $story->is_excluded_from_events = (bool) $request->input('is_excluded_from_events', false);
+            // Cover fields
+            $story->cover_type = (string) $request->input('cover_type', Story::COVER_DEFAULT);
+            $story->cover_data = $request->input('cover_data');
             $story->save();
 
             // 2) Update slug with id suffix
@@ -262,6 +265,23 @@ class StoryService
             // Boolean flags
             $story->is_complete = (bool) $request->input('is_complete', false);
             $story->is_excluded_from_events = (bool) $request->input('is_excluded_from_events', false);
+
+            // Cover fields with genre removal fallback
+            $coverType = (string) $request->input('cover_type', Story::COVER_DEFAULT);
+            $coverData = $request->input('cover_data');
+            if ($coverType === Story::COVER_THEMED && $coverData) {
+                // Verify the themed genre slug is still in the selected genres
+                $selectedGenreSlugs = DB::table('story_ref_genres')
+                    ->whereIn('id', $genreIds)
+                    ->pluck('slug')
+                    ->all();
+                if (!in_array($coverData, $selectedGenreSlugs, true)) {
+                    $coverType = Story::COVER_DEFAULT;
+                    $coverData = null;
+                }
+            }
+            $story->cover_type = $coverType;
+            $story->cover_data = $coverData;
 
             // If title changed, regenerate slug base but keep -id suffix
             if ($story->title !== $oldTitle) {
