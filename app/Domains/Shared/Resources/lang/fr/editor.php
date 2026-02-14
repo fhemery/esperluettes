@@ -7,4 +7,10 @@ return [
     'min-characters' => ':min caractère minimum|:min caractères minimum',
     // Tooltip for the Quill "Remove formatting" button
     'clean' => 'Effacer la mise en forme',
+    // Quill link tooltip translations
+    'link_visit' => 'Visiter le lien :',
+    'link_enter' => 'Saisir le lien :',
+    'link_edit' => 'Modifier',
+    'link_save' => 'Enregistrer',
+    'link_remove' => 'Supprimer',
 ];

@@ -204,6 +204,23 @@ html {
   text-decoration: underline;
 }
 
+/* Translate Quill link tooltip strings via data attributes injected by JS onto the tooltip elements */
+.ql-snow .ql-tooltip[data-label-visit]::before {
+  content: attr(data-label-visit);
+}
+.ql-snow .ql-tooltip[data-label-enter][data-mode=link]::before {
+  content: attr(data-label-enter);
+}
+.ql-snow .ql-tooltip a.ql-action[data-label-edit]::after {
+  content: attr(data-label-edit);
+}
+.ql-snow .ql-tooltip.ql-editing a.ql-action[data-label-save]::after {
+  content: attr(data-label-save);
+}
+.ql-snow .ql-tooltip a.ql-remove[data-label-remove]::before {
+  content: attr(data-label-remove);
+}
+
 .rich-content h2, .rich-content h3 {
   color: rgb(var(--color-accent));
 }

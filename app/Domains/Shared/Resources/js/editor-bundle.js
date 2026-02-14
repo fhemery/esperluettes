@@ -58,6 +58,10 @@ export function initQuillEditor(id, options = {}) {
     }
     toolbar.push(['clean']);
 
+    // Use the closest .rich-content wrapper as bounds so the link tooltip
+    // is not clipped by the .ql-container overflow.
+    const boundsEl = container.closest('.rich-content') || container.parentElement;
+
     const editor = new window.Quill(container, {
       theme: 'snow',
       modules: {
@@ -69,6 +73,7 @@ export function initQuillEditor(id, options = {}) {
       // Whitelist formats so unsupported formatting is dropped on paste
       formats: allowedFormats,
       placeholder,
+      bounds: boundsEl,
     });
     // Mark as initialized
     container.dataset.quillInited = '1';
@@ -90,6 +95,37 @@ export function initQuillEditor(id, options = {}) {
         allButtons.forEach((b) => {
           if (!b.getAttribute('type')) b.setAttribute('type', 'button');
         });
+      }
+    } catch (e) {
+      // no-op
+    }
+
+    // Translate Quill link tooltip labels using data attributes from the .rich-content wrapper
+    try {
+      const wrapper = container.closest('.rich-content');
+      if (wrapper) {
+        const qlSnow = container.closest('.ql-snow') || container.parentElement;
+        const tooltip = qlSnow?.querySelector('.ql-tooltip');
+        if (tooltip) {
+          const visit = wrapper.getAttribute('data-link-visit');
+          const enter = wrapper.getAttribute('data-link-enter');
+          if (visit) tooltip.setAttribute('data-label-visit', visit);
+          if (enter) tooltip.setAttribute('data-label-enter', enter);
+
+          const actionEl = tooltip.querySelector('a.ql-action');
+          if (actionEl) {
+            const edit = wrapper.getAttribute('data-link-edit');
+            const save = wrapper.getAttribute('data-link-save');
+            if (edit) actionEl.setAttribute('data-label-edit', edit);
+            if (save) actionEl.setAttribute('data-label-save', save);
+          }
+
+          const removeEl = tooltip.querySelector('a.ql-remove');
+          if (removeEl) {
+            const remove = wrapper.getAttribute('data-link-remove');
+            if (remove) removeEl.setAttribute('data-label-remove', remove);
+          }
+        }
       }
     } catch (e) {
       // no-op
