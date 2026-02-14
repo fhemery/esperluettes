@@ -31,6 +31,7 @@
                         <th class="p-3">{{ __('story_ref::admin.genres.table.slug') }}</th>
                         <th class="p-3">{{ __('story_ref::admin.genres.table.description') }}</th>
                         <th class="p-3">{{ __('story_ref::admin.genres.table.active') }}</th>
+                        <th class="p-3">{{ __('story_ref::admin.genres.table.has_cover') }}</th>
                         <th class="p-3">{{ __('story_ref::admin.genres.table.actions') }}</th>
                     </tr>
                 </thead>
@@ -43,6 +44,17 @@
                             <td class="p-3 text-fg/70 max-w-xs truncate">{{ $genre->description ?? '-' }}</td>
                             <td class="p-3">
                                 <x-administration::active-badge :active="$genre->is_active" />
+                            </td>
+                            <td class="p-3">
+                                @if($genre->has_cover)
+                                    @if(file_exists(public_path("images/story/{$genre->slug}.jpg")))
+                                        <span class="material-symbols-outlined text-green-600 text-lg" title="{{ __('story_ref::admin.genres.cover_ok') }}">image</span>
+                                    @else
+                                        <span class="material-symbols-outlined text-amber-600 text-lg" title="{{ __('story_ref::admin.genres.cover_missing') }}">broken_image</span>
+                                    @endif
+                                @else
+                                    <span class="text-fg/30">—</span>
+                                @endif
                             </td>
                             <td class="p-3">
                                 <div class="flex gap-2">
@@ -60,7 +72,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-6 text-center text-fg/50">
+                            <td colspan="7" class="p-6 text-center text-fg/50">
                                 {{ __('story_ref::admin.genres.no_genres') }}
                             </td>
                         </tr>

@@ -205,10 +205,14 @@ return [
             'slug' => 'Slug',
             'description' => 'Description',
             'active' => 'Actif',
+            'has_cover' => 'Couverture',
             'actions' => 'Actions',
             'created_at' => 'Créé le',
             'updated_at' => 'Mis à jour le',
         ],
+
+        'cover_ok' => 'Fichier couverture présent',
+        'cover_missing' => 'Fichier couverture manquant',
 
         'active_yes' => 'Actif',
         'active_no' => 'Inactif',
@@ -219,6 +223,9 @@ return [
             'slug_help' => 'Lettres minuscules, chiffres et tirets uniquement (ex: fantaisie, science-fiction)',
             'description' => 'Description',
             'is_active' => 'Genre actif (visible dans les formulaires)',
+            'has_cover' => 'Ce genre dispose d\'une couverture thématique',
+            'cover_file_exists' => 'Fichier :file trouvé',
+            'cover_file_missing' => 'Fichier :file introuvable dans public/images/story/',
 
             'create' => 'Créer le genre',
             'update' => 'Mettre à jour',

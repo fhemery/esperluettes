@@ -18,6 +18,8 @@
 @php($isExcludedFromEventsOld = old('is_excluded_from_events', $story?->is_excluded_from_events ?? false))
 @php($coverTypeOld = old('cover_type', $story?->cover_type ?? 'default'))
 @php($coverDataOld = old('cover_data', $story?->cover_data ?? ''))
+@php($coverSelectionEnabled = \App\Domains\Story\Private\Support\FeatureToggles::isCoverSelectionEnabled())
+@php($themedCoverEnabled = \App\Domains\Story\Private\Support\FeatureToggles::isThemeCoverEnabled())
 @php($twDisclosureOptions = [
 ['value' => 'listed', 'label' => __('story::shared.trigger_warnings.form_options.listed'), 'description' => __('story::shared.trigger_warnings.listed_help')],
 ['value' => 'no_tw', 'label' => __('story::shared.trigger_warnings.form_options.no_tw'), 'description' => __('story::shared.trigger_warnings.no_tw_help')],
@@ -29,7 +31,7 @@
         coverType: @js($coverTypeOld),
         coverData: @js($coverDataOld),
         defaultCoverUrl: @js(asset('images/story/default-cover.svg')),
-        genres: @js(collect($referentials['genres'] ?? [])->map(fn($g) => ['id' => (string)($g['id'] ?? $g['slug'] ?? ''), 'slug' => (string)($g['slug'] ?? ''), 'name' => (string)($g['name'] ?? '')])->values()->all()),
+        genres: @js(collect($referentials['genres'] ?? [])->filter(fn($g) => !empty($g['has_cover']))->map(fn($g) => ['id' => (string)($g['id'] ?? $g['slug'] ?? ''), 'slug' => (string)($g['slug'] ?? ''), 'name' => (string)($g['name'] ?? '')])->values()->all()),
         selectedGenreIds: @js($selectedGenreIds),
     })">
 
@@ -150,12 +152,14 @@
                         <img :src="coverPreviewUrl" alt="" class="w-[150px] object-contain" loading="lazy" />
                     </template>
                 </div>
-                <button type="button"
-                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md border border-accent text-accent hover:bg-accent/10 transition-colors"
-                    @click="$dispatch('open-modal', 'cover-selector')">
-                    <span class="material-symbols-outlined text-[18px]">image</span>
-                    {{ __('story::shared.cover.change') }}
-                </button>
+                @if($coverSelectionEnabled)
+                    <button type="button"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md border border-accent text-accent hover:bg-accent/10 transition-colors"
+                        @click="$dispatch('open-modal', 'cover-selector')">
+                        <span class="material-symbols-outlined text-[18px]">image</span>
+                        {{ __('story::shared.cover.change') }}
+                    </button>
+                @endif
                 <x-input-error :messages="$errors->get('cover_type')" />
                 <x-input-error :messages="$errors->get('cover_data')" />
             </div>
@@ -255,7 +259,9 @@
         </div>
     </x-shared::collapsible>
 
-    <x-story::cover-selector-modal />
+    @if($coverSelectionEnabled)
+        <x-story::cover-selector-modal :themedEnabled="$themedCoverEnabled" />
+    @endif
 </div>
 
 @once

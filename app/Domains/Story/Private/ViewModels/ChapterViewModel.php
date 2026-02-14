@@ -65,6 +65,7 @@ class ChapterStoryViewModel {
         public readonly string $slug,
         public readonly string $coverType,
         public readonly string $coverUrl,
+        public readonly ?string $coverHdUrl,
         /** @var array<ShortChapterViewModel> */
         public readonly array $chapters,
     ) {
@@ -80,6 +81,7 @@ class ChapterStoryViewModel {
             slug: $story->slug,
             coverType: (string) ($story->cover_type ?? Story::COVER_DEFAULT),
             coverUrl: $coverService->getCoverUrl($story),
+            coverHdUrl: $coverService->getCoverHdUrl($story),
             chapters: array_map(fn(Chapter $chapter) => ShortChapterViewModel::from($chapter), $chapters),
         );
     }

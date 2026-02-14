@@ -1,13 +1,16 @@
-@props(['defaultCoverUrl' => asset('images/story/default-cover.svg')])
+@props(['defaultCoverUrl' => asset('images/story/default-cover.svg'), 'themedEnabled' => false])
 
 <x-shared::modal name="cover-selector" maxWidth="2xl">
     <div class="p-6">
         <h2 class="text-lg font-semibold mb-4">{{ __('story::shared.cover.modal_title') }}</h2>
 
-        <x-shared::tabs color="primary" :tabs="[
-            ['key' => 'default', 'label' => __('story::shared.cover.tab_default')],
-            ['key' => 'themed', 'label' => __('story::shared.cover.tab_themed')],
-        ]" initial="default">
+        @php
+            $tabs = [['key' => 'default', 'label' => __('story::shared.cover.tab_default')]];
+            if ($themedEnabled) {
+                $tabs[] = ['key' => 'themed', 'label' => __('story::shared.cover.tab_themed')];
+            }
+        @endphp
+        <x-shared::tabs color="primary" :tabs="$tabs" initial="default">
 
             {{-- Default tab --}}
             <div x-show="tab === 'default'" class="flex flex-col sm:flex-row gap-6 items-start pt-4">
@@ -24,6 +27,7 @@
             </div>
 
             {{-- Themed tab --}}
+            @if($themedEnabled)
             <div x-show="tab === 'themed'" x-cloak class="flex flex-col sm:flex-row gap-6 items-start pt-4">
                 <div class="flex-shrink-0 w-[150px]">
                     <template x-if="modalPreviewSlug">
@@ -58,6 +62,7 @@
                     </template>
                 </div>
             </div>
+            @endif
 
         </x-shared::tabs>
 

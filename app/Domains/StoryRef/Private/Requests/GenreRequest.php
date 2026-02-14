@@ -29,6 +29,7 @@ class GenreRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
             'order' => $isUpdate ? ['sometimes', 'integer', 'min:0'] : ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
+            'has_cover' => ['boolean'],
         ];
     }
 
@@ -36,6 +37,7 @@ class GenreRequest extends FormRequest
     {
         $this->merge([
             'is_active' => $this->boolean('is_active'),
+            'has_cover' => $this->boolean('has_cover'),
         ]);
     }
 

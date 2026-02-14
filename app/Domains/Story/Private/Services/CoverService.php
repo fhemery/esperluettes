@@ -3,6 +3,9 @@
 namespace App\Domains\Story\Private\Services;
 
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
+use App\Domains\StoryRef\Public\Contracts\GenreDto;
+use App\Domains\StoryRef\Public\Contracts\StoryRefFilterDto;
 
 class CoverService
 {
@@ -59,5 +62,33 @@ class CoverService
             return null;
         }
         return asset("images/story/{$genreSlug}-hd.jpg");
+    }
+
+    /**
+     * Return genres that have a themed cover available.
+     * Checks both has_cover flag AND file existence on disk.
+     *
+     * @param int[] $genreIds  Restrict to these genre IDs (e.g. the story's current genres)
+     * @return array<int, array{id:int,slug:string,name:string}>
+     */
+    public function getAvailableThemedCovers(array $genreIds = []): array
+    {
+        /** @var StoryRefPublicApi $storyRefs */
+        $storyRefs = app(StoryRefPublicApi::class);
+        $allGenres = $storyRefs->getAllGenres(new StoryRefFilterDto(activeOnly: true));
+
+        return $allGenres
+            ->filter(function (GenreDto $g) use ($genreIds) {
+                if (!$g->has_cover) {
+                    return false;
+                }
+                if (!empty($genreIds) && !in_array($g->id, $genreIds, false)) {
+                    return false;
+                }
+                return file_exists(public_path("images/story/{$g->slug}.jpg"));
+            })
+            ->map(fn (GenreDto $g) => ['id' => $g->id, 'slug' => $g->slug, 'name' => $g->name])
+            ->values()
+            ->all();
     }
 }
