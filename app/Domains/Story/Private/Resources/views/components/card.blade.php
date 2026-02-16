@@ -15,7 +15,12 @@
 
     <div class="w-[230px] h-[306px] mx-auto overflow-hidden">
         <a href="{{ url('/stories/' . $item->getSlug()) }}" class="block">
-            <x-story::cover :coverType="$item->coverType" :coverUrl="$item->coverUrl" :width="230" />
+            <x-story::cover 
+                :coverType="$item->coverType" 
+                :coverUrl="$item->coverUrl" 
+                :width="230"
+                :authorNames="array_map(fn($a) => $a->display_name, $item->getAuthors())"
+                :storyTitle="$item->getTitle()" />
         </a>
     </div>
 

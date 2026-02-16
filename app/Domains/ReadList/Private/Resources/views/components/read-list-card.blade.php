@@ -9,8 +9,20 @@
     {{-- Cover --}}
     <div class="col-start-1 row-start-1 row-span-3 w-[115px] h-[153px] md:w-[230px] md:h-[306px] mx-auto overflow-hidden">
         <a href="{{ url('/stories/' . $item->slug) }}" class="block">
-            <x-story::cover class="lg:block hidden" :coverType="$item->coverType" :coverUrl="$item->coverUrl" :width="230" />
-            <x-story::cover class="lg:hidden block" :coverType="$item->coverType" :coverUrl="$item->coverUrl" :width="150" />
+            <x-story::cover 
+                class="lg:block hidden" 
+                :coverType="$item->coverType" 
+                :coverUrl="$item->coverUrl" 
+                :width="230"
+                :authorNames="array_map(fn($a) => $a->display_name, $item->authors)"
+                :storyTitle="$item->title" />
+            <x-story::cover 
+                class="lg:hidden block" 
+                :coverType="$item->coverType" 
+                :coverUrl="$item->coverUrl" 
+                :width="150"
+                :authorNames="array_map(fn($a) => $a->display_name, $item->authors)"
+                :storyTitle="$item->title" />
         </a>
     </div>
 

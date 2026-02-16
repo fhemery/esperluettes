@@ -81,8 +81,24 @@
             <div
                 class="col-start-1 col-span-1 row-start-2 row-span-3
                     flex flex-col gap-2 items-center justify-center">
-                <x-story::cover class="lg:block hidden" :coverType="$viewModel->coverType" :coverUrl="$viewModel->coverUrl" :coverHdUrl="$viewModel->coverHdUrl" :hd="true" :width="230" />
-                <x-story::cover class="lg:hidden block" :coverType="$viewModel->coverType" :coverUrl="$viewModel->coverUrl" :coverHdUrl="$viewModel->coverHdUrl" :hd="true" :width="150" />
+                <x-story::cover 
+                    class="lg:block hidden" 
+                    :coverType="$viewModel->coverType" 
+                    :coverUrl="$viewModel->coverUrl" 
+                    :coverHdUrl="$viewModel->coverHdUrl" 
+                    :hd="true" 
+                    :width="230"
+                    :authorNames="array_map(fn($a) => $a->display_name, $viewModel->authors)"
+                    :storyTitle="$viewModel->getTitle()" />
+                <x-story::cover 
+                    class="lg:hidden block" 
+                    :coverType="$viewModel->coverType" 
+                    :coverUrl="$viewModel->coverUrl" 
+                    :coverHdUrl="$viewModel->coverHdUrl" 
+                    :hd="true" 
+                    :width="150"
+                    :authorNames="array_map(fn($a) => $a->display_name, $viewModel->authors)"
+                    :storyTitle="$viewModel->getTitle()" />
                 <x-read-list::read-list-toggle-component :story-id="$viewModel->getId()" :is-author="$viewModel->isAuthor()" />
             </div>
 

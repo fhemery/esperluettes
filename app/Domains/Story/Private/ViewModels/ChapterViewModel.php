@@ -68,13 +68,16 @@ class ChapterStoryViewModel {
         public readonly ?string $coverHdUrl,
         /** @var array<ShortChapterViewModel> */
         public readonly array $chapters,
+        /** @var array<string> */
+        public readonly array $authorNames,
     ) {
     }
 
     /**
      * @param array<Chapter> $chapters
+     * @param array<\App\Domains\Shared\Dto\ProfileDto> $authors
      */
-    static function from(Story $story, array $chapters, CoverService $coverService) : self
+    static function from(Story $story, array $chapters, CoverService $coverService, array $authors = []) : self
     {
         return new self(
             title: $story->title,
@@ -83,6 +86,7 @@ class ChapterStoryViewModel {
             coverUrl: $coverService->getCoverUrl($story),
             coverHdUrl: $coverService->getCoverHdUrl($story),
             chapters: array_map(fn(Chapter $chapter) => ShortChapterViewModel::from($chapter), $chapters),
+            authorNames: array_map(fn($a) => $a->display_name, $authors),
         );
     }
 }
@@ -133,7 +137,7 @@ class ChapterViewModel
         $coverImage = $coverService->getCoverUrl($story);
 
         return new self(
-            story: ChapterStoryViewModel::from($story, $chapters->all(), $coverService),
+            story: ChapterStoryViewModel::from($story, $chapters->all(), $coverService, $authors),
             chapter: CurrentChapterViewModel::from($chapter),
             isAuthor: $isAuthor,
             authors: $authors,
