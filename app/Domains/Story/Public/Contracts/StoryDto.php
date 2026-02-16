@@ -31,6 +31,8 @@ class StoryDto
         public ?int $publishedChaptersCount = null,
         public ?int $wordCount = null,
         public ?bool $isComplete = null,
+        public ?string $coverType = null,
+        public ?string $coverUrl = null,
     ) {
     }
 
@@ -46,6 +48,8 @@ class StoryDto
             createdAt: $story->created_at,
             lastChapterPublishedAt: $story->last_chapter_published_at,
             isComplete: isset($story->is_complete) ? (bool) $story->is_complete : null,
+            coverType: (string) ($story->cover_type ?? 'default'),
+            coverUrl: $helper->coverService->getCoverUrl($story),
         );
 
         if ($fieldsToReturn->includeGenreIds) {

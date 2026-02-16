@@ -13,11 +13,12 @@ class StoryRefGenre extends Model
     use HasSlugAndOrder;
 
     protected $fillable = [
-        'name', 'slug', 'description', 'order', 'is_active',
+        'name', 'slug', 'description', 'order', 'is_active', 'has_cover',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'has_cover' => 'boolean',
         'order' => 'integer',
     ];
 }

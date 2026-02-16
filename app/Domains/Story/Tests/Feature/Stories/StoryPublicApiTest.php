@@ -123,7 +123,8 @@ describe('Story public API', function () {
             expect($resp->title)->toBe('Test Story');
             expect($resp->slug)->toBe($story->slug);
             expect($resp->visibility)->toBe($story->visibility);
-            expect($resp->cover_url)->toBe('');
+            expect($resp->cover_type)->toBe('default');
+            expect($resp->cover_url)->toContain('images/story/default-cover.svg');
         });
 
         it('should sum the chapters of event private stories', function() {
@@ -146,5 +147,26 @@ describe('Story public API', function () {
             expect($resp->word_count)->toBe(4);
         });
 
+    });
+
+    describe('listStories cover data', function () {
+        it('returns coverType and coverUrl in StoryDto', function () {
+            $api = app(StoryPublicApi::class);
+            $alice = alice($this);
+            publicStory('Cover Story', $alice->id);
+
+            $result = $api->listStories(
+                filter: new \App\Domains\Story\Public\Contracts\StoryQueryFilterDto(
+                    visibilities: ['public'],
+                ),
+                pagination: new \App\Domains\Story\Public\Contracts\StoryQueryPaginationDto(page: 1, pageSize: 10),
+                fieldsToReturn: new \App\Domains\Story\Public\Contracts\StoryQueryFieldsToReturnDto(),
+            );
+
+            expect($result->data)->toHaveCount(1);
+            $dto = $result->data[0];
+            expect($dto->coverType)->toBe('default');
+            expect($dto->coverUrl)->toContain('images/story/default-cover.svg');
+        });
     });
 });

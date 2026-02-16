@@ -16,6 +16,7 @@ use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\ReadingProgressService;
+use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\ViewModels\ChapterViewModel;
@@ -36,6 +37,7 @@ class ChapterController
         private AuthPublicApi $authApi,
         private ChapterCreditService $chapterCreditService,
         private StoryRefPublicApi $storyRefs,
+        private CoverService $coverService,
     ) {
     }
 
@@ -155,7 +157,7 @@ class ChapterController
         foreach ($authors as $author) {
             $auth[] = $author;
         }
-        $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe, $auth, $feedbackVm);
+        $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe, $auth, $feedbackVm, $this->coverService);
 
         // Build PageViewModel
         $trail = BreadcrumbViewModel::FromHome($user !== null);

@@ -6,7 +6,14 @@
 <div class="flex flex-col items-center gap-2">
     <!-- Cover -->
     <div>
-        <x-shared::default-cover class="w-[230px] object-cover"/>
+        <x-story::cover 
+            :coverType="$story->coverType" 
+            :coverUrl="$story->coverUrl" 
+            :coverHdUrl="$story->coverHdUrl" 
+            :hd="true" 
+            :width="230"
+            :authorNames="$story->authorNames"
+            :storyTitle="$story->title" />
     </div>
     <!-- Title -->
     <div>

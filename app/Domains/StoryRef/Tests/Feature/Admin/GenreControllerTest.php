@@ -244,6 +244,67 @@ describe('Genre Admin Controller', function () {
         });
     });
 
+    describe('has_cover', function () {
+        it('creates a genre with has_cover enabled', function () {
+            $user = admin($this);
+
+            $response = $this->actingAs($user)
+                ->post(route('story_ref.admin.genres.store'), [
+                    'name' => 'Fantasy',
+                    'slug' => 'fantasy',
+                    'is_active' => true,
+                    'has_cover' => true,
+                    'order' => 1,
+                ]);
+
+            $response->assertRedirect(route('story_ref.admin.genres.index'));
+            $this->assertDatabaseHas('story_ref_genres', [
+                'slug' => 'fantasy',
+                'has_cover' => true,
+            ]);
+        });
+
+        it('creates a genre with has_cover defaulting to false', function () {
+            $user = admin($this);
+
+            $response = $this->actingAs($user)
+                ->post(route('story_ref.admin.genres.store'), [
+                    'name' => 'Romance',
+                    'slug' => 'romance',
+                    'is_active' => true,
+                    'order' => 1,
+                ]);
+
+            $response->assertRedirect(route('story_ref.admin.genres.index'));
+            $this->assertDatabaseHas('story_ref_genres', [
+                'slug' => 'romance',
+                'has_cover' => false,
+            ]);
+        });
+
+        it('updates has_cover on an existing genre', function () {
+            $user = admin($this);
+            $genre = StoryRefGenre::create([
+                'name' => 'Sci-Fi',
+                'slug' => 'sci-fi',
+                'is_active' => true,
+                'has_cover' => false,
+                'order' => 1,
+            ]);
+
+            $response = $this->actingAs($user)
+                ->put(route('story_ref.admin.genres.update', $genre), [
+                    'name' => 'Sci-Fi',
+                    'slug' => 'sci-fi',
+                    'is_active' => true,
+                    'has_cover' => true,
+                ]);
+
+            $response->assertRedirect(route('story_ref.admin.genres.index'));
+            expect($genre->fresh()->has_cover)->toBeTrue();
+        });
+    });
+
     describe('export', function () {
         it('shows the Export CSV button on the genres list page', function () {
             $user = admin($this);

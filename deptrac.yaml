@@ -433,6 +433,7 @@ deptrac:
       - AuthPublic
       - ModerationPublic
       - NotificationPublic
+      - ConfigPublic
 
     StoryRefPublic:
       - Shared
@@ -584,6 +585,7 @@ deptrac:
       - StoryPublic
       - StoryRefPublic
       - NotificationPublic
+      - ConfigPublic
 
     StoryRefPrivate:
       - Shared

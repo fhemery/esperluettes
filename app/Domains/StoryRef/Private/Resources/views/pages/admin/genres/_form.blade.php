@@ -86,6 +86,31 @@
         <x-shared::input-error :messages="$errors->get('is_active')" class="mt-1" />
     </div>
 
+    <!-- Has Cover -->
+    <div>
+        <x-shared::toggle
+            name="has_cover"
+            :checked="old('has_cover', $genre?->has_cover ?? false)"
+            :label="__('story_ref::admin.genres.form.has_cover')"
+        />
+        @php
+            $currentSlug = old('slug', $genre?->slug ?? '');
+            $coverFileExists = $currentSlug && file_exists(public_path("images/story/{$currentSlug}.jpg"));
+        @endphp
+        @if($currentSlug)
+            <p class="text-xs mt-1 flex items-center gap-1">
+                @if($coverFileExists)
+                    <span class="material-symbols-outlined text-green-600 text-sm">check_circle</span>
+                    <span class="text-green-700">{{ __('story_ref::admin.genres.form.cover_file_exists', ['file' => "{$currentSlug}.jpg"]) }}</span>
+                @else
+                    <span class="material-symbols-outlined text-amber-600 text-sm">warning</span>
+                    <span class="text-amber-700">{{ __('story_ref::admin.genres.form.cover_file_missing', ['file' => "{$currentSlug}.jpg"]) }}</span>
+                @endif
+            </p>
+        @endif
+        <x-shared::input-error :messages="$errors->get('has_cover')" class="mt-1" />
+    </div>
+
     <!-- Submit -->
     <div class="flex gap-4">
         <x-shared::button type="submit" color="primary" icon="save">

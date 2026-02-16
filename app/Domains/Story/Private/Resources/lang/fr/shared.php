@@ -3,9 +3,24 @@
 return [
     'panels' => [
         'general' => 'Informations générales',
+        'presentation' => 'Présentation',
         'details' => 'Détails',
         'audience' => 'Audience',
         'misc' => 'Divers',
+    ],
+    'cover' => [
+        'label' => 'Couverture',
+        'change' => 'Changer la couverture',
+        'modal_title' => 'Choisir une couverture',
+        'tab_default' => 'Par défaut',
+        'tab_themed' => 'Par thème',
+        'tab_custom' => 'Personnelle',
+        'default_description' => 'La couverture par défaut du Jardin',
+        'themed_description' => 'Choisissez une couverture correspondant à un genre de votre histoire',
+        'themed_select_genre' => 'Genre',
+        'themed_no_genres' => 'Aucune couverture disponible pour les thèmes sélectionnés',
+        'select' => 'Sélectionner',
+        'cancel' => 'Annuler',
     ],
     'visibility' => [
         'label' => 'Visibilité',

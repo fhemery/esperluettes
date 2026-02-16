@@ -4,6 +4,7 @@ namespace App\Domains\Story\Private\ViewModels;
 
 use App\Domains\Shared\Dto\ProfileDto;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\CoverService;
 
 class StorySummaryViewModel
 {
@@ -17,6 +18,8 @@ class StorySummaryViewModel
     public readonly int $chaptersCount;
     public readonly int $wordsTotal;
     public readonly string $twDisclosure;
+    public readonly string $coverType;
+    public readonly string $coverUrl;
 
     public function __construct(
         public readonly int $id,
@@ -30,6 +33,8 @@ class StorySummaryViewModel
         array $genreNames = [],
         array $triggerWarningNames = [],
         string $twDisclosure = Story::TW_UNSPOILED,
+        string $coverType = Story::COVER_DEFAULT,
+        string $coverUrl = '',
     ) {
         /** @var ProfileDto[] $authors */
         $this->authors = $authors;
@@ -39,9 +44,11 @@ class StorySummaryViewModel
         $this->chaptersCount = max(0, (int)$chaptersCount);
         $this->wordsTotal = max(0, (int)$wordsTotal);
         $this->twDisclosure = (string)$twDisclosure;
+        $this->coverType = $coverType;
+        $this->coverUrl = $coverUrl;
     }
 
-    public static function fromStory(Story $story, array $genresRef, array $triggerWarningRef): self
+    public static function fromStory(Story $story, array $genresRef, array $triggerWarningRef, CoverService $coverService): self
     {
         return new self(
             $story->id,
@@ -55,6 +62,8 @@ class StorySummaryViewModel
             $story->genre_names,
             $story->trigger_warning_names,
             $story->twDisclosure,
+            coverType: (string) ($story->cover_type ?? Story::COVER_DEFAULT),
+            coverUrl: $coverService->getCoverUrl($story),
         );
     }
 

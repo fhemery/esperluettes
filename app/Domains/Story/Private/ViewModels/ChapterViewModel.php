@@ -4,6 +4,7 @@ namespace App\Domains\Story\Private\ViewModels;
 
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Shared\ViewModels\RefViewModel;
 use App\Domains\Shared\ViewModels\SeoViewModel;
 use Illuminate\Support\Collection;
@@ -62,22 +63,30 @@ class ChapterStoryViewModel {
     public function __construct(
         public readonly string $title,
         public readonly string $slug,
+        public readonly string $coverType,
         public readonly string $coverUrl,
+        public readonly ?string $coverHdUrl,
         /** @var array<ShortChapterViewModel> */
         public readonly array $chapters,
+        /** @var array<string> */
+        public readonly array $authorNames,
     ) {
     }
 
     /**
      * @param array<Chapter> $chapters
+     * @param array<\App\Domains\Shared\Dto\ProfileDto> $authors
      */
-    static function from(Story $story, array $chapters) : self
+    static function from(Story $story, array $chapters, CoverService $coverService, array $authors = []) : self
     {
         return new self(
             title: $story->title,
             slug: $story->slug,
-            coverUrl: $story->cover_url ?? asset('images/story/default-cover.svg'),
+            coverType: (string) ($story->cover_type ?? Story::COVER_DEFAULT),
+            coverUrl: $coverService->getCoverUrl($story),
+            coverHdUrl: $coverService->getCoverHdUrl($story),
             chapters: array_map(fn(Chapter $chapter) => ShortChapterViewModel::from($chapter), $chapters),
+            authorNames: array_map(fn($a) => $a->display_name, $authors),
         );
     }
 }
@@ -101,8 +110,10 @@ class ChapterViewModel
     ) {
     }
 
-    public static function from(Story $story, Chapter $chapter, bool $isAuthor, bool $isReadByMe = false, array $authors, ?RefViewModel $feedback = null): self
+    public static function from(Story $story, Chapter $chapter, bool $isAuthor, bool $isReadByMe = false, array $authors, ?RefViewModel $feedback = null, ?CoverService $coverService = null): self
     {
+        $coverService ??= app(CoverService::class);
+
         // Chapters should be eager-loaded and ordered by sort_order
         /** @var Collection<int, Chapter> $chapters */
         $chapters = $story->chapters;
@@ -123,10 +134,10 @@ class ChapterViewModel
 
         $rawTitle = ($story->title ?? '') . ' — ' . ($chapter->title ?? '');
         $pageTitle = Str::limit(strip_tags($rawTitle), 160, '');
-        $coverImage = $story->cover_url ?? asset('images/story/default-cover.svg');
+        $coverImage = $coverService->getCoverUrl($story);
 
         return new self(
-            story: ChapterStoryViewModel::from($story, $chapters->all()),
+            story: ChapterStoryViewModel::from($story, $chapters->all(), $coverService, $authors),
             chapter: CurrentChapterViewModel::from($chapter),
             isAuthor: $isAuthor,
             authors: $authors,

@@ -4,11 +4,11 @@
     <meta property="og:type" content="article">
     <meta property="og:title" content="{{ $viewModel->getTitle() }}">
     <meta property="og:description" content="{{ $metaDescription }}">
-    <meta property="og:image" content="{{ asset('images/story/default-cover.svg') }}">
+    <meta property="og:image" content="{{ $viewModel->coverUrl }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $viewModel->getTitle() }}">
     <meta name="twitter:description" content="{{ $metaDescription }}">
-    <meta name="twitter:image" content="{{ asset('images/story/default-cover.svg') }}">
+    <meta name="twitter:image" content="{{ $viewModel->coverUrl }}">
 @endpush
 
 <x-app-layout :page="$page">
@@ -81,7 +81,24 @@
             <div
                 class="col-start-1 col-span-1 row-start-2 row-span-3
                     flex flex-col gap-2 items-center justify-center">
-                <x-shared::default-cover class="w-[150px] h-[200px] md:w-full md:h-full object-cover" />
+                <x-story::cover 
+                    class="lg:block hidden" 
+                    :coverType="$viewModel->coverType" 
+                    :coverUrl="$viewModel->coverUrl" 
+                    :coverHdUrl="$viewModel->coverHdUrl" 
+                    :hd="true" 
+                    :width="230"
+                    :authorNames="array_map(fn($a) => $a->display_name, $viewModel->authors)"
+                    :storyTitle="$viewModel->getTitle()" />
+                <x-story::cover 
+                    class="lg:hidden block" 
+                    :coverType="$viewModel->coverType" 
+                    :coverUrl="$viewModel->coverUrl" 
+                    :coverHdUrl="$viewModel->coverHdUrl" 
+                    :hd="true" 
+                    :width="150"
+                    :authorNames="array_map(fn($a) => $a->display_name, $viewModel->authors)"
+                    :storyTitle="$viewModel->getTitle()" />
                 <x-read-list::read-list-toggle-component :story-id="$viewModel->getId()" :is-author="$viewModel->isAuthor()" />
             </div>
 

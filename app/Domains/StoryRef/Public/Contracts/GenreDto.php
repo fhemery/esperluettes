@@ -13,6 +13,7 @@ class GenreDto
         public readonly ?string $description,
         public readonly bool $is_active,
         public readonly ?int $order,
+        public readonly bool $has_cover = false,
     ) {}
 
     public static function fromModel(StoryRefGenre $model): self
@@ -24,11 +25,12 @@ class GenreDto
             description: $model->description !== null ? (string) $model->description : null,
             is_active: (bool) $model->is_active,
             order: $model->order !== null ? (int) $model->order : null,
+            has_cover: (bool) ($model->has_cover ?? false),
         );
     }
 
     /**
-     * @return array{id:int,slug:string,name:string,description:?string,is_active:bool,order:?int}
+     * @return array{id:int,slug:string,name:string,description:?string,is_active:bool,order:?int,has_cover:bool}
      */
     public function toArray(): array
     {
@@ -39,6 +41,7 @@ class GenreDto
             'description' => $this->description,
             'is_active' => $this->is_active,
             'order' => $this->order,
+            'has_cover' => $this->has_cover,
         ];
     }
 }

@@ -55,6 +55,11 @@ use App\Domains\Story\Public\Notifications\CollaboratorRoleGivenNotification;
 use App\Domains\Story\Public\Notifications\CollaboratorRemovedNotification;
 use App\Domains\Story\Public\Notifications\CollaboratorLeftNotification;
 use App\Domains\Story\Private\Console\BackfillChapterCommentNotificationsCommand;
+use App\Domains\Config\Public\Api\ConfigPublicApi;
+use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
+use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
+use App\Domains\Shared\Contracts\ParameterType;
+use App\Domains\Story\Private\Support\FeatureToggles;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -66,7 +71,9 @@ class StoryServiceProvider extends ServiceProvider
                 BackfillChapterCommentNotificationsCommand::class,
             ]);
         }
-        
+
+        $this->registerConfigParameters();
+
         // Load domain migrations
         $this->loadMigrationsFrom(app_path('Domains/Story/Database/Migrations'));
 
@@ -170,5 +177,26 @@ class StoryServiceProvider extends ServiceProvider
             type: CollaboratorLeftNotification::type(),
             class: CollaboratorLeftNotification::class
         );
+    }
+
+    protected function registerConfigParameters(): void
+    {
+        $configApi = app(ConfigPublicApi::class);
+
+        $configApi->registerParameter(new ConfigParameterDefinition(
+            domain: FeatureToggles::DOMAIN,
+            key: FeatureToggles::THEME_COVERS_ENABLED,
+            type: ParameterType::BOOL,
+            default: false,
+            visibility: ConfigParameterVisibility::ALL_ADMINS,
+        ));
+
+        $configApi->registerParameter(new ConfigParameterDefinition(
+            domain: FeatureToggles::DOMAIN,
+            key: FeatureToggles::CUSTOM_COVERS_ENABLED,
+            type: ParameterType::BOOL,
+            default: false,
+            visibility: ConfigParameterVisibility::ALL_ADMINS,
+        ));
     }
 }
