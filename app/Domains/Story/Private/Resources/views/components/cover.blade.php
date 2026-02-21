@@ -31,9 +31,9 @@
                 loading="lazy" @click="lightboxOpen = true" />
             
             @if($showText)
-                <div class="absolute inset-0 pointer-events-none flex flex-col text-read" style="padding: 24px 22px 0 22px;">
+                <div class="absolute inset-0 pointer-events-none flex flex-col text-read" style="padding: 20px 22px 0 22px;">
                     @if($authorsText)
-                        <div class="text-center uppercase overflow-hidden text-ellipsis whitespace-nowrap" 
+                        <div class="text-center uppercase overflow-hidden text-ellipsis whitespace-nowrap pb-1" 
                             style="font-family: 'Aptos', sans-serif; font-size: 9px; font-weight: 400; letter-spacing: 0.02em;">
                             {{ $authorsText }}
                         </div>
@@ -82,9 +82,9 @@
                     @if($showText)
                         {{-- Scale text proportionally based on actual image width ratio --}}
                         <div class="absolute inset-0 pointer-events-none flex flex-col text-read" 
-                            :style="`padding: ${24 * ratio}px ${22 * ratio}px 0 ${22 * ratio}px;`">
+                            :style="`padding: ${20 * ratio}px ${22 * ratio}px 0 ${22 * ratio}px;`">
                             @if($authorsText)
-                                <div class="text-center uppercase overflow-hidden text-ellipsis whitespace-nowrap" 
+                                <div class="text-center uppercase overflow-hidden text-ellipsis whitespace-nowrap pb-1" 
                                     :style="`font-family: 'Aptos', sans-serif; font-size: ${9 * ratio}px; font-weight: 400; letter-spacing: 0.02em;`">
                                     {{ $authorsText }}
                                 </div>
@@ -106,9 +106,9 @@
             <img src="{{ $coverUrl }}" alt="" class="{{ $widthClass }} object-contain" loading="lazy" />
             
             @if($showText)
-                 <div class="absolute inset-0 pointer-events-none flex flex-col text-read" style="padding: 24px 22px 0 22px;">
+                 <div class="absolute inset-0 pointer-events-none flex flex-col text-read" style="padding: 20px 22px 0 22px;">
                     @if($authorsText)
-                        <div class="text-center uppercase overflow-hidden text-ellipsis whitespace-nowrap" 
+                        <div class="text-center uppercase overflow-hidden text-ellipsis whitespace-nowrap pb-1" 
                             style="font-family: 'Aptos', sans-serif; font-size: 9px; font-weight: 400; letter-spacing: 0.02em;">
                             {{ $authorsText }}
                         </div>
