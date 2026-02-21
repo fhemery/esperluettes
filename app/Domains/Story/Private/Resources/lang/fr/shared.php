@@ -17,7 +17,7 @@ return [
         'tab_themed' => 'Par genre',
         'tab_custom' => 'Personnelle',
         'default_description' => 'La couverture par défaut du Jardin. Une Esperluette neutre, sur un fond neutre.',
-        'themed_description' => 'Choisissez une couverture correspondant à un genre de votre histoire',
+        'themed_description' => 'Choisissez une couverture correspondant à un genre de votre histoire. Le titre et le pseudo seront automatiquement ajoutés en haut de la couverture après sauvegarde.',
         'themed_select_genre' => 'Genre',
         'themed_no_genres' => 'Aucune couverture disponible pour les genres sélectionnés',
         'select_default' => 'Sélectionner la couverture par défaut',
