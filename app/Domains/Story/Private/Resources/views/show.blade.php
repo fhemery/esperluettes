@@ -21,7 +21,7 @@
 
             <!-- Title -->
             <div class="col-span-2 lg:col-start-1 lg:col-end-4 flex items-center justify-between">
-                <div class="flex flex-wrap sm:flex-no-wrap flex-1 items-center gap-2">
+                <div class="flex flex-wrap sm:flex-no-wrap flex-1 items-center gap-2 line-clamp-3">
                     <x-shared::title class="mb-0">
                         <span>{{ $viewModel->getTitle() }}</span>
                     </x-shared::title>
@@ -51,7 +51,7 @@
                 </div>
 
                 @if ($viewModel->isAuthor())
-                    <div class="flex items-center gap-2 sm:mt-0">
+                    <div class="flex items-center gap-2 sm:mt-0 flex-shrink-0">
                         <a href="{{ route('stories.collaborators.index', ['slug' => $viewModel->getSlug()]) }}"
                             aria-label="{{ __('story::collaborators.manage') }}" title="{{ __('story::collaborators.manage') }}"
                             class="relative">

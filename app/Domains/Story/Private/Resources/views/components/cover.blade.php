@@ -40,7 +40,7 @@
                     @endif
                     @if($storyTitle)
                         <div class="text-center uppercase" 
-                            style="font-family: 'Aptos', sans-serif; font-size: 18px; font-weight: 600; line-height: 0.8; 
+                            style="font-family: 'Aptos', sans-serif; font-size: 18px; font-weight: 600; line-height: 0.85; 
                                    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
                             {{ $storyTitle }}
                         </div>
@@ -91,7 +91,7 @@
                             @endif
                             @if($storyTitle)
                                 <div class="text-center uppercase" 
-                                    :style="`font-family: 'Aptos', sans-serif; font-size: ${18 * ratio}px; font-weight: 600; line-height: 1;
+                                    :style="`font-family: 'Aptos', sans-serif; font-size: ${18 * ratio}px; font-weight: 600; line-height: 0.85;
                                            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;`">
                                     {{ $storyTitle }}
                                 </div>
@@ -115,7 +115,7 @@
                     @endif
                     @if($storyTitle)
                         <div class="text-center uppercase" 
-                            style="font-family: 'Aptos', sans-serif; font-size: 18px; font-weight: 600; line-height: 0.8; 
+                            style="font-family: 'Aptos', sans-serif; font-size: 18px; font-weight: 600; line-height: 0.85; 
                                    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
                             {{ $storyTitle }}
                         </div>
