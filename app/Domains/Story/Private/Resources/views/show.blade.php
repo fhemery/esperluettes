@@ -274,6 +274,7 @@
                                 id="story-moderator-btn">
                                 <x-moderation::action :action="route('stories.moderation.make-private', $viewModel->getSlug())" method="POST" :label="__('story::moderation.make_private.label')" />
                                 <x-moderation::action :action="route('stories.moderation.empty-summary', $viewModel->getSlug())" method="POST" :label="__('story::moderation.empty_summary.label')" />
+                                <x-moderation::action :action="route('stories.moderation.remove-cover', $viewModel->getSlug())" method="POST" :label="__('story::moderation.remove_cover.label')" />
                             </x-moderation::moderation-button>
                         @endif
                     </div>

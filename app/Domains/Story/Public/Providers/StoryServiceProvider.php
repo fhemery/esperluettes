@@ -21,6 +21,7 @@ use App\Domains\Story\Public\Events\ChapterDeleted;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use App\Domains\Story\Public\Events\StoryModeratedAsPrivate;
 use App\Domains\Story\Public\Events\StorySummaryModerated;
+use App\Domains\Story\Public\Events\StoryCoverModerated;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -118,6 +119,7 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->registerEvent(StoryVisibilityChanged::name(), StoryVisibilityChanged::class);
         $eventBus->registerEvent(StoryModeratedAsPrivate::name(), StoryModeratedAsPrivate::class);
         $eventBus->registerEvent(StorySummaryModerated::name(), StorySummaryModerated::class);
+        $eventBus->registerEvent(StoryCoverModerated::name(), StoryCoverModerated::class);
         $eventBus->registerEvent(ChapterUnpublishedByModeration::name(), ChapterUnpublishedByModeration::class);
         $eventBus->registerEvent(ChapterContentModerated::name(), ChapterContentModerated::class);
         $eventBus->registerEvent(ChapterCommentNotificationsBackfilled::name(), ChapterCommentNotificationsBackfilled::class);

@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Story\Public\Events\StoryModeratedAsPrivate;
 use App\Domains\Story\Public\Events\StorySummaryModerated;
+use App\Domains\Story\Public\Events\StoryCoverModerated;
 
 class StoryModerationController
 {
@@ -39,5 +40,11 @@ class StoryModerationController
             }
         }
         return redirect()->back()->with('success', __('story::moderation.empty_summary.success'));
+    }
+
+    public function removeCover(string $slug): RedirectResponse
+    {
+        $this->service->removeCover($slug);
+        return redirect()->back()->with('success', __('story::moderation.remove_cover.success'));
     }
 }

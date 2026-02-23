@@ -24,6 +24,7 @@ use App\Domains\Story\Private\Repositories\StoryRepository;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use App\Domains\Story\Public\Events\StoryExcludedFromEvents;
+use App\Domains\Story\Public\Events\StoryCoverModerated;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -223,6 +224,40 @@ class StoryService
         }
 
         $this->storiesRepository->clearDescription($story->id);
+        return true;
+    }
+
+    /**
+     * Remove a story's custom cover, reverting to default. Returns true if it changed, false if already default.
+     */
+    public function removeCover(string $slug): bool
+    {
+        $story = $this->getStory($slug);
+        if (!$story) {
+            abort(404);
+        }
+
+        if ($story->cover_type === Story::COVER_DEFAULT) {
+            return false;
+        }
+
+        $ownerId = (int) $story->created_by_user_id;
+
+        if ($story->cover_type === Story::COVER_CUSTOM) {
+            $this->coverService->deleteCustomCover($story);
+        }
+
+        Story::query()->whereKey($story->id)->update([
+            'cover_type' => Story::COVER_DEFAULT,
+            'cover_data' => null,
+        ]);
+
+        $this->eventBus->emit(new StoryCoverModerated(
+            storyId: (int) $story->id,
+            title: (string) $story->title,
+            storyOwnerId: $ownerId,
+        ));
+
         return true;
     }
 
