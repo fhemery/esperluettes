@@ -36,6 +36,8 @@ class StoryRequest extends FormRequest
             'is_excluded_from_events' => ['nullable', 'boolean'],
             'cover_type' => ['nullable', 'in:' . implode(',', Story::coverTypeOptions())],
             'cover_data' => ['nullable', 'string', 'max:255'],
+            'cover_image' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'cover_rights_confirmed' => ['nullable', 'boolean'],
         ];
     }
 
@@ -128,6 +130,8 @@ class StoryRequest extends FormRequest
             'tw_disclosure.required' => __('story::validation.tw_disclosure.required'),
             'tw_disclosure.in' => __('story::validation.tw_disclosure.in'),
             'tw_disclosure.listed_requires_tw' => __('story::validation.tw_disclosure.listed_requires_tw'),
+
+            'cover_rights_confirmed' => __('story::validation.cover_rights_confirmed.required'),
         ];
     }
 
@@ -141,6 +145,11 @@ class StoryRequest extends FormRequest
             // When 'listed' is selected, at least one TW must be provided
             if ($disclosure === Story::TW_LISTED && empty($twIds)) {
                 $v->errors()->add('tw_disclosure', __('story::validation.tw_disclosure.listed_requires_tw'));
+            }
+
+            // When uploading a custom cover image, rights checkbox must be confirmed
+            if ($this->hasFile('cover_image') && !$this->boolean('cover_rights_confirmed')) {
+                $v->errors()->add('cover_rights_confirmed', __('story::validation.cover_rights_confirmed.required'));
             }
         });
     }

@@ -20,6 +20,8 @@
 @php($coverDataOld = old('cover_data', $story?->cover_data ?? ''))
 @php($coverSelectionEnabled = \App\Domains\Story\Private\Support\FeatureToggles::isCoverSelectionEnabled())
 @php($themedCoverEnabled = \App\Domains\Story\Private\Support\FeatureToggles::isThemeCoverEnabled())
+@php($customCoverEnabled = \App\Domains\Story\Private\Support\FeatureToggles::isCustomCoverEnabled())
+@php($existingCustomCoverUrl = ($story && $customCoverEnabled) ? app(\App\Domains\Story\Private\Services\CoverService::class)->getCustomCoverUrl($story) : null)
 @php($twDisclosureOptions = [
 ['value' => 'listed', 'label' => __('story::shared.trigger_warnings.form_options.listed'), 'description' => __('story::shared.trigger_warnings.listed_help')],
 ['value' => 'no_tw', 'label' => __('story::shared.trigger_warnings.form_options.no_tw'), 'description' => __('story::shared.trigger_warnings.no_tw_help')],
@@ -33,7 +35,9 @@
         defaultCoverUrl: @js(asset('images/story/default-cover.svg')),
         genres: @js(collect($referentials['genres'] ?? [])->filter(fn($g) => !empty($g['has_cover']))->map(fn($g) => ['id' => (string)($g['id'] ?? $g['slug'] ?? ''), 'slug' => (string)($g['slug'] ?? ''), 'name' => (string)($g['name'] ?? '')])->values()->all()),
         selectedGenreIds: @js($selectedGenreIds),
-    })">
+        existingCustomCoverUrl: @js($existingCustomCoverUrl),
+    })"
+    @custom-cover-selected.window="selectCustom($event.detail)">
 
     <!-- Hidden inputs for cover selection -->
     <input type="hidden" name="cover_type" :value="coverType">
@@ -260,7 +264,10 @@
     </x-shared::collapsible>
 
     @if($coverSelectionEnabled)
-        <x-story::cover-selector-modal :themedEnabled="$themedCoverEnabled" />
+        <x-story::cover-selector-modal
+            :themedEnabled="$themedCoverEnabled"
+            :customEnabled="$customCoverEnabled"
+            :existingCustomCoverUrl="$existingCustomCoverUrl" />
     @endif
 </div>
 
@@ -268,7 +275,7 @@
 @push('scripts')
 <script>
 if (!window.coverForm) {
-    window.coverForm = function ({ coverType, coverData, defaultCoverUrl, genres, selectedGenreIds }) {
+    window.coverForm = function ({ coverType, coverData, defaultCoverUrl, genres, selectedGenreIds, existingCustomCoverUrl }) {
         return {
             coverType: coverType || 'default',
             coverData: coverData || '',
@@ -276,10 +283,14 @@ if (!window.coverForm) {
             allGenres: genres || [],
             selectedGenreIds: selectedGenreIds || [],
             modalPreviewSlug: '',
+            customPreviewUrl: (coverType === 'custom' && existingCustomCoverUrl) ? existingCustomCoverUrl : null,
 
             get coverPreviewUrl() {
                 if (this.coverType === 'themed' && this.coverData) {
                     return this.themedUrl(this.coverData);
+                }
+                if (this.coverType === 'custom' && this.customPreviewUrl) {
+                    return this.customPreviewUrl;
                 }
                 return this.defaultCoverUrl;
             },
@@ -308,6 +319,12 @@ if (!window.coverForm) {
                 if (!slug) return;
                 this.coverType = 'themed';
                 this.coverData = slug;
+            },
+
+            selectCustom(detail) {
+                this.coverType = 'custom';
+                this.coverData = '';
+                this.customPreviewUrl = detail.previewUrl || this.customPreviewUrl;
             },
 
             init() {

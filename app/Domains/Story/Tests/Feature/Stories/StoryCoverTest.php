@@ -1,8 +1,11 @@
 <?php
 
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -252,6 +255,139 @@ describe('Story cover selection', function () {
             $story = Story::query()->latest('id')->firstOrFail();
             $dto = getStoryViaApi($story->id);
             expect($dto->cover_type)->toBe('default');
+        });
+    });
+
+    describe('Custom cover upload', function () {
+
+        it('uploads a custom cover when cover_type is custom and file provided with rights confirmed', function () {
+            Storage::fake('public');
+
+            $user = alice($this);
+            $this->actingAs($user);
+
+            $file = UploadedFile::fake()->image('cover.jpg', 900, 1200);
+
+            $payload = validStoryPayload([
+                'title' => 'Custom Cover Story',
+                'cover_type' => 'custom',
+                'cover_data' => '',
+                'cover_rights_confirmed' => '1',
+            ]);
+
+            $this->post('/stories', array_merge($payload, ['cover_image' => $file]))->assertRedirect();
+
+            $story = Story::query()->latest('id')->firstOrFail();
+            $dto = getStoryViaApi($story->id);
+            expect($dto->cover_type)->toBe('custom');
+
+            $coverService = app(CoverService::class);
+            expect($coverService->hasCustomCover($story))->toBeTrue();
+        });
+
+        it('rejects custom cover upload when rights checkbox is not confirmed', function () {
+            Storage::fake('public');
+
+            $user = alice($this);
+            $file = UploadedFile::fake()->image('cover.jpg', 900, 1200);
+
+            $payload = validStoryPayload([
+                'cover_type' => 'custom',
+                'cover_data' => '',
+            ]);
+
+            $resp = $this->actingAs($user)
+                ->from('/stories/create')
+                ->post('/stories', array_merge($payload, ['cover_image' => $file]));
+
+            $resp->assertRedirect('/stories/create');
+            $resp->assertSessionHasErrors('cover_rights_confirmed');
+        });
+
+        it('rejects cover_image exceeding 2MB', function () {
+            Storage::fake('public');
+
+            $user = alice($this);
+            $file = UploadedFile::fake()->image('cover.jpg')->size(3000);
+
+            $payload = validStoryPayload([
+                'cover_type' => 'custom',
+                'cover_data' => '',
+                'cover_rights_confirmed' => '1',
+            ]);
+
+            $resp = $this->actingAs($user)
+                ->from('/stories/create')
+                ->post('/stories', array_merge($payload, ['cover_image' => $file]));
+
+            $resp->assertRedirect('/stories/create');
+            $resp->assertSessionHasErrors('cover_image');
+        });
+
+        it('updates a story with a new custom cover on edit', function () {
+            Storage::fake('public');
+
+            $author = alice($this);
+            $this->actingAs($author);
+
+            $story = publicStory('Custom Cover Update', $author->id);
+
+            $file = UploadedFile::fake()->image('cover.jpg', 900, 1200);
+
+            $this->put('/stories/' . $story->slug, array_merge(validStoryPayload([
+                'title' => 'Custom Cover Update',
+                'cover_type' => 'custom',
+                'cover_data' => '',
+                'cover_rights_confirmed' => '1',
+            ]), ['cover_image' => $file]))->assertRedirect();
+
+            $story->refresh();
+            expect($story->cover_type)->toBe('custom');
+
+            $coverService = app(CoverService::class);
+            expect($coverService->hasCustomCover($story))->toBeTrue();
+        });
+
+        it('can re-select existing custom cover without uploading a new file', function () {
+            Storage::fake('public');
+
+            $author = alice($this);
+            $this->actingAs($author);
+
+            $story = publicStory('Re-select Custom Cover', $author->id);
+
+            // First upload
+            $file = UploadedFile::fake()->image('cover.jpg', 900, 1200);
+            $this->put('/stories/' . $story->slug, array_merge(validStoryPayload([
+                'title' => 'Re-select Custom Cover',
+                'cover_type' => 'custom',
+                'cover_data' => '',
+                'cover_rights_confirmed' => '1',
+            ]), ['cover_image' => $file]))->assertRedirect();
+
+            // Switch to default
+            $this->put('/stories/' . $story->slug, validStoryPayload([
+                'title' => 'Re-select Custom Cover',
+                'cover_type' => 'default',
+                'cover_data' => '',
+            ]))->assertRedirect();
+
+            $story->refresh();
+            expect($story->cover_type)->toBe('default');
+
+            // Re-select custom without uploading a new file (no cover_image)
+            $this->put('/stories/' . $story->slug, validStoryPayload([
+                'title' => 'Re-select Custom Cover',
+                'cover_type' => 'custom',
+                'cover_data' => '',
+            ]))->assertRedirect();
+
+            $story->refresh();
+            expect($story->cover_type)->toBe('custom');
+
+            // File should still exist on disk
+            $coverService = app(CoverService::class);
+            expect($coverService->hasCustomCover($story))->toBeTrue();
         });
     });
 });

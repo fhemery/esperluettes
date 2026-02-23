@@ -16,6 +16,7 @@
     "Whoops! Something went wrong.": "Oups ! Une erreur s'est produite.",
     "validation.uploaded": "L'image ne vérifie pas les critères de taille et de format.",
     "validation.required": "Champ obligatoire",
+    "validation.max.file": "Le fichier ne doit pas dépasser :max Mo.",
     "Pagination Navigation": "Navigation par pages",
     "pagination.previous": "Précédent",
     "pagination.next": "Suivant",

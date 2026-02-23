@@ -8,4 +8,5 @@ return [
     'max_size' => 'Taille max : :size Mo',
     'delete' => 'Supprimer l\'image',
     'cancel' => 'Annuler',
+    'size_error' => 'Fichier trop volumineux (max :max Mo).',
 ];
