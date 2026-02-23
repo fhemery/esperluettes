@@ -60,7 +60,9 @@
     x-data="imageUpload({ 
         hasCurrentImage: @js($hasCurrentImage), 
         currentUrl: @js($resolvedUrl),
-        inputId: @js($inputId)
+        inputId: @js($inputId),
+        maxSizeKb: @js($maxSize),
+        sizeErrorMessage: @js(__('shared::image-upload.size_error', ['max' => $maxSizeMB]))
     })"
     {{ $attributes->merge(['class' => 'flex flex-col gap-2']) }}
 >
@@ -153,6 +155,9 @@
         <p class="text-xs text-fg/60">{{ $helpText }}</p>
     @endif
 
+    {{-- Client-side size error --}}
+    <p x-show="sizeError" x-cloak class="text-sm text-error" x-text="sizeError"></p>
+
     {{-- Error display --}}
     <x-shared::input-error :messages="$errors->get($name)" class="mt-1" />
 </div>
@@ -161,15 +166,17 @@
 @push('scripts')
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('imageUpload', ({ hasCurrentImage, currentUrl, inputId }) => ({
+        Alpine.data('imageUpload', ({ hasCurrentImage, currentUrl, inputId, maxSizeKb, sizeErrorMessage }) => ({
             previewUrl: currentUrl,
             isNewFile: false,
             markedForRemoval: false,
             isDragging: false,
+            sizeError: null,
 
             handleFileSelect(event) {
                 const file = event.target.files[0];
                 if (file) {
+                    if (!this.checkSize(file)) return;
                     this.setPreview(file);
                 }
             },
@@ -178,12 +185,23 @@
                 this.isDragging = false;
                 const file = event.dataTransfer.files[0];
                 if (file && file.type.startsWith('image/')) {
+                    if (!this.checkSize(file)) return;
                     const input = this.$refs.fileInput;
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     input.files = dataTransfer.files;
                     this.setPreview(file);
                 }
+            },
+
+            checkSize(file) {
+                if (maxSizeKb && file.size > maxSizeKb * 1024) {
+                    this.sizeError = sizeErrorMessage;
+                    this.$refs.fileInput.value = '';
+                    return false;
+                }
+                this.sizeError = null;
+                return true;
             },
 
             setPreview(file) {

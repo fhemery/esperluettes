@@ -67,6 +67,10 @@ return [
         'listed_requires_tw' => 'Si vous choisissez « Avertissements listés », vous devez en sélectionner au moins un.',
     ],
 
+    'cover_rights_confirmed' => [
+        'required' => 'Vous devez confirmer que l\'image est libre de droits et n\'est pas générée par IA.',
+    ],
+
     // Chapters
     'chapter' => [
         'title' => [

@@ -23,6 +23,11 @@ return [
         'select_default' => 'Sélectionner la couverture par défaut',
         'select' => 'Sélectionner',
         'cancel' => 'Annuler',
+        'custom_description' => 'Importez votre propre image de couverture. Elle sera redimensionnée automatiquement.',
+        'custom_ai_warning' => 'Les couvertures générées par IA ne sont pas autorisées.',
+        'custom_upload_label' => 'Image de couverture',
+        'custom_dimensions' => 'Dimensions recommandées : 900×1200px',
+        'custom_rights_label' => 'Je confirme que cette image est libre de droits, et n\'est pas générée par IA.',
     ],
     'visibility' => [
         'label' => 'Visibilité',

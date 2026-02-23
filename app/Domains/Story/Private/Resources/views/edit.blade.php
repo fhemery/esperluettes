@@ -3,7 +3,7 @@
     <div class="w-full mx-auto flex-1 overflow-hidden flex flex-col gap-4 surface-read text-on-surface p-2 sm:p-4">
         <x-shared::title>{{ __('story::edit.title', ['title' => $story->title]) }}</x-shared::title>
 
-        <form action="{{ route('stories.update', ['slug' => $story->slug]) }}" method="POST" novalidate
+        <form action="{{ route('stories.update', ['slug' => $story->slug]) }}" method="POST" enctype="multipart/form-data" novalidate
             class="bg-transparent flex-1 flex flex-col gap-4">
             @csrf
             @method('PUT')

@@ -37,6 +37,7 @@ class StoryService
         private ChapterService $chapters,
         private StoryRepository $storiesRepository,
         private AuthPublicApi $authPublicApi,
+        private CoverService $coverService,
     ) {}
 
     /** 
@@ -103,6 +104,11 @@ class StoryService
             // 2) Update slug with id suffix
             $story->slug = SlugWithId::build($slugBase, $story->id);
             $story->save();
+
+            // 2b) Upload custom cover if provided (story ID is now available)
+            if ($story->cover_type === Story::COVER_CUSTOM && $request->hasFile('cover_image')) {
+                $this->coverService->uploadCustomCover($story, $request->file('cover_image'));
+            }
 
             // 3) Attach genres (1..3)
             $genreIds = $request->input('story_ref_genre_ids', []);
@@ -282,6 +288,11 @@ class StoryService
             }
             $story->cover_type = $coverType;
             $story->cover_data = $coverData;
+
+            // Upload custom cover if a new file was provided
+            if ($coverType === Story::COVER_CUSTOM && $request->hasFile('cover_image')) {
+                $this->coverService->uploadCustomCover($story, $request->file('cover_image'));
+            }
 
             // If title changed, regenerate slug base but keep -id suffix
             if ($story->title !== $oldTitle) {
