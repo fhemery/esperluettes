@@ -119,7 +119,7 @@
                 <x-responsive-nav-link :href="route('profile.show.own')" :active="request()->routeIs('profile.show.own')">
                     {{ __('shared::navigation.profile') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('dashboard') }}">
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                     {{ __('shared::navigation.dashboard') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('account.edit')" :active="request()->routeIs('account.edit')">
