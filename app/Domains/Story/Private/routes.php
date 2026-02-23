@@ -32,6 +32,10 @@ Route::middleware(['web'])->group(function () {
             ->where('slug', '.*')
             ->name('stories.moderation.empty-summary');
 
+        Route::post('/stories/{slug}/moderation/remove-cover', [StoryModerationController::class, 'removeCover'])
+            ->where('slug', '.*')
+            ->name('stories.moderation.remove-cover');
+
         Route::post('/chapters/{slug}/moderation/unpublish', [ChapterModerationController::class, 'unpublish'])
             ->where('slug', '.*')
             ->name('chapters.moderation.unpublish');

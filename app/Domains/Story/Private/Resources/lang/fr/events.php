@@ -49,4 +49,7 @@ return [
     'story_excluded_from_events' => [
         'summary' => "Histoire :title (id: :id) exclue des évènements et activités.",
     ],
+    'story_cover_moderated' => [
+        'summary' => "Couverture supprimée par la modération (id: :id, :title).",
+    ],
 ];
