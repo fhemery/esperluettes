@@ -49,7 +49,7 @@ return [
             'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span,u,s,blockquote,a',
             'HTML.AllowedAttributes' => 'p.style,p.class,span.style,span.class,li.class,ul.class,ol.class,a.href,a.title',
             'CSS.AllowedProperties' => 'text-align',
-            'Attr.AllowedClasses' => ['ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify'],
+            'Attr.AllowedClasses' => ['ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify', 'ql-spoiler'],
             'AutoFormat.AutoParagraph' => true,
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,

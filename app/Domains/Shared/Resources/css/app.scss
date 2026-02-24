@@ -259,6 +259,46 @@ p.ql-align-center { text-indent: 0; }
   }
 }
 
+/* Spoiler format */
+/* In the Quill editor: light grey background to signal spoiler content */
+.ql-editor .ql-spoiler {
+  background-color: rgba(128, 128, 128, 0.25);
+  border-radius: 2px;
+  cursor: text;
+}
+
+.ql-toolbar button.ql-spoiler {
+  background-color: rgba(128, 128, 128, 0.25) !important;
+}
+
+/* Spoiler toolbar button icon */
+.ql-snow .ql-toolbar button.ql-spoiler svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+.ql-snow .ql-toolbar button.ql-spoiler.ql-active {
+  color: #06c;
+}
+
+/* On read-only pages: hide text by matching text color to background */
+.ql-spoiler:not(.ql-editor .ql-spoiler) {
+  background-color: currentColor;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  color: inherit;
+  /* Force all descendant text invisible */
+  -webkit-text-fill-color: transparent;
+}
+
+/* Revealed state: fade background to ~10% grey, restore text */
+.ql-spoiler--revealed:not(.ql-editor .ql-spoiler) {
+  background-color: rgba(128, 128, 128, 0.25);
+  cursor: default;
+  -webkit-text-fill-color: unset;
+}
+
 [x-cloak] { display: none !important; }
 
 

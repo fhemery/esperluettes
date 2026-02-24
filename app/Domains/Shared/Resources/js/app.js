@@ -20,3 +20,13 @@ Alpine.store('popover', { openId: null });
 registerTooltip(Alpine);
 
 Alpine.start();
+
+// Global spoiler reveal: event delegation on document body.
+// Clicking a .ql-spoiler outside a Quill editor fades its background to near-transparent.
+document.addEventListener('click', function (e) {
+  const spoiler = e.target.closest('.ql-spoiler');
+  if (!spoiler) return;
+  // Do not trigger inside the Quill editor itself
+  if (spoiler.closest('.ql-editor')) return;
+  spoiler.classList.add('ql-spoiler--revealed');
+});

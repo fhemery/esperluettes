@@ -12,6 +12,23 @@ window.Delta = Delta;
 Quill.register('modules/emoji-toolbar', ToolbarEmoji);
 Quill.register('modules/emoji-textarea', TextAreaEmoji);
 
+// --- Spoiler blot: renders as <span class="ql-spoiler"> ---
+const Inline = Quill.import('blots/inline');
+class SpoilerBlot extends Inline {
+  static create() {
+    const node = super.create();
+    node.setAttribute('class', 'ql-spoiler');
+    return node;
+  }
+  static formats() {
+    return true;
+  }
+}
+SpoilerBlot.blotName = 'spoiler';
+SpoilerBlot.tagName = 'span';
+SpoilerBlot.className = 'ql-spoiler';
+Quill.register(SpoilerBlot);
+
 // Normalize HTML output from Quill: convert the first &nbsp; of each sequence
 // to a regular space so text can wrap naturally. Single &nbsp; becomes " ",
 // "&nbsp;&nbsp;&nbsp;" becomes " &nbsp;&nbsp;".
@@ -34,6 +51,7 @@ export function initQuillEditor(id, options = {}) {
     // Read optional features from data attributes or options
     const withHeadings = options.withHeadings ?? container.dataset.withHeadings === 'true';
     const withLinks = options.withLinks ?? container.dataset.withLinks === 'true';
+    const withSpoiler = options.withSpoiler ?? container.dataset.withSpoiler === 'true';
 
     // Build allowed formats dynamically
     const allowedFormats = ['bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'align'];
@@ -42,6 +60,9 @@ export function initQuillEditor(id, options = {}) {
     }
     if (withLinks) {
       allowedFormats.push('link');
+    }
+    if (withSpoiler) {
+      allowedFormats.push('spoiler');
     }
 
     // Build toolbar dynamically
@@ -55,6 +76,9 @@ export function initQuillEditor(id, options = {}) {
     toolbar.push([{ list: 'bullet' }, { list: 'ordered' }]);
     if (withLinks) {
       toolbar.push(['link']);
+    }
+    if (withSpoiler) {
+      toolbar.push(['spoiler']);
     }
     toolbar.push(['clean']);
 
@@ -78,6 +102,23 @@ export function initQuillEditor(id, options = {}) {
     // Mark as initialized
     container.dataset.quillInited = '1';
 
+    // Register spoiler toolbar handler
+    if (withSpoiler) {
+      try {
+        const tbModule = editor.getModule('toolbar');
+        if (tbModule) {
+          tbModule.addHandler('spoiler', function () {
+            const range = editor.getSelection();
+            if (!range) return;
+            const current = editor.getFormat(range);
+            editor.format('spoiler', !current.spoiler, 'user');
+          });
+        }
+      } catch (e) {
+        // no-op
+      }
+    }
+
     // Enhance accessibility and clarity: add tooltip to the "Remove formatting" button
     try {
       const toolbar = editor.getModule('toolbar');
@@ -88,6 +129,18 @@ export function initQuillEditor(id, options = {}) {
           btn.setAttribute('title', label);
           btn.setAttribute('aria-label', label);
           btn.setAttribute('data-labeled', '1');
+        }
+
+        // Label the spoiler button
+        if (withSpoiler) {
+          const spoilerBtn = toolbar.container.querySelector('button.ql-spoiler');
+          if (spoilerBtn && !spoilerBtn.getAttribute('data-labeled')) {
+            const spoilerLabel = container.getAttribute('data-spoiler-label') || 'Spoiler';
+            spoilerBtn.setAttribute('title', spoilerLabel);
+            spoilerBtn.setAttribute('aria-label', spoilerLabel);
+            spoilerBtn.setAttribute('data-labeled', '1');
+            spoilerBtn.innerHTML = '<svg viewBox="0 0 18 18"><path d="M9 2C5 2 2 5.6 2 9s3 7 7 7 7-3.6 7-7-3-7-7-7zm0 12.5c-3 0-5.5-2.5-5.5-5.5S6 3.5 9 3.5 14.5 6 14.5 9 12 14.5 9 14.5zm-.75-8.25h1.5v4.5h-1.5zm0 5.25h1.5v1.5h-1.5z"/></svg>';
+          }
         }
 
         // Ensure toolbar buttons do not submit parent forms
