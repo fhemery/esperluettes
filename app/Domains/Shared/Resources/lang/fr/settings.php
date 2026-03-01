@@ -20,6 +20,8 @@ return [
                 'seasonal' => 'Saisonnier (défaut)',
                 'autumn' => 'Automne',
                 'winter' => 'Hiver',
+                'spring' => 'Printemps',
+                'summer' => 'Été',
             ],
         ],
         'font' => [
