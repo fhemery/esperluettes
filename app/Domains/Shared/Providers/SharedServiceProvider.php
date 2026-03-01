@@ -151,6 +151,7 @@ class SharedServiceProvider extends ServiceProvider
                     'seasonal' => 'shared::settings.params.theme.options.seasonal',
                     'autumn' => 'shared::settings.params.theme.options.autumn',
                     'winter' => 'shared::settings.params.theme.options.winter',
+                    'spring' => 'shared::settings.params.theme.options.spring',
                 ],
             ],
         ));
