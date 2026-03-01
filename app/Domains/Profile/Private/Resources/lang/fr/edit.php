@@ -23,6 +23,9 @@ return [
         'x' => 'X',
         'instagram' => 'Instagram',
         'youtube' => 'YouTube',
+        'tiktok' => 'TikTok',
+        'bluesky' => 'Bluesky',
+        'mastodon' => 'Mastodon',
     ],
     'errors' => [
         'profile_picture_too_large' => 'Image trop grande (max 2 Mo).',

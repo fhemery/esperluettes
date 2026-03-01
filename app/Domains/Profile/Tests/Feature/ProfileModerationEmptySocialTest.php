@@ -49,10 +49,13 @@ describe('Profile moderation - Empty Social', function () {
                 ->from('/profile/edit')
                 ->put('/profile', [
                     'display_name' => $this->profile->display_name,
-                    'facebook_url' => 'https://facebook.com/alice',
-                    'x_url' => 'https://x.com/alice',
-                    'instagram_url' => 'https://instagram.com/alice',
-                    'youtube_url' => 'https://youtube.com/@alice',
+                    'facebook_handle'  => 'alice',
+                    'x_handle'         => 'alice',
+                    'instagram_handle' => 'alice',
+                    'youtube_handle'   => '@alice',
+                    'tiktok_handle'    => 'alice',
+                    'bluesky_handle'   => 'alice.bsky.social',
+                    'mastodon_handle'  => 'alice@mastodon.social',
                 ])
                 ->assertRedirect('/profile');
 
@@ -60,6 +63,9 @@ describe('Profile moderation - Empty Social', function () {
             $response->assertSee('facebook-link', false);
             $response->assertSee('instagram-link', false);
             $response->assertSee('youtube-link', false);
+            $response->assertSee('tiktok-link', false);
+            $response->assertSee('bluesky-link', false);
+            $response->assertSee('mastodon-link', false);
 
             // Act
             $moderatorUser = moderator($this);
@@ -73,6 +79,9 @@ describe('Profile moderation - Empty Social', function () {
             $response->assertDontSee('facebook-link', false);
             $response->assertDontSee('instagram-link', false);
             $response->assertDontSee('youtube-link', false);
+            $response->assertDontSee('tiktok-link', false);
+            $response->assertDontSee('bluesky-link', false);
+            $response->assertDontSee('mastodon-link', false);
         });
 
         it('emits SocialModerated event when moderator empties the social networks', function () {

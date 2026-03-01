@@ -14,12 +14,15 @@ describe('ProfileSnapshotFormatter', function () {
         /** @var Profile $profile */
         $profile = Profile::query()->findOrFail($user->id);
         $profile->update([
-            'display_name' => 'Alice Cooper',
-            'description' => 'Hello <b>world</b>',
-            'facebook_url' => 'https://fb.example/alice',
-            'x_url' => 'https://x.example/alice',
-            'instagram_url' => 'https://ig.example/alice',
-            'youtube_url' => 'https://yt.example/alice',
+            'display_name'     => 'Alice Cooper',
+            'description'      => 'Hello <b>world</b>',
+            'facebook_handle'  => 'alice',
+            'x_handle'         => 'alice',
+            'instagram_handle' => 'alice',
+            'youtube_handle'   => 'alice',
+            'tiktok_handle'    => 'alice',
+            'bluesky_handle'   => 'alice.bsky.social',
+            'mastodon_handle'  => 'alice@mastodon.social',
         ]);
 
         $formatter = new ProfileSnapshotFormatter();
@@ -31,10 +34,13 @@ describe('ProfileSnapshotFormatter', function () {
             ->and($snapshot['bio'])->toBe('Hello <b>world</b>')
             ->and($snapshot['social_networks'])
                 ->toMatchArray([
-                    'facebook' => 'https://fb.example/alice',
-                    'x' => 'https://x.example/alice',
-                    'instagram' => 'https://ig.example/alice',
-                    'youtube' => 'https://yt.example/alice',
+                    'facebook'  => 'alice',
+                    'x'         => 'alice',
+                    'instagram' => 'alice',
+                    'youtube'   => 'alice',
+                    'tiktok'    => 'alice',
+                    'bluesky'   => 'alice.bsky.social',
+                    'mastodon'  => 'alice@mastodon.social',
                 ]);
     });
 

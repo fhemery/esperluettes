@@ -21,10 +21,13 @@ class Profile extends Model
         'slug',
         'display_name',
         'profile_picture_path',
-        'facebook_url',
-        'x_url',
-        'instagram_url',
-        'youtube_url',
+        'facebook_handle',
+        'x_handle',
+        'instagram_handle',
+        'youtube_handle',
+        'tiktok_handle',
+        'bluesky_handle',
+        'mastodon_handle',
         'description',
     ];
 
@@ -56,15 +59,18 @@ class Profile extends Model
     }
 
     /**
-     * Get all social network URLs as an array
+     * Get all social network handles as an array
      */
     public function getSocialNetworksAttribute(): array
     {
         return [
-            'facebook' => $this->facebook_url,
-            'x' => $this->x_url,
-            'instagram' => $this->instagram_url,
-            'youtube' => $this->youtube_url,
+            'facebook'  => $this->facebook_handle,
+            'x'         => $this->x_handle,
+            'instagram' => $this->instagram_handle,
+            'youtube'   => $this->youtube_handle,
+            'tiktok'    => $this->tiktok_handle,
+            'bluesky'   => $this->bluesky_handle,
+            'mastodon'  => $this->mastodon_handle,
         ];
     }
 
@@ -73,10 +79,49 @@ class Profile extends Model
      */
     public function hasSocialNetworks(): bool
     {
-        return !empty($this->facebook_url) || 
-               !empty($this->x_url) || 
-               !empty($this->instagram_url) || 
-               !empty($this->youtube_url);
+        return !empty($this->facebook_handle)
+            || !empty($this->x_handle)
+            || !empty($this->instagram_handle)
+            || !empty($this->youtube_handle)
+            || !empty($this->tiktok_handle)
+            || !empty($this->bluesky_handle)
+            || !empty($this->mastodon_handle);
+    }
+
+    /**
+     * Build the full profile URL for a given social network handle.
+     * Returns null if the handle is empty.
+     */
+    public function socialUrl(string $network): ?string
+    {
+        return match ($network) {
+            'facebook'  => $this->facebook_handle  ? 'https://www.facebook.com/' . $this->facebook_handle  : null,
+            'x'         => $this->x_handle         ? 'https://x.com/' . $this->x_handle                    : null,
+            'instagram' => $this->instagram_handle ? 'https://www.instagram.com/' . $this->instagram_handle : null,
+            'youtube'   => $this->youtube_handle   ? 'https://www.youtube.com/' . $this->youtube_handle     : null,
+            'tiktok'    => $this->tiktok_handle    ? 'https://www.tiktok.com/@' . ltrim($this->tiktok_handle, '@') : null,
+            'bluesky'   => $this->bluesky_handle   ? 'https://bsky.app/profile/' . ltrim($this->bluesky_handle, '@') : null,
+            'mastodon'  => $this->mastodonUrl(),
+            default     => null,
+        };
+    }
+
+    /**
+     * Compute Mastodon profile URL from handle @user@instance.social
+     */
+    private function mastodonUrl(): ?string
+    {
+        $handle = $this->mastodon_handle;
+        if (empty($handle)) {
+            return null;
+        }
+        // Accept @user@instance or user@instance
+        $handle = ltrim($handle, '@');
+        $parts = explode('@', $handle, 2);
+        if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
+            return null;
+        }
+        return 'https://' . $parts[1] . '/@' . $parts[0];
     }
 
 }

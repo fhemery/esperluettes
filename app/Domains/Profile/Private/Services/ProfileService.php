@@ -38,10 +38,13 @@ class ProfileService
     public function emptySocial(Profile $profile): bool
     {
         $fields = [
-            'facebook_url' => null,
-            'x_url' => null,
-            'instagram_url' => null,
-            'youtube_url' => null,
+            'facebook_handle'  => null,
+            'x_handle'         => null,
+            'instagram_handle' => null,
+            'youtube_handle'   => null,
+            'tiktok_handle'    => null,
+            'bluesky_handle'   => null,
+            'mastodon_handle'  => null,
         ];
 
         $profile->update($fields);
@@ -52,16 +55,19 @@ class ProfileService
     /**
      * Emit BioUpdated if any of the bio/network fields changed.
      *
-     * @param array{description:mixed,facebook_url:mixed,x_url:mixed,instagram_url:mixed,youtube_url:mixed} $old
+     * @param array{description:mixed,facebook_handle:mixed,x_handle:mixed,instagram_handle:mixed,youtube_handle:mixed,tiktok_handle:mixed,bluesky_handle:mixed,mastodon_handle:mixed} $old
      */
     private function emitBioUpdatedIfChanged(array $old, Profile $fresh): void
     {
         $new = [
-            'description' => $fresh->description,
-            'facebook_url' => $fresh->facebook_url,
-            'x_url' => $fresh->x_url,
-            'instagram_url' => $fresh->instagram_url,
-            'youtube_url' => $fresh->youtube_url,
+            'description'      => $fresh->description,
+            'facebook_handle'  => $fresh->facebook_handle,
+            'x_handle'         => $fresh->x_handle,
+            'instagram_handle' => $fresh->instagram_handle,
+            'youtube_handle'   => $fresh->youtube_handle,
+            'tiktok_handle'    => $fresh->tiktok_handle,
+            'bluesky_handle'   => $fresh->bluesky_handle,
+            'mastodon_handle'  => $fresh->mastodon_handle,
         ];
 
         foreach ($new as $k => $v) {
@@ -69,10 +75,13 @@ class ProfileService
                 $this->eventBus->emit(new BioUpdated(
                     userId: $fresh->user_id,
                     description: $new['description'],
-                    facebookUrl: $new['facebook_url'],
-                    xUrl: $new['x_url'],
-                    instagramUrl: $new['instagram_url'],
-                    youtubeUrl: $new['youtube_url'],
+                    facebookHandle: $new['facebook_handle'],
+                    xHandle: $new['x_handle'],
+                    instagramHandle: $new['instagram_handle'],
+                    youtubeHandle: $new['youtube_handle'],
+                    tiktokHandle: $new['tiktok_handle'],
+                    blueskyHandle: $new['bluesky_handle'],
+                    mastodonHandle: $new['mastodon_handle'],
                 ));
                 break;
             }
@@ -137,9 +146,6 @@ class ProfileService
     {
         $profile = $this->getProfile($userId);
 
-        // Validate social URLs first
-        $data = $this->validateSocialNetworkUrls($data);
-
         // Sanitize description if provided
         if (isset($data['description']) && is_string($data['description'])) {
             $data['description'] = clean($data['description'], 'strict');
@@ -164,11 +170,14 @@ class ProfileService
 
         // Capture old bio/network fields to detect changes
         $old = [
-            'description' => $profile->description,
-            'facebook_url' => $profile->facebook_url,
-            'x_url' => $profile->x_url,
-            'instagram_url' => $profile->instagram_url,
-            'youtube_url' => $profile->youtube_url,
+            'description'      => $profile->description,
+            'facebook_handle'  => $profile->facebook_handle,
+            'x_handle'         => $profile->x_handle,
+            'instagram_handle' => $profile->instagram_handle,
+            'youtube_handle'   => $profile->youtube_handle,
+            'tiktok_handle'    => $profile->tiktok_handle,
+            'bluesky_handle'   => $profile->bluesky_handle,
+            'mastodon_handle'  => $profile->mastodon_handle,
         ];
 
         // Apply remaining fields, then persist once
@@ -269,62 +278,6 @@ class ProfileService
         return false;
     }
 
-    /**
-     * Validate social network URLs
-     */
-    private function validateSocialNetworkUrls(array $data): array
-    {
-        $socialNetworks = [
-            'facebook_url' => ['facebook.com', 'fb.com'],
-            'x_url' => ['x.com', 'twitter.com'],
-            'instagram_url' => ['instagram.com'],
-            'youtube_url' => ['youtube.com', 'youtu.be'],
-        ];
-        $domainErrorKeys = [
-            'facebook_url' => __('Invalid domain for Facebook URL. Allowed domains: :domains'),
-            'x_url' => __('Invalid domain for X URL. Allowed domains: :domains'),
-            'instagram_url' => __('Invalid domain for Instagram URL. Allowed domains: :domains'),
-            'youtube_url' => __('Invalid domain for YouTube URL. Allowed domains: :domains'),
-        ];
-
-        foreach ($socialNetworks as $field => $allowedDomains) {
-            if (!empty($data[$field])) {
-                $url = $data[$field];
-                
-                // Add https:// if no protocol specified
-                if (!preg_match('/^https?:\/\//', $url)) {
-                    $url = 'https://' . $url;
-                }
-                
-                // Validate URL format
-                if (!filter_var($url, FILTER_VALIDATE_URL)) {
-                    throw new \InvalidArgumentException("Invalid URL format for {$field}");
-                }
-                
-                // Check if domain is allowed
-                $host = parse_url($url, PHP_URL_HOST);
-                $host = ltrim($host, 'www.');
-                
-                $isValidDomain = false;
-                foreach ($allowedDomains as $domain) {
-                    if ($host === $domain || str_ends_with($host, '.' . $domain)) {
-                        $isValidDomain = true;
-                        break;
-                    }
-                }
-                
-                if (!$isValidDomain) {
-                    $messageTemplate = $domainErrorKeys[$field] ?? __('Invalid domain. Allowed domains: :domains');
-                    $message = str_replace(':domains', implode(', ', $allowedDomains), $messageTemplate);
-                    throw new \InvalidArgumentException($message);
-                }
-                
-                $data[$field] = $url;
-            }
-        }
-
-        return $data;
-    }
 
     /**
      * Batch get profiles by user IDs with caching.

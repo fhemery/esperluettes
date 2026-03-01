@@ -18,10 +18,13 @@ class ProfileSnapshotFormatter implements SnapshotFormatterInterface
             'display_name' => $profile->display_name,
             'bio' => $profile->description,
             'social_networks' => [
-                'facebook' => $profile->facebook_url,
-                'x' => $profile->x_url,
-                'instagram' => $profile->instagram_url,
-                'youtube' => $profile->youtube_url,
+                'facebook'  => $profile->facebook_handle,
+                'x'         => $profile->x_handle,
+                'instagram' => $profile->instagram_handle,
+                'youtube'   => $profile->youtube_handle,
+                'tiktok'    => $profile->tiktok_handle,
+                'bluesky'   => $profile->bluesky_handle,
+                'mastodon'  => $profile->mastodon_handle,
             ]
         ];
     }

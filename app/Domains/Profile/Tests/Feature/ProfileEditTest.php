@@ -267,21 +267,27 @@ describe('Editing profile', function () {
             $this->actingAs($user);
 
             $response = $this->from('/profile/edit')->put('/profile', [
-                'display_name' => 'Alice', // Required field
-                'facebook_url' => 'facebook.com/someone',
-                'x_url' => 'twitter.com/someone',
-                'instagram_url' => 'https://instagram.com/someone',
-                'youtube_url' => 'youtu.be/abc123',
+                'display_name'     => 'Alice', // Required field
+                'facebook_handle'  => 'someone',
+                'x_handle'         => 'someone',
+                'instagram_handle' => 'someone',
+                'youtube_handle'   => '@someone',
+                'tiktok_handle'    => 'someone',
+                'bluesky_handle'   => 'someone.bsky.social',
+                'mastodon_handle'  => 'someone@mastodon.social',
             ]);
             $response->assertRedirect('/profile');
 
             /** @var BioUpdated $event */
             $event = latestEventOf(BioUpdated::name(), BioUpdated::class);
             expect($event)->not->toBeNull();
-            expect($event->facebookUrl)->toContain('https://');
-            expect($event->xUrl)->toContain('https://');
-            expect($event->instagramUrl)->toContain('https://');
-            expect($event->youtubeUrl)->toContain('https://');
+            expect($event->facebookHandle)->toBe('someone');
+            expect($event->xHandle)->toBe('someone');
+            expect($event->instagramHandle)->toBe('someone');
+            expect($event->youtubeHandle)->toBe('@someone');
+            expect($event->tiktokHandle)->toBe('someone');
+            expect($event->blueskyHandle)->toBe('someone.bsky.social');
+            expect($event->mastodonHandle)->toBe('someone@mastodon.social');
             expect($event->userId)->toBe($user->id);
         });
     });
