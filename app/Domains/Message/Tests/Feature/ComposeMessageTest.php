@@ -53,7 +53,7 @@ describe('Compose Message', function () {
 
         $response->assertRedirect('/messages');
         
-        $deliveries = MessageDelivery::whereIn('user_id', [$recipient1->id, $recipient2->id])->get();
+        $deliveries = MessageDelivery::with('message')->whereIn('user_id', [$recipient1->id, $recipient2->id])->get();
         expect($deliveries)->toHaveCount(2);
         expect($deliveries->first()->message->title)->toBe('Test Message');
         expect($deliveries->first()->message->sent_by_id)->toBe($sender->id);

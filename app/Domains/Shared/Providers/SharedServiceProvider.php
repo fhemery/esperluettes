@@ -10,6 +10,7 @@ use App\Domains\Shared\Contracts\ParameterType;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Views\Layouts\AppLayout;
 use App\Domains\Shared\Validation\CustomValidators;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\URL;
@@ -32,6 +33,9 @@ class SharedServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Prevent lazy loading in non-production to catch N+1 queries early
+        Model::preventLazyLoading(! $this->app->isProduction());
 
         // Note: CSS and JS assets are located in app/Domains/Shared/Resources/
         // and are managed by Vite configuration (see vite.config.js)

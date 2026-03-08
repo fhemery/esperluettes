@@ -31,10 +31,6 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "App\\Domains\\Shared\\": "app/Domains/Shared/",
-            "App\\Domains\\Admin\\": "app/Domains/Admin/",
-            "App\\Domains\\Auth\\": "app/Domains/Auth/",
-            "App\\Domains\\Profile\\": "app/Domains/Profile/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         },
