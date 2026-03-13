@@ -1,4 +1,5 @@
 import './bootstrap';
+import './april-fools';
 import Alpine from 'alpinejs';
 import registerTooltip from './tooltip.js';
 import * as DateUtils from './date-utils.js';
