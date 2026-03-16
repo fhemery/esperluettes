@@ -26,8 +26,8 @@
     @if ($coverType === 'default')
         <x-shared::default-cover class="w-full" />
     @elseif($canLightbox)
-        <div class="relative w-full h-full">
-            <img src="{{ $coverUrl }}" alt="" class="w-full h-full object-cover cursor-pointer"
+        <div class="relative w-full">
+            <img src="{{ $coverUrl }}" alt="" class="w-full object-contain cursor-pointer"
                 loading="lazy" @click="lightboxOpen = true" />
             
             @if($showText)
@@ -102,8 +102,8 @@
             </div>
         </template>
     @else
-        <div class="relative w-full h-full">
-            <img src="{{ $coverUrl }}" alt="" class="w-full h-full object-cover" loading="lazy" />
+        <div class="relative w-full">
+            <img src="{{ $coverUrl }}" alt="" class="w-full object-contain" loading="lazy" />
             
             @if($showText)
                  <div class="absolute inset-0 pointer-events-none flex flex-col text-read" style="padding: 20px 22px 0 22px;">

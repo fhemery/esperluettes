@@ -52,7 +52,13 @@
                     class="w-full flex items-center justify-between px-4 py-2 text-left bg-read"
                     @click="open = !open; if (open && !loaded) fetchComments()">
                     <div class="flex items-center gap-3">
-                        <x-story::cover :width="150" class="h-12 w-auto" />
+                        <div class="h-12 w-9 flex-shrink-0 overflow-hidden">
+                            <x-story::cover
+                                :coverType="$story->coverType"
+                                :coverUrl="$story->coverUrl"
+                                :width="150"
+                                class="h-full w-full" />
+                        </div>
                         <span class="font-semibold">{{ $story->title }}</span>
                         <span class="text-gray-500 text-sm">({{ trans_choice('story::profile.comments-count', $story->commentCount, ['count' => $story->commentCount]) }})</span>
                     </div>
