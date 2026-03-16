@@ -194,6 +194,50 @@ describe('ProfileCommentsComponent', function () {
         });
     });
 
+    describe('Cover display', function () {
+        it('renders a themed cover image when story has themed cover type', function () {
+            $author = alice($this);
+            $commenter = bob($this);
+
+            $story = publicStory('Themed Cover Story', $author->id);
+            Story::where('id', $story->id)->update([
+                'cover_type' => Story::COVER_THEMED,
+                'cover_data' => 'romance',
+            ]);
+
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
+
+            $this->actingAs($commenter);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+
+            // Should render an <img> tag with the themed cover URL, not the default SVG
+            expect($html)
+                ->toContain('romance.jpg')
+                ->not->toContain('default-cover.svg');
+        });
+
+        it('renders the default SVG cover when story has default cover type', function () {
+            $author = alice($this);
+            $commenter = bob($this);
+
+            $story = publicStory('Default Cover Story', $author->id);
+
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Chapter One']);
+
+            $this->actingAs($commenter);
+            createComment('chapter', $chapter->id, generateDummyText(150));
+
+            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+
+            // Default cover renders inline SVG (not an <img> tag)
+            expect($html)
+                ->toContain('viewBox="0 0 150 200"')
+                ->not->toContain('.jpg');
+        });
+    });
+
     describe('Comment display', function () {
         it('displays author collapsible with story inside', function () {
             $author = alice($this);

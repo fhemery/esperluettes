@@ -4,7 +4,9 @@ namespace App\Domains\Story\Private\View\Components;
 
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Services\ChapterService;
+use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Private\ViewModels\ProfileCommentsAuthorViewModel;
 use App\Domains\Story\Private\ViewModels\ProfileCommentsStoryViewModel;
 use Illuminate\Contracts\View\View as ViewContract;
@@ -23,6 +25,7 @@ class ProfileCommentsComponent extends Component
         private CommentPublicApi $commentApi,
         private ChapterService $chapterService,
         private ProfilePublicApi $profileApi,
+        private CoverService $coverService,
         int $userId,
     ) {
         $this->profileUserId = $userId;
@@ -123,6 +126,8 @@ class ProfileCommentsComponent extends Component
                     title: $story->title,
                     slug: $story->slug,
                     commentCount: $storyData['commentCount'],
+                    coverType: (string) ($story->cover_type ?? Story::COVER_DEFAULT),
+                    coverUrl: $this->coverService->getCoverUrl($story),
                 );
                 $totalCommentCount += $storyData['commentCount'];
             }
