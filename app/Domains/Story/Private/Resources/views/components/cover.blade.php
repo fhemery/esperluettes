@@ -20,14 +20,14 @@
     $authorsText = !empty($authorNames) ? implode(', ', $authorNames) : '';
 @endphp
 
-<div {{ $attributes->merge(['class' => "{$widthClass} {$class}"]) }} aria-hidden="true"
+<div {{ $attributes->merge(['class' => "{$widthClass} max-w-full {$class}"]) }} aria-hidden="true"
     @if($canLightbox) x-data="{ lightboxOpen: false }" @endif
 >
     @if ($coverType === 'default')
-        <x-shared::default-cover class="{{ $widthClass }} object-contain" />
+        <x-shared::default-cover class="w-full" />
     @elseif($canLightbox)
-        <div class="relative {{ $widthClass }}">
-            <img src="{{ $coverUrl }}" alt="" class="{{ $widthClass }} object-contain cursor-pointer"
+        <div class="relative w-full h-full">
+            <img src="{{ $coverUrl }}" alt="" class="w-full h-full object-cover cursor-pointer"
                 loading="lazy" @click="lightboxOpen = true" />
             
             @if($showText)
@@ -102,8 +102,8 @@
             </div>
         </template>
     @else
-        <div class="relative {{ $widthClass }}">
-            <img src="{{ $coverUrl }}" alt="" class="{{ $widthClass }} object-contain" loading="lazy" />
+        <div class="relative w-full h-full">
+            <img src="{{ $coverUrl }}" alt="" class="w-full h-full object-cover" loading="lazy" />
             
             @if($showText)
                  <div class="absolute inset-0 pointer-events-none flex flex-col text-read" style="padding: 20px 22px 0 22px;">

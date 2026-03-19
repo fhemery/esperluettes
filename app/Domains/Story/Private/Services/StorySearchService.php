@@ -64,7 +64,7 @@ class StorySearchService
         $rows = $base->orderByDesc('last_chapter_published_at')
             ->orderByDesc('created_at')
             ->limit($cap)
-            ->get(['id', 'slug', 'title']);
+            ->get(['id', 'slug', 'title', 'cover_type', 'cover_data']);
 
         return [
             'rows' => $rows,

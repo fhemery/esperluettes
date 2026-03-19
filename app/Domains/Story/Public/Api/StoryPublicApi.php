@@ -208,7 +208,8 @@ class StoryPublicApi
                 id: (int) $row->id,
                 title: (string) $row->title,
                 slug: (string) $row->slug,
-                cover_url: null,
+                cover_type: (string) ($row->cover_type ?? Story::COVER_DEFAULT),
+                cover_url: $this->coverService->getCoverUrl($row),
                 authors: $authors,
                 url: route('stories.show', ['slug' => $row->slug])
             );

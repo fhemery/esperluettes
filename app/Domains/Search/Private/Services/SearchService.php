@@ -46,6 +46,7 @@ class SearchService
             $authors = is_array($s->authors) ? $s->authors : [];
             return (object) [
                 'url' => $s->url,
+                'cover_type' => $s->cover_type,
                 'cover_url' => $s->cover_url,
                 'title' => $title,
                 'authors' => $authors,
