@@ -19,11 +19,13 @@
         <ul role="listbox" class="mt-2 space-y-2">
           @foreach($stories['items'] as $idx => $s)
             <li role="option" x-show="Math.floor({{ $idx }} / perPage) + 1 === storyPage" class="flex items-center gap-3 p-2 rounded hover:bg-neutral-100 cursor-pointer" onclick="window.location='{{ $s->url }}'">
-              @if($s->cover_url)
-                <img src="{{ $s->cover_url }}" alt="" class="w-10 h-10 object-cover rounded" />
-              @else
-                <x-story::cover :width="150" class="w-10 h-10" />
-              @endif
+              <div class="w-9 h-12 flex-shrink-0 overflow-hidden rounded">
+                <x-story::cover
+                  :coverType="$s->cover_type"
+                  :coverUrl="$s->cover_url"
+                  :width="150"
+                  class="w-full h-full" />
+              </div>
               <div class="min-w-0">
                 <div class="text-sm font-medium">{!! $s->title !!}</div>
                 <div class="text-xs text-neutral-600 truncate">{{ implode(', ', $s->authors) }}</div>

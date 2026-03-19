@@ -11,6 +11,7 @@ class StorySearchResultDto
         public readonly int $id,
         public readonly string $title,
         public readonly string $slug,
+        public readonly string $cover_type,
         public readonly ?string $cover_url,
         public readonly array $authors,
         public readonly string $url
