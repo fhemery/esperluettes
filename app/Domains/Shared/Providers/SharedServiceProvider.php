@@ -23,6 +23,7 @@ class SharedServiceProvider extends ServiceProvider
     public const SECTION_APPEARANCE = 'appearance';
     public const KEY_THEME = 'theme';
     public const KEY_FONT = 'font';
+    public const KEY_INTERLINE = 'interline';
 
     public function register()
     {
@@ -170,6 +171,25 @@ class SharedServiceProvider extends ServiceProvider
                 'options' => [
                     'aptos' => 'shared::settings.params.font.options.aptos',
                     'times' => 'shared::settings.params.font.options.times',
+                ],
+            ],
+        ));
+
+        // Register "Interline" parameter
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_GENERAL,
+            sectionId: self::SECTION_APPEARANCE,
+            key: self::KEY_INTERLINE,
+            type: ParameterType::ENUM,
+            default: 'medium',
+            order: 30,
+            nameKey: 'shared::settings.params.interline.name',
+            descriptionKey: 'shared::settings.params.interline.description',
+            constraints: [
+                'options' => [
+                    'low' => 'shared::settings.params.interline.options.low',
+                    'medium' => 'shared::settings.params.interline.options.medium',
+                    'high' => 'shared::settings.params.interline.options.high',
                 ],
             ],
         ));

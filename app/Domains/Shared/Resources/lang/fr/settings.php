@@ -32,5 +32,14 @@ return [
                 'times' => 'Times New Roman',
             ],
         ],
+        'interline' => [
+            'name' => 'Interligne',
+            'description' => 'Choisissez l\'espacement entre les lignes dans les textes.',
+            'options' => [
+                'low' => 'Faible (1)',
+                'medium' => 'Moyen (1,5) (défaut)',
+                'high' => 'Élevé (2)',
+            ],
+        ],
     ],
 ];

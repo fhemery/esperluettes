@@ -167,13 +167,31 @@ html {
   --content-font: "Aptos", Manrope, system-ui, sans-serif;
 }
 
+/* Line-height selection based on user preference */
+:root[data-interline="low"] {
+  --content-line-height: 1.2;
+}
+
+:root[data-interline="medium"] {
+  --content-line-height: 1.8;
+}
+
+:root[data-interline="high"] {
+  --content-line-height: 2.4;
+}
+
+/* Default interline if no preference set */
+:root:not([data-interline]) {
+  --content-line-height: 1.8;
+}
+
 /* Rich content defaults (for sanitized HTML display) */
 .rich-content {
   font-family: var(--content-font);
   /* Avoid synthetic styles when a face is missing */
   font-synthesis-weight: none;
   font-synthesis-style: none;
-  line-height: 1.8;
+  line-height: var(--content-line-height);
   text-align: justify;
 }
 .rich-content ul {
@@ -232,9 +250,9 @@ html {
 p.ql-align-center { text-indent: 0; }
 .ql-align-right { text-align: right; }
 .ql-align-justify { text-align: justify; }
-.rich-content .ql-editor { 
-  font-size: 1rem; 
-  line-height: 1.8;
+.rich-content .ql-editor {
+  font-size: 1rem;
+  line-height: var(--content-line-height);
 
   & p {
     padding-bottom: .75rem;

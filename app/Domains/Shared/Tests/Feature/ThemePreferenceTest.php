@@ -4,6 +4,7 @@ use App\Domains\Settings\Private\Services\SettingsRegistryService;
 use App\Domains\Shared\Contracts\Theme;
 use App\Domains\Shared\Providers\SharedServiceProvider;
 use App\Domains\Shared\Services\FontService;
+use App\Domains\Shared\Services\InterlineService;
 use App\Domains\Shared\Services\ThemeService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -354,5 +355,124 @@ describe('FontService - settings page integration', function () {
 
         $response->assertOk();
         $response->assertSee('data-font="times"', false);
+    });
+});
+
+describe('InterlineService - user preference', function () {
+    it('returns medium interline for guests', function () {
+        $interlineService = app(InterlineService::class);
+
+        expect($interlineService->resolve(null))->toBe(InterlineService::INTERLINE_MEDIUM);
+    });
+
+    it('returns medium interline when user has no preference', function () {
+        $user = alice($this);
+
+        $interlineService = app(InterlineService::class);
+
+        expect($interlineService->resolve($user->id))->toBe(InterlineService::INTERLINE_MEDIUM);
+    });
+
+    it('returns low interline when user selects low', function () {
+        $user = alice($this);
+
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_INTERLINE,
+            'low'
+        );
+
+        $interlineService = app(InterlineService::class);
+
+        expect($interlineService->resolve($user->id))->toBe(InterlineService::INTERLINE_LOW);
+    });
+
+    it('returns high interline when user selects high', function () {
+        $user = alice($this);
+
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_INTERLINE,
+            'high'
+        );
+
+        $interlineService = app(InterlineService::class);
+
+        expect($interlineService->resolve($user->id))->toBe(InterlineService::INTERLINE_HIGH);
+    });
+
+    it('returns medium interline for invalid preference value', function () {
+        $user = alice($this);
+
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_INTERLINE,
+            'low'
+        );
+
+        \Illuminate\Support\Facades\DB::table('settings')
+            ->where('user_id', $user->id)
+            ->where('domain', SharedServiceProvider::TAB_GENERAL)
+            ->where('key', SharedServiceProvider::KEY_INTERLINE)
+            ->update(['value' => 'invalid_interline']);
+
+        \Illuminate\Support\Facades\Cache::forget("user_settings:{$user->id}");
+
+        $interlineService = app(InterlineService::class);
+
+        expect($interlineService->resolve($user->id))->toBe(InterlineService::INTERLINE_MEDIUM);
+    });
+});
+
+describe('InterlineService - settings registration', function () {
+    it('registers interline parameter with correct options', function () {
+        $settingsApi = app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class);
+
+        $param = $settingsApi->getParameter(SharedServiceProvider::TAB_GENERAL, SharedServiceProvider::KEY_INTERLINE);
+
+        expect($param)->not->toBeNull();
+        expect($param->key)->toBe('interline');
+        expect($param->type)->toBe(\App\Domains\Shared\Contracts\ParameterType::ENUM);
+        expect($param->default)->toBe('medium');
+        expect($param->constraints['options'])->toHaveKeys(['low', 'medium', 'high']);
+    });
+});
+
+describe('InterlineService - settings page integration', function () {
+    it('can update interline preference via settings page', function () {
+        $user = alice($this);
+
+        $response = $this->actingAs($user)
+            ->putJson(route('settings.update', [
+                'tab' => SharedServiceProvider::TAB_GENERAL,
+                'key' => SharedServiceProvider::KEY_INTERLINE,
+            ]), [
+                'value' => 'high',
+            ]);
+
+        $response->assertOk();
+        $response->assertJson(['success' => true]);
+
+        $interlineService = app(InterlineService::class);
+        expect($interlineService->resolve($user->id))->toBe(InterlineService::INTERLINE_HIGH);
+    });
+
+    it('applies interline to HTML data attribute', function () {
+        $user = alice($this);
+
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_INTERLINE,
+            'low'
+        );
+
+        $response = $this->actingAs($user)->get(route('settings.index'));
+
+        $response->assertOk();
+        $response->assertSee('data-interline="low"', false);
     });
 });
