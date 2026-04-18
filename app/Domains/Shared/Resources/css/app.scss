@@ -299,6 +299,26 @@ p.ql-align-center { text-indent: 0; }
   -webkit-text-fill-color: unset;
 }
 
+/* Custom emoji (esper-*): rendered as inline spans with background-image so they survive HTMLPurifier */
+.ql-custom-emoji {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
+}
+.ql-custom-emoji-esperamour   { background-image: url('/images/icons/emojis/esperamour.png'); }
+.ql-custom-emoji-esperbravo   { background-image: url('/images/icons/emojis/esperbravo.png'); }
+.ql-custom-emoji-esperclindoeil { background-image: url('/images/icons/emojis/esperclindoeil.png'); }
+.ql-custom-emoji-espercolere  { background-image: url('/images/icons/emojis/espercolere.png'); }
+.ql-custom-emoji-esperfourire { background-image: url('/images/icons/emojis/esperfourire.png'); }
+.ql-custom-emoji-esperlunettes { background-image: url('/images/icons/emojis/esperlunettes.png'); }
+.ql-custom-emoji-espersnob    { background-image: url('/images/icons/emojis/espersnob.png'); }
+.ql-custom-emoji-espersourire { background-image: url('/images/icons/emojis/espersourire.png'); }
+.ql-custom-emoji-espertriste  { background-image: url('/images/icons/emojis/espertriste.png'); }
+
 [x-cloak] { display: none !important; }
 
 

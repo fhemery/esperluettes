@@ -12,6 +12,26 @@ window.Delta = Delta;
 Quill.register('modules/emoji-toolbar', ToolbarEmoji);
 Quill.register('modules/emoji-textarea', TextAreaEmoji);
 
+// --- CustomEmoji blot: renders as <span class="ql-custom-emoji ql-custom-emoji-{name}"> ---
+// Using a span (not img) so it survives HTMLPurifier and can be sized via CSS background-image.
+const EmbedBlot = Quill.import('blots/embed');
+class CustomEmojiBlot extends EmbedBlot {
+  static create(value) {
+    const node = super.create(); // creates <span class="ql-custom-emoji">
+    node.classList.add('ql-custom-emoji-' + value);
+    return node;
+  }
+  static value(node) {
+    // Recover name from the ql-custom-emoji-{name} class (data-* is stripped by purifier)
+    const cls = Array.from(node.classList).find(c => c.startsWith('ql-custom-emoji-'));
+    return cls ? cls.slice('ql-custom-emoji-'.length) : null;
+  }
+}
+CustomEmojiBlot.blotName = 'custom-emoji';
+CustomEmojiBlot.tagName = 'span';
+CustomEmojiBlot.className = 'ql-custom-emoji';
+Quill.register(CustomEmojiBlot);
+
 // --- Spoiler blot: renders as <span class="ql-spoiler"> ---
 const Inline = Quill.import('blots/inline');
 class SpoilerBlot extends Inline {
@@ -34,7 +54,7 @@ Quill.register(SpoilerBlot);
 // "&nbsp;&nbsp;&nbsp;" becomes " &nbsp;&nbsp;".
 function normalizeHtmlFromQuill(html) {
   if (!html) return '';
-  return html.replace(/&nbsp;((?:&nbsp;)*)/g, ' $1');
+  return html.replace(/&nbsp;((?:&nbsp;)*)/g, ' $1').replace(/\u200B/g, '');
 }
 
 export function initQuillEditor(id, options = {}) {
@@ -54,7 +74,7 @@ export function initQuillEditor(id, options = {}) {
     const withSpoiler = options.withSpoiler ?? container.dataset.withSpoiler === 'true';
 
     // Build allowed formats dynamically
-    const allowedFormats = ['bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'align'];
+    const allowedFormats = ['bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'align', 'custom-emoji'];
     if (withHeadings) {
       allowedFormats.push('header');
     }

@@ -1,5 +1,5 @@
 import Module from 'quill/core/module';
-import { searchEmojis } from './data.js';
+import { searchAll, insertCustomEmoji, createCustomEmojiImg } from './data.js';
 
 export default class ToolbarEmoji extends Module {
   constructor(quill, options = {}) {
@@ -58,26 +58,35 @@ export default class ToolbarEmoji extends Module {
 
     const render = () => {
       grid.innerHTML = '';
-      const items = searchEmojis('', this.options.maxResults);
+      const items = searchAll('', this.options.maxResults);
       items.forEach(item => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'qe-emoji-item';
-        btn.textContent = item.unicode;
+        btn.setAttribute('title', item.shortname);
         Object.assign(btn.style, {
           fontSize: '18px',
           lineHeight: '24px',
           width: '28px',
           height: '28px',
+          padding: '0',
         });
+        if (item.type === 'custom') {
+          btn.appendChild(createCustomEmojiImg(item, 22));
+        } else {
+          btn.textContent = item.unicode;
+        }
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
           const range = this.quill.getSelection(true);
           if (!range) return;
-          this.quill.insertText(range.index, item.unicode, 'user');
-          this.quill.setSelection(range.index + item.unicode.length, 0, 'user');
-          // Close popover after inserting emoji
+          if (item.type === 'custom') {
+            insertCustomEmoji(this.quill, range.index, item.name);
+          } else {
+            this.quill.insertText(range.index, item.unicode, 'user');
+            this.quill.setSelection(range.index + item.unicode.length, 0, 'user');
+          }
           render();
           this.hide();
         });

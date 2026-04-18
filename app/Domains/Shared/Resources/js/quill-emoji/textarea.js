@@ -1,5 +1,5 @@
 import Module from 'quill/core/module';
-import { searchEmojis } from './data.js';
+import { searchAll, insertCustomEmoji, createCustomEmojiImg } from './data.js';
 
 export default class TextAreaEmoji extends Module {
   constructor(quill, options = {}) {
@@ -126,7 +126,7 @@ export default class TextAreaEmoji extends Module {
   }
 
   _render(q){
-    this.items = searchEmojis(q, this.options.maxResults);
+    this.items = searchAll(q, this.options.maxResults);
     this.list.innerHTML = '';
     this.items.forEach((it, i) => {
       const row = document.createElement('div');
@@ -143,13 +143,17 @@ export default class TextAreaEmoji extends Module {
         cursor: 'pointer',
         background: i === this.activeIndex ? '#f3f4f6' : 'transparent',
       });
-      const emoji = document.createElement('div');
-      emoji.textContent = it.unicode;
-      emoji.style.fontSize = '18px';
+      const emojiEl = document.createElement('div');
+      if (it.type === 'custom') {
+        emojiEl.appendChild(createCustomEmojiImg(it));
+      } else {
+        emojiEl.textContent = it.unicode;
+        emojiEl.style.fontSize = '18px';
+      }
       const label = document.createElement('div');
       label.textContent = `:${it.shortname}:`;
       label.style.fontSize = '12px';
-      row.appendChild(emoji);
+      row.appendChild(emojiEl);
       row.appendChild(label);
       row.addEventListener('mouseenter', () => { this._setActive(i); });
       row.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this._insert(it); });
@@ -200,8 +204,12 @@ export default class TextAreaEmoji extends Module {
     if (deleteLen > 0) {
       this.quill.deleteText(startIndex, deleteLen, 'user');
     }
-    this.quill.insertText(startIndex, item.unicode, 'user');
-    this.quill.setSelection(startIndex + item.unicode.length, 0, 'user');
+    if (item.type === 'custom') {
+      insertCustomEmoji(this.quill, startIndex, item.name);
+    } else {
+      this.quill.insertText(startIndex, item.unicode, 'user');
+      this.quill.setSelection(startIndex + item.unicode.length, 0, 'user');
+    }
     this.hide();
     this.triggerStart = null;
     // release guard after this event loop so our text-change gets ignored

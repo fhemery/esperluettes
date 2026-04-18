@@ -1,3 +1,15 @@
+export const CUSTOM_EMOJIS = [
+  { type: 'custom', name: 'esperamour', shortname: 'esperamour', src: '/images/icons/emojis/esperamour.png', keywords: ['esper', 'amour', 'love'] },
+  { type: 'custom', name: 'esperbravo', shortname: 'esperbravo', src: '/images/icons/emojis/esperbravo.png', keywords: ['esper', 'bravo'] },
+  { type: 'custom', name: 'esperclindoeil', shortname: 'esperclindoeil', src: '/images/icons/emojis/esperclindoeil.png', keywords: ['esper', 'wink', 'clindoeil'] },
+  { type: 'custom', name: 'espercolere', shortname: 'espercolere', src: '/images/icons/emojis/espercolere.png', keywords: ['esper', 'colere', 'angry'] },
+  { type: 'custom', name: 'esperfourire', shortname: 'esperfourire', src: '/images/icons/emojis/esperfourire.png', keywords: ['esper', 'fourire', 'laugh'] },
+  { type: 'custom', name: 'esperlunettes', shortname: 'esperlunettes', src: '/images/icons/emojis/esperlunettes.png', keywords: ['esper', 'lunettes', 'cool'] },
+  { type: 'custom', name: 'espersnob', shortname: 'espersnob', src: '/images/icons/emojis/espersnob.png', keywords: ['esper', 'snob'] },
+  { type: 'custom', name: 'espersourire', shortname: 'espersourire', src: '/images/icons/emojis/espersourire.png', keywords: ['esper', 'sourire', 'smile'] },
+  { type: 'custom', name: 'espertriste', shortname: 'espertriste', src: '/images/icons/emojis/espertriste.png', keywords: ['esper', 'triste', 'sad'] },
+];
+
 // Minimal emoji dataset for MVP (Unicode only)
 export const EMOJIS = [
   { name: 'grinning face', shortname: 'grinning', unicode: '😀', keywords: ['smile', 'happy', 'grin'], category: 'people' },
@@ -51,4 +63,37 @@ export function searchEmojis(query, limit = 24) {
     e.keywords.some(k => k.includes(q))
   );
   return res.slice(0, limit);
+}
+
+/**
+ * Insert a custom emoji embed at `index` in `quill`.
+ * Appends a zero-width space when the emoji lands at end of paragraph so the
+ * browser has a text node to anchor the caret to (stripped from HTML on save).
+ */
+export function insertCustomEmoji(quill, index, name) {
+  quill.insertEmbed(index, 'custom-emoji', name, 'user');
+  if (quill.getText(index + 1, 1) === '\n') {
+    quill.insertText(index + 1, '\u200B', 'user');
+    quill.setSelection(index + 2, 0, 'user');
+  } else {
+    quill.setSelection(index + 1, 0, 'user');
+  }
+}
+
+/** Create a small <img> preview for use inside emoji picker buttons / rows. */
+export function createCustomEmojiImg(item, size = 20) {
+  const img = document.createElement('img');
+  img.src = item.src;
+  img.alt = item.shortname;
+  Object.assign(img.style, { width: `${size}px`, height: `${size}px`, objectFit: 'contain' });
+  return img;
+}
+
+export function searchAll(query, limit = 24) {
+  const q = (query || '').trim().toLowerCase();
+  const custom = q
+    ? CUSTOM_EMOJIS.filter(e => e.name.includes(q) || e.keywords.some(k => k.includes(q)))
+    : CUSTOM_EMOJIS;
+  const regular = searchEmojis(q, limit - custom.length);
+  return [...custom, ...regular].slice(0, limit);
 }
