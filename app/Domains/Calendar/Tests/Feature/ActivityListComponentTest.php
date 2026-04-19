@@ -44,7 +44,7 @@ describe('ActivityListComponent', function () {
     it('renders empty state in Blade when no activities exist', function () {
         $html = Blade::render('<x-calendar::activity-list-component />');
         expect($html)
-            ->toContain('event_busy')
+            ->toContain('not-ready.png')
             ->and($html)->toContain(__('calendar::activity.list.no_activities'));
     });
 

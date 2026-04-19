@@ -6,6 +6,7 @@ namespace App\Domains\Calendar\Private\View\Components;
 
 use App\Domains\Calendar\Private\Services\ActivityService;
 use App\Domains\Calendar\Public\Contracts\ActivityDto;
+use App\Domains\Shared\Services\ThemeService;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\View\Component;
 
@@ -15,7 +16,8 @@ class ActivityListComponent extends Component
     public array $activities = [];
 
     public function __construct(
-        private ActivityService $activityService
+        private ActivityService $activityService,
+        private ThemeService $themeService,
     ) {
         $this->hydrate();
     }
@@ -33,6 +35,7 @@ class ActivityListComponent extends Component
     {
         return view('calendar::components.activity-list', [
             'activities' => $this->activities,
+            'theme' => $this->themeService->current(),
         ]);
     }
 }
