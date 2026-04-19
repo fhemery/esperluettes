@@ -2,6 +2,7 @@
 
 namespace App\Domains\Story\Private\Policies;
 
+use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Contracts\Auth\Authenticatable;
 use App\Domains\Story\Private\Models\Story;
 
@@ -12,9 +13,15 @@ class StoryPolicy
      * - public: everyone
      * - community: confirmed users only
      * - private: collaborators only
+     * - moderators/admins can always view any story
      */
     public function view(?Authenticatable $user, Story $story): bool
     {
+        if ($user !== null && method_exists($user, 'hasRole') &&
+            $user->hasRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN])) {
+            return true;
+        }
+
         if ($story->visibility === Story::VIS_PUBLIC) {
             return true;
         }

@@ -241,6 +241,35 @@ final class StoryRepository
     }
 
     /**
+     * Return all stories for the admin moderation screen (no visibility filter).
+     * Optionally filters by title or by stories that have an author matching given user IDs.
+     *
+     * @param string $search Title search string
+     * @param array<int> $authorUserIds User IDs to include via author match (OR with title search)
+     */
+    public function searchAllForAdmin(string $search, array $authorUserIds, int $perPage, int $page): LengthAwarePaginator
+    {
+        $query = Story::query()
+            ->with('collaborators')
+            ->withCount('chapters');
+
+        if ($search !== '' || !empty($authorUserIds)) {
+            $query->where(function ($q) use ($search, $authorUserIds) {
+                if ($search !== '') {
+                    $q->where('title', 'like', '%' . $search . '%');
+                }
+                if (!empty($authorUserIds)) {
+                    $q->orWhereHas('collaborators', function ($c) use ($authorUserIds) {
+                        $c->where('role', 'author')->whereIn('user_id', $authorUserIds);
+                    });
+                }
+            });
+        }
+
+        return $query->orderBy('title')->paginate($perPage, ['*'], 'page', $page);
+    }
+
+    /**
      * Return all stories authored by the given user (appears in authors relation).
      *
      * @return Collection<int, Story>

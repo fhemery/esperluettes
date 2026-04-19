@@ -52,4 +52,10 @@ return [
     'story_cover_moderated' => [
         'summary' => "Couverture supprimée par la modération (id: :id, :title).",
     ],
+    'moderator_accessed_private_story' => [
+        'summary' => "Modérateur : accès à l'histoire privée (id: :id, :title).",
+    ],
+    'moderator_accessed_private_chapter' => [
+        'summary' => "Modérateur : accès au chapitre privé (id: :id, :title) de l'histoire :storyId.",
+    ],
 ];
