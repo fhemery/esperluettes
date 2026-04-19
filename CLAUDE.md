@@ -6,7 +6,7 @@ trigger: always_on
 
 ## Docker/Sail Commands
 - Use `sail` instead of direct PHP/Composer commands
-- To run tests : `./vendor/bin/sail artisan test`
+- To run tests : `./vendor/bin/sail artisan test:parallel` (auto-scales to 80% of available cores; override with `TEST_PROCESSES=N`)
 - To run composer : `./vendor/bin/sail composer` 
 - To run deptrac if needed : `./vendor/bin/sail composer deptrac`
 - To clear cache: `./vendor/bin/sail artisan optimize:clear`

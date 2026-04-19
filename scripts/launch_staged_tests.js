@@ -189,24 +189,24 @@ function runStagedTests(skipBranchCheck = false) {
   if (modified.length === 0) {
     log('No modified files; running full test suite.');
     const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
+    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
   }
 
   const deptrac = readDeptracConfig();
   if (!deptrac) {
     log('deptrac.yaml not found or invalid; running full test suite.');
     const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
+    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
   }
 
   const { domains, runAll } = extractDomainsFromFiles(modified);
   if (runAll) {
     log('Changes include files outside app/Domains (and not ignored); running full test suite.');
     const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
+    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
   }
   if (domains.length === 0) {
     log('Changes contain only non code files, ignoring the  full test suite.');
@@ -233,8 +233,8 @@ function runStagedTests(skipBranchCheck = false) {
   if (testDirs.length === 0) {
     log('No specific test directories resolved; running full test suite.');
     const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure']) ? 0 : 1;
+    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
   }
 
   // Deduplicate and run
@@ -242,8 +242,8 @@ function runStagedTests(skipBranchCheck = false) {
   log(`Running tests for: ${uniqueDirs.join(' ')}`);
   const runner = determineRunner();
   const ok = (runner === 'php')
-    ? runCmd('php', ['artisan', 'test', '--stop-on-failure', ...uniqueDirs])
-    : runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure', ...uniqueDirs]);
+    ? runCmd('php', ['artisan', 'test:parallel', ...uniqueDirs])
+    : runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel', ...uniqueDirs]);
   return ok ? 0 : 1;
 }
 

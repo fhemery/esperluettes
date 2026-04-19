@@ -10,6 +10,10 @@ uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     \Illuminate\Support\Facades\Cache::flush();
+    $key = '__test_api_key__';
+    putenv('DISCORD_BOT_API_KEY=' . $key);
+    $_ENV['DISCORD_BOT_API_KEY'] = $key;
+    $_SERVER['DISCORD_BOT_API_KEY'] = $key;
 });
 
 describe('DiscordComponent', function () {

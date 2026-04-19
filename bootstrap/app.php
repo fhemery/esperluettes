@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        \App\Console\Commands\ParallelTestCommand::class,
+    ])
     ->withSchedule(function (Schedule $schedule): void {
         // Clean up old notifications daily at midnight
         $schedule->command('notifications:cleanup')->daily();

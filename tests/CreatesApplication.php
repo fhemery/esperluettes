@@ -3,7 +3,6 @@
 namespace Tests;
 
 use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Filesystem\Filesystem;
 
 trait CreatesApplication
 {
@@ -18,19 +17,13 @@ trait CreatesApplication
             $app['config']->set('database.default', 'sqlite');
         }
 
-        // Ensure SQLite test database file exists
-        $db = $app['config']['database.connections.sqlite.database'] ?? null;
-        if (is_string($db) && str_contains($db, 'database/testing') && $db !== ':memory:') {
-            $fs = new Filesystem();
-            $path = base_path($db);
-            $dir = dirname($path);
-            if (! $fs->exists($dir)) {
-                $fs->makeDirectory($dir, 0755, true);
-            }
-            if (! $fs->exists($path)) {
-                $fs->put($path, '');
-            }
+        // Give each worker process its own compiled view directory to prevent
+        // race conditions when multiple workers write to the same cache file.
+        $compiledPath = '/tmp/laravel-views-testing-' . getmypid();
+        if (!is_dir($compiledPath)) {
+            mkdir($compiledPath, 0777, true);
         }
+        $app['config']->set('view.compiled', $compiledPath);
 
         return $app;
     }
