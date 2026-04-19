@@ -53,4 +53,4 @@ jobs:
         run: composer deptrac
 
       - name: Run tests
-        run: php artisan test --stop-on-failure --ansi
+        run: php artisan test:parallel

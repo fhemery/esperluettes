@@ -87,10 +87,10 @@ function main() {
         // Fallback to previous behavior if launcher is missing
         log('Staged tests launcher not found; running full test suite');
         if (runner === 'php') {
-            if (!runCmd('php', ['artisan', 'test', '--stop-on-failure'])) process.exit(1);
+            if (!runCmd('php', ['artisan', 'test:parallel'])) process.exit(1);
         } else {
             if (fileExists(path.join('vendor', 'bin', 'sail'))) {
-                if (!runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', '--stop-on-failure'])) process.exit(1);
+                if (!runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel'])) process.exit(1);
             } else {
                 log('sail not found; cannot run tests');
                 process.exit(1);
