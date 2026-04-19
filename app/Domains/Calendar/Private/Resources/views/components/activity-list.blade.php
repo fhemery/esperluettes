@@ -11,7 +11,7 @@
 
     @if(empty($activities))
         <div class="flex-1 flex flex-col justify-center text-center py-8 text-gray-600">
-            <span class="material-symbols-outlined text-6xl text-on-surface/30">event_busy</span>
+            <img src="{{ $theme->asset('not-ready.png') }}" alt="" class="w-auto opacity-50">
             <p class="mt-4">{{ __('calendar::activity.list.no_activities') }}</p>
         </div>
     @else
