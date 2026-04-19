@@ -434,6 +434,7 @@ deptrac:
       - ModerationPublic
       - NotificationPublic
       - ConfigPublic
+      - AdministrationPublic
 
     StoryRefPublic:
       - Shared

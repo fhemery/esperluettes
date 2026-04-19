@@ -47,6 +47,15 @@ describe('Story details page', function () {
         $this->get('/stories/' . $story->slug)->assertNotFound();
     });
 
+    it('allows moderator to view a private story', function () {
+        $author = alice($this);
+        $story = privateStory('Private Story', $author->id);
+
+        $this->actingAs(moderator($this))
+            ->get('/stories/' . $story->slug)
+            ->assertOk();
+    });
+
     it('return 404 for guest for community story', function () {
         $author = alice($this);
         $story = communityStory('Community Story', $author->id);

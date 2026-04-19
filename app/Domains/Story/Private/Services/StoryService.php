@@ -71,6 +71,20 @@ class StoryService
         return $stories;
     }
 
+    /**
+     * Return all stories for the admin moderation panel (no visibility filter).
+     * Searches by title or author display name.
+     */
+    public function searchStoriesForAdmin(string $search, int $perPage = 20, int $page = 1): LengthAwarePaginator
+    {
+        $authorUserIds = [];
+        if ($search !== '') {
+            $authorUserIds = array_keys($this->profileApi->searchDisplayNames($search));
+        }
+
+        return $this->storiesRepository->searchAllForAdmin($search, $authorUserIds, $perPage, $page);
+    }
+
     public function createStory(StoryRequest $request, int $userId): Story
     {
         return DB::transaction(function () use ($request, $userId) {

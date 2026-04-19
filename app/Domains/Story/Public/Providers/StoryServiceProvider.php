@@ -45,6 +45,8 @@ use App\Domains\Story\Public\Events\ChapterContentModerated;
 use App\Domains\Story\Public\Events\ChapterUnpublishedByModeration;
 use App\Domains\Story\Public\Events\ChapterCommentNotificationsBackfilled;
 use App\Domains\Story\Public\Events\StoryExcludedFromEvents;
+use App\Domains\Story\Public\Events\ModeratorAccessedPrivateStory;
+use App\Domains\Story\Public\Events\ModeratorAccessedPrivateChapter;
 use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 use App\Domains\Notification\Public\Services\NotificationFactory;
@@ -61,6 +63,9 @@ use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
 use App\Domains\Shared\Contracts\ParameterType;
 use App\Domains\Story\Private\Support\FeatureToggles;
+use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
+use App\Domains\Auth\Public\Api\Roles;
 
 class StoryServiceProvider extends ServiceProvider
 {
@@ -124,6 +129,8 @@ class StoryServiceProvider extends ServiceProvider
         $eventBus->registerEvent(ChapterContentModerated::name(), ChapterContentModerated::class);
         $eventBus->registerEvent(ChapterCommentNotificationsBackfilled::name(), ChapterCommentNotificationsBackfilled::class);
         $eventBus->registerEvent(StoryExcludedFromEvents::name(), StoryExcludedFromEvents::class);
+        $eventBus->registerEvent(ModeratorAccessedPrivateStory::name(), ModeratorAccessedPrivateStory::class);
+        $eventBus->registerEvent(ModeratorAccessedPrivateChapter::name(), ModeratorAccessedPrivateChapter::class);
 
         // Subscribe to cross-domain events (after-commit listeners)
         $eventBus->subscribe(UserRegistered::class, [app(GrantInitialCreditsOnUserRegistered::class), 'handle']);
@@ -148,6 +155,8 @@ class StoryServiceProvider extends ServiceProvider
             displayName: __('story::moderation.topic_chapter'),
             formatterClass: ChapterSnapshotFormatter::class
         );
+
+        $this->registerAdminNavigation();
 
         // Register notification content types
         $notificationFactory = app(NotificationFactory::class);
@@ -178,6 +187,20 @@ class StoryServiceProvider extends ServiceProvider
         $notificationFactory->register(
             type: CollaboratorLeftNotification::type(),
             class: CollaboratorLeftNotification::class
+        );
+    }
+
+    protected function registerAdminNavigation(): void
+    {
+        $registry = app(AdminNavigationRegistry::class);
+        $registry->registerPage(
+            'story.admin.moderation',
+            'moderation',
+            __('story::admin.moderation.title'),
+            AdminRegistryTarget::route('story.admin.moderation.index'),
+            'menu_book',
+            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
+            10,
         );
     }
 

@@ -121,6 +121,26 @@ describe('Chapter display', function () {
             $resp->assertNotFound();
         });
 
+        it('allows moderator to view an unpublished chapter', function () {
+            $author = alice($this);
+            $story = publicStory('Story', $author->id);
+            $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Draft']);
+
+            $this->actingAs(moderator($this))
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk();
+        });
+
+        it('allows moderator to view a published chapter of a private story', function () {
+            $author = alice($this);
+            $story = privateStory('Private Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Published']);
+
+            $this->actingAs(moderator($this))
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk();
+        });
+
         it('allows author to view unpublished chapter', function () {
             $author = alice($this);
             $this->actingAs($author);

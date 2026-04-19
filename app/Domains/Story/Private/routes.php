@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Route;
+use App\Domains\Story\Private\Controllers\Admin\StoryModerationAdminController;
 use App\Domains\Story\Private\Controllers\StoryCreateController;
 use App\Domains\Story\Private\Controllers\StoryController;
 use App\Domains\Story\Private\Controllers\ChapterController;
@@ -21,6 +22,24 @@ Route::middleware(['web'])->group(function () {
         Route::get('/stories/{storyId}/profile-comments/{userId}', [ProfileCommentsApiController::class, 'getCommentsForStory'])
             ->where(['storyId' => '[0-9]+', 'userId' => '[0-9]+'])
             ->name('profile.comments.api');
+    });
+
+    // Admin moderation screen — must be defined before greedy slug routes
+    Route::middleware(['auth', 'role:' . Roles::MODERATOR . ',' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])->group(function () {
+        Route::get('/stories/admin/moderation', [StoryModerationAdminController::class, 'index'])
+            ->name('story.admin.moderation.index');
+
+        Route::get('/stories/admin/moderation/{story}/chapters', [StoryModerationAdminController::class, 'chapters'])
+            ->where('story', '[0-9]+')
+            ->name('story.admin.moderation.chapters');
+
+        Route::get('/stories/admin/moderation/{story}/access', [StoryModerationAdminController::class, 'accessStory'])
+            ->where('story', '[0-9]+')
+            ->name('story.admin.moderation.story-access');
+
+        Route::get('/stories/admin/moderation/chapters/{chapter}/access', [StoryModerationAdminController::class, 'accessChapter'])
+            ->where('chapter', '[0-9]+')
+            ->name('story.admin.moderation.chapter-access');
     });
 
     Route::middleware(['role:' . Roles::MODERATOR . ',' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])->group(function () {
