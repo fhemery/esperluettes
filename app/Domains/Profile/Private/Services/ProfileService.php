@@ -368,7 +368,7 @@ class ProfileService
             }
             $defaultAvatarPath = 'profile_pictures/' . $userId . '.svg';
             Storage::disk('public')->delete($defaultAvatarPath);
-            $profile->delete();
+            $profile->forceDelete();
         } else {
             $defaultAvatarPath = 'profile_pictures/' . $userId . '.svg';
             Storage::disk('public')->delete($defaultAvatarPath);
