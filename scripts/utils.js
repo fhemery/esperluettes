@@ -93,6 +93,26 @@ export function runCmd(cmd, args, opts = {}) {
   return res.status === 0;
 }
 
+// Runner that returns { ok, output } without throwing — captures stdout+stderr
+export function runCmdWithOutput(cmd, args, opts = {}) {
+  const res = spawnSync(cmd, args || [], {
+    encoding: 'utf8',
+    stdio: ['inherit', 'pipe', 'pipe'],
+    shell: process.platform === 'win32',
+    ...opts,
+  });
+  const output = ((res.stdout || '') + (res.stderr || '')).trim();
+  return { ok: res.status === 0, output };
+}
+
+// Check whether sail containers are currently running
+export function isSailRunning() {
+  const sailPath = path.join('vendor', 'bin', 'sail');
+  const res = spawnSync(sailPath, ['ps'], { encoding: 'utf8', stdio: 'pipe' });
+  if (res.stdout && res.stdout.includes('Sail is not running')) return false;
+  return res.status === 0;
+}
+
 // Determine whether to use local php or sail
 export function determineRunner() {
   let localRunner = process.env.LOCAL_RUNNER;

@@ -9,7 +9,8 @@
         "prepare": "husky",
         "dep:check": "./vendor/bin/sail composer deptrac",
         "husky:precommit": "node scripts/husky-precommit.js",
-        "launch-staged:tests": "node scripts/launch_staged_tests.js"
+        "launch-staged:tests": "node scripts/launch_staged_tests.js",
+        "launch-deptrac": "node scripts/launch-deptrac.js"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.5.0",
