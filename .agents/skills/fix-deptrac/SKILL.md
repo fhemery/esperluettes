@@ -5,9 +5,9 @@ description: Analyze deptrac violations after a failed deptrac check and decide 
 
 # Fix Deptrac Violations
 
-The deptrac output is already in your context from the hook that triggered this skill. Work through each violation systematically.
-
----
+There are two situations in which the deptrac fix is needed:
+1. if the output is already in your context, from the hook that triggered this skill, yoy already have the output.
+2. else, you can run deptrac with `npm run launch-deptrac` command
 
 ## Architecture rules for this project
 
@@ -72,8 +72,10 @@ Open the file at the indicated line. Identify:
 Options, in order of preference:
 1. Use an existing Public API from `Shared` instead
 2. Use an existing `<DomainB>Public` API if there is one that covers the need
-3. Move the shared logic to `Shared` domain
-4. Inject via event/listener pattern to decouple the domains
+3. Inject via event/listener pattern to decouple the domains
+4. Move the shared logic to `Shared` domain if it seems shared enough (with the potential to be reused by other domain)
+
+When in doubt, stop and ask the user what should be done.
 
 ---
 
@@ -108,7 +110,7 @@ Keep the list sorted alphabetically within each entry for readability.
 Run deptrac to confirm the violation is resolved:
 
 ```
-./vendor/bin/sail composer deptrac
+npm run launch-deptrac
 ```
 
 If more violations appear, repeat from Step 1.
