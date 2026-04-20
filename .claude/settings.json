@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/launch_deptrac.js; [ $? -ne 0 ] && exit 2; exit 0",
+            "timeout": 120,
+            "statusMessage": "Running deptrac...",
+            "asyncRewake": true
+          },
+          {
+            "type": "command",
+            "command": "node scripts/launch_staged_tests.js; [ $? -ne 0 ] && exit 2; exit 0",
+            "timeout": 300,
+            "statusMessage": "Running targeted tests...",
+            "asyncRewake": true
+          }
+        ]
+      }
+    ]
+  }
+}
