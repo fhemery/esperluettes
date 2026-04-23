@@ -6,7 +6,8 @@ trigger: always_on
 
 ## Docker/Sail Commands
 - Use `sail` instead of direct PHP/Composer commands
-- To run tests : `./vendor/bin/sail artisan test:parallel` (auto-scales to 80% of available cores; override with `TEST_PROCESSES=N`)
+- To run all tests : `./vendor/bin/sail artisan test:parallel` (auto-scales to 80% of available cores; override with `TEST_PROCESSES=N`)
+- To run selectively tests `./vendor/bin/sail artisan test --filter=<your filter>`
 - To run composer : `./vendor/bin/sail composer` 
 - To run deptrac if needed : `./vendor/bin/sail composer deptrac`
 - To clear cache: `./vendor/bin/sail artisan optimize:clear`
@@ -20,11 +21,39 @@ trigger: always_on
 # Architecture details
 - We use a Domain Oriented Architecture, with modules located in app/Domains
 - No test, no Middleware, no blade component should be created outside of app/Domains/<domain> subfolders unless explicitly requested
-- Controllers are not allowed to call the Databse directly (or through models). They must use a service. 
+- Controllers are not allowed to call the Database directly (or through models). They must use a service. 
 - At the root of the domain (/app/Domains/<domain name>), only Public, Private, Database and Tests folders are allowed
 - Refer to docs/Domain_Structure.md whenever creating a file
 - Database Migrations goes into /app/Domains/<relevant domain>/Database/Migrations folder
 - Database Migrations should never define foreign keys to tables not located inside the Domain. In particular, there should be no foreign key towards 'users' table from outside of Auth domain
+
+## Domain Registry
+
+| Domain | Path | Responsibilities | Tables |
+|--------|------|-----------------|--------|
+| **Admin** | `app/Domains/Admin` | Filament-based admin panel UI; entry point for all admin operations | _(none — uses other domains' tables)_ |
+| **Administration** | `app/Domains/Administration` | Admin layout, logs viewer, maintenance mode controller | _(none)_ |
+| **Auth** | `app/Domains/Auth` | User authentication (Breeze), registration, roles, activation codes, promotion requests | `users`, `roles`, `role_user`, `user_activation_codes`, `user_promotion_request`, `password_reset_tokens`, `sessions` |
+| **Calendar** | `app/Domains/Calendar` | Time-bound activities (contests, challenges) with a plugin-based activity-type registry | `calendar_activities`, `calendar_jardino_*`, `calendar_secret_gift_*` |
+| **Comment** | `app/Domains/Comment` | Pluggable comment system with per-entity policy registry; consumed by Story, News, etc. | `comments` |
+| **Config** | `app/Domains/Config` | Site configuration and feature toggles, readable by other domains via `ConfigPublicApi` | `config_feature_toggles`, `config_parameter_values` |
+| **Dashboard** | `app/Domains/Dashboard` | Authenticated user dashboard page | _(none)_ |
+| **Discord** | `app/Domains/Discord` | Discord bot integration; user connection via code exchange | `discord_connection_codes`, `discord_users` |
+| **Events** | `app/Domains/Events` | Domain event bus and audit log infrastructure; cross-domain communication backbone | `domain_events` |
+| **FAQ** | `app/Domains/FAQ` | FAQ categories and questions with Filament admin panel | `faq_categories`, `faq_questions` |
+| **Home** | `app/Domains/Home` | Home page, aggregates data from multiple domains | _(none)_ |
+| **Message** | `app/Domains/Message` | Private messages between users (incomplete) | `messages`, `message_deliveries` |
+| **Moderation** | `app/Domains/Moderation` | User reporting with pluggable topic registry; moderators review reports in Admin | `moderation_reasons`, `moderation_reports` |
+| **News** | `app/Domains/News` | News articles with publish/unpublish workflow and homepage carousel | `news` |
+| **Notification** | `app/Domains/Notification` | Cross-domain user notification system with extensible content types | `notifications`, `notification_reads` |
+| **Profile** | `app/Domains/Profile` | User profile, picture, bio, social links | `profile_profiles` |
+| **ReadList** | `app/Domains/ReadList` | Reading bookmarks ("pile à lire") with progress tracking and infinite scroll | `read_list_entries` |
+| **Search** | `app/Domains/Search` | Global search across stories and profiles; renders inline results below top bar | _(none)_ |
+| **Settings** | `app/Domains/Settings` | Extensible user preferences system; other domains register their own tabs/parameters | `settings` |
+| **Shared** | `app/Domains/Shared` | Shared components, CSS/JS, translations, common utilities used across all domains | _(none)_ |
+| **StaticPage** | `app/Domains/StaticPage` | Admin-managed static pages with publish/draft lifecycle; served via catch-all routes with slug-map caching | `static_pages` |
+| **Story** | `app/Domains/Story` | Core domain: story and chapter CRUD, publication, credits, reading progress | `stories`, `story_chapters`, `story_chapter_credits`, `story_collaborators`, `story_genres`, `story_reading_progress`, `story_trigger_warnings` |
+| **StoryRef** | `app/Domains/StoryRef` | Reference data for stories (genres, types, statuses, audiences, trigger warnings, etc.) | `story_ref_audiences`, `story_ref_copyrights`, `story_ref_feedbacks`, `story_ref_genres`, `story_ref_statuses`, `story_ref_trigger_warnings`, `story_ref_types` |
 
 
 # Laravel Coding Standards
@@ -38,15 +67,12 @@ trigger: always_on
 - Use Eloquent conventions for foreign keys
 
 ## Controllers
-- Keep controllers thin, logic in models/services
-- Use resource controllers: `Route::resource('novels', NovelController::class)`
-- Return views with compact data: `return view('novels.show', compact('novel'))`
 - Use form requests for validation
 - Follow RESTful naming conventions
 
 ## Migrations
 - Use descriptive migration names
-- Prefix all migrations with date and time of migration YYYY_MM_DD_HHiiss_<migration_name>
+- Prefix : YYYY_MM_DD_HHiiss_<migration_name>
 - Always add `down()` methods
 - Use foreign key constraints only for tables from same domain.
 
@@ -64,7 +90,7 @@ trigger: always_on
 ## Alpine.js Best Practices
 - Keep `x-data` objects simple and focused
 - Use `x-show` for toggles, `x-if` for conditional rendering
-- Prefix Alpine directives: `x-data`, `x-model`, `@click`
+- Prefix Alpine directives: `x-data`, `x-model`, `x-on:click`
 - Extract complex logic to separate functions
 - Use `x-init` for component initialization
 - Avoid deep nesting in Alpine components
@@ -74,78 +100,29 @@ trigger: always_on
 - Prefer `@include` for reusable components
 - Use `{{ }}` for escaped output, `{!! !!}` only when necessary
 - Keep logic minimal in templates
-- Use `@auth`, `@guest` for authentication checks
 
 ## CSS/Styling
 - Use Tailwind classes directly in templates
 - Keep utility-first approach
-- Create component classes for repeated patterns
 - Use responsive prefixes: `md:`, `lg:`
-- Maintain consistent spacing scale
 
 # Database Design
-
-## Naming Conventions
-- Tables: plural snake_case (users, novel_chapters)
-- Columns: snake_case (created_at, user_id)
-- Foreign keys: singular_table_id (user_id, novel_id)
-- Pivot tables: alphabetical order (chapter_reviews)
 
 ## Relationships
 - Use proper relationship types: `hasMany`, `belongsTo`, `belongsToMany`
 - Add foreign key constraints in migrations
-- Consider using polymorphic relationships for flexible designs
-
-# Novel Platform Specific Rules
-
-## Authentication & Authorization
-- Use Laravel's built-in authentication (breeze)
-- Implement policies for model authorization
-- Gate checks in controllers and views
-- Use middleware for route protection
-
-## Content Management
-- Store rich text in TEXT columns
-- Validate chapter word counts
 - Use eager loading to prevent N+1 queries
-
-## Admin Panel (Filament)
-- Create resources for all major models
-- Implement proper CRUD operations
-- Add search and filtering capabilities
-- Use bulk actions for moderation
 
 # Code Quality Rules
 
 ## General Practices
 - Follow PSR-12 coding standards
-- Use meaningful variable and method names
-- Write docblocks for complex methods
-- Keep methods under 20 lines when possible
-- Use type hints for method parameters and returns
 
 ## Testing Considerations
-- Write feature tests for critical user flows
-- Test model relationships and constraints
-- Mock external services
-- Use factories for test data generation
+- Write integration tests for most flows
 
 ## Security
 - Always validate and sanitize user input
 - Use CSRF protection on forms
 - Implement proper authorization checks
 - Never trust frontend data
-- Use prepared statements (Eloquent does this automatically)
-
-## Performance
-- Use eager loading: `with(['relation'])`
-- Implement database indexes for search columns
-- Cache expensive queries when appropriate
-- Optimize image uploads (book covers)
-- Use pagination for large result sets
-
-## Naming Files
-- Controllers: PascalCase + Controller suffix
-- Models: PascalCase, singular
-- Views: kebab-case, grouped in folders
-- Migrations: snake_case with timestamp
