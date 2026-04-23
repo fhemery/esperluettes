@@ -9,6 +9,8 @@ return [
         'no_stories' => 'Aucune histoire trouvée.',
         'no_chapters' => 'Aucun chapitre.',
         'not_visible_title' => 'Non visible sans accès modérateur',
+        'private_story_locked' => "Cette histoire privée n'est visible que par l'auteurice",
+        'chapter_solo_locked' => "Ce chapitre n'est visible que par l'auteurice",
         'chapter_published' => 'Publié',
         'chapter_unpublished' => 'Non publié',
         'columns' => [

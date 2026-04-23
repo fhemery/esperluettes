@@ -64,7 +64,7 @@ describe('Story Moderation Admin - Index', function () {
             ->assertDontSee('Lord of the Rings');
     });
 
-    it('uses audit link for private stories the moderator is not a collaborator on', function () {
+    it('shows no link for a solo private story (single author, no other collaborators)', function () {
         $author = alice($this);
         $story = privateStory('Secret Story', $author->id);
 
@@ -72,6 +72,19 @@ describe('Story Moderation Admin - Index', function () {
             ->get(route('story.admin.moderation.index'))
             ->assertOk()
             ->assertSee('Secret Story')
+            ->assertDontSee(route('story.admin.moderation.story-access', $story->id))
+            ->assertDontSee(route('stories.show', $story->slug));
+    });
+
+    it('shows audit link for a private story with two or more collaborators', function () {
+        $author = alice($this);
+        $coauthor = bob($this);
+        $story = privateStory('Shared Private', $author->id);
+        addCollaborator($story->id, $coauthor->id, 'author');
+
+        $this->actingAs(moderator($this))
+            ->get(route('story.admin.moderation.index'))
+            ->assertOk()
             ->assertSee(route('story.admin.moderation.story-access', $story->id));
     });
 
@@ -111,9 +124,11 @@ describe('Story Moderation Admin - Chapters partial', function () {
             ->assertSee('Hidden Draft');
     });
 
-    it('shows audit link for unpublished chapters when moderator is not author', function () {
+    it('shows audit link for unpublished chapters when moderator is not author (multi-author story)', function () {
         $author = alice($this);
+        $coauthor = bob($this);
         $story = publicStory('Story', $author->id);
+        addCollaborator($story->id, $coauthor->id, 'author');
         $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Draft']);
 
         $this->actingAs(moderator($this)) // not the author
@@ -208,6 +223,73 @@ describe('Story Moderation Admin - Chapter access (audit)', function () {
         $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]))
             ->get(route('story.admin.moderation.chapter-access', $chapter->id))
             ->assertRedirect(route('dashboard'));
+    });
+});
+
+describe('Story Moderation Admin - Pagination', function () {
+    it('renders without error when stories exceed one page', function () {
+        $author = alice($this);
+        for ($i = 1; $i <= 21; $i++) {
+            publicStory("Story $i", $author->id);
+        }
+
+        $this->actingAs(moderator($this))
+            ->get(route('story.admin.moderation.index'))
+            ->assertOk()
+            ->assertSee('Story 1');
+    });
+});
+
+describe('Story Moderation Admin - Chapters button visibility', function () {
+    it('hides the chapters button for solo private stories', function () {
+        $author = alice($this);
+        privateStory('Solo Private', $author->id);
+
+        $this->actingAs(moderator($this))
+            ->get(route('story.admin.moderation.index'))
+            ->assertOk()
+            ->assertDontSee(__('story::admin.moderation.chapters_button'));
+    });
+
+    it('shows the chapters button for private stories with multiple collaborators', function () {
+        $author = alice($this);
+        $coauthor = bob($this);
+        $story = privateStory('Shared Private', $author->id);
+        addCollaborator($story->id, $coauthor->id, 'author');
+
+        $this->actingAs(moderator($this))
+            ->get(route('story.admin.moderation.index'))
+            ->assertOk()
+            ->assertSee(__('story::admin.moderation.chapters_button'));
+    });
+});
+
+describe('Story Moderation Admin - Unpublished chapter access', function () {
+    it('shows no link for an unpublished chapter in a solo-author story', function () {
+        $author = alice($this);
+        $story = publicStory('Solo Author Story', $author->id);
+        $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Draft']);
+
+        $this->actingAs(moderator($this))
+            ->get(route('story.admin.moderation.chapters', $story->id))
+            ->assertOk()
+            ->assertSee('Draft')
+            ->assertDontSee(route('story.admin.moderation.chapter-access', $chapter->id))
+            ->assertDontSee(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+    });
+
+    it('shows audit link for an unpublished chapter in a multi-author story', function () {
+        $author = alice($this);
+        $coauthor = bob($this);
+        $story = publicStory('Multi Author Story', $author->id);
+        addCollaborator($story->id, $coauthor->id, 'author');
+        $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Hidden Draft']);
+
+        $this->actingAs(moderator($this))
+            ->get(route('story.admin.moderation.chapters', $story->id))
+            ->assertOk()
+            ->assertSee('Hidden Draft')
+            ->assertSee(route('story.admin.moderation.chapter-access', $chapter->id));
     });
 });
 

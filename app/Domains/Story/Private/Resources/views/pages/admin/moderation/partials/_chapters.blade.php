@@ -2,6 +2,7 @@
     $storyPrivateNoAccess = $story->visibility === \App\Domains\Story\Private\Models\Story::VIS_PRIVATE
         && !$story->isCollaborator($moderatorId);
     $moderatorIsAuthor = $story->isAuthor($moderatorId);
+    $storyHasMultipleAuthors = $story->collaborators->where('role', 'author')->count() >= 2;
 @endphp
 
 @if ($chapters->isEmpty())
@@ -17,8 +18,10 @@
         <tbody>
             @foreach ($chapters as $chapter)
                 @php
+                    $chapterIsUnpublished = $chapter->status === \App\Domains\Story\Private\Models\Chapter::STATUS_NOT_PUBLISHED;
+                    $chapterSoloAuthorLocked = $chapterIsUnpublished && !$storyHasMultipleAuthors;
                     $chapterNotVisible = $storyPrivateNoAccess
-                        || ($chapter->status === \App\Domains\Story\Private\Models\Chapter::STATUS_NOT_PUBLISHED && !$moderatorIsAuthor);
+                        || ($chapterIsUnpublished && !$moderatorIsAuthor);
                     $chapterLink = $chapterNotVisible
                         ? route('story.admin.moderation.chapter-access', $chapter->id)
                         : route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]);
@@ -26,10 +29,20 @@
                 <tr class="border-b border-border/20 hover:bg-surface/50">
                     <td class="py-2 pr-4">
                         <div class="flex items-center gap-2">
-                            @if ($chapterNotVisible)
-                                <span class="material-symbols-outlined text-[14px] text-fg/40" title="{{ __('story::admin.moderation.not_visible_title') }}">lock</span>
+                            @if ($chapterSoloAuthorLocked)
+                                <x-shared::popover placement="right">
+                                    <x-slot name="trigger">
+                                        <span class="material-symbols-outlined text-[14px] text-fg/40">lock</span>
+                                    </x-slot>
+                                    <p>{{ __('story::admin.moderation.chapter_solo_locked') }}</p>
+                                </x-shared::popover>
+                                <span>{{ $chapter->title }}</span>
+                            @else
+                                @if ($chapterNotVisible)
+                                    <span class="material-symbols-outlined text-[14px] text-fg/40" title="{{ __('story::admin.moderation.not_visible_title') }}">lock</span>
+                                @endif
+                                <a href="{{ $chapterLink }}" class="hover:underline">{{ $chapter->title }}</a>
                             @endif
-                            <a href="{{ $chapterLink }}" class="hover:underline">{{ $chapter->title }}</a>
                         </div>
                     </td>
                     <td class="py-2 pr-4">

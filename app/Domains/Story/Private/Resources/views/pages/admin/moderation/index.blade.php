@@ -37,6 +37,9 @@
                 </thead>
                 @forelse ($stories as $story)
                     @php
+                        $collaboratorCount = $story->collaborators->count();
+                        $storySoloPrivateLocked = $story->visibility === \App\Domains\Story\Private\Models\Story::VIS_PRIVATE
+                            && $collaboratorCount <= 1;
                         $storyNotVisible = $story->visibility === \App\Domains\Story\Private\Models\Story::VIS_PRIVATE
                             && !$story->isCollaborator($moderatorId);
                         $storyLink = $storyNotVisible
@@ -44,17 +47,26 @@
                             : route('stories.show', $story->slug);
                         $authors = $story->collaborators->where('role', 'author');
                         $authorNames = $authors->map(fn($c) => $profiles[$c->user_id]?->display_name ?? '#' . $c->user_id)->join(', ');
-                        $collaboratorCount = $story->collaborators->count();
                     @endphp
                     {{-- Each story gets its own tbody so x-data scope covers both rows --}}
                     <tbody x-data="{ open: false, loading: false, html: '' }">
                         <tr class="border-b border-border/50">
                             <td class="p-3 font-medium">
                                 <div class="flex items-center gap-2">
-                                    @if ($storyNotVisible)
-                                        <span class="material-symbols-outlined text-[16px] text-fg/40" title="{{ __('story::admin.moderation.not_visible_title') }}">lock</span>
+                                    @if ($storySoloPrivateLocked)
+                                        <x-shared::popover placement="right">
+                                            <x-slot name="trigger">
+                                                <span class="material-symbols-outlined text-[16px] text-fg/40">lock</span>
+                                            </x-slot>
+                                            <p>{{ __('story::admin.moderation.private_story_locked') }}</p>
+                                        </x-shared::popover>
+                                        <span>{{ $story->title }}</span>
+                                    @else
+                                        @if ($storyNotVisible)
+                                            <span class="material-symbols-outlined text-[16px] text-fg/40" title="{{ __('story::admin.moderation.not_visible_title') }}">lock</span>
+                                        @endif
+                                        <a href="{{ $storyLink }}" class="hover:underline">{{ $story->title }}</a>
                                     @endif
-                                    <a href="{{ $storyLink }}" class="hover:underline">{{ $story->title }}</a>
                                 </div>
                             </td>
                             <td class="p-3">
@@ -79,6 +91,7 @@
                             <td class="p-3 text-right text-fg/60">{{ $collaboratorCount }}</td>
                             <td class="p-3 text-right text-fg/60">{{ $story->chapters_count }}</td>
                             <td class="p-3">
+                                @unless ($storySoloPrivateLocked)
                                 <button
                                     @click="
                                         if (open) {
@@ -97,6 +110,7 @@
                                     <span class="material-symbols-outlined text-[18px]" x-text="loading ? 'hourglass_empty' : (open ? 'expand_less' : 'expand_more')">expand_more</span>
                                     {{ __('story::admin.moderation.chapters_button') }}
                                 </button>
+                                @endunless
                             </td>
                         </tr>
                         <tr x-show="open" x-cloak class="bg-surface/30">
