@@ -10,8 +10,14 @@ use Illuminate\Console\Command;
 
 class ParallelTestCommand extends Command
 {
-    protected $signature = 'test:parallel';
+    protected $signature = 'test:parallel {dirs?* : Domain test directories to run (e.g. app/Domains/Story/Tests)}';
     protected $description = 'Run tests in parallel, auto-scaling to 80% of available CPU cores (override with TEST_PROCESSES env var).';
+
+    protected function configure(): void
+    {
+        parent::configure();
+        $this->ignoreValidationErrors();
+    }
 
     public function handle(): int
     {
