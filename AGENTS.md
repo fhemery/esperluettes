@@ -2,7 +2,8 @@
 
 ## Docker/Sail Commands
 - Use `sail` instead of direct PHP/Composer commands
-- To run all tests : `./vendor/bin/sail artisan test:parallel [--filter=<your filter>] [list of domains to tests]`
+- To run all tests : `./vendor/bin/sail artisan test:parallel`
+- To run specific tests: `./vendor/bin/sail artisan test [--filter=<your filter>] [list of domains to tests]`
 - Composer : `./vendor/bin/sail composer` 
 - Deptrac : `./vendor/bin/sail composer deptrac`
 - Artisan commands: `./vendor/bin/sail artisan`

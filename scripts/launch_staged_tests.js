@@ -230,8 +230,8 @@ function runStagedTests(skipBranchCheck = false) {
 
   const testDirs = testsDirsForDomains([...impactedDomains]);
 
-  if (testDirs.length === 0) {
-    log('No specific test directories resolved; running full test suite.');
+  if (testDirs.length === 0 || testDirs.length > 5) {
+    log('No specific test directories (or too many of them) resolved; running full test suite.');
     const runner = determineRunner();
     if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
     else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
@@ -242,8 +242,8 @@ function runStagedTests(skipBranchCheck = false) {
   log(`Running tests for: ${uniqueDirs.join(' ')}`);
   const runner = determineRunner();
   const ok = (runner === 'php')
-    ? runCmd('php', ['artisan', 'test:parallel', ...uniqueDirs])
-    : runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel', ...uniqueDirs]);
+    ? runCmd('php', ['artisan', 'test', ...uniqueDirs])
+    : runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', ...uniqueDirs]);
   return ok ? 0 : 1;
 }
 
