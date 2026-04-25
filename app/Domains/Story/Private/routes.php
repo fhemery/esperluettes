@@ -33,12 +33,12 @@ Route::middleware(['web'])->group(function () {
             ->where('story', '[0-9]+')
             ->name('story.admin.moderation.chapters');
 
-        Route::get('/stories/admin/moderation/{story}/access', [StoryModerationAdminController::class, 'accessStory'])
-            ->where('story', '[0-9]+')
+        Route::get('/stories/admin/moderation/access/story', [StoryModerationAdminController::class, 'accessStory'])
+            ->middleware('signed')
             ->name('story.admin.moderation.story-access');
 
-        Route::get('/stories/admin/moderation/chapters/{chapter}/access', [StoryModerationAdminController::class, 'accessChapter'])
-            ->where('chapter', '[0-9]+')
+        Route::get('/stories/admin/moderation/access/chapter', [StoryModerationAdminController::class, 'accessChapter'])
+            ->middleware('signed')
             ->name('story.admin.moderation.chapter-access');
     });
 

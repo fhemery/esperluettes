@@ -43,7 +43,7 @@
                         $storyNotVisible = $story->visibility === \App\Domains\Story\Private\Models\Story::VIS_PRIVATE
                             && !$story->isCollaborator($moderatorId);
                         $storyLink = $storyNotVisible
-                            ? route('story.admin.moderation.story-access', $story->id)
+                            ? $adminModerationAccessUrl::story($story)
                             : route('stories.show', $story->slug);
                         $authors = $story->collaborators->where('role', 'author');
                         $authorNames = $authors->map(fn($c) => $profiles[$c->user_id]?->display_name ?? '#' . $c->user_id)->join(', ');

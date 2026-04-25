@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Support\AdminModerationAccessUrl;
 use App\Domains\Story\Public\Events\ModeratorAccessedPrivateChapter;
 use App\Domains\Story\Public\Events\ModeratorAccessedPrivateStory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -72,7 +73,7 @@ describe('Story Moderation Admin - Index', function () {
             ->get(route('story.admin.moderation.index'))
             ->assertOk()
             ->assertSee('Secret Story')
-            ->assertDontSee(route('story.admin.moderation.story-access', $story->id))
+            ->assertDontSee(route('story.admin.moderation.story-access', [], false))
             ->assertDontSee(route('stories.show', $story->slug));
     });
 
@@ -85,7 +86,7 @@ describe('Story Moderation Admin - Index', function () {
         $this->actingAs(moderator($this))
             ->get(route('story.admin.moderation.index'))
             ->assertOk()
-            ->assertSee(route('story.admin.moderation.story-access', $story->id));
+            ->assertSee(route('story.admin.moderation.story-access', [], false));
     });
 
     it('shows normal link for public stories', function () {
@@ -134,7 +135,7 @@ describe('Story Moderation Admin - Chapters partial', function () {
         $this->actingAs(moderator($this)) // not the author
             ->get(route('story.admin.moderation.chapters', $story->id))
             ->assertOk()
-            ->assertSee(route('story.admin.moderation.chapter-access', $chapter->id));
+            ->assertSee(route('story.admin.moderation.chapter-access', [], false));
     });
 
     it('shows normal link for published chapters of public story', function () {
@@ -156,7 +157,7 @@ describe('Story Moderation Admin - Chapters partial', function () {
         $this->actingAs(moderator($this)) // not a collaborator
             ->get(route('story.admin.moderation.chapters', $story->id))
             ->assertOk()
-            ->assertSee(route('story.admin.moderation.chapter-access', $chapter->id));
+            ->assertSee(route('story.admin.moderation.chapter-access', [], false));
     });
 
     it('denies non-moderators access to chapters endpoint', function () {
@@ -175,7 +176,7 @@ describe('Story Moderation Admin - Story access (audit)', function () {
         $story = privateStory('Secret Story', $author->id);
 
         $this->actingAs(moderator($this))
-            ->get(route('story.admin.moderation.story-access', $story->id))
+            ->get(AdminModerationAccessUrl::story($story))
             ->assertRedirect(route('stories.show', $story->slug));
 
         /** @var ModeratorAccessedPrivateStory $event */
@@ -190,7 +191,7 @@ describe('Story Moderation Admin - Story access (audit)', function () {
         $story = privateStory('Secret', $author->id);
 
         $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]))
-            ->get(route('story.admin.moderation.story-access', $story->id))
+            ->get(AdminModerationAccessUrl::story($story))
             ->assertRedirect(route('dashboard'));
     });
 });
@@ -202,7 +203,7 @@ describe('Story Moderation Admin - Chapter access (audit)', function () {
         $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Hidden Chapter']);
 
         $this->actingAs(moderator($this))
-            ->get(route('story.admin.moderation.chapter-access', $chapter->id))
+            ->get(AdminModerationAccessUrl::chapter($chapter))
             ->assertRedirect(route('chapters.show', [
                 'storySlug' => $story->slug,
                 'chapterSlug' => $chapter->slug,
@@ -221,7 +222,7 @@ describe('Story Moderation Admin - Chapter access (audit)', function () {
         $chapter = createUnpublishedChapter($this, $story, $author);
 
         $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]))
-            ->get(route('story.admin.moderation.chapter-access', $chapter->id))
+            ->get(AdminModerationAccessUrl::chapter($chapter))
             ->assertRedirect(route('dashboard'));
     });
 });
@@ -274,7 +275,7 @@ describe('Story Moderation Admin - Unpublished chapter access', function () {
             ->get(route('story.admin.moderation.chapters', $story->id))
             ->assertOk()
             ->assertSee('Draft')
-            ->assertDontSee(route('story.admin.moderation.chapter-access', $chapter->id))
+            ->assertDontSee(route('story.admin.moderation.chapter-access', [], false))
             ->assertDontSee(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
     });
 
@@ -289,7 +290,7 @@ describe('Story Moderation Admin - Unpublished chapter access', function () {
             ->get(route('story.admin.moderation.chapters', $story->id))
             ->assertOk()
             ->assertSee('Hidden Draft')
-            ->assertSee(route('story.admin.moderation.chapter-access', $chapter->id));
+            ->assertSee(route('story.admin.moderation.chapter-access', [], false));
     });
 });
 

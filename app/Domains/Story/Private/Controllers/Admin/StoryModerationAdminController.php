@@ -9,11 +9,14 @@ use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Services\StoryService;
+use App\Domains\Story\Private\Support\AdminModerationAccessUrl;
 use App\Domains\Story\Public\Events\ModeratorAccessedPrivateChapter;
 use App\Domains\Story\Public\Events\ModeratorAccessedPrivateStory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\View\View;
 
 class StoryModerationAdminController
@@ -45,6 +48,7 @@ class StoryModerationAdminController
             'profiles' => $profiles,
             'search' => $search,
             'moderatorId' => (int) Auth::id(),
+            'adminModerationAccessUrl' => AdminModerationAccessUrl::class,
         ]);
     }
 
@@ -56,11 +60,15 @@ class StoryModerationAdminController
             'story' => $story,
             'chapters' => $story->chapters,
             'moderatorId' => (int) Auth::id(),
+            'adminModerationAccessUrl' => AdminModerationAccessUrl::class,
         ]);
     }
 
-    public function accessStory(Story $story): RedirectResponse
+    public function accessStory(Request $request): RedirectResponse
     {
+        $storyId = $this->resolveEntityId($request, 'token');
+        $story = Story::query()->findOrFail($storyId);
+
         $this->eventBus->emitSync(new ModeratorAccessedPrivateStory(
             storyId: (int) $story->id,
             title: (string) $story->title,
@@ -69,8 +77,10 @@ class StoryModerationAdminController
         return redirect()->route('stories.show', ['slug' => $story->slug]);
     }
 
-    public function accessChapter(Chapter $chapter): RedirectResponse
+    public function accessChapter(Request $request): RedirectResponse
     {
+        $chapterId = $this->resolveEntityId($request, 'token');
+        $chapter = Chapter::query()->findOrFail($chapterId);
         $chapter->loadMissing('story');
 
         $this->eventBus->emitSync(new ModeratorAccessedPrivateChapter(
@@ -83,5 +93,14 @@ class StoryModerationAdminController
             'storySlug' => $chapter->story->slug,
             'chapterSlug' => $chapter->slug,
         ]);
+    }
+
+    private function resolveEntityId(Request $request, string $tokenField): int
+    {
+        try {
+            return (int) Crypt::decryptString((string) $request->query($tokenField));
+        } catch (DecryptException) {
+            abort(404);
+        }
     }
 }

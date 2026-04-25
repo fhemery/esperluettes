@@ -40,7 +40,7 @@ return [
             'intro' => 'Choisissez qui peut voir votre histoire :',
             'public' => 'Publique : visible par tous',
             'community' => 'Communauté : visible par les utilisateurs connectés',
-            'private' => 'Privée : visible uniquement par vous et vos co-auteurs',
+            'private' => "Privée : visible par vous et, si vous ajoutez des co-auteurices, par celleux-ci et l'équipe de modération",
         ],
     ],
     'title' => [

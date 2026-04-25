@@ -5,11 +5,11 @@
 @endif
 
 <!-- Favicons -->
-<link rel="icon" href="{{ $theme->asset('favicons/favicon.ico') }}" sizes="any">
-<link rel="icon" type="image/png" sizes="48x48" href="{{ $theme->asset('favicons/favicon-48x48.png') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ $theme->asset('favicons/favicon-32x32.png') }}">
-<link rel="icon" type="image/png" sizes="16x16" href="{{ $theme->asset('favicons/favicon-16x16.png') }}">
-<link rel="apple-touch-icon" sizes="180x180" href="{{ $theme->asset('favicons/favicon-180x180.png') }}">
+<link rel="icon" href="{{ $theme->asset('favicons/favicon.ico?v=20260425') }}" sizes="any">
+<link rel="icon" type="image/png" sizes="48x48" href="{{ $theme->asset('favicons/favicon-48x48.png?v=20260425') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ $theme->asset('favicons/favicon-32x32.png?v=20260425') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ $theme->asset('favicons/favicon-16x16.png?v=20260425') }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ $theme->asset('favicons/favicon-180x180.png?v=20260425') }}">
 <meta name="theme-color" content="#f7eadf">
 
 <!-- Fonts -->

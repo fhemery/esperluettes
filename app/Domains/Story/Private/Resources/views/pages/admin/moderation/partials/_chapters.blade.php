@@ -23,7 +23,7 @@
                     $chapterNotVisible = $storyPrivateNoAccess
                         || ($chapterIsUnpublished && !$moderatorIsAuthor);
                     $chapterLink = $chapterNotVisible
-                        ? route('story.admin.moderation.chapter-access', $chapter->id)
+                        ? $adminModerationAccessUrl::chapter($chapter)
                         : route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]);
                 @endphp
                 <tr class="border-b border-border/20 hover:bg-surface/50">
