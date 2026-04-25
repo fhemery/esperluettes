@@ -1,5 +1,7 @@
 import './bootstrap';
-import './april-fools';
+// This import was 2026 April Fools Day prank, to show easter egg on the website.
+// Deactivated for now, to save bundle space.
+//import './april-fools';
 import Alpine from 'alpinejs';
 import registerTooltip from './tooltip.js';
 import * as DateUtils from './date-utils.js';
