@@ -40,11 +40,19 @@ The Member Follow feature allows logged-in users to follow other members. Follow
 
 ### 3. "Following" Tab on Profile
 
-- A new tab is added to the user's profile page showing the list of users they follow.
-- **Visibility**: private — visible to the **profile owner only**. Any other visitor (including logged-in users) does not see the tab.
+- A new tab is added to every user's profile page showing the list of users they follow.
+- **Visibility rules**:
+  - Not visible to logged-out users.
+  - Not visible if the profile owner has enabled the privacy preference to hide it.
+  - Visible to any logged-in user otherwise.
 - **Content**: avatar + display name only, each entry is a clickable link to the followed user's profile.
 - No follower/following counts displayed anywhere on the profile.
-- No setting to make this tab public.
+
+### 4. Privacy Preference
+
+- A new toggle is added in the **Profile settings tab**: "Masquer ma liste d'abonnements" (or similar).
+- Default: **off** (tab is visible to logged-in users).
+- When enabled, the Following tab is hidden from all other users (including the profile owner when viewing their own profile via another user's session — though it remains accessible from their own profile settings).
 
 ---
 
@@ -71,6 +79,7 @@ The Follow domain will:
 - Listen to **Story domain events** (story created / visibility changed) to dispatch story notifications.
 - Use the **Notification domain's public API** to create notifications.
 - Expose a **public API** consumed by the Profile domain for the follow/unfollow button state and the Following tab rendering.
+- Register its own **profile preference** through the settings system for the tab visibility toggle.
 
 ---
 
@@ -151,7 +160,7 @@ If the Story domain does not yet dispatch a visibility change event, one should 
   - Render the follow/unfollow button (with correct state).
   - Render the Following tab content.
   - Check the privacy preference to conditionally show the tab.
-- The tab is rendered only when the authenticated user is viewing their own profile.
+- The privacy preference (`follow.hide_following_tab`) is registered through the existing settings system.
 
 ### Access Control for Story Notifications
 
