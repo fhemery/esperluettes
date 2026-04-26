@@ -11,5 +11,6 @@ final class NotificationTypeDefinition
         public readonly string $groupId,
         public readonly string $nameKey,
         public readonly bool $forcedOnWebsite = false,
+        public readonly bool $hideInSettings = false,
     ) {}
 }

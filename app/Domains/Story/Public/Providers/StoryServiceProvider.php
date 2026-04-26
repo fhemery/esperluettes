@@ -167,6 +167,7 @@ class StoryServiceProvider extends ServiceProvider
             class: ChapterCommentNotification::class,
             groupId: 'comments',
             nameKey: 'notification::settings.type_chapter_comment',
+            hideInSettings: true,
         );
         $notificationFactory->register(
             type: ChapterRootCommentNotification::type(),

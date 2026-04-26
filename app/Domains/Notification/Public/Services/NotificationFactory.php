@@ -34,12 +34,13 @@ class NotificationFactory
         string $groupId,
         string $nameKey,
         bool $forcedOnWebsite = false,
+        bool $hideInSettings = false,
     ): void {
         if (!isset($this->groups[$groupId])) {
             throw new \InvalidArgumentException("Group '{$groupId}' is not registered. Call registerGroup() first.");
         }
         $this->map[$type] = $class;
-        $this->types[$type] = new NotificationTypeDefinition($type, $class, $groupId, $nameKey, $forcedOnWebsite);
+        $this->types[$type] = new NotificationTypeDefinition($type, $class, $groupId, $nameKey, $forcedOnWebsite, $hideInSettings);
     }
 
     /**
@@ -53,9 +54,12 @@ class NotificationFactory
     /**
      * @return array<NotificationTypeDefinition>
      */
-    public function getTypesForGroup(string $groupId): array
+    public function getTypesForGroup(string $groupId, bool $includeHidden = false): array
     {
-        return array_values(array_filter($this->types, fn($t) => $t->groupId === $groupId));
+        return array_values(array_filter(
+            $this->types,
+            fn($t) => $t->groupId === $groupId && ($includeHidden || !$t->hideInSettings)
+        ));
     }
 
     public function getTypeDefinition(string $type): ?NotificationTypeDefinition
