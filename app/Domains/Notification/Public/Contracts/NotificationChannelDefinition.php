@@ -11,7 +11,7 @@ final class NotificationChannelDefinition
         public readonly string $nameTranslationKey,
         public readonly bool $defaultEnabled,
         public readonly int $sortOrder,
-        /** fn(Notification $notification, array $userIds): void */
+        /** fn(NotificationDto $dto, array $userIds): void */
         public readonly Closure $deliveryCallback,
         public readonly ?string $featureFlag = null,
     ) {}

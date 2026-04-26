@@ -9,6 +9,51 @@ use Illuminate\Support\Facades\DB;
 class NotificationService
 {
     /**
+     * Persist a notification record and return it.
+     * Does NOT create reads — call createReads() separately.
+     */
+    public function createNotificationRecord(
+        NotificationContent $content,
+        ?int $sourceUserId = null,
+        ?\DateTime $createdAt = null
+    ): Notification {
+        $timestamp = $createdAt ?? now();
+        return Notification::query()->create([
+            'source_user_id' => $sourceUserId,
+            'content_key'    => $content::type(),
+            'content_data'   => $content->toData(),
+            'created_at'     => $timestamp,
+            'updated_at'     => $timestamp,
+        ]);
+    }
+
+    /**
+     * Bulk-insert notification_reads rows for the given user IDs.
+     * Silently no-ops for an empty list.
+     *
+     * @param int[] $userIds
+     */
+    public function createReads(int $notificationId, array $userIds, ?\DateTime $createdAt = null): void
+    {
+        $userIds = array_values(array_unique(array_map('intval', $userIds)));
+        if (empty($userIds)) {
+            return;
+        }
+        $timestamp = $createdAt ?? now();
+        $rows = [];
+        foreach ($userIds as $uid) {
+            $rows[] = [
+                'notification_id' => $notificationId,
+                'user_id'         => (int) $uid,
+                'read_at'         => null,
+                'created_at'      => $timestamp,
+                'updated_at'      => $timestamp,
+            ];
+        }
+        DB::table('notification_reads')->insert($rows);
+    }
+
+    /**
      * Persist a notification and create unread rows for target users.
      *
      * @param int[] $userIds
@@ -20,29 +65,8 @@ class NotificationService
         if (empty($userIds)) {
             return;
         }
-
-        $timestamp = $createdAt ?? now();
-        
-        // Normal creation with automatic timestamps
-        $notification = Notification::query()->create([
-            'source_user_id' => $sourceUserId,
-            'content_key' => $content::type(),
-            'content_data' => $content->toData(),
-            'created_at' => $timestamp,
-            'updated_at' => $timestamp
-        ]);
-
-        $rows = [];
-        foreach ($userIds as $uid) {
-            $rows[] = [
-                'notification_id' => $notification->id,
-                'user_id' => (int) $uid,
-                'read_at' => null,
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp,
-            ];
-        }
-        DB::table('notification_reads')->insert($rows);
+        $notification = $this->createNotificationRecord($content, $sourceUserId, $createdAt);
+        $this->createReads($notification->id, $userIds, $createdAt);
     }
 
     public function getUnreadCount(int $userId): int
