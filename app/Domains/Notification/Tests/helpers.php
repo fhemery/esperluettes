@@ -21,11 +21,13 @@ function makeNotification(array $userIds, ?NotificationContent $content = null, 
     
     // Register test notification type (factory will store if not already there)
     $factory = app(\App\Domains\Notification\Public\Services\NotificationFactory::class);
-    try {
-        $factory->register(TestNotificationContent::type(), TestNotificationContent::class);
-    } catch (\InvalidArgumentException $e) {
-        // Already registered, ignore
-    }
+    $factory->registerGroup('test', 0, 'test::group');
+    $factory->register(
+        type: TestNotificationContent::type(),
+        class: TestNotificationContent::class,
+        groupId: 'test',
+        nameKey: 'test::type',
+    );
     
     $api->createNotification($userIds, $content, $sourceUserId ?? ($userIds[0] ?? null));
 

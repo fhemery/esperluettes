@@ -54,8 +54,10 @@ class NewsServiceProvider extends ServiceProvider
 
         // Register notification types
         app(NotificationFactory::class)->register(
-            NewsPublishedNotification::type(),
-            NewsPublishedNotification::class
+            type: NewsPublishedNotification::type(),
+            class: NewsPublishedNotification::class,
+            groupId: 'news',
+            nameKey: 'notification::settings.type_news_published',
         );
 
         $this->registerAdminNavigation();

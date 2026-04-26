@@ -18,7 +18,12 @@ describe('BackfillChapterCommentNotificationsCommand', function () {
         $bus->registerEvent('Comment.Posted', CommentPosted::class);
         
         $factory = app(\App\Domains\Notification\Public\Services\NotificationFactory::class);
-        $factory->register(ChapterCommentNotification::type(), ChapterCommentNotification::class);
+        $factory->register(
+            type: ChapterCommentNotification::type(),
+            class: ChapterCommentNotification::class,
+            groupId: 'comments',
+            nameKey: 'notification::settings.type_chapter_comment',
+        );
     });
     
     it('deletes existing notifications of type story.chapter.comment before processing', function () {

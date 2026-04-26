@@ -162,31 +162,45 @@ class StoryServiceProvider extends ServiceProvider
         $notificationFactory = app(NotificationFactory::class);
         $notificationFactory->register(
             type: ChapterCommentNotification::type(),
-            class: ChapterCommentNotification::class
+            class: ChapterCommentNotification::class,
+            groupId: 'comments',
+            nameKey: 'notification::settings.type_chapter_comment',
         );
         $notificationFactory->register(
             type: CoAuthorChapterCreatedNotification::type(),
-            class: CoAuthorChapterCreatedNotification::class
+            class: CoAuthorChapterCreatedNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'notification::settings.type_coauthor_chapter_created',
         );
         $notificationFactory->register(
             type: CoAuthorChapterUpdatedNotification::type(),
-            class: CoAuthorChapterUpdatedNotification::class
+            class: CoAuthorChapterUpdatedNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'notification::settings.type_coauthor_chapter_updated',
         );
         $notificationFactory->register(
             type: CoAuthorChapterDeletedNotification::type(),
-            class: CoAuthorChapterDeletedNotification::class
+            class: CoAuthorChapterDeletedNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'notification::settings.type_coauthor_chapter_deleted',
         );
         $notificationFactory->register(
             type: CollaboratorRoleGivenNotification::type(),
-            class: CollaboratorRoleGivenNotification::class
+            class: CollaboratorRoleGivenNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'notification::settings.type_collaborator_role_given',
         );
         $notificationFactory->register(
             type: CollaboratorRemovedNotification::type(),
-            class: CollaboratorRemovedNotification::class
+            class: CollaboratorRemovedNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'notification::settings.type_collaborator_removed',
         );
         $notificationFactory->register(
             type: CollaboratorLeftNotification::type(),
-            class: CollaboratorLeftNotification::class
+            class: CollaboratorLeftNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'notification::settings.type_collaborator_left',
         );
     }
 

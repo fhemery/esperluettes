@@ -100,11 +100,17 @@ class AuthServiceProvider extends ServiceProvider
         $notificationFactory = app(NotificationFactory::class);
         $notificationFactory->register(
             type: PromotionAcceptedNotification::type(),
-            class: PromotionAcceptedNotification::class
+            class: PromotionAcceptedNotification::class,
+            groupId: 'moderation',
+            nameKey: 'notification::settings.type_promotion_accepted',
+            forcedOnWebsite: true,
         );
         $notificationFactory->register(
             type: PromotionRejectedNotification::type(),
-            class: PromotionRejectedNotification::class
+            class: PromotionRejectedNotification::class,
+            groupId: 'moderation',
+            nameKey: 'notification::settings.type_promotion_rejected',
+            forcedOnWebsite: true,
         );
 
         $this->registerAdminNavigation();
