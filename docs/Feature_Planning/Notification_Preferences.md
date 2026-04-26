@@ -172,10 +172,13 @@ class NotificationChannelRegistry
      * Register an external delivery channel.
      * Called from other domains' ServiceProvider::boot().
      *
-     * @throws \InvalidArgumentException if channel ID already registered
+     * @throws \InvalidArgumentException if channel ID already registered or is the reserved 'website' id
      */
     public function register(NotificationChannelDefinition $channel): void
     {
+        if ($channel->id === 'website') {
+            throw new \InvalidArgumentException("Channel id 'website' is reserved for the native website channel.");
+        }
         if (isset($this->channels[$channel->id])) {
             throw new \InvalidArgumentException("Channel '{$channel->id}' already registered.");
         }
@@ -434,7 +437,8 @@ Route::middleware(['auth'])->prefix('notifications/preferences')->name('notifica
 
 ```php
 public function update(string $type, Request $request): JsonResponse
-// Validates: channel (must be registered + active), enabled (bool)
+// Validates: channel — 'website' is always accepted as a special case;
+//            any other value must be a registered + active channel id.
 // Guards: rejects website channel on forcedOnWebsite types (403)
 // Guards: rejects channel whose featureFlag is off (403)
 
@@ -457,7 +461,7 @@ public function bulkUpdate(Request $request): JsonResponse
 @endphp
 ```
 
-The view renders the website column first (always), then iterates `$channels` for additional columns. All AJAX interactions hit `notification.preferences.update` / `notification.preferences.bulk`.
+The view renders the website column first (always, using the hardcoded translation key `notification::settings.channel_website`), then iterates `$channels` for additional columns. All AJAX interactions hit `notification.preferences.update` / `notification.preferences.bulk`.
 
 ---
 

@@ -28,7 +28,11 @@
             <div class="mt-4">
                 <div id="settings-content" class="surface-read text-on-surface rounded-lg">
                     {{-- Initial content loaded server-side --}}
-                    @include('settings::partials.tab-content', ['tab' => $activeTab, 'sections' => $sections])
+                    @if($customViewPath ?? null)
+                        @include($customViewPath)
+                    @else
+                        @include('settings::partials.tab-content', ['tab' => $activeTab, 'sections' => $sections])
+                    @endif
                 </div>
 
                 {{-- Loading indicator --}}
