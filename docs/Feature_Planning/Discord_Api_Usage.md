@@ -278,6 +278,7 @@ Fetch all pending user activity notifications.
         "actor": "JohnDoe",
         "target": "Epic Adventure - Chapter 1"
       },
+      "avatarUrl": "https://jd-esperluettes.fr/storage/profile_pictures/1_1760348457.jpg"
       "recipients": [
         "123456789012345678",
         "987654321098765432"
@@ -300,6 +301,7 @@ Fetch all pending user activity notifications.
   - `id` (integer): Pending notification ID — use this in mark-sent
   - `type` (string): Notification type (see types below)
   - `data` (object): Type-specific notification data — identical for all recipients
+  - `avatarUrl` (string): The URL of the avatar to display
   - `recipients` (array of strings): Discord user IDs to send this notification to
   - `createdAt` (string): ISO 8601 timestamp when notification was created
 - `pagination` (object): Pagination metadata — page counts refer to notification entries, not individual recipients
@@ -494,88 +496,6 @@ curl -X DELETE "https://esperluettes.com/api/discord/users/123456789012345678" \
   -H "Authorization: Bearer sk_abc123xyz789" \
   -H "Accept: application/json"
 ```
-
-## Notification Types
-
-All notifications are user-targeted activity feed events sent as Discord DMs.
-
-**Note**: Connection and disconnection are **synchronous operations** and do not generate notifications. The bot receives role information immediately when calling the connect endpoint.
-
-**Common Structure**:
-```json
-{
-  "id": 125,
-  "type": "{notification_type}",
-  "data": {
-    "message": "{human-readable message}",
-    "url": "{clickable URL to website}",
-    "actor": "{who triggered the event}",
-    "target": "{what was affected}"
-  },
-  "recipients": [
-    "123456789012345678",
-    "987654321098765432"
-  ],
-  "createdAt": "2025-10-02T11:05:00Z"
-}
-```
-
-**Data Fields**:
-- `message` (string): Human-readable notification message — same text for all recipients
-- `url` (string): Full URL to relevant page on website
-- `actor` (string): Username of person who triggered event
-- `target` (string): What was affected (story title, chapter, etc.)
-- `recipients` (array of strings): Discord user IDs who should receive this DM
-
-**Notification Types** (examples, subject to expansion):
-- `comment` - New comment on user's story/chapter
-- `comment_reply` - Reply to user's comment
-- `mention` - User was mentioned in a comment
-- `follow` - Someone followed user
-- `like` - Someone liked user's story
-- `chapter_published` - New chapter from followed author
-- `moderation` - Moderation action on user's content
-- `message` - Private message received
-
-**Bot Action**:
-1. Format message for Discord (embeds, formatting)
-2. Send DM to Discord user
-3. Include clickable link to website
-4. Mark notification as sent
-
-**Example - Comment Notification** (targeted, one recipient):
-```json
-{
-  "id": 126,
-  "type": "comment",
-  "data": {
-    "message": "JohnDoe commented on your story \"Epic Adventure\"",
-    "url": "https://esperluettes.com/stories/epic-adventure/chapters/1#comment-42",
-    "actor": "JohnDoe",
-    "target": "Epic Adventure - Chapter 1"
-  },
-  "recipients": ["123456789012345678"],
-  "createdAt": "2025-10-02T11:05:00Z"
-}
-```
-
-**Example - News Notification** (broadcast, multiple recipients):
-```json
-{
-  "id": 127,
-  "type": "news.posted",
-  "data": {
-    "message": "Nouvelle annonce : Mise à jour de printemps",
-    "url": "https://esperluettes.com/news/mise-a-jour-printemps",
-    "actor": null,
-    "target": "Mise à jour de printemps"
-  },
-  "recipients": ["123456789012345678", "987654321098765432", "555666777888999000"],
-  "createdAt": "2025-10-02T11:06:15Z"
-}
-```
-
-**Note**: Additional notification types will be added as website features expand. Bot should handle unknown types gracefully.
 
 ## Error Handling
 
