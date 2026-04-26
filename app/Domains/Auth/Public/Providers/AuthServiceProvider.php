@@ -102,14 +102,14 @@ class AuthServiceProvider extends ServiceProvider
             type: PromotionAcceptedNotification::type(),
             class: PromotionAcceptedNotification::class,
             groupId: 'moderation',
-            nameKey: 'notification::settings.type_promotion_accepted',
+            nameKey: 'notifications::settings.type_promotion_accepted',
             forcedOnWebsite: true,
         );
         $notificationFactory->register(
             type: PromotionRejectedNotification::type(),
             class: PromotionRejectedNotification::class,
             groupId: 'moderation',
-            nameKey: 'notification::settings.type_promotion_rejected',
+            nameKey: 'notifications::settings.type_promotion_rejected',
             forcedOnWebsite: true,
         );
 

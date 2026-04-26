@@ -9,6 +9,8 @@ use App\Domains\Notification\Private\Listeners\CleanNotificationsOnUserDeleted;
 use App\Domains\Notification\Public\Events\NotificationsCleanedUp;
 use App\Domains\Notification\Public\Services\NotificationChannelRegistry;
 use App\Domains\Notification\Public\Services\NotificationFactory;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
+use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -42,17 +44,36 @@ class NotificationServiceProvider extends ServiceProvider
 
         $this->registerGroups();
         $this->registerEvents();
+        $this->registerSettingsTab();
+    }
+
+    private function registerSettingsTab(): void
+    {
+        $api = app(SettingsPublicApi::class);
+
+        // Skip if already registered (idempotent for testing — static registry persists across test instances)
+        if ($api->getTab('notification') !== null) {
+            return;
+        }
+
+        $api->registerTab(new SettingsTabDefinition(
+            id: 'notification',
+            order: 30,
+            nameKey: 'notifications::settings.tab_name',
+            icon: 'notifications',
+            customViewPath: 'notification::settings.preferences',
+        ));
     }
 
     private function registerGroups(): void
     {
         $factory = app(NotificationFactory::class);
 
-        $factory->registerGroup('comments',      10, 'notification::settings.group_comments');
-        $factory->registerGroup('collaboration', 20, 'notification::settings.group_collaboration');
-        $factory->registerGroup('readlist',      30, 'notification::settings.group_readlist');
-        $factory->registerGroup('news',          40, 'notification::settings.group_news');
-        $factory->registerGroup('moderation',    50, 'notification::settings.group_moderation');
+        $factory->registerGroup('comments',      10, 'notifications::settings.group_comments');
+        $factory->registerGroup('collaboration', 20, 'notifications::settings.group_collaboration');
+        $factory->registerGroup('readlist',      30, 'notifications::settings.group_readlist');
+        $factory->registerGroup('news',          40, 'notifications::settings.group_news');
+        $factory->registerGroup('moderation',    50, 'notifications::settings.group_moderation');
     }
 
     private function registerEvents(): void

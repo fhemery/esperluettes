@@ -456,6 +456,7 @@ deptrac:
       - NotificationPrivate
       - AuthPublic
       - EventsPublic
+      - SettingsPublic
 
     ProfilePublic:
       - Shared

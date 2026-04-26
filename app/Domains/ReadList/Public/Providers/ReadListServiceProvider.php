@@ -66,43 +66,43 @@ class ReadListServiceProvider extends ServiceProvider
             type: ReadListAddedNotification::type(),
             class: ReadListAddedNotification::class,
             groupId: 'readlist',
-            nameKey: 'notification::settings.type_readlist_story_added',
+            nameKey: 'notifications::settings.type_readlist_story_added',
         );
         $factory->register(
             type: ReadListChapterPublishedNotification::type(),
             class: ReadListChapterPublishedNotification::class,
             groupId: 'readlist',
-            nameKey: 'notification::settings.type_readlist_chapter_published',
+            nameKey: 'notifications::settings.type_readlist_chapter_published',
         );
         $factory->register(
             type: ReadListChapterUnpublishedNotification::type(),
             class: ReadListChapterUnpublishedNotification::class,
             groupId: 'readlist',
-            nameKey: 'notification::settings.type_readlist_chapter_unpublished',
+            nameKey: 'notifications::settings.type_readlist_chapter_unpublished',
         );
         $factory->register(
             type: ReadListStoryDeletedNotification::type(),
             class: ReadListStoryDeletedNotification::class,
             groupId: 'readlist',
-            nameKey: 'notification::settings.type_readlist_story_deleted',
+            nameKey: 'notifications::settings.type_readlist_story_deleted',
         );
         $factory->register(
             type: ReadListStoryUnpublishedNotification::type(),
             class: ReadListStoryUnpublishedNotification::class,
             groupId: 'readlist',
-            nameKey: 'notification::settings.type_readlist_story_unpublished',
+            nameKey: 'notifications::settings.type_readlist_story_unpublished',
         );
         $factory->register(
             type: ReadListStoryRepublishedNotification::type(),
             class: ReadListStoryRepublishedNotification::class,
             groupId: 'readlist',
-            nameKey: 'notification::settings.type_readlist_story_republished',
+            nameKey: 'notifications::settings.type_readlist_story_republished',
         );
         $factory->register(
             type: ReadListStoryCompletedNotification::type(),
             class: ReadListStoryCompletedNotification::class,
             groupId: 'readlist',
-            nameKey: 'notification::settings.type_readlist_story_completed',
+            nameKey: 'notifications::settings.type_readlist_story_completed',
         );
 
         // Register ReadList domain events with EventBus

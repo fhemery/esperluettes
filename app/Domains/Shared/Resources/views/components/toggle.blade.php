@@ -16,7 +16,11 @@
      */
 ?>
 
-<label class="inline-flex items-center cursor-pointer select-none pl-1">
+<label @class([
+    'inline-flex items-center select-none pl-1',
+    'cursor-pointer'              => !$disabled,
+    'cursor-not-allowed opacity-50' => $disabled,
+])>
     <input
         @if($id) id="{{ $id }}" @endif
         type="checkbox"
