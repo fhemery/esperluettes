@@ -51,6 +51,8 @@ use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Story\Public\Notifications\ChapterCommentNotification;
+use App\Domains\Story\Public\Notifications\ChapterRootCommentNotification;
+use App\Domains\Story\Public\Notifications\ChapterReplyCommentNotification;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterCreatedNotification;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterUpdatedNotification;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterDeletedNotification;
@@ -165,6 +167,18 @@ class StoryServiceProvider extends ServiceProvider
             class: ChapterCommentNotification::class,
             groupId: 'comments',
             nameKey: 'notification::settings.type_chapter_comment',
+        );
+        $notificationFactory->register(
+            type: ChapterRootCommentNotification::type(),
+            class: ChapterRootCommentNotification::class,
+            groupId: 'comments',
+            nameKey: 'notification::settings.type_chapter_root_comment',
+        );
+        $notificationFactory->register(
+            type: ChapterReplyCommentNotification::type(),
+            class: ChapterReplyCommentNotification::class,
+            groupId: 'comments',
+            nameKey: 'notification::settings.type_chapter_reply_comment',
         );
         $notificationFactory->register(
             type: CoAuthorChapterCreatedNotification::type(),

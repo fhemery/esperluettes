@@ -6,7 +6,8 @@ use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\StoryService;
-use App\Domains\Story\Public\Notifications\ChapterCommentNotification;
+use App\Domains\Story\Public\Notifications\ChapterRootCommentNotification;
+use App\Domains\Story\Public\Notifications\ChapterReplyCommentNotification;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 
@@ -69,14 +70,13 @@ class NotifyOnChapterComment
                 return;
             }
 
-            $content = new ChapterCommentNotification(
+            $content = new ChapterReplyCommentNotification(
                 commentId: (int) $c->commentId,
                 authorName: $authorName,
                 authorSlug: $authorSlug,
                 chapterTitle: (string) ($chapter->title ?? ''),
                 storySlug: (string) $story->slug,
                 chapterSlug: (string) $chapter->slug,
-                isReply: true,
                 storyName: (string) $story->title,
             );
 
@@ -91,14 +91,13 @@ class NotifyOnChapterComment
             return;
         }
 
-        $content = new ChapterCommentNotification(
+        $content = new ChapterRootCommentNotification(
             commentId: (int) $c->commentId,
             authorName: $authorName,
             authorSlug: $authorSlug,
             chapterTitle: (string) ($chapter->title ?? ''),
             storySlug: (string) $story->slug,
             chapterSlug: (string) $chapter->slug,
-            isReply: false,
             storyName: (string) $story->title,
         );
 
