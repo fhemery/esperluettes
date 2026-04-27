@@ -1,7 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Domains\Discord\Private\Controllers\Api\NotificationsController;
 use App\Domains\Discord\Private\Controllers\Api\UsersController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('api/discord')
     ->middleware(['api', 'discord.api'])
@@ -17,4 +18,10 @@ Route::prefix('api/discord')
         Route::delete('/users/{discordId}', [UsersController::class, 'destroy'])
             ->middleware('throttle:100,1')
             ->name('discord.api.users.destroy');
+
+        Route::get('/notifications/pending', [NotificationsController::class, 'pending'])
+            ->name('discord.api.notifications.pending');
+
+        Route::post('/notifications/mark-sent', [NotificationsController::class, 'markSent'])
+            ->name('discord.api.notifications.markSent');
     });

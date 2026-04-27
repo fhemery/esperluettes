@@ -421,6 +421,8 @@ deptrac:
       - Shared
       - DiscordPrivate
       - EventsPublic
+      - NotificationPublic
+      - ConfigPublic
 
     FAQPublic:
       - Shared
@@ -590,6 +592,7 @@ deptrac:
       - DiscordPublic
       - AuthPublic
       - EventsPublic
+      - NotificationPublic
 
     FAQPrivate:
       - Shared
@@ -723,6 +726,7 @@ deptrac:
       - DiscordPrivate
       - DiscordPublic
       - AuthPublic
+      - NotificationPublic
 
     FAQTests:
       - TestHelpers

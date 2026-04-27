@@ -84,7 +84,7 @@ function optInChannel(int $userId, string $type, string $channel): void
  * Register a fake active channel and return an ArrayObject that is appended to on each callback invocation.
  * ArrayObject is passed by handle so the caller sees all appended entries.
  */
-function registerFakeChannel(string $id = 'fake', bool $defaultEnabled = false, ?string $featureFlag = null): \ArrayObject
+function registerFakeChannel(string $id = 'fake', bool $defaultEnabled = false, ?\Closure $featureCheck = null): \ArrayObject
 {
     $calls = new \ArrayObject([]);
     app(NotificationChannelRegistry::class)->register(new NotificationChannelDefinition(
@@ -95,7 +95,7 @@ function registerFakeChannel(string $id = 'fake', bool $defaultEnabled = false, 
         deliveryCallback: function (NotificationDto $dto, array $userIds) use ($calls) {
             $calls->append(['dto' => $dto, 'userIds' => $userIds]);
         },
-        featureFlag: $featureFlag,
+        featureCheck: $featureCheck,
     ));
     return $calls;
 }
@@ -224,7 +224,7 @@ describe('createNotification — external channels', function () {
     });
 
     it('skips an inactive channel even when users have opted in', function () {
-        $calls = registerFakeChannel('discord', defaultEnabled: false, featureFlag: 'services.discord.enabled');
+        $calls = registerFakeChannel('discord', defaultEnabled: false, featureCheck: fn() => false);
         $alice  = alice($this);
 
         optInChannel($alice->id, TestNotificationContent::type(), 'discord');

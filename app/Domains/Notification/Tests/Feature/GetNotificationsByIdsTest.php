@@ -62,10 +62,13 @@ describe('getNotificationsByIds', function () {
 
     it('returns null sourceUserId when none was set', function () {
         $alice = alice($this);
-        $id    = makeNotification([$alice->id], new TestNotificationContent(), null);
 
         /** @var NotificationPublicApi $api */
         $api = app(NotificationPublicApi::class);
+
+        // Call directly so sourceUserId stays null (makeNotification() defaults it to $userIds[0])
+        $api->createNotification([$alice->id], new TestNotificationContent(), null);
+        $id = (int) \Illuminate\Support\Facades\DB::table('notifications')->orderByDesc('id')->value('id');
 
         $result = $api->getNotificationsByIds([$id]);
 

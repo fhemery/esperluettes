@@ -6,12 +6,12 @@ return [
     
     // Shared services
     App\Domains\Shared\Providers\SharedServiceProvider::class,
+    App\Domains\Config\Public\Providers\ConfigServiceProvider::class,
 
     // Notification domain should be on top as well because other modules might register
     // notifications channels
     App\Domains\Notification\Public\Providers\NotificationServiceProvider::class,
     
-    App\Domains\Config\Public\Providers\ConfigServiceProvider::class,
     App\Domains\Events\Public\Providers\EventsServiceProvider::class,
     App\Domains\Moderation\Public\Providers\ModerationServiceProvider::class,
     

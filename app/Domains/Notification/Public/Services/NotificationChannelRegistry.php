@@ -39,7 +39,7 @@ class NotificationChannelRegistry
     public function getActiveChannels(): array
     {
         return collect($this->channels)
-            ->filter(fn($c) => $c->featureFlag === null || config($c->featureFlag, false))
+            ->filter(fn($c) => $c->featureCheck === null || ($c->featureCheck)())
             ->sortBy('sortOrder')
             ->values()
             ->all();

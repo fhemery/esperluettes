@@ -13,6 +13,7 @@ final class NotificationChannelDefinition
         public readonly int $sortOrder,
         /** fn(NotificationDto $dto, array $userIds): void */
         public readonly Closure $deliveryCallback,
-        public readonly ?string $featureFlag = null,
+        /** fn(): bool — null means always active */
+        public readonly ?Closure $featureCheck = null,
     ) {}
 }

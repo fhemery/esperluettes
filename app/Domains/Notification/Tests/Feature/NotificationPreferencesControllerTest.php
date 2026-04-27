@@ -47,7 +47,7 @@ function registerInactiveChannel(string $id = 'test_inactive'): void
         defaultEnabled: false,
         sortOrder: 99,
         deliveryCallback: fn($n, $ids) => null,
-        featureFlag: 'services.test_inactive_channel.enabled', // not in config → false → inactive
+        featureCheck: fn() => false, // inactive channel
     ));
 }
 
