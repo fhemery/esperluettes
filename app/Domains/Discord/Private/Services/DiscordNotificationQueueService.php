@@ -23,15 +23,21 @@ class DiscordNotificationQueueService
     public function queue(NotificationDto $dto, array $userIds): void
     {
         $recipients = [];
-        foreach ($userIds as $userId) {
-            $discordUser = $this->discordAuthService->getDiscordByUserId((int) $userId);
-            if ($discordUser === null) {
-                continue;
+        foreach (array_chunk($userIds, 100) as $userIdChunk) {
+            $normalizedChunk = array_map(static fn ($userId): int => (int) $userId, $userIdChunk);
+            $discordUsersById = $this->discordAuthService->getDiscordByUserIds(array_values(array_unique($normalizedChunk)));
+
+            foreach ($normalizedChunk as $userId) {
+                $discordUser = $discordUsersById->get($userId);
+                if ($discordUser === null) {
+                    continue;
+                }
+
+                $recipients[] = [
+                    'user_id'    => $userId,
+                    'discord_id' => (string) $discordUser->discord_user_id,
+                ];
             }
-            $recipients[] = [
-                'user_id'    => (int) $userId,
-                'discord_id' => (string) $discordUser->discord_user_id,
-            ];
         }
 
         if (empty($recipients)) {
