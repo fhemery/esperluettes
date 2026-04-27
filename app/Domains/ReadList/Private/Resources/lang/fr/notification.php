@@ -17,4 +17,15 @@ return [
     'story_republished' => '<a href=":author_url">:author_name</a> a republié l\'histoire <a href=":story_url">:story_name</a>',
     // <author> a marqué l'histoire <story title> comme terminée (with link)
     'story_completed' => '<a href=":author_url">:author_name</a> a marqué l\'histoire <a href=":story_url">:story_name</a> comme terminée',
+
+    'settings' => [
+        'group_readlist'                     => 'Liste de lecture',
+        'type_readlist_story_added'         => 'Histoire ajoutée à une liste de lecture',
+        'type_readlist_chapter_published'   => 'Nouveau chapitre publié',
+        'type_readlist_chapter_unpublished' => 'Chapitre dépublié',
+        'type_readlist_story_deleted'       => 'Histoire supprimée',
+        'type_readlist_story_unpublished'   => 'Histoire dépubliée',
+        'type_readlist_story_republished'   => 'Histoire republiée',
+        'type_readlist_story_completed'     => 'Histoire terminée',
+    ],
 ];

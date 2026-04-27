@@ -69,11 +69,11 @@ class NotificationServiceProvider extends ServiceProvider
     {
         $factory = app(NotificationFactory::class);
 
-        $factory->registerGroup('comments',      10, 'notifications::settings.group_comments');
-        $factory->registerGroup('collaboration', 20, 'notifications::settings.group_collaboration');
-        $factory->registerGroup('readlist',      30, 'notifications::settings.group_readlist');
-        $factory->registerGroup('news',          40, 'notifications::settings.group_news');
-        $factory->registerGroup('moderation',    50, 'notifications::settings.group_moderation');
+        $factory->registerGroup('comments',      10, 'story::notification.settings.group_comments');
+        $factory->registerGroup('collaboration', 20, 'story::notification.settings.group_collaboration');
+        $factory->registerGroup('readlist',      30, 'readlist::notification.settings.group_readlist');
+        $factory->registerGroup('news',          40, 'news::notification.settings.group_news');
+        $factory->registerGroup('moderation',    50, 'shared::notification.settings.group_moderation');
     }
 
     private function registerEvents(): void

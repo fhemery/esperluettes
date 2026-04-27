@@ -57,7 +57,7 @@ class NewsServiceProvider extends ServiceProvider
             type: NewsPublishedNotification::type(),
             class: NewsPublishedNotification::class,
             groupId: 'news',
-            nameKey: 'notifications::settings.type_news_published',
+            nameKey: 'news::notification.settings.type_news_published',
         );
 
         $this->registerAdminNavigation();

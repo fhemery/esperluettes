@@ -29,7 +29,7 @@ describe('BackfillChapterCommentNotificationsCommand', function () {
             type: ChapterCommentNotification::type(),
             class: ChapterCommentNotification::class,
             groupId: 'comments',
-            nameKey: 'notifications::settings.type_chapter_comment',
+            nameKey: 'story::notification.settings.type_chapter_comment',
         );
 
         $content = new ChapterCommentNotification(

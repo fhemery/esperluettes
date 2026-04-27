@@ -17,4 +17,19 @@ return [
     'collaborator.role_given.beta_reader' => '<a href=":user_url">:user_name</a> vous a donné le rôle de bêta-lecteurice sur l\'histoire "<a href=":story_url">:story_name</a>"',
     'collaborator.removed' => '<a href=":user_url">:user_name</a> vous a retiré le rôle de bêta-lecteurice sur l\'histoire "<a href=":story_url">:story_name</a>"',
     'collaborator.left' => '<a href=":user_url">:user_name</a> ne collabore plus sur l\'histoire "<a href=":story_url">:story_name</a>"',
+
+    'settings' => [
+        'group_comments'      => 'Commentaires',
+        'group_collaboration' => 'Collaboration',
+
+        'type_chapter_comment'          => 'Commentaire sur un chapitre',
+        'type_chapter_root_comment'     => 'Commentaire sur votre histoire',
+        'type_chapter_reply_comment'    => 'Réponse à votre commentaire',
+        'type_coauthor_chapter_created' => 'Chapitre créé par un co-auteur',
+        'type_coauthor_chapter_updated' => 'Chapitre modifié par un co-auteur',
+        'type_coauthor_chapter_deleted' => 'Chapitre supprimé par un co-auteur',
+        'type_collaborator_role_given'  => 'Rôle de collaborateur accordé',
+        'type_collaborator_removed'     => 'Collaborateur retiré',
+        'type_collaborator_left'        => 'Collaborateur parti',
+    ],
 ];
