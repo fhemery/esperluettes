@@ -52,9 +52,15 @@ Quill.register(SpoilerBlot);
 // Normalize HTML output from Quill: convert the first &nbsp; of each sequence
 // to a regular space so text can wrap naturally. Single &nbsp; becomes " ",
 // "&nbsp;&nbsp;&nbsp;" becomes " &nbsp;&nbsp;".
+// Now, this does break some places where we need to keep the &nbsp; for styling purposes.
+// In french, that a few places
 function normalizeHtmlFromQuill(html) {
   if (!html) return '';
-  return html.replace(/&nbsp;((?:&nbsp;)*)/g, ' $1').replace(/\u200B/g, '');
+  const spacesRemoved = html.replace(/&nbsp;((?:&nbsp;)*)/g, ' $1').replace(/\u200B/g, '');
+  const restoredSpaces = spacesRemoved.replace(/ ([?!;:°€$%»=+±≈≠·÷])/g, '&nbsp;$1')
+    .replace(/([—«]) /g, '$1&nbsp;');
+
+  return restoredSpaces;
 }
 
 export function initQuillEditor(id, options = {}) {
