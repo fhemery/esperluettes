@@ -219,6 +219,8 @@ describe('createNotification — external channels', function () {
         expect($dto->type)->toBe(TestNotificationContent::type());
         expect($dto->data)->toBe(['message' => 'hello world']);
         expect($dto->id)->toBeGreaterThan(0);
+        expect($dto->htmlDisplay)->toBe('hello world');
+        expect($dto->sourceUserId)->toBeNull();
     });
 
     it('skips an inactive channel even when users have opted in', function () {

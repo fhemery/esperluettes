@@ -278,7 +278,8 @@ Fetch all pending user activity notifications.
         "actor": "JohnDoe",
         "target": "Epic Adventure - Chapter 1"
       },
-      "avatarUrl": "https://jd-esperluettes.fr/storage/profile_pictures/1_1760348457.jpg"
+      "avatarUrl": "https://jd-esperluettes.fr/storage/profile_pictures/1_1760348457.jpg",
+      "defaultText": "[JohnDoe](https://esperluettes.com/profile/johndoe) commented on your story **\"Epic Adventure\"**",
       "recipients": [
         "123456789012345678",
         "987654321098765432"
@@ -301,7 +302,8 @@ Fetch all pending user activity notifications.
   - `id` (integer): Pending notification ID — use this in mark-sent
   - `type` (string): Notification type (see types below)
   - `data` (object): Type-specific notification data — identical for all recipients
-  - `avatarUrl` (string): The URL of the avatar to display
+  - `avatarUrl` (string|null): Avatar URL of the user who triggered the notification; absent when system-generated
+  - `defaultText` (string): Ready-to-send Discord-formatted message. HTML links from the website notification are converted to `[text](url)` Discord links and bold text becomes `**text**`. Use this as the DM body unless you need custom formatting.
   - `recipients` (array of strings): Discord user IDs to send this notification to
   - `createdAt` (string): ISO 8601 timestamp when notification was created
 - `pagination` (object): Pagination metadata — page counts refer to notification entries, not individual recipients

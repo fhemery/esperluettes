@@ -47,11 +47,11 @@ $channelRegistry = app(NotificationChannelRegistry::class);
 
 $channelRegistry->register(new NotificationChannelDefinition(
     id: 'discord',
-    nameKey: 'discord::channels.name',
+    nameTranslationKey: 'discord::channels.name',
     defaultEnabled: false,
     sortOrder: 20,
-    deliveryCallback: function (Notification $notification, array $userIds) {
-        app(DiscordNotificationQueueService::class)->queue($notification, $userIds);
+    deliveryCallback: function (NotificationDto $dto, array $userIds) {
+        app(DiscordNotificationQueueService::class)->queue($dto, $userIds);
     },
     featureFlag: 'features.discord_notifications',
 ));
@@ -112,12 +112,14 @@ Schema::create('discord_pending_recipients', function (Blueprint $table) {
 
 ### `DiscordNotificationQueueService`
 
-Owns the delivery callback logic. Called by the Notification domain's dispatch with `(Notification $notification, array $userIds)`.
+Owns the delivery callback logic. Called by the Notification domain's dispatch with `(NotificationDto $dto, array $userIds)`.
+
+The callback receives a fully populated `NotificationDto` (including `htmlDisplay` and `sourceUserId`), but **only stores the notification ID** — content is intentionally not persisted here. It will be re-fetched at poll time via `NotificationPublicApi::getNotificationsByIds()`. This keeps the Discord tables thin and avoids duplicating notification payload storage.
 
 ```php
 class DiscordNotificationQueueService
 {
-    public function queue(Notification $notification, array $userIds): void
+    public function queue(NotificationDto $dto, array $userIds): void
     {
         $recipients = [];
         foreach ($userIds as $userId) {
@@ -132,7 +134,7 @@ class DiscordNotificationQueueService
             return;
         }
 
-        $pending = $this->repository->createPending($notification->id);
+        $pending = $this->repository->createPending($dto->id);
         $this->repository->createRecipients($pending->id, $recipients);
     }
 }
@@ -146,7 +148,10 @@ Handles the bot-facing REST endpoints. Lives in `Discord/Private/Controllers/`.
 // GET /api/discord/notifications/pending
 public function pending(Request $request): JsonResponse
 // Returns paginated pending notifications, each with a recipients list (discord_ids only).
-// Content is fetched per notification via NotificationPublicApi::getNotificationData().
+// Notification IDs are collected from pending rows, then content is batch-fetched via
+// NotificationPublicApi::getNotificationsByIds(). The controller converts htmlDisplay
+// (HTML) into a Discord-formatted defaultText string (HTML links → Discord links, bold, etc.).
+// avatarUrl is resolved via ProfilePublicApi::getPublicProfile($dto->sourceUserId).
 
 // POST /api/discord/notifications/mark-sent
 public function markSent(Request $request): JsonResponse
@@ -155,7 +160,7 @@ public function markSent(Request $request): JsonResponse
 // Failed recipients remain pending and will reappear on the next poll.
 ```
 
-The `pending` action fetches `discord_pending_notifications` that have at least one recipient with `sent_at IS NULL`, ordered by `created_at`. For each, it calls `NotificationPublicApi::getNotificationData($notificationId)` and `NotificationFactory::make(type, data)` to build the `data` payload.
+The `pending` action fetches `discord_pending_notifications` that have at least one recipient with `sent_at IS NULL`, ordered by `created_at`. It then calls `NotificationPublicApi::getNotificationsByIds($notificationIds)` to batch-load content and builds the `data` payload from `getUrl()`, `getActorName()`, `getTargetDescription()`, and derives `defaultText` from `htmlDisplay`.
 
 ### `DiscordPendingNotificationRepository`
 
@@ -193,20 +198,29 @@ Users toggle Discord preferences through the standard `PUT /notifications/prefer
 
 ## Notification Content for Discord
 
-The bot response format (`{message, url, actor, target}`) is built from `NotificationContent` instances. The `NotificationContent` interface should expose:
+The bot response format (`{defaultText, message, url, actor, target, avatarUrl}`) is built from `NotificationContent` instances and the `NotificationDto`. Three new methods must be added to the `NotificationContent` interface:
 
 ```php
 interface NotificationContent
 {
+    // --- existing methods (unchanged) ---
+    public static function type(): string;
     public static function fromData(array $data): static;
-    public function render(): string;          // Website HTML rendering (existing)
+    public function toData(): array;
+    public function display(): string;         // HTML rendering for the website
+
+    // --- new methods required for Discord ---
     public function getUrl(): string;          // Canonical URL for the subject
     public function getActorName(): ?string;   // Who triggered the event (null for system)
     public function getTargetDescription(): string; // What was affected
 }
 ```
 
-Each notification content class (in each domain) implements these methods. The `DiscordNotificationApiController` calls `$content->render()` (plain text version, stripped of HTML tags) and the additional methods to build the `data` payload.
+Each notification content class (in each domain) implements the three new methods.
+
+**`htmlDisplay` and `defaultText`**: `NotificationDto::htmlDisplay` is populated at dispatch time from `$content->display()`. The `DiscordNotificationApiController` derives `defaultText` by converting `htmlDisplay` from HTML to Discord markdown — HTML links become `[text](url)` and bold tags become `**text**`. This means the Discord domain never calls `display()` directly; it works from the pre-populated DTO field.
+
+**`avatarUrl`**: `NotificationDto::sourceUserId` carries the ID of the user who triggered the notification (already stored in the `notifications` table). The `DiscordNotificationApiController` calls `ProfilePublicApi::getPublicProfile($dto->sourceUserId)` to resolve the avatar URL. If `sourceUserId` is null (system-generated notification), `avatarUrl` is omitted from the response.
 
 ---
 
@@ -273,8 +287,8 @@ Discord/
 ### Phase 3: Bot API
 5. Implement `DiscordNotificationApiController` (`pending`, `markSent`)
 6. Register new API routes in `Discord/Private/routes.php`
-7. Update `NotificationContent` interface with `getUrl()`, `getActorName()`, `getTargetDescription()`
-8. Implement these methods in all existing `NotificationContent` classes
+7. Add `getUrl()`, `getActorName()`, `getTargetDescription()` to the `NotificationContent` interface (the existing `display()` method is already used — `htmlDisplay` on `NotificationDto` is populated from it at dispatch time; no `render()` method is needed)
+8. Implement these three new methods in all existing `NotificationContent` classes
 
 ### Phase 4: Disconnect Cleanup
 9. Update Discord disconnect handler to call `DiscordPendingNotificationRepository::deleteRecipientsForUser()`
@@ -285,7 +299,7 @@ Discord/
 
 ### Phase 6: Testing
 12. Channel registration: Discord channel appears in `getActiveChannels()` when flag on; absent when flag off
-13. Queue: `DiscordNotificationQueueService::queue()` creates one pending_notification + N recipient rows; skips users with no discord_id; creates no pending_notification when all users are skipped
+13. Queue: `DiscordNotificationQueueService::queue(NotificationDto, userIds)` creates one pending_notification + N recipient rows; stores only the notification ID (no content data); skips users with no discord_id; creates no pending_notification when all users are skipped
 14. Bot API: `pending` returns notifications grouped with recipients list; content rendered correctly; `markSent` with no `failedRecipients` marks all recipients delivered; `markSent` with `failedRecipients` leaves those recipients pending; authentication required
 15. Disconnect: `deleteRecipientsForUser()` clears only that user's recipient rows; sibling recipients unaffected
 16. Cascade: deleting a `notifications` row cascades to `discord_pending_notifications` and `discord_pending_recipients`

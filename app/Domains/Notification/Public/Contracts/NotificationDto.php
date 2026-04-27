@@ -8,5 +8,7 @@ final readonly class NotificationDto
         public int    $id,
         public string $type,
         public array  $data,
+        public string $htmlDisplay,
+        public ?int   $sourceUserId = null,
     ) {}
 }

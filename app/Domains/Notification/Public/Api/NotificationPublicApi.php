@@ -72,7 +72,7 @@ class NotificationPublicApi
         $definition = $this->factory->getTypeDefinition($type);
 
         $notification = $this->service->createNotificationRecord($content, $sourceUserId, $createdAt);
-        $dto = new NotificationDto($notification->id, $type, $content->toData());
+        $dto = new NotificationDto($notification->id, $type, $content->toData(), $content->display(), $sourceUserId);
 
         // Website channel (default ON, built-in)
         $websiteUserIds = $definition?->forcedOnWebsite
@@ -117,7 +117,7 @@ class NotificationPublicApi
         $allUserIds = array_values(array_unique(array_map('intval', $allUserIds)));
 
         $notification = $this->service->createNotificationRecord($content, $sourceUserId);
-        $dto = new NotificationDto($notification->id, $type, $content->toData());
+        $dto = new NotificationDto($notification->id, $type, $content->toData(), $content->display(), $sourceUserId);
 
         // Website channel (default ON, built-in)
         $websiteUserIds = $definition?->forcedOnWebsite
@@ -153,6 +153,40 @@ class NotificationPublicApi
     public function deleteNotificationsByType(string $contentKey): int
     {
         return $this->service->deleteNotificationsByType($contentKey);
+    }
+
+    /**
+     * Fetch a batch of notifications by their IDs and return them as NotificationDto instances
+     * keyed by notification ID. Unknown IDs are silently omitted.
+     *
+     * @param int[] $ids
+     * @return array<int, NotificationDto>
+     */
+    public function getNotificationsByIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        $rows = $this->service->findByIds($ids);
+        $result = [];
+        foreach ($rows as $row) {
+            $data    = is_string($row->content_data)
+                ? json_decode($row->content_data, true)
+                : (array) $row->content_data;
+            $content = $this->factory->make($row->content_key, $data);
+            if ($content === null) {
+                continue;
+            }
+            $result[(int) $row->id] = new NotificationDto(
+                id:           (int) $row->id,
+                type:         $row->content_key,
+                data:         $data,
+                htmlDisplay:  $content->display(),
+                sourceUserId: $row->source_user_id !== null ? (int) $row->source_user_id : null,
+            );
+        }
+        return $result;
     }
 
     /**

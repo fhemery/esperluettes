@@ -238,6 +238,23 @@ class NotificationService
     }
 
     /**
+     * Fetch raw notification rows by IDs. Unknown IDs are silently omitted.
+     *
+     * @param int[] $ids
+     * @return array<int, object> stdClass rows with id, content_key, content_data, source_user_id
+     */
+    public function findByIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+        return DB::table('notifications')
+            ->whereIn('id', array_map('intval', $ids))
+            ->get(['id', 'content_key', 'content_data', 'source_user_id'])
+            ->all();
+    }
+
+    /**
      * Delete all notification_reads rows for the given user.
      * Returns the number of deleted rows.
      */
