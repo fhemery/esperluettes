@@ -52,7 +52,7 @@
     
     <!-- Display Button -->
     <button type="button" x-ref="button" @click="open = !open; if (open) { $nextTick(() => updatePosition()) }" 
-            class="w-full flex items-center gap-2 justify-between text-left px-3 py-2 rounded-md border border-{{$color}} hover:border-{{$color}}/80 focus:outline-none focus:ring-2 focus:ring-{{$color}}/50 flex items-center justify-between">
+            class="w-full flex items-center gap-2 justify-between text-left px-3 py-2 rounded-md border border-{{$color}} hover:border-{{$color}}/80 focus:outline-hidden focus:ring-2 focus:ring-{{$color}}/50 flex items-center justify-between">
         <span x-text="selectedLabel || @js($placeholder)" 
               :class="selectedLabel ? 'text-{{$color}} font-semibold' : 'text-{{$color}}/70'" class="flex-1 truncate"></span>
         <span class="material-symbols-outlined text-{{$color}} transition-transform" 
@@ -90,7 +90,7 @@
 
                         <!-- Tooltip for options with descriptions -->
                         <template x-if="opt.description">
-                            <div class="flex-shrink-0" @click.stop>
+                            <div class="shrink-0" @click.stop>
                                 <x-shared::tooltip type="help" placement="top">
                                     <span x-text="opt.description"></span>
                                 </x-shared::tooltip>

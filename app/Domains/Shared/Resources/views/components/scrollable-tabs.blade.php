@@ -52,7 +52,7 @@
         x-on:click="scrollByAmount(-1)"
         x-cloak
         aria-label="{{ __('shared::components.scrollable_tabs.previous') }}"
-        class="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
+        class="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-hidden focus:ring-2 focus:ring-accent">
         <span class="material-symbols-outlined text-lg">chevron_left</span>
     </button>
 
@@ -64,7 +64,7 @@
                 <a href="{{ $tab['url'] }}"
                     role="tab"
                     aria-selected="{{ $activeTab === $tab['key'] ? 'true' : 'false' }}"
-                    class="shrink-0 flex-1 whitespace-nowrap py-3 px-1 border-b-2 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex items-center justify-center gap-2 {{ $activeTab === $tab['key'] ? 'selected border-none font-extrabold' : 'border-transparent' }}">
+                    class="shrink-0 flex-1 whitespace-nowrap py-3 px-1 border-b-2 text-center focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 flex items-center justify-center gap-2 {{ $activeTab === $tab['key'] ? 'selected border-none font-extrabold' : 'border-transparent' }}">
                     @if(isset($tab['icon']))
                         <span class="material-symbols-outlined">{{ $tab['icon'] }}</span>
                     @endif
@@ -76,7 +76,7 @@
                     role="tab"
                     :aria-selected="activeTab === '{{ $tab['key'] }}'"
                     :class="activeTab === '{{ $tab['key'] }}' ? 'selected border-none font-extrabold' : 'border-transparent'"
-                    class="shrink-0 flex-1 whitespace-nowrap py-3 px-1 border-b-2 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex items-center justify-center gap-2">
+                    class="shrink-0 flex-1 whitespace-nowrap py-3 px-1 border-b-2 text-center focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 flex items-center justify-center gap-2">
                     @if(isset($tab['icon']))
                         <span class="material-symbols-outlined">{{ $tab['icon'] }}</span>
                     @endif
@@ -92,7 +92,7 @@
         x-on:click="scrollByAmount(1)"
         x-cloak
         aria-label="{{ __('shared::components.scrollable_tabs.next') }}"
-        class="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
+        class="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-hidden focus:ring-2 focus:ring-accent">
         <span class="material-symbols-outlined text-lg">chevron_right</span>
     </button>
 </div>

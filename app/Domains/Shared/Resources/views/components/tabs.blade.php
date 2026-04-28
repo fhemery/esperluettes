@@ -71,7 +71,7 @@
             x-show="scrollable && canPrev"
             x-on:click="scrollByAmount(-1)"
             aria-label="Précédent"
-            class="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
+            class="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-hidden focus:ring-2 focus:ring-accent">
             <span class="material-symbols-outlined text-lg">chevron_left</span>
         </button>
         @endif
@@ -104,7 +104,7 @@
                         const prev = buttons[(i - 1 + buttons.length) % buttons.length];
                         prev.focus(); prev.click();
                     "
-                    class="{{ $scrollable ? 'shrink-0' : 'flex-1' }} whitespace-nowrap py-3 px-1 border-b-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                    class="{{ $scrollable ? 'shrink-0' : 'flex-1' }} whitespace-nowrap py-3 px-1 border-b-2 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2"
                     :class="tab === @js($key)
                         ? 'selected border-none font-extrabold'
                         : 'border-transparent {{ $disabled ? 'opacity-50 cursor-not-allowed' : '' }}'"
@@ -120,7 +120,7 @@
             x-show="scrollable && canNext"
             x-on:click="scrollByAmount(1)"
             aria-label="Suivant"
-            class="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-accent">
+            class="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-hidden focus:ring-2 focus:ring-accent">
             <span class="material-symbols-outlined text-lg">chevron_right</span>
         </button>
         @endif

@@ -3,7 +3,7 @@
      x-data="notificationIcon({ initialCount: {{ $unreadCount }} })"
      @notification-read.window="onMarkedRead()"
      @notification-unread.window="onMarkedUnread()">
-    <a href="{{ route('notifications.index') }}" class="relative inline-flex items-center p-2 text-fg hover:text-fg/80 focus:outline-none transition ease-in-out duration-150">
+    <a href="{{ route('notifications.index') }}" class="relative inline-flex items-center p-2 text-fg hover:text-fg/80 focus:outline-hidden transition ease-in-out duration-150">
         <span class="material-symbols-outlined">
             notifications
         </span>

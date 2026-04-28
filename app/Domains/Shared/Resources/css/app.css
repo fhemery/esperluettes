@@ -1,36 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-
+@import "tailwindcss";
+@config "../../../../../tailwind.config.js";
+@source inline("border-accent bg-accent text-accent hover:text-accent hover:bg-accent hover:border-accent border-primary bg-primary text-primary hover:text-primary hover:bg-primary hover:border-primary border-secondary bg-secondary text-secondary hover:text-secondary hover:bg-secondary hover:border-secondary border-tertiary bg-tertiary text-tertiary hover:text-tertiary hover:bg-tertiary hover:border-tertiary border-error bg-error text-error hover:text-error hover:bg-error hover:border-error border-info bg-info text-info hover:text-info hover:bg-info hover:border-info border-success bg-success text-success hover:text-success hover:bg-success hover:border-success border-warning bg-warning text-warning hover:text-warning hover:bg-warning hover:border-warning");
 /* Design tokens as CSS variables (RGB triplets for alpha support) */
-:root{
+:root {
   /* Base colors */
-  --color-bg: 255 255 255;        
-  --color-fg: 17 24 39;           
-  --color-primary: 30 64 175;     
-  --color-accent: 234 88 12;      
-  --color-tertiary: 99 157 165;   
+  --color-bg: 255 255 255;
+  --color-fg: 17 24 39;
+  --color-primary: 30 64 175;
+  --color-accent: 234 88 12;
+  --color-tertiary: 99 157 165;
   --error-background: 255 255 255;
   --error-text: 255 0 0;
   --dark: 0 0 0;
-  
   --color-error-fg: 185 28 28;
   --color-error-bg: 254 226 226;
-
   --color-info-fg: 29 78 216;
   --color-info-bg: 219 234 254;
-
   --color-success-fg: 21 128 61;
   --color-success-bg: 220 252 231;
-
   --color-warning-fg: 194 65 12;
   --color-warning-bg: 255 237 213;
-
   --color-read-bg: 255 253 251;
   --color-read-fg: 0 0 0;
-
   /* Images */
   --home-bg-image: none;
   --home-bg-size: auto;
@@ -38,7 +29,7 @@
 
 .nonprod-nav {
   background-color: rgb(var(--color-bg));
-  background-image: url('/images/ui/nav-nonprod.svg');
+  background-image: url("/images/ui/nav-nonprod.svg");
   background-repeat: no-repeat;
   background-position: top center;
   background-size: auto 64px;
@@ -52,75 +43,68 @@ html {
 /* Self-hosted Aptos font faces (scoped via .rich-content) */
 @font-face {
   font-family: "Aptos";
-  src: url('/fonts/aptos/Aptos.woff2') format('woff2'),
-       url('/fonts/aptos/Aptos.ttf') format('truetype');
+  src: url("/fonts/aptos/Aptos.woff2") format("woff2"), url("/fonts/aptos/Aptos.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Aptos";
-  src: url('/fonts/aptos/Aptos-Italic.woff2') format('woff2'),
-       url('/fonts/aptos/Aptos-Italic.ttf') format('truetype');
+  src: url("/fonts/aptos/Aptos-Italic.woff2") format("woff2"), url("/fonts/aptos/Aptos-Italic.ttf") format("truetype");
   font-weight: 400;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: "Aptos";
-  src: url('/fonts/aptos/Aptos-Bold.woff2') format('woff2'),
-       url('/fonts/aptos/Aptos-Bold.ttf') format('truetype');
+  src: url("/fonts/aptos/Aptos-Bold.woff2") format("woff2"), url("/fonts/aptos/Aptos-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Aptos";
-  src: url('/fonts/aptos/Aptos-Bold-Italic.woff2') format('woff2'),
-       url('/fonts/aptos/Aptos-Bold-Italic.ttf') format('truetype');
+  src: url("/fonts/aptos/Aptos-Bold-Italic.woff2") format("woff2"), url("/fonts/aptos/Aptos-Bold-Italic.ttf") format("truetype");
   font-weight: 700;
   font-style: italic;
   font-display: swap;
 }
-
-:root[data-season="autumn"] {
-  --color-bg: 247 234 223;        // Blanc cassé
-  --color-primary: 201 129 41;    // Yellow
-  --color-secondary: 65 37 10;    // Brown
-  --color-accent: 164 52 92;      // Fuschia
-  --color-tertiary: 99 157 165;   // Bleu / vert
+:root[data-season=autumn] {
+  --color-bg: 247 234 223;
+  --color-primary: 201 129 41;
+  --color-secondary: 65 37 10;
+  --color-accent: 164 52 92;
+  --color-tertiary: 99 157 165;
   /* Public web root is /, so image path should not include /public */
   --home-bg-image: url('/images/themes/autumn/background.png');
   --profile-bg-image-small: url('/images/themes/autumn/profile-bg-640.jpg');
   --profile-bg-image-big: url('/images/themes/autumn/profile-bg-1280.jpg');
   --theme-ribbon: url('/images/themes/autumn/top-ribbon.png');
-
   --frame-corner-tl:url('/images/themes/autumn/design/frame-corner-tl.png');
   --frame-corner-tr:url('/images/themes/autumn/design/frame-corner-tr.png');
   --frame-corner-bl:url('/images/themes/autumn/design/frame-corner-bl.png');
   --frame-corner-br:url('/images/themes/autumn/design/frame-corner-br.png');
 }
 
-:root[data-season="winter"] {
-  --color-bg: 232 240 243;        
-  --color-primary: 107 152 170;    
+:root[data-season=winter] {
+  --color-bg: 232 240 243;
+  --color-primary: 107 152 170;
   --color-secondary: 24 67 91;
-  --color-accent: 181 55 98;      
+  --color-accent: 181 55 98;
   --color-tertiary: 181 144 49;
   /* Public web root is /, so image path should not include /public */
   --home-bg-image: url('/images/themes/winter/background.png');
   --profile-bg-image-small: url('/images/themes/winter/profile-bg-640.jpg');
   --profile-bg-image-big: url('/images/themes/winter/profile-bg-1280.jpg');
   --theme-ribbon: url('/images/themes/winter/top-ribbon.png');
-
   --frame-corner-tl:url('/images/themes/winter/design/frame-corner-tl.png');
   --frame-corner-tr:url('/images/themes/winter/design/frame-corner-tr.png');
   --frame-corner-bl:url('/images/themes/winter/design/frame-corner-bl.png');
   --frame-corner-br:url('/images/themes/winter/design/frame-corner-br.png');
 }
 
-:root[data-season="spring"] {
-  --color-bg: 238 244 217;        // Placeholder: same as autumn
+:root[data-season=spring] {
+  --color-bg: 238 244 217;
   --color-primary: 118 160 51;
   --color-secondary: 10 94 1;
   --color-accent: 244 100 124;
@@ -129,15 +113,14 @@ html {
   --profile-bg-image-small: url('/images/themes/spring/profile-bg-640.jpg');
   --profile-bg-image-big: url('/images/themes/spring/profile-bg-1280.jpg');
   --theme-ribbon: url('/images/themes/spring/top-ribbon.png');
-
   --frame-corner-tl:url('/images/themes/spring/design/frame-corner-tl.png');
   --frame-corner-tr:url('/images/themes/spring/design/frame-corner-tr.png');
   --frame-corner-bl:url('/images/themes/spring/design/frame-corner-bl.png');
   --frame-corner-br:url('/images/themes/spring/design/frame-corner-br.png');
 }
 
-:root[data-season="summer"] {
-  --color-bg: 247 234 223;        // Placeholder: same as autumn
+:root[data-season=summer] {
+  --color-bg: 247 234 223;
   --color-primary: 201 129 41;
   --color-secondary: 65 37 10;
   --color-accent: 164 52 92;
@@ -146,7 +129,6 @@ html {
   --profile-bg-image-small: url('/images/themes/summer/profile-bg-640.jpg');
   --profile-bg-image-big: url('/images/themes/summer/profile-bg-1280.jpg');
   --theme-ribbon: url('/images/themes/summer/top-ribbon.png');
-
   --frame-corner-tl:url('/images/themes/summer/design/frame-corner-tl.png');
   --frame-corner-tr:url('/images/themes/summer/design/frame-corner-tr.png');
   --frame-corner-bl:url('/images/themes/summer/design/frame-corner-bl.png');
@@ -154,11 +136,11 @@ html {
 }
 
 /* Font selection based on user preference */
-:root[data-font="aptos"] {
+:root[data-font=aptos] {
   --content-font: "Aptos", Manrope, system-ui, sans-serif;
 }
 
-:root[data-font="times"] {
+:root[data-font=times] {
   --content-font: "Times New Roman", Times, serif;
 }
 
@@ -168,15 +150,15 @@ html {
 }
 
 /* Line-height selection based on user preference */
-:root[data-interline="low"] {
+:root[data-interline=low] {
   --content-line-height: 1.2;
 }
 
-:root[data-interline="medium"] {
+:root[data-interline=medium] {
   --content-line-height: 1.8;
 }
 
-:root[data-interline="high"] {
+:root[data-interline=high] {
   --content-line-height: 2.4;
 }
 
@@ -194,28 +176,30 @@ html {
   line-height: var(--content-line-height);
   text-align: justify;
 }
+
 .rich-content ul {
   list-style: disc;
   margin-left: 1.25rem; /* ~20px */
   padding-left: 0.25rem;
 }
+
 .rich-content ol {
   list-style: decimal;
   margin-left: 1.25rem;
   padding-left: 0.25rem;
 }
+
 .rich-content li {
   margin: 0.25rem 0;
 }
 
 .rich-content p {
-  padding-bottom: .75rem;
+  padding-bottom: 0.75rem;
   white-space-collapse: preserve;
   word-break: break-word;
-
-  &:last-of-type {
-    padding-bottom: 0;
-  }
+}
+.rich-content p:last-of-type {
+  padding-bottom: 0;
 }
 
 .rich-content a {
@@ -226,15 +210,19 @@ html {
 .ql-snow .ql-tooltip[data-label-visit]::before {
   content: attr(data-label-visit);
 }
+
 .ql-snow .ql-tooltip[data-label-enter][data-mode=link]::before {
   content: attr(data-label-enter);
 }
+
 .ql-snow .ql-tooltip a.ql-action[data-label-edit]::after {
   content: attr(data-label-edit);
 }
+
 .ql-snow .ql-tooltip.ql-editing a.ql-action[data-label-save]::after {
   content: attr(data-label-save);
 }
+
 .ql-snow .ql-tooltip a.ql-remove[data-label-remove]::before {
   content: attr(data-label-remove);
 }
@@ -243,38 +231,46 @@ html {
   color: rgb(var(--color-accent));
 }
 
-
 /* Quill alignment classes on read-only pages (no .ql-editor wrapper) */
-.ql-align-left { text-align: left; }
-.ql-align-center { text-align: center; }
-p.ql-align-center { text-indent: 0; }
-.ql-align-right { text-align: right; }
-.ql-align-justify { text-align: justify; }
+.ql-align-left {
+  text-align: left;
+}
+
+.ql-align-center {
+  text-align: center;
+}
+
+p.ql-align-center {
+  text-indent: 0;
+}
+
+.ql-align-right {
+  text-align: right;
+}
+
+.ql-align-justify {
+  text-align: justify;
+}
+
 .rich-content .ql-editor {
   font-size: 1rem;
   line-height: var(--content-line-height);
-
-  & p {
-    padding-bottom: .75rem;
-    
-
-    &:last-of-type {
-      padding-bottom: 0;
-    }
-  }
-
-  &.ql-blank::before {
-    font-style: normal;
-  }
 }
-.rich-content .ql-indent {
-  p {
-    text-indent: 2rem;
-  }
+.rich-content .ql-editor p {
+  padding-bottom: 0.75rem;
+}
+.rich-content .ql-editor p:last-of-type {
+  padding-bottom: 0;
+}
+.rich-content .ql-editor.ql-blank::before {
+  font-style: normal;
+}
 
-  & .ql-toolbar {
-    text-indent: none; 
-  }
+.rich-content .ql-indent p {
+  text-indent: 2rem;
+}
+.rich-content .ql-indent .ql-toolbar {
+  text-indent: none;
 }
 
 /* Spoiler format */
@@ -295,6 +291,7 @@ p.ql-align-center { text-indent: 0; }
   height: 18px;
   fill: currentColor;
 }
+
 .ql-snow .ql-toolbar button.ql-spoiler.ql-active {
   color: #06c;
 }
@@ -327,18 +324,46 @@ p.ql-align-center { text-indent: 0; }
   background-position: center;
   vertical-align: middle;
 }
-.ql-custom-emoji-esperamour   { background-image: url('/images/icons/emojis/esperamour.png'); }
-.ql-custom-emoji-esperbravo   { background-image: url('/images/icons/emojis/esperbravo.png'); }
-.ql-custom-emoji-esperclindoeil { background-image: url('/images/icons/emojis/esperclindoeil.png'); }
-.ql-custom-emoji-espercolere  { background-image: url('/images/icons/emojis/espercolere.png'); }
-.ql-custom-emoji-esperfourire { background-image: url('/images/icons/emojis/esperfourire.png'); }
-.ql-custom-emoji-esperlunettes { background-image: url('/images/icons/emojis/esperlunettes.png'); }
-.ql-custom-emoji-espersnob    { background-image: url('/images/icons/emojis/espersnob.png'); }
-.ql-custom-emoji-espersourire { background-image: url('/images/icons/emojis/espersourire.png'); }
-.ql-custom-emoji-espertriste  { background-image: url('/images/icons/emojis/espertriste.png'); }
 
-[x-cloak] { display: none !important; }
+.ql-custom-emoji-esperamour {
+  background-image: url("/images/icons/emojis/esperamour.png");
+}
 
+.ql-custom-emoji-esperbravo {
+  background-image: url("/images/icons/emojis/esperbravo.png");
+}
+
+.ql-custom-emoji-esperclindoeil {
+  background-image: url("/images/icons/emojis/esperclindoeil.png");
+}
+
+.ql-custom-emoji-espercolere {
+  background-image: url("/images/icons/emojis/espercolere.png");
+}
+
+.ql-custom-emoji-esperfourire {
+  background-image: url("/images/icons/emojis/esperfourire.png");
+}
+
+.ql-custom-emoji-esperlunettes {
+  background-image: url("/images/icons/emojis/esperlunettes.png");
+}
+
+.ql-custom-emoji-espersnob {
+  background-image: url("/images/icons/emojis/espersnob.png");
+}
+
+.ql-custom-emoji-espersourire {
+  background-image: url("/images/icons/emojis/espersourire.png");
+}
+
+.ql-custom-emoji-espertriste {
+  background-image: url("/images/icons/emojis/espertriste.png");
+}
+
+[x-cloak] {
+  display: none !important;
+}
 
 /* Utility layer: one-off helpers, escape hatches */
 @layer utilities {
@@ -348,37 +373,32 @@ p.ql-align-center { text-indent: 0; }
     background-position: top left;
     background-size: var(--home-bg-size);
   }
-
   .bg-profile-seasonal {
     background-image: var(--profile-bg-image-small);
     background-repeat: no-repeat;
     background-size: cover;
   }
-
   .bg-profile-seasonal-big {
     background-image: var(--profile-bg-image-big);
     background-repeat: no-repeat;
     background-size: cover;
   }
-
   .bg-theme-ribbon {
     background-image: var(--theme-ribbon);
     background-repeat: repeat-x;
   }
-
   /* Surface system: season-agnostic light/dark panels */
   .surface-secondary {
     /* Set surface background/foreground tokens for children */
     --surface-bg: var(--color-secondary);
     --surface-fg: 255 255 255;
-    --surface-error-bg: 218 59 57; 
+    --surface-error-bg: 218 59 57;
     /* Hint to browser for built-in UI (inputs, etc.) */
     color-scheme: dark;
     /* Apply colors */
-    background-color: rgb(var(--color-secondary) / 0.9);
+    background-color: rgb(var(--color-secondary)/0.9);
     /* Do NOT set text color here; use .text-on-surface opt-in on text elements */
   }
-
   .surface-primary {
     --surface-bg: var(--color-primary);
     --surface-fg: 255 255 255;
@@ -386,160 +406,135 @@ p.ql-align-center { text-indent: 0; }
     color-scheme: light;
     background-color: rgb(var(--color-primary));
     /* Do NOT set text color here; use .text-on-surface opt-in on text elements */
-
-    &:hover {
-      background-color: rgb(var(--color-primary) / 0.9);
-    }
-
-    &.selected, .selected {
-      background-color: rgb(var(--surface-fg));
-      color: rgb(var(--surface-bg));
-    }
-
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-primary);
-      --surface-border: var(--color-primary);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-primary:hover {
+    background-color: rgb(var(--color-primary)/0.9);
+  }
+  .surface-primary.selected, .surface-primary .selected {
+    background-color: rgb(var(--surface-fg));
+    color: rgb(var(--surface-bg));
+  }
+  .surface-primary.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-primary);
+    --surface-border: var(--color-primary);
+    background-color: rgb(var(--color-read-bg));
+  }
   .surface-accent {
     --surface-bg: var(--color-accent);
     --surface-fg: 255 255 255;
     --surface-border: var(--color-accent);
     color-scheme: light;
     background-color: rgb(var(--color-accent));
-
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-accent);
-      --surface-border: var(--color-accent);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-accent.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-accent);
+    --surface-border: var(--color-accent);
+    background-color: rgb(var(--color-read-bg));
+  }
   .surface-tertiary {
     --surface-bg: var(--color-tertiary);
     --surface-fg: 255 255 255;
     --surface-border: var(--color-tertiary);
     color-scheme: light;
     background-color: rgb(var(--color-tertiary));
-
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-tertiary);
-      --surface-border: var(--color-tertiary);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-tertiary.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-tertiary);
+    --surface-border: var(--color-tertiary);
+    background-color: rgb(var(--color-read-bg));
+  }
   .surface-neutral {
     --surface-bg: var(--color-read-bg);
     --surface-fg: var(--color-read-fg);
     --surface-border: var(--color-read-bg);
     color-scheme: light;
     background-color: rgb(var(--color-read-bg));
-
-    // This badge, as neutral as it is, it already an outline one
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-read-fg);
-      --surface-border: var(--color-read-fg);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-neutral.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-read-fg);
+    --surface-border: var(--color-read-fg);
+    background-color: rgb(var(--color-read-bg));
+  }
   .surface-error {
     --surface-bg: var(--color-error-bg);
     --surface-fg: var(--color-error-fg);
     --surface-border: var(--color-error-bg);
     color-scheme: light;
     background-color: rgb(var(--color-error-bg));
-
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-error-bg);
-      --surface-border: var(--color-error-bg);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-error.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-error-bg);
+    --surface-border: var(--color-error-bg);
+    background-color: rgb(var(--color-read-bg));
+  }
   .surface-info {
     --surface-bg: var(--color-info-bg);
     --surface-fg: var(--color-info-fg);
     --surface-border: var(--color-info-bg);
     color-scheme: light;
     background-color: rgb(var(--color-info-bg));
-
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-info-bg);
-      --surface-border: var(--color-info-bg);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-info.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-info-bg);
+    --surface-border: var(--color-info-bg);
+    background-color: rgb(var(--color-read-bg));
+  }
   .surface-success {
     --surface-bg: var(--color-success-bg);
     --surface-fg: var(--color-success-fg);
     --surface-border: var(--color-success-bg);
     color-scheme: light;
     background-color: rgb(var(--color-success-bg));
-
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-success-fg);
-      --surface-border: var(--color-success-fg);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-success.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-success-fg);
+    --surface-border: var(--color-success-fg);
+    background-color: rgb(var(--color-read-bg));
+  }
   .surface-warning {
     --surface-bg: var(--color-warning-bg);
     --surface-fg: var(--color-warning-fg);
     --surface-border: var(--color-warning-bg);
     color-scheme: light;
     background-color: rgb(var(--color-warning-bg));
-
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-warning-bg);
-      --surface-border: var(--color-warning-bg);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-warning.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-warning-bg);
+    --surface-border: var(--color-warning-bg);
+    background-color: rgb(var(--color-read-bg));
+  }
   .surface-read {
     --surface-bg: var(--color-read-bg);
     --surface-fg: var(--color-read-fg);
     --surface-border: transparent;
     color-scheme: light;
     background-color: rgb(var(--color-read-bg));
-
-    &.is-outline {
-      --surface-bg: var(--color-read-bg);
-      --surface-fg: var(--color-read-fg);
-      --surface-border: var(--color-read-bg);
-      background-color: rgb(var(--color-read-bg));
-    }
   }
-
+  .surface-read.is-outline {
+    --surface-bg: var(--color-read-bg);
+    --surface-fg: var(--color-read-fg);
+    --surface-border: var(--color-read-bg);
+    background-color: rgb(var(--color-read-bg));
+  }
   .text-on-surface {
     color: rgb(var(--surface-fg));
   }
-
   .border-surface {
     border: 1px solid rgb(var(--surface-border));
   }
-
   .error-on-surface {
     color: rgb(var(--surface-fg));
     background-color: rgb(var(--surface-error-bg));
   }
 }
-
-
 .framed-tight {
   background-image: var(--frame-corner-tl), var(--frame-corner-tr), var(--frame-corner-bl), var(--frame-corner-br);
   background-position: top -1rem left -1rem, top -1rem right -1rem, bottom -1rem left -1rem, bottom -1rem right -1rem;
@@ -553,26 +548,21 @@ p.ql-align-center { text-indent: 0; }
     background-repeat: no-repeat;
   }
 }
-
 table.admin {
   background-color: rgb(var(--color-read-bg));
- 
-  th {
-    padding: .25rem .5rem;
-    text-align: left;
-    font-size: .75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: .1rem;
-  }
-
-  td {
-    font-size: .75rem;
-    padding: .25rem .5rem;
-  }
-
-  tr {
-    
-    border-bottom: 1px solid rgb(var(--color-fg));
-  }
+}
+table.admin th {
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+}
+table.admin td {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+table.admin tr {
+  border-bottom: 1px solid rgb(var(--color-fg));
 }

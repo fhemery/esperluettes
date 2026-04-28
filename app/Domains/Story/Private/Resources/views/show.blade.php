@@ -51,7 +51,7 @@
                 </div>
 
                 @if ($viewModel->isAuthor())
-                    <div class="flex items-center gap-2 sm:mt-0 flex-shrink-0">
+                    <div class="flex items-center gap-2 sm:mt-0 shrink-0">
                         <a href="{{ route('stories.collaborators.index', ['slug' => $viewModel->getSlug()]) }}"
                             aria-label="{{ __('story::collaborators.manage') }}" title="{{ __('story::collaborators.manage') }}"
                             class="relative">

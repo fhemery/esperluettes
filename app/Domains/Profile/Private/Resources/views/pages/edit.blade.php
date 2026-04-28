@@ -79,7 +79,7 @@
                                 <span class="flex select-none items-center pl-3 text-gray-400 sm:text-sm no-wrap">facebook.com/</span>
                                 <input type="text" id="facebook_handle" name="facebook_handle"
                                     value="{{ old('facebook_handle', $profile->facebook_handle) }}"
-                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-none" />
+                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-hidden" />
                             </div>
                             <x-input-error :messages="$errors->get('facebook_handle')" class="error-on-surface" />
                         </div>
@@ -96,7 +96,7 @@
                                 <span class="flex select-none items-center pl-3 text-gray-400 sm:text-sm no-wrap">x.com/</span>
                                 <input type="text" id="x_handle" name="x_handle"
                                     value="{{ old('x_handle', $profile->x_handle) }}"
-                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-none" />
+                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-hidden" />
                             </div>
                             <x-input-error :messages="$errors->get('x_handle')" class="error-on-surface" />
                         </div>
@@ -113,7 +113,7 @@
                                 <span class="flex select-none items-center pl-3 text-gray-400 sm:text-sm no-wrap">instagram.com/</span>
                                 <input type="text" id="instagram_handle" name="instagram_handle"
                                     value="{{ old('instagram_handle', $profile->instagram_handle) }}"
-                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-none" />
+                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-hidden" />
                             </div>
                             <x-input-error :messages="$errors->get('instagram_handle')" class="error-on-surface" />
                         </div>
@@ -130,7 +130,7 @@
                                 <span class="flex select-none items-center pl-3 text-gray-400 sm:text-sm no-wrap">youtube.com/</span>
                                 <input type="text" id="youtube_handle" name="youtube_handle"
                                     value="{{ old('youtube_handle', $profile->youtube_handle) }}"
-                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-none" />
+                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-hidden" />
                             </div>
                             <x-input-error :messages="$errors->get('youtube_handle')" class="error-on-surface" />
                         </div>
@@ -147,7 +147,7 @@
                                 <span class="flex select-none items-center pl-3 text-gray-400 sm:text-sm no-wrap">tiktok.com/@</span>
                                 <input type="text" id="tiktok_handle" name="tiktok_handle"
                                     value="{{ old('tiktok_handle', $profile->tiktok_handle) }}"
-                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-none" />
+                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-hidden" />
                             </div>
                             <x-input-error :messages="$errors->get('tiktok_handle')" class="error-on-surface" />
                         </div>
@@ -164,7 +164,7 @@
                                 <span class="flex select-none items-center pl-3 text-gray-400 sm:text-sm no-wrap">bsky.app/profile/</span>
                                 <input type="text" id="bluesky_handle" name="bluesky_handle"
                                     value="{{ old('bluesky_handle', $profile->bluesky_handle) }}"
-                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-none" />
+                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-hidden" />
                             </div>
                             <x-input-error :messages="$errors->get('bluesky_handle')" class="error-on-surface" />
                         </div>
@@ -182,7 +182,7 @@
                                 <input type="text" id="mastodon_handle" name="mastodon_handle"
                                     placeholder="user@instance.social"
                                     value="{{ old('mastodon_handle', $profile->mastodon_handle) }}"
-                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-none" />
+                                    class="flex-1 border-0 bg-transparent py-1.5 pl-1 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 outline-hidden" />
                             </div>
                             <x-input-error :messages="$errors->get('mastodon_handle')" class="error-on-surface" />
                         </div>

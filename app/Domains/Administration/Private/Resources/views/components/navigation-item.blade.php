@@ -11,7 +11,7 @@
       {{ $active ? 'text-tertiary' : '' }} {{ $class }}" data-test-id="admin-sidebar-link">
 
     <!-- Icon -->
-    <span class="flex-shrink-0 w-5 mr-2">
+    <span class="shrink-0 w-5 mr-2">
         @if ($icon)
             <span class="material-symbols-outlined text-lg">
                 {{ $icon }}

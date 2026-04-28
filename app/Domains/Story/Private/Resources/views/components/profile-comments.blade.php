@@ -52,7 +52,7 @@
                     class="w-full flex items-center justify-between px-4 py-2 text-left bg-read"
                     @click="open = !open; if (open && !loaded) fetchComments()">
                     <div class="flex items-center gap-3">
-                        <div class="h-12 w-9 flex-shrink-0 overflow-hidden">
+                        <div class="h-12 w-9 shrink-0 overflow-hidden">
                             <x-story::cover
                                 :coverType="$story->coverType"
                                 :coverUrl="$story->coverUrl"

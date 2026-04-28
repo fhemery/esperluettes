@@ -3,7 +3,7 @@
     Emits no events; calls selectDefault() + closes modal directly via Alpine parent scope.
 --}}
 <div x-show="tab === 'default'" class="flex flex-col sm:flex-row gap-6 items-center p-4 h-full">
-    <div class="flex-shrink-0 mx-auto">
+    <div class="shrink-0 mx-auto">
         <x-shared::default-cover class="w-[150px] object-contain" />
     </div>
     <div class="flex flex-col gap-4 flex-1 h-full justify-between">

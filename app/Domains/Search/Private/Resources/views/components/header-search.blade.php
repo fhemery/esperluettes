@@ -12,7 +12,7 @@
             @keydown.arrow-up.prevent="highlightPrev()"
             @keydown.enter.prevent="activateHighlighted()"
             type="search"
-            class="hidden lg:block bg-transparent border-transparent outline-none w-full placeholder-fg focus:ring-1 focus:ring-accent/50 focus:border-transparent"
+            class="hidden lg:block bg-transparent border-transparent outline-hidden w-full placeholder-fg focus:ring-1 focus:ring-accent/50 focus:border-transparent"
             placeholder="{{ __('search::header.label') }}"
             aria-label="{{ __('search::header.label') }}"
         />
@@ -34,7 +34,7 @@
                     @keydown.arrow-up.prevent="highlightPrev()"
                     @keydown.enter.prevent="activateHighlighted()"
                     type="search"
-                    class="w-full bg-transparent border-b border-fg/40 focus:border-fg outline-none placeholder-fg focus:ring-1 focus:ring-fg/10"
+                    class="w-full bg-transparent border-b border-fg/40 focus:border-fg outline-hidden placeholder-fg focus:ring-1 focus:ring-fg/10"
                     placeholder="{{ __('search::header.label') }}"
                     aria-label="{{ __('search::header.label') }}"
                     x-ref="mobileInput"

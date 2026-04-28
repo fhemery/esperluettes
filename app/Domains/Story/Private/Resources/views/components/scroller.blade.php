@@ -37,7 +37,7 @@
         :disabled="!canPrev"
         :aria-disabled="(!canPrev).toString()"
         aria-label="Précédent"
-        class=" surface-accent text-on-surface [@media(pointer:coarse)]:hidden flex absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-surface/80 focus:outline-none focus:ring-2 focus:ring-accent shadow"
+        class=" surface-accent text-on-surface [@media(pointer:coarse)]:hidden flex absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-surface/80 focus:outline-hidden focus:ring-2 focus:ring-accent shadow"
         :class="{ 'opacity-40 pointer-events-none': !canPrev, 'hover:bg-surface': canPrev }">
         <span class="material-symbols-outlined">chevron_left</span>
     </button>
@@ -55,7 +55,7 @@
         :disabled="!canNext"
         :aria-disabled="(!canNext).toString()"
         aria-label="Suivant"
-        class="surface-accent text-on-surface [@media(pointer:coarse)]:hidden flex absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-surface/80 focus:outline-none focus:ring-2 focus:ring-accent shadow"
+        class="surface-accent text-on-surface [@media(pointer:coarse)]:hidden flex absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-surface/80 focus:outline-hidden focus:ring-2 focus:ring-accent shadow"
         :class="{ 'opacity-40 pointer-events-none': !canNext, 'hover:bg-surface': canNext }">
         <span class="material-symbols-outlined">chevron_right</span>
     </button>

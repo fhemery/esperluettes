@@ -7,7 +7,7 @@
     <x-shared::popover placement="top">
         <x-slot name="trigger">
             <button type="button" aria-label="{{ __('story::shared.trigger_warnings.label') }}"
-                class="inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                class="inline-flex items-center justify-center h-5 w-5 rounded-full focus:outline-hidden focus:ring-2 focus:ring-red-500/40"
                 title="{{ __('story::shared.trigger_warnings.tooltips.listed') }}">
                 <span class="translate-y-0.5 material-symbols-outlined text-[18px] leading-none text-error">warning</span>
             </button>

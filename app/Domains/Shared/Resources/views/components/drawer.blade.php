@@ -32,7 +32,7 @@
                 <div class="flex items-center gap-3">
                     {{ $header ?? '' }}
                 </div>
-                <button @click="open = false" class="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none" aria-label="Close menu">
+                <button @click="open = false" class="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-hidden" aria-label="Close menu">
                     <i class="material-symbols-outlined text-accent">close</i>
                 </button>
             </div>

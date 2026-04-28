@@ -13,7 +13,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <!-- Back to site button (desktop) -->
-                <a href="{{ route('dashboard') }}" class="hidden md:inline-flex items-center py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                <a href="{{ route('dashboard') }}" class="hidden md:inline-flex items-center py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 focus:outline-hidden transition ease-in-out duration-150">
                     <x-shared::button color="neutral" :outline="true">
                         {{ __('administration::navigation.back-to-site') }}
                     </x-shared::button>

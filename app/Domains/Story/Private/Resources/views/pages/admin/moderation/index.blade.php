@@ -9,7 +9,7 @@
                 name="search"
                 value="{{ $search }}"
                 placeholder="{{ __('story::admin.moderation.search_placeholder') }}"
-                class="flex-1 border border-border rounded px-3 py-2 bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+                class="flex-1 border border-border rounded px-3 py-2 bg-surface text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary"
             />
             <button type="submit" class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary/90">
                 <span class="material-symbols-outlined text-[20px] align-middle">search</span>

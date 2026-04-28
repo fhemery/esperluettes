@@ -79,7 +79,7 @@
                             <span x-text="opt.name" class="flex-1"></span>
                             <!-- Tooltip for options with descriptions -->
                             <template x-if="opt.description">
-                                <div class="flex-shrink-0" @mousedown.stop>
+                                <div class="shrink-0" @mousedown.stop>
                                     <x-shared::tooltip type="help" placement="top">
                                         <span x-text="opt.description"></span>
                                     </x-shared::tooltip>

@@ -11,7 +11,7 @@
     class="flex flex-col sm:flex-row gap-6 items-start p-4">
 
     {{-- Preview --}}
-    <div class="flex-shrink-0 w-[150px]">
+    <div class="shrink-0 w-[150px]">
         <template x-if="previewUrl">
             <img :src="previewUrl" alt="" class="w-[150px] object-contain rounded" loading="lazy" />
         </template>
@@ -28,7 +28,7 @@
 
         {{-- AI warning notice --}}
         <div class="flex items-start gap-2 rounded-md bg-warning/10 border border-warning/40 px-3 py-2 text-sm text-warning-fg">
-            <span class="material-symbols-outlined text-[18px] mt-0.5 flex-shrink-0">warning</span>
+            <span class="material-symbols-outlined text-[18px] mt-0.5 shrink-0">warning</span>
             <span>{{ __('story::shared.cover.custom_ai_warning') }}</span>
         </div>
 

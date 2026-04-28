@@ -19,7 +19,7 @@
         <ul role="listbox" class="mt-2 space-y-2">
           @foreach($stories['items'] as $idx => $s)
             <li role="option" x-show="Math.floor({{ $idx }} / perPage) + 1 === storyPage" class="flex items-center gap-3 p-2 rounded hover:bg-neutral-100 cursor-pointer" onclick="window.location='{{ $s->url }}'">
-              <div class="w-9 h-12 flex-shrink-0 overflow-hidden rounded">
+              <div class="w-9 h-12 shrink-0 overflow-hidden rounded">
                 <x-story::cover
                   :coverType="$s->cover_type"
                   :coverUrl="$s->cover_url"

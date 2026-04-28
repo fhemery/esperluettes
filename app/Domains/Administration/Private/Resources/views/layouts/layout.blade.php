@@ -44,7 +44,7 @@
             x-transition:leave-start="translate-x-0"
             x-transition:leave-end="-translate-x-full"
         >
-            <div class="p-2 border-b border-border flex justify-end flex-shrink-0">
+            <div class="p-2 border-b border-border flex justify-end shrink-0">
                 <button
                     type="button"
                     class="p-1 text-fg"

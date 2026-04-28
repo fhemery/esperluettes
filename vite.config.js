@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
@@ -39,9 +40,10 @@ export default defineConfig(({ mode }) => {
                 : {}),
         },
         plugins: [
+            tailwindcss(),
             laravel({
                 input: [
-                    'app/Domains/Shared/Resources/css/app.scss',
+                    'app/Domains/Shared/Resources/css/app.css',
                     'app/Domains/Shared/Resources/js/app.js',
                     'app/Domains/Shared/Resources/js/editor-bundle.js',
                 ],

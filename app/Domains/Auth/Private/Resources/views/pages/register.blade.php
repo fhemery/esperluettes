@@ -100,7 +100,7 @@
         </div>
 
         <div class="flex items-center justify-end mt-4 gap-1">
-            <a class="text-on-surface underline text-sm hover:text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+            <a class="text-on-surface underline text-sm hover:text-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('auth::register.links.already_registered') }}
             </a>
 

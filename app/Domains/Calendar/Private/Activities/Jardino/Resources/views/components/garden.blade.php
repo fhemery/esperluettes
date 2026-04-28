@@ -66,7 +66,7 @@
                 @endfor
 
                 <!-- Cell Info Modal -->
-                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-show="showCellModal" x-cloak>
+                <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-show="showCellModal" x-cloak>
                     <div class="surface-read text-on-surface max-w-md w-full max-h-[50vh] overflow-hidden flex flex-col" @click.away="closeCellModal()">
                         <div class="flex gap-2items-center justify-between p-4 border-b border-surface/20">
                             <x-shared::title tag="h3" x-text="`{{ __('jardino::planting.position') }} ${selectedCellX}, ${selectedCellY}`"></x-shared::title>

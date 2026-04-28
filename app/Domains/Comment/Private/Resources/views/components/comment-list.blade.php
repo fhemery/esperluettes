@@ -104,7 +104,7 @@
             const targetElement = document.getElementById('comment-{{ $targetCommentId }}');
             if (targetElement) {
               // Add highlight effect
-              targetElement.classList.add('ring-2', 'ring-accent', 'ring-opacity-50');
+              targetElement.classList.add('ring-2', 'ring-accent/50');
               
               // Scroll to the comment
               targetElement.scrollIntoView({ 
@@ -114,7 +114,7 @@
               
               // Remove highlight after 3 seconds
               setTimeout(() => {
-                targetElement.classList.remove('ring-2', 'ring-accent', 'ring-opacity-50');
+                targetElement.classList.remove('ring-2', 'ring-accent/50');
               }, 3000);
             }
           });

@@ -23,4 +23,4 @@
 
 <!-- Assets -->
 @stack('styles')
-@vite(['app/Domains/Shared/Resources/css/app.scss', 'app/Domains/Shared/Resources/js/app.js'])
+@vite(['app/Domains/Shared/Resources/css/app.css', 'app/Domains/Shared/Resources/js/app.js'])
