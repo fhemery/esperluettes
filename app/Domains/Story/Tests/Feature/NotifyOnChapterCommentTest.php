@@ -9,12 +9,11 @@ uses(TestCase::class, RefreshDatabase::class);
 
 describe('Notify authors chapter comment', function () {
     it('does nothing if entity is not a chapter', function () {
-
         $snapshot = new CommentSnapshot(
             commentId: 10,
             entityType: 'story', // not chapter
             entityId: 55,
-            authorId: 101, // commenter
+            authorId: 101,
             isReply: false,
             parentCommentId: null,
             wordCount: 3,
@@ -23,12 +22,11 @@ describe('Notify authors chapter comment', function () {
 
         dispatchEvent(new CommentPosted($snapshot));
 
-        $notif = getLatestNotificationByKey('story.chapter.comment');
-        expect($notif)->toBeNull();
+        expect(getLatestNotificationByKey('story.chapter.root_comment'))->toBeNull();
+        expect(getLatestNotificationByKey('story.chapter.reply_comment'))->toBeNull();
     });
 
     it('does nothing if authors cannot be resolved (e.g., chapter not found)', function () {
-
         $snapshot = new CommentSnapshot(
             commentId: 11,
             entityType: 'chapter',
@@ -42,8 +40,8 @@ describe('Notify authors chapter comment', function () {
 
         dispatchEvent(new CommentPosted($snapshot));
 
-        $notif = getLatestNotificationByKey('story.chapter.comment');
-        expect($notif)->toBeNull();
+        expect(getLatestNotificationByKey('story.chapter.root_comment'))->toBeNull();
+        expect(getLatestNotificationByKey('story.chapter.reply_comment'))->toBeNull();
     });
 
     describe('when comment is a root comment', function () {
@@ -72,26 +70,28 @@ describe('Notify authors chapter comment', function () {
 
             dispatchEvent(new CommentPosted($snapshot));
 
-            $notif = getLatestNotificationByKey('story.chapter.comment');
+            $notif = getLatestNotificationByKey('story.chapter.root_comment');
             expect($notif)->not->toBeNull();
-            $targets = getNotificationTargetUserIds((int)$notif->id);
+            $targets = getNotificationTargetUserIds((int) $notif->id);
             sort($targets);
             sort($expectedRecipients);
             expect($targets)->toEqual($expectedRecipients);
 
-            // Validate payload values and source user
             $payload = $notif->content_data;
             if (is_string($payload)) {
                 $payload = json_decode($payload, true) ?: [];
             }
-            expect($payload)->toHaveKeys(['comment_id', 'author_name', 'author_slug', 'chapter_title', 'story_slug', 'chapter_slug', 'is_reply', 'story_name']);
+            expect($payload)->toHaveKeys([
+                'comment_id', 'author_name', 'author_slug',
+                'chapter_title', 'story_slug', 'chapter_slug', 'story_name',
+            ]);
+            expect($payload)->not->toHaveKey('is_reply');
             expect($payload['comment_id'])->toBe(12);
-            expect($payload['author_name'])->toBe("Carol");
+            expect($payload['author_name'])->toBe('Carol');
             expect($payload['author_slug'])->toBe('carol');
             expect($payload['chapter_title'])->toBe('Chapter One');
             expect($payload['story_slug'])->toBe($story1->slug);
             expect($payload['chapter_slug'])->toBe($chapter->slug);
-            expect($payload['is_reply'])->toBe(false);
             expect($notif->source_user_id)->toBe($commenter->id);
         });
     });
@@ -103,14 +103,11 @@ describe('Notify authors chapter comment', function () {
 
             $this->actingAs($this->author);
 
-            // Author creates story and chapter
             $this->story = publicStory('Story', $this->author->id);
             $this->chapter = createPublishedChapter($this, $this->story, $this->author, ['title' => 'Chapter One']);
 
-            // Commenter creates root comment
             $this->actingAs($this->rootCommenter);
             $this->rootCommentId = createComment('chapter', $this->chapter->id, generateDummyText(150));
-
         });
 
         it('does warn the comment root author', function () {
@@ -130,26 +127,23 @@ describe('Notify authors chapter comment', function () {
 
             $expectedRecipients = [$this->rootCommenter->id];
 
-            $notif = getLatestNotificationByKey('story.chapter.comment');
+            $notif = getLatestNotificationByKey('story.chapter.reply_comment');
             expect($notif)->not->toBeNull();
-            $targets = getNotificationTargetUserIds((int)$notif->id);
+            $targets = getNotificationTargetUserIds((int) $notif->id);
             expect($targets)->toEqual($expectedRecipients);
         });
 
-        it('does also notify everyone who replied to the root comment, excluding current user', function() {
-            // Author replies
+        it('does also notify everyone who replied to the root comment, excluding current user', function () {
             $this->actingAs($this->author);
-            createComment('chapter', $this->chapter->id, generateDummyText(150), $this->rootCommentId); 
+            createComment('chapter', $this->chapter->id, generateDummyText(150), $this->rootCommentId);
 
-            // Bob replies as well
             $otherCommenter = bob($this);
             $this->actingAs($otherCommenter);
-            createComment('chapter', $this->chapter->id, generateDummyText(150), $this->rootCommentId); 
+            createComment('chapter', $this->chapter->id, generateDummyText(150), $this->rootCommentId);
 
-            // Bob then writes one more comment and event is sent
             $this->actingAs($otherCommenter);
-            $lastCommentId = createComment('chapter', $this->chapter->id, generateDummyText(150), $this->rootCommentId); 
-            
+            $lastCommentId = createComment('chapter', $this->chapter->id, generateDummyText(150), $this->rootCommentId);
+
             $snapshot = new CommentSnapshot(
                 commentId: $lastCommentId,
                 entityType: 'chapter',
@@ -163,13 +157,10 @@ describe('Notify authors chapter comment', function () {
 
             dispatchEvent(new CommentPosted($snapshot));
 
-            $notif = getLatestNotificationByKey('story.chapter.comment');
+            $notif = getLatestNotificationByKey('story.chapter.reply_comment');
             expect($notif)->not->toBeNull();
-            $targets = getNotificationTargetUserIds((int)$notif->id);
-            
-            // Author should be notified, because she answered to the thread
-            // Root commenter as well
-            // But bob will not, because he is the author of the last comment
+            $targets = getNotificationTargetUserIds((int) $notif->id);
+
             expect($targets)->toContain($this->rootCommenter->id);
             expect($targets)->toContain($this->author->id);
             expect($targets)->not->toContain($otherCommenter->id);

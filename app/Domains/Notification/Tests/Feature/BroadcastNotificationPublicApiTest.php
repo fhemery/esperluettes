@@ -18,7 +18,13 @@ describe('Broadcast Notification public API', function () {
 
             // Register test notification type
             $factory = app(\App\Domains\Notification\Public\Services\NotificationFactory::class);
-            $factory->register(TestNotificationContent::type(), TestNotificationContent::class);
+            $factory->registerGroup('test', 0, 'test::group');
+            $factory->register(
+                type: TestNotificationContent::type(),
+                class: TestNotificationContent::class,
+                groupId: 'test',
+                nameKey: 'test::type',
+            );
 
             // Precondition
             expect($api->getUnreadCount($alice->id))->toBe(0);

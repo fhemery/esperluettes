@@ -68,4 +68,60 @@ function discordDeleteUser($test, string $discordId, array $headers = [])
     ];
     return $test->deleteJson('/api/discord/users/' . $discordId, [], array_replace($defaultHeaders, $headers));
 }
-        
+
+/**
+ * GET /api/discord/notifications/pending with default API headers
+ */
+function discordGetPendingNotifications($test, array $query = [], array $headers = [])
+{
+    $defaultHeaders = [
+        'Authorization' => 'Bearer __test_api_key__',
+        'Accept' => 'application/json',
+    ];
+    $url = '/api/discord/notifications/pending';
+    if (!empty($query)) {
+        $url .= '?' . http_build_query($query);
+    }
+    return $test->getJson($url, array_replace($defaultHeaders, $headers));
+}
+
+/**
+ * POST /api/discord/notifications/mark-sent with default API headers
+ */
+function discordMarkSent($test, array $notifications, array $headers = [])
+{
+    $defaultHeaders = [
+        'Authorization' => 'Bearer __test_api_key__',
+        'Accept' => 'application/json',
+    ];
+    return $test->postJson(
+        '/api/discord/notifications/mark-sent',
+        ['notifications' => $notifications],
+        array_replace($defaultHeaders, $headers)
+    );
+}
+
+/**
+ * Link a user to Discord using the connect flow. Returns the discordId used.
+ */
+function linkDiscord($test, $user, string $discordId = '111222333444555666', string $username = 'TestUser'): string
+{
+    $code = givenDiscordConnectCodeForUser($test, $user);
+    discordConnectWithCode($test, $code, [
+        'discordId'       => $discordId,
+        'discordUsername' => $username,
+    ])->assertStatus(200);
+    return $discordId;
+}
+
+/**
+ * Create a pending Discord notification row + recipients directly via the repository.
+ * Returns the created DiscordPendingNotification model.
+ */
+function queueDiscordNotification(int $notificationId, array $recipients): \App\Domains\Discord\Private\Models\DiscordPendingNotification
+{
+    $repo    = app(\App\Domains\Discord\Private\Repositories\DiscordPendingNotificationRepository::class);
+    $pending = $repo->createPending($notificationId);
+    $repo->createRecipients($pending->id, $recipients);
+    return $pending;
+}

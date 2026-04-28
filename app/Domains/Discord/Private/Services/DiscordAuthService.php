@@ -128,6 +128,20 @@ class DiscordAuthService
     }
 
     /**
+     * Return DiscordUser rows for the provided website user ids, keyed by user_id.
+     *
+     * @param  array<int>  $userIds
+     * @return \Illuminate\Support\Collection<int, DiscordUser>
+     */
+    public function getDiscordByUserIds(array $userIds): \Illuminate\Support\Collection
+    {
+        return DiscordUser::query()
+            ->whereIn('user_id', $userIds)
+            ->get()
+            ->keyBy(fn (DiscordUser $discordUser): int => (int) $discordUser->user_id);
+    }
+
+    /**
      * Unlink a Discord user mapping by its discord user id.
      * Returns true if a mapping existed and was deleted, false otherwise.
      */

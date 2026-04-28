@@ -6,8 +6,12 @@ return [
     
     // Shared services
     App\Domains\Shared\Providers\SharedServiceProvider::class,
-    // Events domain
     App\Domains\Config\Public\Providers\ConfigServiceProvider::class,
+
+    // Notification domain should be on top as well because other modules might register
+    // notifications channels
+    App\Domains\Notification\Public\Providers\NotificationServiceProvider::class,
+    
     App\Domains\Events\Public\Providers\EventsServiceProvider::class,
     App\Domains\Moderation\Public\Providers\ModerationServiceProvider::class,
     
@@ -24,10 +28,11 @@ return [
     App\Domains\Message\Public\Providers\MessageServiceProvider::class,
     App\Domains\Story\Public\Providers\StoryServiceProvider::class,
     App\Domains\Search\Public\Providers\SearchServiceProvider::class,
-    App\Domains\Discord\Public\Providers\DiscordServiceProvider::class,
     App\Domains\FAQ\Private\Providers\FaqServiceProvider::class,
     App\Domains\Calendar\Public\Providers\CalendarServiceProvider::class,
-    App\Domains\Notification\Public\Providers\NotificationServiceProvider::class,
+    
+    
+    App\Domains\Discord\Public\Providers\DiscordServiceProvider::class,
     App\Domains\ReadList\Public\Providers\ReadListServiceProvider::class,
     
     // Add other domain providers here as they are created

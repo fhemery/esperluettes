@@ -1,7 +1,7 @@
 # Discord Bot - API Usage Documentation
 
-**Version**: 1.0  
-**Last Updated**: 2025-10-02  
+**Version**: 1.1  
+**Last Updated**: 2026-04-25  
 **Base URL**: `https://esperluettes.com`
 
 ## Overview
@@ -28,6 +28,11 @@ This document describes the Esperluettes website API that the Discord bot integr
 The bot polls for pending notifications containing:
 - **User-targeted notifications**: Activity feed events (comments, mentions, follows, etc.)
 
+Key points for bot developers:
+- Notifications appear in the pending queue **only for users who have opted in** to Discord delivery for that notification type. User preferences are managed on the website's notification preferences page.
+- A user must have a linked Discord account to receive notifications. Opting in without linking has no effect.
+- If a user disconnects their Discord account, all their pending unsent notifications are deleted immediately.
+- The pending queue is pre-filtered — the bot never needs to apply preference logic itself.
 
 ## Authentication
 
@@ -139,15 +144,16 @@ User → Discord → /disconnect → Bot
 **Trigger**: Activity event occurs on website (comment, mention, etc.)
 **Steps**:
 
-1. **Website queues user notification**
-   - Type: activity type (e.g., `comment`, `mention`)
-   - Data contains message, URL, actor, target
+1. **Website queues Discord notification automatically**
+   - When the activity triggers a notification, the Notification domain calls the Discord channel's delivery callback.
+   - The callback resolves each concerned user's `discord_id` and writes a row to `discord_pending_notifications`.
+   - Only users who have opted in for that notification type on the Discord channel are queued.
 
 2. **Bot polls notification endpoint**
    ```
    GET /api/discord/notifications/pending
    ```
-   - Receives user notifications (within 1 minute)
+   - Receives pre-filtered, pre-resolved notifications (within 1 minute)
 
 3. **Bot sends Discord DM**
    - Formats notification message
@@ -265,7 +271,6 @@ Fetch all pending user activity notifications.
   "data": [
     {
       "id": 123,
-      "discordId": "123456789012345678",
       "type": "comment",
       "data": {
         "message": "JohnDoe commented on your story \"Epic Adventure\"",
@@ -273,25 +278,19 @@ Fetch all pending user activity notifications.
         "actor": "JohnDoe",
         "target": "Epic Adventure - Chapter 1"
       },
+      "avatarUrl": "https://jd-esperluettes.fr/storage/profile_pictures/1_1760348457.jpg",
+      "defaultText": "[JohnDoe](https://esperluettes.com/profile/johndoe) commented on your story **\"Epic Adventure\"**",
+      "recipients": [
+        "123456789012345678",
+        "987654321098765432"
+      ],
       "createdAt": "2025-10-02T11:05:00Z"
-    },
-    {
-      "id": 124,
-      "discordId": "987654321098765432",
-      "type": "mention",
-      "data": {
-        "message": "AliceWrites mentioned you in a comment",
-        "url": "https://esperluettes.com/stories/mystery-novel/chapters/3#comment-89",
-        "actor": "AliceWrites",
-        "target": "Mystery Novel - Chapter 3"
-      },
-      "createdAt": "2025-10-02T11:06:30Z"
     }
   ],
   "pagination": {
     "currentPage": 1,
     "perPage": 100,
-    "total": 2,
+    "total": 1,
     "lastPage": 1,
     "hasMore": false
   }
@@ -299,13 +298,15 @@ Fetch all pending user activity notifications.
 ```
 
 **Response Fields**:
-- `data` (array): Array of notification objects
-  - `id` (integer): Unique notification ID
-  - `discordId` (string): Discord user ID this notification is for
+- `data` (array): Array of notification objects — one entry per notification, regardless of recipient count
+  - `id` (integer): Pending notification ID — use this in mark-sent
   - `type` (string): Notification type (see types below)
-  - `data` (object): Type-specific notification data
+  - `data` (object): Type-specific notification data — identical for all recipients
+  - `avatarUrl` (string|null): Avatar URL of the user who triggered the notification; absent when system-generated
+  - `defaultText` (string): Ready-to-send Discord-formatted message. HTML links from the website notification are converted to `[text](url)` Discord links and bold text becomes `**text**`. Use this as the DM body unless you need custom formatting.
+  - `recipients` (array of strings): Discord user IDs to send this notification to
   - `createdAt` (string): ISO 8601 timestamp when notification was created
-- `pagination` (object): Pagination metadata
+- `pagination` (object): Pagination metadata — page counts refer to notification entries, not individual recipients
   - `currentPage` (integer): Current page number
   - `perPage` (integer): Items per page
   - `total` (integer): Total pending notifications
@@ -335,31 +336,36 @@ curl -X GET "https://esperluettes.com/api/discord/notifications/pending?page=1&p
 
 ### POST /api/discord/notifications/mark-sent
 
-Mark notifications as sent after bot delivers them.
+Mark notifications as delivered after the bot sends DMs. Supports partial delivery — if some recipients failed, list them in `failedRecipients` so they are retried on the next poll.
 
 **Authentication**: Required (API key)
 
 **Request Body**:
 ```json
 {
-  "notificationIds": [123, 124, 125]
+  "notifications": [
+    {"id": 123},
+    {"id": 124, "failedRecipients": ["111222333444555666"]}
+  ]
 }
 ```
 
 **Request Fields**:
-- `notificationIds` (array, required): Array of notification IDs to mark as sent
+- `notifications` (array, required): Array of delivery reports
+  - `id` (integer, required): Pending notification ID (from the `id` field in the poll response)
+  - `failedRecipients` (array of strings, optional): Discord user IDs that could not be reached. When absent, all recipients of this notification are marked as delivered. When present, all recipients **except** the listed ones are marked as delivered — the listed ones remain pending and reappear on the next poll.
 
 **Success Response** (200 OK):
 ```json
 {
   "success": true,
-  "markedCount": 3
+  "markedCount": 5
 }
 ```
 
 **Response Fields**:
 - `success` (boolean): Always true on success
-- `markedCount` (integer): Number of notifications marked as sent
+- `markedCount` (integer): Number of individual recipients marked as delivered
 
 **Error Responses**:
 
@@ -374,17 +380,17 @@ Mark notifications as sent after bot delivers them.
 {
   "error": "Validation failed",
   "errors": {
-    "notificationIds": ["The notificationIds field is required."]
+    "notifications": ["The notifications field is required."]
   }
 }
 ```
 
 **Rate Limit**: 120 requests/hour
 
-**Important**: 
-- Only mark notifications as sent AFTER successfully delivering them
-- If delivery fails, do not mark as sent (notification will be retried on next poll)
-- Invalid notification IDs are silently ignored
+**Important**:
+- Only report delivery after the DM has been successfully sent
+- Unknown notification IDs and unknown `failedRecipients` discord IDs are silently ignored
+- A notification with all recipients marked delivered will no longer appear in the poll response
 
 **Example**:
 ```bash
@@ -392,7 +398,10 @@ curl -X POST "https://esperluettes.com/api/discord/notifications/mark-sent" \
   -H "Authorization: Bearer sk_abc123xyz789" \
   -H "Content-Type: application/json" \
   -d '{
-    "notificationIds": [123, 124, 125]
+    "notifications": [
+      {"id": 123},
+      {"id": 124, "failedRecipients": ["111222333444555666"]}
+    ]
   }'
 ```
 
@@ -489,84 +498,6 @@ curl -X DELETE "https://esperluettes.com/api/discord/users/123456789012345678" \
   -H "Authorization: Bearer sk_abc123xyz789" \
   -H "Accept: application/json"
 ```
-
-## Notification Types
-
-All notifications are user-targeted activity feed events sent as Discord DMs.
-
-**Note**: Connection and disconnection are **synchronous operations** and do not generate notifications. The bot receives role information immediately when calling the connect endpoint.
-
-**Common Structure**:
-```json
-{
-  "id": 125,
-  "discordId": "123456789012345678",
-  "type": "{notification_type}",
-  "data": {
-    "message": "{human-readable message}",
-    "url": "{clickable URL to website}",
-    "actor": "{who triggered the event}",
-    "target": "{what was affected}"
-  },
-  "createdAt": "2025-10-02T11:05:00Z"
-}
-```
-
-**Data Fields**:
-- `message` (string): Human-readable notification message
-- `url` (string): Full URL to relevant page on website
-- `actor` (string): Username of person who triggered event
-- `target` (string): What was affected (story title, chapter, etc.)
-
-**Notification Types** (examples, subject to expansion):
-- `comment` - New comment on user's story/chapter
-- `comment_reply` - Reply to user's comment
-- `mention` - User was mentioned in a comment
-- `follow` - Someone followed user
-- `like` - Someone liked user's story
-- `chapter_published` - New chapter from followed author
-- `moderation` - Moderation action on user's content
-- `message` - Private message received
-
-**Bot Action**:
-1. Format message for Discord (embeds, formatting)
-2. Send DM to Discord user
-3. Include clickable link to website
-4. Mark notification as sent
-
-**Example - Comment Notification**:
-```json
-{
-  "id": 126,
-  "discordId": "123456789012345678",
-  "type": "comment",
-  "data": {
-    "message": "JohnDoe commented on your story \"Epic Adventure\"",
-    "url": "https://esperluettes.com/stories/epic-adventure/chapters/1#comment-42",
-    "actor": "JohnDoe",
-    "target": "Epic Adventure - Chapter 1"
-  },
-  "createdAt": "2025-10-02T11:05:00Z"
-}
-```
-
-**Example - Mention Notification**:
-```json
-{
-  "id": 127,
-  "discordId": "123456789012345678",
-  "type": "mention",
-  "data": {
-    "message": "AliceWrites mentioned you in a comment",
-    "url": "https://esperluettes.com/stories/mystery-novel/chapters/3#comment-89",
-    "actor": "AliceWrites",
-    "target": "Mystery Novel - Chapter 3"
-  },
-  "createdAt": "2025-10-02T11:06:15Z"
-}
-```
-
-**Note**: Additional notification types will be added as website features expand. Bot should handle unknown types gracefully.
 
 ## Error Handling
 

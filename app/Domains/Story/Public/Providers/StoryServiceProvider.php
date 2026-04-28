@@ -51,6 +51,8 @@ use App\Domains\Story\Private\Support\Moderation\StorySnapshotFormatter;
 use App\Domains\Story\Private\Support\Moderation\ChapterSnapshotFormatter;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Story\Public\Notifications\ChapterCommentNotification;
+use App\Domains\Story\Public\Notifications\ChapterRootCommentNotification;
+use App\Domains\Story\Public\Notifications\ChapterReplyCommentNotification;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterCreatedNotification;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterUpdatedNotification;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterDeletedNotification;
@@ -162,31 +164,58 @@ class StoryServiceProvider extends ServiceProvider
         $notificationFactory = app(NotificationFactory::class);
         $notificationFactory->register(
             type: ChapterCommentNotification::type(),
-            class: ChapterCommentNotification::class
+            class: ChapterCommentNotification::class,
+            groupId: 'comments',
+            nameKey: 'story::notification.settings.type_chapter_comment',
+            hideInSettings: true,
+        );
+        $notificationFactory->register(
+            type: ChapterRootCommentNotification::type(),
+            class: ChapterRootCommentNotification::class,
+            groupId: 'comments',
+            nameKey: 'story::notification.settings.type_chapter_root_comment',
+        );
+        $notificationFactory->register(
+            type: ChapterReplyCommentNotification::type(),
+            class: ChapterReplyCommentNotification::class,
+            groupId: 'comments',
+            nameKey: 'story::notification.settings.type_chapter_reply_comment',
         );
         $notificationFactory->register(
             type: CoAuthorChapterCreatedNotification::type(),
-            class: CoAuthorChapterCreatedNotification::class
+            class: CoAuthorChapterCreatedNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'story::notification.settings.type_coauthor_chapter_created',
         );
         $notificationFactory->register(
             type: CoAuthorChapterUpdatedNotification::type(),
-            class: CoAuthorChapterUpdatedNotification::class
+            class: CoAuthorChapterUpdatedNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'story::notification.settings.type_coauthor_chapter_updated',
         );
         $notificationFactory->register(
             type: CoAuthorChapterDeletedNotification::type(),
-            class: CoAuthorChapterDeletedNotification::class
+            class: CoAuthorChapterDeletedNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'story::notification.settings.type_coauthor_chapter_deleted',
         );
         $notificationFactory->register(
             type: CollaboratorRoleGivenNotification::type(),
-            class: CollaboratorRoleGivenNotification::class
+            class: CollaboratorRoleGivenNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'story::notification.settings.type_collaborator_role_given',
         );
         $notificationFactory->register(
             type: CollaboratorRemovedNotification::type(),
-            class: CollaboratorRemovedNotification::class
+            class: CollaboratorRemovedNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'story::notification.settings.type_collaborator_removed',
         );
         $notificationFactory->register(
             type: CollaboratorLeftNotification::type(),
-            class: CollaboratorLeftNotification::class
+            class: CollaboratorLeftNotification::class,
+            groupId: 'collaboration',
+            nameKey: 'story::notification.settings.type_collaborator_left',
         );
     }
 

@@ -30,6 +30,7 @@ class SettingsController extends Controller
                 'tabs' => [],
                 'activeTab' => null,
                 'sections' => [],
+                'customViewPath' => null,
             ]);
         }
 
@@ -37,12 +38,16 @@ class SettingsController extends Controller
         $activeTabId = $request->query('tab', $tabs[0]->id ?? null);
         $activeTab = $this->registry->getTab($activeTabId) ?? $tabs[0] ?? null;
 
-        $sections = $activeTab ? $this->getSectionsWithParameters($activeTab->id, $userId, $userRoles) : [];
+        $customViewPath = $activeTab?->customViewPath;
+        $sections = ($activeTab && $customViewPath === null)
+            ? $this->getSectionsWithParameters($activeTab->id, $userId, $userRoles)
+            : [];
 
         return view('settings::pages.index', [
             'tabs' => $tabs,
             'activeTab' => $activeTab,
             'sections' => $sections,
+            'customViewPath' => $customViewPath,
         ]);
     }
 
@@ -59,6 +64,12 @@ class SettingsController extends Controller
         // Check if user can see this tab
         if (!$this->isTabVisibleForRoles($tabId, $userRoles)) {
             abort(403);
+        }
+
+        if ($tab->customViewPath !== null) {
+            return view('settings::partials.custom-tab-content', [
+                'customView' => $tab->customViewPath,
+            ]);
         }
 
         $sections = $this->getSectionsWithParameters($tabId, $userId, $userRoles);
@@ -132,10 +143,16 @@ class SettingsController extends Controller
     }
 
     /**
-     * Check if a tab has at least one visible parameter for the given roles.
+     * Check if a tab is visible to the user.
+     * Custom-view tabs are always visible; standard tabs require at least one visible parameter.
      */
     private function isTabVisibleForRoles(string $tabId, array $userRoles): bool
     {
+        $tab = $this->registry->getTab($tabId);
+        if ($tab?->customViewPath !== null) {
+            return true;
+        }
+
         $parameters = $this->registry->getParametersForTab($tabId);
 
         foreach ($parameters as $param) {

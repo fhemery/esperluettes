@@ -2,39 +2,9 @@
 
 ## Purpose
 
-Centralize user-facing notifications across the platform. Provides a stable extensibility contract (`NotificationContent`) for domain-specific payloads that are persisted, reconstructed, and rendered for display. Exposes a public API to create targeted and broadcast notifications with validation and backfilling support.
+Centralize user-facing notifications across the platform. Provides a stable extensibility contract (`NotificationContent`) for domain-specific payloads that are persisted, reconstructed, and rendered for display. Exposes a public API to create targeted and broadcast notifications with validation and backfilling support. Supports per-user, per-type, per-channel delivery preferences via an extensible channel registry.
 
-## Architecture overview
-
-```
-Notification/
-  Database/
-    Migrations/               notifications, notification_reads tables
-  Private/
-    Console/                  CleanupOldNotificationsCommand
-    Controllers/              NotificationController
-    Listeners/                CleanNotificationsOnUserDeleted
-    Models/                   Notification, NotificationRead
-    Resources/
-      lang/fr/                pages.php, events.php
-      views/
-        components/           notification-icon.blade.php, notification-item.blade.php
-        pages/                index.blade.php
-    Services/                 NotificationService
-    View/Components/          NotificationIconComponent
-    ViewModels/               NotificationViewModel, NotificationPageViewModel
-    routes.php
-  Public/
-    Api/                      NotificationPublicApi
-    Contracts/                NotificationContent (interface)
-    Events/                   NotificationsCleanedUp
-    Providers/                NotificationServiceProvider
-    Services/                 NotificationFactory (singleton)
-  Tests/
-    Feature/                  Full feature test coverage
-    Fixtures/                 TestNotificationContent
-    helpers.php               Test utility functions
-```
+Feature planning doc: [docs/Feature_Planning/Notification_Preferences.md](../../../docs/Feature_Planning/Notification_Preferences.md) (may be partially outdated once implemented).
 
 ## Key concepts
 
@@ -46,7 +16,7 @@ The interface all notification content types must implement:
 
 | Method | Description |
 |--------|-------------|
-| `static type(): string` | Unique, stable type key (e.g. `story.chapter.comment`). Never change after creation. |
+| `static type(): string` | Unique, stable type key (e.g. `story.chapter.root_comment`). Never change after creation. |
 | `toData(): array` | Serialize to a JSON-safe array (scalars, arrays, IDs only — no Eloquent models). |
 | `static fromData(array $data): static` | Reconstruct the object from stored data. |
 | `display(): string` | Return localized HTML for display in the UI. |
@@ -57,14 +27,35 @@ Implementations should use `readonly` properties to ensure deterministic seriali
 
 `App\Domains\Notification\Public\Services\NotificationFactory`
 
-A singleton registry that maps type strings to their implementation classes:
+A singleton registry that maps type strings to their implementation classes. Types are organized into groups for display in the preferences UI.
+
+**Group management:**
 
 | Method | Description |
 |--------|-------------|
-| `register(string $type, string $class)` | Register a `NotificationContent` class for a type key. Call from domain `ServiceProvider::boot()`. |
-| `resolve(string $type): ?string` | Return the class name for a type, or null if unknown. |
+| `registerGroup(string $id, int $sortOrder, string $translationKey)` | Register a notification group. Groups must be registered before any type in that group. |
+| `getGroups(): array` | Return all groups sorted by `sortOrder`. |
+| `getTypesForGroup(string $groupId, bool $includeHidden = false): array` | Return types for a group; hidden types excluded by default. |
+
+**Type management:**
+
+| Method | Description |
+|--------|-------------|
+| `register(string $type, string $class, string $groupId, string $nameKey, bool $forcedOnWebsite = false, bool $hideInSettings = false)` | Register a `NotificationContent` class. Throws if `groupId` is not registered. |
+| `getTypeDefinition(string $type): ?NotificationTypeDefinition` | Return the full type definition, or null if unknown. |
+| `resolve(string $type): ?string` | Return the class name for a type, or null if unregistered. |
 | `make(string $type, array $data): ?NotificationContent` | Instantiate content via `fromData()`, or null if unregistered. |
 | `getRegisteredTypes(): array` | List all registered type keys. |
+
+Pre-defined groups (registered in `NotificationServiceProvider`, in `NotificationServiceProvider::boot()`):
+
+| Group ID | Sort | Purpose |
+|----------|------|---------|
+| `comments` | 10 | Comment-related notifications |
+| `collaboration` | 20 | Story collaboration notifications |
+| `readlist` | 30 | Reading list notifications |
+| `news` | 40 | Site news notifications |
+| `moderation` | 50 | Moderation and admin notifications |
 
 ### `NotificationPublicApi`
 
@@ -74,8 +65,8 @@ The primary entry point for other domains:
 
 | Method | Description |
 |--------|-------------|
-| `createNotification(int[] $userIds, NotificationContent $content, ?int $sourceUserId = null, ?\DateTime $createdAt = null)` | Validate and persist a notification for specific users. |
-| `createBroadcastNotification(NotificationContent $content, ?int $sourceUserId = null)` | Send to all users with roles `user` and `user-confirmed`. |
+| `createNotification(int[] $userIds, NotificationContent $content, ?int $sourceUserId = null, ?\DateTime $createdAt = null)` | Validate and persist a notification for specific users with channel-aware delivery. |
+| `createBroadcastNotification(NotificationContent $content, ?int $sourceUserId = null)` | Send to all users with roles `user` and `user-confirmed` with channel-aware delivery. |
 | `getUnreadCount(int $userId): int` | Count unread notifications for a user. |
 | `deleteNotificationsByType(string $contentKey): int` | Delete all notifications of a given type (returns count deleted). |
 | `countNotificationsByType(string $contentKey): int` | Count notifications of a given type. |
@@ -85,6 +76,41 @@ Validation rules applied by `createNotification`:
 - `sourceUserId`, if provided, must also be an existing user.
 - IDs are deduplicated and cast to int automatically.
 
+### Delivery Channels
+
+A **channel** is a delivery mechanism. The `website` channel is native — it creates `notification_reads` rows and is always present. All other channels (e.g., Discord) are registered externally via `NotificationChannelRegistry`.
+
+`App\Domains\Notification\Public\Services\NotificationChannelRegistry`
+
+External domains register a channel in their `ServiceProvider::boot()`:
+
+```php
+app(NotificationChannelRegistry::class)->register(new NotificationChannelDefinition(
+    id: 'discord',
+    nameTranslationKey: 'discord::notifications.channel_name',
+    defaultEnabled: false,
+    sortOrder: 10,
+    deliveryCallback: function(NotificationDto $dto, array $userIds): void {
+        // $dto->id, $dto->type, $dto->data are available
+    },
+    featureFlag: 'services.discord.enabled', // optional; channel hidden when flag is off
+));
+```
+
+The `'website'` ID is reserved — registering it throws `InvalidArgumentException`. At dispatch time, the Notification domain filters each user list per channel preferences and calls the delivery callback only if the filtered list is non-empty. Channels whose feature flag is off are skipped entirely.
+
+### User Preferences
+
+Users control which notification types they receive, per channel, through the **Notifications** tab in the Settings page. This tab uses the custom-view capability of the Settings domain: the Notification domain registers a `SettingsTabDefinition` with `customViewPath: 'notification::settings.preferences'`, and the Settings domain delegates content rendering to that view.
+
+The preferences model uses sparse storage: only non-default values are persisted in `notification_preferences`. When a user sets a preference equal to the channel's `defaultEnabled`, the row is deleted rather than saved. This keeps the table lean and ensures future default changes don't require migrations.
+
+**Preference filtering happens at write time.** When `createNotification()` or `createBroadcastNotification()` is called, the domain computes which users are eligible per channel before creating `notification_reads` rows or calling delivery callbacks. Existing rows are never retroactively removed when preferences change.
+
+**`forcedOnWebsite`** types cannot be opted out on the website channel. The website toggle is rendered as disabled in the preferences UI. Other channels remain fully user-controlled even for forced types. This flag is enforced in `NotificationPublicApi` at dispatch time and in `NotificationPreferencesController` at preference update time.
+
+**`hideInSettings`** types are excluded from the preferences UI and from `getTypesForGroup()` by default. Used for deprecated or legacy type keys (e.g., `story.chapter.comment` which was superseded by `story.chapter.root_comment` and `story.chapter.reply_comment`). These types are still delivered normally — `hideInSettings` only affects the preferences page.
+
 ## Database schema
 
 ### `notifications`
@@ -93,7 +119,7 @@ Validation rules applied by `createNotification`:
 |--------|------|-------|
 | `id` | bigint PK | Auto-increment |
 | `source_user_id` | integer, nullable | The acting user (no FK constraint — cross-domain). Null for system notifications. |
-| `content_key` | string | Type identifier (e.g. `story.chapter.comment`) |
+| `content_key` | string | Type identifier (e.g. `story.chapter.root_comment`) |
 | `content_data` | json | Serialized payload from `toData()` |
 | `created_at` / `updated_at` | timestamps | |
 
@@ -110,9 +136,26 @@ Index on `created_at` for cleanup queries.
 
 Composite index on `(user_id, read_at)` for unread count queries.
 
+### `notification_preferences`
+
+Sparse storage of non-default preferences. Only rows that differ from the channel's `defaultEnabled` are stored.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | bigint PK | |
+| `user_id` | integer | No FK constraint (cross-domain) |
+| `type` | string(100) | Notification type key |
+| `channel` | string(50) | Channel ID (`website`, `discord`, etc.) |
+| `enabled` | boolean | |
+| `created_at` / `updated_at` | timestamps | |
+
+Unique constraint on `(user_id, type, channel)`. Indexes on `user_id` and `(type, channel, enabled)`.
+
 ## HTTP routes
 
 All routes require `auth` + `compliant` middleware, and the `user` or `user-confirmed` role.
+
+**Notifications:**
 
 | Method | URI | Route name | Action |
 |--------|-----|------------|--------|
@@ -121,6 +164,14 @@ All routes require `auth` + `compliant` middleware, and the `user` or `user-conf
 | POST | `/notifications/{id}/read` | `notifications.markRead` | Mark one as read (idempotent, 204) |
 | POST | `/notifications/{id}/unread` | `notifications.markUnread` | Mark one as unread (idempotent, 204) |
 | POST | `/notifications/read-all` | `notifications.markAllRead` | Mark all as read (204) |
+
+**Preferences:**
+
+| Method | URI | Route name | Action |
+|--------|-----|------------|--------|
+| POST | `/notifications/preferences` | `notification.preferences.save` | Save a single preference (type + channel + enabled) |
+| PUT | `/notifications/preferences/{type}` | `notification.preferences.update` | Update a single type toggle |
+| PUT | `/notifications/preferences` | `notification.preferences.bulk` | Bulk update (global or by group) |
 
 The `loadMore` endpoint returns raw rendered HTML for each notification item and sets the `X-Has-More: true/false` response header.
 
@@ -155,7 +206,7 @@ Emits a `NotificationsCleanedUp` domain event via `EventBus` after completing.
 
 ## Registration of notification types
 
-Each domain that defines notification content must register its types in its own `ServiceProvider::boot()`:
+Each domain that defines notification content must register its groups and types in its own `ServiceProvider::boot()`. Groups must already exist (the Notification domain registers them in its own provider, which boots first).
 
 ```php
 use App\Domains\Notification\Public\Services\NotificationFactory;
@@ -165,7 +216,11 @@ public function boot(): void
 {
     app(NotificationFactory::class)->register(
         type: SomethingHappenedNotification::type(),
-        class: SomethingHappenedNotification::class
+        class: SomethingHappenedNotification::class,
+        groupId: 'comments',           // must be a pre-registered group
+        nameKey: 'mydomain::notifications.something_happened_label',
+        forcedOnWebsite: false,        // optional
+        hideInSettings: false,         // optional; true for deprecated/legacy types
     );
 }
 ```
@@ -230,24 +285,11 @@ app(NotificationPublicApi::class)->createBroadcastNotification(
 );
 ```
 
-## Known implementations
-
-| Type key | Class | Domain |
-|----------|-------|--------|
-| `readlist.story.added` | `ReadListAddedNotification` | ReadList |
-| `story.chapter.comment` | `ChapterCommentNotification` | Story |
-| `story.coauthor.chapter_created` | `CoAuthorChapterCreatedNotification` | Story |
-| `story.coauthor.chapter_updated` | `CoAuthorChapterUpdatedNotification` | Story |
-| `story.coauthor.chapter_deleted` | `CoAuthorChapterDeletedNotification` | Story |
-| `story.collaborator.role_given` | `CollaboratorRoleGivenNotification` | Story |
-| `story.collaborator.role_removed` | `CollaboratorRoleRemovedNotification` | Story |
-| `story.collaborator.left` | `CollaboratorLeftNotification` | Story |
-
 ## Validation and constraints
 
 - `toData()` must return a JSON-safe array — no Eloquent models, no closures.
 - Type strings must be stable. Changing a type key after data has been stored will orphan existing rows (unresolvable by `NotificationFactory`), causing them to be silently discarded on display and deleted by the next cleanup run.
-- There are no foreign key constraints from `notifications.source_user_id` or `notification_reads.user_id` to the `users` table (cross-domain FK prohibition). Cleanup on user deletion is handled by the `CleanNotificationsOnUserDeleted` listener.
+- There are no foreign key constraints from `notifications.source_user_id` or `notification_reads.user_id` or `notification_preferences.user_id` to the `users` table (cross-domain FK prohibition). Cleanup on user deletion is handled by the `CleanNotificationsOnUserDeleted` listener.
 
 ## Backfilling historical notifications
 
@@ -285,4 +327,4 @@ $api->createNotification(
 | `countNotificationsByKey(string): int` | Count via public API |
 | `notificationExists(int): bool` | Check if a notification row exists by ID |
 
-`Tests/Fixtures/TestNotificationContent` is a minimal `NotificationContent` implementation (`type: test.notification`) for use in tests.
+`Tests/Fixtures/TestNotificationContent` is a minimal `NotificationContent` implementation (`type: test.notification`) for use in tests. `Tests/Fixtures/ForcedTestNotificationContent` is a variant with `forcedOnWebsite: true`.
