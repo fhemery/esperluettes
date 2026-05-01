@@ -59,4 +59,9 @@ Route::middleware('web')->prefix('profile')->group(function () {
         Route::get('/{profile:slug}/comments', [ProfileController::class, 'showComments'])->name('profile.show.comments');
     });
 
+    // Following tab - accessible to authenticated users
+    Route::middleware(['auth', 'compliant'])->group(function () {
+        Route::get('/{profile:slug}/following', [ProfileController::class, 'showFollowing'])->name('profile.show.following');
+    });
+
 });

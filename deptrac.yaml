@@ -305,6 +305,22 @@ deptrac:
         - type: directory
           value: 'app/Domains/Profile/Tests/'
 
+    # Follow Domain
+    - name: FollowPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Follow/Public/'
+
+    - name: FollowPrivate
+      collectors:
+        - type: directory
+          value: 'app/Domains/Follow/Private/'
+
+    - name: FollowTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Follow/Tests/'
+
     # ReadList Domain
     - name: ReadListPublic
       collectors:
@@ -467,6 +483,15 @@ deptrac:
       - EventsPublic
       - ModerationPublic
       - SettingsPublic
+
+    FollowPublic:
+      - Shared
+      - FollowPrivate
+      - AuthPublic
+      - EventsPublic
+      - NotificationPublic
+      - SettingsPublic
+      - StoryPublic
 
     ReadListPublic:
       - Shared
@@ -636,6 +661,7 @@ deptrac:
       - ModerationPublic
       - ProfilePublic
       - SettingsPublic
+      - FollowPublic
 
     SearchPrivate:
       - Shared
@@ -646,6 +672,15 @@ deptrac:
       - Shared
       - AuthPublic
       - SettingsPublic
+
+    FollowPrivate:
+      - Shared
+      - FollowPublic
+      - AuthPublic
+      - EventsPublic
+      - NotificationPublic
+      - SettingsPublic
+      - StoryPublic
 
     ReadListPrivate:
       - Shared
@@ -773,6 +808,14 @@ deptrac:
       - ProfilePrivate
       - ProfilePublic
       - AuthPublic
+
+    FollowTests:
+      - TestHelpers
+      - FollowPrivate
+      - FollowPublic
+      - AuthPublic
+      - StoryPublic
+      - NotificationPublic
 
     ReadListTests:
       - TestHelpers

@@ -33,6 +33,7 @@ return [
     
     
     App\Domains\Discord\Public\Providers\DiscordServiceProvider::class,
+    App\Domains\Follow\Public\Providers\FollowServiceProvider::class,
     App\Domains\ReadList\Public\Providers\ReadListServiceProvider::class,
     
     // Add other domain providers here as they are created

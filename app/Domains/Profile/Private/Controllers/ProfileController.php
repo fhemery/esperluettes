@@ -4,6 +4,7 @@ namespace App\Domains\Profile\Private\Controllers;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Follow\Public\Api\FollowPublicApi;
 use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Profile\Private\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Private\Services\ProfileService;
@@ -64,6 +65,20 @@ class ProfileController extends Controller
     public function showComments(Profile $profile): View
     {
         return $this->renderProfile($profile, 'comments');
+    }
+
+    /**
+     * Display the following tab of a user's profile.
+     */
+    public function showFollowing(Profile $profile): View
+    {
+        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
+
+        if (!app(FollowPublicApi::class)->canViewFollowingTab($profile->user_id, $viewerId)) {
+            abort(403);
+        }
+
+        return $this->renderProfile($profile, 'following');
     }
 
     /**
