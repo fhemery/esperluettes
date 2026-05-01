@@ -9,10 +9,11 @@
         </p>
     </header>
 
-    <x-danger-button
-        x-data=""
+    <x-shared::button
+        type="button"
+        color="danger"
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('auth::account.delete.title') }}</x-danger-button>
+    >{{ __('auth::account.delete.title') }}</x-shared::button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
         <form method="post" action="{{ route('account.destroy') }}" class="p-6 flex flex-col gap-4">
@@ -46,9 +47,9 @@
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-danger-button>
+                <x-shared::button color="danger" type="submit">
                     {{ __('auth::account.delete.submit') }}
-                </x-danger-button>
+                </x-shared::button>
             </div>
         </form>
     </x-modal>
