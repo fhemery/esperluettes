@@ -17,7 +17,6 @@ app/
         Models/                     # Eloquent models
         Notifications/              # Email/notification classes
         Policies/                   # Authorization policies
-        Providers/                  # Service providers
         Repositories/               # Data access layer
         Requests/                   # Form requests and validation
         Resources/                  # Frontend assets and Blade templates
@@ -35,9 +34,11 @@ app/
         routes.php                  # use web.routes.php and api.routes.php if there are both
 
       Public/
-        Contracts/                  # Interfaces or classes exposed to other domains
-          Dto/                      # Data Transfer Objects (if any related to contracts)
-        Events/                     # Domain events.
+        Api/                        # Public API classes exposed to other domains
+        Contracts/                  # Interfaces and DTOs exposed to other domains
+          Dto/                      # Data Transfer Objects
+        Events/                     # Domain events
+        Providers/                  # Service provider (bootstraps the domain)
 
       Tests/                      # Domain-specific tests
         Unit/
@@ -91,7 +92,7 @@ This separation prevents `Components` (PHP) vs `components` (Blade) folder name 
 
 1. Create a new directory under `app/Domains/`
 2. Follow the directory structure outlined above
-3. Create a service provider in the domain's `Providers/` directory
+3. Create a service provider in the domain's `Public/Providers/` directory
 4. Register the service provider in `config/app.php`
 5. Update `composer.json` to autoload the new domain
 6. Run `composer dump-autoload`
