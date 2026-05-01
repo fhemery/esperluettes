@@ -18,11 +18,11 @@
             <thead>
                 <tr class="border-b border-fg/10">
                     <th class="text-left py-2 pr-4 font-normal text-fg/50 w-full"></th>
-                    <th class="text-center py-2 px-4 min-w-32 font-medium">
-                        {{ __('notifications::settings.channel_website') }}
+                    <th class="text-center py-2 px-1 sm:px-4 min-w-16 sm:min-w-32 font-medium">
+                        {{ empty($channels) ? '' : __('notifications::settings.channel_website') }}
                     </th>
                     @foreach($channels as $channel)
-                    <th class="text-center py-2 px-4 min-w-32 font-medium">
+                    <th class="text-center py-2 px-1 sm:px-4 min-w-16 sm:min-w-32 font-medium">
                         {{ __($channel->nameTranslationKey) }}
                     </th>
                     @endforeach
@@ -34,8 +34,10 @@
                     @if(count($typesInGroup) > 0)
 
                     <tr class="border-b border-fg/10 bg-fg/3">
-                        <td class="py-2 pr-4 font-semibold text-fg/80" colspan="{{ 1 + 1 + count($channels) }}">
-                            {{ __($group->translationKey) }}
+                        <td class="py-2 pr-4" colspan="{{ 1 + 1 + count($channels) }}">
+                            <x-shared::title tag="h3" class="mb-0">
+                                {{ __($group->translationKey) }}
+                            </x-shared::title>
                         </td>
                     </tr>
 
@@ -44,9 +46,16 @@
                         <td class="py-2 pr-4 text-fg/80">{{ __($typeDef->nameKey) }}</td>
 
                         {{-- Website toggle --}}
-                        <td class="text-center py-2 px-4">
+                        <td class="text-center py-2 px-1 sm:px-4">
                             @if($typeDef->forcedOnWebsite)
-                                <x-shared::toggle name="prefs[{{ $typeDef->type }}][website]" :checked="true" :disabled="true" />
+                                <div class="inline-flex items-center justify-center gap-1">
+                                    <x-shared::popover placement="top">
+                                        <x-slot name="trigger">
+                                            <x-shared::toggle name="prefs[{{ $typeDef->type }}][website]" :checked="true" :disabled="true" />
+                                        </x-slot>
+                                        <p>Ces éléments ne peuvent pas être désactivés</p>
+                                    </x-shared::popover>
+                                </div>
                             @else
                                 <input type="hidden" name="prefs[{{ $typeDef->type }}][website]" value="0">
                                 <x-shared::toggle name="prefs[{{ $typeDef->type }}][website]" :checked="$preferences[$typeDef->type]['website']['enabled'] ?? true" />
@@ -55,7 +64,7 @@
 
                         {{-- External channel toggles --}}
                         @foreach($channels as $channel)
-                        <td class="text-center py-2 px-4">
+                        <td class="text-center py-2 px-1 sm:px-4">
                             <input type="hidden" name="prefs[{{ $typeDef->type }}][{{ $channel->id }}]" value="0">
                             <x-shared::toggle name="prefs[{{ $typeDef->type }}][{{ $channel->id }}]" :checked="$preferences[$typeDef->type][$channel->id]['enabled'] ?? false" />
                         </td>

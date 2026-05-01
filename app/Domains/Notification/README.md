@@ -101,7 +101,7 @@ The `'website'` ID is reserved — registering it throws `InvalidArgumentExcepti
 
 ### User Preferences
 
-Users control which notification types they receive, per channel, through the **Notifications** tab in the Settings page. This tab uses the custom-view capability of the Settings domain: the Notification domain registers a `SettingsTabDefinition` with `customViewPath: 'notification::settings.preferences'`, and the Settings domain delegates content rendering to that view.
+Users control which notification types they receive, per channel, through the **Notifications** tab in the Settings page. This tab uses the custom-view capability of the Settings domain: the Notification domain registers a `SettingsTabDefinition` with `customViewPath: 'notification::settings.settings'`, and the Settings domain delegates content rendering to that view.
 
 The preferences model uses sparse storage: only non-default values are persisted in `notification_preferences`. When a user sets a preference equal to the channel's `defaultEnabled`, the row is deleted rather than saved. This keeps the table lean and ensures future default changes don't require migrations.
 

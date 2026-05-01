@@ -19,13 +19,13 @@ return [
     'story_completed' => '<a href=":author_url">:author_name</a> a marqué l\'histoire <a href=":story_url">:story_name</a> comme terminée',
 
     'settings' => [
-        'group_readlist'                     => 'Liste de lecture',
-        'type_readlist_story_added'         => 'Histoire ajoutée à une liste de lecture',
-        'type_readlist_chapter_published'   => 'Nouveau chapitre publié',
-        'type_readlist_chapter_unpublished' => 'Chapitre dépublié',
-        'type_readlist_story_deleted'       => 'Histoire supprimée',
-        'type_readlist_story_unpublished'   => 'Histoire dépubliée',
-        'type_readlist_story_republished'   => 'Histoire republiée',
-        'type_readlist_story_completed'     => 'Histoire terminée',
+        'group_readlist'                     => 'Pile à Lire (PAL)',
+        'type_readlist_story_added'         => 'Une de mes histoires a été ajoutée à une PAL',
+        'type_readlist_chapter_published'   => "Un nouveau chapitre d'une histoire de ma PAL a été publié",
+        'type_readlist_chapter_unpublished' => "Un chapitre d'une histoire de ma PAL a été dépublié",
+        'type_readlist_story_deleted'       => "Une histoire de ma PAL a été supprimée",
+        'type_readlist_story_unpublished'   => "Une histoire de ma PAL a été dépubliée",
+        'type_readlist_story_republished'   => "Une histoire de ma PAL a été republiée",
+        'type_readlist_story_completed'     => "Une histoire de ma PAL a été marquée comme terminée",
     ],
 ];

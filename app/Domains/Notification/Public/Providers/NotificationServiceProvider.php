@@ -61,7 +61,7 @@ class NotificationServiceProvider extends ServiceProvider
             order: 30,
             nameKey: 'notifications::settings.tab_name',
             icon: 'notifications',
-            customViewPath: 'notification::settings.preferences',
+            customViewPath: 'notification::settings.settings',
         ));
     }
 
