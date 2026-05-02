@@ -3,6 +3,7 @@
 namespace App\Domains\Story\Private\View\Components;
 
 use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Services\ChapterService;
@@ -19,6 +20,8 @@ class ProfileCommentsComponent extends Component
     public array $authorGroups = [];
     public bool $hasComments = false;
     public bool $isAllowed = false;
+    public bool $isOwn = false;
+    public bool $isHidden = false;
     public int $profileUserId;
 
     public function __construct(
@@ -26,9 +29,13 @@ class ProfileCommentsComponent extends Component
         private ChapterService $chapterService,
         private ProfilePublicApi $profileApi,
         private CoverService $coverService,
+        private SettingsPublicApi $settings,
         int $userId,
     ) {
         $this->profileUserId = $userId;
+        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
+        $this->isOwn = $viewerId === $userId;
+        $this->isHidden = (bool) $this->settings->getValue($userId, 'profile', 'hide-comments-section');
         $this->hydrate($userId);
     }
 
@@ -154,6 +161,8 @@ class ProfileCommentsComponent extends Component
             'authorGroups' => $this->authorGroups,
             'hasComments' => $this->hasComments,
             'isAllowed' => $this->isAllowed,
+            'isOwn' => $this->isOwn,
+            'isHidden' => $this->isHidden,
             'profileUserId' => $this->profileUserId,
         ]);
     }

@@ -12,4 +12,9 @@ return [
     'comments-count' => '{1} :count commentaire|[2,*] :count commentaires',
     'collapse' => 'Réduire',
     'loading-comments' => 'Chargement des commentaires...',
+    'visibility' => [
+        'visible' => 'Cet onglet est visible des autres Esperluettes confirmé·e·s.',
+        'hidden' => 'Cet onglet est visible uniquement de vous et des Cadratins.',
+        'preferences_link' => 'Vos préférences',
+    ],
 ];

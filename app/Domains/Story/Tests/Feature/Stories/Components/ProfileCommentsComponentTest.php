@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -581,6 +582,38 @@ describe('ProfileCommentsComponent', function () {
 
             expect($html)->toContain(__('story::profile.no-comments'));
         });
+    });
+});
+
+describe('Visibility indicator', function () {
+    it('shows visibility_off icon when owner views their hidden tab', function () {
+        $owner = alice($this);
+        app(SettingsPublicApi::class)->setValue($owner->id, 'profile', 'hide-comments-section', true);
+
+        $this->actingAs($owner);
+        $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $owner->id]);
+
+        expect($html)->toContain('visibility_off');
+    });
+
+    it('shows visibility icon when owner views their visible tab', function () {
+        $owner = alice($this);
+
+        $this->actingAs($owner);
+        $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $owner->id]);
+
+        expect($html)->toContain('visibility')
+            ->and($html)->not->toContain('visibility_off');
+    });
+
+    it('does not show visibility indicator to other users', function () {
+        $owner = alice($this);
+        $viewer = bob($this);
+
+        $this->actingAs($viewer);
+        $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $owner->id]);
+
+        expect($html)->not->toContain('data-comments-visibility-indicator');
     });
 });
 

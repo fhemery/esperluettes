@@ -709,6 +709,7 @@ deptrac:
       - StoryRefPublic
       - NotificationPublic
       - ConfigPublic
+      - SettingsPublic
 
     StoryRefPrivate:
       - Shared
