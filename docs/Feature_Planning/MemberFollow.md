@@ -78,8 +78,8 @@ The Follow domain will:
 - Own the `follow` table and its repository.
 - Listen to **Story domain events** (story created / visibility changed) to dispatch story notifications.
 - Use the **Notification domain's public API** to create notifications.
-- Expose a **public API** consumed by the Profile domain for the follow/unfollow button state and the Following tab rendering.
-- Register its own **profile preference** through the settings system for the tab visibility toggle.
+- Expose two **PHP Blade components** (`FollowButton`, `FollowingTab`) registered under the `follow` component namespace, consumed directly by Profile domain views. Each component fetches its own data internally via Follow domain services.
+- Register its own **profile preference** through the settings system for the tab visibility toggle, under the existing `profile` tab and `privacy` section (using hardcoded string IDs to avoid a code dependency on the Profile domain).
 
 ---
 
@@ -91,7 +91,7 @@ The Follow domain will:
 Follow/
 ├── Public/
 │   ├── Api/
-│   │   └── FollowPublicApi.php          # isFollowing, follow, unfollow, getFollowing, getFollowerIds
+│   │   └── FollowPublicApi.php          # getFollowerIds (minimal public surface)
 │   ├── Events/
 │   │   └── UserFollowed.php             # dispatched after a follow action
 │   └── Providers/
@@ -105,10 +105,15 @@ Follow/
 │   │   ├── FollowService.php            # follow/unfollow logic, checks
 │   │   └── FollowNotificationService.php# builds and dispatches notifications
 │   ├── Listeners/
-│   │   └── StoryPublishedListener.php   # listens to Story events, fans out story notifications
+│   │   ├── StoryCreatedListener.php     # fans out story notifications on creation
+│   │   └── StoryVisibilityChangedListener.php # fans out on private→public/community
 │   ├── Notifications/
-│   │   ├── NewFollowerNotification.php  # "X vous suit"
-│   │   └── NewStoryNotification.php     # "X a créé une nouvelle histoire"
+│   │   ├── NewFollowerNotification.php  # "Une Esperluette vous suit"
+│   │   └── NewStoryNotification.php     # "Une Esperluette que vous suivez a publié..."
+│   ├── Views/
+│   │   └── Components/
+│   │       ├── FollowButton.php         # follow/unfollow button; fetches own state
+│   │       └── FollowingTab.php         # following list tab; fetches own data, checks privacy pref
 │   └── routes.php
 ├── Database/
 │   └── Migrations/
@@ -138,30 +143,39 @@ Follow/
 
 ### Notification Types
 
-Two new notification content types registered with the Notification domain factory:
+One new notification group and two content types, registered with the Notification domain factory in `FollowServiceProvider::boot()`:
 
-| Type key               | Content class            | Recipient       |
-|------------------------|--------------------------|-----------------|
-| `follow.new_follower`  | `NewFollowerNotification`| followed user   |
-| `follow.new_story`     | `NewStoryNotification`   | each follower   |
+**Group:**
+
+| Group key | Display name |
+|-----------|-------------|
+| `follow`  | "Suivi"      |
+
+**Types:**
+
+| Type key               | Content class            | Recipient       | Content |
+|------------------------|--------------------------|-----------------|---------|
+| `follow.new_follower`  | `NewFollowerNotification`| followed user   | "Une Esperluette vous suit" |
+| `follow.new_story`     | `NewStoryNotification`   | each follower   | "Une Esperluette que vous suivez a publié une nouvelle histoire" |
 
 ### Story Event Integration
 
-The Follow domain listens to one or two events from the Story domain:
+The Follow domain listens to two confirmed events from the Story domain (both carry a `StorySnapshot` which includes the `visibility` field):
 
-- **StoryCreated** (or equivalent): if visibility is `public` or `community`, trigger story notifications.
-- **StoryVisibilityChanged** (to be confirmed with Story domain): if new visibility is `public` or `community` and old was `private`, trigger story notifications.
-
-If the Story domain does not yet dispatch a visibility change event, one should be added as part of this implementation.
+- **`StoryCreated`**: if `StorySnapshot::visibility` is `public` or `community`, fan out story notifications.
+- **`StoryVisibilityChanged`**: carries `oldVisibility` and `newVisibility`; trigger fan-out only when `newVisibility` is `public` or `community` and `oldVisibility` was `private`.
 
 ### Profile Integration
 
-- The Profile domain consumes `FollowPublicApi` to:
-  - Render the follow/unfollow button (with correct state).
-  - Render the Following tab content.
-  - Check the privacy preference to conditionally show the tab.
-- The privacy preference (`follow.hide_following_tab`) is registered through the existing settings system.
+The Profile domain does **not** call `FollowPublicApi` directly. Instead, it embeds two PHP Blade components exposed by the Follow domain:
+
+- `<x-follow::follow-button :userId="$profileUser->id" />` — renders the follow/unfollow button with correct state for the authenticated user.
+- `<x-follow::following-tab :userId="$profileUser->id" />` — renders the Following tab list; internally checks the privacy preference and conditionally renders or hides content.
+
+The components access Follow domain services directly (same domain), keeping the Profile domain free of Follow business logic.
+
+The privacy preference (`follow.hide_following_tab`) is registered in `FollowServiceProvider::boot()` via `SettingsPublicApi`, under tab `'profile'` and section `'privacy'` (hardcoded string IDs matching `ProfileServiceProvider::TAB_PROFILE` and `SECTION_PRIVACY`, without importing Profile domain classes).
 
 ### Access Control for Story Notifications
 
-When fanning out story notifications for a `community` story, the Follow domain must check that each follower is an authenticated community member. This check should be performed via an existing `Auth` or `Member` domain public API (e.g., `isMember(userId)`).
+When fanning out story notifications for a `community` story, the Follow domain must filter followers to confirmed members only. Use `AuthPublicApi::getRolesByUserIds(array $followerIds)` and keep only those whose roles include `Roles::USER_CONFIRMED`.

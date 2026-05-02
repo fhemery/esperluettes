@@ -1,6 +1,6 @@
 @props([
     'type' => 'button',
-    'color' => 'primary', // primary | accent | tertiary | success | danger | neutral
+    'color' => 'primary', // primary | accent | tertiary | success | danger | error | neutral
     'icon' => null,
     'size' => 'md', // xs | sm | md | lg,
     'disabled' => false,
@@ -8,7 +8,7 @@
 ])
 
 @php
-    $base = 'inline-flex items-center justify-center rounded-md font-medium transition ease-in-out duration-150 focus:outline-hidden focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    $base = 'inline-flex items-center justify-center rounded-md font-medium transition ease-in-out duration-150 focus:outline-hidden focus:ring-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed';
 
     // Size map
     $sizes = [
@@ -25,6 +25,7 @@
         'accent' => 'surface-accent text-on-surface border-surface hover:border-surface/90 focus:ring-accent/40',
         'tertiary' => 'surface-tertiary text-on-surface border-surface hover:border-surface/90 focus:ring-tertiary/40',
         'success' => 'surface-success text-on-surface border-surface hover:border-surface/90 focus:ring-green-500/40',
+        'danger' => 'surface-error text-on-surface border-surface hover:border-surface/90 focus:ring-red-500/40',
         'error' => 'surface-error text-on-surface border-surface hover:border-surface/90 focus:ring-red-500/40',
         'neutral' => 'surface-neutral text-on-surface border-surface hover:border-surface/90 focus:ring-gray-500/40',
     ];

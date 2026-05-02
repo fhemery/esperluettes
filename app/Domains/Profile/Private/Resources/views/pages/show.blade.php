@@ -13,8 +13,13 @@
 
                 <!-- User Info -->
                 <div class="flex-1 flex flex-col flex-start gap-2">
-                    <div class="flex items-center">
+                    <div class="flex items-center gap-4">
                         <x-shared::title class="text-2xl sm:text-4xl text-secondary">{{ $profile->display_name }}</x-shared::title>
+                        @if(!$isOwn)
+                        <div class="mb-4">
+                            <x-follow::follow-button :user-id="$profile->user_id" />
+                        </div>
+                        @endif
                     </div>
 
                     @if($isOwn)
@@ -70,8 +75,8 @@
 
                     @if(Auth::check() && !$isOwn)
                     <div class="flex gap-4 justify-end w-full">
-                        <x-moderation::report-button 
-                            topic-key="profile" 
+                        <x-moderation::report-button
+                            topic-key="profile"
                             :entity-id="$profile->user_id"
                             :compact="true"
                         />
@@ -134,6 +139,17 @@
                         ];
                     }
 
+                    // Following tab visible to authenticated users if not hidden by privacy setting
+                    $followApi = app(\App\Domains\Follow\Public\Api\FollowPublicApi::class);
+                    $canViewFollowing = $followApi->canViewFollowingTab($profile->user_id, Auth::id());
+                    if ($canViewFollowing) {
+                        $tabs[] = [
+                            'key' => 'following',
+                            'label' => $isOwn ? __('follow::follow.following_tab.label') : __('follow::follow.following_tab.label'),
+                            'url' => route('profile.show.following', $profile),
+                        ];
+                    }
+
                     // Check if viewer can see comments content (privacy setting)
                     $privacyService = app(\App\Domains\Profile\Private\Services\ProfilePrivacyService::class);
                     $canViewComments = $privacyService->canViewComments($profile->user_id, Auth::id());
@@ -154,6 +170,8 @@
                         @else
                             <p class="text-center text-gray-500 py-8">{{ __('profile::settings.privacy.comments-hidden') }}</p>
                         @endif
+                    @elseif($activeTab === 'following' && $canViewFollowing)
+                        <x-follow::following-tab :user-id="$profile->user_id" />
                     @endif
                 </div>
             </div>
