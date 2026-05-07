@@ -151,6 +151,15 @@ class AuthServiceProvider extends ServiceProvider
     {
         $registry = app(AdminNavigationRegistry::class);
         $registry->registerPage(
+            'auth.roles',
+            'auth',
+            __('auth::admin.roles.nav_label'),
+            AdminRegistryTarget::route('auth.admin.roles.index'),
+            'shield',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            2,
+        );
+        $registry->registerPage(
             'auth.promotion_requests',
             'auth',
             __('auth::admin.promotion.nav_label'),

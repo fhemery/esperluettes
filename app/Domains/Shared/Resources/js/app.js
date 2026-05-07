@@ -4,6 +4,7 @@ import './bootstrap';
 //import './april-fools';
 import Alpine from 'alpinejs';
 import registerTooltip from './tooltip.js';
+import { registerSlugForm } from './slug-utils.js';
 import * as DateUtils from './date-utils.js';
 import {BadgeOverflow} from './badge-overflow.js';
 import '../../../Moderation/Private/Resources/js/moderation.js';
@@ -21,6 +22,7 @@ Alpine.plugin(intersect)
 // Global store for popover exclusivity (single-open behavior)
 Alpine.store('popover', { openId: null });
 registerTooltip(Alpine);
+registerSlugForm(Alpine);
 
 Alpine.start();
 

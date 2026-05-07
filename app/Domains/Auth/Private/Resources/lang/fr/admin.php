@@ -58,6 +58,36 @@ return [
         ],
     ],
 
+    'roles' => [
+        'title' => 'Gestion des rôles',
+        'nav_label' => 'Rôles',
+        'create_button' => 'Créer un rôle',
+        'create_title' => 'Créer un rôle',
+        'edit_title' => 'Modifier le rôle :name',
+        'no_roles' => 'Aucun rôle trouvé.',
+        'created' => 'Le rôle a été créé avec succès.',
+        'updated' => 'Le rôle a été mis à jour avec succès.',
+        'deleted' => 'Le rôle a été supprimé avec succès.',
+        'delete_blocked' => 'Impossible de supprimer ce rôle car il est assigné à des utilisateurs.',
+
+        'table' => [
+            'id' => 'ID',
+            'name' => 'Nom',
+            'slug' => 'Slug',
+            'users_count' => 'Utilisateurs',
+            'description' => 'Description',
+            'actions' => 'Actions',
+        ],
+
+        'form' => [
+            'name' => 'Nom',
+            'slug' => 'Slug',
+            'description' => 'Description',
+            'save' => 'Enregistrer',
+            'cancel' => 'Annuler',
+        ],
+    ],
+
     'promotion' => [
         'title' => 'Demandes de promotion',
         'nav_label' => 'Demandes de promotion',
