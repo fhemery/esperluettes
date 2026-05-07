@@ -3,6 +3,8 @@
 namespace App\Domains\Follow\Public\Providers;
 
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Follow\Private\Listeners\RemoveFollowsOnUserDeleted;
 use App\Domains\Follow\Private\Listeners\StoryCreatedListener;
 use App\Domains\Follow\Private\Listeners\StoryVisibilityChangedListener;
 use App\Domains\Follow\Private\Notifications\NewFollowerNotification;
@@ -38,6 +40,7 @@ class FollowServiceProvider extends ServiceProvider
         $eventBus->registerEvent(UserFollowed::name(), UserFollowed::class);
         $eventBus->subscribe(StoryCreated::name(), [StoryCreatedListener::class, 'handle']);
         $eventBus->subscribe(StoryVisibilityChanged::name(), [StoryVisibilityChangedListener::class, 'handle']);
+        $eventBus->subscribe(UserDeleted::name(), [RemoveFollowsOnUserDeleted::class, 'handle']);
 
         $this->app->booted(function () {
             $this->registerNotifications();

@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Follow\Public\Api\FollowPublicApi;
 use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,6 +14,14 @@ describe('Following tab visibility — canViewFollowingTab', function () {
 
         $api = app(FollowPublicApi::class);
         expect($api->canViewFollowingTab($profileUser->id, null))->toBeFalse();
+    });
+
+    it('is not visible to simple USER (not confirmed)', function () {
+        $profileUser = alice($this);
+        $viewer = registerUserThroughForm($this, ['name' => 'Eve', 'email' => 'eve@example.com'], roles: [Roles::USER]);
+
+        $api = app(FollowPublicApi::class);
+        expect($api->canViewFollowingTab($profileUser->id, $viewer->id))->toBeFalse();
     });
 
     it('is visible to authenticated users by default', function () {
@@ -50,6 +59,16 @@ describe('Following tab route protection', function () {
             ->assertRedirect('/login');
     });
 
+    it('returns 403 for a simple USER (not confirmed) viewing someone else\'s tab', function () {
+        $owner = alice($this);
+        $viewer = registerUserThroughForm($this, ['name' => 'Eve', 'email' => 'eve@example.com'], roles: [Roles::USER]);
+        $slug = profileSlugFromApi($owner->id);
+
+        $this->actingAs($viewer)
+            ->get(route('profile.show.following', $slug))
+            ->assertForbidden();
+    });
+
     it('returns 200 for an authenticated viewer when privacy is off', function () {
         $owner = alice($this);
         $viewer = bob($this);
@@ -74,6 +93,15 @@ describe('Following tab route protection', function () {
     it('returns 200 for the owner even when they have hidden the tab', function () {
         $owner = alice($this);
         app(SettingsPublicApi::class)->setValue($owner->id, 'profile', 'hide-following-tab', true);
+        $slug = profileSlugFromApi($owner->id);
+
+        $this->actingAs($owner)
+            ->get(route('profile.show.following', $slug))
+            ->assertOk();
+    });
+
+    it('returns 200 for a simple USER viewing their own following tab', function () {
+        $owner = registerUserThroughForm($this, ['name' => 'Eve', 'email' => 'eve@example.com'], roles: [Roles::USER]);
         $slug = profileSlugFromApi($owner->id);
 
         $this->actingAs($owner)
@@ -116,6 +144,46 @@ describe('Following tab — visibility indicator', function () {
             ->get(route('profile.show.following', $slug))
             ->assertOk()
             ->assertDontSee('data-follow-visibility-indicator', false);
+    });
+});
+
+describe('Following tab in profile page', function () {
+    it('shows the following tab link to a simple USER on their own profile', function () {
+        $owner = registerUserThroughForm($this, ['name' => 'Eve', 'email' => 'eve@example.com'], roles: [Roles::USER]);
+        $slug = profileSlugFromApi($owner->id);
+
+        $html = $this->actingAs($owner)
+            ->get(route('profile.show', $slug))
+            ->assertOk()
+            ->getContent();
+
+        expect($html)->toContain(route('profile.show.following', $slug));
+    });
+
+    it('does not show the following tab link to a simple USER', function () {
+        $owner = alice($this);
+        $viewer = registerUserThroughForm($this, ['name' => 'Eve', 'email' => 'eve@example.com'], roles: [Roles::USER]);
+        $slug = profileSlugFromApi($owner->id);
+
+        $html = $this->actingAs($viewer)
+            ->get(route('profile.show', $slug))
+            ->assertOk()
+            ->getContent();
+
+        expect($html)->not->toContain(route('profile.show.following', $slug));
+    });
+
+    it('shows the following tab link to a USER_CONFIRMED viewer', function () {
+        $owner = alice($this);
+        $viewer = bob($this);
+        $slug = profileSlugFromApi($owner->id);
+
+        $html = $this->actingAs($viewer)
+            ->get(route('profile.show', $slug))
+            ->assertOk()
+            ->getContent();
+
+        expect($html)->toContain(route('profile.show.following', $slug));
     });
 });
 

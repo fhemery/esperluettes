@@ -45,8 +45,18 @@ class FollowRepository
     {
         return Follow::where('follower_id', $followerId)
             ->pluck('followed_id')
-            ->map('intval')
+            ->map(fn($id) => (int) $id)
             ->all();
+    }
+
+    public function deleteAllByFollower(int $followerId): void
+    {
+        Follow::where('follower_id', $followerId)->delete();
+    }
+
+    public function deleteAllByFollowed(int $followedId): void
+    {
+        Follow::where('followed_id', $followedId)->delete();
     }
 
     /** @return int[] */
@@ -54,7 +64,7 @@ class FollowRepository
     {
         return Follow::where('followed_id', $followedId)
             ->pluck('follower_id')
-            ->map('intval')
+            ->map(fn($id) => (int) $id)
             ->all();
     }
 }
