@@ -66,13 +66,13 @@ We are migrating away from Filament to eliminate the `filament/filament` depende
 | **Roles** | ADMIN, TECH_ADMIN |
 | **Icons** | Filament: `heroicon-o-key` / Registry: `key` |
 
-- [ ] Controller — `app/Domains/Auth/Private/Controllers/Admin/ActivationCodeController.php`
-- [ ] Views — `app/Domains/Auth/Private/Resources/views/pages/admin/activation-codes/`
-- [ ] Routes — `app/Domains/Auth/Private/routes.php`
-- [ ] Nav registration — `AuthServiceProvider::registerAdminNavigation()`
-- [ ] Tests — `app/Domains/Auth/Tests/Feature/Admin/ActivationCodeControllerTest.php`
-- [ ] Filament resource removed — `app/Domains/Admin/Filament/Resources/Auth/ActivationCodeResource.php`
-- [ ] `NavigationItem` added to `AdminServiceProvider::panel()`
+- [x] Controller — `app/Domains/Auth/Private/Controllers/Admin/ActivationCodeController.php`
+- [x] Views — `app/Domains/Auth/Private/Resources/views/pages/admin/activation-codes/`
+- [x] Routes — `app/Domains/Auth/Private/routes.php`
+- [x] Nav registration — `AuthServiceProvider::registerAdminNavigation()`
+- [x] Tests — `app/Domains/Auth/Tests/Feature/Admin/ActivationCodeControllerTest.php`
+- [x] Filament resource removed — `app/Domains/Admin/Filament/Resources/Auth/ActivationCodeResource.php`
+- [x] `NavigationItem` added to `AdminServiceProvider::panel()`
 
 ---
 

@@ -88,6 +88,61 @@ return [
         ],
     ],
 
+    'activation_codes' => [
+        'title' => 'Codes d\'activation',
+        'nav_label' => 'Codes d\'activation',
+        'create_button' => 'Générer un code',
+        'create_title' => 'Générer un code d\'activation',
+        'no_codes' => 'Aucun code d\'activation trouvé.',
+        'created' => 'Le code d\'activation a été généré avec succès.',
+        'deleted' => 'Le code d\'activation a été supprimé.',
+        'delete_blocked' => 'Impossible de supprimer un code déjà utilisé.',
+        'delete_button' => 'Supprimer',
+        'delete_confirm' => 'Êtes-vous sûr de vouloir supprimer ce code ?',
+
+        'filter' => [
+            'all' => 'Tous',
+            'apply' => 'Filtrer',
+            'reset' => 'Réinitialiser',
+        ],
+
+        'status' => [
+            'active' => 'Actif',
+            'used' => 'Utilisé',
+            'expired' => 'Expiré',
+        ],
+
+        'table' => [
+            'code' => 'Code',
+            'status' => 'Statut',
+            'sponsor' => 'Parrain',
+            'used_by' => 'Utilisé par',
+            'used_at' => 'Utilisé le',
+            'expires_at' => 'Expire le',
+            'comment' => 'Commentaire',
+            'created_at' => 'Créé le',
+            'actions' => 'Actions',
+        ],
+
+        'placeholder' => [
+            'no_sponsor' => 'Aucun parrain',
+            'not_used' => 'Non utilisé',
+            'deleted' => '(compte supprimé)',
+        ],
+
+        'form' => [
+            'sponsor_user_id' => 'ID du parrain (optionnel)',
+            'sponsor_user_id_placeholder' => 'ID numérique de l\'utilisateur...',
+            'sponsor_user_id_helper' => 'Laissez vide si aucun parrain.',
+            'comment' => 'Commentaire (optionnel)',
+            'comment_placeholder' => 'Usage prévu, contexte...',
+            'expires_at' => 'Date d\'expiration (optionnel)',
+            'expires_at_helper' => 'Laissez vide pour un code sans expiration.',
+            'save' => 'Générer',
+            'cancel' => 'Annuler',
+        ],
+    ],
+
     'promotion' => [
         'title' => 'Demandes de promotion',
         'nav_label' => 'Demandes de promotion',

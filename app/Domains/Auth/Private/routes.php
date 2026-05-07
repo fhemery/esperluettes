@@ -3,6 +3,7 @@
 use App\Domains\Auth\Private\Controllers\AuthenticatedSessionController;
 use App\Domains\Auth\Private\Controllers\Admin\AuthAdminUserController;
 use App\Domains\Auth\Private\Controllers\Admin\PromotionRequestController;
+use App\Domains\Auth\Private\Controllers\Admin\ActivationCodeController;
 use App\Domains\Auth\Private\Controllers\Admin\RoleController;
 use App\Domains\Auth\Private\Controllers\Admin\UserController;
 use App\Domains\Auth\Private\Controllers\ComplianceController;
@@ -133,12 +134,14 @@ Route::middleware('web')->group(function () {
                 Route::post('/{user}/clear-authorization', [UserController::class, 'clearAuthorization'])->name('clear-authorization');
             });
 
-        // Admin role management
+        // Admin role management and activation codes
         Route::middleware('role:'.Roles::ADMIN.','.Roles::TECH_ADMIN)
             ->prefix('admin/auth')
             ->name('auth.admin.')
             ->group(function () {
                 Route::resource('roles', RoleController::class)->except(['show']);
+                Route::resource('activation-codes', ActivationCodeController::class)
+                    ->only(['index', 'create', 'store', 'destroy']);
             });
 
         // Admin promotion request management

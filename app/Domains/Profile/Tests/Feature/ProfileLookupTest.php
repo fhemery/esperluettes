@@ -33,6 +33,47 @@ describe('profile lookup', function () {
     });
 });
 
+describe('profile search (HTML partial)', function () {
+    it('returns HTML containing matching profiles', function () {
+        $admin = admin($this);
+        alice($this, ['name' => 'Alice Dupont']);
+        bob($this, ['name' => 'Bobby Smith']);
+
+        $resp = $this->actingAs($admin)->get('/profile/search?q=Ali');
+
+        $resp->assertOk()
+            ->assertSee('Alice Dupont')
+            ->assertDontSee('Bobby Smith');
+    });
+
+    it('returns empty HTML for queries shorter than 2 characters', function () {
+        $admin = admin($this);
+        alice($this, ['name' => 'Alice']);
+
+        $resp = $this->actingAs($admin)->get('/profile/search?q=A');
+
+        $resp->assertOk();
+        expect(trim($resp->getContent()))->toBe('');
+    });
+
+    it('returns HTML with data-user-id and data-avatar-url attributes', function () {
+        $admin = admin($this);
+        $user = alice($this, ['name' => 'Alice Dupont']);
+
+        $resp = $this->actingAs($admin)->get('/profile/search?q=Alice');
+
+        $resp->assertOk()
+            ->assertSee('data-user-id="' . $user->id . '"', false)
+            ->assertSee('data-name="Alice Dupont"', false)
+            ->assertSee('data-avatar-url=', false);
+    });
+
+    it('requires authentication', function () {
+        $this->get('/profile/search?q=Alice')
+            ->assertRedirect(route('login'));
+    });
+});
+
 describe('profile lookup by ids', function () {
     it('returns profiles by ids for preload', function () {
         $admin = admin($this);

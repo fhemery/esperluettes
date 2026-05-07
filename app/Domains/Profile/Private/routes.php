@@ -40,6 +40,9 @@ Route::middleware('web')->prefix('profile')->group(function () {
         Route::get('/lookup/by-ids', [ProfileLookupController::class, 'byIds'])
             ->middleware(['throttle:60,1'])
             ->name('profiles.lookup.by_ids');
+        Route::get('/search', [ProfileLookupController::class, 'searchProfiles'])
+            ->middleware(['throttle:60,1'])
+            ->name('profiles.search');
     });
 
     // Public profile pages (by slug) - tab-based routes

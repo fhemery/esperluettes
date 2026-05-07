@@ -42,6 +42,50 @@ class ProfileLookupController extends Controller
         ]);
     }
 
+    public function adminSearch(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+        if (mb_strlen($q) < 2) {
+            return response()->json(['profiles' => [], 'total' => 0]);
+        }
+        $page = $this->profiles->listProfiles(search: $q, page: 1, perPage: 25);
+
+        $items = [];
+        foreach ($page->items() as $p) {
+            $items[] = [
+                'id' => (int) $p->user_id,
+                'display_name' => (string) ($p->display_name ?? ''),
+                'slug' => (string) ($p->slug ?? ''),
+                'avatar_url' => $this->avatars->publicUrl($p->profile_picture_path, (int) $p->user_id),
+            ];
+        }
+
+        return response()->json([
+            'profiles' => $items,
+            'total' => (int) $page->total(),
+        ]);
+    }
+
+    public function searchProfiles(Request $request): \Illuminate\Contracts\View\View
+    {
+        $q = trim((string) $request->query('q', ''));
+        if (mb_strlen($q) < 2) {
+            return view('profile::components.user-search-results', ['profiles' => []]);
+        }
+        $page = $this->profiles->listProfiles(search: $q, page: 1, perPage: 25);
+
+        $profiles = [];
+        foreach ($page->items() as $p) {
+            $profiles[] = [
+                'id' => (int) $p->user_id,
+                'display_name' => (string) ($p->display_name ?? ''),
+                'avatar_url' => $this->avatars->publicUrl($p->profile_picture_path, (int) $p->user_id),
+            ];
+        }
+
+        return view('profile::components.user-search-results', compact('profiles'));
+    }
+
     public function byIds(Request $request): JsonResponse
     {
         $idsParam = (string) $request->query('ids', '');

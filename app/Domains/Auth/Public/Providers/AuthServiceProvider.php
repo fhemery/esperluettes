@@ -160,6 +160,15 @@ class AuthServiceProvider extends ServiceProvider
             2,
         );
         $registry->registerPage(
+            'auth.activation_codes',
+            'auth',
+            __('auth::admin.activation_codes.nav_label'),
+            AdminRegistryTarget::route('auth.admin.activation-codes.index'),
+            'key',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            3,
+        );
+        $registry->registerPage(
             'auth.promotion_requests',
             'auth',
             __('auth::admin.promotion.nav_label'),

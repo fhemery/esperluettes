@@ -7,6 +7,7 @@ use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
 use App\Domains\Shared\Contracts\ParameterType;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
@@ -68,6 +69,9 @@ class ProfileServiceProvider extends ServiceProvider
         
         // Register view namespace for Profile domain
         View::addNamespace('profile', app_path('Domains/Profile/Private/Resources/views'));
+
+        // Register PHP Blade component namespace
+        Blade::componentNamespace('App\\Domains\\Profile\\Private\\View\\Components', 'profile');
 
         // Ensure Carbon uses the current app locale (for translated month/day names)
         Carbon::setLocale(app()->getLocale());
