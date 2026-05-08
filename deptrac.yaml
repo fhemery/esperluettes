@@ -600,6 +600,7 @@ deptrac:
     ConfigPrivate:
       - Shared
       - ConfigPublic
+      - AuthPublic
 
     DashboardPrivate:
       - Shared
@@ -753,6 +754,7 @@ deptrac:
       - TestHelpers
       - ConfigPrivate
       - ConfigPublic
+      - AuthPublic
 
     EventsTests:
       - TestHelpers

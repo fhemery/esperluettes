@@ -119,6 +119,43 @@ class FeatureToggleService
         $this->events->emit(new FeatureToggleUpdated($snapshot));
     }
 
+    public function editFeatureToggle(string $name, string $domain, FeatureToggleAdminVisibility $adminVisibility, FeatureToggleAccess $access, array $roles): void
+    {
+        if (!$this->auth->hasAnyRole([Roles::TECH_ADMIN])) {
+            throw new AuthorizationException('Only tech admins can edit feature toggles');
+        }
+
+        $all = $this->getAllCached();
+        $row = $all['byDomain'][strtolower($domain)][strtolower($name)] ?? null;
+        if (!$row) {
+            return;
+        }
+
+        $model = $this->repo->findByDomainAndName($row['domain'], $row['name']);
+        if (!$model instanceof FeatureToggleModel) {
+            return;
+        }
+
+        $this->repo->update($model, [
+            'admin_visibility' => $adminVisibility->value,
+            'access' => $access->value,
+            'roles' => $roles,
+            'updated_by' => Auth::id(),
+        ]);
+
+        Cache::forget($this->allCacheKey());
+
+        $toggle = new \App\Domains\Config\Public\Contracts\FeatureToggle(
+            name: $model->name,
+            domain: $model->domain,
+            admin_visibility: $adminVisibility,
+            access: $access,
+            roles: $roles,
+        );
+        $snapshot = FeatureToggleSnapshot::fromFeatureToggle($toggle);
+        $this->events->emit(new FeatureToggleUpdated($snapshot));
+    }
+
     public function deleteFeatureToggle(string $name, ?string $domain = 'config'): void
     {
         $domainKey = strtolower($domain ?? 'config');

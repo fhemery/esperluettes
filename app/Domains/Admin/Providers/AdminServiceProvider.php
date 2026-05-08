@@ -244,6 +244,13 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
 
+                NavigationItem::make('Commutateurs de fonctionnalité')
+                    ->url('/admin/config/feature-toggles')
+                    ->icon('heroicon-o-adjustments-vertical')
+                    ->group('Configuration')
+                    ->sort(2)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+
                 NavigationItem::make('Événements')
                     ->url('/admin/events/domain-events')
                     ->icon('heroicon-o-bolt')

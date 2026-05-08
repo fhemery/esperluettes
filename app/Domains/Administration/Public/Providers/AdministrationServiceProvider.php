@@ -120,17 +120,6 @@ class AdministrationServiceProvider extends ServiceProvider
             1,
         );
 
-        // Config
-        $registry->registerPage(
-            'config.feature_toggles',
-            'config',
-            __('admin::config.feature_toggles.nav_label'),
-            AdminRegistryTarget::url('/admin/config/feature-toggles'),
-            'tune',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            1,
-        );
-
         // Events — now registered in EventsServiceProvider (custom admin page)
 
         // FAQ

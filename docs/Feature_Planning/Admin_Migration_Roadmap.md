@@ -164,13 +164,13 @@ We are migrating away from Filament to eliminate the `filament/filament` depende
 | **Roles** | ADMIN, TECH_ADMIN (list); TECH_ADMIN only (create/delete) |
 | **Icons** | Filament: `heroicon-o-adjustments-vertical` / Registry: `toggle_on` |
 
-- [ ] Controller — `app/Domains/Config/Private/Controllers/Admin/FeatureToggleController.php`
-- [ ] Views — `app/Domains/Config/Private/Resources/views/pages/admin/feature-toggles/`
-- [ ] Routes — `app/Domains/Config/Private/routes.php`
-- [ ] Nav registration — `ConfigServiceProvider::registerAdminNavigation()`
-- [ ] Tests — `app/Domains/Config/Tests/Feature/Admin/FeatureToggleControllerTest.php`
-- [ ] Filament resource removed — `app/Domains/Admin/Filament/Resources/Config/FeatureToggleResource.php`
-- [ ] `NavigationItem` added to `AdminServiceProvider::panel()`
+- [x] Controller — `app/Domains/Config/Private/Controllers/Admin/FeatureToggleController.php`
+- [x] Views — `app/Domains/Config/Private/Resources/views/pages/admin/feature-toggles/`
+- [x] Routes — `app/Domains/Config/Private/routes.php`
+- [x] Nav registration — `ConfigServiceProvider::registerAdminNavigation()`
+- [x] Tests — `app/Domains/Config/Tests/Feature/Admin/FeatureToggleControllerTest.php`
+- [x] Filament resource removed — `app/Domains/Admin/Filament/Resources/Config/FeatureToggleResource.php`
+- [x] `NavigationItem` added to `AdminServiceProvider::panel()`
 
 ---
 

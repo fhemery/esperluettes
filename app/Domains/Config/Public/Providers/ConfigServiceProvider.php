@@ -56,5 +56,15 @@ class ConfigServiceProvider extends ServiceProvider
             permissions: [Roles::ADMIN, Roles::TECH_ADMIN],
             sortOrder: 20,
         );
+
+        $registry->registerPage(
+            key: 'config.feature-toggles',
+            group: 'config',
+            label: __('config::admin.feature_toggles.nav_label'),
+            target: AdminRegistryTarget::route('config.admin.feature-toggles.index'),
+            icon: 'toggle_on',
+            permissions: [Roles::ADMIN, Roles::TECH_ADMIN],
+            sortOrder: 30,
+        );
     }
 }

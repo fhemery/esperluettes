@@ -5,6 +5,7 @@ namespace App\Domains\Config\Public\Api;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\FeatureToggle;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
+use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
 use App\Domains\Config\Public\Services\ConfigParameterService;
 use App\Domains\Config\Public\Services\FeatureToggleService;
 
@@ -32,6 +33,11 @@ class ConfigPublicApi
     public function updateFeatureToggle(string $featureToggleName, FeatureToggleAccess $access, ?string $domain = 'config'): void
     {
         $this->featureToggleService->updateFeatureToggle($featureToggleName, $access, $domain);
+    }
+
+    public function editFeatureToggle(string $name, string $domain, FeatureToggleAdminVisibility $adminVisibility, FeatureToggleAccess $access, array $roles): void
+    {
+        $this->featureToggleService->editFeatureToggle($name, $domain, $adminVisibility, $access, $roles);
     }
 
     public function deleteFeatureToggle(string $featureToggleName, ?string $domain = 'config'): void
