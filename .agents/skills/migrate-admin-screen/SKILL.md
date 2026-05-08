@@ -27,6 +27,8 @@ Note:
 
 Cross-reference the roadmap entry for the resource — it lists cross-domain dependencies and special cases.
 
+IMPORTANT: before implementing anything, describe which screen you will migrate and ask questions about the screen you are migrating. Ask if there are any specificities that should be taken into account. Be careful that the migration should be as iso functional as possible UX wise, and ask for clarifications.
+
 ---
 
 ## Step 1 — Controller

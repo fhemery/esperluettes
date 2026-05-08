@@ -164,16 +164,7 @@ class AdministrationServiceProvider extends ServiceProvider
         );
 
         // Moderation
-        $registry->registerPage(
-            'moderation.reasons',
-            'moderation',
-            __('admin::moderation.reason.navigation_label'),
-            AdminRegistryTarget::url('/admin/moderation/reasons'),
-            'flag',
-            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
-            1,
-        );
-
+        // NOTE: moderation.reasons is now registered in ModerationServiceProvider (custom admin page)
         $registry->registerPage(
             'moderation.reports',
             'moderation',

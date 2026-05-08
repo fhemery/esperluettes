@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Moderation\Private\Controllers\Admin\ModerationReasonController;
 use App\Domains\Moderation\Private\Controllers\ModerationAdminController;
 use App\Domains\Moderation\Private\Controllers\ModerationReportController;
 use Illuminate\Support\Facades\Route;
@@ -20,8 +21,10 @@ Route::middleware(['web', 'auth', 'compliant'])->group(function () {
     Route::middleware(['role:' . Roles::MODERATOR . ',' . Roles::ADMIN. ','.Roles::TECH_ADMIN])->prefix('admin/moderation')->name('moderation.admin.')->group(function () {
         Route::get('user-management', [ModerationAdminController::class, 'userManagementPage'])
             ->name('user-management');
-        // Get report form with reasons for a specific topic (AJAX, returns HTML)
         Route::get('search', [ModerationAdminController::class, 'search'])
             ->name('search');
+
+        Route::put('moderation-reasons/reorder', [ModerationReasonController::class, 'reorder'])->name('moderation-reasons.reorder');
+        Route::resource('moderation-reasons', ModerationReasonController::class)->except(['show']);
     });
 });

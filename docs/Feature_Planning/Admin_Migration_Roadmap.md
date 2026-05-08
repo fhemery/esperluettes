@@ -91,13 +91,13 @@ We are migrating away from Filament to eliminate the `filament/filament` depende
 | **Roles** | ADMIN, TECH_ADMIN, MODERATOR |
 | **Icons** | Filament: `heroicon-o-flag` / Registry: `flag` |
 
-- [ ] Controller — `app/Domains/Moderation/Private/Controllers/Admin/ModerationReasonController.php`
-- [ ] Views — `app/Domains/Moderation/Private/Resources/views/pages/admin/moderation-reasons/`
-- [ ] Routes — `app/Domains/Moderation/Private/routes.php`
-- [ ] Nav registration — `ModerationServiceProvider::registerAdminNavigation()`
-- [ ] Tests — `app/Domains/Moderation/Tests/Feature/Admin/ModerationReasonControllerTest.php`
-- [ ] Filament resource removed — `app/Domains/Admin/Filament/Resources/Moderation/ModerationReasonResource.php`
-- [ ] `NavigationItem` added to `AdminServiceProvider::panel()`
+- [x] Controller — `app/Domains/Moderation/Private/Controllers/Admin/ModerationReasonController.php`
+- [x] Views — `app/Domains/Moderation/Private/Resources/views/pages/admin/moderation-reasons/`
+- [x] Routes — `app/Domains/Moderation/Private/routes.php`
+- [x] Nav registration — `ModerationServiceProvider::registerAdminNavigation()`
+- [x] Tests — `app/Domains/Moderation/Tests/Feature/Admin/ModerationReasonControllerTest.php`
+- [x] Filament resource removed — `app/Domains/Admin/Filament/Resources/Moderation/ModerationReasonResource.php`
+- [x] `NavigationItem` added to `AdminServiceProvider::panel()`
 
 ---
 

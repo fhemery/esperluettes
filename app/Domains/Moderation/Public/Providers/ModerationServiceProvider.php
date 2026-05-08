@@ -53,9 +53,17 @@ class ModerationServiceProvider extends ServiceProvider
     protected function registerAdminNavigation(): void
     {
         $registry = app(AdminNavigationRegistry::class);
-        
-        // For now, the moderation group is registered in AdministrationServiceProvider
-        //$registry->registerGroup('moderation', __('admin::moderation.navigation_group'), 70);
+
+        $registry->registerPage(
+            'moderation.reasons',
+            'moderation',
+            __('moderation::admin.reasons.nav_label'),
+            AdminRegistryTarget::route('moderation.admin.moderation-reasons.index'),
+            'flag',
+            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
+            1,
+        );
+
         $registry->registerPage(
             'moderation.admin.user-management',
             'moderation',
@@ -63,7 +71,7 @@ class ModerationServiceProvider extends ServiceProvider
             AdminRegistryTarget::route('moderation.admin.user-management'),
             'groups',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
-            1,
+            10,
         );
     }
 }

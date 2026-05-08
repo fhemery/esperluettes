@@ -158,6 +158,33 @@ class ModerationService
         return '';
     }
 
+    public function createReason(array $data): ModerationReason
+    {
+        $sortOrder = $data['sort_order'] ?? null;
+        if ($sortOrder === null || $sortOrder === '') {
+            $data['sort_order'] = (int) (ModerationReason::where('topic_key', $data['topic_key'])->max('sort_order') ?? -1) + 1;
+        }
+
+        return ModerationReason::create($data);
+    }
+
+    public function updateReason(ModerationReason $reason, array $data): void
+    {
+        $reason->update($data);
+    }
+
+    public function deleteReason(ModerationReason $reason): void
+    {
+        $reason->delete();
+    }
+
+    public function reorderReasons(array $orderedIds): void
+    {
+        foreach ($orderedIds as $index => $id) {
+            ModerationReason::where('id', $id)->update(['sort_order' => $index]);
+        }
+    }
+
     /**
      * Get total number of pending moderation reports (cached until invalidated).
      */

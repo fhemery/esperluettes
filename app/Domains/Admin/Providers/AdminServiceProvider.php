@@ -216,6 +216,13 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
                     
+                NavigationItem::make('Raisons de signalement')
+                    ->url('/admin/moderation/moderation-reasons')
+                    ->icon('heroicon-o-flag')
+                    ->group('Modération')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]) ?? false),
+
                 NavigationItem::make('Gestion des utilisateurs')
                     ->url('/admin/moderation/user-management')
                     ->icon('heroicon-o-users')
