@@ -39,16 +39,15 @@ class AdministrationServiceProvider extends ServiceProvider
     protected function registerAdminPages(): void
     {
         $registry = app(AdminNavigationRegistry::class);
-        $techDomain = __('administration::admin.category.label');
-        $registry->registerGroup($techDomain, $techDomain, 10);
+        $registry->registerGroup('administration', 'administration::admin.category.label', 10);
 
-        // Dashboard (/administration) is not registered here, it is 
+        // Dashboard (/administration) is not registered here, it is
         // hardcoded in the sidebar
 
         $registry->registerPage(
             __('administration::maintenance.key'),
-            $techDomain,
-            __('administration::maintenance.title'),
+            'administration',
+            'administration::maintenance.title',
             AdminRegistryTarget::route('administration.maintenance'),
             'settings',
             [Roles::TECH_ADMIN],
@@ -57,32 +56,32 @@ class AdministrationServiceProvider extends ServiceProvider
 
         $registry->registerPage(
             'logs',
-            $techDomain,
-            __('administration::logs.title'),
+            'administration',
+            'administration::logs.title',
             AdminRegistryTarget::route('administration.logs'),
             'description',
             [Roles::TECH_ADMIN],
             2,
-        );   
+        );
     }
 
     protected function addLegacyAdminLinks(): void
     {
         $registry = app(AdminNavigationRegistry::class);
 
-        $registry->registerGroup('calendar', __('admin::calendar.navigation.group'), 20);
-        $registry->registerGroup('config', __('admin::config.group'), 30);
-        $registry->registerGroup('moderation', __('admin::moderation.navigation_group'), 40);
-        $registry->registerGroup('story', __('admin::story.group'), 70);
-        $registry->registerGroup('auth', __('admin::auth.user_management'), 80);
-        $registry->registerGroup('faq', __('admin::faq.navigation.group'), 90);
-        $registry->registerGroup('events', __('admin::domain_events.navigation_group'), 100);
+        $registry->registerGroup('calendar', 'calendar::admin.nav_group', 20);
+        $registry->registerGroup('config', 'config::admin.nav_group', 30);
+        $registry->registerGroup('moderation', 'moderation::admin.nav_group', 40);
+        $registry->registerGroup('story', 'story_ref::admin.nav_group', 70);
+        $registry->registerGroup('auth', 'auth::admin.users.title', 80);
+        $registry->registerGroup('faq', 'faq::admin.nav_group', 90);
+        $registry->registerGroup('events', 'events::admin.domain_events.nav_group', 100);
 
         // Auth resources
         $registry->registerPage(
             'auth.users',
             'auth',
-            __('admin::auth.users.navigation_label'),
+            'auth::admin.users.nav_label',
             AdminRegistryTarget::route('auth.admin.users.index'),
             'groups',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -92,7 +91,7 @@ class AdministrationServiceProvider extends ServiceProvider
         $registry->registerPage(
             'auth.roles',
             'auth',
-            __('admin::auth.role.navigation_label'),
+            'auth::admin.roles.nav_label',
             AdminRegistryTarget::url('/admin/roles'),
             'admin_panel_settings',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -102,7 +101,7 @@ class AdministrationServiceProvider extends ServiceProvider
         $registry->registerPage(
             'auth.activation_codes',
             'auth',
-            __('admin::auth.activation_codes.navigation_label'),
+            'auth::admin.activation_codes.nav_label',
             AdminRegistryTarget::url('/admin/auth/activation-codes'),
             'key',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -113,7 +112,7 @@ class AdministrationServiceProvider extends ServiceProvider
         $registry->registerPage(
             'calendar.activities',
             'calendar',
-            __('admin::calendar.navigation.activities'),
+            'calendar::admin.activities.nav_label',
             AdminRegistryTarget::url('/admin/calendar/activities'),
             'calendar_month',
             [Roles::ADMIN, Roles::TECH_ADMIN],

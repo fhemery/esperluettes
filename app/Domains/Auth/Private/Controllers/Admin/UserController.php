@@ -100,7 +100,7 @@ class UserController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', __('admin::auth.users.promote.success', ['role' => $roleName]));
+            ->with('success', __('auth::admin.users.promote.success', ['role' => $roleName]));
     }
 
     public function destroy(User $user): RedirectResponse
@@ -109,7 +109,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('auth.admin.users.index')
-            ->with('success', __('admin::auth.users.deletion.success'));
+            ->with('success', __('auth::admin.users.deletion.success'));
     }
 
     public function downloadAuthorization(User $user): StreamedResponse|RedirectResponse
@@ -143,14 +143,14 @@ class UserController extends Controller
     {
         $columns = [
             'id' => 'ID',
-            'email' => __('admin::auth.users.email_header'),
-            'is_active' => __('admin::auth.users.is_active_header'),
+            'email' => __('auth::admin.users.table.email'),
+            'is_active' => __('auth::admin.users.is_active_header'),
             'is_under_15' => __('auth::admin.users.table.is_minor'),
             'parental_authorization_verified_at' => __('auth::admin.users.table.authorization_verified'),
-            'email_verified_at' => __('admin::auth.users.email_verified_at_header'),
+            'email_verified_at' => __('auth::admin.users.email_verified_at_header'),
             'terms_accepted_at' => __('auth::admin.users.table.terms_accepted'),
-            'created_at' => __('admin::shared.column.created_at'),
-            'updated_at' => __('admin::shared.column.updated_at'),
+            'created_at' => __('administration::shared.column.created_at'),
+            'updated_at' => __('administration::shared.column.updated_at'),
         ];
 
         return ExportCsv::streamFromQuery(

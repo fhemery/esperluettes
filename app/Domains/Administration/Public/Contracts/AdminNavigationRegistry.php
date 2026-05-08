@@ -20,13 +20,13 @@ final class AdminNavigationRegistry
      * Register a navigation group
      *
      * @param string $key Unique group identifier
-     * @param string $label Display label (translatable)
+     * @param string $labelTranslationKey Translation key for the display label
      * @param int $sortOrder Sort order within navigation
      */
-    public function registerGroup(string $key, string $label, int $sortOrder = 100): void
+    public function registerGroup(string $key, string $labelTranslationKey, int $sortOrder = 100): void
     {
         $this->groups[$key] = [
-            'label' => $label,
+            'label' => $labelTranslationKey,
             'sort_order' => $sortOrder,
         ];
     }
@@ -36,7 +36,7 @@ final class AdminNavigationRegistry
      *
      * @param string $key Unique page identifier
      * @param string $group Group key this page belongs to
-     * @param string $label Display label (translatable)
+     * @param string $labelTranslationKey Translation key for the display label
      * @param AdminRegistryTarget $target URL target (resolved route name or direct URL)
      * @param string $icon Icon identifier (Material Symbols, Heroicons)
      * @param array<string> $permissions Required permissions/roles
@@ -45,7 +45,7 @@ final class AdminNavigationRegistry
     public function registerPage(
         string $key,
         string $group,
-        string $label,
+        string $labelTranslationKey,
         AdminRegistryTarget $target,
         string $icon = '',
         array $permissions = [],
@@ -53,7 +53,7 @@ final class AdminNavigationRegistry
     ): void {
         $this->pages[$key] = [
             'group' => $group,
-            'label' => $label,
+            'label' => $labelTranslationKey,
             'target' => $target,
             'icon' => $icon,
             'permissions' => $permissions,
@@ -72,10 +72,10 @@ final class AdminNavigationRegistry
 
         foreach ($this->groups as $groupKey => $group) {
             $pages = $this->getPagesForGroup($groupKey);
-            
+
             if ($pages->isNotEmpty()) {
                 $navigation[$groupKey] = [
-                    'label' => $group['label'],
+                    'label' => __($group['label']),
                     'sort_order' => $group['sort_order'],
                     'pages' => $pages->values()->all(),
                 ];
@@ -96,6 +96,7 @@ final class AdminNavigationRegistry
         return collect($this->pages)
             ->filter(fn($page) => $page['group'] === $groupKey)
             ->filter(fn($page) => $this->userCanAccessPage($page))
+            ->map(fn($page) => array_merge($page, ['label' => __($page['label'])]))
             ->sortBy('sort_order');
     }
 

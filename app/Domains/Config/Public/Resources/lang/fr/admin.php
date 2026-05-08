@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'nav_group' => 'Configuration',
+
     'feature_toggles' => [
         'title'          => 'Commutateurs de fonctionnalité',
         'nav_label'      => 'Commutateurs de fonctionnalité',

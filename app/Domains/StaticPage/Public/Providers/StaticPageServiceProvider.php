@@ -53,12 +53,12 @@ class StaticPageServiceProvider extends ServiceProvider
     {
         $registry = app(AdminNavigationRegistry::class);
 
-        $registry->registerGroup('static', __('static::admin.nav.group'), 60);
+        $registry->registerGroup('static', 'static::admin.nav.group', 60);
 
         $registry->registerPage(
             'static.pages',
             'static',
-            __('static::admin.nav.pages'),
+            'static::admin.nav.pages',
             AdminRegistryTarget::route('static.admin.index'),
             'description',
             [Roles::ADMIN, Roles::TECH_ADMIN],

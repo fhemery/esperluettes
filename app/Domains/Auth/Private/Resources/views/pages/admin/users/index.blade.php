@@ -26,11 +26,11 @@
                 />
             </div>
             <div class="w-40">
-                <x-shared::input-label for="is_active">{{ __('admin::auth.users.is_active_header') }}</x-shared::input-label>
+                <x-shared::input-label for="is_active">{{ __('auth::admin.users.is_active_header') }}</x-shared::input-label>
                 <select name="is_active" id="is_active" class="mt-1 block w-full form-control">
                     <option value="">{{ __('auth::admin.users.filter.all') }}</option>
-                    <option value="1" @selected(($filters['is_active'] ?? '') === '1')>{{ __('admin::auth.users.status.active') }}</option>
-                    <option value="0" @selected(($filters['is_active'] ?? '') === '0')>{{ __('admin::auth.users.status.inactive') }}</option>
+                    <option value="1" @selected(($filters['is_active'] ?? '') === '1')>{{ __('auth::admin.users.status.active') }}</option>
+                    <option value="0" @selected(($filters['is_active'] ?? '') === '0')>{{ __('auth::admin.users.status.inactive') }}</option>
                 </select>
             </div>
             <div class="flex gap-2 items-end">
@@ -81,11 +81,11 @@
                             <td class="p-3">
                                 @if ($user->is_active)
                                     <span class="inline-flex items-center px-2 py-1 text-xs bg-success/20 text-success">
-                                        {{ __('admin::auth.users.status.active') }}
+                                        {{ __('auth::admin.users.status.active') }}
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2 py-1 text-xs bg-error/20 text-error">
-                                        {{ __('admin::auth.users.status.inactive') }}
+                                        {{ __('auth::admin.users.status.inactive') }}
                                     </span>
                                 @endif
                             </td>
@@ -124,11 +124,11 @@
                                         <form action="{{ route('auth.admin.users.deactivate', $user) }}" 
                                               method="POST" 
                                               class="inline"
-                                              onsubmit="return confirm('{{ __('admin::auth.users.deactivation.confirm_message') }}')">
+                                              onsubmit="return confirm('{{ __('auth::admin.users.deactivation.confirm_message') }}')">
                                             @csrf
                                             <button type="submit" 
                                                     class="text-warning hover:text-warning/80"
-                                                    title="{{ __('admin::auth.users.actions.deactivate') }}">
+                                                    title="{{ __('auth::admin.users.actions.deactivate') }}">
                                                 <span class="material-symbols-outlined">block</span>
                                             </button>
                                         </form>
@@ -136,11 +136,11 @@
                                         <form action="{{ route('auth.admin.users.reactivate', $user) }}" 
                                               method="POST" 
                                               class="inline"
-                                              onsubmit="return confirm('{{ __('admin::auth.users.activation.confirm_message') }}')">
+                                              onsubmit="return confirm('{{ __('auth::admin.users.activation.confirm_message') }}')">
                                             @csrf
                                             <button type="submit" 
                                                     class="text-success hover:text-success/80"
-                                                    title="{{ __('admin::auth.users.actions.activate') }}">
+                                                    title="{{ __('auth::admin.users.actions.activate') }}">
                                                 <span class="material-symbols-outlined">check_circle</span>
                                             </button>
                                         </form>
@@ -149,7 +149,7 @@
                                     <form action="{{ route('auth.admin.users.destroy', $user) }}" 
                                           method="POST" 
                                           class="inline"
-                                          onsubmit="return confirm('{{ __('admin::auth.users.deletion.confirm_message') }}')">
+                                          onsubmit="return confirm('{{ __('auth::admin.users.deletion.confirm_message') }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
@@ -163,11 +163,11 @@
                                         <form action="{{ route('auth.admin.users.promote', $user) }}" 
                                               method="POST" 
                                               class="inline"
-                                              onsubmit="return confirm('{{ __('admin::auth.users.promote.confirm_message', ['from' => 'utilisateur', 'to' => 'utilisateur confirmé']) }}')">
+                                              onsubmit="return confirm('{{ __('auth::admin.users.promote.confirm_message', ['from' => 'utilisateur', 'to' => 'utilisateur confirmé']) }}')">
                                             @csrf
                                             <button type="submit" 
                                                     class="text-primary hover:text-primary/80"
-                                                    title="{{ __('admin::auth.users.promote.action_label') }}">
+                                                    title="{{ __('auth::admin.users.promote.action_label') }}">
                                                 <span class="material-symbols-outlined">arrow_upward</span>
                                             </button>
                                         </form>

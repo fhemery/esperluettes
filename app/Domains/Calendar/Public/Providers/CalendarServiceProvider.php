@@ -57,7 +57,7 @@ class CalendarServiceProvider extends ServiceProvider
         $registry->registerPage(
             'calendar.activities',
             'calendar',
-            __('calendar::admin.activities.nav_label'),
+            'calendar::admin.activities.nav_label',
             AdminRegistryTarget::route('calendar.admin.activities.index'),
             'calendar_month',
             [Roles::ADMIN, Roles::TECH_ADMIN],

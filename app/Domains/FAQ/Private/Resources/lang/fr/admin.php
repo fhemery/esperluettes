@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'nav_group' => 'FAQ',
+
     'categories' => [
         'title' => 'Catégories de FAQ',
         'nav_label' => 'Catégories',

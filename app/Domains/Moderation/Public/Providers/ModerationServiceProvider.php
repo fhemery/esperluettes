@@ -57,7 +57,7 @@ class ModerationServiceProvider extends ServiceProvider
         $registry->registerPage(
             'moderation.reasons',
             'moderation',
-            __('moderation::admin.reasons.nav_label'),
+            'moderation::admin.reasons.nav_label',
             AdminRegistryTarget::route('moderation.admin.moderation-reasons.index'),
             'flag',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
@@ -67,7 +67,7 @@ class ModerationServiceProvider extends ServiceProvider
         $registry->registerPage(
             'moderation.reports',
             'moderation',
-            __('moderation::admin.reports.nav_label'),
+            'moderation::admin.reports.nav_label',
             AdminRegistryTarget::route('moderation.admin.moderation-reports.index'),
             'report',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
@@ -77,7 +77,7 @@ class ModerationServiceProvider extends ServiceProvider
         $registry->registerPage(
             'moderation.admin.user-management',
             'moderation',
-            __('moderation::admin.user_management.title'),
+            'moderation::admin.user_management.title',
             AdminRegistryTarget::route('moderation.admin.user-management'),
             'groups',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],

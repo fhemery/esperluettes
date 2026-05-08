@@ -15,7 +15,6 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
-use App\Domains\Admin\Controllers\LogDownloadController;
 use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
@@ -45,12 +44,6 @@ class AdminServiceProvider extends PanelProvider
                     ->name('filament.admin.auth.logout');
             });
 
-        // Admin tech routes (logs download)
-        Route::middleware(['web', Authenticate::class, CheckRole::class . ':admin,tech-admin'])
-            ->prefix('admin')
-            ->group(function () {
-                Route::get('/logs/download', LogDownloadController::class)->name('admin.logs.download');
-            });
     }
 
     public function panel(Panel $panel): Panel

@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // Auth domain seeders (roles must exist before admin/user seeding)
             \App\Domains\Auth\Database\Seeders\AuthSeeder::class,
-            // Admin domain seeders
-            \App\Domains\Admin\Database\Seeders\AdminUserSeeder::class,
+            // Administration domain seeders
+            \App\Domains\Administration\Database\Seeders\AdminUserSeeder::class,
             // Story domain seeders
             \App\Domains\StoryRef\Database\Seeders\StoryRefSeeder::class,
             // Moderation domain seeders

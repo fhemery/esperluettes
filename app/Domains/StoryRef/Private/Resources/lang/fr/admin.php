@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'nav_group' => 'Histoires - Référentiels',
+
     'audiences' => [
         'nav_label' => 'Publics cibles',
         'title' => 'Gestion des publics cibles',

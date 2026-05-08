@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'nav_group' => 'Calendrier',
+
     'activities' => [
         'title' => 'Activités',
         'nav_label' => 'Activités',

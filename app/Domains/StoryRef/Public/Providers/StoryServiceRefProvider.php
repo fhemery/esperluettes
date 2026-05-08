@@ -49,7 +49,7 @@ class StoryServiceRefProvider extends ServiceProvider
         $registry->registerPage(
             'story_ref.audiences',
             'story',
-            __('story_ref::admin.audiences.nav_label'),
+            'story_ref::admin.audiences.nav_label',
             AdminRegistryTarget::route('story_ref.admin.audiences.index'),
             'group',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -60,7 +60,7 @@ class StoryServiceRefProvider extends ServiceProvider
         $registry->registerPage(
             'story_ref.copyrights',
             'story',
-            __('story_ref::admin.copyrights.nav_label'),
+            'story_ref::admin.copyrights.nav_label',
             AdminRegistryTarget::route('story_ref.admin.copyrights.index'),
             'copyright',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -71,7 +71,7 @@ class StoryServiceRefProvider extends ServiceProvider
         $registry->registerPage(
             'story_ref.feedbacks',
             'story',
-            __('story_ref::admin.feedbacks.nav_label'),
+            'story_ref::admin.feedbacks.nav_label',
             AdminRegistryTarget::route('story_ref.admin.feedbacks.index'),
             'forum',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -82,7 +82,7 @@ class StoryServiceRefProvider extends ServiceProvider
         $registry->registerPage(
             'story_ref.genres',
             'story',
-            __('story_ref::admin.genres.nav_label'),
+            'story_ref::admin.genres.nav_label',
             AdminRegistryTarget::route('story_ref.admin.genres.index'),
             'menu_book',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -93,7 +93,7 @@ class StoryServiceRefProvider extends ServiceProvider
         $registry->registerPage(
             'story_ref.statuses',
             'story',
-            __('story_ref::admin.statuses.nav_label'),
+            'story_ref::admin.statuses.nav_label',
             AdminRegistryTarget::route('story_ref.admin.statuses.index'),
             'flag',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -104,7 +104,7 @@ class StoryServiceRefProvider extends ServiceProvider
         $registry->registerPage(
             'story_ref.trigger_warnings',
             'story',
-            __('story_ref::admin.trigger_warnings.nav_label'),
+            'story_ref::admin.trigger_warnings.nav_label',
             AdminRegistryTarget::route('story_ref.admin.trigger-warnings.index'),
             'warning',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -115,7 +115,7 @@ class StoryServiceRefProvider extends ServiceProvider
         $registry->registerPage(
             'story_ref.types',
             'story',
-            __('story_ref::admin.types.nav_label'),
+            'story_ref::admin.types.nav_label',
             AdminRegistryTarget::route('story_ref.admin.types.index'),
             'category',
             [Roles::ADMIN, Roles::TECH_ADMIN],

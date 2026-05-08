@@ -225,7 +225,7 @@ class StoryServiceProvider extends ServiceProvider
         $registry->registerPage(
             'story.admin.moderation',
             'moderation',
-            __('story::admin.moderation.title'),
+            'story::admin.moderation.title',
             AdminRegistryTarget::route('story.admin.moderation.index'),
             'menu_book',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],

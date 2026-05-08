@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'nav_group' => 'Modération',
+
     'reasons' => [
         'title' => 'Raisons de signalement',
         'nav_label' => 'Raisons',

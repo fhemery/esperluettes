@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Admin\Database\Seeders;
+namespace App\Domains\Administration\Database\Seeders;
 
 use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Private\Models\Role;
@@ -33,7 +33,7 @@ class AdminUserSeeder extends Seeder
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'password' => Hash::make('password'), // You should change this password
+                'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
         );

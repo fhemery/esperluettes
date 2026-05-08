@@ -4,6 +4,40 @@ return [
     'users' => [
         'title' => 'Gestion des utilisateurs',
         'nav_label' => 'Utilisateurs',
+        'name_header' => 'Pseudo',
+        'email_header' => 'Email',
+        'is_active_header' => 'Actif',
+        'email_verified_at_header' => 'Email vérifié ?',
+
+        'status' => [
+            'active' => 'Actif',
+            'inactive' => 'Inactif',
+        ],
+
+        'actions' => [
+            'activate' => 'Activer',
+            'deactivate' => 'Désactiver',
+        ],
+
+        'activation' => [
+            'confirm_message' => 'Êtes-vous sûr de vouloir activer cet utilisateur ?',
+        ],
+
+        'deactivation' => [
+            'confirm_message' => 'Êtes-vous sûr de vouloir désactiver cet utilisateur ? Toutes ses sessions actives seront terminées.',
+        ],
+
+        'deletion' => [
+            'confirm_message' => 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
+            'success' => "L'utilisateur a été supprimé avec succès.",
+        ],
+
+        'promote' => [
+            'action_label' => 'Promouvoir',
+            'confirm_message' => "Cela remplacera le rôle « :from » par « :to ».",
+            'success' => "L'utilisateur a été promu au rôle « :role ».",
+        ],
+
         'export_button' => 'Exporter',
         'edit_button' => 'Modifier',
         'delete_button' => 'Supprimer',

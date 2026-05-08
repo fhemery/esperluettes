@@ -51,7 +51,7 @@ class EventsServiceProvider extends ServiceProvider
         $registry->registerPage(
             'events.admin.domain-events',
             'events',
-            __('events::admin.domain_events.nav_label'),
+            'events::admin.domain_events.nav_label',
             AdminRegistryTarget::route('events.admin.domain-events.index'),
             'bolt',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],

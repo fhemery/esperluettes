@@ -153,7 +153,7 @@ class AuthServiceProvider extends ServiceProvider
         $registry->registerPage(
             'auth.roles',
             'auth',
-            __('auth::admin.roles.nav_label'),
+            'auth::admin.roles.nav_label',
             AdminRegistryTarget::route('auth.admin.roles.index'),
             'shield',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -162,7 +162,7 @@ class AuthServiceProvider extends ServiceProvider
         $registry->registerPage(
             'auth.activation_codes',
             'auth',
-            __('auth::admin.activation_codes.nav_label'),
+            'auth::admin.activation_codes.nav_label',
             AdminRegistryTarget::route('auth.admin.activation-codes.index'),
             'key',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -171,7 +171,7 @@ class AuthServiceProvider extends ServiceProvider
         $registry->registerPage(
             'auth.promotion_requests',
             'auth',
-            __('auth::admin.promotion.nav_label'),
+            'auth::admin.promotion.nav_label',
             AdminRegistryTarget::route('auth.admin.promotion-requests.index'),
             'upgrade',
             [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],

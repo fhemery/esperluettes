@@ -67,13 +67,13 @@ class NewsServiceProvider extends ServiceProvider
     {
         $registry = app(AdminNavigationRegistry::class);
 
-        $registry->registerGroup('news', __('news::admin.nav.group'), 50);
+        $registry->registerGroup('news', 'news::admin.nav.group', 50);
 
         // Register News management page
         $registry->registerPage(
             'news.management',
             'news',
-            __('news::admin.nav.news'),
+            'news::admin.nav.news',
             AdminRegistryTarget::route('news.admin.index'),
             'newspaper',
             [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -84,7 +84,7 @@ class NewsServiceProvider extends ServiceProvider
         $registry->registerPage(
             'news.pinned',
             'news',
-            __('news::admin.nav.pinned'),
+            'news::admin.nav.pinned',
             AdminRegistryTarget::route('news.admin.pinned.index'),
             'push_pin',
             [Roles::ADMIN, Roles::TECH_ADMIN],

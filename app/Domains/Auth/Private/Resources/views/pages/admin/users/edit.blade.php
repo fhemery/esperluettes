@@ -15,7 +15,7 @@
                 <!-- Display Name (read-only) -->
                 <div>
                     <x-shared::input-label for="display_name">
-                        {{ __('admin::auth.users.name_header') }}
+                        {{ __('auth::admin.users.name_header') }}
                     </x-shared::input-label>
                     <x-shared::text-input
                         type="text"
@@ -30,7 +30,7 @@
                 <!-- Email -->
                 <div>
                     <x-shared::input-label for="email" :required="true">
-                        {{ __('admin::auth.users.email_header') }}
+                        {{ __('auth::admin.users.table.email') }}
                     </x-shared::input-label>
                     <x-shared::text-input
                         type="email"
@@ -46,7 +46,7 @@
                 <!-- Roles -->
                 <div>
                     <x-shared::input-label for="roles">
-                        {{ __('admin::auth.users.roles_header') }}
+                        {{ __('auth::admin.users.table.roles') }}
                     </x-shared::input-label>
                     <div class="mt-2">
                         <x-shared::searchable-multi-select
@@ -69,17 +69,17 @@
 
                     <dl class="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <dt class="text-fg/60">{{ __('admin::auth.users.is_active_header') }}</dt>
+                            <dt class="text-fg/60">{{ __('auth::admin.users.is_active_header') }}</dt>
                             <dd class="font-medium">
                                 @if ($user->is_active)
-                                    <span class="text-success">{{ __('admin::auth.users.status.active') }}</span>
+                                    <span class="text-success">{{ __('auth::admin.users.status.active') }}</span>
                                 @else
-                                    <span class="text-error">{{ __('admin::auth.users.status.inactive') }}</span>
+                                    <span class="text-error">{{ __('auth::admin.users.status.inactive') }}</span>
                                 @endif
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-fg/60">{{ __('admin::auth.users.email_verified_at_header') }}</dt>
+                            <dt class="text-fg/60">{{ __('auth::admin.users.email_verified_at_header') }}</dt>
                             <dd class="font-medium">
                                 @if ($user->email_verified_at)
                                     <span class="text-success">{{ $user->email_verified_at->format('d/m/Y H:i') }}</span>
@@ -99,7 +99,7 @@
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-fg/60">{{ __('admin::shared.column.created_at') }}</dt>
+                            <dt class="text-fg/60">{{ __('administration::shared.column.created_at') }}</dt>
                             <dd class="font-medium">{{ $user->created_at->format('d/m/Y H:i') }}</dd>
                         </div>
                     </dl>

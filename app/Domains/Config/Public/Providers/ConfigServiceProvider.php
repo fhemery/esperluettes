@@ -50,7 +50,7 @@ class ConfigServiceProvider extends ServiceProvider
         $registry->registerPage(
             key: 'config.parameters',
             group: 'config',
-            label: __('config::admin.parameters.nav_label'),
+            labelTranslationKey: 'config::admin.parameters.nav_label',
             target: AdminRegistryTarget::route('config.admin.parameters.index'),
             icon: 'tune',
             permissions: [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -60,7 +60,7 @@ class ConfigServiceProvider extends ServiceProvider
         $registry->registerPage(
             key: 'config.feature-toggles',
             group: 'config',
-            label: __('config::admin.feature_toggles.nav_label'),
+            labelTranslationKey: 'config::admin.feature_toggles.nav_label',
             target: AdminRegistryTarget::route('config.admin.feature-toggles.index'),
             icon: 'toggle_on',
             permissions: [Roles::ADMIN, Roles::TECH_ADMIN],

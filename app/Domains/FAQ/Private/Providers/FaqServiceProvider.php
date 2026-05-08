@@ -26,7 +26,7 @@ class FaqServiceProvider extends ServiceProvider
         $registry->registerPage(
             key: 'faq.categories',
             group: 'faq',
-            label: __('faq::admin.categories.nav_label'),
+            labelTranslationKey: 'faq::admin.categories.nav_label',
             target: AdminRegistryTarget::route('faq.admin.faq-categories.index'),
             icon: 'folder',
             permissions: [Roles::ADMIN, Roles::TECH_ADMIN],
@@ -36,7 +36,7 @@ class FaqServiceProvider extends ServiceProvider
         $registry->registerPage(
             key: 'faq.questions',
             group: 'faq',
-            label: __('faq::admin.questions.nav_label'),
+            labelTranslationKey: 'faq::admin.questions.nav_label',
             target: AdminRegistryTarget::route('faq.admin.faq-questions.index'),
             icon: 'help',
             permissions: [Roles::ADMIN, Roles::TECH_ADMIN],
