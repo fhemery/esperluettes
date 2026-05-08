@@ -409,6 +409,7 @@ deptrac:
       - Shared
       - CalendarPrivate
       - AuthPublic
+      - AdministrationPublic
 
     CommentPublic: 
       - Shared

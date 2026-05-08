@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Calendar\Public\Providers;
 
+use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Private\Activities\Jardino\JardinoRegistration;
 use App\Domains\Calendar\Private\Activities\SecretGift\SecretGiftRegistration;
 use Illuminate\Support\ServiceProvider;
@@ -43,5 +46,22 @@ class CalendarServiceProvider extends ServiceProvider
         $registry = app(CalendarRegistry::class);
         $registry->register(JardinoRegistration::ACTIVITY_TYPE, new JardinoRegistration());
         $registry->register(SecretGiftRegistration::ACTIVITY_TYPE, new SecretGiftRegistration());
+
+        $this->registerAdminNavigation();
+    }
+
+    protected function registerAdminNavigation(): void
+    {
+        $registry = app(AdminNavigationRegistry::class);
+
+        $registry->registerPage(
+            'calendar.activities',
+            'calendar',
+            __('calendar::admin.activities.nav_label'),
+            AdminRegistryTarget::route('calendar.admin.activities.index'),
+            'calendar_month',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            1,
+        );
     }
 }

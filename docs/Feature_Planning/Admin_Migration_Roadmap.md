@@ -237,13 +237,13 @@ We are migrating away from Filament to eliminate the `filament/filament` depende
 | **Roles** | ADMIN, TECH_ADMIN |
 | **Icons** | Filament: `heroicon-o-calendar` / Registry: `calendar_month` |
 
-- [ ] Controller — `app/Domains/Calendar/Private/Controllers/Admin/ActivityController.php`
-- [ ] Views — `app/Domains/Calendar/Private/Resources/views/pages/admin/activities/`
-- [ ] Routes — `app/Domains/Calendar/Private/routes.php`
-- [ ] Nav registration — `CalendarServiceProvider::registerAdminNavigation()`
-- [ ] Tests — `app/Domains/Calendar/Tests/Feature/Admin/ActivityControllerTest.php`
-- [ ] Filament resource removed — `app/Domains/Admin/Filament/Resources/Calendar/ActivitiesResource.php`
-- [ ] `NavigationItem` added to `AdminServiceProvider::panel()`
+- [x] Controller — `app/Domains/Calendar/Private/Controllers/Admin/ActivityController.php`
+- [x] Views — `app/Domains/Calendar/Private/Resources/views/pages/admin/activities/`
+- [x] Routes — `app/Domains/Calendar/Private/routes.php`
+- [x] Nav registration — `CalendarServiceProvider::registerAdminNavigation()`
+- [x] Tests — `app/Domains/Calendar/Tests/Feature/Admin/ActivityControllerTest.php`
+- [x] Filament resource removed — `app/Domains/Admin/Filament/Resources/Calendar/ActivitiesResource.php`
+- [x] `NavigationItem` added to `AdminServiceProvider::panel()`
 
 ---
 

@@ -74,7 +74,7 @@ class FaqQuestionController extends Controller
         $data = $request->validated();
         $data['image_alt_text'] = $data['image_alt_text'] ?? null;
 
-        if ($request->input('image_remove')) {
+        if ($request->boolean('image_remove')) {
             if ($faqQuestion->image_path) {
                 $this->imageService->deleteWithVariants('public', $faqQuestion->image_path);
             }

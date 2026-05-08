@@ -272,6 +272,13 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(2)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
 
+                NavigationItem::make('Activités')
+                    ->url('/admin/calendar/activities')
+                    ->icon('heroicon-o-calendar')
+                    ->group('Calendrier')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+
             ])
             ->renderHook('panels::body.end', fn () => view('admin::partials.format-dates'));
     }
