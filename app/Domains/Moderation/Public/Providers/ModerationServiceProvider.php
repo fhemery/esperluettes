@@ -65,6 +65,16 @@ class ModerationServiceProvider extends ServiceProvider
         );
 
         $registry->registerPage(
+            'moderation.reports',
+            'moderation',
+            __('moderation::admin.reports.nav_label'),
+            AdminRegistryTarget::route('moderation.admin.moderation-reports.index'),
+            'report',
+            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
+            5,
+        );
+
+        $registry->registerPage(
             'moderation.admin.user-management',
             'moderation',
             __('moderation::admin.user_management.title'),

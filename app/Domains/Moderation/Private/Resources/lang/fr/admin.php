@@ -49,6 +49,69 @@ return [
         'edit_button' => 'Modifier',
     ],
 
+    'reports' => [
+        'title' => 'Signalements',
+        'nav_label' => 'Signalements',
+
+        'approved' => 'Signalement approuvé.',
+        'dismissed' => 'Signalement rejeté.',
+        'deleted' => 'Signalement supprimé.',
+        'comment_saved' => 'Commentaire enregistré.',
+
+        'table' => [
+            'id' => 'ID',
+            'topic' => 'Type de contenu',
+            'entity_id' => 'Entité',
+            'reason' => 'Raison',
+            'description' => 'Description',
+            'review_comment' => 'Commentaire',
+            'reported_by' => 'Signalé par',
+            'status' => 'Statut',
+            'created_at' => 'Date',
+            'actions' => 'Actions',
+            'no_results' => 'Aucun signalement.',
+        ],
+
+        'filters' => [
+            'all_topics' => 'Tous les types',
+            'all_statuses' => 'Tous les statuts',
+            'apply' => 'Filtrer',
+            'reset' => 'Réinitialiser',
+        ],
+
+        'status' => [
+            'pending' => 'En attente',
+            'confirmed' => 'Confirmé',
+            'dismissed' => 'Rejeté',
+        ],
+
+        'actions' => [
+            'show' => 'Voir le détail',
+            'open' => 'Voir le contenu signalé',
+            'approve' => 'Approuver',
+            'dismiss' => 'Rejeter',
+            'delete' => 'Supprimer',
+            'confirm_delete' => 'Confirmer la suppression de ce signalement ?',
+        ],
+
+        'show' => [
+            'title' => 'Signalement #:id',
+            'topic' => 'Type de contenu',
+            'entity_id' => 'Entité',
+            'reason' => 'Raison',
+            'description' => 'Description',
+            'reporter' => 'Signalé par',
+            'status' => 'Statut',
+            'created_at' => 'Date',
+            'snapshot' => 'Aperçu du contenu',
+            'review_comment' => 'Commentaire de modération',
+            'review_comment_hint' => 'Note interne (non visible par l\'utilisateur)',
+            'save_comment' => 'Enregistrer le commentaire',
+            'back' => 'Retour à la liste',
+            'anonymous' => 'Anonyme',
+        ],
+    ],
+
     'user_management' => [
         'title' => 'Gestion des utilisateurs',
         'search' => [

@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Moderation\Private\Controllers\Admin\ModerationReasonController;
+use App\Domains\Moderation\Private\Controllers\Admin\ModerationReportController as AdminModerationReportController;
 use App\Domains\Moderation\Private\Controllers\ModerationAdminController;
 use App\Domains\Moderation\Private\Controllers\ModerationReportController;
 use Illuminate\Support\Facades\Route;
@@ -26,5 +27,10 @@ Route::middleware(['web', 'auth', 'compliant'])->group(function () {
 
         Route::put('moderation-reasons/reorder', [ModerationReasonController::class, 'reorder'])->name('moderation-reasons.reorder');
         Route::resource('moderation-reasons', ModerationReasonController::class)->except(['show']);
+
+        Route::post('moderation-reports/{moderationReport}/approve', [AdminModerationReportController::class, 'approve'])->name('moderation-reports.approve');
+        Route::post('moderation-reports/{moderationReport}/dismiss', [AdminModerationReportController::class, 'dismiss'])->name('moderation-reports.dismiss');
+        Route::put('moderation-reports/{moderationReport}/comment', [AdminModerationReportController::class, 'updateComment'])->name('moderation-reports.update-comment');
+        Route::resource('moderation-reports', AdminModerationReportController::class)->only(['index', 'show', 'destroy']);
     });
 });
