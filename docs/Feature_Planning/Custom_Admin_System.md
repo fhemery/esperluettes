@@ -69,7 +69,7 @@ A dedicated layout for admin pages that:
 Each registered page contains:
 - `label`: Display name (translatable)
 - `route`: Route name or URL
-- `icon`: Icon identifier (Material Symbols, Heroicons)
+- `icon`: Icon identifier (Material Symbols)
 - `permissions`: Required roles/permissions (array)
 - `group`: Navigation group (e.g., "Moderation", "Content", "System")
 - `order`: Sort order within group

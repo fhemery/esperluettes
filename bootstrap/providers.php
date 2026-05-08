@@ -16,7 +16,6 @@ return [
     App\Domains\Moderation\Public\Providers\ModerationServiceProvider::class,
     
     // Domain-specific providers
-    App\Domains\Admin\Providers\AdminServiceProvider::class,
     App\Domains\Administration\Public\Providers\AdministrationServiceProvider::class,
     App\Domains\Auth\Public\Providers\AuthServiceProvider::class,
     App\Domains\News\Public\Providers\NewsServiceProvider::class,

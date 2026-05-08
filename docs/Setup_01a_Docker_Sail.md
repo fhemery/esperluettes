@@ -91,11 +91,6 @@ Or on every change (very useful for development):
 - Clear cache: `sail artisan cache:clear`
 - Generate key: `sail artisan key:generate`
 
-### Filament Commands (for admin)
-- Create resource: `sail artisan make:filament-resource ModelName`
-- Create user: `sail artisan make:filament-user`
-- Create page: `sail artisan make:filament-page PageName`
-
 ## Database Backup and Restore
 
 ### Create a Database Backup

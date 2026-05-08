@@ -28,8 +28,7 @@
 
 | Domain | Path | Responsibilities | Tables |
 |--------|------|-----------------|--------|
-| **Admin** | `app/Domains/Admin` | Filament-based admin panel UI; entry point for all admin operations |
-| **Administration** | `app/Domains/Administration` | Admin layout, logs viewer, maintenance mode controller |
+| **Administration** | `app/Domains/Administration` | Custom admin panel layout, navigation registry (`AdminNavigationRegistry`), logs viewer, maintenance mode |
 | **Auth** | `app/Domains/Auth` | User authentication (Breeze), registration, roles, activation codes, promotion requests |
 | **Calendar** | `app/Domains/Calendar` | Time-bound activities (contests, challenges) with a plugin-based activity-type registry |
 | **Comment** | `app/Domains/Comment` | Pluggable comment system with per-entity policy registry; consumed by Story, News, etc. |
@@ -37,10 +36,10 @@
 | **Dashboard** | `app/Domains/Dashboard` | Authenticated user dashboard page |
 | **Discord** | `app/Domains/Discord` | Discord bot integration; user connection via code exchange |
 | **Events** | `app/Domains/Events` | Domain event bus and audit log infrastructure; cross-domain communication backbone |
-| **FAQ** | `app/Domains/FAQ` | FAQ categories and questions with Filament admin panel |
+| **FAQ** | `app/Domains/FAQ` | FAQ categories and questions with admin panel |
 | **Home** | `app/Domains/Home` | Home page, aggregates data from multiple domains |
 | **Message** | `app/Domains/Message` | Private messages between users (incomplete) |
-| **Moderation** | `app/Domains/Moderation` | User reporting with pluggable topic registry; moderators review reports in Admin |
+| **Moderation** | `app/Domains/Moderation` | User reporting with pluggable topic registry; moderators review reports in the admin panel |
 | **News** | `app/Domains/News` | News articles with publish/unpublish workflow and homepage carousel |
 | **Notification** | `app/Domains/Notification` | Cross-domain user notification system with extensible content types |
 | **Profile** | `app/Domains/Profile` | User profile, picture, bio, social links |

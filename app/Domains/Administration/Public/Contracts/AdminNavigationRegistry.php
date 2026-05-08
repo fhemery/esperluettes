@@ -13,7 +13,7 @@ final class AdminNavigationRegistry
     /** @var array<string, array{label: string, sort_order: int}> */
     private array $groups = [];
 
-    /** @var array<string, array{group: string, label: string, target: AdminRegistryTarget, icon: string, permissions: array<string>, sort_order: int, type: 'filament'|'custom'}> */
+    /** @var array<string, array{group: string, label: string, target: AdminRegistryTarget, icon: string, permissions: array<string>, sort_order: int, type: 'custom'}> */
     private array $pages = [];
 
     /**
@@ -38,7 +38,7 @@ final class AdminNavigationRegistry
      * @param string $group Group key this page belongs to
      * @param string $labelTranslationKey Translation key for the display label
      * @param AdminRegistryTarget $target URL target (resolved route name or direct URL)
-     * @param string $icon Icon identifier (Material Symbols, Heroicons)
+     * @param string $icon Icon identifier (Material Symbols)
      * @param array<string> $permissions Required permissions/roles
      * @param int $sortOrder Sort order within group
      */
@@ -139,7 +139,7 @@ final class AdminNavigationRegistry
     /**
      * Get all registered pages
      *
-     * @return array<string, array{group: string, label: string, target: AdminRegistryTarget, icon: string, permissions: array<string>, sort_order: int, type: 'filament'|'custom'}>
+     * @return array<string, array{group: string, label: string, target: AdminRegistryTarget, icon: string, permissions: array<string>, sort_order: int, type: 'custom'}>
      */
     public function getPages(): array
     {

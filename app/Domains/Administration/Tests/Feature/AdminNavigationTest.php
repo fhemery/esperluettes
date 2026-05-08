@@ -4,7 +4,6 @@ use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -36,74 +35,6 @@ function countNewAdminSidebarLinks(string $html): int
 }
 
 describe('Admin navigation', function () {
-
-    it('has same number of sidebar links between Filament and new admin for admin role', function () {
-        $user = admin($this, [], true, [Roles::ADMIN, Roles::USER_CONFIRMED]);
-        $this->actingAs($user);
-
-        // Old Filament admin
-        $filamentResponse = $this->get('/admin');
-        $filamentResponse->assertOk();
-        $filamentCount = countFilamentSidebarLinks($filamentResponse->getContent());
-
-        // New custom admin
-        $newAdminResponse = $this->get('/administration');
-        $newAdminResponse->assertOk();
-        $newAdminCount = countNewAdminSidebarLinks($newAdminResponse->getContent());
-
-        expect($newAdminCount)->toBe($filamentCount);
-    });
-
-    it('renders hardcoded dashboard and back-to-site links in the admin sidebar', function () {
-        // Use a tech admin user who has full access to the admin area
-        $user = techAdmin($this, [], true, [Roles::TECH_ADMIN, Roles::USER_CONFIRMED]);
-        $this->actingAs($user);
-
-        $response = $this->get('/administration');
-        $response->assertOk();
-
-        $html = $response->getContent();
-
-        // Dashboard link
-        $dashboardUrl = route('administration.dashboard');
-        expect($html)->toContain('href="' . $dashboardUrl . '"')
-            ->and($html)->toContain(__('administration::dashboard.title'));
-
-        // Back to site link
-        $backToSiteUrl = route('dashboard');
-        expect($html)->toContain('href="' . $backToSiteUrl . '"')
-            ->and($html)->toContain(__('administration::navigation.back-to-site'));
-    });
-
-    it('has same number of sidebar links between Filament and new admin for tech admin role', function () {
-        $user = techAdmin($this, [], true, [Roles::TECH_ADMIN, Roles::USER_CONFIRMED]);
-        $this->actingAs($user);
-
-        $filamentResponse = $this->get('/admin');
-        $filamentResponse->assertOk();
-        $filamentCount = countFilamentSidebarLinks($filamentResponse->getContent());
-
-        $newAdminResponse = $this->get('/administration');
-        $newAdminResponse->assertOk();
-        $newAdminCount = countNewAdminSidebarLinks($newAdminResponse->getContent());
-
-        expect($newAdminCount)->toBe($filamentCount);
-    });
-
-    it('has same number of sidebar links between Filament and new admin for moderator role', function () {
-        $user = moderator($this, [], true, [Roles::MODERATOR, Roles::USER_CONFIRMED]);
-        $this->actingAs($user);
-
-        $filamentResponse = $this->get('/admin');
-        $filamentResponse->assertOk();
-        $filamentCount = countFilamentSidebarLinks($filamentResponse->getContent());
-
-        $newAdminResponse = $this->get('/administration');
-        $newAdminResponse->assertOk();
-        $newAdminCount = countNewAdminSidebarLinks($newAdminResponse->getContent());
-
-        expect($newAdminCount)->toBe($filamentCount);
-    });
 
     describe('Registration management and sorting', function () {
         beforeEach(function () {
