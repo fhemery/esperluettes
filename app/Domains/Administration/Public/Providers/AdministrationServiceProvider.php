@@ -131,16 +131,7 @@ class AdministrationServiceProvider extends ServiceProvider
             1,
         );
 
-        // Events
-        $registry->registerPage(
-            'events.domain_events',
-            'events',
-            __('admin::domain_events.navigation_label'),
-            AdminRegistryTarget::url('/admin/event/domain-events'),
-            'bolt',
-            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
-            1,
-        );
+        // Events — now registered in EventsServiceProvider (custom admin page)
 
         // FAQ
         $registry->registerPage(
@@ -163,17 +154,7 @@ class AdministrationServiceProvider extends ServiceProvider
             2,
         );
 
-        // Moderation
-        // NOTE: moderation.reasons is now registered in ModerationServiceProvider (custom admin page)
-        $registry->registerPage(
-            'moderation.reports',
-            'moderation',
-            __('admin::moderation.reports.navigation_label'),
-            AdminRegistryTarget::url('/admin/moderation/moderation-reports'),
-            'report',
-            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
-            2,
-        );
+        // Moderation — reasons and reports now registered in ModerationServiceProvider (custom admin pages)
 
         // Story references
         // NOTE: All StoryRef admin pages are now registered in StoryServiceRefProvider (custom admin pages)

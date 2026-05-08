@@ -243,7 +243,14 @@ class AdminServiceProvider extends PanelProvider
                     ->group('Configuration')
                     ->sort(1)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
- 
+
+                NavigationItem::make('Événements')
+                    ->url('/admin/events/domain-events')
+                    ->icon('heroicon-o-bolt')
+                    ->group('Audit')
+                    ->sort(99)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]) ?? false),
+
             ])
             ->renderHook('panels::body.end', fn () => view('admin::partials.format-dates'));
     }

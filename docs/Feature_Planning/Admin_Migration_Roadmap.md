@@ -139,13 +139,13 @@ We are migrating away from Filament to eliminate the `filament/filament` depende
 | **Roles** | ADMIN, TECH_ADMIN, MODERATOR |
 | **Icons** | Filament: `heroicon-o-bolt` / Registry: `bolt` |
 
-- [ ] Controller — `app/Domains/Events/Private/Controllers/Admin/DomainEventController.php`
-- [ ] Views — `app/Domains/Events/Private/Resources/views/pages/admin/domain-events/`
-- [ ] Routes — `app/Domains/Events/Private/routes.php`
-- [ ] Nav registration — `EventsServiceProvider::registerAdminNavigation()`
-- [ ] Tests — `app/Domains/Events/Tests/Feature/Admin/DomainEventControllerTest.php`
-- [ ] Filament resource removed — `app/Domains/Admin/Filament/Resources/Event/DomainEventResource.php`
-- [ ] `NavigationItem` added to `AdminServiceProvider::panel()`
+- [x] Controller — `app/Domains/Events/Private/Controllers/Admin/DomainEventController.php`
+- [x] Views — `app/Domains/Events/Private/Resources/views/pages/admin/domain-events/`
+- [x] Routes — `app/Domains/Events/Private/routes.php`
+- [x] Nav registration — `EventsServiceProvider::registerAdminNavigation()`
+- [x] Tests — `app/Domains/Events/Tests/Feature/Admin/DomainEventControllerTest.php`
+- [x] Filament resource removed — `app/Domains/Admin/Filament/Resources/Event/DomainEventResource.php`
+- [x] `NavigationItem` added to `AdminServiceProvider::panel()`
 
 ---
 

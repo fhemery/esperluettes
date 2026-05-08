@@ -431,6 +431,8 @@ deptrac:
     EventsPublic:
       - Shared
       - EventsPrivate
+      - AuthPublic
+      - AdministrationPublic
 
     DiscordPublic:
       - AuthPublic
@@ -611,6 +613,7 @@ deptrac:
     EventsPrivate:
       - Shared
       - EventsPublic
+      - AuthPublic
 
     DiscordPrivate:
       - Shared
@@ -755,6 +758,8 @@ deptrac:
       - TestHelpers
       - EventsPrivate
       - EventsPublic
+      - AuthPublic
+      - Shared
 
     DiscordTests:
       - Shared
