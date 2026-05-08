@@ -122,26 +122,7 @@ class AdministrationServiceProvider extends ServiceProvider
 
         // Events — now registered in EventsServiceProvider (custom admin page)
 
-        // FAQ
-        $registry->registerPage(
-            'faq.categories',
-            'faq',
-            __('admin::faq.navigation.categories'),
-            AdminRegistryTarget::url('/admin/f-a-q/faq-categories'),
-            'folder',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            1,
-        );
-
-        $registry->registerPage(
-            'faq.questions',
-            'faq',
-            __('admin::faq.navigation.questions'),
-            AdminRegistryTarget::url('/admin/f-a-q/faq-questions'),
-            'help',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
-            2,
-        );
+        // FAQ — now registered in FaqServiceProvider (custom admin pages)
 
         // Moderation — reasons and reports now registered in ModerationServiceProvider (custom admin pages)
 

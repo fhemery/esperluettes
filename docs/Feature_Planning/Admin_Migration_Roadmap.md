@@ -189,13 +189,13 @@ We are migrating away from Filament to eliminate the `filament/filament` depende
 | **Roles** | ADMIN, TECH_ADMIN |
 | **Icons** | Filament: `heroicon-o-folder` / Registry: `folder` |
 
-- [ ] Controller — `app/Domains/FAQ/Private/Controllers/Admin/FaqCategoryController.php`
-- [ ] Views — `app/Domains/FAQ/Private/Resources/views/pages/admin/faq-categories/`
-- [ ] Routes — `app/Domains/FAQ/Private/routes.php`
-- [ ] Nav registration — `FaqServiceProvider::registerAdminNavigation()`
-- [ ] Tests — `app/Domains/FAQ/Tests/Feature/Admin/FaqCategoryControllerTest.php`
-- [ ] Filament resource removed — `app/Domains/Admin/Filament/Resources/FAQ/FaqCategoryResource.php`
-- [ ] `NavigationItem` added to `AdminServiceProvider::panel()`
+- [x] Controller — `app/Domains/FAQ/Private/Controllers/Admin/FaqCategoryController.php`
+- [x] Views — `app/Domains/FAQ/Private/Resources/views/pages/admin/faq-categories/`
+- [x] Routes — `app/Domains/FAQ/Private/routes.php`
+- [x] Nav registration — `FaqServiceProvider::registerAdminNavigation()`
+- [x] Tests — `app/Domains/FAQ/Tests/Feature/Admin/FaqCategoryControllerTest.php`
+- [x] Filament resource removed — `app/Domains/Admin/Filament/Resources/FAQ/FaqCategoryResource.php`
+- [x] `NavigationItem` added to `AdminServiceProvider::panel()`
 
 ---
 
@@ -212,13 +212,13 @@ We are migrating away from Filament to eliminate the `filament/filament` depende
 | **Roles** | ADMIN, TECH_ADMIN |
 | **Icons** | Filament: `heroicon-o-question-mark-circle` / Registry: `help` |
 
-- [ ] Controller — `app/Domains/FAQ/Private/Controllers/Admin/FaqQuestionController.php`
-- [ ] Views — `app/Domains/FAQ/Private/Resources/views/pages/admin/faq-questions/`
-- [ ] Routes — `app/Domains/FAQ/Private/routes.php`
-- [ ] Nav registration — `FaqServiceProvider::registerAdminNavigation()`
-- [ ] Tests — `app/Domains/FAQ/Tests/Feature/Admin/FaqQuestionControllerTest.php`
-- [ ] Filament resource removed — `app/Domains/Admin/Filament/Resources/FAQ/FaqQuestionResource.php`
-- [ ] `NavigationItem` added to `AdminServiceProvider::panel()`
+- [x] Controller — `app/Domains/FAQ/Private/Controllers/Admin/FaqQuestionController.php`
+- [x] Views — `app/Domains/FAQ/Private/Resources/views/pages/admin/faq-questions/`
+- [x] Routes — `app/Domains/FAQ/Private/routes.php`
+- [x] Nav registration — `FaqServiceProvider::registerAdminNavigation()`
+- [x] Tests — `app/Domains/FAQ/Tests/Feature/Admin/FaqQuestionControllerTest.php`
+- [x] Filament resource removed — `app/Domains/Admin/Filament/Resources/FAQ/FaqQuestionResource.php`
+- [x] `NavigationItem` added to `AdminServiceProvider::panel()`
 
 ---
 

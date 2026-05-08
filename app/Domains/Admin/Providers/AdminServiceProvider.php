@@ -258,6 +258,20 @@ class AdminServiceProvider extends PanelProvider
                     ->sort(99)
                     ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR]) ?? false),
 
+                NavigationItem::make('Catégories')
+                    ->url('/admin/faq/faq-categories')
+                    ->icon('heroicon-o-folder')
+                    ->group('FAQ')
+                    ->sort(1)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+
+                NavigationItem::make('Questions')
+                    ->url('/admin/faq/faq-questions')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->group('FAQ')
+                    ->sort(2)
+                    ->visible(fn (): bool => auth()->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false),
+
             ])
             ->renderHook('panels::body.end', fn () => view('admin::partials.format-dates'));
     }

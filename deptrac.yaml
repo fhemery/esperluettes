@@ -624,8 +624,10 @@ deptrac:
       - NotificationPublic
 
     FAQPrivate:
-      - Shared
+      - AdministrationPublic
+      - AuthPublic
       - FAQPublic
+      - Shared
 
     HomePrivate:
       - Shared

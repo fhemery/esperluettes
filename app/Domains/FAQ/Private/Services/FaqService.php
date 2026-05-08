@@ -170,6 +170,11 @@ class FaqService
         $this->cache->clear();
     }
 
+    public function clearCache(): void
+    {
+        $this->cache->clear();
+    }
+
     /**
      * Get active FAQ categories ordered by sort_order for frontend display.
      */
