@@ -180,7 +180,7 @@ The `loadMore` endpoint returns raw rendered HTML for each notification item and
 - `<x-notification::notification-icon />` — Bell icon for the navbar showing the unread count. Self-contained: fetches the count in its constructor. Hidden for guests.
 - `notification::components.notification-item` — Partial used for each notification row (also returned by `loadMore`).
 
-## Artisan command
+## Artisan commands
 
 `notifications:cleanup`
 
@@ -189,6 +189,10 @@ Runs two cleanup operations:
 2. Deletes notifications whose `content_key` is not registered in `NotificationFactory` (stale/orphaned types).
 
 Emits a `NotificationsCleanedUp` domain event via `EventBus` after completing.
+
+`notifications:export-types-doc`
+
+Writes [docs/notification-types.md](../../../docs/notification-types.md) (by default) with every registered notification type, PHP class, preference flags, and external delivery channels. Use `--output=` to change the path and `--locale=` to resolve labels in a specific locale. Regenerate after adding or changing notification types so integrators (e.g. Discord) stay in sync.
 
 ## Events
 

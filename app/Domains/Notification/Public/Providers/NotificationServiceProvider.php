@@ -5,6 +5,7 @@ namespace App\Domains\Notification\Public\Providers;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Notification\Private\Console\CleanupOldNotificationsCommand;
+use App\Domains\Notification\Private\Console\ExportNotificationTypesDocumentationCommand;
 use App\Domains\Notification\Private\Listeners\CleanNotificationsOnUserDeleted;
 use App\Domains\Notification\Public\Events\NotificationsCleanedUp;
 use App\Domains\Notification\Public\Services\NotificationChannelRegistry;
@@ -28,6 +29,7 @@ class NotificationServiceProvider extends ServiceProvider
 
         $this->commands([
             CleanupOldNotificationsCommand::class,
+            ExportNotificationTypesDocumentationCommand::class,
         ]);
     }
 
