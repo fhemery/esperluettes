@@ -25,12 +25,15 @@ import yaml from 'js-yaml';
 import { makeLog, fileExists, runCmd, determineRunner } from './utils.js';
 
 const excludeFoldersOrFiles = [
+  '.github',
   'docs/',
   'scripts/',
   'deptrac.yaml',
   '.windsurf',
   '.husky',
   '.vscode',
+  '.claude',
+  'AGENTS.md'
 ]
 
 const log = makeLog('staged-tests');
