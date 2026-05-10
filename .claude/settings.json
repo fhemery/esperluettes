@@ -1,6 +1,6 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "Stop": [
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [
@@ -11,7 +11,7 @@
           },
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && npm run launch-staged:tests",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && npm run launch-staged:tests -- --claude",
             "timeout": 300
           }
         ]
