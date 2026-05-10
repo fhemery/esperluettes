@@ -2,24 +2,16 @@
 
 namespace App\Domains\FAQ\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
+#[Fillable(['name', 'slug', 'description', 'sort_order', 'is_active', 'created_by_user_id', 'updated_by_user_id'])]
 class FaqCategory extends Model
 {
     use HasSlug;
-
-    protected $fillable = [
-        'name',
-        'slug',
-        'description',
-        'sort_order',
-        'is_active',
-        'created_by_user_id',
-        'updated_by_user_id',
-    ];
 
     protected $casts = [
         'is_active' => 'boolean',

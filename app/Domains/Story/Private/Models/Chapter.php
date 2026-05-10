@@ -2,6 +2,8 @@
 
 namespace App\Domains\Story\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,24 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Domains\Story\Private\Models\ReadingProgress;
 use App\Domains\Shared\Contracts\Sortable;
 
+#[Table('story_chapters')]
+#[Fillable(['story_id', 'title', 'slug', 'author_note', 'content', 'sort_order', 'status', 'first_published_at', 'reads_logged_count', 'word_count', 'character_count'])]
 class Chapter extends Model implements Sortable
 {
     use SoftDeletes;
-    protected $table = 'story_chapters';
-
-    protected $fillable = [
-        'story_id',
-        'title',
-        'slug',
-        'author_note',
-        'content',
-        'sort_order',
-        'status',
-        'first_published_at',
-        'reads_logged_count',
-        'word_count',
-        'character_count',
-    ];
 
     protected $casts = [
         'story_id' => 'integer',

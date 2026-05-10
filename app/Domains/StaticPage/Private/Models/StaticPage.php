@@ -9,23 +9,14 @@ use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Builder;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
+
+#[Table('static_pages')]
+#[Fillable(['title', 'slug', 'summary', 'content', 'header_image_path', 'status', 'meta_description', 'published_at', 'created_by'])]
 class StaticPage extends Model
 {
     use HasSlug, HasFactory;
-
-    protected $table = 'static_pages';
-
-    protected $fillable = [
-        'title',
-        'slug',
-        'summary',
-        'content',
-        'header_image_path',
-        'status',
-        'meta_description',
-        'published_at',
-        'created_by',
-    ];
 
     protected $casts = [
         'published_at' => 'datetime',
