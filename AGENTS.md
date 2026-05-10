@@ -55,7 +55,29 @@
 # Laravel Coding Standards
 
 ## Models
-- Use `protected $fillable`
+Use PHP attribute syntax (Laravel 13+) instead of property declarations:
+
+```php
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+
+#[Table('my_table')]                          // replaces: protected $table
+#[Table('my_table', timestamps: false)]       // replaces: public $timestamps = false
+#[Table('my_table', key: 'user_id', incrementing: false)]  // replaces: $primaryKey + $incrementing
+#[WithoutIncrementing]                        // shorthand for incrementing: false
+#[WithoutTimestamps]                          // shorthand for timestamps: false
+#[Fillable(['col1', 'col2'])]                 // replaces: protected $fillable
+#[Hidden(['password'])]                       // replaces: protected $hidden
+class MyModel extends Model {}
+```
+
+Rules:
+- Always use PHP attributes for `$table`, `$fillable`, `$hidden`, `$incrementing`, `$timestamps`
+- Keep `protected $casts` as a property — no attribute equivalent exists
+- Keep `protected $primaryKey = null` as a property for composite-key models — `#[Table]` cannot set the key to null
 - Add validation rules in model methods
 - Use Eloquent conventions for foreign keys
 

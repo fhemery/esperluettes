@@ -22,9 +22,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawnSync } from 'child_process';
 import yaml from 'js-yaml';
-import { makeLog, fileExists, runCmd, runCmdWithOutput, determineRunner } from './utils.js';
-
-const claudeMode = process.argv.includes('--claude');
+import { makeLog, fileExists, runCmd, determineRunner } from './utils.js';
 
 const excludeFoldersOrFiles = [
   'docs/',
@@ -37,12 +35,7 @@ const excludeFoldersOrFiles = [
 
 const log = makeLog('staged-tests');
 
-function runTestCmd(cmd, args) {
-  if (!claudeMode) return runCmd(cmd, args);
-  const { ok, output } = runCmdWithOutput(cmd, args);
-  if (!ok && output) process.stderr.write(output + '\n');
-  return ok;
-}
+// runCmd imported from utils
 
 function getModifiedFiles() {
   // Collect modified files from staged, unstaged, and untracked sources
@@ -196,24 +189,24 @@ function runStagedTests(skipBranchCheck = false) {
   if (modified.length === 0) {
     log('No modified files; running full test suite.');
     const runner = determineRunner();
-    if (runner === 'php') return runTestCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
-    else return runTestCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
+    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
   }
 
   const deptrac = readDeptracConfig();
   if (!deptrac) {
     log('deptrac.yaml not found or invalid; running full test suite.');
     const runner = determineRunner();
-    if (runner === 'php') return runTestCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
-    else return runTestCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
+    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
   }
 
   const { domains, runAll } = extractDomainsFromFiles(modified);
   if (runAll) {
     log('Changes include files outside app/Domains (and not ignored); running full test suite.');
     const runner = determineRunner();
-    if (runner === 'php') return runTestCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
-    else return runTestCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
+    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
   }
   if (domains.length === 0) {
     log('Changes contain only non code files, ignoring the  full test suite.');
@@ -240,8 +233,8 @@ function runStagedTests(skipBranchCheck = false) {
   if (testDirs.length === 0 || testDirs.length > 5) {
     log('No specific test directories (or too many of them) resolved; running full test suite.');
     const runner = determineRunner();
-    if (runner === 'php') return runTestCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
-    else return runTestCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
+    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
+    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
   }
 
   // Deduplicate and run
@@ -249,8 +242,8 @@ function runStagedTests(skipBranchCheck = false) {
   log(`Running tests for: ${uniqueDirs.join(' ')}`);
   const runner = determineRunner();
   const ok = (runner === 'php')
-    ? runTestCmd('php', ['artisan', 'test', ...uniqueDirs])
-    : runTestCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', ...uniqueDirs]);
+    ? runCmd('php', ['artisan', 'test', ...uniqueDirs])
+    : runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', ...uniqueDirs]);
   return ok ? 0 : 1;
 }
 
@@ -258,13 +251,6 @@ function runStagedTests(skipBranchCheck = false) {
 const __filename = fileURLToPath(import.meta.url);
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   const code = runStagedTests(true);
-  if (claudeMode) {
-    if (code !== 0) {
-      process.stdout.write(JSON.stringify({ decision: 'block', reason: 'Les tests ont échoué. Corrige les erreurs avant de finaliser.' }) + '\n');
-    } else {
-      process.stdout.write('✅ Tous les tests passent.\n');
-    }
-  }
   process.exit(code);
 }
 
