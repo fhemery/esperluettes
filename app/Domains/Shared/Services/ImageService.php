@@ -92,12 +92,12 @@ class ImageService
     protected function generateVariants(string $disk, string $folder, string $filename, string $sourcePath, array $widths): void
     {
         foreach ($widths as $width) {
-            $img = Image::read($sourcePath)->scale(width: (int) $width);
+            $img = Image::decode($sourcePath)->scale(width: (int) $width);
             $jpgPath = sprintf('%s/%s-%dw.jpg', $folder, $filename, $width);
-            Storage::disk($disk)->put($jpgPath, (string) $img->encodeByExtension('jpg', quality: 82));
+            Storage::disk($disk)->put($jpgPath, (string) $img->encodeUsingFileExtension('jpg', quality: 82));
 
             $webpPath = sprintf('%s/%s-%dw.webp', $folder, $filename, $width);
-            Storage::disk($disk)->put($webpPath, (string) $img->encodeByExtension('webp', quality: 82));
+            Storage::disk($disk)->put($webpPath, (string) $img->encodeUsingFileExtension('webp', quality: 82));
         }
     }
 
@@ -115,8 +115,8 @@ class ImageService
     {
         $sourcePath = $file instanceof UploadedFile ? $file->getRealPath() : (string) $file;
 
-        $img = Image::read($sourcePath)->cover($size, $size);
-        Storage::disk($disk)->put($targetPath, (string) $img->encodeByExtension('jpg', quality: $quality));
+        $img = Image::decode($sourcePath)->cover($size, $size);
+        Storage::disk($disk)->put($targetPath, (string) $img->encodeUsingFileExtension('jpg', quality: $quality));
 
         return $targetPath;
     }

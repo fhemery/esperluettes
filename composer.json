@@ -7,15 +7,15 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "intervention/image-laravel": "^1.5",
+        "intervention/image-laravel": "^4.0",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "mews/purifier": "^3.4",
-        "spatie/laravel-sluggable": "^3.7",
+        "spatie/laravel-sluggable": "^4.0",
         "spatie/laravel-translatable": "^6.11"
     },
     "require-dev": {
-        "deptrac/deptrac": "^3.0",
+        "deptrac/deptrac": "^4.0",
         "fakerphp/faker": "^1.23",
         "laravel/breeze": "^2.3",
         "laravel/pail": "^1.2.2",
@@ -25,7 +25,7 @@
         "nunomaduro/collision": "^8.6",
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
-        "symfony/css-selector": "^7.3"
+        "symfony/css-selector": "^8.0"
     },
     "autoload": {
         "psr-4": {

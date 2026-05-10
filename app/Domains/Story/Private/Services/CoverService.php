@@ -86,16 +86,16 @@ class CoverService
 
         $sourcePath = $file->getRealPath();
 
-        $small = Image::read($sourcePath)->cover(self::CUSTOM_COVER_SMALL_WIDTH, self::CUSTOM_COVER_SMALL_HEIGHT);
+        $small = Image::decode($sourcePath)->cover(self::CUSTOM_COVER_SMALL_WIDTH, self::CUSTOM_COVER_SMALL_HEIGHT);
         Storage::disk(self::CUSTOM_COVER_DISK)->put(
             $this->customCoverPath($story),
-            (string) $small->encodeByExtension('jpg', quality: 85)
+            (string) $small->encodeUsingFileExtension('jpg', quality: 85)
         );
 
-        $hd = Image::read($sourcePath)->cover(self::CUSTOM_COVER_HD_WIDTH, self::CUSTOM_COVER_HD_HEIGHT);
+        $hd = Image::decode($sourcePath)->cover(self::CUSTOM_COVER_HD_WIDTH, self::CUSTOM_COVER_HD_HEIGHT);
         Storage::disk(self::CUSTOM_COVER_DISK)->put(
             $this->customCoverHdPath($story),
-            (string) $hd->encodeByExtension('jpg', quality: 85)
+            (string) $hd->encodeUsingFileExtension('jpg', quality: 85)
         );
     }
 
