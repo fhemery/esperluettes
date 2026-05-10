@@ -18,7 +18,7 @@
 
     <!-- Sliding Panel -->
     <div class="fixed inset-y-0 right-0 z-50 w-80 min-w-[300px] max-w-full motion-reduce:transition-none"
-         :id="'drawer-'+{{ json_encode($name) }}"
+         :id="'drawer-'+{{ Js::from($name) }}"
          x-show="open" x-cloak
          x-transition:enter="transform transition ease-out duration-300"
          x-transition:enter-start="translate-x-full"

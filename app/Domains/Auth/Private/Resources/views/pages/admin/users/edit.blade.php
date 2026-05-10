@@ -167,7 +167,7 @@ function clearAuthorizationComponent() {
         loading: false,
         clearAuthorization() {
             if (this.loading) return;
-            if (!confirm({!! json_encode(__('auth::admin.users.authorization.clear_confirm')) !!})) return;
+            if (!confirm({{ Js::from(__('auth::admin.users.authorization.clear_confirm')) }})) return;
             
             this.loading = true;
             fetch('{{ route('auth.admin.users.clear-authorization', $user) }}', {
@@ -181,7 +181,7 @@ function clearAuthorizationComponent() {
                 if (response.ok) {
                     window.location.reload();
                 } else {
-                    alert({!! json_encode(__('auth::admin.users.authorization.cannot_clear')) !!});
+                    alert({{ Js::from(__('auth::admin.users.authorization.cannot_clear')) }});
                     this.loading = false;
                 }
             })
