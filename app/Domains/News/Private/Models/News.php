@@ -2,6 +2,8 @@
 
 namespace App\Domains\News\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Domains\News\Database\Factories\NewsFactory;
@@ -10,26 +12,12 @@ use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
+#[Table('news')]
+#[Fillable(['title', 'slug', 'summary', 'content', 'header_image_path', 'is_pinned', 'display_order', 'status', 'meta_description', 'published_at', 'created_by'])]
 class News extends Model
 {
     /** @use HasFactory<\App\Domains\News\Database\Factories\NewsFactory> */
     use HasSlug, HasFactory;
-
-    protected $table = 'news';
-
-    protected $fillable = [
-        'title',
-        'slug',
-        'summary',
-        'content',
-        'header_image_path',
-        'is_pinned',
-        'display_order',
-        'status',
-        'meta_description',
-        'published_at',
-        'created_by',
-    ];
 
     protected $casts = [
         'is_pinned' => 'boolean',

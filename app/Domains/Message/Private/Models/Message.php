@@ -2,24 +2,18 @@
 
 namespace App\Domains\Message\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[Table('messages')]
+#[Fillable(['title', 'content', 'sent_by_id', 'sent_at', 'reply_to_id'])]
 class Message extends Model
 {
     use HasFactory;
     use SoftDeletes;
-
-    protected $table = 'messages';
-
-    protected $fillable = [
-        'title',
-        'content',
-        'sent_by_id',
-        'sent_at',
-        'reply_to_id',
-    ];
 
     protected $casts = [
         'sent_by_id' => 'integer',

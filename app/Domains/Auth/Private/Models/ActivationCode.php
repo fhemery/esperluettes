@@ -2,25 +2,18 @@
 
 namespace App\Domains\Auth\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
+#[Table('user_activation_codes')]
+#[Fillable(['code', 'sponsor_user_id', 'used_by_user_id', 'comment', 'expires_at', 'used_at'])]
 class ActivationCode extends Model
 {
     use HasFactory;
-
-    protected $table = 'user_activation_codes';
-
-    protected $fillable = [
-        'code',
-        'sponsor_user_id',
-        'used_by_user_id',
-        'comment',
-        'expires_at',
-        'used_at',
-    ];
 
     protected $casts = [
         'sponsor_user_id' => 'integer',

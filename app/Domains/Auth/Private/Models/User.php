@@ -5,36 +5,16 @@ namespace App\Domains\Auth\Private\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Domains\Auth\Private\Models\Role;
 use App\Domains\Auth\Public\Api\Roles;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+#[Fillable(['email', 'password', 'is_active', 'terms_accepted_at', 'is_under_15', 'parental_authorization_verified_at'])]
+#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     use Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'email',
-        'password',
-        'is_active',
-        'terms_accepted_at',
-        'is_under_15',
-        'parental_authorization_verified_at',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
 
     /**
      * Will load the roles eagerly

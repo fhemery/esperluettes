@@ -2,21 +2,16 @@
 
 namespace App\Domains\Message\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[Table('message_deliveries')]
+#[Fillable(['message_id', 'user_id', 'is_read', 'read_at'])]
 class MessageDelivery extends Model
 {
     use HasFactory;
-
-    protected $table = 'message_deliveries';
-
-    protected $fillable = [
-        'message_id',
-        'user_id',
-        'is_read',
-        'read_at',
-    ];
 
     protected $casts = [
         'message_id' => 'integer',

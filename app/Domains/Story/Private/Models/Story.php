@@ -5,31 +5,15 @@ namespace App\Domains\Story\Private\Models;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\StoryGenre;
 use App\Domains\Story\Private\Models\StoryTriggerWarning;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+#[Fillable(['created_by_user_id', 'title', 'slug', 'description', 'visibility', 'last_chapter_published_at', 'reads_logged_total', 'story_ref_type_id', 'story_ref_audience_id', 'story_ref_copyright_id', 'story_ref_feedback_id', 'tw_disclosure', 'is_complete', 'is_excluded_from_events', 'cover_type', 'cover_data'])]
 class Story extends Model
 {
     use SoftDeletes;
-    protected $fillable = [
-        'created_by_user_id',
-        'title',
-        'slug',
-        'description',
-        'visibility',
-        'last_chapter_published_at',
-        'reads_logged_total',
-        'story_ref_type_id',
-        'story_ref_audience_id',
-        'story_ref_copyright_id',
-        'story_ref_feedback_id',
-        'tw_disclosure',
-        'is_complete',
-        'is_excluded_from_events',
-        'cover_type',
-        'cover_data',
-    ];
 
     protected $attributes = [
         'cover_type' => self::COVER_DEFAULT,

@@ -4,30 +4,17 @@ declare(strict_types=1);
 
 namespace App\Domains\Calendar\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Carbon\CarbonImmutable;
 use App\Domains\Calendar\Public\Contracts\ActivityState;
 
+#[Table('calendar_activities')]
+#[Fillable(['name', 'slug', 'description', 'image_path', 'activity_type', 'role_restrictions', 'requires_subscription', 'max_participants', 'preview_starts_at', 'active_starts_at', 'active_ends_at', 'archived_at', 'created_by_user_id'])]
 class Activity extends Model
 {
-    protected $table = 'calendar_activities';
-
-    protected $fillable = [
-        'name',
-        'slug',
-        'description',
-        'image_path',
-        'activity_type',
-        'role_restrictions',
-        'requires_subscription',
-        'max_participants',
-        'preview_starts_at',
-        'active_starts_at',
-        'active_ends_at',
-        'archived_at',
-        'created_by_user_id',
-    ];
 
     protected $casts = [
         'role_restrictions' => 'array',

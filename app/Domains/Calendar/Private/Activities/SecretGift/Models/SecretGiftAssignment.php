@@ -5,21 +5,15 @@ declare(strict_types=1);
 namespace App\Domains\Calendar\Private\Activities\SecretGift\Models;
 
 use App\Domains\Calendar\Private\Models\Activity;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Table('calendar_secret_gift_assignments')]
+#[Fillable(['activity_id', 'giver_user_id', 'recipient_user_id', 'gift_text', 'gift_image_path', 'gift_sound_path'])]
 class SecretGiftAssignment extends Model
 {
-    protected $table = 'calendar_secret_gift_assignments';
-
-    protected $fillable = [
-        'activity_id',
-        'giver_user_id',
-        'recipient_user_id',
-        'gift_text',
-        'gift_image_path',
-        'gift_sound_path',
-    ];
 
     protected $casts = [
         'activity_id' => 'integer',

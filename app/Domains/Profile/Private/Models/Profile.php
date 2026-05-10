@@ -2,34 +2,16 @@
 
 namespace App\Domains\Profile\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[Table('profile_profiles', key: 'user_id', incrementing: false)]
+#[Fillable(['user_id', 'slug', 'display_name', 'profile_picture_path', 'facebook_handle', 'x_handle', 'instagram_handle', 'youtube_handle', 'tiktok_handle', 'bluesky_handle', 'mastodon_handle', 'description'])]
 class Profile extends Model
 {
     use SoftDeletes;
-    protected $table = 'profile_profiles';
-    
-    protected $primaryKey = 'user_id';
-    
-    public $incrementing = false;
-    
-    protected $keyType = 'int';
-
-    protected $fillable = [
-        'user_id',
-        'slug',
-        'display_name',
-        'profile_picture_path',
-        'facebook_handle',
-        'x_handle',
-        'instagram_handle',
-        'youtube_handle',
-        'tiktok_handle',
-        'bluesky_handle',
-        'mastodon_handle',
-        'description',
-    ];
 
     protected $casts = [
         'user_id' => 'integer',

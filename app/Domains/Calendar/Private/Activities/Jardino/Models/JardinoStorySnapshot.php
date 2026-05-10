@@ -4,23 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domains\Calendar\Private\Activities\Jardino\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Table('calendar_jardino_story_snapshots')]
+#[Fillable(['goal_id', 'story_id', 'story_title', 'initial_word_count', 'current_word_count', 'biggest_word_count', 'selected_at', 'deselected_at'])]
 class JardinoStorySnapshot extends Model
 {
-    protected $table = 'calendar_jardino_story_snapshots';
-
-    protected $fillable = [
-        'goal_id',
-        'story_id',
-        'story_title',
-        'initial_word_count',
-        'current_word_count',
-        'biggest_word_count',
-        'selected_at',
-        'deselected_at',
-    ];
 
     protected $casts = [
         'selected_at' => 'datetime',

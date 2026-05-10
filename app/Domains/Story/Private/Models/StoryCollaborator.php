@@ -2,25 +2,18 @@
 
 namespace App\Domains\Story\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Table('story_collaborators', timestamps: false)]
+#[WithoutIncrementing]
+#[Fillable(['story_id', 'user_id', 'role', 'invited_by_user_id', 'invited_at', 'accepted_at'])]
 class StoryCollaborator extends Model
 {
-    protected $table = 'story_collaborators';
-
-    public $timestamps = false;
-    public $incrementing = false;
     protected $primaryKey = null;
-
-    protected $fillable = [
-        'story_id',
-        'user_id',
-        'role',
-        'invited_by_user_id',
-        'invited_at',
-        'accepted_at',
-    ];
 
     protected $casts = [
         'story_id' => 'integer',

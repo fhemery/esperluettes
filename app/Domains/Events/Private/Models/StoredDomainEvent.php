@@ -2,31 +2,16 @@
 
 namespace App\Domains\Events\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
 
-/**
- * Stored record of a domain event (persistence model).
- * Table: events_domain
- */
+#[Table('events_domain', timestamps: false)]
+#[Fillable(['name', 'payload', 'triggered_by_user_id', 'context_ip', 'context_user_agent', 'context_url', 'meta', 'occurred_at'])]
 class StoredDomainEvent extends Model
 {
     use Prunable;
-
-    protected $table = 'events_domain';
-
-    public $timestamps = false;
-
-    protected $fillable = [
-        'name',
-        'payload',
-        'triggered_by_user_id',
-        'context_ip',
-        'context_user_agent',
-        'context_url',
-        'meta',
-        'occurred_at',
-    ];
 
     protected $casts = [
         'payload' => 'array',

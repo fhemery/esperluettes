@@ -2,20 +2,14 @@
 
 namespace App\Domains\Config\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
+#[Table('config_feature_toggles')]
+#[Fillable(['domain', 'name', 'access', 'admin_visibility', 'roles', 'updated_by'])]
 class FeatureToggle extends Model
 {
-    protected $table = 'config_feature_toggles';
-
-    protected $fillable = [
-        'domain',
-        'name',
-        'access',
-        'admin_visibility',
-        'roles',
-        'updated_by',
-    ];
 
     protected $casts = [
         'roles' => 'array',

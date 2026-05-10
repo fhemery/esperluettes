@@ -4,21 +4,16 @@ declare(strict_types=1);
 
 namespace App\Domains\Calendar\Private\Activities\Jardino\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-
 use Illuminate\Database\Eloquent\Model;
 
+#[Table('calendar_jardino_goals')]
+#[Fillable(['activity_id', 'user_id', 'story_id', 'target_word_count'])]
 class JardinoGoal extends Model
 {
-    protected $table = 'calendar_jardino_goals';
-
-    protected $fillable = [
-        'activity_id',
-        'user_id',
-        'story_id',
-        'target_word_count',
-    ];
 
     protected $casts = [
         'target_word_count' => 'integer',

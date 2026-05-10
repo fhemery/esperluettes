@@ -186,7 +186,7 @@ function clearAuthorizationComponent() {
                 }
             })
             .catch(() => {
-                alert({!! json_encode(__('auth::admin.users.authorization.cannot_clear')) !!});
+                alert({{ Js::from(__('auth::admin.users.authorization.cannot_clear')) }});
                 this.loading = false;
             });
         }

@@ -2,26 +2,18 @@
 
 namespace App\Domains\Auth\Private\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Table('user_promotion_request')]
+#[Fillable(['user_id', 'status', 'comment_count', 'requested_at', 'decided_at', 'decided_by', 'rejection_reason'])]
 class PromotionRequest extends Model
 {
-    protected $table = 'user_promotion_request';
-
     public const STATUS_PENDING = 'pending';
     public const STATUS_ACCEPTED = 'accepted';
     public const STATUS_REJECTED = 'rejected';
-
-    protected $fillable = [
-        'user_id',
-        'status',
-        'comment_count',
-        'requested_at',
-        'decided_at',
-        'decided_by',
-        'rejection_reason',
-    ];
 
     protected $casts = [
         'user_id' => 'integer',
