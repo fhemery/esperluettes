@@ -32,8 +32,9 @@ const excludeFoldersOrFiles = [
   '.windsurf',
   '.husky',
   '.vscode',
-  '.claude',
-  'AGENTS.md'
+  '.claude/',
+  'AGENTS.md',
+  '.agents/'
 ]
 
 const log = makeLog('staged-tests');
