@@ -63,7 +63,78 @@ function normalizeHtmlFromQuill(html) {
   return restoredSpaces;
 }
 
-export function initQuillEditor(id, options = {}) {
+// Per-token toolbar configuration. Each token maps to:
+//   - category: tokens of the same category stay in the same visual group;
+//               a category transition opens a new group (Quill separator).
+//   - config:   the value(s) pushed into the Quill toolbar config array.
+//               null means the token is a feature flag with no toolbar button
+//               (currently only 'custom-emoji'; the emoji button is injected
+//               by the emoji-toolbar module).
+//   - format:   the Quill format name to whitelist in `formats:`.
+const TOOLBAR_TOKEN_DEFS = {
+  'bold':         { category: 'inline-format', config: ['bold'],                               format: 'bold' },
+  'italic':       { category: 'inline-format', config: ['italic'],                             format: 'italic' },
+  'underline':    { category: 'inline-format', config: ['underline'],                          format: 'underline' },
+  'strike':       { category: 'inline-format', config: ['strike'],                             format: 'strike' },
+  'header':       { category: 'header',        config: [{ header: [2, 3, false] }],            format: 'header' },
+  'blockquote':   { category: 'blockquote',    config: ['blockquote'],                         format: 'blockquote' },
+  'align':        { category: 'align',         config: [{ align: [] }],                        format: 'align' },
+  'list':         { category: 'list',          config: [{ list: 'bullet' }, { list: 'ordered' }], format: 'list' },
+  'link':         { category: 'link',          config: ['link'],                               format: 'link' },
+  'spoiler':      { category: 'spoiler',       config: ['spoiler'],                            format: 'spoiler' },
+  'custom-emoji': { category: null,            config: null,                                   format: 'custom-emoji' },
+};
+
+function parseToolbarTokens(container) {
+  const raw = container.dataset.toolbar;
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      console.warn('initQuillEditor: data-toolbar is not a JSON array, falling back to empty toolbar', raw);
+      return [];
+    }
+    return parsed;
+  } catch (e) {
+    console.warn('initQuillEditor: failed to parse data-toolbar JSON, falling back to empty toolbar', raw, e);
+    return [];
+  }
+}
+
+function buildEditorConfigFromTokens(tokens) {
+  const allowedFormats = [];
+  const groups = [];
+  let currentGroup = null;
+  let currentCategory = null;
+  let hasEmoji = false;
+  let hasSpoiler = false;
+  let hasLink = false;
+
+  for (const token of tokens) {
+    const def = TOOLBAR_TOKEN_DEFS[token];
+    if (!def) {
+      console.warn(`initQuillEditor: unknown toolbar token "${token}"`);
+      continue;
+    }
+    if (def.format) allowedFormats.push(def.format);
+    if (token === 'custom-emoji') { hasEmoji = true; continue; }
+    if (token === 'spoiler') hasSpoiler = true;
+    if (token === 'link') hasLink = true;
+    if (def.category !== currentCategory) {
+      if (currentGroup) groups.push(currentGroup);
+      currentGroup = [];
+      currentCategory = def.category;
+    }
+    currentGroup.push(...def.config);
+  }
+  if (currentGroup) groups.push(currentGroup);
+  // 'clean' is always the last group (per design: not exposed as a token).
+  groups.push(['clean']);
+
+  return { toolbar: groups, allowedFormats, hasEmoji, hasSpoiler, hasLink };
+}
+
+export function initQuillEditor(id) {
   const run = () => {
     const container = document.getElementById(id);
     if (!container || typeof window.Quill === 'undefined') return;
@@ -74,52 +145,25 @@ export function initQuillEditor(id, options = {}) {
     // Fix: The single quote character is encoded as &#039; in HTML attributes
     placeholder = placeholder.replace(/&#039;/g, "'");
 
-    // Read optional features from data attributes or options
-    const withHeadings = options.withHeadings ?? container.dataset.withHeadings === 'true';
-    const withLinks = options.withLinks ?? container.dataset.withLinks === 'true';
-    const withSpoiler = options.withSpoiler ?? container.dataset.withSpoiler === 'true';
-
-    // Build allowed formats dynamically
-    const allowedFormats = ['bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'align', 'custom-emoji'];
-    if (withHeadings) {
-      allowedFormats.push('header');
-    }
-    if (withLinks) {
-      allowedFormats.push('link');
-    }
-    if (withSpoiler) {
-      allowedFormats.push('spoiler');
-    }
-
-    // Build toolbar dynamically
-    const toolbar = [];
-    toolbar.push(['bold', 'italic', 'underline', 'strike']);
-    if (withHeadings) {
-      toolbar.push([{ header: [2, 3, false] }]);
-    }
-    toolbar.push(['blockquote']);
-    toolbar.push([{ align: [] }]);
-    toolbar.push([{ list: 'bullet' }, { list: 'ordered' }]);
-    if (withLinks) {
-      toolbar.push(['link']);
-    }
-    if (withSpoiler) {
-      toolbar.push(['spoiler']);
-    }
-    toolbar.push(['clean']);
+    const tokens = parseToolbarTokens(container);
+    const { toolbar, allowedFormats, hasEmoji, hasSpoiler, hasLink } = buildEditorConfigFromTokens(tokens);
 
     // Use the closest .rich-content wrapper as bounds so the link tooltip
     // is not clipped by the .ql-container overflow.
     const boundsEl = container.closest('.rich-content') || container.parentElement;
 
+    const modules = {
+      toolbar,
+      // No image module registered, so user cannot insert images via toolbar
+    };
+    if (hasEmoji) {
+      modules['emoji-toolbar'] = true;
+      modules['emoji-textarea'] = true;
+    }
+
     const editor = new window.Quill(container, {
       theme: 'snow',
-      modules: {
-        toolbar,
-        'emoji-toolbar': true,
-        'emoji-textarea': true,
-        // No image module registered, so user cannot insert images via toolbar
-      },
+      modules,
       // Whitelist formats so unsupported formatting is dropped on paste
       formats: allowedFormats,
       placeholder,
@@ -129,7 +173,7 @@ export function initQuillEditor(id, options = {}) {
     container.dataset.quillInited = '1';
 
     // Register spoiler toolbar handler
-    if (withSpoiler) {
+    if (hasSpoiler) {
       try {
         const tbModule = editor.getModule('toolbar');
         if (tbModule) {
@@ -158,7 +202,7 @@ export function initQuillEditor(id, options = {}) {
         }
 
         // Label the spoiler button
-        if (withSpoiler) {
+        if (hasSpoiler) {
           const spoilerBtn = toolbar.container.querySelector('button.ql-spoiler');
           if (spoilerBtn && !spoilerBtn.getAttribute('data-labeled')) {
             const spoilerLabel = container.getAttribute('data-spoiler-label') || 'Spoiler';
@@ -180,7 +224,7 @@ export function initQuillEditor(id, options = {}) {
     }
 
     // Translate Quill link tooltip labels using data attributes from the .rich-content wrapper
-    try {
+    if (hasLink) try {
       const wrapper = container.closest('.rich-content');
       if (wrapper) {
         const qlSnow = container.closest('.ql-snow') || container.parentElement;

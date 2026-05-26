@@ -70,14 +70,13 @@
             <x-shared::input-label for="content-editor" :required="true">
                 {{ __('static::admin.form.content') }}
             </x-shared::input-label>
-            <x-shared::editor 
-                name="content" 
-                id="content-editor" 
+            <x-shared::editor
+                name="content"
+                id="content-editor"
                 :defaultValue="old('content', $page?->content ?? '')"
                 :nbLines="15"
                 :isMandatory="true"
-                :withHeadings="true"
-                :withLinks="true"
+                :toolbar="['bold','italic','underline','strike','header','blockquote','align','list','custom-emoji','link']"
             />
             <x-shared::input-error :messages="$errors->get('content')" class="mt-1" />
         </div>
