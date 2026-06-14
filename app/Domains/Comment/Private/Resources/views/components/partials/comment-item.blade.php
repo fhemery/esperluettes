@@ -145,6 +145,11 @@
           method="POST"
           action="{{ route('comments.store') }}"
           class="space-y-2"
+          data-comment-draft="reply"
+          data-user-id="{{ (int) (Auth::id() ?? 0) }}"
+          data-entity-type="{{ $comment->entityType }}"
+          data-entity-id="{{ (int) $comment->entityId }}"
+          data-parent-comment-id="{{ (int) $replyId }}"
           x-data="{ editorValid: false }"
           @editor-valid.window="if($event.detail.id==='reply-editor-{{ $replyId }}'){ editorValid = $event.detail.valid }">
           @csrf
