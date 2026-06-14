@@ -15,7 +15,7 @@
                     {{ __('moderation::admin.reports.table.topic') }}
                 </label>
                 <select id="filter_topic" name="topic_key"
-                    class="rounded-md border-border bg-surface text-fg text-sm focus:border-primary focus:ring-primary">
+                    class="rounded-md border-border surface-read text-on-surface text-sm focus:border-primary focus:ring-primary">
                     <option value="">{{ __('moderation::admin.reports.filters.all_topics') }}</option>
                     @foreach ($distinctTopics as $key)
                         <option value="{{ $key }}" @selected($topicKey === $key)>
@@ -30,7 +30,7 @@
                     {{ __('moderation::admin.reports.table.status') }}
                 </label>
                 <select id="filter_status" name="status"
-                    class="rounded-md border-border bg-surface text-fg text-sm focus:border-primary focus:ring-primary">
+                    class="rounded-md border-border surface-read text-on-surface text-sm focus:border-primary focus:ring-primary">
                     <option value="">{{ __('moderation::admin.reports.filters.all_statuses') }}</option>
                     <option value="pending" @selected($status === 'pending')>{{ __('moderation::admin.reports.status.pending') }}</option>
                     <option value="confirmed" @selected($status === 'confirmed')>{{ __('moderation::admin.reports.status.confirmed') }}</option>

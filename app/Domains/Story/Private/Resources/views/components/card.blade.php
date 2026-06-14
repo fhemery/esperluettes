@@ -36,11 +36,11 @@
         {{-- Title + summary tooltip icon --}}
         <div class="flex items-center gap-1">
             <a href="{{ url('/stories/' . $item->getSlug()) }}" class="block">
-                <div class="flex-1 font-extrabold text-gray-900 text-md leading-5 line-clamp-2 hover:underline">{{ $item->getTitle() }}</div>
+                <div class="flex-1 font-extrabold text-on-surface text-md leading-5 line-clamp-2 hover:underline">{{ $item->getTitle() }}</div>
             </a>
             @if(trim($item->getDescription()) !== '')
             <div class="-mb-1">
-                <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" maxWidth="20rem" iconClass="text-black">
+                <x-shared::tooltip type="info" :title="__('story::shared.description.label')" placement="right" maxWidth="20rem" iconClass="text-tertiary">
                     {{ strip_tags($item->getDescription()) }}
                 </x-shared::tooltip>
             </div>
@@ -49,7 +49,7 @@
 
         {{-- Authors --}}
         @if($displayAuthors)
-        <div class="mt-1 text-sm text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
+        <div class="mt-1 text-sm text-on-surface/80 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
             {{ __('story::shared.by') }}
             <x-profile::inline-names :profiles="$item->getAuthors()" />
         </div>
@@ -58,13 +58,13 @@
 
     {{-- Bottom meta row: chapters and words + TW icon/tooltip (hidden in light mode) --}}
     @if(!$light)
-    <div class="pb-1 border-b border-gray-700">
+    <div class="pb-1 border-b border-on-surface/80">
         <div class="flex items-center justify-between text-sm font-bold">
-            <div class="flex items-center gap-2 text-gray-600">
+            <div class="flex items-center gap-2 text-on-surface/80">
 
                 <span>{!! trans_choice('story::shared.metrics.chapters', $item->getChaptersCount(), ['count' => '<span class="text-accent">'. $item->getChaptersCount() . '</span>']) !!}</span>
                 @if($item->getChaptersCount() > 0)
-                    <span class="text-gray-400">|</span>
+                    <span class="text-on-surface/40">|</span>
                     <span>{!! trans_choice('story::shared.metrics.words', $item->getWordsTotal(), ['count' => '<span class="text-accent">'. \App\Domains\Shared\Support\NumberFormatter::compact($item->getWordsTotal()) . '</span>']) !!}</span>
                 @endif
             </div>

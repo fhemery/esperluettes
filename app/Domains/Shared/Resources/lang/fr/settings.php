@@ -24,6 +24,14 @@ return [
                 'summer' => 'Été',
             ],
         ],
+        'appearance' => [
+            'name' => 'Mode',
+            'description' => 'Choisissez le mode clair ou sombre.',
+            'options' => [
+                'light' => 'Clair (défaut)',
+                'dark' => 'Sombre',
+            ],
+        ],
         'font' => [
             'name' => 'Police des textes',
             'description' => 'Choisissez la police utilisée pour le contenu textuel.',

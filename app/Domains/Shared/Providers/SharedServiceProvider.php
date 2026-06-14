@@ -22,6 +22,7 @@ class SharedServiceProvider extends ServiceProvider
     public const TAB_GENERAL = 'general';
     public const SECTION_APPEARANCE = 'appearance';
     public const KEY_THEME = 'theme';
+    public const KEY_APPEARANCE = 'appearance';
     public const KEY_FONT = 'font';
     public const KEY_INTERLINE = 'interline';
 
@@ -153,6 +154,25 @@ class SharedServiceProvider extends ServiceProvider
                     'autumn' => 'shared::settings.params.theme.options.autumn',
                     'winter' => 'shared::settings.params.theme.options.winter',
                     'spring' => 'shared::settings.params.theme.options.spring',
+                    'summer' => 'shared::settings.params.theme.options.summer',
+                ],
+            ],
+        ));
+
+        // Register "Appearance" parameter (light/dark mode)
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_GENERAL,
+            sectionId: self::SECTION_APPEARANCE,
+            key: self::KEY_APPEARANCE,
+            type: ParameterType::ENUM,
+            default: 'light',
+            order: 15,
+            nameKey: 'shared::settings.params.appearance.name',
+            descriptionKey: 'shared::settings.params.appearance.description',
+            constraints: [
+                'options' => [
+                    'light' => 'shared::settings.params.appearance.options.light',
+                    'dark' => 'shared::settings.params.appearance.options.dark',
                 ],
             ],
         ));

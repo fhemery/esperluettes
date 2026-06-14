@@ -9,7 +9,7 @@
                     type="text" 
                     x-model="query" 
                     placeholder="{{ __('config::admin.parameters.search_placeholder') }}"
-                    class="w-full px-4 py-2 border border-border rounded-lg bg-surface text-fg focus:ring-2 focus:ring-primary focus:border-primary"
+                    class="w-full px-4 py-2 border border-border rounded-lg surface-read text-on-surface focus:ring-2 focus:ring-primary focus:border-primary"
                 />
             </div>
         </div>

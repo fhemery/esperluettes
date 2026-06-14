@@ -3,7 +3,7 @@
     // Expected fields: display_name or name, slug or profile_slug
     'profiles' => [],
     // Tailwind classes for links
-    'linkClass' => 'text-gray-700 hover:text-black underline',
+    'linkClass' => 'text-on-surface/80 hover:text-on-surface underline',
 ])
 
 @php($profilesArr = is_array($profiles) ? $profiles : $profiles->all())

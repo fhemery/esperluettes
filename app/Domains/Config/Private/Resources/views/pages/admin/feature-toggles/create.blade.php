@@ -22,7 +22,7 @@
             <div>
                 <x-shared::input-label for="admin_visibility" :required="true">{{ __('config::admin.feature_toggles.form.admin_visibility') }}</x-shared::input-label>
                 <select id="admin_visibility" name="admin_visibility"
-                    class="w-full border border-border rounded-lg px-3 py-2 bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-primary">
+                    class="w-full border border-border rounded-lg px-3 py-2 surface-read text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
                     <option value="tech_admins_only" {{ old('admin_visibility', 'tech_admins_only') === 'tech_admins_only' ? 'selected' : '' }}>
                         {{ __('config::admin.feature_toggles.admin_visibility.tech_admins_only') }}
                     </option>
@@ -36,7 +36,7 @@
             <div>
                 <x-shared::input-label for="access" :required="true">{{ __('config::admin.feature_toggles.form.access') }}</x-shared::input-label>
                 <select id="access" name="access"
-                    class="w-full border border-border rounded-lg px-3 py-2 bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-primary">
+                    class="w-full border border-border rounded-lg px-3 py-2 surface-read text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
                     <option value="off" {{ old('access', 'off') === 'off' ? 'selected' : '' }}>OFF</option>
                     <option value="on" {{ old('access') === 'on' ? 'selected' : '' }}>ON</option>
                     <option value="role_based" {{ old('access') === 'role_based' ? 'selected' : '' }}>PAR RÔLE</option>

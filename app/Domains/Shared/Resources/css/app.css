@@ -135,6 +135,59 @@ html {
   --frame-corner-br:url('/images/themes/summer/design/frame-corner-br.png');
 }
 
+/* Dark appearance: shared defaults (overridden per season below) */
+:root[data-appearance=dark] {
+  color-scheme: dark;
+  --color-bg: 12 14 16;
+  --color-fg: 220 220 220;
+  --color-read-bg: 20 22 26;
+  --color-read-fg: 220 220 220;
+  --color-error-fg: 252 165 165;
+  --color-error-bg: 55 28 28;
+  --color-info-fg: 147 197 253;
+  --color-info-bg: 23 37 64;
+  --color-success-fg: 134 239 172;
+  --color-success-bg: 20 55 35;
+  --color-warning-fg: 253 186 116;
+  --color-warning-bg: 55 35 15;
+}
+
+/* Autumn dark */
+:root[data-season=autumn][data-appearance=dark] {
+  --color-bg: 14 10 8;
+  --color-fg: 220 210 198;
+  --color-primary: 160 105 35;
+  --color-secondary: 48 28 14;
+  --color-accent: 150 55 85;
+  --color-tertiary: 75 115 120;
+  --color-read-bg: 22 16 12;
+  --color-read-fg: 220 210 198;
+}
+
+/* Winter dark */
+:root[data-season=winter][data-appearance=dark] {
+  --color-bg: 10 14 20;
+  --color-fg: 200 210 220;
+  --color-primary: 72 110 130;
+  --color-secondary: 18 32 44;
+  --color-accent: 160 55 85;
+  --color-tertiary: 140 115 45;
+  --color-read-bg: 16 22 30;
+  --color-read-fg: 200 210 220;
+}
+
+/* Spring dark */
+:root[data-season=spring][data-appearance=dark] {
+  --color-bg: 8 12 9;
+  --color-fg: 200 210 192;
+  --color-primary: 96 130 48;
+  --color-secondary: 20 32 16;
+  --color-accent: 180 75 95;
+  --color-tertiary: 120 72 88;
+  --color-read-bg: 14 20 15;
+  --color-read-fg: 200 210 192;
+}
+
 /* Font selection based on user preference */
 :root[data-font=aptos] {
   --content-font: "Aptos", Manrope, system-ui, sans-serif;
@@ -387,6 +440,26 @@ p.ql-align-center {
     background-image: var(--theme-ribbon);
     background-repeat: repeat-x;
   }
+  :root[data-appearance=dark] .bg-seasonal {
+    background-image:
+      linear-gradient(rgb(var(--color-bg) / 0.97), rgb(var(--color-bg) / 0.97)),
+      var(--home-bg-image);
+  }
+  :root[data-appearance=dark] .bg-theme-ribbon {
+    background-image:
+      linear-gradient(rgb(var(--color-bg) / 0.92), rgb(var(--color-bg) / 0.92)),
+      var(--theme-ribbon);
+  }
+  :root[data-appearance=dark] .bg-profile-seasonal {
+    background-image:
+      linear-gradient(rgb(var(--color-bg) / 0.88), rgb(var(--color-bg) / 0.88)),
+      var(--profile-bg-image-small);
+  }
+  :root[data-appearance=dark] .bg-profile-seasonal-big {
+    background-image:
+      linear-gradient(rgb(var(--color-bg) / 0.88), rgb(var(--color-bg) / 0.88)),
+      var(--profile-bg-image-big);
+  }
   /* Surface system: season-agnostic light/dark panels */
   .surface-secondary {
     /* Set surface background/foreground tokens for children */
@@ -534,11 +607,35 @@ p.ql-align-center {
     color: rgb(var(--surface-fg));
     background-color: rgb(var(--surface-error-bg));
   }
+  :root[data-appearance=dark] .surface-read,
+  :root[data-appearance=dark] .surface-neutral,
+  :root[data-appearance=dark] .surface-primary,
+  :root[data-appearance=dark] .surface-accent,
+  :root[data-appearance=dark] .surface-tertiary,
+  :root[data-appearance=dark] .surface-primary.is-outline,
+  :root[data-appearance=dark] .surface-accent.is-outline,
+  :root[data-appearance=dark] .surface-tertiary.is-outline,
+  :root[data-appearance=dark] .surface-neutral.is-outline,
+  :root[data-appearance=dark] .surface-error,
+  :root[data-appearance=dark] .surface-error.is-outline,
+  :root[data-appearance=dark] .surface-info,
+  :root[data-appearance=dark] .surface-info.is-outline,
+  :root[data-appearance=dark] .surface-success,
+  :root[data-appearance=dark] .surface-success.is-outline,
+  :root[data-appearance=dark] .surface-warning,
+  :root[data-appearance=dark] .surface-warning.is-outline {
+    color-scheme: dark;
+  }
 }
 .framed-tight {
   background-image: var(--frame-corner-tl), var(--frame-corner-tr), var(--frame-corner-bl), var(--frame-corner-br);
   background-position: top -1rem left -1rem, top -1rem right -1rem, bottom -1rem left -1rem, bottom -1rem right -1rem;
   background-repeat: no-repeat;
+}
+
+:root[data-appearance=dark] .framed-tight,
+:root[data-appearance=dark] .framed-large {
+  opacity: 0.45;
 }
 
 @media (min-width: 640px) {

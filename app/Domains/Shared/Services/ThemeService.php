@@ -27,7 +27,18 @@ class ThemeService
             );
 
             if ($pref && $pref !== 'seasonal') {
-                return Theme::tryFrom($pref) ?? Theme::seasonal();
+                $theme = Theme::tryFrom($pref);
+
+                if ($theme !== null) {
+                    return $theme;
+                }
+
+                // Legacy: theme=dark implied spring season before appearance was split out
+                if ($pref === 'dark') {
+                    return Theme::SPRING;
+                }
+
+                return Theme::seasonal();
             }
         }
 
