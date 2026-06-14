@@ -628,21 +628,37 @@ p.ql-align-center {
   }
 }
 .framed-tight {
+  position: relative;
+}
+
+.framed-tight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-image: var(--frame-corner-tl), var(--frame-corner-tr), var(--frame-corner-bl), var(--frame-corner-br);
   background-position: top -1rem left -1rem, top -1rem right -1rem, bottom -1rem left -1rem, bottom -1rem right -1rem;
   background-repeat: no-repeat;
+  pointer-events: none;
 }
 
-:root[data-appearance=dark] .framed-tight,
-:root[data-appearance=dark] .framed-large {
+:root[data-appearance=dark] .framed-tight::before,
+:root[data-appearance=dark] .framed-large::before {
   opacity: 0.45;
 }
 
 @media (min-width: 640px) {
   .framed-large {
+    position: relative;
+  }
+
+  .framed-large::before {
+    content: '';
+    position: absolute;
+    inset: 0;
     background-image: var(--frame-corner-tl), var(--frame-corner-tr), var(--frame-corner-bl), var(--frame-corner-br);
     background-position: top left, top right, bottom left, bottom right;
     background-repeat: no-repeat;
+    pointer-events: none;
   }
 }
 table.admin {
