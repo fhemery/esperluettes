@@ -10,7 +10,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{ $theme->asset('favicons/favicon-32x32.png?v=20260425') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ $theme->asset('favicons/favicon-16x16.png?v=20260425') }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ $theme->asset('favicons/favicon-180x180.png?v=20260425') }}">
-<meta name="theme-color" content="#f7eadf">
+@php
+    $themeColor = match (true) {
+        ($appearance ?? 'light') !== 'dark' => '#f7eadf',
+        ($theme->value ?? '') === 'spring' => '#080c09',
+        ($theme->value ?? '') === 'winter' => '#0a0e14',
+        ($theme->value ?? '') === 'autumn' => '#0e0a08',
+        default => '#0c0e10',
+    };
+@endphp
+<meta name="theme-color" content="{{ $themeColor }}">
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">

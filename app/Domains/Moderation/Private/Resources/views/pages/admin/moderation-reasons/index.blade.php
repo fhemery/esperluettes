@@ -27,7 +27,7 @@
                         {{ __('moderation::admin.reasons.table.topic') }}
                     </label>
                     <select id="filter_topic" name="topic_key"
-                        class="rounded-md border-border bg-surface text-fg text-sm focus:border-primary focus:ring-primary">
+                        class="rounded-md border-border surface-read text-on-surface text-sm focus:border-primary focus:ring-primary">
                         <option value="">{{ __('moderation::admin.reasons.filters.all_topics') }}</option>
                         @foreach ($topics as $key => $config)
                             <option value="{{ $key }}" @selected(request('topic_key') === $key)>
@@ -42,7 +42,7 @@
                         {{ __('moderation::admin.reasons.table.is_active') }}
                     </label>
                     <select id="filter_active" name="is_active"
-                        class="rounded-md border-border bg-surface text-fg text-sm focus:border-primary focus:ring-primary">
+                        class="rounded-md border-border surface-read text-on-surface text-sm focus:border-primary focus:ring-primary">
                         <option value="">{{ __('moderation::admin.reasons.filters.all_statuses') }}</option>
                         <option value="1" @selected(request('is_active') === '1')>{{ __('moderation::admin.reasons.filters.active_only') }}</option>
                         <option value="0" @selected(request('is_active') === '0')>{{ __('moderation::admin.reasons.filters.inactive_only') }}</option>

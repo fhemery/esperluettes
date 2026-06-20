@@ -123,4 +123,60 @@ describe('POST /comments route', function () {
             expect($redirectUrl)->not()->toContain('comment=');
         });
     });
+
+    describe('comment.draft_consumed flash', function () {
+        beforeEach(function () {
+            $this->user = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $this->actingAs($this->user);
+            $this->from('/default/123#comments');
+        });
+
+        it('flashes a root-scoped payload after a successful root comment create', function () {
+            $response = $this->post('/comments', [
+                'entity_type' => 'default',
+                'entity_id' => 123,
+                'body' => 'My root comment',
+            ]);
+
+            $response->assertRedirect();
+            $response->assertSessionHas('comment.draft_consumed', [
+                'scope' => 'root',
+                'userId' => $this->user->id,
+                'entityType' => 'default',
+                'entityId' => 123,
+                'parentCommentId' => null,
+            ]);
+        });
+
+        it('flashes a reply-scoped payload (carrying the parent id) after a successful reply create', function () {
+            $parentCommentId = createComment('default', 123, 'Parent comment');
+
+            $response = $this->post('/comments', [
+                'entity_type' => 'default',
+                'entity_id' => 123,
+                'body' => 'My reply',
+                'parent_comment_id' => $parentCommentId,
+            ]);
+
+            $response->assertRedirect();
+            $response->assertSessionHas('comment.draft_consumed', [
+                'scope' => 'reply',
+                'userId' => $this->user->id,
+                'entityType' => 'default',
+                'entityId' => 123,
+                'parentCommentId' => $parentCommentId,
+            ]);
+        });
+
+        it('does not flash the payload when validation fails', function () {
+            $response = $this->post('/comments', [
+                'entity_type' => 'default',
+                'entity_id' => 123,
+                'body' => '', // empty body fails validation
+            ]);
+
+            $response->assertRedirect();
+            $response->assertSessionMissing('comment.draft_consumed');
+        });
+    });
 });

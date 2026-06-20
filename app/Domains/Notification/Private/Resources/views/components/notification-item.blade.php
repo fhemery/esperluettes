@@ -22,12 +22,12 @@
     </div>
 
     {{-- Content --}}
-    <div class="col-span-2"
+    <div class="col-span-2 text-on-surface"
         :class="isRead ? '' : 'font-bold'">{!! $notification->renderedContent !!}</div>
 
     {{-- Date --}}
     <div class="grid-col-1 flex items-center justify-between mt-1">
-        <div class="text-sm text-fg/70">
+        <div class="text-sm text-on-surface/70">
             {{ \Illuminate\Support\Str::ucfirst(\Carbon\Carbon::parse($notification->createdAt)->diffForHumans()) }}</div>
     </div>
 

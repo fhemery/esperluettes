@@ -3,6 +3,7 @@
 use App\Domains\Settings\Private\Services\SettingsRegistryService;
 use App\Domains\Shared\Contracts\Theme;
 use App\Domains\Shared\Providers\SharedServiceProvider;
+use App\Domains\Shared\Services\AppearanceService;
 use App\Domains\Shared\Services\FontService;
 use App\Domains\Shared\Services\InterlineService;
 use App\Domains\Shared\Services\ThemeService;
@@ -134,6 +135,30 @@ describe('ThemeService - user preference', function () {
 
         expect($themeService->current())->toBe(Theme::WINTER);
     });
+
+    it('returns spring theme for legacy dark theme preference', function () {
+        Carbon::setTestNow(Carbon::create(2024, 12, 25));
+
+        $user = alice($this);
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_THEME,
+            'spring'
+        );
+
+        \Illuminate\Support\Facades\DB::table('settings')
+            ->where('user_id', $user->id)
+            ->where('domain', SharedServiceProvider::TAB_GENERAL)
+            ->where('key', SharedServiceProvider::KEY_THEME)
+            ->update(['value' => 'dark']);
+
+        \Illuminate\Support\Facades\Cache::forget("user_settings:{$user->id}");
+
+        $themeService = app(ThemeService::class);
+
+        expect($themeService->resolve($user->id))->toBe(Theme::SPRING);
+    });
 });
 
 describe('ThemeService - settings registration', function () {
@@ -166,7 +191,19 @@ describe('ThemeService - settings registration', function () {
         expect($param->key)->toBe('theme');
         expect($param->type)->toBe(\App\Domains\Shared\Contracts\ParameterType::ENUM);
         expect($param->default)->toBe('seasonal');
-        expect($param->constraints['options'])->toHaveKeys(['seasonal', 'autumn', 'winter']);
+        expect($param->constraints['options'])->toHaveKeys(['seasonal', 'autumn', 'winter', 'spring', 'summer']);
+    });
+
+    it('registers appearance parameter with correct options', function () {
+        $api = app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class);
+
+        $param = $api->getParameter(SharedServiceProvider::TAB_GENERAL, SharedServiceProvider::KEY_APPEARANCE);
+
+        expect($param)->not->toBeNull();
+        expect($param->key)->toBe('appearance');
+        expect($param->type)->toBe(\App\Domains\Shared\Contracts\ParameterType::ENUM);
+        expect($param->default)->toBe('light');
+        expect($param->constraints['options'])->toHaveKeys(['light', 'dark']);
     });
 });
 
@@ -243,6 +280,153 @@ describe('ThemeService - settings page integration', function () {
 
         $themeService = app(ThemeService::class);
         expect($themeService->resolve($user->id))->toBe(Theme::WINTER);
+    });
+});
+
+describe('AppearanceService - user preference', function () {
+    it('returns light appearance for guests', function () {
+        $appearanceService = app(AppearanceService::class);
+
+        expect($appearanceService->resolve(null))->toBe(AppearanceService::LIGHT);
+    });
+
+    it('returns light appearance when user has no preference', function () {
+        $user = alice($this);
+
+        $appearanceService = app(AppearanceService::class);
+
+        expect($appearanceService->resolve($user->id))->toBe(AppearanceService::LIGHT);
+    });
+
+    it('returns light appearance when user selects a seasonal theme', function () {
+        $user = alice($this);
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_THEME,
+            'autumn'
+        );
+
+        $appearanceService = app(AppearanceService::class);
+
+        expect($appearanceService->resolve($user->id))->toBe(AppearanceService::LIGHT);
+    });
+
+    it('returns dark appearance when user selects dark mode', function () {
+        $user = alice($this);
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_APPEARANCE,
+            'dark'
+        );
+
+        $appearanceService = app(AppearanceService::class);
+
+        expect($appearanceService->resolve($user->id))->toBe(AppearanceService::DARK);
+    });
+
+    it('returns dark appearance for legacy theme=dark preference', function () {
+        $user = alice($this);
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_THEME,
+            'spring'
+        );
+
+        \Illuminate\Support\Facades\DB::table('settings')
+            ->where('user_id', $user->id)
+            ->where('domain', SharedServiceProvider::TAB_GENERAL)
+            ->where('key', SharedServiceProvider::KEY_THEME)
+            ->update(['value' => 'dark']);
+
+        \Illuminate\Support\Facades\Cache::forget("user_settings:{$user->id}");
+
+        $appearanceService = app(AppearanceService::class);
+
+        expect($appearanceService->resolve($user->id))->toBe(AppearanceService::DARK);
+    });
+
+    it('returns light appearance for invalid appearance value', function () {
+        $user = alice($this);
+
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_APPEARANCE,
+            'dark'
+        );
+
+        \Illuminate\Support\Facades\DB::table('settings')
+            ->where('user_id', $user->id)
+            ->where('domain', SharedServiceProvider::TAB_GENERAL)
+            ->where('key', SharedServiceProvider::KEY_APPEARANCE)
+            ->update(['value' => 'invalid_appearance']);
+
+        \Illuminate\Support\Facades\Cache::forget("user_settings:{$user->id}");
+
+        $appearanceService = app(AppearanceService::class);
+
+        expect($appearanceService->resolve($user->id))->toBe(AppearanceService::LIGHT);
+    });
+
+    it('uses current() method for authenticated user', function () {
+        $user = alice($this);
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_APPEARANCE,
+            'dark'
+        );
+
+        $this->actingAs($user);
+        $appearanceService = app(AppearanceService::class);
+
+        expect($appearanceService->current())->toBe(AppearanceService::DARK);
+    });
+});
+
+describe('AppearanceService - settings page integration', function () {
+    it('can update appearance via settings page', function () {
+        $user = alice($this);
+
+        $response = $this->actingAs($user)
+            ->putJson(route('settings.update', [
+                'tab' => SharedServiceProvider::TAB_GENERAL,
+                'key' => SharedServiceProvider::KEY_APPEARANCE,
+            ]), [
+                'value' => 'dark',
+            ]);
+
+        $response->assertOk();
+        $response->assertJson(['success' => true]);
+
+        $appearanceService = app(AppearanceService::class);
+        expect($appearanceService->resolve($user->id))->toBe(AppearanceService::DARK);
+    });
+
+    it('applies season and appearance independently to HTML data attributes', function () {
+        $user = alice($this);
+
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_THEME,
+            'spring'
+        );
+        setSettingsValue(
+            $user->id,
+            SharedServiceProvider::TAB_GENERAL,
+            SharedServiceProvider::KEY_APPEARANCE,
+            'dark'
+        );
+
+        $response = $this->actingAs($user)->get(route('settings.index'));
+
+        $response->assertOk();
+        $response->assertSee('data-appearance="dark"', false);
+        $response->assertSee('data-season="spring"', false);
     });
 });
 

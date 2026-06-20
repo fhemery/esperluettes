@@ -2,6 +2,7 @@
   url: '{{ route('comments.fragments') }}',
   entityType: '{{ $entityType }}',
   entityId: {{ (int) $entityId }},
+  userId: {{ (int) (Auth::id() ?? 0) }},
   page: {{ (int) ($list->page ?? 1) }},
   perPage: {{ (int) ($list->perPage ?? 20) }},
   hasMore: {{ ($list->total > count($list->items)) ? 'true' : 'false' }},
@@ -37,6 +38,10 @@
       method="POST"
       action="{{ route('comments.store') }}"
       class="mt-4 space-y-2"
+      data-comment-draft="root"
+      data-user-id="{{ (int) (Auth::id() ?? 0) }}"
+      data-entity-type="{{ $entityType }}"
+      data-entity-id="{{ (int) $entityId }}"
       x-data="{ editorValid: {{ $list->config?->minRootCommentLength ? 'false' : 'true' }} }"
       @editor-valid.window="if($event.detail.id==='comment-body-editor'){ editorValid = $event.detail.valid }"
     >
@@ -81,9 +86,32 @@
   @if(!$isGuest)
     @push('scripts')
       @vite('app/Domains/Shared/Resources/js/editor-bundle.js')
+      @vite('app/Domains/Comment/Resources/js/comment-draft/index.js')
     @endpush
   @endif
 @endonce
+
+@if(!$isGuest && session()->has('comment.draft_consumed'))
+  @push('scripts')
+    <script>
+      (function () {
+        const payload = @json(session('comment.draft_consumed'));
+        const apply = () => {
+          if (!window.commentDrafts || !payload) return;
+          const { scope, userId, entityType, entityId } = payload;
+          if (!userId || !entityType || !entityId) return;
+          if (scope === 'root') {
+            window.commentDrafts.clearRoot(userId, entityType, entityId);
+          } else if (scope === 'reply') {
+            window.commentDrafts.clearReply(userId, entityType, entityId);
+          }
+        };
+        if (window.commentDrafts) apply();
+        else document.addEventListener('DOMContentLoaded', apply, { once: true });
+      })();
+    </script>
+  @endpush
+@endif
 @push('scripts')
 <script>
   window.commentList = function(opts){
@@ -91,6 +119,7 @@
       url: opts.url,
       entityType: opts.entityType,
       entityId: opts.entityId,
+      userId: opts.userId || 0,
       page: opts.page,
       perPage: opts.perPage,
       hasMore: !!opts.hasMore,
@@ -98,6 +127,15 @@
       activeReplyId: null,
       activeEditId: null,
       init(){
+        // If a reply draft exists for a comment currently rendered, auto-open
+        // its reply form so the saved body restores into the inline editor.
+        if (this.userId && window.commentDrafts) {
+          const state = window.commentDrafts.load(this.userId, this.entityType, this.entityId);
+          if (state.reply && Number.isInteger(state.reply.parentCommentId)) {
+            this.activeReplyId = state.reply.parentCommentId;
+          }
+        }
+
         // Focus on target comment if specified
         @if($targetCommentId)
           this.$nextTick(() => {
@@ -169,7 +207,9 @@
           if (!res.ok) { this.hasMore = false; return; }
           const html = await res.text();
           this.$refs.list.insertAdjacentHTML('beforeend', html);
-          // Initialize any reply editors in the newly appended HTML
+          // Initialize any reply editors in the newly appended HTML, then
+          // wire draft autosave on the newly appended reply forms (and open
+          // a parent's reply form if a draft for it is now on-screen).
           try {
             if (window.initQuillEditor) {
               // Defer 2 animation frames to let Alpine bind listeners after DOM insertion
@@ -179,6 +219,16 @@
                   containers.forEach((el) => {
                     window.initQuillEditor(el.id);
                   });
+                  if (window.commentDrafts) {
+                    window.commentDrafts.bootstrap(this.$refs.list);
+                    if (this.userId && this.activeReplyId === null) {
+                      const state = window.commentDrafts.load(this.userId, this.entityType, this.entityId);
+                      if (state.reply && Number.isInteger(state.reply.parentCommentId)) {
+                        const found = this.$refs.list.querySelector(`form[data-comment-draft="reply"][data-parent-comment-id="${state.reply.parentCommentId}"]`);
+                        if (found) this.activeReplyId = state.reply.parentCommentId;
+                      }
+                    }
+                  }
                 });
               });
             }

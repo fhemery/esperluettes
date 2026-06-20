@@ -4,7 +4,7 @@
     <div>
         <x-shared::input-label for="topic_key" :required="true">{{ __('moderation::admin.reasons.form.topic_key') }}</x-shared::input-label>
         <select id="topic_key" name="topic_key"
-            class="mt-1 block w-full rounded-md border-border bg-surface text-fg focus:border-primary focus:ring-primary">
+            class="mt-1 block w-full rounded-md border-border surface-read text-on-surface focus:border-primary focus:ring-primary">
             <option value="">{{ __('moderation::admin.reasons.form.topic_placeholder') }}</option>
             @foreach ($topics as $key => $config)
                 <option value="{{ $key }}" @selected(old('topic_key', $reason->topic_key ?? '') === $key)>

@@ -132,7 +132,7 @@
                     id="review_comment"
                     name="review_comment"
                     rows="4"
-                    class="w-full rounded-md border-border bg-surface text-fg text-sm focus:border-primary focus:ring-primary"
+                    class="w-full rounded-md border-border surface-read text-on-surface text-sm focus:border-primary focus:ring-primary"
                 >{{ old('review_comment', $moderationReport->review_comment) }}</textarea>
 
                 <x-shared::input-error :messages="$errors->get('review_comment')" />

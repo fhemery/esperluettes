@@ -16,7 +16,7 @@
                 </label>
                 <input id="filter_name" name="name_filter" type="text"
                        value="{{ $nameFilter ?? '' }}"
-                       class="rounded-md border-border bg-surface text-fg text-sm focus:border-primary focus:ring-primary">
+                       class="rounded-md border-border surface-read text-on-surface text-sm focus:border-primary focus:ring-primary">
             </div>
 
             <div class="min-w-48">
@@ -36,7 +36,7 @@
                 </label>
                 <input id="filter_after" name="occurred_after" type="datetime-local"
                        value="{{ $occurredAfter ?? '' }}"
-                       class="rounded-md border-border bg-surface text-fg text-sm focus:border-primary focus:ring-primary">
+                       class="rounded-md border-border surface-read text-on-surface text-sm focus:border-primary focus:ring-primary">
             </div>
 
             <div>
@@ -45,7 +45,7 @@
                 </label>
                 <input id="filter_before" name="occurred_before" type="datetime-local"
                        value="{{ $occurredBefore ?? '' }}"
-                       class="rounded-md border-border bg-surface text-fg text-sm focus:border-primary focus:ring-primary">
+                       class="rounded-md border-border surface-read text-on-surface text-sm focus:border-primary focus:ring-primary">
             </div>
 
             <x-shared::button type="submit" color="secondary" size="sm">

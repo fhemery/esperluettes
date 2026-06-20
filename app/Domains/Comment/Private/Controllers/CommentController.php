@@ -46,8 +46,17 @@ class CommentController extends Controller
             $redirectUrl = str_replace('#comments', '', $redirectUrl);
             $redirectUrl .= (strpos($redirectUrl, '?') !== false ? '&' : '?') . 'comment=' . $commentId . '#comments';
 
+            $isReply = $data['parent_comment_id'] !== null;
+
             return redirect()->to($redirectUrl)
-                ->with('status', __('comment::comments.posted'));
+                ->with('status', __('comment::comments.posted'))
+                ->with('comment.draft_consumed', [
+                    'scope' => $isReply ? 'reply' : 'root',
+                    'userId' => (int) ($request->user()?->getAuthIdentifier() ?? 0),
+                    'entityType' => $data['entity_type'],
+                    'entityId' => (int) $data['entity_id'],
+                    'parentCommentId' => $isReply ? (int) $data['parent_comment_id'] : null,
+                ]);
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
         }

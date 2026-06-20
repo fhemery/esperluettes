@@ -17,7 +17,7 @@ Concrete, phase-by-phase plan for the v1 delivery.
 
 | # | Phase | Estimated size | Dependencies |
 |---|-------|----------------|--------------|
-| 1 | Editor refactor (`<x-shared::editor>` toolbar prop) | M | — |
+| [OK] 1 | Editor refactor (`<x-shared::editor>` toolbar prop) | M | — |
 | 2 | Root-comment draft local storage | S | 1 |
 | 3 | JS test infrastructure | S | — (can run in parallel) |
 | 4 | Schema + model | S | — |

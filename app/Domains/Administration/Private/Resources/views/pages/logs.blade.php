@@ -10,27 +10,25 @@
             <div class="flex gap-4 items-center">
                 <div>
                     <form method="GET" action="{{ route('administration.logs') }}" class="flex gap-4 items-center">
-                        <select name="file" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @foreach($availableFiles as $file)
-                                <option value="{{ $file['file'] }}" {{ $selectedFile === $file['file'] ? 'selected' : '' }}>
-                                    {{ $file['file'] }} ({{ number_format($file['size'] / 1024, 2) }} KB, {{ \Carbon\Carbon::createFromTimestamp($file['mtime'])->format('Y-m-d H:i:s') }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <x-shared::select
+                            name="file"
+                            :options="collect($availableFiles)->map(fn ($file) => [
+                                'id' => $file['file'],
+                                'name' => $file['file'].' ('.number_format($file['size'] / 1024, 2).' KB, '.\Carbon\Carbon::createFromTimestamp($file['mtime'])->format('Y-m-d H:i:s').')',
+                            ])->all()"
+                            :selected="$selectedFile"
+                            chevron
+                        />
                         <x-shared::button type="submit" color="primary" icon="visibility">{{ __('administration::logs.view_button') }}</x-shared::button>
                     </form>
                 </div>
                 
                 @if($selectedFile)
-                    <div>
-                        <a href="{{ route('administration.logs.download', ['file' => $selectedFile]) }}" 
-                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                    <form method="GET" action="{{ route('administration.logs.download', ['file' => $selectedFile]) }}">
+                        <x-shared::button type="submit" color="tertiary" icon="download">
                             {{ __('administration::logs.download_button') }}
-                        </a>
-                    </div>
+                        </x-shared::button>
+                    </form>
                 @endif
             </div>
         </div>

@@ -14,12 +14,12 @@
         x-model.number="timeDisplayValue"
         min="0"
         :disabled="saving"
-        class="w-24 px-3 py-2 border border-border rounded-lg bg-surface text-fg focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-50"
+        class="w-24 px-3 py-2 border border-border rounded-lg surface-read text-on-surface focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-50"
     />
     <select 
         x-model="timeUnit"
         :disabled="saving"
-        class="flex-1 px-3 py-2 border border-border rounded-lg bg-surface text-fg focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-50"
+        class="flex-1 px-3 py-2 border border-border rounded-lg surface-read text-on-surface focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-50"
     >
         <option value="1">{{ __('shared::fields.time_units.seconds') }}</option>
         <option value="60">{{ __('shared::fields.time_units.minutes') }}</option>

@@ -29,7 +29,7 @@
 
     <div>
         <x-shared::input-label for="description">{{ __('story_ref::admin.statuses.form.description') }}</x-shared::input-label>
-        <textarea id="description" name="description" rows="3" class="mt-1 block w-full rounded-md border-border bg-surface text-fg focus:border-primary focus:ring-primary">{{ old('description', $status?->description ?? '') }}</textarea>
+        <textarea id="description" name="description" rows="3" class="mt-1 block w-full rounded-md border-border surface-read text-on-surface focus:border-primary focus:ring-primary">{{ old('description', $status?->description ?? '') }}</textarea>
         <x-shared::input-error :messages="$errors->get('description')" class="mt-1" />
     </div>
 

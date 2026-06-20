@@ -66,7 +66,7 @@
             id="description"
             name="description"
             rows="3"
-            class="mt-1 block w-full rounded-md border-border bg-surface text-fg focus:border-primary focus:ring-primary"
+            class="mt-1 block w-full rounded-md border-border surface-read text-on-surface focus:border-primary focus:ring-primary"
         >{{ old('description', $genre?->description ?? '') }}</textarea>
         <x-shared::input-error :messages="$errors->get('description')" class="mt-1" />
     </div>

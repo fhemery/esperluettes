@@ -74,8 +74,7 @@
             :nbLines="10"
             :isMandatory="true"
             :resizable="true"
-            :withHeadings="true"
-            :withLinks="true"
+            :toolbar="['bold','italic','underline','strike','header','blockquote','align','list','custom-emoji','link']"
             class="mt-1"
         />
         <x-shared::input-error :messages="$errors->get('answer')" class="mt-1" />
