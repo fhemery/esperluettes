@@ -258,6 +258,82 @@ describe('Creating a chapter', function () {
         });
     });
 
+    describe('Scheduled publication (publish_at)', function () {
+        it('stores publish_at when creating an unpublished chapter with a future date', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+            $story = createStoryForAuthor($user->id, ['title' => 'Sched Story']);
+
+            $future = now()->addDay()->format('Y-m-d\TH:i');
+            $resp = $this->post('/stories/' . $story->slug . '/chapters', [
+                'title' => 'Scheduled Chapter',
+                'content' => '<p>Body</p>',
+                'publish_at' => $future,
+                'timezone' => 'UTC',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter = Chapter::query()->firstOrFail();
+            expect($chapter->status)->toBe(Chapter::STATUS_NOT_PUBLISHED)
+                ->and($chapter->publish_at)->not->toBeNull();
+        });
+
+        it('clears publish_at when creating with published toggle ON', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+            $story = createStoryForAuthor($user->id, ['title' => 'Pub Story']);
+
+            $future = now()->addDay()->format('Y-m-d\TH:i');
+            $resp = $this->post('/stories/' . $story->slug . '/chapters', [
+                'title' => 'Published Chapter',
+                'content' => '<p>Body</p>',
+                'published' => '1',
+                'publish_at' => $future,
+                'timezone' => 'UTC',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter = Chapter::query()->firstOrFail();
+            expect($chapter->status)->toBe(Chapter::STATUS_PUBLISHED)
+                ->and($chapter->publish_at)->toBeNull();
+        });
+
+        it('rejects publish_at in the past on creation', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+            $story = createStoryForAuthor($user->id, ['title' => 'Past Story']);
+
+            $past = now()->subHour()->format('Y-m-d\TH:i');
+            $resp = $this->from('/stories/' . $story->slug . '/chapters/create')
+                ->post('/stories/' . $story->slug . '/chapters', [
+                    'title' => 'Past Chapter',
+                    'content' => '<p>Body</p>',
+                    'publish_at' => $past,
+                    'timezone' => 'UTC',
+                ]);
+
+            $resp->assertRedirect('/stories/' . $story->slug . '/chapters/create');
+            $resp->assertSessionHasErrors(['publish_at']);
+            expect(Chapter::query()->count())->toBe(0);
+        });
+
+        it('accepts null publish_at on a plain draft', function () {
+            $user = alice($this);
+            $this->actingAs($user);
+            $story = createStoryForAuthor($user->id, ['title' => 'Draft Story']);
+
+            $resp = $this->post('/stories/' . $story->slug . '/chapters', [
+                'title' => 'Plain Draft',
+                'content' => '<p>Body</p>',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter = Chapter::query()->firstOrFail();
+            expect($chapter->status)->toBe(Chapter::STATUS_NOT_PUBLISHED)
+                ->and($chapter->publish_at)->toBeNull();
+        });
+    });
+
     it('rejects chapter creation with 403 when no chapter credits are left (after 5 creations)', function () {
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
         $this->actingAs($user);

@@ -80,5 +80,8 @@ return [
         'content' => [
             'required' => 'Le contenu est requis.',
         ],
+        'publish_at' => [
+            'after' => 'La date de publication planifiée doit être dans le futur.',
+        ],
     ],
 ];

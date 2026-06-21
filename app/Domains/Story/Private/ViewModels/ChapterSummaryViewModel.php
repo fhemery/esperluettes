@@ -17,6 +17,7 @@ class ChapterSummaryViewModel
         public readonly bool $hasUnrepliedByAuthors,
         public readonly string $url,
         public readonly \DateTimeInterface $updatedAt,
+        public readonly ?\DateTimeInterface $publishAt = null,
     ) {
     }
 }

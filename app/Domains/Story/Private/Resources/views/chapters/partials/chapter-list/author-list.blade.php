@@ -13,6 +13,15 @@
                 <p>{{ __('story::chapters.list.not_published') }}</p>
             </x-shared::popover>
             @endif
+            @if(!$ch->isPublished && $ch->publishAt)
+            <x-shared::popover placement="top">
+                <x-slot name="trigger">
+                    <span class="material-symbols-outlined text-[18px] leading-none shrink-0 text-accent">schedule</span>
+                </x-slot>
+                <p x-data="{ publishAt: new Date('{{ $ch->publishAt->toIso8601String() }}') }"
+                   x-text="'{{ __('story::chapters.list.scheduled_at') }} ' + DateUtils.formatDateTime(publishAt)"></p>
+            </x-shared::popover>
+            @endif
         </div>
 
         <!-- Updated at, and badges for mobile -->

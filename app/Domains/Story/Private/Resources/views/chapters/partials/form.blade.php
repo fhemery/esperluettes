@@ -37,20 +37,54 @@
         <x-input-error :messages="$errors->get('content')" class="mt-2" />
     </div>
 
-    <!-- Published toggle -->
-    <div>
-        <div class="flex items-center gap-2">
-            @php($checked = old('published', isset($chapter) ? ($chapter->status === \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED ? '1' : '') : '1'))
-                <x-shared::toggle id="published" 
-                    :label="__('story::chapters.form.published.label')" 
-                    name="published" 
-                    :checked="$checked ? true : false" 
+    <!-- Published toggle + scheduled publication -->
+    @php
+        $checked = old('published', isset($chapter) ? ($chapter->status === \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED ? '1' : '') : '1');
+        $existingPublishAt = old('publish_at', isset($chapter) && $chapter->publish_at ? $chapter->publish_at->format('Y-m-d\TH:i') : '');
+    @endphp
+    <div
+        x-data="{
+            published: {{ $checked ? 'true' : 'false' }},
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }"
+        x-on:change="if ($event.target.name === 'published') published = $event.target.checked"
+    >
+        <!-- Single row: toggle + inline date picker on sm+ -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+
+            <!-- Toggle + help tooltip -->
+            <div class="flex items-center gap-2 shrink-0">
+                <x-shared::toggle id="published"
+                    :label="__('story::chapters.form.published.label')"
+                    name="published"
+                    :checked="$checked ? true : false"
                     value="1"
                     btnColor="accent"
                     textColor="secondary" />
-            <x-shared::tooltip type="help" :title="__('story::chapters.form.published.help.label')" placement="right">
-                {{ __('story::chapters.form.published.help.text') }}
-            </x-shared::tooltip>
+                <x-shared::tooltip type="help" :title="__('story::chapters.form.published.help.label')" placement="right">
+                    {{ __('story::chapters.form.published.help.text') }}
+                </x-shared::tooltip>
+            </div>
+
+            <!-- Inline date picker — appears when toggle is OFF -->
+            <div x-show="!published" x-cloak class="flex items-center gap-2 sm:flex-1">
+                <span class="material-symbols-outlined text-secondary text-[18px] leading-none shrink-0">schedule</span>
+                <input
+                    type="datetime-local"
+                    id="publish_at"
+                    name="publish_at"
+                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-accent focus:ring-accent text-sm"
+                    value="{{ $existingPublishAt }}"
+                    :min="new Date(Date.now() + 60000).toISOString().slice(0, 16)"
+                />
+                <input type="hidden" name="timezone" :value="timezone" />
+            </div>
+        </div>
+
+        <!-- Validation error + help below -->
+        <div x-show="!published" x-cloak class="mt-1 pl-0 sm:pl-0">
+            <x-input-error :messages="$errors->get('publish_at')" class="mt-1" />
+            <p class="text-xs text-secondary mt-1">{{ __('story::chapters.form.publish_at.help') }}</p>
         </div>
     </div>
 </div>

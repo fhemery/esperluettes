@@ -59,7 +59,9 @@ use App\Domains\Story\Public\Notifications\CoAuthorChapterDeletedNotification;
 use App\Domains\Story\Public\Notifications\CollaboratorRoleGivenNotification;
 use App\Domains\Story\Public\Notifications\CollaboratorRemovedNotification;
 use App\Domains\Story\Public\Notifications\CollaboratorLeftNotification;
+use App\Domains\Story\Public\Notifications\ChapterScheduledPublishedNotification;
 use App\Domains\Story\Private\Console\BackfillChapterCommentNotificationsCommand;
+use App\Domains\Story\Private\Console\PublishScheduledChaptersCommand;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
@@ -77,6 +79,7 @@ class StoryServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 BackfillChapterCommentNotificationsCommand::class,
+                PublishScheduledChaptersCommand::class,
             ]);
         }
 
@@ -216,6 +219,13 @@ class StoryServiceProvider extends ServiceProvider
             class: CollaboratorLeftNotification::class,
             groupId: 'collaboration',
             nameKey: 'story::notification.settings.type_collaborator_left',
+        );
+        $notificationFactory->registerGroup('publication', 25, 'story::notification.settings.group_publication');
+        $notificationFactory->register(
+            type: ChapterScheduledPublishedNotification::type(),
+            class: ChapterScheduledPublishedNotification::class,
+            groupId: 'publication',
+            nameKey: 'story::notification.settings.type_chapter_scheduled_published',
         );
     }
 

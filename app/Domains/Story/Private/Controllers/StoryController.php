@@ -320,6 +320,7 @@ class StoryController
                 hasUnrepliedByAuthors: (bool)($hasUnreplied[$cid] ?? false),
                 url: route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $c->slug]),
                 updatedAt: $c->last_edited_at,
+                publishAt: $c->publish_at,
             );
         }
 

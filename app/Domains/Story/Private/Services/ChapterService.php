@@ -19,6 +19,7 @@ use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterCreatedNotification;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterUpdatedNotification;
 use App\Domains\Story\Public\Notifications\CoAuthorChapterDeletedNotification;
+use App\Domains\Story\Public\Notifications\ChapterScheduledPublishedNotification;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Story\Private\Services\ChapterCreditService;
@@ -38,16 +39,19 @@ class ChapterService
     public function createChapter(Story $story, ChapterRequest $request, int $userId): Chapter
     {
         $title = (string) $request->input('title');
-        $authorNoteHtml = $request->input('author_note'); 
+        $authorNoteHtml = $request->input('author_note');
         $contentHtml = (string) $request->input('content');
         $published = (bool)($request->boolean('published', false));
+        $publishAt = (!$published && $request->input('publish_at'))
+            ? now()->parse($request->input('publish_at'))
+            : null;
 
         // Enforce chapter credits: must have at least 1 available to create
         if ($this->credits->availableForUser($userId) <= 0) {
             throw new \Illuminate\Auth\Access\AuthorizationException('No chapter credits left. Comment other chapters to earn more.');
         }
-        
-        return DB::transaction(function () use ($story, $title, $authorNoteHtml, $contentHtml, $published, $userId) {
+
+        return DB::transaction(function () use ($story, $title, $authorNoteHtml, $contentHtml, $published, $publishAt, $userId) {
             // compute sparse sort order
             $maxOrder = (int) (Chapter::where('story_id', $story->id)->max('sort_order') ?? 0);
             $sortOrder = $maxOrder + 100;
@@ -70,6 +74,9 @@ class ChapterService
 
             if ($published) {
                 $chapter->first_published_at = now();
+                $chapter->publish_at = null;
+            } else {
+                $chapter->publish_at = $publishAt;
             }
 
             // Any authoring action counts as an edit
@@ -208,8 +215,11 @@ class ChapterService
         $authorNoteHtml = $request->input('author_note'); // purified or null
         $contentHtml = (string) $request->input('content'); // purified
         $published = (bool)($request->boolean('published', false));
+        $publishAt = (!$published && $request->input('publish_at'))
+            ? now()->parse($request->input('publish_at'))
+            : null;
 
-        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published, $userId) {
+        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published, $publishAt, $userId) {
             // Snapshot BEFORE changes
             $before = ChapterSnapshot::fromModel($chapter);
             $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
@@ -221,11 +231,16 @@ class ChapterService
             $chapter->content = $contentHtml;
             $chapter->status = $published ? Chapter::STATUS_PUBLISHED : Chapter::STATUS_NOT_PUBLISHED;
 
-            // Handle first publish timestamp
+            // Handle first publish timestamp and publish_at scheduling
             $firstPublishedNow = false;
             if ($published && !$wasPublished && $chapter->first_published_at === null) {
                 $chapter->first_published_at = now();
                 $firstPublishedNow = true;
+            }
+            if ($published) {
+                $chapter->publish_at = null;
+            } else {
+                $chapter->publish_at = $publishAt;
             }
 
             // Regenerate slug base but keep id suffix stable
@@ -290,6 +305,59 @@ class ChapterService
             ->when(!$isAuthor, fn($q) => $q->where('status', Chapter::STATUS_PUBLISHED))
             ->orderBy('sort_order','asc')
             ->get();
+    }
+
+    /**
+     * Publish a single chapter via scheduled automation. Emits events and notifies author.
+     * No-op if the chapter is already published.
+     */
+    public function publishScheduledChapter(Chapter $chapter): void
+    {
+        if ($chapter->status === Chapter::STATUS_PUBLISHED) {
+            return;
+        }
+
+        DB::transaction(function () use ($chapter) {
+            /** @var Story $story */
+            $story = Story::query()->findOrFail((int) $chapter->story_id);
+
+            $before = ChapterSnapshot::fromModel($chapter);
+
+            $chapter->status = Chapter::STATUS_PUBLISHED;
+            if ($chapter->first_published_at === null) {
+                $chapter->first_published_at = now();
+            }
+            $chapter->publish_at = null;
+            $chapter->last_edited_at = now();
+            $chapter->save();
+
+            $this->updateStoryLastPublished($story);
+
+            $after = ChapterSnapshot::fromModel($chapter);
+
+            $this->eventBus->emit(new ChapterPublished(
+                storyId: (int) $story->id,
+                chapter: $after,
+            ));
+
+            $this->eventBus->emit(new ChapterUpdated(
+                storyId: (int) $story->id,
+                before: $before,
+                after: $after,
+            ));
+
+            // Notify all authors of the story that the chapter was auto-published
+            $authorIds = $story->authors()->pluck('user_id')->map(fn($id) => (int) $id)->all();
+            if (!empty($authorIds)) {
+                $notification = new ChapterScheduledPublishedNotification(
+                    storyTitle: (string) $story->title,
+                    storySlug: (string) $story->slug,
+                    chapterTitle: (string) $chapter->title,
+                    chapterSlug: (string) $chapter->slug,
+                );
+                $this->notifications->createNotification($authorIds, $notification, null);
+            }
+        });
     }
 
     /**

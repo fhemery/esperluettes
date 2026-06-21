@@ -232,6 +232,105 @@ describe('Editing a chapter', function () {
         });
     });
 
+    describe('Scheduled publication (publish_at)', function () {
+        it('stores publish_at when editing an unpublished chapter with a future date', function () {
+            $author = alice($this);
+            $story = publicStory('Sched Story', $author->id);
+            $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Draft Ch']);
+
+            $this->actingAs($author);
+            $future = now()->addDay()->format('Y-m-d\TH:i');
+            $resp = updateChapter($this, $story, $chapter, [
+                'published' => '0',
+                'publish_at' => $future,
+                'timezone' => 'UTC',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter->refresh();
+            expect($chapter->status)->toBe(Chapter::STATUS_NOT_PUBLISHED)
+                ->and($chapter->publish_at)->not->toBeNull();
+        });
+
+        it('updates publish_at to a new future date on re-edit', function () {
+            $author = alice($this);
+            $story = publicStory('Resched Story', $author->id);
+            $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Resched Ch']);
+
+            $chapter->publish_at = now()->addDays(3);
+            $chapter->save();
+
+            $this->actingAs($author);
+            $newFuture = now()->addDays(7)->format('Y-m-d\TH:i');
+            $resp = updateChapter($this, $story, $chapter, [
+                'published' => '0',
+                'publish_at' => $newFuture,
+                'timezone' => 'UTC',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter->refresh();
+            expect($chapter->publish_at)->not->toBeNull();
+            expect($chapter->publish_at->gt(now()->addDays(5)))->toBeTrue();
+        });
+
+        it('clears publish_at when toggling chapter to published', function () {
+            $author = alice($this);
+            $story = publicStory('Clear Sched Story', $author->id);
+            $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Will Publish']);
+
+            $chapter->publish_at = now()->addDay();
+            $chapter->save();
+
+            $this->actingAs($author);
+            $resp = updateChapter($this, $story, $chapter, ['published' => '1']);
+            $resp->assertRedirect();
+
+            $chapter->refresh();
+            expect($chapter->status)->toBe(Chapter::STATUS_PUBLISHED)
+                ->and($chapter->publish_at)->toBeNull();
+        });
+
+        it('clears publish_at when explicitly sent as empty on edit', function () {
+            $author = alice($this);
+            $story = publicStory('Clear Sched2 Story', $author->id);
+            $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Cancel Sched']);
+
+            $chapter->publish_at = now()->addDay();
+            $chapter->save();
+
+            $this->actingAs($author);
+            $resp = updateChapter($this, $story, $chapter, [
+                'published' => '0',
+                'publish_at' => '',
+                'timezone' => 'UTC',
+            ]);
+            $resp->assertRedirect();
+
+            $chapter->refresh();
+            expect($chapter->publish_at)->toBeNull();
+        });
+
+        it('rejects publish_at in the past on edit', function () {
+            $author = alice($this);
+            $story = publicStory('Past Sched Story', $author->id);
+            $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Past Edit Ch']);
+
+            $this->actingAs($author);
+            $past = now()->subHour()->format('Y-m-d\TH:i');
+            $resp = $this->from(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->put(route('chapters.update', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]), [
+                    'title' => 'Past Edit Ch',
+                    'content' => '<p>Content</p>',
+                    'published' => '0',
+                    'publish_at' => $past,
+                    'timezone' => 'UTC',
+                ]);
+
+            $resp->assertSessionHasErrors(['publish_at']);
+        });
+    });
+
     describe('Link handling', function () {
         it('preserves internal links in chapter content', function () {
             config(['app.url' => config('app.url') ?: 'http://localhost']);

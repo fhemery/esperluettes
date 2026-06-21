@@ -3,6 +3,7 @@
 namespace App\Domains\Story\Private\Http\Requests;
 
 use App\Domains\Shared\Support\HtmlLinkUtils;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Mews\Purifier\Facades\Purifier;
 
@@ -21,6 +22,7 @@ class ChapterRequest extends FormRequest
             'author_note' => ['nullable', 'maxstripped:1000'],
             'content' => ['required'],
             'published' => ['nullable', 'boolean'],
+            'publish_at' => ['nullable', 'date', 'after:now'],
         ];
     }
 
@@ -37,6 +39,20 @@ class ChapterRequest extends FormRequest
         }
         $content = $this->input('content');
 
+        $publishAt = $this->input('publish_at');
+        $timezone = $this->input('timezone', 'UTC');
+        $resolvedPublishAt = null;
+        if (is_string($publishAt) && $publishAt !== '') {
+            try {
+                $tz = in_array($timezone, \DateTimeZone::listIdentifiers(), true) ? $timezone : 'UTC';
+                $resolvedPublishAt = Carbon::createFromFormat('Y-m-d\TH:i', $publishAt, $tz)
+                    ->utc()
+                    ->toDateTimeString();
+            } catch (\Throwable) {
+                $resolvedPublishAt = $publishAt;
+            }
+        }
+
         $this->merge([
             'title' => $title,
             'author_note' => $authorNote !== null
@@ -45,6 +61,7 @@ class ChapterRequest extends FormRequest
             'content' => HtmlLinkUtils::stripExternalLinks(
                 Purifier::clean((string) ($content ?? ''), 'strict-with-links')
             ),
+            'publish_at' => $resolvedPublishAt,
         ]);
     }
 
@@ -54,6 +71,7 @@ class ChapterRequest extends FormRequest
             'title.required_trimmed' => __('story::validation.chapter.title.required'),
             'author_note.maxstripped' => __('story::validation.chapter.author_note_too_long'),
             'content.required' => __('story::validation.chapter.content.required'),
+            'publish_at.after' => __('story::validation.chapter.publish_at.after'),
         ];
     }
 }

@@ -12,7 +12,7 @@ use App\Domains\Story\Private\Models\ReadingProgress;
 use App\Domains\Shared\Contracts\Sortable;
 
 #[Table('story_chapters')]
-#[Fillable(['story_id', 'title', 'slug', 'author_note', 'content', 'sort_order', 'status', 'first_published_at', 'reads_logged_count', 'word_count', 'character_count'])]
+#[Fillable(['story_id', 'title', 'slug', 'author_note', 'content', 'sort_order', 'status', 'first_published_at', 'publish_at', 'reads_logged_count', 'word_count', 'character_count'])]
 class Chapter extends Model implements Sortable
 {
     use SoftDeletes;
@@ -22,6 +22,7 @@ class Chapter extends Model implements Sortable
         'sort_order' => 'integer',
         'reads_logged_count' => 'integer',
         'first_published_at' => 'datetime',
+        'publish_at' => 'datetime',
         'last_edited_at' => 'datetime',
         'word_count' => 'integer',
         'character_count' => 'integer',

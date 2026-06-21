@@ -39,6 +39,10 @@ return [
                 'text' => 'Décochez si vous souhaitez garder le chapitre en brouillon, ou le cacher temporairement. Si votre histoire est privée, ce chapitre ne sera pas visible par la communauté même publié',
             ],
         ],
+        'publish_at' => [
+            'label' => 'Publication planifiée',
+            'help' => 'La date et l\'heure sont affichées dans votre fuseau horaire local. Le chapitre sera publié automatiquement à cette date.',
+        ],
         'cancel' => 'Annuler',
         'submit' => 'Créer le chapitre',
         'update' => 'Enregistrer les modifications',
@@ -52,6 +56,7 @@ return [
     'list' => [
         'empty' => 'Aucun chapitre disponible pour le moment.',
         'not_published' => 'Non publié',
+        'scheduled_at' => 'Publication planifiée le',
     ],
     'actions' => [
         'cancel' => 'Annuler',

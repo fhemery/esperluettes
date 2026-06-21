@@ -11,6 +11,7 @@ return [
     'chapter.created' => '<a href=":user_url">:user_name</a> a ajouté un nouveau chapitre "<a href=":chapter_url">:chapter_name</a>" à l\'histoire "<a href=":story_url">:story_name</a>"',
     'chapter.updated' => '<a href=":user_url">:user_name</a> a modifié le chapitre "<a href=":chapter_url">:chapter_name</a>" de l\'histoire "<a href=":story_url">:story_name</a>"',
     'chapter.deleted' => '<a href=":user_url">:user_name</a> a supprimé le chapitre ":chapter_name" de l\'histoire "<a href=":story_url">:story_name</a>"',
+    'chapter.scheduled_published' => 'Votre chapitre "<a href=":chapter_url">:chapter_name</a>" de l\'histoire "<a href=":story_url">:story_name</a>" a été publié automatiquement.',
 
     // Collaborator role notifications
     'collaborator.role_given.author' => '<a href=":user_url">:user_name</a> vous a donné le rôle de co-auteurice sur l\'histoire "<a href=":story_url">:story_name</a>"',
@@ -21,6 +22,7 @@ return [
     'settings' => [
         'group_comments'      => 'Commentaires',
         'group_collaboration' => 'Collaboration',
+        'group_publication'   => 'Publication',
 
         'type_chapter_comment'          => "J'ai reçu un commentaire sur l'une de mes histoires ou un de mes commentaires a reçu une réponse",
         'type_chapter_root_comment'     => "J'ai reçu un commentaire sur l'une de mes histoires",
@@ -30,6 +32,7 @@ return [
         'type_coauthor_chapter_deleted' => 'Un·e de mes co-auteurices a supprimé un chapitre sur une de nos histoires',
         'type_collaborator_role_given'  => "Un rôle de collaborateurice (auteurice, bêta-lecteurice...) m'a été accordé",
         'type_collaborator_removed'     => "Un rôle de collaborateurice (bêta-lecteurice...) m'a été retiré",
-        'type_collaborator_left'        => 'Un·e collaborateurice a quitté une histoire',
+        'type_collaborator_left'              => 'Un·e collaborateurice a quitté une histoire',
+        'type_chapter_scheduled_published'    => 'Un de mes chapitres a été publié automatiquement à la date planifiée',
     ],
 ];
