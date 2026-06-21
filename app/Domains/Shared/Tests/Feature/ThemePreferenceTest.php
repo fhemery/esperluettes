@@ -194,7 +194,15 @@ describe('ThemeService - settings registration', function () {
         expect($param->constraints['options'])->toHaveKeys(['seasonal', 'autumn', 'winter', 'spring', 'summer']);
     });
 
-    it('registers appearance parameter with correct options', function () {
+    it('does not register dark theme setting when toggle is disabled', function () {
+        $api = app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class);
+
+        expect($api->getParameter(SharedServiceProvider::TAB_GENERAL, SharedServiceProvider::KEY_APPEARANCE))->toBeNull();
+    });
+
+    it('registers appearance parameter with correct options when toggle is enabled', function () {
+        enableDarkThemeSettingForTesting($this);
+
         $api = app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class);
 
         $param = $api->getParameter(SharedServiceProvider::TAB_GENERAL, SharedServiceProvider::KEY_APPEARANCE);
@@ -388,6 +396,10 @@ describe('AppearanceService - user preference', function () {
 });
 
 describe('AppearanceService - settings page integration', function () {
+    beforeEach(function () {
+        enableDarkThemeSettingForTesting($this);
+    });
+
     it('can update appearance via settings page', function () {
         $user = alice($this);
 

@@ -1,5 +1,11 @@
 <?php
 
+use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
+use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
+use App\Domains\Shared\Contracts\ParameterType;
+use App\Domains\Shared\Providers\SharedServiceProvider;
+use App\Domains\Shared\Support\FeatureToggles;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\StoryRef\Private\Models\StoryRefType;
@@ -21,6 +27,37 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
+
+function enableDarkThemeSettingForTesting(TestCase $t): void
+{
+    createFeatureToggle($t, new FeatureToggle(
+        FeatureToggles::DARK_THEME,
+        FeatureToggles::DOMAIN,
+        access: FeatureToggleAccess::ON,
+    ));
+
+    $settingsApi = app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class);
+    if ($settingsApi->getParameter(SharedServiceProvider::TAB_GENERAL, SharedServiceProvider::KEY_APPEARANCE) !== null) {
+        return;
+    }
+
+    registerSettingsParameter(new SettingsParameterDefinition(
+        tabId: SharedServiceProvider::TAB_GENERAL,
+        sectionId: SharedServiceProvider::SECTION_APPEARANCE,
+        key: SharedServiceProvider::KEY_APPEARANCE,
+        type: ParameterType::ENUM,
+        default: 'light',
+        order: 15,
+        nameKey: 'shared::settings.params.appearance.name',
+        descriptionKey: 'shared::settings.params.appearance.description',
+        constraints: [
+            'options' => [
+                'light' => 'shared::settings.params.appearance.options.light',
+                'dark' => 'shared::settings.params.appearance.options.dark',
+            ],
+        ],
+    ));
+}
 
 function assertHasIconBadge(TestCase $t, string $badgeIcon, string $badgeText, string $content): TestCase
 {

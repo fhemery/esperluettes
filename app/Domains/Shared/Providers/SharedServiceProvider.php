@@ -2,7 +2,9 @@
 
 namespace App\Domains\Shared\Providers;
 
+use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Settings\Public\Api\SettingsPublicApi;
+use App\Domains\Shared\Support\FeatureToggles;
 use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
@@ -13,6 +15,7 @@ use App\Domains\Shared\Validation\CustomValidators;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -159,23 +162,24 @@ class SharedServiceProvider extends ServiceProvider
             ],
         ));
 
-        // Register "Appearance" parameter (light/dark mode)
-        $settingsApi->registerParameter(new SettingsParameterDefinition(
-            tabId: self::TAB_GENERAL,
-            sectionId: self::SECTION_APPEARANCE,
-            key: self::KEY_APPEARANCE,
-            type: ParameterType::ENUM,
-            default: 'light',
-            order: 15,
-            nameKey: 'shared::settings.params.appearance.name',
-            descriptionKey: 'shared::settings.params.appearance.description',
-            constraints: [
-                'options' => [
-                    'light' => 'shared::settings.params.appearance.options.light',
-                    'dark' => 'shared::settings.params.appearance.options.dark',
+        if ($this->isDarkThemeSettingEnabled()) {
+            $settingsApi->registerParameter(new SettingsParameterDefinition(
+                tabId: self::TAB_GENERAL,
+                sectionId: self::SECTION_APPEARANCE,
+                key: self::KEY_APPEARANCE,
+                type: ParameterType::ENUM,
+                default: 'light',
+                order: 15,
+                nameKey: 'shared::settings.params.appearance.name',
+                descriptionKey: 'shared::settings.params.appearance.description',
+                constraints: [
+                    'options' => [
+                        'light' => 'shared::settings.params.appearance.options.light',
+                        'dark' => 'shared::settings.params.appearance.options.dark',
+                    ],
                 ],
-            ],
-        ));
+            ));
+        }
 
         // Register "Font" parameter
         $settingsApi->registerParameter(new SettingsParameterDefinition(
@@ -213,6 +217,18 @@ class SharedServiceProvider extends ServiceProvider
                 ],
             ],
         ));
+    }
+
+    private function isDarkThemeSettingEnabled(): bool
+    {
+        if (! Schema::hasTable('config_feature_toggles')) {
+            return false;
+        }
+
+        return app(ConfigPublicApi::class)->isToggleEnabled(
+            FeatureToggles::DARK_THEME,
+            FeatureToggles::DOMAIN,
+        );
     }
 
     private function registerValidators(): void

@@ -388,6 +388,7 @@ deptrac:
     # Shared contracts and DTOs - accessible by all domains
     Shared:
       - SettingsPublic
+      - ConfigPublic
 
     # Test helpers - accessible by all domain tests
     TestHelpers: [ ]
