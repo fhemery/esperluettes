@@ -120,19 +120,19 @@ html {
 }
 
 :root[data-season=summer] {
-  --color-bg: 247 234 223;
-  --color-primary: 201 129 41;
-  --color-secondary: 65 37 10;
-  --color-accent: 164 52 92;
-  --color-tertiary: 99 157 165;
-  --home-bg-image: url('/images/themes/summer/background.png');
-  --profile-bg-image-small: url('/images/themes/summer/profile-bg-640.jpg');
-  --profile-bg-image-big: url('/images/themes/summer/profile-bg-1280.jpg');
-  --theme-ribbon: url('/images/themes/summer/top-ribbon.png');
-  --frame-corner-tl:url('/images/themes/summer/design/frame-corner-tl.png');
-  --frame-corner-tr:url('/images/themes/summer/design/frame-corner-tr.png');
-  --frame-corner-bl:url('/images/themes/summer/design/frame-corner-bl.png');
-  --frame-corner-br:url('/images/themes/summer/design/frame-corner-br.png');
+  --color-bg: 238 244 217;
+  --color-primary: 118 160 51;
+  --color-secondary: 10 94 1;
+  --color-accent: 244 100 124;
+  --color-tertiary: 173 99 115;
+  --home-bg-image: url('/images/themes/spring/background.png');
+  --profile-bg-image-small: url('/images/themes/spring/profile-bg-640.jpg');
+  --profile-bg-image-big: url('/images/themes/spring/profile-bg-1280.jpg');
+  --theme-ribbon: url('/images/themes/spring/top-ribbon.png');
+  --frame-corner-tl:url('/images/themes/spring/design/frame-corner-tl.png');
+  --frame-corner-tr:url('/images/themes/spring/design/frame-corner-tr.png');
+  --frame-corner-bl:url('/images/themes/spring/design/frame-corner-bl.png');
+  --frame-corner-br:url('/images/themes/spring/design/frame-corner-br.png');
 }
 
 /* Dark appearance: shared defaults (overridden per season below) */
