@@ -51,3 +51,16 @@ export function formatTime(value, lang = getLang()) {
 export function formatDateTime(value, lang = getLang()) {
   return format(value, DATE_TIME_OPTS, lang);
 }
+
+/**
+ * Convert a UTC datetime string to the local-time value for <input type="datetime-local">.
+ * Uses local getters (getFullYear, getHours…) so no offset arithmetic is needed.
+ * @param {string} utcString - UTC datetime string e.g. "2026-06-21T13:07" or "2026-06-21 13:07:00"
+ * @returns {string} Local time in "YYYY-MM-DDTHH:mm" format, or "" if unparseable
+ */
+export function utcToLocalInput(utcString) {
+  const d = new Date(utcString.replace(' ', 'T').slice(0, 16) + ':00Z');
+  if (isNaN(d)) return '';
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}

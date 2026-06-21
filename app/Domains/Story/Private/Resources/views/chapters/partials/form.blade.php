@@ -46,6 +46,7 @@
         x-data="{
             published: {{ $checked ? 'true' : 'false' }},
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            publishAtLocal: '{{ $existingPublishAt }}' ? DateUtils.utcToLocalInput('{{ $existingPublishAt }}') : '',
         }"
         x-on:change="if ($event.target.name === 'published') published = $event.target.checked"
     >
@@ -74,7 +75,7 @@
                     id="publish_at"
                     name="publish_at"
                     class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-accent focus:ring-accent text-sm"
-                    value="{{ $existingPublishAt }}"
+                    x-model="publishAtLocal"
                     :min="new Date(Date.now() + 60000).toISOString().slice(0, 16)"
                 />
                 <input type="hidden" name="timezone" :value="timezone" />
