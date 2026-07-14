@@ -3,17 +3,23 @@
     'label' => '',
     'cumulative' => false,
     'height' => '300px',
+    'granularity' => 'daily',
     'color' => 'rgb(99, 102, 241)',
     'backgroundColor' => 'rgba(99, 102, 241, 0.1)',
 ])
 
 @php
+    $dateFormat = match ($granularity) {
+        'monthly' => 'M Y',
+        default => 'd M Y',
+    };
+
     $chartPoints = collect($data)->map(fn ($point) => [
-        'label' => $point->periodStart->format('M Y'),
+        'label' => $point->periodStart->format($dateFormat),
         'value' => $point->value,
         'cumulativeValue' => $point->cumulativeValue,
     ])->values()->all();
-    
+
     $options = [
         'cumulative' => $cumulative,
         'color' => $color,
@@ -22,14 +28,18 @@
 @endphp
 
 @if(count($chartPoints) > 0)
-    <div 
-        x-data="statisticsLineChart(@js($chartPoints), @js($label), @js($options))"
-        {{ $attributes->class(['stat-line-chart']) }}
+    <div
+        data-statistics-line-chart
+        data-points='@json($chartPoints)'
+        data-label="{{ $label }}"
+        data-options='@json($options)'
+        {{ $attributes->class(['stat-line-chart w-full']) }}
+        style="height: {{ $height }};"
     >
-        <canvas x-ref="canvas" style="height: {{ $height }}; width: 100%;"></canvas>
+        <canvas class="w-full h-full"></canvas>
     </div>
 @else
-    <div {{ $attributes->class(['stat-line-chart-empty text-gray-400 text-center py-8']) }}>
-        {{ __('statistics::statistics.profile.no_data') }}
+    <div {{ $attributes->class(['stat-line-chart-empty text-fg/50 text-center py-8 border border-dashed border-border rounded-lg']) }}>
+        {{ __('statistics::profile.no_data') }}
     </div>
 @endif

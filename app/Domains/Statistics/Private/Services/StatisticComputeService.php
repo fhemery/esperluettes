@@ -47,6 +47,12 @@ class StatisticComputeService
                         $delta,
                         $occurredAt ?? now()
                     );
+
+                    $this->recomputeCumulativeValues(
+                        $key,
+                        $definition::scopeType(),
+                        $scopeId ?: null,
+                    );
                 }
             }
         }

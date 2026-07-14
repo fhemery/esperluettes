@@ -2,6 +2,9 @@
 
 namespace App\Domains\Statistics\Public\Providers;
 
+use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
+use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Events\Public\Api\EventBus;
@@ -38,6 +41,24 @@ class StatisticsServiceProvider extends ServiceProvider
         $this->registerStatistics();
         $this->registerEventListeners();
         $this->registerCommands();
+        $this->registerAdminNavigation();
+    }
+
+    protected function registerAdminNavigation(): void
+    {
+        $registry = app(AdminNavigationRegistry::class);
+
+        $registry->registerGroup('statistics', 'statistics::admin.nav_group', 55);
+
+        $registry->registerPage(
+            'statistics.admin',
+            'statistics',
+            'statistics::admin.nav_label',
+            AdminRegistryTarget::route('statistics.admin.index'),
+            'bar_chart',
+            [Roles::ADMIN, Roles::TECH_ADMIN],
+            1,
+        );
     }
 
     private function registerCommands(): void

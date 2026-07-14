@@ -17,9 +17,19 @@
 @endphp
 
 <div 
-    x-data="{ expanded: false }"
+    x-data="{
+        expanded: false,
+        toggle() {
+            this.expanded = !this.expanded;
+            if (this.expanded) {
+                this.$nextTick(() => {
+                    this.$refs.chartPanel?.dispatchEvent(new CustomEvent('statistics-chart-show'));
+                });
+            }
+        },
+    }"
     {{ $attributes->class(['stat-card bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow']) }}
-    @click="expanded = !expanded"
+    @click="toggle()"
 >
     <div class="stat-card-header">
         <x-statistics::digit 
@@ -31,9 +41,11 @@
     
     @if($showTimeSeries && count($timeSeries) > 0)
         <div 
-            x-show="expanded" 
-            x-collapse
+            x-show="expanded"
+            x-ref="chartPanel"
+            x-transition
             class="stat-card-chart mt-4 border-t pt-4"
+            @click.stop
         >
             <x-statistics::line-chart 
                 :data="$timeSeries" 
