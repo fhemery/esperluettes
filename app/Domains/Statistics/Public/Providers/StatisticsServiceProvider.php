@@ -79,9 +79,8 @@ class StatisticsServiceProvider extends ServiceProvider
     private function registerEventListeners(): void
     {
         $eventBus = app(EventBus::class);
-        $listener = app(UpdateStatisticsOnEvent::class);
 
-        $eventBus->subscribe(UserRegistered::class, [$listener, 'handle']);
-        $eventBus->subscribe(UserDeleted::class, [$listener, 'handle']);
+        $eventBus->subscribe(UserRegistered::class, [UpdateStatisticsOnEvent::class, 'handle']);
+        $eventBus->subscribe(UserDeleted::class, [UpdateStatisticsOnEvent::class, 'handle']);
     }
 }
