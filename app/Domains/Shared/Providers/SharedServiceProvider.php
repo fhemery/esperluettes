@@ -15,7 +15,6 @@ use App\Domains\Shared\Validation\CustomValidators;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -162,7 +161,10 @@ class SharedServiceProvider extends ServiceProvider
             ],
         ));
 
-        if ($this->isDarkThemeSettingEnabled()) {
+        if (app(ConfigPublicApi::class)->isToggleEnabled(
+            FeatureToggles::DARK_THEME,
+            FeatureToggles::DOMAIN,
+        )) {
             $settingsApi->registerParameter(new SettingsParameterDefinition(
                 tabId: self::TAB_GENERAL,
                 sectionId: self::SECTION_APPEARANCE,
@@ -217,18 +219,6 @@ class SharedServiceProvider extends ServiceProvider
                 ],
             ],
         ));
-    }
-
-    private function isDarkThemeSettingEnabled(): bool
-    {
-        if (! Schema::hasTable('config_feature_toggles')) {
-            return false;
-        }
-
-        return app(ConfigPublicApi::class)->isToggleEnabled(
-            FeatureToggles::DARK_THEME,
-            FeatureToggles::DOMAIN,
-        );
     }
 
     private function registerValidators(): void

@@ -476,14 +476,9 @@ document.addEventListener('alpine:init', () => {
 @endPushOnce
 ```
 
-### Backfill Commands
-
-#### Full Recompute
+### Compute Commands
 
 ```bash
-# Recompute all statistics from scratch
-php artisan statistics:compute-all
-
 # Recompute specific statistic
 php artisan statistics:compute global.total_users
 
@@ -491,21 +486,15 @@ php artisan statistics:compute global.total_users
 php artisan statistics:compute user.words_written --scope-type=user --scope-id=123
 ```
 
-#### Backfill from Events
+**Compute behavior:**
+- For **non-time-series statistics**: computes current value directly (e.g., count users in DB)
+- For **time-series statistics**: clears existing data, replays all relevant events chronologically to rebuild both the snapshot and historical time-series data
 
-```bash
-# Replay events to build time-series history
-php artisan statistics:backfill user.words_written --from="2024-01-01"
-
-# Backfill all statistics that listen to a specific event
-php artisan statistics:backfill-event Story.ChapterPublished
-```
-
-**Backfill process:**
-1. Query events by name(s) within date range
-2. For each event, call `computeDelta()` on relevant statistics
-3. Update time-series records for the event's date
-4. Optionally recompute current snapshot at the end
+This unified approach means:
+1. Clear existing snapshot and time-series data
+2. For time-series: query events by name(s) and replay them in order
+3. For each event, call `computeDelta()` and update both snapshot and time-series
+4. Recompute cumulative values for charts
 
 ---
 

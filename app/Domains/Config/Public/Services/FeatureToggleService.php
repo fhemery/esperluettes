@@ -6,6 +6,7 @@ use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Config\Private\Models\FeatureToggle as FeatureToggleModel;
 use App\Domains\Config\Private\Repositories\FeatureToggleRepository;
+use App\Domains\Config\Private\Support\ConfigStorageReadiness;
 use App\Domains\Config\Public\Contracts\FeatureToggle as FeatureToggleContract;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
@@ -202,6 +203,10 @@ class FeatureToggleService
      */
     private function getAllCached(): array
     {
+        if (! ConfigStorageReadiness::isAvailable()) {
+            return ['list' => [], 'byDomain' => []];
+        }
+
         return Cache::remember($this->allCacheKey(), now()->addMinutes(60), function () {
             $items = $this->repo->all();
             $list = [];

@@ -5,6 +5,7 @@ namespace App\Domains\Config\Public\Services;
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Config\Private\Repositories\ConfigParameterRepository;
+use App\Domains\Config\Private\Support\ConfigStorageReadiness;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
 use App\Domains\Config\Public\Events\ConfigParameterUpdated;
@@ -214,6 +215,10 @@ class ConfigParameterService
      */
     private function getAllCached(): array
     {
+        if (! ConfigStorageReadiness::isAvailable()) {
+            return ['byDomain' => []];
+        }
+
         return Cache::remember($this->allCacheKey(), now()->addMinutes(60), function () {
             $items = $this->repo->all();
             $byDomain = [];

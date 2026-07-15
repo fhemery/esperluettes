@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('notifications:cleanup')->daily();
         // Publish chapters whose scheduled publication date has been reached (every 5 min at :00, :05, :10…)
         $schedule->command('story:publish-scheduled-chapters')->cron('*/5 * * * *');
+        $schedule->command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
