@@ -9,11 +9,22 @@ use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Statistics\Private\Console\ComputeStatisticCommand;
+use App\Domains\Statistics\Private\Definitions\Global\TotalChaptersStatistic;
+use App\Domains\Statistics\Private\Definitions\Global\TotalStoriesStatistic;
 use App\Domains\Statistics\Private\Definitions\Global\TotalUsersStatistic;
+use App\Domains\Statistics\Private\Definitions\Global\TotalWordsStatistic;
+use App\Domains\Statistics\Private\Definitions\User\UserTotalChaptersStatistic;
+use App\Domains\Statistics\Private\Definitions\User\UserTotalStoriesStatistic;
+use App\Domains\Statistics\Private\Definitions\User\UserTotalWordsStatistic;
 use App\Domains\Statistics\Private\Listeners\UpdateStatisticsOnEvent;
 use App\Domains\Statistics\Private\Services\StatisticComputeService;
 use App\Domains\Statistics\Private\Services\StatisticQueryService;
 use App\Domains\Statistics\Private\Services\StatisticRegistry;
+use App\Domains\Story\Public\Events\ChapterCreated;
+use App\Domains\Story\Public\Events\ChapterDeleted;
+use App\Domains\Story\Public\Events\ChapterUpdated;
+use App\Domains\Story\Public\Events\StoryCreated;
+use App\Domains\Story\Public\Events\StoryDeleted;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -73,14 +84,30 @@ class StatisticsServiceProvider extends ServiceProvider
     private function registerStatistics(): void
     {
         $registry = app(StatisticRegistry::class);
+
         $registry->register(TotalUsersStatistic::class);
+        $registry->register(TotalStoriesStatistic::class);
+        $registry->register(TotalChaptersStatistic::class);
+        $registry->register(TotalWordsStatistic::class);
+        $registry->register(UserTotalStoriesStatistic::class);
+        $registry->register(UserTotalChaptersStatistic::class);
+        $registry->register(UserTotalWordsStatistic::class);
     }
 
     private function registerEventListeners(): void
     {
         $eventBus = app(EventBus::class);
 
-        $eventBus->subscribe(UserRegistered::class, [UpdateStatisticsOnEvent::class, 'handle']);
-        $eventBus->subscribe(UserDeleted::class, [UpdateStatisticsOnEvent::class, 'handle']);
+        foreach ([
+            UserRegistered::class,
+            UserDeleted::class,
+            StoryCreated::class,
+            StoryDeleted::class,
+            ChapterCreated::class,
+            ChapterDeleted::class,
+            ChapterUpdated::class,
+        ] as $eventClass) {
+            $eventBus->subscribe($eventClass, [UpdateStatisticsOnEvent::class, 'handle']);
+        }
     }
 }

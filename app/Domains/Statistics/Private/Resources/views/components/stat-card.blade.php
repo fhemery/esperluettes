@@ -6,13 +6,24 @@
     'scopeId' => null,
     'showTimeSeries' => true,
     'timeSeriesHeight' => '200px',
+    'from' => null,
+    'to' => null,
+    'maxPoints' => 48,
 ])
 
 @php
     $queryService = app(\App\Domains\Statistics\Private\Services\StatisticQueryService::class);
     $statValue = $queryService->getValue($statisticKey, $scopeType, $scopeId);
-    $timeSeries = $showTimeSeries 
-        ? $queryService->getTimeSeries($statisticKey, $scopeType, $scopeId, 'daily')
+    $timeSeries = $showTimeSeries
+        ? $queryService->getChartTimeSeries(
+            $statisticKey,
+            $scopeType,
+            $scopeId,
+            $from,
+            $to,
+            $maxPoints,
+            cumulative: true,
+        )
         : [];
 @endphp
 

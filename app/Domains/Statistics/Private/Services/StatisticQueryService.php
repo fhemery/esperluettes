@@ -4,8 +4,10 @@ namespace App\Domains\Statistics\Private\Services;
 
 use App\Domains\Statistics\Private\Models\StatisticSnapshot;
 use App\Domains\Statistics\Private\Models\StatisticTimeSeries;
+use App\Domains\Statistics\Private\Support\TimeSeriesResampler;
 use App\Domains\Statistics\Public\DTOs\StatisticValue;
 use App\Domains\Statistics\Public\DTOs\TimeSeriesPoint;
+use Carbon\Carbon;
 use DateTimeInterface;
 
 class StatisticQueryService
@@ -99,5 +101,61 @@ class StatisticQueryService
                 cumulativeValue: $row->cumulative_value !== null ? (float) $row->cumulative_value : null,
             ))
             ->all();
+    }
+
+    /**
+     * Get resampled time-series data suitable for chart display.
+     *
+     * @return TimeSeriesPoint[]
+     */
+    public function getChartTimeSeries(
+        string $statisticKey,
+        string $scopeType = 'global',
+        mixed $scopeId = null,
+        ?DateTimeInterface $from = null,
+        ?DateTimeInterface $to = null,
+        int $maxPoints = 48,
+        bool $cumulative = true,
+    ): array {
+        $boundsQuery = StatisticTimeSeries::query()
+            ->where('statistic_key', $statisticKey)
+            ->where('scope_type', $scopeType)
+            ->where('scope_id', $scopeId)
+            ->where('granularity', 'daily');
+
+        if ($from === null) {
+            $firstPeriod = (clone $boundsQuery)->min('period_start');
+
+            if ($firstPeriod === null) {
+                return [];
+            }
+
+            $from = Carbon::parse($firstPeriod)->startOfDay();
+        } else {
+            $from = Carbon::parse($from)->startOfDay();
+        }
+
+        if ($to === null) {
+            $to = now()->startOfDay();
+        } else {
+            $to = Carbon::parse($to)->startOfDay();
+        }
+
+        $dailyPoints = $this->getTimeSeries(
+            $statisticKey,
+            $scopeType,
+            $scopeId,
+            'daily',
+            $from,
+            $to,
+        );
+
+        return app(TimeSeriesResampler::class)->resample(
+            $dailyPoints,
+            $from,
+            $to,
+            $maxPoints,
+            $cumulative,
+        );
     }
 }

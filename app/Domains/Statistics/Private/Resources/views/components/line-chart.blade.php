@@ -3,27 +3,28 @@
     'label' => '',
     'cumulative' => false,
     'height' => '300px',
-    'granularity' => 'daily',
     'color' => 'rgb(99, 102, 241)',
     'backgroundColor' => 'rgba(99, 102, 241, 0.1)',
 ])
 
 @php
-    $dateFormat = match ($granularity) {
-        'monthly' => 'M Y',
-        default => 'd M Y',
-    };
-
     $chartPoints = collect($data)->map(fn ($point) => [
-        'label' => $point->periodStart->format($dateFormat),
+        'x' => $point->periodStart->format('Y-m-d'),
         'value' => $point->value,
         'cumulativeValue' => $point->cumulativeValue,
     ])->values()->all();
 
+    $rangeMin = count($chartPoints) > 0 ? $chartPoints[0]['x'] : null;
+    $rangeMax = count($chartPoints) > 0 ? $chartPoints[array_key_last($chartPoints)]['x'] : null;
+
     $options = [
         'cumulative' => $cumulative,
+        'stepped' => $cumulative,
         'color' => $color,
         'backgroundColor' => $backgroundColor,
+        'rangeMin' => $rangeMin,
+        'rangeMax' => $rangeMax,
+        'locale' => app()->getLocale(),
     ];
 @endphp
 

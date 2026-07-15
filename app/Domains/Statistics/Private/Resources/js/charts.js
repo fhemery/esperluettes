@@ -1,8 +1,24 @@
 import { Chart, registerables } from 'chart.js';
+import 'chartjs-adapter-date-fns';
+import { format } from 'date-fns';
+import { enUS, fr } from 'date-fns/locale';
 
 Chart.register(...registerables);
 
+const DATE_LOCALES = {
+    fr,
+    en: enUS,
+};
+
+function resolveDateLocale(localeCode) {
+    const language = (localeCode ?? 'fr').split(/[-_]/)[0].toLowerCase();
+
+    return DATE_LOCALES[language] ?? fr;
+}
+
 function initLineChart(canvas, data, options = {}) {
+    const dateLocale = resolveDateLocale(options.locale);
+
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -13,12 +29,32 @@ function initLineChart(canvas, data, options = {}) {
             tooltip: {
                 mode: 'index',
                 intersect: false,
+                callbacks: {
+                    title(tooltipItems) {
+                        if (tooltipItems.length === 0) {
+                            return '';
+                        }
+
+                        return format(new Date(tooltipItems[0].parsed.x), 'd MMMM yyyy', { locale: dateLocale });
+                    },
+                },
             },
         },
         scales: {
             x: {
+                type: 'time',
+                min: options.rangeMin ?? undefined,
+                max: options.rangeMax ?? undefined,
+                adapters: {
+                    date: {
+                        locale: dateLocale,
+                    },
+                },
                 grid: {
                     display: false,
+                },
+                ticks: {
+                    maxTicksLimit: 6,
                 },
             },
             y: {
@@ -33,7 +69,7 @@ function initLineChart(canvas, data, options = {}) {
         },
         elements: {
             line: {
-                tension: 0.3,
+                tension: options.stepped ? 0 : 0.3,
             },
             point: {
                 radius: 3,
@@ -56,24 +92,32 @@ function formatChartData(points, label, options = {}) {
     let runningTotal = 0;
 
     return {
-        labels: points.map((point) => point.label),
         datasets: [{
             label,
             data: points.map((point) => {
                 if (!useCumulative) {
-                    return point.value;
+                    return {
+                        x: point.x,
+                        y: point.value,
+                    };
                 }
 
-                if (point.cumulativeValue !== null && point.cumulativeValue !== undefined) {
-                    return point.cumulativeValue;
+                let y = point.cumulativeValue;
+
+                if (y === null || y === undefined) {
+                    runningTotal += point.value;
+                    y = runningTotal;
                 }
 
-                runningTotal += point.value;
-                return runningTotal;
+                return {
+                    x: point.x,
+                    y,
+                };
             }),
             borderColor: color,
             backgroundColor,
             fill: true,
+            stepped: options.stepped ? 'before' : false,
         }],
     };
 }

@@ -14,6 +14,11 @@ describe('Statistics Admin Controller', function () {
             ->assertOk()
             ->assertSee(__('statistics::admin.title'))
             ->assertSee(__('statistics::admin.users'))
+            ->assertSee(__('statistics::admin.stories'))
+            ->assertSee(__('statistics::admin.chapters'))
+            ->assertSee(__('statistics::admin.words'))
+            ->assertSee(__('statistics::admin.tab_users'))
+            ->assertSee(__('statistics::admin.tab_content'))
             ->assertSee(__('statistics::admin.evolution', ['metric' => __('statistics::admin.users')]));
     });
 
