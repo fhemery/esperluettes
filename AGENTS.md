@@ -48,6 +48,7 @@
 | **Settings** | `app/Domains/Settings` | Extensible user preferences system; other domains register their own tabs/parameters |
 | **Shared** | `app/Domains/Shared` | Shared components, CSS/JS, translations, common utilities used across all domains |
 | **StaticPage** | `app/Domains/StaticPage` | Admin-managed static pages with publish/draft lifecycle; served via catch-all routes with slug-map caching | 
+| **Statistics** | `app/Domains/Statistics` | Precomputed aggregate metrics (global and per-user), event-driven updates, admin stats page, embeddable display components | `statistic_snapshots`, `statistic_time_series` |
 | **Story** | `app/Domains/Story` | Core domain: story and chapter CRUD, publication, credits, reading progress |
 | **StoryRef** | `app/Domains/StoryRef` | Reference data for stories (genres, types, statuses, audiences, trigger warnings, etc.) |
 
