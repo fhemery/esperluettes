@@ -161,13 +161,78 @@ function mountLineChartContainer(container) {
     container.dataset.statisticsChartMounted = 'true';
 }
 
+function formatMultiChartData(series, options = {}) {
+    const useCumulative = options.cumulative ?? false;
+
+    return {
+        datasets: series.map((item) => {
+            let runningTotal = 0;
+
+            return {
+                label: item.label,
+                data: item.points.map((point) => {
+                    if (!useCumulative) {
+                        return {
+                            x: point.x,
+                            y: point.value,
+                        };
+                    }
+
+                    let y = point.cumulativeValue;
+
+                    if (y === null || y === undefined) {
+                        runningTotal += point.value;
+                        y = runningTotal;
+                    }
+
+                    return {
+                        x: point.x,
+                        y,
+                    };
+                }),
+                borderColor: item.color,
+                backgroundColor: item.backgroundColor,
+                fill: false,
+                stepped: options.stepped ? 'before' : false,
+            };
+        }),
+    };
+}
+
+function mountMultiLineChartContainer(container) {
+    if (container.dataset.statisticsChartMounted === 'true') {
+        return;
+    }
+
+    const canvas = container.querySelector('canvas');
+
+    if (!canvas) {
+        return;
+    }
+
+    const series = parseJsonDataset(container, 'series', []);
+    const hasPoints = series.some((item) => item.points?.length > 0);
+
+    if (!hasPoints) {
+        return;
+    }
+
+    const options = parseJsonDataset(container, 'options', {});
+    const chartData = formatMultiChartData(series, options);
+
+    initLineChart(canvas, chartData, options);
+    container.dataset.statisticsChartMounted = 'true';
+}
+
 function mountAllLineCharts() {
     document.querySelectorAll('[data-statistics-line-chart]').forEach(mountLineChartContainer);
+    document.querySelectorAll('[data-statistics-multi-line-chart]').forEach(mountMultiLineChartContainer);
 }
 
 window.StatisticsCharts = {
     initLineChart,
     formatChartData,
+    formatMultiChartData,
     mountAll: mountAllLineCharts,
 };
 

@@ -9,7 +9,10 @@ use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Auth\Public\Events\UserRegistered;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Statistics\Private\Console\ComputeStatisticCommand;
+use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Statistics\Private\Definitions\Global\TotalChaptersStatistic;
+use App\Domains\Statistics\Private\Definitions\Global\TotalCommentsStatistic;
+use App\Domains\Statistics\Private\Definitions\Global\TotalRootCommentsStatistic;
 use App\Domains\Statistics\Private\Definitions\Global\TotalStoriesStatistic;
 use App\Domains\Statistics\Private\Definitions\Global\TotalUsersStatistic;
 use App\Domains\Statistics\Private\Definitions\Global\TotalWordsStatistic;
@@ -89,6 +92,8 @@ class StatisticsServiceProvider extends ServiceProvider
         $registry->register(TotalStoriesStatistic::class);
         $registry->register(TotalChaptersStatistic::class);
         $registry->register(TotalWordsStatistic::class);
+        $registry->register(TotalCommentsStatistic::class);
+        $registry->register(TotalRootCommentsStatistic::class);
         $registry->register(UserTotalStoriesStatistic::class);
         $registry->register(UserTotalChaptersStatistic::class);
         $registry->register(UserTotalWordsStatistic::class);
@@ -106,6 +111,7 @@ class StatisticsServiceProvider extends ServiceProvider
             ChapterCreated::class,
             ChapterDeleted::class,
             ChapterUpdated::class,
+            CommentPosted::class,
         ] as $eventClass) {
             $eventBus->subscribe($eventClass, [UpdateStatisticsOnEvent::class, 'handle']);
         }
