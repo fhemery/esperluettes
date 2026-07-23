@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => {
                     'app/Domains/Shared/Resources/js/app.js',
                     'app/Domains/Shared/Resources/js/editor-bundle.js',
                     'app/Domains/Comment/Resources/js/comment-draft/index.js',
+                    'app/Domains/Comment/Resources/js/annotable/toolbar.js',
                     'app/Domains/Statistics/Private/Resources/js/charts.js',
                 ],
                 refresh: true,
