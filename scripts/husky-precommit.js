@@ -78,6 +78,9 @@ function main() {
         process.exit(0);
     }
 
+    // JS tests (Vitest)
+    if (!runCmd('npx', ['vitest', 'run'])) process.exit(1);
+
     // Delegate test execution to the staged tests launcher (imported)
     try {
         log('Delegating tests to scripts/launch_staged_tests.js (import call)');
