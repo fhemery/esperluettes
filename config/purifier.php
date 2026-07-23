@@ -85,6 +85,22 @@ return [
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,
         ],
+        'quote-note' => [
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.AllowedElements' => 'strong,em,span',
+            'HTML.AllowedAttributes' => 'span.class',
+            'Attr.AllowedClasses' => [
+                'ql-custom-emoji',
+                'ql-custom-emoji-esperamour', 'ql-custom-emoji-esperbravo', 'ql-custom-emoji-esperclindoeil',
+                'ql-custom-emoji-espercolere', 'ql-custom-emoji-esperfourire', 'ql-custom-emoji-esperlunettes',
+                'ql-custom-emoji-espersnob', 'ql-custom-emoji-espersourire', 'ql-custom-emoji-espertriste',
+            ],
+            'AutoFormat.AutoParagraph' => false,
+            'Attr.EnableID' => false,
+            'HTML.SafeIframe' => false,
+            'Core.CollectErrors' => false,
+            'AutoFormat.RemoveEmpty' => false,
+        ],
         'test' => [
             'Attr.EnableID' => 'true',
         ],
