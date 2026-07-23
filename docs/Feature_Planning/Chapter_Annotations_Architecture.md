@@ -4,6 +4,11 @@ Companion to [`Chapter_Annotations.md`](./Chapter_Annotations.md). The functiona
 
 **v1 scope is deliberately narrower than the functional spec.** The MVP loop is "highlight → write comment → save → review via pop-up modal", with no in-chapter visual indicators, no post-publish editing, no replies, no gutter, no filter UI. See §8 for the v1-vs-vNext split. The data model and PHP architecture below are sized for the full spec — only the JS / UI surface and a few API methods are trimmed for v1.
 
+**Quotes ship first.** The Quote feature ([`Quotes_Architecture.md`](./Quotes_Architecture.md)) establishes shared infrastructure that Annotations inherits:
+- **JS test tooling** (Vitest + happy-dom) — set up by Quote, available to Annotations.
+- **Shared anchoring JS** (`buildCanonicalText`, `extractAnchor`, `findAnchor`) — live in `app/Domains/Shared/Resources/js/anchoring/` after Quote Phase 2. Annotations imports from there instead of owning local copies.
+- **`<x-comment::annotable>` with toolbar slot** — created by Quote Phase 9. Annotations adds its "Annoter" button to the existing `@slot('toolbar-actions')` in `chapters/show.blade.php` alongside the Quote button.
+
 Conventions used below:
 - File paths under `app/Domains/<Domain>/Public|Private/...` follow the project's domain layout (see `docs/Domain_Structure.md`).
 - "Comment domain" means `app/Domains/Comment`. "Story domain" means `app/Domains/Story`.
@@ -290,7 +295,7 @@ Loaded conditionally: each of `<x-comment::annotable>`, `<x-comment::annotation-
 
 ### 4.3 Pure functional core
 
-The hard parts are pure functions, isolated from Alpine and DOM events:
+The hard parts are pure functions, isolated from Alpine and DOM events. **These functions are implemented and tested as part of the Quote feature** and live in `app/Domains/Shared/Resources/js/anchoring/`. Annotations imports them from that shared location.
 
 - `buildCanonicalText(rootEl)` — walks the DOM of the annotable container and returns:
   - `text`: a single string with HTML stripped, custom emoji blots replaced by `:name:`, block boundaries materialised as a single space.

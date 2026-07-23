@@ -13,26 +13,38 @@ Concrete, phase-by-phase plan for the v1 delivery.
 - Phase order is fixed unless we find a blocker; in that case we discuss before re-ordering.
 - "Manual smoke" items in the acceptance lists are a hard requirement, not a nice-to-have.
 
+## Common bricks delivered by Quote
+
+**Quotes ship before Annotations.** Three phases of the original plan are now delivered (or partially delivered) by the Quote implementation and are treated as pre-existing when Annotations work begins:
+
+| Original phase | Status | Delivered by |
+|----------------|--------|--------------|
+| Phase 3 — JS test infrastructure | **Done by Quote Phase 1** | [`Quotes_Implementation_Plan.md` Phase 1](./Quotes_Implementation_Plan.md) |
+| Phase 9 — JS pure core (anchoring functions) | **Done by Quote Phase 2** (`canonical-text`, `extract-anchor`, `reanchor` live in `Shared/Resources/js/anchoring/`) | [`Quotes_Implementation_Plan.md` Phase 2](./Quotes_Implementation_Plan.md) |
+| Phase 10 — `<x-comment::annotable>` component + toolbar slot | **Done by Quote Phase 9** (component exists; toolbar slot wired; generic toolbar JS in Comment domain) | [`Quotes_Implementation_Plan.md` Phase 9](./Quotes_Implementation_Plan.md) |
+
+Annotations phases 3, 9, and 10 below are updated accordingly.
+
 ## Phase index
 
 | # | Phase | Estimated size | Dependencies |
 |---|-------|----------------|--------------|
 | [OK] 1 | Editor refactor (`<x-shared::editor>` toolbar prop) | M | — |
 | 2 | Root-comment draft local storage | S | 1 |
-| 3 | JS test infrastructure | S | — (can run in parallel) |
+| [→ Quote] 3 | JS test infrastructure | — | Delivered by Quote Phase 1 |
 | 4 | Schema + model | S | — |
 | 5 | Policy contract + cascade listeners | S | 4 |
 | 6 | PHP services + `AnnotationPublicApi` | M | 4, 5 |
 | 7 | Backend endpoints | M | 6 |
 | 8 | Moderation topic registration | S | 4 |
-| 9 | JS pure core | M | 3 |
-| 10 | `<x-comment::annotable>` bootstrap (invisible) | S | 1, 9 |
+| [→ Quote] 9 | JS pure core (anchoring functions) | — | Delivered by Quote Phase 2 |
+| [→ Quote] 10 | `<x-comment::annotable>` bootstrap | S | 1, Quote Phase 9 |
 | 11 | Write mode (toolbar + form + drafts + banner) | M | 10 |
 | 12 | Pop-up modal (drafts mode + server mode) | L | 7, 8, 11 |
 | 13 | Atomic publish wiring | S | 7, 11, 12 |
 | 14 | v1 polish (i18n, a11y, manual QA) | M | 12, 13 |
 
-Total: ~14 PRs. Sizes are rough — S ≈ half a day, M ≈ 1–2 days, L ≈ 2–3 days. They will all be smaller than current annotation feature scope suggests because each is sharply bounded.
+Total: ~11 PRs (14 minus 3 delivered by Quote). Sizes are rough — S ≈ half a day, M ≈ 1–2 days, L ≈ 2–3 days.
 
 ---
 
@@ -80,25 +92,16 @@ Total: ~14 PRs. Sizes are rough — S ≈ half a day, M ≈ 1–2 days, L ≈ 2�
 
 ---
 
-## Phase 3 — JS test infrastructure
+## Phase 3 — JS test infrastructure *(delivered by Quote)*
 
-**Goal.** Stand up Vitest + happy-dom + testing-library + user-event. Wire into pre-commit and CI. Can land before or in parallel with phase 2.
+> **This phase is complete.** The Vitest + happy-dom + testing-library setup is established by [Quote Phase 1](./Quotes_Implementation_Plan.md). Verify the infrastructure is in place before starting Annotations Phase 9.
 
-**Deliverables.**
-- `package.json` devDependencies: `vitest`, `happy-dom`, `@testing-library/dom`, `@testing-library/user-event`.
-- `vitest.config.js` at repo root with `environment: 'happy-dom'`, `include: ['app/Domains/**/Resources/js/**/*.test.js']`.
-- `npm run test` script (alias for `vitest run`).
-- One trivial passing test (e.g., `app/Domains/Comment/Resources/js/comment-draft/index.test.js` if phase 2 has shipped; otherwise a smoke test).
-- `scripts/husky-precommit.js` runs `npx vitest run` after deptrac, before PHP staged tests.
-- CI: add a `vitest run` step (alongside `composer deptrac` and the PHP test suite).
+No work required here. The acceptance criteria below serve as a checklist to confirm the Quote phase landed correctly before Annotations JS work begins.
 
-**Tests.**
-- Self-validating: the test infra runs at least one test, which passes.
-
-**Acceptance.**
-- ✅ `./vendor/bin/sail composer deptrac && npx vitest run` succeeds locally.
-- ✅ Pre-commit invokes Vitest and blocks on failure.
-- ✅ CI invokes Vitest as a required check.
+**Acceptance (verify, don't redo).**
+- ✅ `npx vitest run` succeeds locally.
+- ✅ Pre-commit hook invokes Vitest and blocks on failure.
+- ✅ CI `vitest run` step is a required check.
 
 ---
 
@@ -238,56 +241,53 @@ Total: ~14 PRs. Sizes are rough — S ≈ half a day, M ≈ 1–2 days, L ≈ 2�
 
 ---
 
-## Phase 9 — JS pure core
+## Phase 9 — JS pure core *(anchoring functions delivered by Quote)*
 
-**Goal.** The hard, regression-prone JS, all as pure functions, fully unit-tested. No DOM wiring yet.
+> **The three anchoring functions are already delivered.** `buildCanonicalText`, `extractAnchor`, and `findAnchor` live in `app/Domains/Shared/Resources/js/anchoring/` (created by [Quote Phase 2](./Quotes_Implementation_Plan.md)) with full unit-test coverage. This phase only delivers the Annotations-specific `drafts-store`.
 
-**Deliverables.**
-- `app/Domains/Comment/Resources/js/annotations/selection/canonical-text.js`
-  - `buildCanonicalText(rootEl)` → `{ text, nodeMap }` per [Architecture §4.3](./Chapter_Annotations_Architecture.md#43-pure-functional-core).
-  - Custom emoji blots replaced by `:{name}:`.
-  - Block boundaries contribute a single space.
-- `app/Domains/Comment/Resources/js/annotations/selection/extract-anchor.js`
-  - `extractAnchor(range, rootEl, canonicalText)` → `{ highlighted, prefix, suffix }`.
-  - Up to 5 words on each side; empty at chapter boundaries OK.
-  - Returns `null` if the highlight exceeds 500 plain-text chars.
+**Remaining deliverable.**
 - `app/Domains/Comment/Resources/js/annotations/stores/drafts-store.js`
   - Pure reducer over the local-storage drafts shape ([Architecture §4.4](./Chapter_Annotations_Architecture.md#44-local-storage-schema)).
   - Methods: `load(key)`, `add(state, draft)`, `edit(state, tempId, body)`, `delete(state, tempId)`, `clear(key)`.
 
+The annotation JS modules that need anchoring functions (`toolbar.js`, `inline-form.js`, etc.) import directly from `app/Domains/Shared/Resources/js/anchoring/` — no local copy.
+
 **Tests.**
-- Vitest unit tests for every function. Test fixtures: small synthetic HTML strings parsed into a happy-dom `DocumentFragment`, then passed to the functions.
-- `canonical-text`: HTML stripped, emojis turned into `:name:`, paragraph boundaries become spaces, node map round-trips a known offset back to the right text node + offset.
-- `extract-anchor`: synthetic `Range` over a known node → expected `{prefix, highlighted, suffix}` for several positions (chapter start, chapter end, mid-paragraph, across a `<p>` boundary).
-- `drafts-store`: add / edit / delete reduce correctly; `load` returns empty state when key missing; version mismatch discards.
+- `drafts-store`: `add` / `edit` / `delete` reduce correctly; `load` returns empty state when key missing; version mismatch discards stored data.
 
 **Acceptance.**
-- ✅ Coverage of pure functions in this module > 90% line.
-- ✅ All edge cases above explicitly tested.
+- ✅ `drafts-store` unit tests pass.
+- ✅ Confirm shared anchoring tests are still green (no regression from import path changes).
 
 ---
 
-## Phase 10 — `<x-comment::annotable>` bootstrap (invisible)
+## Phase 10 — `<x-comment::annotable>` bootstrap
 
-**Goal.** Wire the wrapper component, load annotations from the server, expose the Alpine store. Still nothing visible on the chapter.
+> **The component and toolbar slot already exist** from [Quote Phase 9](./Quotes_Implementation_Plan.md). `<x-comment::annotable>` is registered, the `@slot('toolbar-actions')` is wired, the generic selection → toolbar JS is in place, and `chapters/show.blade.php` already wraps the chapter content. This phase only adds the Annotations-specific JS bootstrap.
 
-**Deliverables.**
-- Blade component `app/Domains/Comment/Public/View/Components/AnnotableComponent.php` + template `annotable.blade.php`. Props: `entityType`, `entityId`, `gutter` (default `true`; unused in v1).
-- Renders `<div class="comment-annotable" data-annotable data-entity-type="..." data-entity-id="..." data-can-annotate="..." data-viewer-role="...">{slot}</div>`.
-- Pushes the Vite include via `@once @push('scripts') @vite(...)`.
+**Remaining deliverables.**
 - JS bootstrap `app/Domains/Comment/Resources/js/annotations/index.js`:
   - Finds `[data-annotable]`. If more than one, logs and exits.
-  - Builds canonical text. Fetches `GET /comments/annotations` for the entity. Populates `Alpine.store('annotations')` with the response.
-- Story `chapters/show.blade.php` updated to wrap the chapter content in `<x-comment::annotable :entity-id="$chapter->id" entity-type="chapter">…</x-comment::annotable>`.
+  - Builds canonical text via the shared `buildCanonicalText` from `Shared/Resources/js/anchoring/`.
+  - Fetches `GET /comments/annotations?entity_type=…&entity_id=…`. Populates `Alpine.store('annotations')` with the response.
+- Add the Annotations `"Annoter"` button to the toolbar slot in `chapters/show.blade.php` (alongside the existing Quote button):
+  ```blade
+  <x-slot:toolbar-actions>
+      <x-quote::toolbar-button />
+      <x-comment::annotate-button />
+  </x-slot:toolbar-actions>
+  ```
+- Push the Annotations Vite bundle via `@once @push('scripts') @vite(...)` from the annotate-button component.
 
 **Tests.**
-- Vitest DOM test: render a minimal HTML fixture containing `[data-annotable]`, mock `fetch`, assert `Alpine.store('annotations').items` is populated.
-- Manual smoke: open a chapter, open browser devtools, confirm the GET fires, the store is populated, no visible change to the page.
+- Vitest DOM test: render minimal `[data-annotable]` fixture, mock `fetch`, assert `Alpine.store('annotations').items` is populated.
+- Multiple `[data-annotable]` → warning logged, bootstrap aborted.
+- Manual smoke: open a chapter, confirm `GET /comments/annotations` fires once, store is populated, no visible change (Quote tints unaffected).
 
 **Acceptance.**
 - ✅ GET fires once per chapter view.
-- ✅ Multiple `[data-annotable]` warning works.
-- ✅ Existing chapter page passes manual smoke (nothing breaks).
+- ✅ Both "Citation" (Quote) and "Annoter" (Annotations) buttons appear in the toolbar on selection.
+- ✅ Existing chapter page and Quote functionality pass manual smoke (no regression).
 
 ---
 
