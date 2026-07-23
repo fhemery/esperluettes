@@ -6,9 +6,13 @@ use App\Domains\Auth\Public\Events\UserDeactivated;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Auth\Public\Events\UserReactivated;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Notification\Public\Services\NotificationFactory;
+use App\Domains\Quote\Private\Listeners\NotifyAuthorsOnQuoteCreated;
 use App\Domains\Quote\Private\Listeners\NullifyUserOnUserDeleted;
 use App\Domains\Quote\Private\Listeners\RestoreOnUserReactivated;
 use App\Domains\Quote\Private\Listeners\SoftDeleteOnUserDeactivated;
+use App\Domains\Quote\Public\Events\ChapterPassageQuoted;
+use App\Domains\Quote\Public\Notifications\ChapterQuotedNotification;
 use App\Domains\Quote\Private\Services\QuotePolicy;
 use App\Domains\Quote\Private\Services\QuoteService;
 use App\Domains\Quote\Private\Support\QuoteNoteSanitizer;
@@ -42,9 +46,31 @@ class QuoteServiceProvider extends ServiceProvider
 
         $eventBus = app(EventBus::class);
         $this->registerSettings();
+        $this->registerNotifications();
         $eventBus->subscribe(UserDeleted::class, [app(NullifyUserOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeactivated::class, [app(SoftDeleteOnUserDeactivated::class), 'handle']);
         $eventBus->subscribe(UserReactivated::class, [app(RestoreOnUserReactivated::class), 'handle']);
+    }
+
+    private function registerNotifications(): void
+    {
+        $factory = app(NotificationFactory::class);
+
+        $factory->registerGroup(
+            id: 'quote',
+            sortOrder: 60,
+            translationKey: 'quote::notification.groups.quote',
+        );
+
+        $factory->register(
+            type: ChapterQuotedNotification::type(),
+            class: ChapterQuotedNotification::class,
+            groupId: 'quote',
+            nameKey: 'quote::notification.settings.type_chapter_quoted',
+        );
+
+        $eventBus = app(EventBus::class);
+        $eventBus->subscribe(ChapterPassageQuoted::class, [app(NotifyAuthorsOnQuoteCreated::class), 'handle']);
     }
 
     private function registerSettings(): void
