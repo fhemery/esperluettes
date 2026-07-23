@@ -35,7 +35,8 @@ return [
     App\Domains\Follow\Public\Providers\FollowServiceProvider::class,
     App\Domains\ReadList\Public\Providers\ReadListServiceProvider::class,
     App\Domains\Statistics\Public\Providers\StatisticsServiceProvider::class,
-    
+    App\Domains\Quote\Public\Providers\QuoteServiceProvider::class,
+
     // Add other domain providers here as they are created
 
     // This one should be put last, because it declares catch-all routes
