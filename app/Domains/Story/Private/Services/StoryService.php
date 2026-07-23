@@ -196,6 +196,13 @@ class StoryService
             ->first()?->authors()->pluck('user_id')->map(fn($v) => (int)$v)->all() ?? [];
     }
 
+    public function getCollaboratorIds(int $storyId): array
+    {
+        return Story::query()
+            ->whereKey($storyId)
+            ->first()?->collaborators()->pluck('user_id')->map(fn($v) => (int)$v)->all() ?? [];
+    }
+
     /**
      * Set a story visibility to private. Returns true if it changed, false if already private.
      */
