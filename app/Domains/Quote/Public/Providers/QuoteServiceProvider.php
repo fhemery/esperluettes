@@ -31,6 +31,7 @@ class QuoteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(app_path('Domains/Quote/Database/Migrations'));
+        $this->loadRoutesFrom(app_path('Domains/Quote/Private/routes.php'));
 
         $eventBus = app(EventBus::class);
         $eventBus->subscribe(UserDeleted::class, [app(NullifyUserOnUserDeleted::class), 'handle']);

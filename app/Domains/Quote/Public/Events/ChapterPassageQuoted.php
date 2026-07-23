@@ -13,4 +13,39 @@ class ChapterPassageQuoted implements DomainEvent
         public readonly string $highlightedText,
     ) {
     }
+
+    public static function name(): string
+    {
+        return 'Quote.ChapterPassageQuoted';
+    }
+
+    public static function version(): int
+    {
+        return 1;
+    }
+
+    public function toPayload(): array
+    {
+        return [
+            'quoterId' => $this->quoterId,
+            'chapterId' => $this->chapterId,
+            'storyId' => $this->storyId,
+            'highlightedText' => $this->highlightedText,
+        ];
+    }
+
+    public static function fromPayload(array $payload): static
+    {
+        return new static(
+            quoterId: (int) ($payload['quoterId'] ?? 0),
+            chapterId: (int) ($payload['chapterId'] ?? 0),
+            storyId: (int) ($payload['storyId'] ?? 0),
+            highlightedText: (string) ($payload['highlightedText'] ?? ''),
+        );
+    }
+
+    public function summary(): string
+    {
+        return "Quoter #{$this->quoterId} quoted chapter #{$this->chapterId}";
+    }
 }
