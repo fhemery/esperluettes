@@ -33,7 +33,7 @@ Authors have asked to **mix content types** inside one body — most immediately
 | **Block palette** | The row of "add a block" buttons (one per allowed block type) shown at the bottom of the Advanced editor. |
 | **Insert affordance** | The dynamic "+" control that appears between two blocks, letting the author insert a new block at that position. |
 | **Image library** | The set of previously-uploaded images the author can reuse, scoped by storage path (§5.4). |
-| **Reference** | A pointer from an image block to a stored image file. One stored file may have many references across documents. |
+| **Reference (usage)** | An occurrence of a stored image path inside a document. One stored file may be used many times — across documents **and repeated within a single document**. |
 
 ## 3. Editor Modes
 
@@ -78,7 +78,7 @@ Each block has **move controls** (up / down, and/or drag handle). Reordering cha
 Each block has a **delete** control. Deleting removes the block from the document.
 
 - Deleting a **text block** discards its text.
-- Deleting an **image block** removes the *reference* to the stored file. The file itself is only deleted if this was its last reference anywhere (§5.3). A confirmation is shown only when the block is non-empty.
+- Deleting an **image block** just stops the document from using that file's path. The file itself is garbage-collected only if nothing else uses it anymore (§5.3). A confirmation is shown only when the block is non-empty.
 
 ### 4.5 Empty blocks
 
@@ -96,18 +96,20 @@ An image block reuses the existing upload component (`app/Domains/Shared/Resourc
 
 ### 5.2 Reusing an existing image
 
-Each image block also offers **"Choose existing"**, opening a **picker** over the author's image library (§5.4). Selecting an image creates a **reference** to the already-stored file — **no re-upload, no duplicate file**. This lets an author reuse, for example, a single custom separator image across many documents without uploading it dozens of times.
+Each image block also offers **"Choose existing"**, opening a **picker** over the author's image library (§5.4). Selecting an image points the block at the already-stored file by its **storage path** — **no re-upload, no duplicate file**. This lets an author reuse, for example, a single custom separator image across many documents without uploading it dozens of times. The **same image may also be used several times within one document** (e.g. the same separator between each section of a chapter).
 
-### 5.3 Image lifecycle — reference-counted
+Each image block also shows, for authors' awareness, **how many places currently use this image** ("used in N places"), so removing it from one spot is an informed choice.
 
-Stored image files are managed by **reference counting**:
+### 5.3 Image lifecycle — usage-driven cleanup
 
-- Uploading a new image, or picking an existing one, creates a **reference** from the block to the file.
-- A file may have **many references** (same file used in multiple blocks and/or multiple documents).
-- Removing an image from a block, or deleting a document, **removes that block's reference**.
-- A stored file is **deleted** only when its **last** reference is removed (reference count reaches zero).
+Stored image files are cleaned up based on **whether any content still uses them** — the image's storage path is the record of use, so there is no separate reference bookkeeping to keep in sync:
 
-Consequence, made explicit for authors' expectations: reuse is durable **as long as the image is used somewhere**. If the author removes it from the very last place it's used, the file is garbage-collected; re-adding it later means uploading it again. There is **no separate "keep forever" library manager** in v1.
+- Uploading a new image, or picking an existing one, means the block now **uses that path**.
+- The same path may be used **many times** (multiple blocks, multiple documents, or repeated within one document).
+- Removing an image from a block, or deleting a document, simply means that content **no longer uses the path**.
+- A stored file is **garbage-collected** by a scheduled cleanup once **no content uses it anymore** and it has sat unused past a short **grace window** (a safety margin so a file removed and re-added shortly after, or an in-progress edit, is never destroyed prematurely).
+
+Consequence, made explicit for authors' expectations: reuse is durable **as long as the image is used somewhere**. If the author removes it from the very last place it's used, the file is eventually garbage-collected; re-adding it much later means uploading it again. There is **no separate "keep forever" library manager** in v1.
 
 ### 5.4 Library scope & storage paths
 
@@ -121,7 +123,7 @@ The reuse picker lists images under the **current surface's storage path**:
 
 So the picker is **scoped to its surface**: a chapter's picker shows only that author's chapter images; a News picker shows the shared News image pool. Cross-surface reuse (e.g. reusing a News image inside a chapter) is **not** offered — surfaces have separate pools by path. The storage folder is a **parameter of the shared component**, so each surface declares its own path.
 
-> Reference counting operates within these pools; a file under `news/` is retained while any News document references it, independent of chapters.
+> Cleanup operates within these pools; a file under `news/` is retained while any News document uses it, independent of chapters.
 
 ### 5.5 Image metadata
 
@@ -135,7 +137,7 @@ No alignment or width controls in v1: images render **centered and responsive** 
 ## 6. Persistence & Mode Memory
 
 - Simple-mode documents are stored **exactly as today** (single HTML string in the existing `content` field). Nothing changes for them.
-- Advanced-mode documents store their **ordered list of typed blocks** plus a flag recording that the document is Advanced. (The concrete storage shape — column, JSON, side table — is an architecture decision; functionally, the requirement is: the system knows the mode and the block order/content on reload.)
+- Advanced-mode documents store their **ordered list of typed blocks**, from which the Advanced mode is inferred. (The concrete storage shape is an architecture decision; functionally, the requirement is: the system knows the mode and the block order/content on reload. Image blocks reference their file by **storage path**.)
 - On reopening a document for editing, the form **restores the exact mode and block structure** it was saved in.
 - The mode is a property of the **document**, not a global setting; two News articles can independently be Simple or Advanced.
 
@@ -173,7 +175,7 @@ Chapters are **not** in v1, but the shared design must not block them. When Adva
 - **Advanced mode on Static pages and Chapters.** v1 is **News only**. The shared mechanism is built to be reused, but the other two surfaces are wired and released later.
 - **Block types beyond text and image** (video, embeds, galleries, columns/layout blocks). The palette is designed to grow, but v1 offers text + image only.
 - **Image editing** (crop, resize, alignment, width controls). v1 renders centered + responsive.
-- **A persistent "keep forever" image library manager / media browser** decoupled from reference counting. v1 GC-collects unreferenced files.
+- **A persistent "keep forever" image library manager / media browser** decoupled from usage. v1 GC-collects files no content uses anymore.
 - **Cross-surface image reuse** (using a News image in a chapter, etc.). Pools are separated by storage path.
 - **Immediate/AJAX image upload** with server-side draft persistence. v1 uploads on submit (multipart).
 - **Annotating image blocks** on chapters (tracked in `Chapter_Annotations.md`).
@@ -190,13 +192,13 @@ Chapters are **not** in v1, but the shared design must not block them. When Adva
 | 5 | Block types (v1) | Text and image. |
 | 6 | Palette | One button per allowed type, at the bottom; appends. Never removed. |
 | 7 | Insert between blocks | Dynamic "+" affordance in the gaps; inserts at that position. |
-| 8 | Reorder / delete | Per-block move + delete controls. Deleting an image removes its reference (file GC'd only if last reference). |
+| 8 | Reorder / delete | Per-block move + delete controls. Deleting an image just stops the document using its path (file GC'd only when no content uses it). |
 | 9 | Empty blocks | Dropped on save. |
 | 10 | Image upload timing | On form submit (multipart), all-or-nothing with the save. |
-| 11 | Image count cap | **None.** |
+| 11 | Image count cap | **None.** Same image may be reused, including **repeated within one document**. |
 | 12 | Image types / size | Component defaults (jpg/png/webp, 2 MB), overridable per surface. |
-| 13 | Image reuse | "Choose existing" picker creates a reference; no re-upload/duplicate. |
-| 14 | Image lifecycle | **Reference-counted GC** — file deleted when last reference removed. No keep-forever library. |
+| 13 | Image reuse | "Choose existing" picker points the block at an existing **path**; no re-upload/duplicate. Component shows "used in N places". |
+| 14 | Image lifecycle | **Usage-driven GC** — a scheduled sweep deletes files no content uses anymore, past a short grace window. No reference table; no keep-forever library. |
 | 15 | Library / picker scope | Storage-path scoped: `chapters/{userId}/` (per author), `news/` & `static-pages/` (shared). No cross-surface reuse. |
 | 16 | Alt text | **Mandatory** per image block; blocks save on absence. |
 | 17 | Caption | Optional; shown under image in view mode. |
@@ -215,15 +217,15 @@ Chapters are **not** in v1, but the shared design must not block them. When Adva
 3. Editor clicks **Add image** → an image block appears → drag-drops a photo → fills **alt text** (mandatory) and an optional **caption**.
 4. Editor clicks **Add text**, writes the next section.
 5. Editor realizes the image belongs *after* the second paragraph: uses the block's **move down** control to reorder.
-6. Editor hovers the gap between two paragraphs, clicks the **"+"**, inserts another image — this time via **Choose existing**, picking the site's standard News separator from the shared `news/` library (no re-upload; a reference is created).
-7. Editor submits. All new images upload with the form; the document is saved as **Advanced** with its block order. The separator's reference count increments.
+6. Editor hovers the gap between two paragraphs, clicks the **"+"**, inserts another image — this time via **Choose existing**, picking the site's standard News separator from the shared `news/` library (no re-upload; the block just points at the existing path).
+7. Editor submits. All new images upload with the form; the document is saved as **Advanced** with its block order. The separator is now used by one more document.
 8. Public News page renders the blocks in order: text, image+caption, text, separator image.
 
 ### 12.2 Reusing a separator across many articles
 
 1. A separator image was uploaded once for an earlier News article; it lives under `news/`.
-2. For every new article, the editor uses **Choose existing** to reference the same file. Reference count climbs; the file is stored once.
-3. Months later the separator is removed from the last article still using it → reference count hits zero → the file is garbage-collected.
+2. For every new article, the editor uses **Choose existing** to point at the same file. The "used in N places" count climbs; the file is stored once.
+3. Months later the separator is removed from the last article still using it → nothing uses it anymore → the scheduled sweep garbage-collects the file after the grace window.
 
 ### 12.3 Trying to return to Simple mode
 
@@ -238,12 +240,12 @@ Once this functional spec is locked, the architecture document (`MultiEdit_Archi
 
 - Storage shape for Advanced documents (dedicated column vs JSON vs side table) and how it coexists with the existing `content` field + the mode flag.
 - The shared Blade/Alpine component(s) for the block editor, palette, insert affordance, reorder/delete, and how surfaces configure block types + storage path + editor toolbar.
-- Image reference model: how references are tracked, the reference-counting/GC mechanism, and where it runs (on save, on delete).
+- Image usage model: how a file's path records use, the usage-provider registry + scheduled GC sweep, and its grace window.
 - The image picker (library listing by storage path) and its server endpoints.
 - Multipart submit handling: parsing block order + per-block payloads + new-image uploads in one request.
 - View-mode rendering pipeline shared across News (v1) and later surfaces.
 - Per-surface integration points for News in v1 (form, controller/service, public view).
 - Design hooks that keep chapter annotations (per-block canonical text) feasible later.
-- Testing strategy (mode round-trip, block CRUD/reorder, reference counting & GC, validation summing, view rendering).
+- Testing strategy (mode round-trip, block CRUD/reorder, usage-driven GC, validation summing, view rendering).
 
 Then a planning document (`MultiEdit_Planning.md`) will sequence the delivery (shared mechanism → News rollout → later surfaces).
