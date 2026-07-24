@@ -6,7 +6,7 @@ use App\Domains\FAQ\Private\Models\FaqCategory;
 use App\Domains\FAQ\Private\Models\FaqQuestion;
 use App\Domains\FAQ\Private\Requests\Admin\FaqQuestionRequest;
 use App\Domains\FAQ\Private\Services\FaqService;
-use App\Domains\Shared\Services\ImageService;
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,10 +15,35 @@ use Illuminate\View\View;
 
 class FaqQuestionController extends Controller
 {
+    private const SCOPE = 'faq';
+
     public function __construct(
         private readonly FaqService $faqService,
-        private readonly ImageService $imageService,
+        private readonly MediaPublicApi $media,
     ) {}
+
+    /**
+     * Resolve the image_path/image_alt_text from the media-image-field payload.
+     * A new upload is stored; otherwise the (possibly reused or kept) path is used;
+     * empty means the image was removed. Files are never deleted here — the Media
+     * GC reclaims any path no question references anymore.
+     *
+     * @param array<string,mixed> $data validated request data
+     * @return array{image_path:?string, image_alt_text:?string}
+     */
+    private function resolveImage(Request $request, array $data): array
+    {
+        $file = $request->file('image.file');
+        $path = $data['image']['path'] ?? null;
+        $alt = $data['image']['alt'] ?? null;
+
+        $imagePath = $file ? $this->media->store(self::SCOPE, $file) : ($path ?: null);
+
+        return [
+            'image_path' => $imagePath,
+            'image_alt_text' => $imagePath ? $alt : null,
+        ];
+    }
 
     public function index(Request $request): View
     {
@@ -44,15 +69,8 @@ class FaqQuestionController extends Controller
     public function store(FaqQuestionRequest $request): RedirectResponse
     {
         $data = $request->validated();
-
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $this->imageService->process(
-                'public',
-                'faq/' . date('Y/m'),
-                $request->file('image'),
-                [400, 800]
-            );
-        }
+        $data = array_merge($data, $this->resolveImage($request, $data));
+        unset($data['image']);
 
         $data['sort_order'] = FaqQuestion::where('faq_category_id', $data['faq_category_id'])->count() + 1;
 
@@ -72,27 +90,8 @@ class FaqQuestionController extends Controller
     public function update(FaqQuestionRequest $request, FaqQuestion $faqQuestion): RedirectResponse
     {
         $data = $request->validated();
-        $data['image_alt_text'] = $data['image_alt_text'] ?? null;
-
-        if ($request->boolean('image_remove')) {
-            if ($faqQuestion->image_path) {
-                $this->imageService->deleteWithVariants('public', $faqQuestion->image_path);
-            }
-            $data['image_path'] = null;
-            $data['image_alt_text'] = null;
-        } elseif ($request->hasFile('image')) {
-            if ($faqQuestion->image_path) {
-                $this->imageService->deleteWithVariants('public', $faqQuestion->image_path);
-            }
-            $data['image_path'] = $this->imageService->process(
-                'public',
-                'faq/' . date('Y/m'),
-                $request->file('image'),
-                [400, 800]
-            );
-        } else {
-            $data['image_path'] = $faqQuestion->image_path;
-        }
+        $data = array_merge($data, $this->resolveImage($request, $data));
+        unset($data['image']);
 
         $data['sort_order'] = $faqQuestion->sort_order;
 
@@ -104,10 +103,7 @@ class FaqQuestionController extends Controller
 
     public function destroy(FaqQuestion $faqQuestion): RedirectResponse
     {
-        if ($faqQuestion->image_path) {
-            $this->imageService->deleteWithVariants('public', $faqQuestion->image_path);
-        }
-
+        // The image file is left to the Media GC once no question references it.
         $this->faqService->deleteQuestion($faqQuestion->id);
 
         return redirect()->route('faq.admin.faq-questions.index')

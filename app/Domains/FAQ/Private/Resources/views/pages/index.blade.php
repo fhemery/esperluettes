@@ -33,8 +33,11 @@
                 @foreach($questions as $q)
                     <x-shared::collapsible :title="$q->question" color="primary" textColor="fg">
                         @if(!empty($q->image_path))
-                            @php $url = asset('storage/' . $q->image_path); @endphp
-                            <img src="{{ $url }}" alt="{{ $q->image_alt_text ?? '' }}" style="display:block; max-height:300px; width:auto; height:auto; max-width:100%; margin: 0 auto 0.75rem;" />
+                            <x-media::image
+                                :path="$q->image_path"
+                                :alt="$q->image_alt_text ?? ''"
+                                class="mb-3"
+                                imgClass="block mx-auto max-h-[300px] w-auto h-auto max-w-full" />
                         @endif
                         <div class="text-on-surface">{!! $q->answer !!}</div>
                     </x-shared::collapsible>

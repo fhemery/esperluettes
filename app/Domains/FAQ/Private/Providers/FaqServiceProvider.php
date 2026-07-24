@@ -5,6 +5,8 @@ namespace App\Domains\FAQ\Private\Providers;
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\FAQ\Private\Support\FaqMediaUsageProvider;
+use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use Illuminate\Support\ServiceProvider;
 
 class FaqServiceProvider extends ServiceProvider
@@ -17,6 +19,9 @@ class FaqServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(app_path('Domains/FAQ/Private/Resources/lang'), 'faq');
 
         $this->registerAdminNavigation();
+
+        // Let Media GC know which image files FAQ still uses.
+        app(MediaUsageRegistry::class)->register(new FaqMediaUsageProvider());
     }
 
     protected function registerAdminNavigation(): void
