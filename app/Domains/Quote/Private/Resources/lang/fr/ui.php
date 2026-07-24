@@ -16,4 +16,11 @@ return [
     'toolbar' => [
         'label' => 'Actions sur la sélection',
     ],
+    'panel' => [
+        'title' => 'Ma citation',
+        'close' => 'Fermer',
+        'no_note' => 'Aucune note',
+        'edit_note' => 'Modifier la note',
+        'delete' => 'Supprimer',
+    ],
 ];

@@ -16,4 +16,11 @@ return [
     'toolbar' => [
         'label' => 'Selection actions',
     ],
+    'panel' => [
+        'title' => 'My quote',
+        'close' => 'Close',
+        'no_note' => 'No note',
+        'edit_note' => 'Edit note',
+        'delete' => 'Delete',
+    ],
 ];

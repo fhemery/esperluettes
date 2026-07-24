@@ -195,25 +195,32 @@
                 </aside>
                 @endif
 
-                <x-comment::annotable
-                    entity-type="chapter"
-                    :entity-id="$vm->chapter->id"
-                    :can-annotate="auth()->check()"
+                @php($canQuoteStory = !$vm->isAuthor && auth()->check() && Auth::user()?->hasRole(['user-confirmed']))
+                <div
+                    x-data="quoteHighlighter({ chapterId: {{ $vm->chapter->id }}, storyId: {{ $vm->story->id }} })"
+                    @click="openPanel($event)"
                 >
-                    <x-slot:toolbar-actions>
-                        <x-quote::toolbar-button
-                            :chapter-id="$vm->chapter->id"
-                            :story-id="$vm->story->id"
-                            :can-quote="!$vm->isAuthor && auth()->check() && Auth::user()->hasRole(['user-confirmed'])"
-                        />
-                    </x-slot:toolbar-actions>
+                    <x-comment::annotable
+                        entity-type="chapter"
+                        :entity-id="$vm->chapter->id"
+                        :can-annotate="$canQuoteStory"
+                    >
+                        <x-slot:toolbar-actions>
+                            <x-quote::toolbar-button
+                                :chapter-id="$vm->chapter->id"
+                                :story-id="$vm->story->id"
+                                :can-quote="$canQuoteStory"
+                            />
+                        </x-slot:toolbar-actions>
 
-                    <article class="prose rich-content max-w-none [text-indent:2rem] text-xl">
-                        {!! $vm->chapter->content !!}
-                    </article>
-                </x-comment::annotable>
+                        <article data-quote-article class="prose rich-content max-w-none [text-indent:2rem] text-xl">
+                            {!! $vm->chapter->content !!}
+                        </article>
+                    </x-comment::annotable>
 
-                <x-quote::mini-form />
+                    <x-quote::mini-form />
+                </div>
+                <x-quote::chapter-panel />
             </div>
 
             <div class="mt-8 pt-4 border-t border-accent">
