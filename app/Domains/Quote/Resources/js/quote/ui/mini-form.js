@@ -79,9 +79,7 @@ export function quoteMiniForm() {
                 this.open = false;
                 this._anchor = null;
             } catch {
-                this.error = document.documentElement.lang === 'fr'
-                    ? 'Impossible de sauvegarder la citation. Veuillez réessayer.'
-                    : 'Unable to save the quote. Please try again.';
+                this.error = this.$el.dataset.errorSave;
             } finally {
                 this.saving = false;
             }

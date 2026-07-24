@@ -3,6 +3,8 @@
     x-init="$watch('open', v => v && $nextTick(() => $refs.dialog.focus()))"
     x-show="open"
     x-cloak
+    data-error-save="{{ __('quote::ui.errors.save_note') }}"
+    data-error-delete="{{ __('quote::ui.errors.delete_quote') }}"
     @quote:open-panel.window="showPanel($event.detail.quote)"
     @keydown.escape.window="close()"
     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/30"
@@ -73,6 +75,7 @@
                             x-model="noteValue"
                             rows="4"
                             maxlength="1000"
+                            @keydown.enter="if ($event.ctrlKey || $event.metaKey) { $event.preventDefault(); saveNote() }"
                             class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-1 focus:ring-tertiary mb-3"
                             placeholder="{{ __('quote::ui.mini_form.note_placeholder') }}"
                         ></textarea>

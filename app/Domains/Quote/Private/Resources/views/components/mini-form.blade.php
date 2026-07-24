@@ -12,6 +12,7 @@
     aria-labelledby="quote-mini-form-title"
     x-ref="dialog"
     tabindex="-1"
+    data-error-save="{{ __('quote::ui.errors.save_quote') }}"
     :style="`position:absolute; top:${_pos.top}px; left:${_pos.left}px; width:360px; z-index:9999;`"
     class="bg-white rounded-lg shadow-xl p-6 outline-none"
 >
@@ -30,6 +31,7 @@
             x-model="note"
             rows="3"
             maxlength="1000"
+            @keydown.enter="if ($event.ctrlKey || $event.metaKey) { $event.preventDefault(); save() }"
             class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-1 focus:ring-tertiary"
             placeholder="{{ __('quote::ui.mini_form.note_placeholder') }}"
         ></textarea>

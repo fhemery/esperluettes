@@ -114,19 +114,107 @@ class QuoteService
         }
 
         $perPage = 20;
-        $paginator = Quote::query()
-            ->where('user_id', $profileUserId)
-            ->orderByDesc('created_at')
-            ->paginate($perPage, page: $page);
+        $page = max(1, $page);
 
-        $quotes = $paginator->items();
+        if ($isOwner) {
+            // The owner sees everything, so we can paginate at the DB level.
+            $paginator = Quote::query()
+                ->where('user_id', $profileUserId)
+                ->orderByDesc('created_at')
+                ->paginate($perPage, page: $page);
 
-        if (empty($quotes)) {
-            return new QuoteListDto([], $isOwner, false, $page, (int) $paginator->total());
+            $items = $this->buildProfileItems($paginator->items(), true, $viewerId);
+
+            return new QuoteListDto($items, true, false, $page, (int) $paginator->total());
         }
 
-        $storyIds = array_values(array_unique(array_map(fn($q) => $q->story_id, $quotes)));
-        $chapterIds = array_values(array_unique(array_map(fn($q) => $q->chapter_id, $quotes)));
+        // Non-owner: visibility filtering must run before pagination so the
+        // page slice and total reflect only entries the viewer may actually see
+        // (unavailable chapters / inaccessible stories are excluded entirely).
+        $allRows = Quote::query()
+            ->where('user_id', $profileUserId)
+            ->orderByDesc('created_at')
+            ->get()
+            ->all();
+
+        $visible = $this->filterVisibleForViewer($allRows, $viewerId);
+
+        $total = count($visible);
+        $pageRows = array_slice($visible, ($page - 1) * $perPage, $perPage);
+        $items = $this->buildProfileItems($pageRows, false, $viewerId);
+
+        return new QuoteListDto($items, false, false, $page, $total);
+    }
+
+    /**
+     * Keep only the quote rows the viewer is allowed to see: chapter must be
+     * available (published) and the viewer must have access to the story.
+     * Story access is resolved once per unique story, not once per row.
+     *
+     * @param array<int, Quote> $rows
+     * @return array<int, Quote>
+     */
+    private function filterVisibleForViewer(array $rows, int $viewerId): array
+    {
+        if (empty($rows)) {
+            return [];
+        }
+
+        $storyIds = array_values(array_unique(array_map(fn($q) => $q->story_id, $rows)));
+        $chapterIds = array_values(array_unique(array_map(fn($q) => $q->chapter_id, $rows)));
+
+        $stories = $this->storyApi->getStoriesByIds($storyIds);
+        $chapters = $this->storyApi->getChaptersByIds($chapterIds);
+
+        $accessByStory = [];
+        foreach ($storyIds as $storyId) {
+            $accessByStory[$storyId] = in_array(
+                $viewerId,
+                $this->storyApi->filterUsersWithAccessToStory([$viewerId], $storyId),
+                true,
+            );
+        }
+
+        $visible = [];
+        foreach ($rows as $row) {
+            /** @var StorySummaryDto|null $story */
+            $story = $stories[$row->story_id] ?? null;
+            /** @var StoryChapterDto|null $chapter */
+            $chapter = $chapters[$row->chapter_id] ?? null;
+
+            $chapterAvailable = $story !== null
+                && $chapter !== null
+                && $chapter->status === 'published';
+
+            if (!$chapterAvailable) {
+                continue;
+            }
+
+            if (!($accessByStory[$row->story_id] ?? false)) {
+                continue;
+            }
+
+            $visible[] = $row;
+        }
+
+        return $visible;
+    }
+
+    /**
+     * Build QuoteDto items for a profile page slice, resolving story/chapter/
+     * author metadata in batch. The private note is populated only for the owner.
+     *
+     * @param array<int, Quote> $rows
+     * @return array<int, QuoteDto>
+     */
+    private function buildProfileItems(array $rows, bool $isOwner, ?int $viewerId): array
+    {
+        if (empty($rows)) {
+            return [];
+        }
+
+        $storyIds = array_values(array_unique(array_map(fn($q) => $q->story_id, $rows)));
+        $chapterIds = array_values(array_unique(array_map(fn($q) => $q->chapter_id, $rows)));
 
         $stories = $this->storyApi->getStoriesByIds($storyIds);
         $chapters = $this->storyApi->getChaptersByIds($chapterIds);
@@ -136,7 +224,7 @@ class QuoteService
         $profiles = $allAuthorIds ? $this->profileApi->getPublicProfiles($allAuthorIds) : [];
 
         $items = [];
-        foreach ($quotes as $quote) {
+        foreach ($rows as $quote) {
             /** @var StorySummaryDto|null $story */
             $story = $stories[$quote->story_id] ?? null;
             /** @var StoryChapterDto|null $chapter */
@@ -145,17 +233,6 @@ class QuoteService
             $chapterAvailable = $story !== null
                 && $chapter !== null
                 && $chapter->status === 'published';
-
-            if (!$isOwner && !$chapterAvailable) {
-                continue;
-            }
-
-            if (!$isOwner && $story !== null && $viewerId !== null) {
-                $accessible = $this->storyApi->filterUsersWithAccessToStory([$viewerId], $quote->story_id);
-                if (!in_array($viewerId, $accessible)) {
-                    continue;
-                }
-            }
 
             $storyUrl = $story ? route('stories.show', ['slug' => $story->slug]) : null;
             $chapterUrl = ($story && $chapter)
@@ -190,13 +267,7 @@ class QuoteService
             );
         }
 
-        return new QuoteListDto(
-            items: $items,
-            viewerIsOwner: $isOwner,
-            canQuote: false,
-            page: $page,
-            totalCount: (int) $paginator->total(),
-        );
+        return $items;
     }
 
     private function toChapterQuoteDto(Quote $quote, int $userId): QuoteDto

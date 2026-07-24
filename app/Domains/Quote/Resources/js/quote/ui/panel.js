@@ -37,9 +37,7 @@ export function quotePanel() {
                 this.quote = { ...updated };
                 this.editingNote = false;
             } catch {
-                this.error = document.documentElement.lang === 'fr'
-                    ? 'Impossible de sauvegarder la note.'
-                    : 'Unable to save the note.';
+                this.error = this.$el.dataset.errorSave;
             } finally {
                 this.saving = false;
             }
@@ -55,9 +53,7 @@ export function quotePanel() {
                 this.open = false;
                 this.quote = null;
             } catch {
-                this.error = document.documentElement.lang === 'fr'
-                    ? 'Impossible de supprimer la citation.'
-                    : 'Unable to delete the quote.';
+                this.error = this.$el.dataset.errorDelete;
             } finally {
                 this.deleting = false;
             }

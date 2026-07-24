@@ -57,7 +57,9 @@ export function quoteHighlighter({ chapterId, storyId, markLabel = '' }) {
                 const nodeEnd = Math.min(entry.domNode.length, end - entry.start);
                 if (nodeStart >= nodeEnd) continue;
                 const mark = document.createElement('mark');
-                mark.className = 'quote-tint bg-tertiary/10 cursor-pointer';
+                // Yellow, Medium-style highlight — kept visually distinct from the
+                // (future) annotation tint. See Quotes.md §4.2 / §11.
+                mark.className = 'quote-tint bg-yellow-200/70 dark:bg-yellow-400/30 text-inherit cursor-pointer';
                 mark.dataset.quoteId = String(quoteId);
                 mark.setAttribute('role', 'button');
                 mark.setAttribute('tabindex', '0');
