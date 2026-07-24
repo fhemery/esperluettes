@@ -32,4 +32,5 @@
 
 <!-- Assets -->
 @stack('styles')
+@stack('head-scripts')
 @vite(['app/Domains/Shared/Resources/css/app.css', 'app/Domains/Shared/Resources/js/app.js'])

@@ -384,6 +384,22 @@ deptrac:
         - type: directory
           value: app/Domains/StoryRef/Tests/
 
+    # Quote Domain
+    - name: QuotePublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Quote/Public/'
+
+    - name: QuotePrivate
+      collectors:
+        - type: directory
+          value: 'app/Domains/Quote/Private/'
+
+    - name: QuoteTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Quote/Tests/'
+
   ruleset:
     # Shared contracts and DTOs - accessible by all domains
     Shared:
@@ -500,6 +516,15 @@ deptrac:
     ReadListPublic:
       - Shared
       - ReadListPrivate
+      - AuthPublic
+      - EventsPublic
+      - NotificationPublic
+      - SettingsPublic
+      - StoryPublic
+
+    QuotePublic:
+      - Shared
+      - QuotePrivate
       - AuthPublic
       - EventsPublic
       - NotificationPublic
@@ -666,10 +691,11 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - FollowPublic
       - ModerationPublic
       - ProfilePublic
+      - QuotePublic
       - SettingsPublic
-      - FollowPublic
 
     SearchPrivate:
       - Shared
@@ -699,6 +725,15 @@ deptrac:
       - StoryPublic
       - NotificationPublic
       - StoryRefPublic
+
+    QuotePrivate:
+      - Shared
+      - QuotePublic
+      - AuthPublic
+      - EventsPublic
+      - NotificationPublic
+      - SettingsPublic
+      - StoryPublic
 
     StaticPagePrivate:
       - Shared
@@ -833,6 +868,15 @@ deptrac:
       - TestHelpers
       - ReadListPrivate
       - ReadListPublic
+
+    QuoteTests:
+      - Shared
+      - TestHelpers
+      - QuotePrivate
+      - QuotePublic
+      - AuthPublic
+      - StoryPublic
+      - NotificationPublic
 
     StaticPageTests:
       - Shared

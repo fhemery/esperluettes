@@ -23,6 +23,7 @@ require_once __DIR__ . '/../app/Domains/StoryRef/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Settings/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Follow/Tests/helpers.php';
 require_once __DIR__ . '/../app/Domains/Statistics/Tests/helpers.php';
+require_once __DIR__ . '/../app/Domains/Quote/Tests/helpers.php';
 
 // Root tests directory
 uses(TestCase::class)->in('Feature');

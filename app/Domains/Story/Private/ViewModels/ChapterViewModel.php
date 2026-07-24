@@ -61,6 +61,7 @@ class ShortChapterViewModel {
 
 class ChapterStoryViewModel {
     public function __construct(
+        public readonly int $id,
         public readonly string $title,
         public readonly string $slug,
         public readonly string $coverType,
@@ -80,6 +81,7 @@ class ChapterStoryViewModel {
     static function from(Story $story, array $chapters, CoverService $coverService, array $authors = []) : self
     {
         return new self(
+            id: $story->id,
             title: $story->title,
             slug: $story->slug,
             coverType: (string) ($story->cover_type ?? Story::COVER_DEFAULT),

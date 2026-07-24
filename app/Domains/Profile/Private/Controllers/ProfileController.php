@@ -12,6 +12,7 @@ use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
 use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
 use App\Domains\Shared\ViewModels\PageViewModel;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -68,6 +69,17 @@ class ProfileController extends Controller
     }
 
     /**
+     * Display the quotes tab of a user's profile.
+     */
+    public function showQuotes(Profile $profile, Request $request): View
+    {
+        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
+        $page = max(1, (int) $request->query('page', 1));
+        $quoteList = app(\App\Domains\Quote\Public\Api\QuotePublicApi::class)->getForProfile($profile->user_id, $viewerId, $page);
+        return $this->renderProfile($profile, 'quotes', ['quoteList' => $quoteList]);
+    }
+
+    /**
      * Display the following tab of a user's profile.
      */
     public function showFollowing(Profile $profile): View
@@ -84,7 +96,7 @@ class ProfileController extends Controller
     /**
      * Render the profile page with the specified active tab.
      */
-    private function renderProfile(Profile $profile, string $activeTab): View
+    private function renderProfile(Profile $profile, string $activeTab, array $extra = []): View
     {
         $isOwn = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
         $isModerator = $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]);
@@ -92,7 +104,7 @@ class ProfileController extends Controller
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
 
-        return view('profile::pages.show', compact('profile', 'isOwn', 'isModerator', 'activeTab'));
+        return view('profile::pages.show', array_merge(compact('profile', 'isOwn', 'isModerator', 'activeTab'), $extra));
     }
 
     /**

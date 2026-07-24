@@ -11,6 +11,7 @@ use App\Domains\Story\Private\Services\StoryAccessService;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
+use App\Domains\Story\Public\Contracts\StoryChapterDto;
 use App\Domains\Story\Public\Contracts\StorySummaryDto;
 use App\Domains\Story\Public\Contracts\UserStoryListItemDto;
 use App\Domains\Story\Public\Contracts\StoryQueryFilterDto;
@@ -157,6 +158,11 @@ class StoryPublicApi
         return in_array($userId, $this->storyService->getAuthorIds($storyId));
     }
 
+    public function isAuthorOrCoAuthor(int $storyId, int $userId): bool
+    {
+        return in_array($userId, $this->storyService->getCollaboratorIds($storyId));
+    }
+
     /**
      * Return list of author user IDs for a story.
      * @return int[]
@@ -237,6 +243,34 @@ class StoryPublicApi
     public function filterUsersWithAccessToStory(array $userIds, int $storyId): array
     {
         return $this->accessService->filterUsersWithAccessToStory($userIds, $storyId);
+    }
+
+    /** @return array<int, StorySummaryDto> */
+    public function getStoriesByIds(array $storyIds): array
+    {
+        $stories = $this->storyService->getStoriesByIds($storyIds);
+        $result = [];
+        foreach ($stories as $id => $story) {
+            $result[(int) $id] = StorySummaryDto::fromModel($story, $this->coverService);
+        }
+        return $result;
+    }
+
+    /** @return array<int, StoryChapterDto> */
+    public function getChaptersByIds(array $chapterIds): array
+    {
+        $chapters = $this->storyService->getChaptersByIds($chapterIds);
+        $result = [];
+        foreach ($chapters as $id => $chapter) {
+            $result[(int) $id] = StoryChapterDto::fromModel($chapter);
+        }
+        return $result;
+    }
+
+    /** @return array<int, int[]> */
+    public function getAuthorIdsByStoryIds(array $storyIds): array
+    {
+        return $this->storyService->getAuthorIdsByStoryIds($storyIds);
     }
 
     /**

@@ -19,6 +19,7 @@ use App\Domains\Story\Public\Events\StoryUpdated;
 use App\Domains\Story\Public\Events\StoryDeleted;
 use App\Domains\Story\Public\Events\DTO\ChapterSnapshot;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
+use App\Domains\Story\Private\Models\StoryCollaborator;
 use App\Domains\Story\Private\Models\StoryWithNextChapter;
 use App\Domains\Story\Private\Repositories\StoryRepository;
 use App\Domains\Story\Private\Services\ChapterService;
@@ -194,6 +195,49 @@ class StoryService
         return Story::query()
             ->whereKey($storyId)
             ->first()?->authors()->pluck('user_id')->map(fn($v) => (int)$v)->all() ?? [];
+    }
+
+    public function getCollaboratorIds(int $storyId): array
+    {
+        return Story::query()
+            ->whereKey($storyId)
+            ->first()?->collaborators()->pluck('user_id')->map(fn($v) => (int)$v)->all() ?? [];
+    }
+
+    /** @return array<int, Story> */
+    public function getStoriesByIds(array $storyIds): array
+    {
+        if (empty($storyIds)) {
+            return [];
+        }
+        return Story::query()->whereIn('id', $storyIds)->get()->keyBy('id')->all();
+    }
+
+    /** @return array<int, Chapter> */
+    public function getChaptersByIds(array $chapterIds): array
+    {
+        if (empty($chapterIds)) {
+            return [];
+        }
+        return Chapter::query()->whereIn('id', $chapterIds)->get()->keyBy('id')->all();
+    }
+
+    /** @return array<int, int[]> */
+    public function getAuthorIdsByStoryIds(array $storyIds): array
+    {
+        if (empty($storyIds)) {
+            return [];
+        }
+        $rows = StoryCollaborator::query()
+            ->whereIn('story_id', $storyIds)
+            ->authors()
+            ->get(['story_id', 'user_id']);
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[(int) $row->story_id][] = (int) $row->user_id;
+        }
+        return $result;
     }
 
     /**
