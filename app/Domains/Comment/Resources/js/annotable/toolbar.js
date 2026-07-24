@@ -44,7 +44,14 @@ function positionToolbar(toolbar, range) {
 
 function getAnnotableRegion(node) {
     let el = node.nodeType === 3 ? node.parentElement : node;
-    return el?.closest('[data-entity-type]') ?? null;
+    return el?.closest('[data-annotable]') ?? null;
+}
+
+function setTooLongState(toolbar, tooLong) {
+    const actions = toolbar.querySelector('[data-toolbar-actions]');
+    const message = toolbar.querySelector('[data-toolbar-too-long]');
+    if (actions) actions.classList.toggle('hidden', tooLong);
+    if (message) message.classList.toggle('hidden', !tooLong);
 }
 
 function showToolbar() {
@@ -69,6 +76,13 @@ function showToolbar() {
 
     const toolbar = getOrCreateToolbar();
     if (!toolbar) return;
+
+    // A selection longer than the region's cap disables the actions and shows
+    // a "selection too long" hint instead. The cap lives on the region so the
+    // generic toolbar stays feature-agnostic.
+    const maxSelection = parseInt(region.dataset.maxSelection ?? '0', 10);
+    const tooLong = maxSelection > 0 && text.length > maxSelection;
+    setTooLongState(toolbar, tooLong);
 
     toolbar.style.display = '';
     positionToolbar(toolbar, range);

@@ -184,7 +184,7 @@
                     @elseif($activeTab === 'following' && $canViewFollowing)
                         <x-follow::following-tab :user-id="$profile->user_id" />
                     @elseif($activeTab === 'quotes' && isset($quoteList))
-                        <x-quote::profile-tab :quote-list="$quoteList" :is-own="$isOwn" />
+                        <x-quote::profile-tab :quote-list="$quoteList" :is-own="$isOwn" :profile-slug="$profile->slug" />
                     @endif
                 </div>
             </div>
