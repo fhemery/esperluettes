@@ -74,11 +74,17 @@ class NewsService
                 }
                 $blocks[] = ['type' => 'text', 'html' => $html];
             } elseif ($type === 'image') {
+                $keep = !empty($b['keep_original']);
                 $file = $b['file'] ?? null;
                 if ($file instanceof UploadedFile) {
-                    $path = $this->media->store(self::SCOPE, $file);
+                    // "keep original" stores the file without generating variants.
+                    $path = $this->media->store(self::SCOPE, $file, $keep ? [] : [400, 800]);
                 } else {
                     $path = !empty($b['path']) ? (string) $b['path'] : null;
+                    // A reused image with no variants must render raw, whatever the box says.
+                    if ($path && !$keep && !$this->media->hasVariants($path)) {
+                        $keep = true;
+                    }
                 }
                 if (!$path) {
                     continue; // drop empty image block
@@ -90,6 +96,9 @@ class NewsService
                     ]);
                 }
                 $block = ['type' => 'image', 'path' => $path, 'alt' => $alt];
+                if ($keep) {
+                    $block['keep_original'] = true;
+                }
                 if (!empty($b['caption'])) {
                     $block['caption'] = (string) $b['caption'];
                 }

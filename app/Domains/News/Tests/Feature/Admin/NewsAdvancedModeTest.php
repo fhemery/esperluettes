@@ -32,6 +32,8 @@ function newsData(array $override = []): array
 
 describe('News advanced mode — create', function () {
     it('persists blocks and renders the content cache', function () {
+        // A normal reused image has variants on disk → responsive rendering.
+        Storage::disk('public')->put('news/sep-800w.webp', 'x');
         $news = newsSvc()->create(newsData([
             'mode' => 'advanced',
             'blocks_order' => 'b0,b1',
@@ -60,6 +62,40 @@ describe('News advanced mode — create', function () {
         $path = $news->content_blocks[0]['path'];
         expect($path)->toStartWith('news/');
         Storage::disk('public')->assertExists($path);
+    });
+
+    it('stores a keep-original image without variants and flags the block', function () {
+        $news = newsSvc()->create(newsData([
+            'mode' => 'advanced',
+            'blocks_order' => 'b0',
+            'blocks' => ['b0' => [
+                'type' => 'image',
+                'file' => UploadedFile::fake()->image('small.png', 120, 90),
+                'alt' => 'Small',
+                'keep_original' => '1',
+            ]],
+        ]));
+
+        $path = $news->content_blocks[0]['path'];
+        expect($news->content_blocks[0]['keep_original'])->toBeTrue();
+        Storage::disk('public')->assertExists($path);
+        // No responsive variants were generated.
+        $dir = pathinfo($path, PATHINFO_DIRNAME);
+        $name = pathinfo($path, PATHINFO_FILENAME);
+        Storage::disk('public')->assertMissing("{$dir}/{$name}-800w.webp");
+        // The rendered cache serves the original directly (no srcset).
+        expect($news->content)->not->toContain('srcset');
+    });
+
+    it('forces raw rendering when reusing an image that has no variants', function () {
+        Storage::disk('public')->put('news/nov.png', 'x'); // original only, no variants
+        $news = newsSvc()->create(newsData([
+            'mode' => 'advanced',
+            'blocks_order' => 'b0',
+            'blocks' => ['b0' => ['type' => 'image', 'path' => 'news/nov.png', 'alt' => 'A']],
+        ]));
+
+        expect($news->content_blocks[0]['keep_original'])->toBeTrue();
     });
 
     it('drops empty blocks on save', function () {

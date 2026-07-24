@@ -97,6 +97,19 @@ class MediaService
     }
 
     /**
+     * Whether responsive variants were generated for this original (i.e. it was
+     * not stored "keep original"). Used to decide raw vs responsive rendering
+     * for a reused image, tableless.
+     */
+    public function hasVariants(string $path): bool
+    {
+        $dir = pathinfo($path, PATHINFO_DIRNAME);
+        $name = pathinfo($path, PATHINFO_FILENAME);
+        $rel = ($dir === '' || $dir === '.') ? "{$name}-800w.webp" : "{$dir}/{$name}-800w.webp";
+        return Storage::disk(self::DISK)->exists($rel);
+    }
+
+    /**
      * Garbage-collect originals no provider claims and older than $days.
      *
      * Safety guard: a folder that holds originals but has zero claimed paths is

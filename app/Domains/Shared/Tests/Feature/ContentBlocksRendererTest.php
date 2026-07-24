@@ -41,6 +41,17 @@ describe('ContentBlocksRenderer::render', function () {
         expect($html)->toContain('Fig. 1');
     });
 
+    it('renders a keep_original image as a raw original (no srcset)', function () {
+        $html = renderer()->render([
+            ['type' => 'image', 'path' => 'news/small.png', 'alt' => 'Small', 'keep_original' => true],
+        ]);
+
+        expect($html)->not->toContain('<picture');
+        expect($html)->not->toContain('srcset');
+        expect($html)->toContain('storage/news/small.png');
+        expect($html)->toContain('alt="Small"');
+    });
+
     it('skips image blocks without a path', function () {
         $html = renderer()->render([
             ['type' => 'image', 'path' => null, 'alt' => 'x'],

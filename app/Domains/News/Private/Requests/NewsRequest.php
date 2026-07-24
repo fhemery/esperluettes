@@ -49,6 +49,7 @@ class NewsRequest extends FormRequest
             $rules['blocks.*.path'] = ['nullable', 'string', 'max:1024'];
             $rules['blocks.*.alt'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.caption'] = ['nullable', 'string', 'max:255'];
+            $rules['blocks.*.keep_original'] = ['nullable'];
             $rules['blocks.*.file'] = ['nullable', 'image', 'max:2048'];
         } else {
             $rules['content'] = ['required', 'string'];

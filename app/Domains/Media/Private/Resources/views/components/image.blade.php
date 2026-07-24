@@ -5,6 +5,9 @@
     'sizes' => '(max-width: 640px) calc(100vw - 2rem), 800px',
     'loading' => 'lazy',
     'caption' => null,
+    // raw: serve the stored original at its natural size (no responsive variants).
+    // Used for "keep original width" images that were stored without variants.
+    'raw' => false,
     // Default: render at the image's natural size, capped to the container and
     // centered — a small image stays small. Pass imgClass="w-full h-auto" for
     // full-bleed use (e.g. a header banner).
@@ -24,16 +27,24 @@
 
 @if($path)
     <figure {{ $attributes->merge(['class' => 'media-image text-center']) }}>
-        <picture>
-            <source type="image/webp" srcset="{{ $srcset('webp') }}">
+        @if($raw)
             <img
                 class="{{ $imgClass }}"
-                src="{{ $api->variantUrl($path, (int) $maxWidth, 'jpg') }}"
-                srcset="{{ $srcset('jpg') }}"
-                sizes="{{ $sizes }}"
+                src="{{ $api->originalUrl($path) }}"
                 alt="{{ $alt }}"
                 loading="{{ $loading }}">
-        </picture>
+        @else
+            <picture>
+                <source type="image/webp" srcset="{{ $srcset('webp') }}">
+                <img
+                    class="{{ $imgClass }}"
+                    src="{{ $api->variantUrl($path, (int) $maxWidth, 'jpg') }}"
+                    srcset="{{ $srcset('jpg') }}"
+                    sizes="{{ $sizes }}"
+                    alt="{{ $alt }}"
+                    loading="{{ $loading }}">
+            </picture>
+        @endif
         @if($caption)
             <figcaption class="text-center text-sm text-gray-500 mt-1">{{ $caption }}</figcaption>
         @endif

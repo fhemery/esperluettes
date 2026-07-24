@@ -94,6 +94,7 @@
                     @include('shared::components.multi-editor._image-block', [
                         'name' => $name, 'uid' => 'b' . $i, 'scope' => $scope,
                         'path' => $block['path'] ?? null, 'alt' => $block['alt'] ?? '', 'caption' => $block['caption'] ?? '',
+                        'keepOriginal' => $block['keep_original'] ?? false,
                     ])
                 @else
                     @include('shared::components.multi-editor._text-block', [
@@ -131,6 +132,7 @@
     <template x-ref="tplImage">
         @include('shared::components.multi-editor._image-block', [
             'name' => $name, 'uid' => '__UID__', 'scope' => $scope, 'path' => null, 'alt' => '', 'caption' => '',
+            'keepOriginal' => false,
         ])
     </template>
 

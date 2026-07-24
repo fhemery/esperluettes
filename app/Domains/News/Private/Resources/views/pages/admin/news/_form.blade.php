@@ -86,6 +86,7 @@
                         'path' => $ob['path'] ?? null,
                         'alt' => $ob['alt'] ?? '',
                         'caption' => $ob['caption'] ?? '',
+                        'keep_original' => !empty($ob['keep_original']),
                     ];
                 }
             }

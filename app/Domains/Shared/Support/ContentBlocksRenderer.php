@@ -40,11 +40,12 @@ class ContentBlocksRenderer
                     continue;
                 }
                 $out .= Blade::render(
-                    '<x-media::image :path="$path" :alt="$alt" :caption="$caption" class="ce-block ce-block--image" />',
+                    '<x-media::image :path="$path" :alt="$alt" :caption="$caption" :raw="$raw" class="ce-block ce-block--image" />',
                     [
                         'path' => (string) $path,
                         'alt' => (string) ($block['alt'] ?? ''),
                         'caption' => ($block['caption'] ?? null) ?: null,
+                        'raw' => !empty($block['keep_original']),
                     ]
                 );
             }

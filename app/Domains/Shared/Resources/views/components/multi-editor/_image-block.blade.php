@@ -1,7 +1,7 @@
 {{--
     One image block of the multi-editor. Composes the Media image-field.
 
-    Vars: $name (base), $uid, $scope, $path, $alt, $caption
+    Vars: $name (base), $uid, $scope, $path, $alt, $caption, $keepOriginal
 --}}
 <div class="ce-block ce-block--image border border-border rounded-lg p-3 mb-3 relative" data-block data-type="image" data-uid="{{ $uid }}">
     <div class="flex items-center justify-end gap-1 mb-2 text-fg/60">
@@ -20,7 +20,9 @@
         :caption="$caption ?? ''"
         :show-caption="true"
         :alt-required="true"
-        :show-usage="false" />
+        :show-usage="false"
+        :allow-keep-original="true"
+        :keep-original="$keepOriginal ?? false" />
 
     @include('shared::components.multi-editor._insert-affordance')
 </div>

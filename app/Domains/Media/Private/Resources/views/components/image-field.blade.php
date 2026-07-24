@@ -22,6 +22,8 @@
     'showAlt' => true,
     'showCaption' => true,
     'altRequired' => true,
+    'allowKeepOriginal' => false,
+    'keepOriginal' => false,
     'maxSize' => 2048,
     'accept' => 'image/jpeg,image/png,image/webp',
     'label' => null,
@@ -31,7 +33,7 @@
 @php
     $uid = 'media-field-' . Str::random(8);
     $api = app(\App\Domains\Media\Public\Api\MediaPublicApi::class);
-    $currentUrl = $path ? $api->variantUrl($path, 400, 'webp') : null;
+    $currentUrl = $path ? ($keepOriginal ? $api->originalUrl($path) : $api->variantUrl($path, 400, 'webp')) : null;
     if ($showUsage && $usageCount === null && $path) {
         $usageCount = $api->countUsages($path);
     }
@@ -43,6 +45,7 @@
         path: @js($path),
         currentUrl: @js($currentUrl),
         scope: @js($scope),
+        keepOriginal: @js((bool) $keepOriginal),
         libraryUrl: @js(route('media.library')),
         maxSizeKb: @js($maxSize),
         sizeErrorMessage: @js(__('media::image-field.size_error', ['max' => $maxSizeMB])),
@@ -110,6 +113,16 @@
     <input type="file" name="{{ $name }}[file]" x-ref="fileInput" accept="{{ $accept }}"
            class="hidden" x-on:change="handleFileSelect($event)" />
 
+    @if($allowKeepOriginal)
+        {{-- Hidden mirror always submits the current state ("1"/"") --}}
+        <input type="hidden" name="{{ $name }}[keep_original]" :value="keepOriginal ? '1' : ''" />
+        <label class="flex items-center gap-2 text-sm text-fg/80 cursor-pointer">
+            <input type="checkbox" x-model="keepOriginal" class="rounded border-border" />
+            {{ __('media::image-field.keep_original') }}
+        </label>
+        <p class="text-xs text-fg/50">{{ __('media::image-field.keep_original_help') }}</p>
+    @endif
+
     @if($showAlt)
         <div class="flex flex-col gap-1">
             <x-shared::input-label :for="$uid.'-alt'">
@@ -170,9 +183,10 @@
 @push('scripts')
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('mediaImageField', ({ path, currentUrl, scope, libraryUrl, maxSizeKb, sizeErrorMessage }) => ({
+        Alpine.data('mediaImageField', ({ path, currentUrl, scope, keepOriginal, libraryUrl, maxSizeKb, sizeErrorMessage }) => ({
             path: path || '',
             previewUrl: currentUrl || null,
+            keepOriginal: keepOriginal || false,
             isNewFile: false,
             isDragging: false,
             sizeError: null,

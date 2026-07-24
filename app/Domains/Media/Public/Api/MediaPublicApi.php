@@ -59,4 +59,21 @@ class MediaPublicApi
     {
         return $this->media->countUsages($path);
     }
+
+    /**
+     * Whether responsive variants exist for a stored original (false for images
+     * stored "keep original"). Lets a renderer choose raw vs responsive markup.
+     */
+    public function hasVariants(string $path): bool
+    {
+        return $this->media->hasVariants($path);
+    }
+
+    /**
+     * Absolute URL of the stored original file (no resizing).
+     */
+    public function originalUrl(string $path): string
+    {
+        return asset('storage/' . ltrim($path, '/'));
+    }
 }

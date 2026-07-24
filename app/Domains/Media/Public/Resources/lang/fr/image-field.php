@@ -14,6 +14,8 @@ return [
     'alt_placeholder' => 'Décrivez l’image pour l’accessibilité',
     'caption_label' => 'Légende',
     'caption_placeholder' => 'Légende affichée sous l’image (optionnel)',
+    'keep_original' => 'Conserver la taille d’origine',
+    'keep_original_help' => 'L’image ne sera pas redimensionnée : une petite image restera petite.',
     'picker_title' => 'Bibliothèque d’images',
     'picker_empty' => 'Aucune image disponible pour le moment.',
     'picker_more' => 'Charger plus',
