@@ -12,7 +12,7 @@ export function quoteMiniForm() {
         _anchor: null,
         _chapterId: null,
         _storyId: null,
-        _range: null,
+        _pos: { top: 0, left: 0 },
 
         openForm({ chapterId, storyId }) {
             const selection = window.getSelection();
@@ -30,10 +30,24 @@ export function quoteMiniForm() {
 
             if (!anchor) return;
 
+            // Compute document-relative position just below the selection
+            const rect = range.getBoundingClientRect();
+            const formWidth = 360;
+            const left = Math.min(
+                Math.max(8, rect.left + rect.width / 2 - formWidth / 2),
+                window.innerWidth - formWidth - 8
+            );
+            this._pos = {
+                top: rect.bottom + window.scrollY + 8,
+                left: left + window.scrollX,
+            };
+
+            // Clear selection so the toolbar hides
+            selection.removeAllRanges();
+
             this._anchor = anchor;
             this._chapterId = chapterId;
             this._storyId = storyId;
-            this._range = range.cloneRange();
             this.selectedText = anchor.highlighted;
             this.note = '';
             this.error = null;

@@ -8,7 +8,7 @@
     x-data
 >
     <template id="comment-toolbar-template">
-        <div class="comment-toolbar" role="toolbar" aria-label="{{ __('quote::ui.toolbar.label') }}">
+        <div class="comment-toolbar bg-white border border-gray-200 rounded-lg shadow-md px-2 py-1" role="toolbar" aria-label="{{ __('quote::ui.toolbar.label') }}">
             {{ $toolbarActions ?? '' }}
         </div>
     </template>

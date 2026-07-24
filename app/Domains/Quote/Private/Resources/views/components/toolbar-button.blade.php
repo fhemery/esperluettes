@@ -21,7 +21,7 @@
 @endif
 
 @once
-    @push('scripts')
+    @push('head-scripts')
         @vite('app/Domains/Quote/Resources/js/quote/index.js')
     @endpush
 @endonce
