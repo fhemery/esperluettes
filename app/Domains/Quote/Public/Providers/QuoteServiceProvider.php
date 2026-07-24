@@ -22,6 +22,7 @@ use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
 use App\Domains\Shared\Contracts\ParameterType;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class QuoteServiceProvider extends ServiceProvider
@@ -43,6 +44,8 @@ class QuoteServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(app_path('Domains/Quote/Database/Migrations'));
         $this->loadRoutesFrom(app_path('Domains/Quote/Private/routes.php'));
         $this->loadTranslationsFrom(app_path('Domains/Quote/Private/Resources/lang'), 'quote');
+        $this->loadViewsFrom(app_path('Domains/Quote/Private/Resources/views'), 'quote');
+        Blade::anonymousComponentPath(app_path('Domains/Quote/Private/Resources/views/components'), 'quote');
 
         $eventBus = app(EventBus::class);
         $this->registerSettings();

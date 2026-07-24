@@ -1,3 +1,4 @@
+@props(['entityType', 'entityId', 'canAnnotate' => false, 'viewerRole' => null])
 <div
     class="annotable-region"
     data-entity-type="{{ $entityType }}"
@@ -7,7 +8,7 @@
     x-data
 >
     <template id="comment-toolbar-template">
-        <div class="comment-toolbar" role="toolbar" aria-label="{{ __('quote::toolbar.label') }}">
+        <div class="comment-toolbar" role="toolbar" aria-label="{{ __('quote::ui.toolbar.label') }}">
             {{ $toolbarActions ?? '' }}
         </div>
     </template>
