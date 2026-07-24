@@ -42,6 +42,10 @@ class NewsServiceProvider extends ServiceProvider
         // Model observers
         News::observe(NewsObserver::class);
 
+        // Let Media GC know which image files News still uses (header + block images).
+        app(\App\Domains\Media\Public\Contracts\MediaUsageRegistry::class)
+            ->register(new \App\Domains\News\Private\Support\NewsMediaUsageProvider());
+
         // Register News domain events mapping with EventBus
         $eventBus = app(EventBus::class);
         $eventBus->registerEvent(NewsPublished::name(), NewsPublished::class);

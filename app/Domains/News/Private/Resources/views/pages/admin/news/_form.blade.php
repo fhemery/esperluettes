@@ -71,17 +71,38 @@
         <x-shared::input-label for="content" :required="true">
             {{ __('news::admin.form.content') }}
         </x-shared::input-label>
-        <x-shared::editor
-            name="content"
-            id="content"
-            :defaultValue="old('content', $news?->content ?? '')"
-            :nbLines="15"
-            :isMandatory="true"
-            :resizable="true"
+        @php
+            // On a failed validation re-render, rebuild the advanced blocks from old input
+            // (uploaded files are not repopulated by the browser and must be re-picked).
+            $meBlocks = $news?->content_blocks ?? [];
+            if (old('mode') === 'advanced' && is_array(old('blocks'))) {
+                $meBlocks = [];
+                foreach (array_filter(explode(',', (string) old('blocks_order', ''))) as $uid) {
+                    $ob = old('blocks')[$uid] ?? null;
+                    if (!is_array($ob)) { continue; }
+                    $meBlocks[] = [
+                        'type' => $ob['type'] ?? 'text',
+                        'html' => $ob['html'] ?? '',
+                        'path' => $ob['path'] ?? null,
+                        'alt' => $ob['alt'] ?? '',
+                        'caption' => $ob['caption'] ?? '',
+                    ];
+                }
+            }
+            $meMode = old('mode', ($news?->content_blocks ? 'advanced' : 'simple'));
+        @endphp
+        <x-shared::multi-editor
+            name="blocks"
+            content-name="content"
+            :content-value="old('content', $news?->content ?? '')"
+            :blocks="$meBlocks"
+            :mode="$meMode"
+            scope="news"
             :toolbar="['bold','italic','underline','strike','header','blockquote','align','list','custom-emoji','link']"
             class="mt-1"
         />
         <x-shared::input-error :messages="$errors->get('content')" class="mt-1" />
+        <x-shared::input-error :messages="$errors->get('blocks')" class="mt-1" />
     </div>
 
     <hr class="border-border" />

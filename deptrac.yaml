@@ -504,6 +504,7 @@ deptrac:
       - NewsPrivate
       - EventsPublic
       - AdministrationPublic
+      - MediaPublic
       - NotificationPublic
 
     NotificationPublic:
@@ -696,6 +697,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - MediaPublic
       - NewsPublic
       - NotificationPublic
 
@@ -863,6 +865,7 @@ deptrac:
       - NewsPrivate
       - NewsPublic
       - AuthPublic
+      - MediaPublic
 
     NotificationTests:
       - TestHelpers

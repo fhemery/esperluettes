@@ -7,19 +7,27 @@ use App\Domains\News\Private\Models\News;
 use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUnpublished;
 use App\Domains\News\Public\Notifications\NewsPublishedNotification;
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Shared\Services\ImageService;
+use App\Domains\Shared\Support\ContentBlocksRenderer;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 use Mews\Purifier\Facades\Purifier;
 
 class NewsService
 {
+    /** Media scope for News images (header + content blocks). */
+    private const SCOPE = 'news';
+
     public function __construct(
         private readonly EventBus $eventBus,
         private readonly NotificationPublicApi $notificationApi,
+        private readonly ContentBlocksRenderer $renderer,
+        private readonly MediaPublicApi $media,
     ) {}
 
     public function sanitizeContent(string $html): string
@@ -30,12 +38,88 @@ class NewsService
     }
 
     /**
+     * Resolve the persisted content fields from the submitted payload.
+     *
+     * Simple mode: `content` = sanitized author HTML, `content_blocks` = null.
+     * Advanced mode: build the normalized block list (store new image uploads,
+     * reuse existing paths, drop empties, sanitize text), persist it in
+     * `content_blocks`, and render it into `content` as the display cache.
+     *
+     * @param array<string,mixed> $data
+     * @return array{content:string, content_blocks:?array<int,array<string,mixed>>}
+     */
+    private function resolveContent(array $data): array
+    {
+        if (($data['mode'] ?? 'simple') !== 'advanced') {
+            return [
+                'content' => $this->sanitizeContent($data['content'] ?? ''),
+                'content_blocks' => null,
+            ];
+        }
+
+        $order = array_values(array_filter(explode(',', (string) ($data['blocks_order'] ?? '')), fn ($u) => $u !== ''));
+        $raw = is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
+
+        $blocks = [];
+        foreach ($order as $uid) {
+            $b = $raw[$uid] ?? null;
+            if (!is_array($b)) {
+                continue;
+            }
+            $type = $b['type'] ?? null;
+
+            if ($type === 'text') {
+                $html = $this->renderer->sanitizeText((string) ($b['html'] ?? ''));
+                if (trim(strip_tags($html)) === '') {
+                    continue; // drop empty text block
+                }
+                $blocks[] = ['type' => 'text', 'html' => $html];
+            } elseif ($type === 'image') {
+                $file = $b['file'] ?? null;
+                if ($file instanceof UploadedFile) {
+                    $path = $this->media->store(self::SCOPE, $file);
+                } else {
+                    $path = !empty($b['path']) ? (string) $b['path'] : null;
+                }
+                if (!$path) {
+                    continue; // drop empty image block
+                }
+                $alt = trim((string) ($b['alt'] ?? ''));
+                if ($alt === '') {
+                    throw ValidationException::withMessages([
+                        'blocks' => __('news::admin.validation.image_alt_required'),
+                    ]);
+                }
+                $block = ['type' => 'image', 'path' => $path, 'alt' => $alt];
+                if (!empty($b['caption'])) {
+                    $block['caption'] = (string) $b['caption'];
+                }
+                $blocks[] = $block;
+            }
+        }
+
+        if ($blocks === []) {
+            throw ValidationException::withMessages([
+                'blocks' => __('news::admin.validation.blocks_required'),
+            ]);
+        }
+
+        return [
+            'content' => $this->renderer->render($blocks),
+            'content_blocks' => $blocks,
+        ];
+    }
+
+    /**
      * Create a new news article.
      */
     public function create(array $data): News
     {
-        // Sanitize content
-        $data['content'] = $this->sanitizeContent($data['content'] ?? '');
+        // Resolve content (simple HTML or advanced block list + rendered cache)
+        $resolved = $this->resolveContent($data);
+        $data['content'] = $resolved['content'];
+        $data['content_blocks'] = $resolved['content_blocks'];
+        unset($data['blocks'], $data['blocks_order'], $data['mode']);
 
         // Process header image if uploaded
         if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
@@ -59,8 +143,11 @@ class NewsService
      */
     public function update(News $news, array $data): News
     {
-        // Sanitize content
-        $data['content'] = $this->sanitizeContent($data['content'] ?? '');
+        // Resolve content (simple HTML or advanced block list + rendered cache)
+        $resolved = $this->resolveContent($data);
+        $data['content'] = $resolved['content'];
+        $data['content_blocks'] = $resolved['content_blocks'];
+        unset($data['blocks'], $data['blocks_order'], $data['mode']);
 
         // Handle header image removal
         if (!empty($data['header_image_remove'])) {

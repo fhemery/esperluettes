@@ -16,9 +16,9 @@ class NewsRequest extends FormRequest
     public function rules(): array
     {
         $newsId = $this->route('news')?->id;
-        $isUpdate = $newsId !== null;
+        $isAdvanced = $this->input('mode') === 'advanced';
 
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:200'],
             'slug' => [
                 'required',
@@ -28,13 +28,30 @@ class NewsRequest extends FormRequest
                 Rule::unique('news', 'slug')->ignore($newsId),
             ],
             'summary' => ['required', 'string', 'max:500'],
-            'content' => ['required', 'string'],
             'header_image' => ['nullable', 'image', 'max:2048'], // 2MB max
             'header_image_remove' => ['nullable', 'boolean'],
             'status' => ['required', Rule::in(['draft', 'published'])],
             'is_pinned' => ['boolean'],
             'meta_description' => ['nullable', 'string', 'max:160'],
+            'mode' => ['nullable', Rule::in(['simple', 'advanced'])],
         ];
+
+        if ($isAdvanced) {
+            // Advanced (MultiEdit): content is a generated cache, blocks are the source.
+            $rules['content'] = ['nullable', 'string'];
+            $rules['blocks_order'] = ['nullable', 'string'];
+            $rules['blocks'] = ['required', 'array', 'min:1'];
+            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image'])];
+            $rules['blocks.*.html'] = ['nullable', 'string'];
+            $rules['blocks.*.path'] = ['nullable', 'string', 'max:1024'];
+            $rules['blocks.*.alt'] = ['nullable', 'string', 'max:255'];
+            $rules['blocks.*.caption'] = ['nullable', 'string', 'max:255'];
+            $rules['blocks.*.file'] = ['nullable', 'image', 'max:2048'];
+        } else {
+            $rules['content'] = ['required', 'string'];
+        }
+
+        return $rules;
     }
 
     protected function prepareForValidation(): void
