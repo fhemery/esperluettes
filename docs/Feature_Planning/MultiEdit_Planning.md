@@ -65,7 +65,7 @@ Sequencing for the MultiEdit feature. Reads on top of `MultiEdit.md` (functional
 
 ## Phase 2.5 — Checkpoint (plan remaining consumers)
 
-Short planning step, **not** code. Using the FAQ experience, decide per-consumer specifics for News header, StaticPage header, Calendar, Profile picture (each single-image, same recipe: swap `process`→`store`, adopt components, register a provider). Note the second News `ImageService` consumer — `NewsObserver` — explicitly so it isn't missed. Capture surprises (alt handling, view churn) and schedule them. These adoptions are **not** on the MultiEdit critical path and can proceed in parallel with Phases 3–4.
+Short planning step, **not** code. Done — captured in **`MultiEdit_Consumer_Migration.md`**: FAQ-pilot learnings (no schema change, controllers simplified, non-recursive-scope vs dated-subfolder surprise) and a per-consumer plan for Calendar, StaticPage header, News header (shares its provider with Phase 4), and Profile (a non-variant special case). Also flags the `activities` scope-map gap and the `NewsObserver` 6th consumer. These adoptions are **not** on the MultiEdit critical path and can proceed in parallel with Phases 3–4.
 
 ---
 
