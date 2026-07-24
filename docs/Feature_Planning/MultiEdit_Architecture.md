@@ -89,7 +89,7 @@ The caller (surface) builds the scope string; Media resolves the folder. GC is s
 
 ### 4.4 Absorbing `ImageService`
 
-`ImageService` moves `Shared/Services → Media/Private/Services`, unchanged in behavior (it is already path-based: `process` → path, `deleteWithVariants($disk, $path)`, variant naming). Its capabilities are reached through `MediaPublicApi`. Single-image consumers (News/Static/FAQ/Calendar/Profile) call `store` instead of `process`; their existing `image_path` columns are unchanged.
+`ImageService` is already path-based (`process` → path, `deleteWithVariants($disk, $path)`, variant naming). Media's `MediaService` **delegates** to it, and new callers reach it only through `MediaPublicApi`. To keep every phase non-breaking, `ImageService` **stays in `Shared/Services` while unmigrated consumers still reference it directly**; it is physically relocated into `Media/Private/Services` (and dropped from Shared) only once the last consumer is off it. `MediaService → Shared\ImageService` is an allowed `MediaPrivate → Shared` dependency in the meantime.
 
 ### 4.5 The usage registry & garbage collection
 

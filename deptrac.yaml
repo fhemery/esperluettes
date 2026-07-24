@@ -400,11 +400,28 @@ deptrac:
         - type: directory
           value: 'app/Domains/Quote/Tests/'
 
+    # Media Domain
+    - name: MediaPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Media/Public/'
+
+    - name: MediaPrivate
+      collectors:
+        - type: directory
+          value: 'app/Domains/Media/Private/'
+
+    - name: MediaTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Media/Tests/'
+
   ruleset:
     # Shared contracts and DTOs - accessible by all domains
     Shared:
       - SettingsPublic
       - ConfigPublic
+      - MediaPublic
 
     # Test helpers - accessible by all domain tests
     TestHelpers: [ ]
@@ -912,3 +929,18 @@ deptrac:
       - StoryPublic
       - StoryRefPublic
       - StoryRefPrivate
+
+    # Media Domain
+    MediaPublic:
+      - Shared
+      - MediaPrivate
+
+    MediaPrivate:
+      - Shared
+      - MediaPublic
+
+    MediaTests:
+      - Shared
+      - TestHelpers
+      - MediaPrivate
+      - MediaPublic

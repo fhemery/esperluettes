@@ -30,7 +30,7 @@ Sequencing for the MultiEdit feature. Reads on top of `MultiEdit.md` (functional
 **Work:**
 1. Scaffold `app/Domains/Media` (Private/Public per `Domain_Structure.md`), `MediaServiceProvider`.
 2. **No migrations.** Media owns no tables (architecture §4.1).
-3. Move `ImageService` → `Media/Private/Services` (behavior unchanged, already path-based); make it internal.
+3. `MediaService` delegates to the existing `Shared\ImageService` (kept in Shared for now, since unmigrated consumers still reference it; physically relocated into `Media/Private` only once the last consumer is off it).
 4. `MediaPublicApi` + `MediaPathPageDto`/`MediaPathDto`: `store(scope,file,widths)→path`, `listByScope`, `variantUrl(path,width,format)`, `folderFor(scope)`, `countUsages(path)`. `scope → folder` mapping (§4.3).
 5. `MediaUsageRegistry` + `MediaUsageProvider` interface (`usedPaths(): iterable<string>`, one entry per occurrence). `countUsages` sums occurrences across providers.
 6. `media:gc` artisan command: live set = union of providers' `usedPaths`; delete on-disk originals under managed scopes not in the live set and older than the 7-day grace window (`deleteWithVariants`); sweeps debris the same way. Schedule **daily at 03:30** (off midnight).
