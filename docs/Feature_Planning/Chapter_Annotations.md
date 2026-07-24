@@ -346,6 +346,7 @@ Notes:
 
 ## 10. Out of Scope (v1) — Reserved for Later
 
+- **Annotating images.** Once chapters support multi-block content (text + images) via the MultiEdit feature (see `MultiEdit.md`), readers should be able to annotate an **image block** — attach a comment/reaction to a whole image (and later, possibly a region of it), analogous to annotating a text passage. v1 annotations anchor to plain text only (§5); image blocks are neither annotatable nor part of the canonical text projection. To be designed once MultiEdit lands on chapters.
 - **Surfacing "processed" state to the commenter.** v1 keeps the processed flag strictly author-side. A future enhancement could optionally show readers when their annotation has been processed, or even let the reader request a re-review.
 - **In-chapter annotation icons on mobile (below `md`).** v1 deliberately has no inline UI on phones. A future enhancement could add a discreet inline indicator if user testing shows the pop-up-only flow is insufficient.
 - **Cross-device draft / pending-change sync.** Drafts and post-publish pending changes live in local storage; no server-side draft persistence. If a user starts on phone and switches to desktop, drafts/pending edits don't follow.
