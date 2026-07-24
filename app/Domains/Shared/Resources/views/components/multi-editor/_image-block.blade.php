@@ -22,7 +22,5 @@
         :alt-required="true"
         :show-usage="false" />
 
-    <div class="mt-2 flex justify-center">
-        <button type="button" x-on:click="insertAfter($el, 'image')" class="text-xs text-primary hover:underline flex items-center gap-1" :title="labels.insert"><span class="material-symbols-outlined text-[16px]">add</span></button>
-    </div>
+    @include('shared::components.multi-editor._insert-affordance')
 </div>

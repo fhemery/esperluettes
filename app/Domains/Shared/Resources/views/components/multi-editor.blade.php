@@ -98,14 +98,14 @@
                 @else
                     @include('shared::components.multi-editor._text-block', [
                         'name' => $name, 'uid' => 'b' . $i, 'toolbar' => $toolbar,
-                        'min' => $min, 'max' => $max, 'html' => $block['html'] ?? '', 'placeholder' => $placeholder, 'init' => true,
+                        'min' => $min, 'max' => $max, 'html' => $block['html'] ?? '', 'placeholder' => $placeholder,
                     ])
                 @endif
             @endforeach
         </div>
 
         {{-- Palette --}}
-        <div class="flex gap-2 mt-2">
+        <div class="flex gap-2 mt-2 justify-center">
             @if (in_array('text', $blockTypes, true))
                 <button type="button" x-on:click="appendBlock('text')"
                     class="px-3 py-1.5 text-sm rounded-md border border-border text-primary hover:bg-primary/5 flex items-center gap-1">
@@ -125,7 +125,7 @@
     <template x-ref="tplText">
         @include('shared::components.multi-editor._text-block', [
             'name' => $name, 'uid' => '__UID__', 'toolbar' => $toolbar,
-            'min' => $min, 'max' => $max, 'html' => '', 'placeholder' => $placeholder, 'init' => false,
+            'min' => $min, 'max' => $max, 'html' => '', 'placeholder' => $placeholder,
         ])
     </template>
     <template x-ref="tplImage">
@@ -149,7 +149,23 @@
                 orderCsv: '',
 
                 init() {
-                    this.syncState();
+                    // Initialize Quill on the server-rendered text blocks. Done here
+                    // (not via inline scripts) so it can't run before the editor
+                    // bundle has loaded — the cause of blank editors on the edit page.
+                    this.$nextTick(() => {
+                        this._blocks().forEach((b) => {
+                            if (b.dataset.type === 'text') {
+                                const ed = b.querySelector('[data-toolbar]');
+                                if (ed) this._ensureEditor(ed.id);
+                            }
+                        });
+                        this.syncState();
+                    });
+                },
+                _ensureEditor(id, attempt = 0) {
+                    if (window.initQuillEditor) { window.initQuillEditor(id); return; }
+                    if (attempt > 60) return; // give up after ~3s
+                    setTimeout(() => this._ensureEditor(id, attempt + 1), 50);
                 },
                 _container() { return this.$refs.container; },
                 _blocks() { return Array.from(this._container().querySelectorAll('[data-block]')); },
@@ -164,7 +180,7 @@
                 _afterInsert(node, type) {
                     if (type === 'text') {
                         const ed = node.querySelector('[data-toolbar]');
-                        if (ed && window.initQuillEditor) window.initQuillEditor(ed.id);
+                        if (ed) this._ensureEditor(ed.id);
                     }
                     this.syncState();
                 },

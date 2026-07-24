@@ -42,4 +42,14 @@ describe('<x-shared::multi-editor>', function () {
             ->assertSee("appendBlock('text')", false)
             ->assertSee("appendBlock('image')", false);
     });
+
+    it('offers both block types in the insert affordance popover', function () {
+        // The insert "+" lets the author choose the type to insert at that spot.
+        $this->blade(
+            '<x-shared::multi-editor name="blocks" scope="news" :blocks="$blocks" />',
+            ['blocks' => [['type' => 'text', 'html' => '<p>x</p>']]]
+        )
+            ->assertSee("insertAfter(\$el, 'text')", false)
+            ->assertSee("insertAfter(\$el, 'image')", false);
+    });
 });

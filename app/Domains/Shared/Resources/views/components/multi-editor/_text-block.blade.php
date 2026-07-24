@@ -1,8 +1,10 @@
 {{--
     One text block of the multi-editor. Included both for initial blocks (real
-    $uid, $init=true) and inside the hidden template ($uid='__UID__', $init=false).
+    $uid) and inside the hidden template ($uid='__UID__'). Quill is initialized
+    by the parent multiEditor Alpine component (init / _afterInsert), not here,
+    so load order can't leave an uninitialized editor.
 
-    Vars: $name (base), $uid, $toolbar (array), $min, $max, $html, $placeholder, $init
+    Vars: $name (base), $uid, $toolbar (array), $min, $max, $html, $placeholder
 --}}
 @php
     $editorId = preg_replace('/[^A-Za-z0-9_]/', '_', $name . '__' . $uid);
@@ -24,11 +26,5 @@
         <textarea class="hidden" name="{{ $name }}[{{ $uid }}][html]" id="quill-editor-area-{{ $editorId }}">{!! $html ?? '' !!}</textarea>
     </div>
 
-    <div class="mt-2 flex justify-center">
-        <button type="button" x-on:click="insertAfter($el, 'text')" class="text-xs text-primary hover:underline flex items-center gap-1" :title="labels.insert"><span class="material-symbols-outlined text-[16px]">add</span></button>
-    </div>
-
-    @if($init ?? false)
-        <script>window.initQuillEditor && window.initQuillEditor('{{ $editorId }}');</script>
-    @endif
+    @include('shared::components.multi-editor._insert-affordance')
 </div>
