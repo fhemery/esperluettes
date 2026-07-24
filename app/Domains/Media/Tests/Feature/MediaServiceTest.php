@@ -4,11 +4,14 @@ use App\Domains\Media\Private\Services\MediaService;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Media\Public\Contracts\MediaUsageProvider;
 use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
-uses(TestCase::class);
+// RefreshDatabase: registered consumer usage-providers (FAQ, News) query their
+// tables during gc()/countUsages(), so the schema must exist.
+uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     Storage::fake('public');
