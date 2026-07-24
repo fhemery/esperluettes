@@ -1,15 +1,6 @@
 <?php
 
 return [
-    'tabs' => [
-        'quote' => 'Citations',
-    ],
-    'sections' => [
-        'general' => [
-            'name' => 'Général',
-            'description' => 'Paramètres de votre carnet de citations.',
-        ],
-    ],
     'params' => [
         'book_public' => [
             'name' => 'Carnet de citations public',

@@ -42,7 +42,7 @@ class QuotePolicy
 
         $isPublic = (bool) $this->settingsApi->getValue(
             $profileUserId,
-            QuoteServiceProvider::TAB_QUOTE,
+            QuoteServiceProvider::TAB_PROFILE,
             QuoteServiceProvider::KEY_BOOK_PUBLIC,
         );
 
