@@ -16,6 +16,13 @@ return [
     'toolbar' => [
         'label' => 'Actions sur la sélection',
     ],
+    'profile_tab' => [
+        'my_quotes' => 'Mes Citations',
+        'quotes' => 'Citations',
+        'empty_own' => 'Vous n\'avez pas encore de citations sauvegardées.',
+        'empty_other' => 'Aucune citation publique.',
+        'showing' => ':count citations sur :total',
+    ],
     'panel' => [
         'title' => 'Ma citation',
         'close' => 'Fermer',

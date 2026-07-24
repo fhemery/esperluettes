@@ -16,6 +16,13 @@ return [
     'toolbar' => [
         'label' => 'Selection actions',
     ],
+    'profile_tab' => [
+        'my_quotes' => 'My Quotes',
+        'quotes' => 'Quotes',
+        'empty_own' => 'You have no saved quotes yet.',
+        'empty_other' => 'No public quotes.',
+        'showing' => 'Showing :count of :total quotes',
+    ],
     'panel' => [
         'title' => 'My quote',
         'close' => 'Close',

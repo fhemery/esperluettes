@@ -153,6 +153,17 @@
                     // Check if viewer can see comments content (privacy setting)
                     $privacyService = app(\App\Domains\Profile\Private\Services\ProfilePrivacyService::class);
                     $canViewComments = $privacyService->canViewComments($profile->user_id, Auth::id());
+
+                    // Quotes tab: visible to owner, and to others if book is public
+                    $quoteViewerId = Auth::id() !== null ? (int) Auth::id() : null;
+                    $canViewQuotes = app(\App\Domains\Quote\Public\Api\QuotePublicApi::class)->canViewQuoteBook($profile->user_id, $quoteViewerId);
+                    if ($canViewQuotes) {
+                        $tabs[] = [
+                            'key' => 'quotes',
+                            'label' => $isOwn ? __('quote::ui.profile_tab.my_quotes') : __('quote::ui.profile_tab.quotes'),
+                            'url' => route('profile.show.quotes', $profile),
+                        ];
+                    }
                 @endphp
 
                 <!-- Tab Navigation -->
@@ -172,6 +183,8 @@
                         @endif
                     @elseif($activeTab === 'following' && $canViewFollowing)
                         <x-follow::following-tab :user-id="$profile->user_id" />
+                    @elseif($activeTab === 'quotes' && isset($quoteList))
+                        <x-quote::profile-tab :quote-list="$quoteList" :is-own="$isOwn" />
                     @endif
                 </div>
             </div>

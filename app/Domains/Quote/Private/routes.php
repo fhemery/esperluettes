@@ -16,8 +16,8 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . Roles::USER_CONFIRMED])
     });
 
 Route::middleware(['web'])
-    ->prefix('profile')
+    ->prefix('quotes/profile')
     ->group(function () {
-        Route::get('/{profileSlug}/quotes', [QuoteProfileController::class, 'show'])
+        Route::get('/{profileSlug}', [QuoteProfileController::class, 'show'])
             ->name('quotes.profile.show');
     });

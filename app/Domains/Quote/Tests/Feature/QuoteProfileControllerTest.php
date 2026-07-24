@@ -6,7 +6,7 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-describe('GET /profile/{profileSlug}/quotes', function () {
+describe('GET /quotes/profile/{profileSlug}', function () {
     it('owner sees their own quotes', function () {
         $author = alice($this);
         $reader = bob($this);
@@ -17,7 +17,7 @@ describe('GET /profile/{profileSlug}/quotes', function () {
         $profile = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $reader->id)->firstOrFail();
 
         $response = $this->actingAs($reader)
-            ->getJson('/profile/' . $profile->slug . '/quotes');
+            ->getJson('/quotes/profile/' . $profile->slug);
 
         $response->assertOk()
             ->assertJsonPath('viewer_is_owner', true)
@@ -29,13 +29,13 @@ describe('GET /profile/{profileSlug}/quotes', function () {
         $reader = bob($this);
         $profile = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $reader->id)->firstOrFail();
 
-        $response = $this->getJson('/profile/' . $profile->slug . '/quotes');
+        $response = $this->getJson('/quotes/profile/' . $profile->slug);
 
         $response->assertOk()
             ->assertJsonPath('total_count', 0);
     });
 
     it('returns 404 for unknown profile', function () {
-        $this->getJson('/profile/nonexistent-slug-99999/quotes')->assertNotFound();
+        $this->getJson('/quotes/profile/nonexistent-slug-99999')->assertNotFound();
     });
 });

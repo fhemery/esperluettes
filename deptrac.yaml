@@ -691,10 +691,11 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - FollowPublic
       - ModerationPublic
       - ProfilePublic
+      - QuotePublic
       - SettingsPublic
-      - FollowPublic
 
     SearchPrivate:
       - Shared

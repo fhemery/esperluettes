@@ -67,4 +67,7 @@ Route::middleware('web')->prefix('profile')->group(function () {
         Route::get('/{profile:slug}/following', [ProfileController::class, 'showFollowing'])->name('profile.show.following');
     });
 
+    // Quotes tab - publicly accessible (visibility controlled by quote book privacy setting)
+    Route::get('/{profile:slug}/quotes', [ProfileController::class, 'showQuotes'])->name('profile.show.quotes');
+
 });

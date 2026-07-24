@@ -2,6 +2,7 @@
 
 namespace App\Domains\Quote\Public\Api;
 
+use App\Domains\Quote\Private\Services\QuotePolicy;
 use App\Domains\Quote\Private\Services\QuoteService;
 use App\Domains\Quote\Public\Api\Contracts\CreateQuoteDto;
 use App\Domains\Quote\Public\Api\Contracts\QuoteDto;
@@ -11,6 +12,7 @@ class QuotePublicApi
 {
     public function __construct(
         private readonly QuoteService $service,
+        private readonly QuotePolicy $policy,
     ) {
     }
 
@@ -37,5 +39,10 @@ class QuotePublicApi
     public function getForProfile(int $profileUserId, ?int $viewerId, int $page): QuoteListDto
     {
         return $this->service->getForProfile($profileUserId, $viewerId, $page);
+    }
+
+    public function canViewQuoteBook(int $profileUserId, ?int $viewerId): bool
+    {
+        return $this->policy->canViewQuoteBook($profileUserId, $viewerId);
     }
 }
