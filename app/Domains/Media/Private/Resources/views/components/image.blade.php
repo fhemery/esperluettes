@@ -5,7 +5,10 @@
     'sizes' => '(max-width: 640px) calc(100vw - 2rem), 800px',
     'loading' => 'lazy',
     'caption' => null,
-    'imgClass' => 'w-full h-auto',
+    // Default: render at the image's natural size, capped to the container and
+    // centered — a small image stays small. Pass imgClass="w-full h-auto" for
+    // full-bleed use (e.g. a header banner).
+    'imgClass' => 'inline-block max-w-full h-auto',
 ])
 
 @php
@@ -20,7 +23,7 @@
 @endphp
 
 @if($path)
-    <figure {{ $attributes->merge(['class' => 'media-image']) }}>
+    <figure {{ $attributes->merge(['class' => 'media-image text-center']) }}>
         <picture>
             <source type="image/webp" srcset="{{ $srcset('webp') }}">
             <img

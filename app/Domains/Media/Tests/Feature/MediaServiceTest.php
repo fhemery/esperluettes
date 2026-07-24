@@ -63,6 +63,16 @@ describe('variantUrl', function () {
         $url = app(MediaPublicApi::class)->variantUrl('news/sep-abc.jpg', 800, 'webp');
         expect($url)->toContain('storage/news/sep-abc-800w.webp');
     });
+
+    it('handles nested (dated) paths of pre-migration images', function () {
+        $api = app(MediaPublicApi::class);
+        $path = 'news/2025/10/01K7E6PNMNHWFQ400B1T8SCF2Z.jpg';
+
+        expect($api->variantUrl($path, 400, 'webp'))
+            ->toContain('storage/news/2025/10/01K7E6PNMNHWFQ400B1T8SCF2Z-400w.webp');
+        expect($api->variantUrl($path, 800, 'jpg'))
+            ->toContain('storage/news/2025/10/01K7E6PNMNHWFQ400B1T8SCF2Z-800w.jpg');
+    });
 });
 
 describe('listByScope', function () {

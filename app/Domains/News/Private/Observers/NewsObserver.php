@@ -3,7 +3,6 @@
 namespace App\Domains\News\Private\Observers;
 
 use App\Domains\News\Private\Models\News;
-use App\Domains\Shared\Services\ImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Domains\Events\Public\Api\EventBus;
@@ -72,10 +71,8 @@ class NewsObserver
 
     public function deleted(News $news): void
     {
-        // Delete header image and its variants if present
-        if (!empty($news->header_image_path)) {
-            app(ImageService::class)->deleteWithVariants('public', $news->header_image_path);
-        }
+        // Header/content image files are left to the Media GC once no News row
+        // references them.
         Cache::forget('news.carousel');
 
         // Emit News.Deleted

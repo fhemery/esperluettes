@@ -160,13 +160,15 @@ describe('News Admin Controller', function () {
                     'summary' => 'A summary',
                     'content' => '<p>Content</p>',
                     'status' => 'draft',
-                    'header_image' => UploadedFile::fake()->image('header.jpg', 800, 400),
+                    'header_image' => ['file' => UploadedFile::fake()->image('header.jpg', 800, 400)],
                 ]);
 
             $response->assertRedirect(route('news.admin.index'));
 
             $news = News::where('slug', 'news-with-image')->first();
             expect($news->header_image_path)->not->toBeNull();
+            expect($news->header_image_path)->toStartWith('news/');
+            Storage::disk('public')->assertExists($news->header_image_path);
         });
     });
 

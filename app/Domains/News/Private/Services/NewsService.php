@@ -9,7 +9,6 @@ use App\Domains\News\Public\Events\NewsUnpublished;
 use App\Domains\News\Public\Notifications\NewsPublishedNotification;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
-use App\Domains\Shared\Services\ImageService;
 use App\Domains\Shared\Support\ContentBlocksRenderer;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Http\UploadedFile;
@@ -121,11 +120,9 @@ class NewsService
         $data['content_blocks'] = $resolved['content_blocks'];
         unset($data['blocks'], $data['blocks_order'], $data['mode']);
 
-        // Process header image if uploaded
-        if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
-            $data['header_image_path'] = $this->processHeaderImage($data['header_image']);
-        }
-        unset($data['header_image'], $data['header_image_remove']);
+        // Resolve header image from the Media image-field payload
+        $data['header_image_path'] = $this->resolveHeaderImage($data);
+        unset($data['header_image']);
 
         // Set creator
         $data['created_by'] = Auth::id();
@@ -149,21 +146,10 @@ class NewsService
         $data['content_blocks'] = $resolved['content_blocks'];
         unset($data['blocks'], $data['blocks_order'], $data['mode']);
 
-        // Handle header image removal
-        if (!empty($data['header_image_remove'])) {
-            $this->deleteHeaderImage($news->header_image_path);
-            $data['header_image_path'] = null;
-        }
-
-        // Process new header image if uploaded
-        if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
-            // Delete old image first
-            if ($news->header_image_path) {
-                $this->deleteHeaderImage($news->header_image_path);
-            }
-            $data['header_image_path'] = $this->processHeaderImage($data['header_image']);
-        }
-        unset($data['header_image'], $data['header_image_remove']);
+        // Resolve header image from the Media image-field payload. Old files are
+        // not deleted here — the Media GC reclaims any path no News row uses.
+        $data['header_image_path'] = $this->resolveHeaderImage($data);
+        unset($data['header_image']);
 
         // Handle published_at if transitioning to published
         if (($data['status'] ?? 'draft') === 'published' && !$news->published_at) {
@@ -180,10 +166,8 @@ class NewsService
      */
     public function delete(News $news): void
     {
-        // Delete header image if exists
-        if ($news->header_image_path) {
-            $this->deleteHeaderImage($news->header_image_path);
-        }
+        // Header/content image files are left to the Media GC once no News row
+        // references them.
 
         // Bust cache if it was pinned
         if ($news->is_pinned) {
@@ -193,18 +177,23 @@ class NewsService
         $news->delete();
     }
 
-    public function processHeaderImage(UploadedFile|string|null $file): ?string
+    /**
+     * Resolve the header image path from the Media image-field payload.
+     * New upload → stored via Media; otherwise the reused/kept path (or null).
+     *
+     * @param array<string,mixed> $data
+     */
+    private function resolveHeaderImage(array $data): ?string
     {
-        if (!$file) {
+        $field = $data['header_image'] ?? null;
+        if (!is_array($field)) {
             return null;
         }
-
-        $disk = 'public';
-        $folder = 'news/' . date('Y/m');
-
-        // Normalize Filament temp array handled at caller; we accept UploadedFile|string here
-        $imageService = app(ImageService::class);
-        return $imageService->process($disk, $folder, $file, widths: [400, 800]);
+        $file = $field['file'] ?? null;
+        if ($file instanceof UploadedFile) {
+            return $this->media->store(self::SCOPE, $file);
+        }
+        return !empty($field['path']) ? (string) $field['path'] : null;
     }
 
     public function publish(News $news): News
@@ -266,18 +255,6 @@ class NewsService
         $news->save();
         $this->bustCarouselCache();
         return $news;
-    }
-
-    /**
-     * Delete an existing header image and its generated variants.
-     */
-    public function deleteHeaderImage(?string $headerImagePath): void
-    {
-        if (!$headerImagePath) {
-            return;
-        }
-        $disk = 'public';
-        app(ImageService::class)->deleteWithVariants($disk, $headerImagePath);
     }
 
     public function bustCarouselCache(): void

@@ -109,15 +109,17 @@
 
     {{-- Header Image --}}
     <div>
-        <x-shared::image-upload
+        <x-media::image-field
             name="header_image"
-            id="header_image"
-            :currentPath="$news?->header_image_path"
+            scope="news"
+            :path="old('header_image.path', $news?->header_image_path)"
+            :show-alt="false"
+            :show-caption="false"
+            :show-usage="false"
             :label="__('news::admin.form.header_image')"
-            :recommendedWidth="800"
-            :recommendedHeight="400"
-            :helpText="__('news::admin.form.header_image_help')"
+            :help-text="__('news::admin.form.header_image_help')"
         />
+        <x-shared::input-error :messages="$errors->get('header_image.file')" class="mt-1" />
     </div>
 
     <hr class="border-border" />
