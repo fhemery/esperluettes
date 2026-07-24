@@ -13,6 +13,9 @@ return [
         'saving' => 'Saving…',
         'cancel' => 'Cancel',
     ],
+    'mark' => [
+        'label' => 'View quote',
+    ],
     'toolbar' => [
         'label' => 'Selection actions',
     ],

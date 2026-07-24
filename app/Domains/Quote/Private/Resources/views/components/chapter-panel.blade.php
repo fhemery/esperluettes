@@ -1,5 +1,6 @@
 <div
     x-data="quotePanel()"
+    x-init="$watch('open', v => v && $nextTick(() => $refs.dialog.focus()))"
     x-show="open"
     x-cloak
     @quote:open-panel.window="showPanel($event.detail.quote)"
@@ -8,11 +9,16 @@
     @click.self="close()"
 >
     <div
-        class="bg-white rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-md mx-0 sm:mx-4 p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quote-panel-title"
+        x-ref="dialog"
+        tabindex="-1"
+        class="bg-white rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 outline-none"
         @click.stop
     >
         <div class="flex items-start justify-between mb-4">
-            <h2 class="text-lg font-semibold">{{ __('quote::ui.panel.title') }}</h2>
+            <h2 id="quote-panel-title" class="text-lg font-semibold">{{ __('quote::ui.panel.title') }}</h2>
             <button type="button" @click="close()" aria-label="{{ __('quote::ui.panel.close') }}"
                 class="text-gray-400 hover:text-gray-600 leading-none ml-2">
                 <span class="material-symbols-outlined">close</span>
@@ -61,7 +67,9 @@
 
                 <template x-if="editingNote">
                     <div>
+                        <label for="quote-panel-note-input" class="sr-only">{{ __('quote::ui.mini_form.note_label') }}</label>
                         <textarea
+                            id="quote-panel-note-input"
                             x-model="noteValue"
                             rows="4"
                             maxlength="1000"

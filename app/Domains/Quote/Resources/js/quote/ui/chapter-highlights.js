@@ -1,10 +1,11 @@
 import { buildCanonicalText } from '../../../../../Shared/Resources/js/anchoring/canonical-text.js';
 import { findAnchor } from '../../../../../Shared/Resources/js/anchoring/reanchor.js';
 
-export function quoteHighlighter({ chapterId, storyId }) {
+export function quoteHighlighter({ chapterId, storyId, markLabel = '' }) {
     return {
         chapterId,
         storyId,
+        markLabel,
         _stopEffect: null,
 
         init() {
@@ -58,6 +59,9 @@ export function quoteHighlighter({ chapterId, storyId }) {
                 const mark = document.createElement('mark');
                 mark.className = 'quote-tint bg-tertiary/10 cursor-pointer';
                 mark.dataset.quoteId = String(quoteId);
+                mark.setAttribute('role', 'button');
+                mark.setAttribute('tabindex', '0');
+                if (this.markLabel) mark.setAttribute('aria-label', this.markLabel);
                 try {
                     const range = document.createRange();
                     range.setStart(entry.domNode, nodeStart);
@@ -76,6 +80,14 @@ export function quoteHighlighter({ chapterId, storyId }) {
             const quote = Alpine.store('quotes').items.find(q => q.id === quoteId);
             if (!quote) return;
             this.$dispatch('quote:open-panel', { quote });
+        },
+
+        handleKey(event) {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            const mark = event.target.closest('mark.quote-tint');
+            if (!mark) return;
+            event.preventDefault();
+            this.openPanel(event);
         },
     };
 }

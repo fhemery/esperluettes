@@ -13,6 +13,9 @@ return [
         'saving' => 'Enregistrement…',
         'cancel' => 'Annuler',
     ],
+    'mark' => [
+        'label' => 'Voir la citation',
+    ],
     'toolbar' => [
         'label' => 'Actions sur la sélection',
     ],

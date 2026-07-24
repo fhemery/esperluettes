@@ -197,8 +197,9 @@
 
                 @php($canQuoteStory = !$vm->isAuthor && auth()->check() && Auth::user()?->hasRole(['user-confirmed']))
                 <div
-                    x-data="quoteHighlighter({ chapterId: {{ $vm->chapter->id }}, storyId: {{ $vm->story->id }} })"
+                    x-data="quoteHighlighter({ chapterId: {{ $vm->chapter->id }}, storyId: {{ $vm->story->id }}, markLabel: {!! json_encode(__('quote::ui.mark.label')) !!} })"
                     @click="openPanel($event)"
+                    @keydown="handleKey($event)"
                 >
                     <x-comment::annotable
                         entity-type="chapter"

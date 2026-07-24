@@ -1,26 +1,34 @@
 <div
     x-data="quoteMiniForm()"
+    x-init="$watch('open', v => v && $nextTick(() => $refs.dialog.focus()))"
     x-show="open"
     x-cloak
     @quote:open-mini-form.window="openForm($event.detail)"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
     @keydown.escape.window="cancel()"
+    @click.self="cancel()"
 >
     <div
-        class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quote-mini-form-title"
+        x-ref="dialog"
+        tabindex="-1"
+        class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6 outline-none"
         @click.stop
     >
-        <h2 class="text-lg font-semibold mb-3">{{ __('quote::ui.mini_form.title') }}</h2>
+        <h2 id="quote-mini-form-title" class="text-lg font-semibold mb-3">{{ __('quote::ui.mini_form.title') }}</h2>
 
         <blockquote class="border-l-4 border-tertiary/40 pl-3 mb-4 text-sm text-gray-700 italic line-clamp-3"
                     x-text="selectedText">
         </blockquote>
 
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="quote-note-input" class="block text-sm font-medium text-gray-700 mb-1">
                 {{ __('quote::ui.mini_form.note_label') }}
             </label>
             <textarea
+                id="quote-note-input"
                 x-model="note"
                 rows="3"
                 maxlength="1000"
