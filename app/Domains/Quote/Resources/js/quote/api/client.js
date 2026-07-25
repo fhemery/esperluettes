@@ -29,7 +29,7 @@ export async function createQuote({ chapterId, storyId, highlightedText, prefix,
 
 export async function updateQuoteNote(quoteId, note) {
     const res = await fetch(`/quotes/${quoteId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: headers(),
         body: JSON.stringify({ note }),
     });

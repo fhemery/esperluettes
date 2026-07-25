@@ -11,7 +11,7 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . Roles::USER_CONFIRMED])
     ->group(function () {
         Route::get('/', [QuoteController::class, 'index'])->name('index');
         Route::post('/', [QuoteController::class, 'store'])->name('store');
-        Route::patch('/{quoteId}', [QuoteController::class, 'updateNote'])->name('update-note');
+        Route::put('/{quoteId}', [QuoteController::class, 'updateNote'])->name('update-note');
         Route::delete('/{quoteId}', [QuoteController::class, 'destroy'])->name('destroy');
     });
 

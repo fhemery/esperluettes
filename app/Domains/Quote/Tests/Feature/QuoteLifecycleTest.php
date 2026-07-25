@@ -44,7 +44,7 @@ describe('quote notifications', function () {
 
         expect(countNotificationsByKey('quote.chapter_quoted'))->toBe(1);
 
-        $this->actingAs($reader)->patchJson('/quotes/' . $created['id'], ['note' => 'updated'])->assertOk();
+        $this->actingAs($reader)->putJson('/quotes/' . $created['id'], ['note' => 'updated'])->assertOk();
         $this->actingAs($reader)->deleteJson('/quotes/' . $created['id'])->assertNoContent();
 
         expect(countNotificationsByKey('quote.chapter_quoted'))->toBe(1);

@@ -112,7 +112,7 @@ describe('POST /quotes', function () {
     });
 });
 
-describe('PATCH /quotes/{quoteId}', function () {
+describe('PUT /quotes/{quoteId}', function () {
     it('owner can update the note', function () {
         $author = alice($this);
         $reader = bob($this);
@@ -121,7 +121,7 @@ describe('PATCH /quotes/{quoteId}', function () {
         $quote = createQuote($reader->id, $chapter->id, $story->id);
 
         $response = $this->actingAs($reader)
-            ->patchJson('/quotes/' . $quote->id, ['note' => '<strong>My note</strong>']);
+            ->putJson('/quotes/' . $quote->id, ['note' => '<strong>My note</strong>']);
 
         $response->assertOk()
             ->assertJsonPath('note', '<strong>My note</strong>');
@@ -138,12 +138,12 @@ describe('PATCH /quotes/{quoteId}', function () {
         $quote = createQuote($reader->id, $chapter->id, $story->id);
 
         $this->actingAs($thirdUser)
-            ->patchJson('/quotes/' . $quote->id, ['note' => 'Hacked'])
+            ->putJson('/quotes/' . $quote->id, ['note' => 'Hacked'])
             ->assertForbidden();
     });
 
     it('requires authentication', function () {
-        $this->patchJson('/quotes/1', ['note' => 'test'])->assertUnauthorized();
+        $this->putJson('/quotes/1', ['note' => 'test'])->assertUnauthorized();
     });
 });
 

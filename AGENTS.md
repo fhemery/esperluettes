@@ -87,6 +87,7 @@ Rules:
 ## Controllers
 - Use form requests for validation
 - Follow RESTful naming conventions
+- Do not use `Route::patch()` / HTTP PATCH — the production VPS's front-end (WAF/proxy) blocks the PATCH verb and resets the connection, while GET/POST/PUT/DELETE work fine. Use PUT for update endpoints instead.
 
 ## Migrations
 - Format: YYYY_MM_DD_HHiiss_<descriptive_migration_name>
