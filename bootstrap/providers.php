@@ -7,6 +7,8 @@ return [
     // Shared services
     App\Domains\Shared\Providers\SharedServiceProvider::class,
     App\Domains\Config\Public\Providers\ConfigServiceProvider::class,
+    // Media must be early so other domains can register usage providers
+    App\Domains\Media\Public\Providers\MediaServiceProvider::class,
 
     // Notification domain should be on top as well because other modules might register
     // notifications channels

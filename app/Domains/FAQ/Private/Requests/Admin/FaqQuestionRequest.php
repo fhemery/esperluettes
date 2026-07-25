@@ -22,8 +22,11 @@ class FaqQuestionRequest extends FormRequest
                 Rule::unique('faq_questions', 'slug')->ignore($questionId),
             ],
             'answer' => ['required', 'string'],
-            'image' => ['nullable', 'image', 'max:2048'],
-            'image_alt_text' => ['nullable', 'string', 'max:255'],
+            // Media image-field payload: a new upload (file) xor a reused/kept path.
+            'image' => ['nullable', 'array'],
+            'image.file' => ['nullable', 'image', 'max:2048'],
+            'image.path' => ['nullable', 'string', 'max:1024'],
+            'image.alt' => ['nullable', 'string', 'max:255'],
             'is_active' => ['boolean'],
         ];
     }

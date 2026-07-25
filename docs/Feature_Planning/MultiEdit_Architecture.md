@@ -5,93 +5,72 @@ Companion to `MultiEdit.md` (functional spec). This document defines the technic
 ## 1. Scope recap
 
 - **Functional v1 surface:** News only (Static pages + Chapters deferred).
-- **Foundation decision:** before building the editing feature, we **extract a `Media` domain** (full extraction of image handling, all 6 current `ImageService` consumers migrated) so MultiEdit builds on a clean asset layer.
-- **Editor UI stays in `Shared`** and composes the `Media` picker for image blocks.
+- **Foundation decision:** introduce a `Media` domain that owns image **upload, responsive variants, the reuse picker, garbage collection, and the reusable upload/display components**. It is **path-addressed** — the identifier of an image is its storage path, exactly as `ImageService` already works today.
+- **No reference table, no `asset_id`, no consumer migration.** Content (columns and `content_blocks`) already records which paths it uses; that content *is* the source of truth. Cleanup is a scheduled sweep that asks each domain which paths it still uses.
+- **Media owns its Blade components** (`<x-media::image-field>`, `<x-media::image>`); the Shared multi-editor composes them for image blocks.
 
 ## 2. Decisions locked (architecture)
 
 | # | Decision |
 |---|----------|
 | A | **Storage:** advanced content is an ordered JSON block array in a new nullable `content_blocks` column; **presence of `content_blocks` = advanced mode** (no separate mode flag). `content` is reused as a **rendered-HTML cache** for advanced docs. **No data migration** — existing rows stay simple. |
-| B | **No polymorphic side table** for blocks (rejected: breaks modularity, join-per-read, ordering bookkeeping). |
-| C | **New `Media` domain** owns all image/binary assets: storage, responsive variants (absorbs `ImageService`), reference tracking, reference-counted GC, reuse-picker backend. Sole entry point: `MediaPublicApi`. |
-| D | **Full extraction up front:** all 6 current `ImageService` consumers (FAQ, News, Calendar, StaticPage, Profile) migrate to `MediaPublicApi`; `ImageService` moves into `Media` as an internal detail. |
-| E | **Editor UI stays in `Shared`:** `editor.blade.php`, `editor-bundle.js`, quill-emoji, the new **multi-editor** component, and the **content-blocks renderer** all live in Shared. Shared depends on `MediaPublic` for the picker. |
-| F | **Reference counting is global per asset**; scope governs only storage path + picker listing, not GC. |
-| G | **GC is safe-by-design, not immediate:** text blocks forbid `<img>` (dedicated `multiedit-text` sanitizer) so references are complete by construction; refs→0 marks `orphaned_at` (never deletes on save); a scheduled `media:gc` sweep deletes assets orphaned **> 7 days** still at 0 refs. Resolves accumulation-vs-safety. |
+| B | **Path is the identity of an image.** Blocks and image columns store the **storage path string** (what `ImageService::process` already returns and every `image_path` column already holds). **No `asset_id`, no `media_assets`/`media_references` tables.** The same path may appear many times — across documents *and repeated within one owner* (e.g. a chapter using one separator image several times) — with no bookkeeping. |
+| C | **New `Media` domain** owns all image handling: storage + responsive variants (absorbs `ImageService`), the reuse picker, garbage collection, and the reusable `<x-media::image-field>` / `<x-media::image>` components. Public entry point: `MediaPublicApi` + a `MediaUsageRegistry`. |
+| D | **No up-front consumer migration.** The 6 current `ImageService` consumers keep their `image_path` columns and simply call `MediaPublicApi::store` instead of `ImageService::process` directly; `ImageService` moves into `Media` as an internal detail. Adopting the shared component + registering a usage provider is done per consumer, incrementally, and is **not** a prerequisite for News MultiEdit. |
+| E | **Media owns the components:** the editable `<x-media::image-field>` and the readonly `<x-media::image>` live in `Media`. The Shared multi-editor composes `<x-media::image-field>` for image blocks (`Shared → MediaPublic`, the same allowed shape as `Shared → ConfigPublic`/`SettingsPublic`). |
+| F | **Cleanup reads the truth, it does not cache it.** Each domain registers a `MediaUsageProvider` reporting the paths it currently references. A scheduled `media:gc` sweep unions those paths and deletes on-disk files (under managed scopes) that no provider claims. Media never joins into other domains' tables — every domain reports its own paths. |
+| G | **GC is safe-by-design, deferred, never on-the-spot.** Removing an image from a document just drops the path from that document's content; no file is deleted at save time. `media:gc` deletes only files that (a) live under a managed scope, (b) are claimed by **no** provider, and (c) are older than a **7-day grace window**. The grace window covers upload-then-failed-save debris and a forgotten/buggy provider (recoverable before deletion). |
+
+**Why path-addressed and not a reference registry.** `ImageService` is already entirely path-keyed (`process()` returns a path; `deleteWithVariants($disk, $path)` deletes by path; variants are a `name-<width>w.ext` naming convention in the same folder). Every current consumer stores an `image_path`. A `media_references` table would be a *denormalized cache* of what content already states, and caches drift — that drift is what produced the owner-collision and reference-completeness hazards of the earlier draft. Storing paths and reading usage directly from content removes the second source of truth entirely.
 
 ## 3. Domain topology & dependency direction
 
 ```
                  ┌─────────────┐
-                 │   Media     │  (new)  — assets, variants, references, GC, picker API
-                 │  Public API │
+                 │   Media     │  (new)  — storage, variants, picker, GC, components
+                 │  Public API │         — MediaPublicApi + MediaUsageRegistry
                  └──────▲──────┘
         depends on      │ depends on (Shared → MediaPublic)
       (Private→Shared)  │
    ┌───────────────┐    │        ┌──────────────────────────────────────┐
    │    Shared     │────┘        │ Consumers of MediaPublicApi:          │
    │  editor.blade │             │  News (MultiEdit v1 + header image)   │
-   │  multi-editor │             │  StaticPage, FAQ, Calendar, Profile   │
-   │  blocks render│             │  (migrated from ImageService)         │
-   └───────▲───────┘             └──────────────────────────────────────┘
-           │ used by
+   │  multi-editor │             │  FAQ, StaticPage, Calendar, Profile   │
+   └───────▲───────┘             │  (each registers a MediaUsageProvider)│
+           │ used by             └──────────────────────────────────────┘
    News / Static / Chapter / Comment / Profile … (Blade components)
 ```
 
-**Deptrac:** add `MediaPublic` to the `Shared` layer's allowlist (alongside the existing `SettingsPublic`, `ConfigPublic`). `Media` (Private) depends on `Shared` as usual. This `Shared → MediaPublic` / `MediaPrivate → Shared` shape already exists for Config/Settings and is accepted — no new cycle policy needed. Each consumer domain adds `MediaPublic` to its own allowlist.
+**Deptrac:** add `MediaPublic` to the `Shared` layer's allowlist (alongside `SettingsPublic`, `ConfigPublic`). `Media` (Private) depends on `Shared` as usual. This `Shared → MediaPublic` / `MediaPrivate → Shared` shape already exists for Config/Settings and is accepted — no new cycle policy needed. Each consumer domain adds `MediaPublic` to its own allowlist and registers its usage provider in its ServiceProvider.
 
 ## 4. The `Media` domain
 
-### 4.1 Tables (owned by Media)
+### 4.1 No tables
 
-**`media_assets`** — one row per stored original file.
+Media owns **no database tables**. An image is a file (plus its derived variants) under a scope folder on a disk. There is no id, no metadata row, no reference row. Descriptive data that used to justify a table:
 
-| Column | Notes |
-|--------|-------|
-| `id` | PK |
-| `disk` | e.g. `public` |
-| `path` | relative path of the original within the disk (variants derived by `ImageService` naming) |
-| `scope` | storage/listing scope string, e.g. `news`, `static-pages`, `chapters/{userId}` |
-| `mime`, `width`, `height`, `size` | metadata (best-effort) |
-| `alt_default` | nullable; pre-fills alt on reuse (functional §5.5) |
-| `created_by` | user id (nullable, like News) |
-| `orphaned_at` | nullable; set when references reach 0, cleared on re-use; drives grace-period GC (§4.5) |
-| timestamps | |
-
-Index on (`scope`) for picker listing; unique on (`disk`,`path`).
-
-**`media_references`** — who uses an asset.
-
-| Column | Notes |
-|--------|-------|
-| `id` | PK |
-| `asset_id` | FK → `media_assets` (same-domain FK, allowed) |
-| `owner_type` | plain string, e.g. `news`, `static-page`, `chapter`, `profile` — **no cross-domain FK** |
-| `owner_id` | integer id of the owning entity |
-| timestamps | |
-
-Unique on (`asset_id`,`owner_type`,`owner_id`). Index on (`owner_type`,`owner_id`) for `syncReferences`/`releaseAll`, and on `asset_id` for GC checks.
-
-> `owner_type`/`owner_id` is a soft reference by design — Media never joins into other domains' tables, honoring "FK only within a domain."
+- **alt text** is per-placement and lives with the owner (the image block's `alt`, FAQ's `image_alt_text`, etc.) — never global to a file.
+- **dimensions / variants** are derived from the file by `ImageService` naming convention, not stored.
+- **alt pre-fill on reuse** becomes best-effort: the picker may copy alt from an existing placement of the same path if one is cheaply available, otherwise the author types it. (Functional §5.5 already treats alt as per-block and editable.)
 
 ### 4.2 `MediaPublicApi`
 
 ```
-storeUpload(string $scope, UploadedFile $file, ?string $altDefault = null): MediaAssetDto
-getById(int $assetId): ?MediaAssetDto
-listByScope(string $scope, int $page = 1, int $perPage = 40): MediaAssetPageDto
-syncReferences(string $ownerType, int $ownerId, int[] $assetIds): void
-releaseAll(string $ownerType, int $ownerId): void
-variantUrl(int $assetId, int $width, string $format = 'webp'): string
+store(string $scope, UploadedFile $file, array $widths = [400,800]): string   // → stored original path
+listByScope(string $scope, int $page = 1, int $perPage = 40): MediaPathPageDto // picker listing
+variantUrl(string $path, int $width, string $format = 'webp'): string
+folderFor(string $scope): string
+countUsages(string $path): int                                                // sum of occurrences across providers
 ```
 
-- **`storeUpload`** delegates to the absorbed `ImageService::process($disk, folderFor($scope), $file, widths)`, inserts a `media_assets` row, returns the DTO. Does **not** create a reference (the caller does that on save via `syncReferences`).
-- **`syncReferences`** is the save-time diff: computes current reference rows for (`ownerType`,`ownerId`), inserts new asset ids, deletes removed ones. It **never hard-deletes files**: any asset whose reference count reaches **0** is marked `orphaned_at = now()` (and hidden from pickers); any asset that regains a reference has `orphaned_at` cleared. Actual file deletion happens later, in the grace-period sweep (§4.5). Runs in a transaction.
-- **`releaseAll`** = `syncReferences(ownerType, ownerId, [])` — used on document delete.
-- **`listByScope`** returns distinct assets for the picker (clean list — no disk scan, no `-400w`/`-800w` variant noise). Paginated for large libraries.
+- **`store`** delegates to the absorbed `ImageService::process($disk, folderFor($scope), $file, $widths)` and returns the stored **original path**. It does not track anything — the path only becomes "used" once the caller persists it in its own content.
+- **`listByScope`** lists **original** images directly under `folderFor($scope)` for the reuse picker — **non-recursive** (subfolders excluded) — filtering out `-<width>w.(jpg|webp)` variant files. Backed by a disk listing (paginated); results are cache-friendly. Per-author scopes (`chapters/{userId}`) are naturally isolated because the scope string carries the user id.
+- **`variantUrl`** builds a variant URL from a path by naming convention (`{name}-{width}w.{format}`), the one place that assembly lives.
+- **`countUsages`** returns how many times a path is currently referenced across the whole app (sum over registered providers). Used by the component's "used in N places" indicator; computed on demand, not on every render.
 
-**DTOs** (Public/Contracts/Dto): `MediaAssetDto { id, disk, path, scope, altDefault, url(width,format) }`, `MediaAssetPageDto { items[], page, hasMore }`.
+**DTO** (Public/Contracts/Dto): `MediaPathPageDto { items: MediaPathDto[], page, hasMore }`, `MediaPathDto { path, url(width,format) }`.
+
+There is **no** `getById`, `syncReferences`, or `releaseAll` — nothing to sync, because content is the reference.
 
 ### 4.3 Scope → path mapping
 
@@ -100,33 +79,54 @@ variantUrl(int $assetId, int $width, string $format = 'webp'): string
 | Scope string | Folder | Picker sharing |
 |--------------|--------|----------------|
 | `news` | `news/` | shared among News editors |
+| `faq` | `faq/` | shared |
 | `static-pages` | `static-pages/` | shared |
+| `profile` | `profile/…` | as today |
+| `calendar` | `calendar/…` | as today |
 | `chapters/{userId}` | `chapters/{userId}/` | per author |
 
-The caller (surface) builds the scope string; Media resolves the folder. GC is scope-independent (an asset lives while *any* reference exists).
+The caller (surface) builds the scope string; Media resolves the folder. GC is scope-independent (a file lives while *any* provider claims its path).
 
 ### 4.4 Absorbing `ImageService`
 
-`ImageService` moves `Shared/Services → Media/Private/Services`, unchanged in behavior. Its public capabilities are only reachable through `MediaPublicApi`. Header-image style single-file features (News/Static/FAQ/Calendar/Profile) migrate to `storeUpload` + `syncReferences`/`releaseAll` (see §9).
+`ImageService` is already path-based (`process` → path, `deleteWithVariants($disk, $path)`, variant naming). Media's `MediaService` **delegates** to it, and new callers reach it only through `MediaPublicApi`. To keep every phase non-breaking, `ImageService` **stays in `Shared/Services` while unmigrated consumers still reference it directly**; it is physically relocated into `Media/Private/Services` (and dropped from Shared) only once the last consumer is off it. `MediaService → Shared\ImageService` is an allowed `MediaPrivate → Shared` dependency in the meantime.
 
-### 4.5 Reference completeness & garbage collection
+### 4.5 The usage registry & garbage collection
 
-The naïve "delete the file the instant its reference count hits 0" is **unsafe**: reference tracking runs on save, and if any content path is used without a registered reference, we would delete a live file. Two independent guards address this.
+**`MediaUsageRegistry` (public).** Each domain that stores image paths registers a provider in its ServiceProvider:
 
-**Guard 1 — references complete by construction.** A media asset can only ever be *used* via an `asset_id`, never via a raw path:
+```php
+interface MediaUsageProvider {
+    /**
+     * Every managed image path this domain currently references,
+     * one entry per occurrence (duplicates included, for accurate counts).
+     * @return iterable<string>
+     */
+    public function usedPaths(): iterable;
+}
+```
 
-- Multi-editor **text blocks forbid `<img>`** — they are sanitized with a dedicated Purifier profile (`multiedit-text`) that drops `img`. Images exist *only* as image blocks (`asset_id`). (Note: the existing `admin-content` profile *does* allow `img` — see `config/purifier.php` — which is exactly the hole; the new text profile closes it.)
-- All other asset owners (the 6 migrated consumers) reference by `asset_id` too.
+- **News** yields its header `image_path` plus every image-block `path` in `content_blocks` (structured — no HTML parsing, because text blocks forbid `<img>`, §4.6).
+- **FAQ / Profile / Calendar / StaticPage** yield their `image_path` column values.
+- **Chapters (later)** yield image-block paths from `content_blocks`.
 
-So there is no in-app way to reference an asset that bypasses `syncReferences`; the registry cannot undercount from application content. (A raw path could only re-enter via direct DB editing, which is out of scope.)
+**`media:gc` (scheduled command).** Deletion is decoupled from every save:
 
-**Guard 2 — deferred, swept deletion (never delete on the spot).** Even with Guard 1, a *wiring bug* (an owner we forgot to migrate) could undercount. So deletion is deferred:
+1. Build the **live set** = union of `usedPaths()` across all registered providers.
+2. List on-disk **original** files under each managed scope folder.
+3. Delete (via `ImageService::deleteWithVariants`) every original that is **not** in the live set **and** whose file mtime is older than the **7-day grace window**. This also removes debris (uploaded-then-abandoned files) once past the window.
 
-- `syncReferences` marks `orphaned_at` when refs reach 0 (Guard against accumulation: they are queued for collection). Re-use clears it.
-- A scheduled command **`media:gc`** deletes assets where `orphaned_at < now() − 7 days` **and** still at 0 references (`deleteWithVariants` + remove the `media_assets` row). The **7-day grace window** gives a recovery margin: a transient/buggy undercount can be noticed and corrected before any file is destroyed.
-- The same command optionally sweeps **on-disk files with no `media_assets` row** (failed-upload debris) past the same window.
+Scheduled **daily at 03:30** (off midnight to avoid the daily-job pile-up).
 
-This resolves the accumulation-vs-safety tension: orphans *are* collected (scheduled, so no unbounded growth) but never deleted immediately (so a missed reference is recoverable, not catastrophic).
+The grace window makes the sweep safe against the one real failure mode — a domain that stores paths without registering a provider: its files look unclaimed, but they are only *deletable* after 7 days, long enough for the gap to surface (e.g. a test asserting "every scope with stored paths has a provider"). `deleteWithVariants` is idempotent, so re-runs are harmless.
+
+**`countUsages($path)`** is the same registry read, filtered: sum the occurrences of `$path` across providers. Providers back it with an indexed/targeted query where possible; exact counts (needed because "used in N places" must not over-count on path substrings) come from the same enumeration used for `usedPaths`.
+
+### 4.6 Why text blocks forbid `<img>`
+
+Keeping the News provider cheap and exact, image-block paths are the **only** image paths inside advanced News content. Multi-editor **text blocks are sanitized with a dedicated `multiedit-text` Purifier profile that drops `img`** (mirrors `admin-content` minus `img`; the existing `admin-content` profile *does* allow `img` — see `config/purifier.php`). So the provider enumerates paths from structured image blocks alone, never by parsing arbitrary HTML.
+
+This is safe for the Simple→Advanced switch because the shared editor **cannot insert images** (`editor-bundle.js`: *"No image module registered, so user cannot insert images via toolbar"*). The only way an `<img>` reaches simple content is pasted external HTML pointing at a non-managed URL; the switch drops it (with a warning if present), losing no managed file.
 
 ## 5. Advanced-content storage (News, v1)
 
@@ -147,14 +147,14 @@ add column content_blocks JSON NULL   -- source of truth for advanced docs
 ```json
 [
   { "type": "text",  "html": "<p>Intro…</p>" },
-  { "type": "image", "asset_id": 123, "alt": "A map", "caption": "Fig. 1" },
+  { "type": "image", "path": "news/sep-abc123.jpg", "alt": "A map", "caption": "Fig. 1" },
   { "type": "text",  "html": "<p>More…</p>" }
 ]
 ```
 
-- `asset_id` is the canonical image reference (resolved to URLs via Media). `alt` is the effective per-block alt (required); `caption` optional.
+- `path` is the canonical image reference (resolved to variant URLs via `MediaPublicApi::variantUrl`). `alt` is the effective per-block alt (required); `caption` optional. The **same `path` may appear in multiple image blocks** (reuse / repeated separator).
 - Empty blocks are dropped before persistence (functional §4.5).
-- Text `html` is sanitized per block with a dedicated **`multiedit-text`** Purifier profile — mirrors `admin-content` **minus `img`** (images belong to image blocks only; see §4.5 Guard 1). This is what keeps the reference registry complete.
+- Text `html` is sanitized per block with the **`multiedit-text`** profile — `admin-content` minus `img` (§4.6).
 
 ## 6. Frontend — the multi-editor (Shared)
 
@@ -178,13 +178,13 @@ The component owns `blocks: [{ uid, type, … }]` plus `mode`. Responsibilities:
 
 - **Add/insert/reorder/delete** operate on the array; each block has a stable client `uid` for keying.
 - **Text block:** renders `editor.blade.php` markup with a unique `id`/`name` derived from `uid`; after insertion calls `window.initQuillEditor(id)` (idempotent — guarded by `data-quill-inited`). The editor's hidden `<textarea>` feeds serialization.
-- **Image block:** renders `image-upload.blade.php` for new uploads, plus alt/caption fields and a **"Choose existing"** button that opens the Media picker (§6.3). Holds either a pending `File` (new) or an `asset_id` (reuse).
+- **Image block:** renders `<x-media::image-field>` (§8.2) — current image preview, upload, remove, "Choose existing" picker, alt/caption. Holds either a pending `File` (new upload) or a `path` (reuse).
 - **Palette** (bottom) and **"+" insert affordances** (between blocks) driven by `blockTypes`.
-- **Mode toggle:** Simple→Advanced wraps current HTML as text block #0; Advanced→Simple enabled only when exactly one text block and zero image blocks.
+- **Mode toggle:** Simple→Advanced wraps current HTML as text block #0 (warns if it contains `<img>`); Advanced→Simple enabled only when exactly one text block and zero image blocks.
 
 ### 6.3 Media picker
 
-A Shared Alpine modal that calls a Media web endpoint (`GET /media/library?scope=…&page=…`, auth-gated) backed by `MediaPublicApi::listByScope`. Selecting an asset sets the block's `asset_id` and pre-fills `alt` from `alt_default`.
+`<x-media::image-field>` opens the Media picker: a modal calling a Media web endpoint (`GET /media/library?scope=…&page=…`, auth-gated) backed by `MediaPublicApi::listByScope`. Selecting an image sets the block's `path`; alt is pre-filled best-effort (§4.1) and remains editable.
 
 ### 6.4 Serialization (multipart)
 
@@ -195,8 +195,8 @@ blocks[i][type]      = text | image
 blocks[i][html]      = <sanitized-on-server> (text only)
 blocks[i][alt]       = … (image only)
 blocks[i][caption]   = … (image only, optional)
-blocks[i][asset_id]  = 123           (image reuse)
-blocks[i][file]      = <UploadedFile> (image new upload)
+blocks[i][path]      = news/sep-abc123.jpg   (image reuse — existing path)
+blocks[i][file]      = <UploadedFile>        (image new upload)
 mode                 = simple | advanced
 ```
 
@@ -209,7 +209,7 @@ Order is the array index. Simple mode submits the plain single-editor field exac
 `NewsRequest` gains conditional rules when `mode = advanced`:
 
 - `blocks` present, array, ≥1 surviving block.
-- Each block: `type in [text,image]`; text ⇒ `html` string; image ⇒ (`asset_id` xor `file`) present, `alt` required non-empty, `caption` nullable, `file` obeys image mime/size, `asset_id` must resolve within `scope` (ownership/scope check via Media).
+- Each block: `type in [text,image]`; text ⇒ `html` string; image ⇒ (`path` xor `file`) present, `alt` required non-empty, `caption` nullable, `file` obeys image mime/size, `path` must resolve within `scope` (folder-prefix check via `MediaPublicApi::folderFor`).
 - **Summed-text min/max** validated across text blocks' plain-text length.
 
 ### 7.2 NewsService
@@ -218,58 +218,65 @@ Order is the array index. Simple mode submits the plain single-editor field exac
 
 - **Simple:** unchanged (`sanitizeContent` → `content`).
 - **Advanced:**
-  1. For each image block with a `file`: `assetId = MediaPublicApi::storeUpload($scope, $file, $alt)`. For `asset_id` blocks: reuse as-is.
-  2. Build the normalized block array (drop empties, sanitize each text `html` via the `multiedit-text` Purifier profile — no `img`, §4.5).
+  1. For each image block with a `file`: `path = MediaPublicApi::store($scope, $file)`. For `path` blocks: reuse the path as-is.
+  2. Build the normalized block array (drop empties, sanitize each text `html` via the `multiedit-text` profile — no `img`, §4.6).
   3. Persist `content_blocks = blocks`.
   4. `content = ContentBlocksRenderer::render($blocks)` (sanitized HTML cache).
-  5. `MediaPublicApi::syncReferences('news', $news->id, $distinctAssetIds)` — creates/removes references and GCs orphans.
-- **Delete:** `MediaPublicApi::releaseAll('news', $news->id)` in `NewsService::delete`.
+- **Delete:** nothing special — the row goes away, its paths leave the News provider's `usedPaths()`, and `media:gc` reclaims any now-unclaimed files after the grace window.
 
-`scope` for News = `"news"`.
+`scope` for News = `"news"`. **News registers a `MediaUsageProvider`** yielding the header `image_path` plus all image-block `path`s across News rows.
 
-## 8. Rendering — `ContentBlocksRenderer` (Shared)
+## 8. Rendering & components
+
+### 8.1 `ContentBlocksRenderer` (Shared)
 
 A pure function `render(array $blocks): string` and/or `<x-shared::content-blocks :blocks="…">`:
 
 - text → sanitized HTML passthrough.
-- image → responsive `<figure><picture>…</picture><figcaption?></figure>` using Media `variantUrl` (webp+jpg srcset, centered, `max-width:100%`), alt from block.
+- image → `<x-media::image>` (responsive `<figure><picture>` centered, `max-width:100%`) + optional `<figcaption>`, alt from block.
 
 Used at **save time** to populate the `content` cache. Public views keep rendering `{!! $content !!}` — no view change for News in v1. (Chapters will later render from blocks directly for per-block annotation, see §10.)
 
-### 8.1 `<x-shared::media-image>` — the asset display component
+### 8.2 Media components (owned by `Media`)
 
-A single Shared component renders any Media asset by id (or DTO) as responsive `<picture>` markup, resolving variants via `MediaPublicApi::variantUrl`:
+**`<x-media::image>` — readonly display.** Renders any managed image by **path** as responsive `<picture>` (webp `<source>` + jpg `<img>` fallback), resolving variants via `MediaPublicApi::variantUrl`:
 
 ```blade
-<x-shared::media-image :asset="$dto" {{-- or :asset-id="123" --}}
-    :alt="$altText" sizes="…" :widths="[400,800]" class="…" loading="lazy" />
+<x-media::image path="news/sep-abc123.jpg" :alt="$altText"
+    sizes="…" :widths="[400,800]" class="…" loading="lazy" />
 ```
 
-It emits `<source type="image/webp" srcset>` + `<img>` jpg fallback (the same shape hand-rolled today in `news/show.blade.php`). This is the **one** place variant URLs are assembled, and it is reused by:
+This is the **one** place variant URLs are assembled. Reused by the `ContentBlocksRenderer` image branch, every consumer's display, and (later) News header image.
 
-- the `ContentBlocksRenderer` image branch (MultiEdit image blocks),
-- every migrated consumer's display (FAQ pilot first — §9),
-- later, News header image and the rest.
+**`<x-media::image-field>` — editable.** The dedicated upload/manage control the multi-editor image block and single-image consumers both use:
 
-Keeping it in Shared (not Media) leaves `Media` a headless API/backend domain; all Blade rendering lives in Shared, consistent with decision E.
+```blade
+<x-media::image-field name="…" :path="$currentPath" scope="news"
+    :alt="$alt" :caption="$caption" :show-usage="true" />
+```
 
-## 9. Migrating existing ImageService consumers — **FAQ pilot first**
+Responsibilities:
+- **Displays the current image** (via `<x-media::image>`) when a path is set.
+- **Upload** a new file (drag/drop or pick; on-submit multipart).
+- **Remove** — clears the field's path (file untouched; GC reclaims if it becomes unclaimed).
+- **Choose existing** — opens the picker (§6.3), sets the path.
+- alt (required) / caption (optional) fields.
+- **"Used in N places"** indicator via `MediaPublicApi::countUsages($path)` when `show-usage` is set, so an author knows whether the image is shared before removing it.
 
-There are 6 consumers (FAQ, News, Calendar, StaticPage, Profile — plus News's MultiEdit use). Rather than convert all at once, **FAQ is the pilot**: the smallest, self-contained case (one image per question). We migrate FAQ, validate the pattern end-to-end, then plan the remaining consumers from that experience (see planning doc).
+Both components living in `Media` keeps all image UI in one cohesive domain; consumers depend on `MediaPublic`.
 
-**Chosen shape: reference by `asset_id`** (not the interim keep-the-path approach).
+## 9. Existing `ImageService` consumers — **FAQ pilot first**
 
-FAQ specifics (`FaqQuestion`: `image_path`, `image_alt_text`; `FaqQuestionController` handles create/update/delete):
+The 6 consumers (FAQ, News `NewsService` + `NewsObserver`, Calendar, StaticPage, Profile) **keep their `image_path` columns** — there is **no `asset_id` migration and no backfill**. Adopting Media is a light, per-consumer change; **FAQ is the pilot** (smallest, self-contained — one image per question) to validate the component + provider pattern end-to-end before the rest.
 
-- **Schema:** add nullable `image_asset_id` (plain integer, **no FK** — `media_assets` is another domain). Keep `image_alt_text` on `FaqQuestion` (alt is per-placement, owner-held — same model as MultiEdit image blocks). Drop `image_path` after backfill.
-- **Backfill migration:** for each row with `image_path`, `MediaPublicApi` (or a one-off) inserts a `media_assets` row (`scope='faq'`, `path=image_path`, `alt_default=image_alt_text`, `created_by=created_by_user_id`) + a `media_references` row (`owner_type='faq-question'`, `owner_id=id`), and sets `image_asset_id`. Then drop `image_path`.
-- **Controller:** inject `MediaPublicApi` instead of `ImageService`.
-  - create with file → `storeUpload('faq', $file, $alt)` → asset id; `syncReferences('faq-question', $id, [$assetId])`.
-  - replace/remove → `syncReferences('faq-question', $id, $newAssetIds)` (`[]` to release).
-  - delete question → `releaseAll('faq-question', $id)`.
-- **Display:** replace hand-rolled markup with `<x-shared::media-image :asset-id="$q->image_asset_id" :alt="$q->image_alt_text" />` (§8.1).
+FAQ specifics (`FaqQuestion`: `image_path`, `image_alt_text`; `FaqQuestionController`):
 
-The remaining consumers (News header, StaticPage header, Calendar, Profile picture) follow the same `asset_id` recipe and are sequenced after the pilot.
+- **Schema:** unchanged. Keep `image_path` and `image_alt_text`.
+- **Controller:** inject `MediaPublicApi`; call `store('faq', $file)` on create/replace instead of `ImageService::process`. Remove no longer clears anything but the `image_path` column. Delete-question just clears the row.
+- **Provider:** register a `MediaUsageProvider` yielding every non-null `faq_questions.image_path`.
+- **Display:** replace hand-rolled markup with `<x-media::image :path="$q->image_path" :alt="$q->image_alt_text" />` (§8.2). Editing uses `<x-media::image-field scope="faq">`.
+
+The remaining consumers (News header, StaticPage header, Calendar, Profile picture) follow the same recipe — swap `process`→`store`, adopt the components, register a provider — and are sequenced after the pilot.
 
 ## 10. Chapter-forward hooks (not built in v1)
 
@@ -277,32 +284,35 @@ Design constraints kept open so chapters aren't blocked later:
 
 - `ContentBlocksRenderer` can emit **each text block as its own `[data-annotable]` region**; `canonical-text.js` then builds the canonical projection **per block**, satisfying "annotations constrained to a single text block."
 - Word/character counting sums text blocks (already the validation model in §7.1).
-- Chapter scope = `chapters/{userId}` (per-author picker).
+- Chapter scope = `chapters/{userId}` (per-author picker); a chapter provider yields its `content_blocks` image paths. Repeated separator images within one chapter are naturally supported (same path many times).
 - Image annotation remains out of scope (tracked in `Chapter_Annotations.md`).
 
 ## 11. Backward compatibility & risks
 
 - **Simple docs:** byte-for-byte unchanged; zero migration.
-- **Denormalization risk:** `content` cache must never drift from `content_blocks`. Mitigation: a single write path in the service always rewrites the cache from blocks; the cache is never edited independently.
-- **Media as a new hard dependency** for 6 domains at once (full extraction) is the largest risk to schedule — isolated to the migration phase, before MultiEdit editing work.
-- **GC correctness:** deletion is decoupled from save (§4.5) — `syncReferences` only flips `orphaned_at` inside the save transaction and never touches files, so a crash mid-save cannot destroy data. Actual deletion is a separate, idempotent `media:gc` sweep with a 7-day grace window, guarded by the `multiedit-text` no-`img` rule that makes references complete. Residual risk: a consumer that references an asset **without** calling `syncReferences` (wiring bug) — caught within the grace window before the file is removed.
-- **Picker scale:** `listByScope` paginated; shared `news`/`static-pages` pools could grow — pagination + optional search later.
+- **No reference cache to drift.** The earlier owner-collision / reference-undercount hazards are gone by construction: content is the only record of usage.
+- **Denormalization risk (content cache):** `content` cache must never drift from `content_blocks`. Mitigation: a single write path in the service always rewrites the cache from blocks; the cache is never edited independently.
+- **GC correctness:** deletion is decoupled from save — a removed image just leaves the content; nothing is deleted synchronously. `media:gc` deletes only unclaimed files past a 7-day window, `deleteWithVariants` is idempotent. **Residual risk:** a domain that stores paths but forgets to register a provider — its files look unclaimed. Mitigations: the 7-day window (recoverable), and a test asserting every scope with stored paths has a registered provider.
+- **GC / picker cost:** `usedPaths` fan-out and the picker's disk listing are the price of not caching. Both are batch/on-demand (scheduled sweep; picker open), paginated, and cache-friendly — far cheaper than per-file id resolution on every read.
+- **`countUsages` precision:** must count real occurrences (not `LIKE %path%` substrings) so "used in N places" is exact; providers enumerate rather than pattern-match.
 
 ## 12. Testing strategy
 
-- **Media:** unit/integration for `storeUpload` (asset row + variants), `syncReferences` (add/remove; refs→0 sets `orphaned_at`; re-use clears it; **no file deleted on save**), `releaseAll`, `listByScope` scoping (orphaned assets excluded), scope→path mapping. `media:gc`: deletes only assets orphaned > 7 days at 0 refs; spares recently-orphaned and re-referenced ones; sweeps rowless disk debris. `multiedit-text` sanitizer strips `<img>`. Regression tests for each migrated consumer (header image create/replace/delete still works).
-- **News MultiEdit:** mode round-trip (simple↔advanced), block CRUD/reorder persistence, summed min/max validation, empty-block dropping, render-cache equals rendered blocks, image upload vs reuse, reference counting across two documents sharing one asset, delete releases references.
+- **Media:** `store` (original + variants written, returns path), `listByScope` (lists originals under scope, excludes `-Nw` variants, paginates, per-author isolation), `variantUrl` naming, `folderFor` mapping. `MediaUsageRegistry`/`countUsages` (sums occurrences across providers; exact, no substring over-count). `media:gc`: deletes only unclaimed files older than 7 days; spares claimed and recently-modified files; idempotent; sweeps rowless debris. `multiedit-text` sanitizer strips `<img>`.
+- **Providers:** each consumer's provider yields exactly its stored paths (News: header + block paths; FAQ: `image_path`s).
+- **News MultiEdit:** mode round-trip (simple↔advanced), block CRUD/reorder persistence, summed min/max validation, empty-block dropping, render-cache equals rendered blocks, image upload vs reuse, **same path repeated in one document**, two documents sharing one path, delete leaves file until GC then reclaims.
+- **Components:** `<x-media::image>` path→srcset output; `<x-media::image-field>` shows current image / upload / remove / choose-existing / usage count.
 - **Renderer:** blocks → expected sanitized HTML (text passthrough sanitization, image figure/srcset).
 - **Deptrac:** passes with `MediaPublic` added to Shared + consumer allowlists.
 
-## 13. Open items for the planning doc
+## 13. Resolved items
 
-- ~~Per-domain migration shape~~ — **settled: `asset_id`, FAQ piloted first**, others sequenced after (§9).
-- Whether the Media picker is a shared route under `Media` (`/media/library`) or per-surface — proposed: single `Media` route, scope as query param, authorization per scope.
-- Search indexing: confirm News search reads `content` (cache) — if it reads structured fields, no change needed either way.
+- **Media picker route:** single `Media` web route `GET /media/library?scope=…&page=…`, auth-gated per scope, owned by Media (Phase 1) even though the modal UI lands with Phase 3. The scope resolves to **one base folder**; the listing is **non-recursive** — only images directly under that folder are returned, **subfolders excluded**.
+- **Search indexing:** there is **no News search**, so nothing reads structured News fields — the `content` cache keeps all existing readers working with no change.
+- **`media:gc`:** 7-day grace window; scheduled **daily at 03:30** (deliberately off midnight to avoid the daily job pile-up).
 
 ---
 
 ## Next step
 
-`MultiEdit_Planning.md` sequences: **(1)** Media domain (tables, `MediaPublicApi`, absorb `ImageService`, `media:gc`, `<x-shared::media-image>`) → **(2)** **FAQ pilot** migration to `asset_id` + checkpoint to plan the remaining consumers → **(3)** Shared multi-editor + `ContentBlocksRenderer` + `multiedit-text` profile → **(4)** News advanced mode (storage, form, service, view, tests) → **(5)** later surfaces (Static pages, then Chapters).
+`MultiEdit_Planning.md` sequences: **(1)** Media domain (absorb `ImageService`, `MediaPublicApi`, `MediaUsageRegistry`, `media:gc`, `<x-media::image>` + `<x-media::image-field>`, `/media/library` route) → **(2)** **FAQ pilot** (swap to `store`, adopt components, register provider) + checkpoint to plan the remaining consumers → **(3)** Shared multi-editor + `ContentBlocksRenderer` + `multiedit-text` profile → **(4)** News advanced mode (storage, form, service, provider, view, tests) → **(5)** later surfaces (Static pages, then Chapters).

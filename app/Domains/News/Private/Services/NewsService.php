@@ -7,19 +7,26 @@ use App\Domains\News\Private\Models\News;
 use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUnpublished;
 use App\Domains\News\Public\Notifications\NewsPublishedNotification;
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
-use App\Domains\Shared\Services\ImageService;
+use App\Domains\Shared\Support\ContentBlocksRenderer;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 use Mews\Purifier\Facades\Purifier;
 
 class NewsService
 {
+    /** Media scope for News images (header + content blocks). */
+    private const SCOPE = 'news';
+
     public function __construct(
         private readonly EventBus $eventBus,
         private readonly NotificationPublicApi $notificationApi,
+        private readonly ContentBlocksRenderer $renderer,
+        private readonly MediaPublicApi $media,
     ) {}
 
     public function sanitizeContent(string $html): string
@@ -30,18 +37,101 @@ class NewsService
     }
 
     /**
+     * Resolve the persisted content fields from the submitted payload.
+     *
+     * Simple mode: `content` = sanitized author HTML, `content_blocks` = null.
+     * Advanced mode: build the normalized block list (store new image uploads,
+     * reuse existing paths, drop empties, sanitize text), persist it in
+     * `content_blocks`, and render it into `content` as the display cache.
+     *
+     * @param array<string,mixed> $data
+     * @return array{content:string, content_blocks:?array<int,array<string,mixed>>}
+     */
+    private function resolveContent(array $data): array
+    {
+        if (($data['mode'] ?? 'simple') !== 'advanced') {
+            return [
+                'content' => $this->sanitizeContent($data['content'] ?? ''),
+                'content_blocks' => null,
+            ];
+        }
+
+        $order = array_values(array_filter(explode(',', (string) ($data['blocks_order'] ?? '')), fn ($u) => $u !== ''));
+        $raw = is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
+
+        $blocks = [];
+        foreach ($order as $uid) {
+            $b = $raw[$uid] ?? null;
+            if (!is_array($b)) {
+                continue;
+            }
+            $type = $b['type'] ?? null;
+
+            if ($type === 'text') {
+                $html = $this->renderer->sanitizeText((string) ($b['html'] ?? ''));
+                if (trim(strip_tags($html)) === '') {
+                    continue; // drop empty text block
+                }
+                $blocks[] = ['type' => 'text', 'html' => $html];
+            } elseif ($type === 'image') {
+                $keep = !empty($b['keep_original']);
+                $file = $b['file'] ?? null;
+                if ($file instanceof UploadedFile) {
+                    // "keep original" stores the file without generating variants.
+                    $path = $this->media->store(self::SCOPE, $file, $keep ? [] : [400, 800]);
+                } else {
+                    $path = !empty($b['path']) ? (string) $b['path'] : null;
+                    // A reused image with no variants must render raw, whatever the box says.
+                    if ($path && !$keep && !$this->media->hasVariants($path)) {
+                        $keep = true;
+                    }
+                }
+                if (!$path) {
+                    continue; // drop empty image block
+                }
+                $alt = trim((string) ($b['alt'] ?? ''));
+                if ($alt === '') {
+                    throw ValidationException::withMessages([
+                        'blocks' => __('news::admin.validation.image_alt_required'),
+                    ]);
+                }
+                $block = ['type' => 'image', 'path' => $path, 'alt' => $alt];
+                if ($keep) {
+                    $block['keep_original'] = true;
+                }
+                if (!empty($b['caption'])) {
+                    $block['caption'] = (string) $b['caption'];
+                }
+                $blocks[] = $block;
+            }
+        }
+
+        if ($blocks === []) {
+            throw ValidationException::withMessages([
+                'blocks' => __('news::admin.validation.blocks_required'),
+            ]);
+        }
+
+        return [
+            'content' => $this->renderer->render($blocks),
+            'content_blocks' => $blocks,
+        ];
+    }
+
+    /**
      * Create a new news article.
      */
     public function create(array $data): News
     {
-        // Sanitize content
-        $data['content'] = $this->sanitizeContent($data['content'] ?? '');
+        // Resolve content (simple HTML or advanced block list + rendered cache)
+        $resolved = $this->resolveContent($data);
+        $data['content'] = $resolved['content'];
+        $data['content_blocks'] = $resolved['content_blocks'];
+        unset($data['blocks'], $data['blocks_order'], $data['mode']);
 
-        // Process header image if uploaded
-        if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
-            $data['header_image_path'] = $this->processHeaderImage($data['header_image']);
-        }
-        unset($data['header_image'], $data['header_image_remove']);
+        // Resolve header image from the Media image-field payload
+        $data['header_image_path'] = $this->resolveHeaderImage($data);
+        unset($data['header_image']);
 
         // Set creator
         $data['created_by'] = Auth::id();
@@ -59,24 +149,16 @@ class NewsService
      */
     public function update(News $news, array $data): News
     {
-        // Sanitize content
-        $data['content'] = $this->sanitizeContent($data['content'] ?? '');
+        // Resolve content (simple HTML or advanced block list + rendered cache)
+        $resolved = $this->resolveContent($data);
+        $data['content'] = $resolved['content'];
+        $data['content_blocks'] = $resolved['content_blocks'];
+        unset($data['blocks'], $data['blocks_order'], $data['mode']);
 
-        // Handle header image removal
-        if (!empty($data['header_image_remove'])) {
-            $this->deleteHeaderImage($news->header_image_path);
-            $data['header_image_path'] = null;
-        }
-
-        // Process new header image if uploaded
-        if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
-            // Delete old image first
-            if ($news->header_image_path) {
-                $this->deleteHeaderImage($news->header_image_path);
-            }
-            $data['header_image_path'] = $this->processHeaderImage($data['header_image']);
-        }
-        unset($data['header_image'], $data['header_image_remove']);
+        // Resolve header image from the Media image-field payload. Old files are
+        // not deleted here — the Media GC reclaims any path no News row uses.
+        $data['header_image_path'] = $this->resolveHeaderImage($data);
+        unset($data['header_image']);
 
         // Handle published_at if transitioning to published
         if (($data['status'] ?? 'draft') === 'published' && !$news->published_at) {
@@ -93,10 +175,8 @@ class NewsService
      */
     public function delete(News $news): void
     {
-        // Delete header image if exists
-        if ($news->header_image_path) {
-            $this->deleteHeaderImage($news->header_image_path);
-        }
+        // Header/content image files are left to the Media GC once no News row
+        // references them.
 
         // Bust cache if it was pinned
         if ($news->is_pinned) {
@@ -106,18 +186,23 @@ class NewsService
         $news->delete();
     }
 
-    public function processHeaderImage(UploadedFile|string|null $file): ?string
+    /**
+     * Resolve the header image path from the Media image-field payload.
+     * New upload → stored via Media; otherwise the reused/kept path (or null).
+     *
+     * @param array<string,mixed> $data
+     */
+    private function resolveHeaderImage(array $data): ?string
     {
-        if (!$file) {
+        $field = $data['header_image'] ?? null;
+        if (!is_array($field)) {
             return null;
         }
-
-        $disk = 'public';
-        $folder = 'news/' . date('Y/m');
-
-        // Normalize Filament temp array handled at caller; we accept UploadedFile|string here
-        $imageService = app(ImageService::class);
-        return $imageService->process($disk, $folder, $file, widths: [400, 800]);
+        $file = $field['file'] ?? null;
+        if ($file instanceof UploadedFile) {
+            return $this->media->store(self::SCOPE, $file);
+        }
+        return !empty($field['path']) ? (string) $field['path'] : null;
     }
 
     public function publish(News $news): News
@@ -179,18 +264,6 @@ class NewsService
         $news->save();
         $this->bustCarouselCache();
         return $news;
-    }
-
-    /**
-     * Delete an existing header image and its generated variants.
-     */
-    public function deleteHeaderImage(?string $headerImagePath): void
-    {
-        if (!$headerImagePath) {
-            return;
-        }
-        $disk = 'public';
-        app(ImageService::class)->deleteWithVariants($disk, $headerImagePath);
     }
 
     public function bustCarouselCache(): void

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 #[Table('news')]
-#[Fillable(['title', 'slug', 'summary', 'content', 'header_image_path', 'is_pinned', 'display_order', 'status', 'meta_description', 'published_at', 'created_by'])]
+#[Fillable(['title', 'slug', 'summary', 'content', 'content_blocks', 'header_image_path', 'is_pinned', 'display_order', 'status', 'meta_description', 'published_at', 'created_by'])]
 class News extends Model
 {
     /** @use HasFactory<\App\Domains\News\Database\Factories\NewsFactory> */
@@ -24,6 +24,7 @@ class News extends Model
         'published_at' => 'datetime',
         'created_by' => 'integer',
         'display_order' => 'integer',
+        'content_blocks' => 'array',
     ];
 
     public function getSlugOptions(): SlugOptions

@@ -85,6 +85,24 @@ return [
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,
         ],
+        // Text blocks of the MultiEdit advanced editor: same as admin-content but
+        // WITHOUT <img>. Images live only in dedicated image blocks (addressed by
+        // path), so forbidding inline <img> keeps the set of used image paths
+        // enumerable from structured blocks alone (see MultiEdit_Architecture §4.6).
+        'multiedit-text' => [
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.AllowedElements' => 'h1,h2,h3,h4,h5,h6,p,ul,ol,li,strong,em,b,i,a,u,s,del,blockquote,hr,br,span',
+            'HTML.AllowedAttributes' => 'a.href,a.title,a.rel,a.target,span.style',
+            'Attr.AllowedFrameTargets' => ['_blank'],
+            'Attr.AllowedRel' => ['noopener', 'noreferrer'],
+            'CSS.AllowedProperties' => 'text-align,text-decoration',
+            'URI.SafeIframeRegexp' => null,
+            'AutoFormat.AutoParagraph' => true,
+            'AutoFormat.RemoveEmpty' => false,
+            'Attr.EnableID' => false,
+            'HTML.SafeIframe' => false,
+        ],
+
         'quote-note' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             'HTML.AllowedElements' => 'strong,em,span',

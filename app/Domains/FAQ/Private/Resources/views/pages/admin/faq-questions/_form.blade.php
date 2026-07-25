@@ -81,28 +81,18 @@
     </div>
 
     <div>
-        <x-shared::image-upload
+        <x-media::image-field
             name="image"
-            id="image"
-            :currentPath="$faqQuestion?->image_path"
+            scope="faq"
+            :path="old('image.path', $faqQuestion?->image_path)"
+            :alt="old('image.alt', $faqQuestion?->image_alt_text ?? '')"
+            :show-caption="false"
+            :alt-required="false"
+            :show-usage="true"
             :label="__('faq::admin.questions.form.image')"
-            :helpText="__('shared::image-upload.max_size', ['size' => 2])"
         />
-    </div>
-
-    <div>
-        <x-shared::input-label for="image_alt_text">
-            {{ __('faq::admin.questions.form.image_alt_text') }}
-        </x-shared::input-label>
-        <x-shared::text-input
-            type="text"
-            id="image_alt_text"
-            name="image_alt_text"
-            class="mt-1 block w-full"
-            :value="old('image_alt_text', $faqQuestion?->image_alt_text ?? '')"
-            maxlength="255"
-        />
-        <x-shared::input-error :messages="$errors->get('image_alt_text')" class="mt-1" />
+        <x-shared::input-error :messages="$errors->get('image.file')" class="mt-1" />
+        <x-shared::input-error :messages="$errors->get('image.alt')" class="mt-1" />
     </div>
 
     <div>

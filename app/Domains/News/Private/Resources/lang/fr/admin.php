@@ -102,6 +102,8 @@ return [
         'summary_required' => 'Le résumé est obligatoire.',
         'summary_max' => 'Le résumé ne peut pas dépasser 500 caractères.',
         'content_required' => 'Le contenu est obligatoire.',
+        'blocks_required' => 'Le contenu doit comporter au moins un bloc.',
+        'image_alt_required' => 'Chaque image doit avoir un texte alternatif.',
         'header_image_type' => 'Le fichier doit être une image.',
         'header_image_max' => 'L\'image ne doit pas dépasser 2 Mo.',
         'status_required' => 'Le statut est obligatoire.',
