@@ -1,8 +1,9 @@
 <?php
 
 use App\Domains\Discord\Private\Repositories\DiscordPendingNotificationRepository;
+use App\Domains\Discord\Tests\Fixtures\ComplexTestNotificationContent;
+use App\Domains\Discord\Tests\Fixtures\EmptyPayloadTestNotificationContent;
 use App\Domains\Discord\Tests\Fixtures\HtmlTestNotificationContent;
-use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Notification\Tests\Fixtures\TestNotificationContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -68,7 +69,7 @@ describe('GET /api/discord/notifications/pending', function () {
             ->assertJsonPath('data.0.recipients', [$discordId]);
     });
 
-    it('includes the correct data fields for the notification', function () {
+    it('includes the envelope fields for the notification', function () {
         $alice     = alice($this);
         $discordId = linkDiscord($this, $alice);
         $notifId   = makeNotification([$alice->id], new TestNotificationContent('hello'));
@@ -78,33 +79,20 @@ describe('GET /api/discord/notifications/pending', function () {
 
         $resp->assertStatus(200);
         $item = $resp->json('data.0');
-        expect($item['data']['message'])->toBe('hello');
-        expect($item['defaultText'])->toBeString();
+        expect($item['type'])->toBe(TestNotificationContent::type());
+        expect($item['defaultText'])->toBe('hello');
         expect($item['createdAt'])->toBeString();
     });
 
-    it('converts HTML links in htmlDisplay to Discord markdown in defaultText', function () {
-        $alice     = alice($this);
-        $discordId = linkDiscord($this, $alice);
-
-        // Register the fixture type so getNotificationsByIds() can reconstruct it
-        $factory = app(NotificationFactory::class);
-        $factory->registerGroup('discord_test', 99, 'discord_test::group');
-        $factory->register(
-            type:    HtmlTestNotificationContent::type(),
-            class:   HtmlTestNotificationContent::class,
-            groupId: 'discord_test',
-            nameKey: 'discord_test::type',
-        );
-
-        $notifId = makeNotification([$alice->id], new HtmlTestNotificationContent());
-        queueDiscordNotification($notifId, [['user_id' => $alice->id, 'discord_id' => $discordId]]);
+    it('converts HTML to Discord markdown in defaultText', function () {
+        $alice = alice($this);
+        givenPendingDiscordNotification($this, $alice, new HtmlTestNotificationContent());
 
         $resp = discordGetPendingNotifications($this);
 
         $resp->assertStatus(200);
-        expect($resp->json('data.0.defaultText'))->toBe('[click here](https://example.com)');
-        expect($resp->json('data.0.data.message'))->toBe('click here');
+        expect($resp->json('data.0.defaultText'))
+            ->toBe("[click here](https://example.com) **important** *note*\nCafé");
     });
 
     it('excludes notifications where all recipients are already sent', function () {
@@ -176,6 +164,99 @@ describe('GET /api/discord/notifications/pending', function () {
             ->assertJsonPath('pagination.total', 3)
             ->assertJsonPath('pagination.hasMore', true)
             ->assertJsonPath('pagination.lastPage', 2);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/discord/notifications/pending — `data` payload contract
+//
+// `data` is the notification's stored content payload, returned verbatim.
+// The Discord domain is type-agnostic: it must never derive, rename, reshape or
+// drop keys, and must never invent keys the notification type does not define.
+// ---------------------------------------------------------------------------
+
+describe('GET /api/discord/notifications/pending — data payload', function () {
+
+    it('returns the stored payload verbatim for a multi-field notification', function () {
+        $alice = alice($this);
+        givenPendingDiscordNotification($this, $alice, new ComplexTestNotificationContent());
+
+        $item = discordGetPendingNotifications($this)->assertStatus(200)->json('data.0');
+
+        expect($item['data'])->toBe([
+            'comment_id'    => 42,
+            'author_name'   => 'Daniel',
+            'author_slug'   => 'daniel',
+            'chapter_title' => 'Chapitre 2.1',
+            'story_slug'    => 'immortelle-le-roman',
+            'chapter_slug'  => 'chapitre-21-7',
+            'is_reply'      => true,
+            'story_name'    => 'Immortelle, le roman',
+        ]);
+    });
+
+    it('preserves scalar types across the JSON round-trip', function () {
+        $alice = alice($this);
+        givenPendingDiscordNotification($this, $alice, new ComplexTestNotificationContent(
+            commentId: 7,
+            isReply: false,
+        ));
+
+        $data = discordGetPendingNotifications($this)->assertStatus(200)->json('data.0.data');
+
+        expect($data['comment_id'])->toBe(7)->toBeInt();
+        expect($data['is_reply'])->toBe(false)->toBeBool();
+        expect($data['author_name'])->toBeString();
+    });
+
+    it('keeps nullable fields present and null rather than dropping them', function () {
+        $alice = alice($this);
+        givenPendingDiscordNotification($this, $alice, new ComplexTestNotificationContent(
+            storyName: null,
+        ));
+
+        $data = discordGetPendingNotifications($this)->assertStatus(200)->json('data.0.data');
+
+        expect($data)->toHaveKey('story_name');
+        expect($data['story_name'])->toBeNull();
+    });
+
+    it('does not inject keys the notification type never defined', function () {
+        $alice = alice($this);
+        givenPendingDiscordNotification($this, $alice, new ComplexTestNotificationContent());
+
+        $data = discordGetPendingNotifications($this)->assertStatus(200)->json('data.0.data');
+
+        // `message` used to be derived from the rendered HTML, and url/actor/target
+        // were read from keys no notification type has ever produced.
+        expect($data)->not->toHaveKey('message');
+        expect($data)->not->toHaveKey('url');
+        expect($data)->not->toHaveKey('actor');
+        expect($data)->not->toHaveKey('target');
+    });
+
+    it('exposes payload keys distinct from the rendered text', function () {
+        $alice = alice($this);
+        givenPendingDiscordNotification($this, $alice, new HtmlTestNotificationContent());
+
+        $item = discordGetPendingNotifications($this)->assertStatus(200)->json('data.0');
+
+        expect($item['data'])->toBe([
+            'link_url'   => 'https://example.com',
+            'link_label' => 'click here',
+            'emphasis'   => 'important',
+        ]);
+        expect($item['defaultText'])->not->toBe($item['data']['link_label']);
+    });
+
+    it('serialises an empty payload as a JSON object, not an array', function () {
+        $alice = alice($this);
+        givenPendingDiscordNotification($this, $alice, new EmptyPayloadTestNotificationContent());
+
+        $resp = discordGetPendingNotifications($this)->assertStatus(200);
+
+        expect($resp->json('data.0.data'))->toBe([]);
+        expect($resp->getContent())->toContain('"data":{}');
     });
 });
 

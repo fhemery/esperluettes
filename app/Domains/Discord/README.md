@@ -6,8 +6,9 @@ The Discord domain manages the integration between the website and the external 
 
 1. **User connection via code exchange** — authenticated website users generate a short-lived one-time code; the Discord bot exchanges that code to link a Discord identity to a website user account.
 2. **Bot-facing REST API** — a set of JSON endpoints secured by a shared API key, allowing the bot to connect users, look up their roles, and remove Discord links.
+3. **Notification delivery queue** — Discord registers itself as an external notification channel; notifications for opted-in, linked users are queued in `discord_pending_notifications` and drained by the bot via a polling endpoint.
 
-Out of scope: push notifications from the site to Discord (documented as future work in the feature planning doc), Discord OAuth flows, and any Discord-specific permission enforcement beyond role look-up.
+Out of scope: Discord OAuth flows, and any Discord-specific permission enforcement beyond role look-up.
 
 See [docs/Feature_Planning/Discord_Api_Usage.md](../../../docs/Feature_Planning/Discord_Api_Usage.md) for the full API specification (may be partially ahead of the current implementation).
 
@@ -46,6 +47,10 @@ The `<x-discord::discord />` Blade component supports a restricted-preview mode:
 **Codes are cleaned up eagerly on generation, not by a scheduled job** — when a user requests a new code, all expired codes across all users and all pending (unused) codes for the requesting user are deleted in the same transaction. This avoids needing a separate housekeeping job at the cost of slightly more work per generation request.
 
 **`DiscordConnected` is only emitted on a genuinely new link** — a re-connect of an already-established pair does not re-emit the event, preventing duplicate audit log entries or downstream side-effects.
+
+**The notification `data` payload is passed through verbatim** — `GET /api/discord/notifications/pending` returns each notification's stored `content_data` unchanged, rather than mapping it into Discord-specific fields. The domain stays type-agnostic: adding a notification type anywhere in the app requires no change here, and the bot can rebuild any presentation it needs from `type` + `data`. The trade-off is that payload keys become part of the bot API contract, so renaming a field in a notification type is a breaking change — `docs/notification-types.md` documents the per-type fields and is regenerated with `php artisan notifications:export-types-doc`.
+
+An earlier design instead required every `NotificationContent` class to implement `getUrl()`/`getActorName()`/`getTargetDescription()`. Those methods were never added, yet the controller read `data['url']`, `data['actor']` and `data['target']`, so all three were permanently `null`. Do not reintroduce derived keys here.
 
 ## Cross-domain delegation
 

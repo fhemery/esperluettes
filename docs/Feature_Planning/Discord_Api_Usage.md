@@ -1,7 +1,7 @@
 # Discord Bot - API Usage Documentation
 
-**Version**: 1.1  
-**Last Updated**: 2026-04-25  
+**Version**: 1.2  
+**Last Updated**: 2026-07-25  
 **Base URL**: `https://esperluettes.com`
 
 ## Overview
@@ -78,7 +78,7 @@ curl -X GET "https://esperluettes.com/api/discord/notifications/pending" \
 
 3. **Bot calls connection endpoint**
    ```
-   POST /api/discord/auth/connect
+   POST /api/discord/users
    ```
    - Sends code, Discord ID, and Discord username
    - Website validates code and associates Discord account
@@ -98,7 +98,7 @@ User → Profile page (logged in) → Website generates code
                   ↓
     User → Discord → /connect 1258ac67 → Bot
                   ↓
-    Bot → POST /api/discord/auth/connect (with code)
+    Bot → POST /api/discord/users (with code)
                   ↓
     Website validates & returns roles immediately
                   ↓
@@ -243,7 +243,7 @@ Create a Discord user link using a one-time code generated on the website.
 
 **Example**:
 ```bash
-curl -X POST "https://esperluettes.com/api/discord/auth/connect" \
+curl -X POST "https://esperluettes.com/api/discord/users" \
   -H "Authorization: Bearer sk_abc123xyz789" \
   -H "Content-Type: application/json" \
   -d '{
@@ -271,15 +271,15 @@ Fetch all pending user activity notifications.
   "data": [
     {
       "id": 123,
-      "type": "comment",
+      "type": "readlist.story.added",
       "data": {
-        "message": "JohnDoe commented on your story \"Epic Adventure\"",
-        "url": "https://esperluettes.com/stories/epic-adventure/chapters/1#comment-42",
-        "actor": "JohnDoe",
-        "target": "Epic Adventure - Chapter 1"
+        "reader_name": "Daniel",
+        "reader_slug": "daniel",
+        "story_title": "Epic Adventure",
+        "story_slug": "epic-adventure"
       },
-      "avatarUrl": "https://jd-esperluettes.fr/storage/profile_pictures/1_1760348457.jpg",
-      "defaultText": "[JohnDoe](https://esperluettes.com/profile/johndoe) commented on your story **\"Epic Adventure\"**",
+      "avatarUrl": "https://esperluettes.com/storage/profile_pictures/6.svg",
+      "defaultText": "[Daniel](https://esperluettes.com/profile/daniel) a ajouté [Epic Adventure](https://esperluettes.com/stories/epic-adventure) à sa Pile à Lire",
       "recipients": [
         "123456789012345678",
         "987654321098765432"
@@ -300,8 +300,8 @@ Fetch all pending user activity notifications.
 **Response Fields**:
 - `data` (array): Array of notification objects — one entry per notification, regardless of recipient count
   - `id` (integer): Pending notification ID — use this in mark-sent
-  - `type` (string): Notification type (see types below)
-  - `data` (object): Type-specific notification data — identical for all recipients
+  - `type` (string): Notification type key (e.g. `readlist.story.added`) — see [notification-types.md](../notification-types.md) for the full catalog
+  - `data` (object): The notification's stored payload, returned **verbatim** — identical for all recipients. See "Working with `data`" below.
   - `avatarUrl` (string|null): Avatar URL of the user who triggered the notification; absent when system-generated
   - `defaultText` (string): Ready-to-send Discord-formatted message. HTML links from the website notification are converted to `[text](url)` Discord links and bold text becomes `**text**`. Use this as the DM body unless you need custom formatting.
   - `recipients` (array of strings): Discord user IDs to send this notification to
@@ -313,6 +313,26 @@ Fetch all pending user activity notifications.
   - `lastPage` (integer): Last page number
   - `hasMore` (boolean): Whether more pages exist
 
+**Working with `data`**:
+
+`data` is the notification's stored payload, passed through unchanged. Its keys are **type-specific**: they are defined by the notification type that produced it, and the website does not normalise, rename or supplement them.
+
+Consequences for the bot:
+
+- **No key is guaranteed across types.** There is no common `message`, `url`, `actor` or `target` field. Read `type` first, then interpret `data` according to that type.
+- **The per-type field list lives in [notification-types.md](../notification-types.md)**, which is auto-generated from the code and therefore always current.
+- **Values keep their JSON types** — integers stay integers, booleans stay booleans, and a field the type defines as nullable is present with a `null` value rather than omitted.
+- **`data` is always a JSON object**, `{}` for types that store no payload.
+
+Recommended rendering strategy:
+
+| Goal | Use |
+|------|-----|
+| Send a correct DM with no per-type code | `defaultText` — already Discord-formatted, works for every type |
+| Build a rich embed (thumbnails, fields, buttons) | `type` + `data`, falling back to `defaultText` for types not handled yet |
+
+Because `data` keys are part of this endpoint's contract, renaming a field in a website notification type is a breaking change for the bot.
+
 **Error Responses**:
 
 ```json
@@ -321,9 +341,14 @@ Fetch all pending user activity notifications.
   "error": "Unauthorized",
   "message": "Invalid API key"
 }
+
+// 429 Too Many Requests - Rate limit exceeded
+{
+  "message": "Too Many Attempts."
+}
 ```
 
-**Rate Limit**: 300 requests / minute
+**Rate Limit**: 60 requests/minute
 
 **Example**:
 ```bash
@@ -448,13 +473,13 @@ Get current roles for a connected Discord user. Might contain more information l
 }
 ```
 
-**Rate Limit**: 300 requests/hour
+**Rate Limit**: 300 requests/minute
 
 **Use Case**: On-demand role sync when you need to verify user's current roles
 
 **Example**:
 ```bash
-curl -X GET "https://esperluettes.com/api/discord/users/123456789012345678/roles" \
+curl -X GET "https://esperluettes.com/api/discord/users/123456789012345678" \
   -H "Authorization: Bearer sk_abc123xyz789" \
   -H "Accept: application/json"
 ```
@@ -558,11 +583,13 @@ Attempt 5: Wait 16 seconds
 
 | Endpoint | Limit | Per |
 |----------|-------|-----|
-| `POST /api/discord/auth/connect` | 100 requests | Minute (per IP) |
-| `GET /api/discord/notifications/pending` | 120 requests | Hour (1/minute) |
-| `POST /api/discord/notifications/mark-sent` | 120 requests | Hour |
-| `GET /api/discord/users/{discordId}/roles` | 300 requests | Hour |
-| `DELETE /api/discord/users/{discordId}` | 100 requests | Minute (per IP) |
+| `POST /api/discord/users` | 100 requests | Minute |
+| `GET /api/discord/notifications/pending` | 60 requests | Minute |
+| `POST /api/discord/notifications/mark-sent` | 60 requests | Minute |
+| `GET /api/discord/users/{discordId}` | 300 requests | Minute |
+| `DELETE /api/discord/users/{discordId}` | 100 requests | Minute |
+
+The notification endpoints are sized for a one-minute polling loop: normal operation uses about 1 request/minute each, so the allowance leaves ample room for retries and backoff.
 
 **Rate Limit Headers** (included in responses):
 ```

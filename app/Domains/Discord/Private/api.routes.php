@@ -19,9 +19,13 @@ Route::prefix('api/discord')
             ->middleware('throttle:100,1')
             ->name('discord.api.users.destroy');
 
+        // The bot polls once a minute and reports delivery once per poll; the
+        // allowance leaves room for retries and backoff without permitting hammering.
         Route::get('/notifications/pending', [NotificationsController::class, 'pending'])
+            ->middleware('throttle:60,1')
             ->name('discord.api.notifications.pending');
 
         Route::post('/notifications/mark-sent', [NotificationsController::class, 'markSent'])
+            ->middleware('throttle:60,1')
             ->name('discord.api.notifications.markSent');
     });
