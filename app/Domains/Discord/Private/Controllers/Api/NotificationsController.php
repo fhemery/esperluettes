@@ -68,12 +68,10 @@ class NotificationsController extends BaseController
             $data[] = [
                 'id'          => $pending->id,
                 'type'        => $dto->type,
-                'data'        => [
-                    'message' => strip_tags($dto->htmlDisplay),
-                    'url'     => $dto->data['url'] ?? null,
-                    'actor'   => $dto->data['actor'] ?? null,
-                    'target'  => $dto->data['target'] ?? null,
-                ],
+                // Stored content payload, returned verbatim. Keys are type-specific:
+                // the Discord domain deliberately knows nothing about them.
+                // Cast so an empty payload serialises as {} rather than [].
+                'data'        => (object) $dto->data,
                 'avatarUrl'   => $avatarUrl,
                 'defaultText' => $this->toDiscordMarkdown($dto->htmlDisplay),
                 'recipients'  => $recipients,

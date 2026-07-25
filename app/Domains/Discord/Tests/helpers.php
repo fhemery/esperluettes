@@ -115,6 +115,46 @@ function linkDiscord($test, $user, string $discordId = '111222333444555666', str
 }
 
 /**
+ * Register a Discord test notification content class with the notification factory,
+ * so getNotificationsByIds() can reconstruct it when polling the pending endpoint.
+ *
+ * @param class-string<\App\Domains\Notification\Public\Contracts\NotificationContent> $class
+ */
+function registerDiscordTestNotificationType(string $class): void
+{
+    $factory = app(\App\Domains\Notification\Public\Services\NotificationFactory::class);
+    $factory->registerGroup('discord_test', 99, 'discord_test::group');
+    $factory->register(
+        type:    $class::type(),
+        class:   $class,
+        groupId: 'discord_test',
+        nameKey: 'discord_test::type',
+    );
+}
+
+/**
+ * Arrange a pending Discord notification for a single linked user, using the given
+ * content class/instance. Returns [pendingId, discordId].
+ *
+ * @return array{0:int,1:string}
+ */
+function givenPendingDiscordNotification(
+    $test,
+    $user,
+    \App\Domains\Notification\Public\Contracts\NotificationContent $content,
+    string $discordId = '111222333444555666'
+): array {
+    registerDiscordTestNotificationType($content::class);
+    $linkedId = linkDiscord($test, $user, $discordId);
+    $notifId  = makeNotification([$user->id], $content);
+    $pending  = queueDiscordNotification($notifId, [
+        ['user_id' => $user->id, 'discord_id' => $linkedId],
+    ]);
+
+    return [$pending->id, $linkedId];
+}
+
+/**
  * Create a pending Discord notification row + recipients directly via the repository.
  * Returns the created DiscordPendingNotification model.
  */

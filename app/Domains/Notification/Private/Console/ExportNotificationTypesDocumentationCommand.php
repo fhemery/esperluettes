@@ -66,15 +66,16 @@ class ExportNotificationTypesDocumentationCommand extends Command
         foreach ($factory->getGroups() as $group) {
             $lines[] = '## Group: '.$this->markdownPlain(__($group->translationKey)).' (`'.$group->id.'`)';
             $lines[] = '';
-            $lines[] = '| Type key | PHP class | User-facing label | Forced on website | Hidden in preferences UI |';
-            $lines[] = '| --- | --- | --- | --- | --- |';
+            $lines[] = '| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |';
+            $lines[] = '| --- | --- | --- | --- | --- | --- |';
 
             foreach ($factory->getTypesForGroup($group->id, true) as $def) {
                 $lines[] = sprintf(
-                    '| `%s` | `%s` | %s | %s | %s |',
+                    '| `%s` | `%s` | %s | %s | %s | %s |',
                     $def->type,
                     $def->class,
                     $this->markdownTableCell(__($def->nameKey)),
+                    $this->payloadFields($def->class),
                     $def->forcedOnWebsite ? 'yes' : 'no',
                     $def->hideInSettings ? 'yes' : 'no',
                 );
@@ -102,10 +103,35 @@ class ExportNotificationTypesDocumentationCommand extends Command
         $lines[] = '## Stored payload';
         $lines[] = '';
         $lines[] = 'Each notification row stores a `content_key` (the type key) and JSON from `NotificationContent::toData()`. '
-            .'See `toData()` and `fromData()` on each PHP class for field names and types.';
+            .'The "Payload fields" column above lists the keys each type stores; see `toData()` and `fromData()` on the PHP class for value types.';
+        $lines[] = '';
+        $lines[] = 'External delivery channels receive this payload **verbatim**. In particular, the Discord bot API '
+            .'(`GET /api/discord/notifications/pending`) returns it unchanged as the `data` object, so the key names below '
+            .'are part of that endpoint\'s contract — renaming one is a breaking change for the bot.';
         $lines[] = '';
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Derive the stored payload keys for a notification type.
+     *
+     * Every content class reconstructs from a partial array (all fields null-coalesce),
+     * so an empty `fromData([])` yields an instance whose `toData()` exposes the full key set.
+     */
+    private function payloadFields(string $class): string
+    {
+        try {
+            $keys = array_keys($class::fromData([])->toData());
+        } catch (\Throwable) {
+            return '_(could not be determined)_';
+        }
+
+        if ($keys === []) {
+            return '_(none)_';
+        }
+
+        return implode(', ', array_map(fn (string $key): string => '`'.$key.'`', $keys));
     }
 
     private function markdownPlain(string $value): string
