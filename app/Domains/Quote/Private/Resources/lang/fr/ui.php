@@ -48,4 +48,9 @@ return [
         'delete_confirm' => 'Supprimer cette citation ?',
         'note_placeholder' => 'Ajoutez une note sur ce passage…',
     ],
+    'visibility' => [
+        'visible' => 'Cet onglet est visible des autres Esperluettes confirmé·e·s.',
+        'hidden' => 'Cet onglet est visible uniquement de vous.',
+        'preferences_link' => 'Vos préférences',
+    ],
 ];

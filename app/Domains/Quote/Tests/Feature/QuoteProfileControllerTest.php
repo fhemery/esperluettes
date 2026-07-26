@@ -121,3 +121,51 @@ describe('GET /quotes/profile/{profileSlug}', function () {
         $response->assertOk()->assertJsonPath('total_count', 0);
     });
 });
+
+describe('Quotes profile tab — visibility indicator', function () {
+    it('shows the visibility_off icon when owner views their private book (default)', function () {
+        $owner = alice($this);
+        $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
+
+        $this->actingAs($owner)
+            ->get(route('profile.show.quotes', $slug))
+            ->assertOk()
+            ->assertSee('visibility_off');
+    });
+
+    it('shows the visibility icon when owner views their public book', function () {
+        $owner = alice($this);
+        app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->setValue(
+            $owner->id,
+            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
+            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
+            true,
+        );
+        $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
+
+        $html = $this->actingAs($owner)
+            ->get(route('profile.show.quotes', $slug))
+            ->assertOk()
+            ->getContent();
+
+        expect($html)->toContain('visibility')
+            ->and($html)->not->toContain('visibility_off');
+    });
+
+    it('does not show the visibility indicator to other users', function () {
+        $owner = alice($this);
+        $viewer = bob($this);
+        app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->setValue(
+            $owner->id,
+            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
+            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
+            true,
+        );
+        $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
+
+        $this->actingAs($viewer)
+            ->get(route('profile.show.quotes', $slug))
+            ->assertOk()
+            ->assertDontSee('data-quote-visibility-indicator', false);
+    });
+});

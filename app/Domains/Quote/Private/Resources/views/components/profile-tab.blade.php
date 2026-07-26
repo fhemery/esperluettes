@@ -1,5 +1,11 @@
 @props(['quoteList', 'isOwn' => false, 'profileSlug' => ''])
 @php
+    $isHidden = $isOwn && !(bool) app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->getValue(
+        (int) auth()->id(),
+        \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
+        \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
+    );
+
     $initial = [
         'items' => array_map(fn($q) => [
             'id' => $q->id,
@@ -33,6 +39,24 @@
 @endphp
 
 <div class="flex flex-col gap-6" x-data="quoteList({{ \Illuminate\Support\Js::from($initial) }})">
+    @if($isOwn)
+    <div class="flex justify-end" data-quote-visibility-indicator>
+        <x-shared::popover placement="bottom">
+            <x-slot name="trigger">
+                <span class="material-symbols-outlined text-xl text-gray-400 leading-none">
+                    {{ $isHidden ? 'visibility_off' : 'visibility' }}
+                </span>
+            </x-slot>
+            <div class="text-sm">
+                <p>{{ $isHidden ? __('quote::ui.visibility.hidden') : __('quote::ui.visibility.visible') }}</p>
+                <a href="{{ route('settings.index', ['tab' => 'profile']) }}" class="underline text-primary">
+                    {{ __('quote::ui.visibility.preferences_link') }}
+                </a>
+            </div>
+        </x-shared::popover>
+    </div>
+    @endif
+
     <template x-if="items.length === 0">
         <p class="text-center text-gray-500 py-8">
             {{ $isOwn ? __('quote::ui.profile_tab.empty_own') : __('quote::ui.profile_tab.empty_other') }}
