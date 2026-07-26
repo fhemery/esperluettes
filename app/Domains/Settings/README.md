@@ -27,7 +27,7 @@ Settings/
         partials/
           tab-content.blade.php       # AJAX-loadable tab content partial
     Services/
-      SettingsRegistryService.php     # In-memory static registry of tabs/sections/parameters
+      SettingsRegistryService.php     # In-memory registry of tabs/sections/parameters (container singleton)
     routes.php
   Public/
     Api/

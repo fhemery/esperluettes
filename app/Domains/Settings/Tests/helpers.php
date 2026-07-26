@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 
 function clearSettingsRegistry(): void
 {
-    SettingsRegistryService::clearAll();
+    app(SettingsRegistryService::class)->clear();
 }
 
 function registerSettingsTab(SettingsTabDefinition $tab): void

@@ -32,7 +32,7 @@ This domain registers no event listeners.
 
 **Role filtering is enforced at the controller level only.** `SettingsService` and `SettingsPublicApi` do not check roles when reading or writing values. Role gating is applied by `SettingsController` for the web UI routes. If another domain calls `setValue()` directly it bypasses role restrictions — only do this intentionally.
 
-**`SettingsRegistryService` uses static properties.** The registry is stored in `static` class properties, making it process-global. In tests, always call `clearSettingsRegistry()` (which calls `SettingsRegistryService::clearAll()`) in `beforeEach` and `afterEach` to prevent cross-test contamination.
+**`SettingsRegistryService` is a container singleton, bound in `SettingsServiceProvider::register()`.** It holds instance state and is rebuilt on every application boot, so each test starts from the definitions registered by the service providers — nothing leaks between tests. Call `clearSettingsRegistry()` (which calls `->clear()` on the singleton) only when a test needs an *empty* registry rather than the real one. Do not resolve the class with `new` — every consumer must share the bound instance.
 
 ## Registry integrations
 
