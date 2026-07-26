@@ -30,12 +30,19 @@ function getOrCreateToolbar() {
     return el;
 }
 
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
 function positionToolbar(toolbar, range) {
     const rect = range.getBoundingClientRect();
     const scrollX = window.scrollX || window.pageXOffset;
     const scrollY = window.scrollY || window.pageYOffset;
 
-    const top = rect.top + scrollY - toolbar.offsetHeight - 8;
+    // On touch devices, the browser's native selection action bar (Copy/Paste/...)
+    // renders above the selection, so placing our toolbar there gets covered by it
+    // (observed on Firefox for Android). Place it below the selection instead.
+    const top = isTouchDevice
+        ? rect.bottom + scrollY + 8
+        : rect.top + scrollY - toolbar.offsetHeight - 8;
     const left = rect.left + scrollX + rect.width / 2 - toolbar.offsetWidth / 2;
 
     toolbar.style.top = Math.max(0, top) + 'px';
