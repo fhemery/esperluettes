@@ -16,7 +16,7 @@ class CreateQuoteRequest extends FormRequest
         return [
             'chapter_id' => ['required', 'integer', 'min:1'],
             'story_id' => ['required', 'integer', 'min:1'],
-            'highlighted_text' => ['required', 'string', 'max:500'],
+            'highlighted_text' => ['required', 'string', 'max:' . config('quote.highlighted_text_max_length')],
             'prefix' => ['nullable', 'string', 'max:255'],
             'suffix' => ['nullable', 'string', 'max:255'],
             'note' => ['nullable', 'string', 'max:1000'],

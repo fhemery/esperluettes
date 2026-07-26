@@ -7,6 +7,7 @@ export function quoteMiniForm() {
         open: false,
         saving: false,
         error: null,
+        tooLong: false,
         note: '',
         selectedText: '',
         _anchor: null,
@@ -50,7 +51,10 @@ export function quoteMiniForm() {
             this._storyId = storyId;
             this.selectedText = anchor.highlighted;
             this.note = '';
-            this.error = null;
+
+            const maxLength = Number(this.$el.dataset.highlightMaxLength);
+            this.tooLong = anchor.highlighted.length > maxLength;
+            this.error = this.tooLong ? this.$el.dataset.errorHighlightTooLong : null;
             this.open = true;
         },
 
@@ -60,7 +64,7 @@ export function quoteMiniForm() {
         },
 
         async save() {
-            if (!this._anchor || this.saving) return;
+            if (!this._anchor || this.saving || this.tooLong) return;
 
             this.saving = true;
             this.error = null;

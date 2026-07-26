@@ -13,6 +13,8 @@
     x-ref="dialog"
     tabindex="-1"
     data-error-save="{{ __('quote::ui.errors.save_quote') }}"
+    data-highlight-max-length="{{ config('quote.highlighted_text_max_length') }}"
+    data-error-highlight-too-long="{{ __('quote::ui.errors.highlight_too_long', ['max' => config('quote.highlighted_text_max_length')]) }}"
     :style="`position:absolute; top:${_pos.top}px; left:${_pos.left}px; width:360px; z-index:9999;`"
     class="bg-white rounded-lg shadow-xl p-6 outline-none"
 >
@@ -48,7 +50,7 @@
         <button
             type="button"
             @click="save()"
-            :disabled="saving"
+            :disabled="saving || tooLong"
             class="px-4 py-2 text-sm rounded bg-tertiary text-white hover:bg-tertiary/90 disabled:opacity-50"
         >
             <span x-show="!saving">{{ __('quote::ui.mini_form.save') }}</span>
