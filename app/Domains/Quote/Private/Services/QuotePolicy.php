@@ -40,13 +40,13 @@ class QuotePolicy
             return false;
         }
 
-        $isPublic = (bool) $this->settingsApi->getValue(
+        $isHidden = (bool) $this->settingsApi->getValue(
             $profileUserId,
             QuoteServiceProvider::TAB_PROFILE,
-            QuoteServiceProvider::KEY_BOOK_PUBLIC,
+            QuoteServiceProvider::KEY_HIDE_QUOTES_TAB,
         );
 
-        if (!$isPublic) {
+        if ($isHidden) {
             return false;
         }
 

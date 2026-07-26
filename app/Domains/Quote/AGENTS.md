@@ -22,7 +22,7 @@ These are four separate listeners, not one handler — deactivation and deletion
 ## Registrations
 
 - **Notification**: registers group `quote` and the `ChapterQuotedNotification` type (`quote.chapter_quoted`).
-- **Settings**: registers the `book_public` boolean parameter, but **inside `app->booted()`** — it must run after Profile has registered its tab/section, because it attaches to the Profile tab (`TAB_PROFILE`) / Privacy section. The setting was migrated from an earlier `quote` domain key to `profile`; read/write it with `SettingsPublicApi` using `QuoteServiceProvider::TAB_PROFILE` + `::KEY_BOOK_PUBLIC`, never a hardcoded string.
+- **Settings**: registers the `hide-quotes-tab` boolean parameter (default `false`, i.e. the book is visible), but **inside `app->booted()`** — it must run after Profile has registered its tab/section, because it attaches to the Profile tab (`TAB_PROFILE`) / Privacy section. Read/write it with `SettingsPublicApi` using `QuoteServiceProvider::TAB_PROFILE` + `::KEY_HIDE_QUOTES_TAB`, never a hardcoded string. Note the polarity: **true means hidden**, matching `follow.hide-following-tab` and `profile.hide-comments-section`. It replaced an earlier opt-in `book_public` key (default hidden); the migration kept only the deliberate "keep it hidden" choices.
 
 ## Invariants (span multiple files — easy to break)
 

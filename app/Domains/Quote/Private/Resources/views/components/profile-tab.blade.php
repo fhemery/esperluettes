@@ -1,9 +1,9 @@
 @props(['quoteList', 'isOwn' => false, 'profileSlug' => ''])
 @php
-    $isHidden = $isOwn && !(bool) app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->getValue(
+    $isHidden = $isOwn && (bool) app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->getValue(
         (int) auth()->id(),
         \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
-        \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
+        \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_HIDE_QUOTES_TAB,
     );
 
     $initial = [

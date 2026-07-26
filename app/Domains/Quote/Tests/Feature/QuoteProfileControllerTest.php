@@ -30,7 +30,7 @@ describe('GET /quotes/profile/{profileSlug}', function () {
             ->assertJsonPath('items.0.highlighted_text', 'passage');
     });
 
-    it('unauthenticated user sees 403 for non-public quote book', function () {
+    it('unauthenticated user sees an empty book', function () {
         $reader = bob($this);
         $profile = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $reader->id)->firstOrFail();
 
@@ -44,7 +44,7 @@ describe('GET /quotes/profile/{profileSlug}', function () {
         $this->getJson('/quotes/profile/nonexistent-slug-99999')->assertNotFound();
     });
 
-    it('hides the private note from a confirmed non-owner viewing a public book', function () {
+    it('hides the private note from a confirmed non-owner viewing a visible book', function () {
         $author = alice($this);
         $reader = bob($this);
         $viewer = carol($this);
@@ -54,12 +54,6 @@ describe('GET /quotes/profile/{profileSlug}', function () {
             'highlighted_text' => 'passage',
             'note' => '<strong>secret note</strong>',
         ]);
-        app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->setValue(
-            $reader->id,
-            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
-            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
-            true,
-        );
 
         $response = $this->actingAs($viewer)
             ->getJson('/quotes/profile/' . \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $reader->id)->firstOrFail()->slug);
@@ -85,12 +79,6 @@ describe('GET /quotes/profile/{profileSlug}', function () {
 
         createQuote($reader->id, $publicChapter->id, $publicStoryModel->id, ['highlighted_text' => 'visible']);
         createQuote($reader->id, $privateChapter->id, $privateStoryModel->id, ['highlighted_text' => 'hidden']);
-        app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->setValue(
-            $reader->id,
-            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
-            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
-            true,
-        );
 
         $response = $this->actingAs($viewer)
             ->getJson('/quotes/profile/' . \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $reader->id)->firstOrFail()->slug);
@@ -101,19 +89,49 @@ describe('GET /quotes/profile/{profileSlug}', function () {
             ->assertJsonPath('items.0.highlighted_text', 'visible');
     });
 
-    it('does not show a public book to an unconfirmed viewer', function () {
+    it('does not show the book to a confirmed viewer when the owner hid the tab', function () {
         $author = alice($this);
         $reader = bob($this);
-        $unconfirmed = carol($this, roles: [Roles::USER]);
+        $viewer = carol($this);
         $story = publicStory('Story', $author->id);
         $chapter = createPublishedChapter($this, $story, $author);
         createQuote($reader->id, $chapter->id, $story->id, ['highlighted_text' => 'passage']);
         app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->setValue(
             $reader->id,
             \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
-            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
+            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_HIDE_QUOTES_TAB,
             true,
         );
+
+        $response = $this->actingAs($viewer)
+            ->getJson('/quotes/profile/' . \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $reader->id)->firstOrFail()->slug);
+
+        $response->assertOk()->assertJsonPath('total_count', 0);
+    });
+
+    it('shows the book to a confirmed viewer by default', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $viewer = carol($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        createQuote($reader->id, $chapter->id, $story->id, ['highlighted_text' => 'passage']);
+
+        $response = $this->actingAs($viewer)
+            ->getJson('/quotes/profile/' . \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $reader->id)->firstOrFail()->slug);
+
+        $response->assertOk()
+            ->assertJsonPath('viewer_is_owner', false)
+            ->assertJsonCount(1, 'items');
+    });
+
+    it('does not show a visible book to an unconfirmed viewer', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $unconfirmed = carol($this, roles: [Roles::USER]);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        createQuote($reader->id, $chapter->id, $story->id, ['highlighted_text' => 'passage']);
 
         $response = $this->actingAs($unconfirmed)
             ->getJson('/quotes/profile/' . \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $reader->id)->firstOrFail()->slug);
@@ -123,24 +141,8 @@ describe('GET /quotes/profile/{profileSlug}', function () {
 });
 
 describe('Quotes profile tab — visibility indicator', function () {
-    it('shows the visibility_off icon when owner views their private book (default)', function () {
+    it('shows the visibility icon when owner views their book (visible by default)', function () {
         $owner = alice($this);
-        $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
-
-        $this->actingAs($owner)
-            ->get(route('profile.show.quotes', $slug))
-            ->assertOk()
-            ->assertSee('visibility_off');
-    });
-
-    it('shows the visibility icon when owner views their public book', function () {
-        $owner = alice($this);
-        app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->setValue(
-            $owner->id,
-            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
-            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
-            true,
-        );
         $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
 
         $html = $this->actingAs($owner)
@@ -152,15 +154,25 @@ describe('Quotes profile tab — visibility indicator', function () {
             ->and($html)->not->toContain('visibility_off');
     });
 
-    it('does not show the visibility indicator to other users', function () {
+    it('shows the visibility_off icon when the owner hid the tab', function () {
         $owner = alice($this);
-        $viewer = bob($this);
         app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->setValue(
             $owner->id,
             \App\Domains\Quote\Public\Providers\QuoteServiceProvider::TAB_PROFILE,
-            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_BOOK_PUBLIC,
+            \App\Domains\Quote\Public\Providers\QuoteServiceProvider::KEY_HIDE_QUOTES_TAB,
             true,
         );
+        $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
+
+        $this->actingAs($owner)
+            ->get(route('profile.show.quotes', $slug))
+            ->assertOk()
+            ->assertSee('visibility_off');
+    });
+
+    it('does not show the visibility indicator to other users', function () {
+        $owner = alice($this);
+        $viewer = bob($this);
         $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
 
         $this->actingAs($viewer)

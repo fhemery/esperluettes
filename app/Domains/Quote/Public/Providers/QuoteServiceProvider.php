@@ -25,7 +25,7 @@ use Illuminate\Support\ServiceProvider;
 
 class QuoteServiceProvider extends ServiceProvider
 {
-    public const KEY_BOOK_PUBLIC = 'book_public';
+    public const KEY_HIDE_QUOTES_TAB = 'hide-quotes-tab';
     public const TAB_PROFILE = 'profile';
     public const SECTION_PRIVACY = 'privacy';
 
@@ -84,19 +84,19 @@ class QuoteServiceProvider extends ServiceProvider
     {
         $settingsApi = app(SettingsPublicApi::class);
 
-        if ($settingsApi->getParameter(self::TAB_PROFILE, self::KEY_BOOK_PUBLIC) !== null) {
+        if ($settingsApi->getParameter(self::TAB_PROFILE, self::KEY_HIDE_QUOTES_TAB) !== null) {
             return;
         }
 
         $settingsApi->registerParameter(new SettingsParameterDefinition(
             tabId: self::TAB_PROFILE,
             sectionId: self::SECTION_PRIVACY,
-            key: self::KEY_BOOK_PUBLIC,
+            key: self::KEY_HIDE_QUOTES_TAB,
             type: ParameterType::BOOL,
             default: false,
             order: 30,
-            nameKey: 'quote::settings.params.book_public.name',
-            descriptionKey: 'quote::settings.params.book_public.description',
+            nameKey: 'quote::settings.params.hide-quotes-tab.name',
+            descriptionKey: 'quote::settings.params.hide-quotes-tab.description',
         ));
     }
 }
