@@ -31,6 +31,8 @@ class QuoteServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->mergeConfigFrom(app_path('Domains/Quote/Private/Config/quote.php'), 'quote');
+
         $this->app->singleton(QuoteNoteSanitizer::class);
         $this->app->singleton(QuotePolicy::class);
         $this->app->singleton(QuoteService::class);

@@ -110,6 +110,25 @@ describe('POST /quotes', function () {
             ])
             ->assertUnprocessable();
     });
+
+    it('rejects highlighted_text over the configured max length', function () {
+        config(['quote.highlighted_text_max_length' => 20]);
+
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($reader)
+            ->postJson('/quotes', [
+                'chapter_id' => $chapter->id,
+                'story_id' => $story->id,
+                'highlighted_text' => str_repeat('x', 21),
+            ])
+            ->assertUnprocessable();
+
+        $this->assertDatabaseEmpty('quotes');
+    });
 });
 
 describe('PUT /quotes/{quoteId}', function () {
