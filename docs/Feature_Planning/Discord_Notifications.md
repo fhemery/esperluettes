@@ -198,7 +198,7 @@ Users toggle Discord preferences through the standard `PUT /notifications/prefer
 
 ## Notification Content for Discord
 
-The bot response format (`{type, data, defaultText, avatarUrl}`) is built entirely from the `NotificationDto`. **The `NotificationContent` interface is unchanged** — no Discord-specific methods are added to it.
+The bot response format (`{type, data, sourceUserId, defaultText, avatarUrl}`) is built entirely from the `NotificationDto`. **The `NotificationContent` interface is unchanged** — no Discord-specific methods are added to it.
 
 `data` is `NotificationDto::data`, i.e. the notification's stored `content_data` returned verbatim:
 
@@ -214,7 +214,7 @@ Because payload keys are now part of the bot API contract, `docs/notification-ty
 
 **`htmlDisplay` and `defaultText`**: `NotificationDto::htmlDisplay` is populated at dispatch time from `$content->display()`. The `DiscordNotificationApiController` derives `defaultText` by converting `htmlDisplay` from HTML to Discord markdown — HTML links become `[text](url)` and bold tags become `**text**`. This means the Discord domain never calls `display()` directly; it works from the pre-populated DTO field.
 
-**`avatarUrl`**: `NotificationDto::sourceUserId` carries the ID of the user who triggered the notification (already stored in the `notifications` table). The `DiscordNotificationApiController` calls `ProfilePublicApi::getPublicProfile($dto->sourceUserId)` to resolve the avatar URL. If `sourceUserId` is null (system-generated notification), `avatarUrl` is omitted from the response.
+**`sourceUserId` and `avatarUrl`**: `NotificationDto::sourceUserId` carries the ID of the user who triggered the notification (already stored in the `notifications` table) and is exposed directly as `sourceUserId`, a sibling of `data` — a `null` value means the notification was system-generated. The `DiscordNotificationApiController` also calls `ProfilePublicApi::getPublicProfile($dto->sourceUserId)` to resolve `avatarUrl`. Both fields are always present in the response; when `sourceUserId` is null, `avatarUrl` is null too.
 
 ---
 

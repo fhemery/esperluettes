@@ -72,6 +72,8 @@ class NotificationsController extends BaseController
                 // the Discord domain deliberately knows nothing about them.
                 // Cast so an empty payload serialises as {} rather than [].
                 'data'        => (object) $dto->data,
+                // Website user who triggered the notification; null means system-generated.
+                'sourceUserId' => $dto->sourceUserId,
                 'avatarUrl'   => $avatarUrl,
                 'defaultText' => $this->toDiscordMarkdown($dto->htmlDisplay),
                 'recipients'  => $recipients,

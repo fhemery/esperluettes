@@ -4,6 +4,7 @@ use App\Domains\Discord\Private\Repositories\DiscordPendingNotificationRepositor
 use App\Domains\Discord\Tests\Fixtures\ComplexTestNotificationContent;
 use App\Domains\Discord\Tests\Fixtures\EmptyPayloadTestNotificationContent;
 use App\Domains\Discord\Tests\Fixtures\HtmlTestNotificationContent;
+use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Notification\Tests\Fixtures\TestNotificationContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -82,6 +83,43 @@ describe('GET /api/discord/notifications/pending', function () {
         expect($item['type'])->toBe(TestNotificationContent::type());
         expect($item['defaultText'])->toBe('hello');
         expect($item['createdAt'])->toBeString();
+    });
+
+    it('exposes the id of the user who triggered the notification', function () {
+        $alice     = alice($this);
+        $bob       = bob($this);
+        $discordId = linkDiscord($this, $alice);
+
+        registerDiscordTestNotificationType(ComplexTestNotificationContent::class);
+        $notifId = makeNotification([$alice->id], new ComplexTestNotificationContent(), $bob->id);
+        queueDiscordNotification($notifId, [['user_id' => $alice->id, 'discord_id' => $discordId]]);
+
+        $item = discordGetPendingNotifications($this)->assertStatus(200)->json('data.0');
+
+        expect($item['sourceUserId'])->toBe($bob->id)->toBeInt();
+        // Sibling of `data`, never nested inside the type-specific payload.
+        expect($item['data'])->not->toHaveKey('sourceUserId');
+    });
+
+    it('returns a null sourceUserId for a system-generated notification', function () {
+        $alice     = alice($this);
+        $discordId = linkDiscord($this, $alice);
+
+        registerDiscordTestNotificationType(ComplexTestNotificationContent::class);
+        app(NotificationPublicApi::class)->createNotification(
+            [$alice->id],
+            new ComplexTestNotificationContent(),
+            null,
+        );
+        $notifId = (int) DB::table('notifications')->orderByDesc('id')->value('id');
+        queueDiscordNotification($notifId, [['user_id' => $alice->id, 'discord_id' => $discordId]]);
+
+        $resp = discordGetPendingNotifications($this)->assertStatus(200);
+
+        expect($resp->json('data.0.sourceUserId'))->toBeNull();
+        expect($resp->json('data.0.avatarUrl'))->toBeNull();
+        // Explicitly present as null rather than omitted from the response.
+        expect($resp->json('data.0'))->toHaveKey('sourceUserId');
     });
 
     it('converts HTML to Discord markdown in defaultText', function () {
