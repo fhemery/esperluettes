@@ -236,14 +236,13 @@ Two simplifications since the first draft:
 
 Profile resolves it through `SettingsPublicApi` (already a `ProfilePrivate` dependency) and renders, **only when `$isOwn`**, a small `visibility` / `visibility_off` icon next to the tab label, with a popover linking to `route('settings.index', ['tab' => $settingsTabId])`.
 
-As built, it renders in **two places**, because the two serve different jobs:
+It renders in **one place**: a popover above the active tab's content, showing the eye icon, the wording, and the link to the setting. This is the existing Follow/Quote indicator, relocated and generalised — one implementation in Profile instead of **three** hand-rolled copies (Follow, Quote and, discovered late, Story's comments tab, which meant the comments tab rendered two).
 
-- **In the tab strip**, an `visibility` / `visibility_off` icon on every setting-gated tab. This is the new capability: the owner sees at a glance which of their tabs are exposed, without opening each one. It is deliberately non-interactive — an `<a role="tab">` must not wrap a control — so it carries the explanation in `title` / `aria-label` only.
-- **Above the active tab's content**, the popover with the same wording plus the link to the setting. This is the existing Follow/Quote indicator, relocated and generalised: one implementation in Profile instead of two hand-rolled copies, and now covering `comments` too.
+An earlier build also put a small icon on every setting-gated tab in the strip, so the owner could see all their tabs' state at once. Dropped after review: it was visual noise for a rarely-consulted piece of information, and it pushed markup into `x-shared::scrollable-tabs` that Shared had no business carrying. The strip is back to `key`/`label`/`url`/`icon`.
 
-`x-shared::scrollable-tabs` gained one optional per-tab key, `visibility` (`hidden` bool + `label`), and stays generic — the URL and copy are passed in, so Shared learns nothing about settings.
+The icon uses the `text-tertiary` theme token rather than a fixed grey, so it follows the season and the light/dark appearance. Never hardcode a colour here — `text-gray-400` renders unreadably in dark mode.
 
-The strip data is assembled by `ProfileController::buildTabStrip()`, not in Blade, so the view holds no logic at all.
+The strip is assembled by `ProfileController::buildTabStrip()` and the indicator by `tabVisibility()`, so the view holds no logic.
 
 It stays purely informative: the actual decision remains the `ProfileTabVisibility` implementation. The two can drift — a tab could declare `privacy` pointing at a setting its visibility rule ignores — and per D16 nothing enforces the pairing.
 

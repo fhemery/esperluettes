@@ -24,11 +24,11 @@ export default async function ({ page, ctx, browser, helpers }) {
   let tabs = await tabStrip(page);
   check('owner: lands on the default tab (stories)',
     tabs.find((t) => t.selected)?.key === 'stories', tabs.find((t) => t.selected)?.key);
-  check('owner: indicators on exactly the setting-gated tabs',
-    JSON.stringify(tabs.map((t) => [t.key, t.icon])) ===
-      JSON.stringify([['about', null], ['stories', null], ['comments', 'visibility'],
-        ['following', 'visibility'], ['quotes', 'visibility']]),
-    tabs.map((t) => t.key + '=' + t.icon).join(' '));
+  check('owner: sees all five tabs',
+    JSON.stringify(tabs.map((t) => t.key)) ===
+      JSON.stringify(['about', 'stories', 'comments', 'following', 'quotes']),
+    tabs.map((t) => t.key).join(','));
+  check('owner: the tab strip carries no icons', tabs.every((t) => t.icon === null));
 
   for (const key of ['about', 'stories', 'comments', 'following', 'quotes']) {
     const status = await goto(page, `/profile/${slug}/${key}`);
@@ -42,18 +42,33 @@ export default async function ({ page, ctx, browser, helpers }) {
   await goto(page, `/profile/${slug}/banana`);
   check('unknown tab redirects to the profile', page.url() === `${BASE}/profile/${slug}`, page.url());
 
+  // --- exactly one indicator per tab, and only on setting-gated ones -------
+  const indicator = (p) => p.evaluate(() => {
+    const boxes = document.querySelectorAll('[data-test-id="profile-tab-visibility"]');
+    const eyes = Array.from(document.querySelectorAll('span'))
+      .filter((s) => ['visibility', 'visibility_off'].includes(s.textContent.trim()));
+    return { boxes: boxes.length, eyes: eyes.length, icon: eyes[0]?.textContent.trim() || null };
+  });
+
+  for (const key of ['comments', 'following', 'quotes']) {
+    await goto(page, `/profile/${slug}/${key}`);
+    const i = await indicator(page);
+    check(`owner: ${key} shows exactly one indicator`, i.boxes === 1 && i.eyes === 1, JSON.stringify(i));
+  }
+  await goto(page, `/profile/${slug}/stories`);
+  check('owner: stories has no indicator', (await indicator(page)).boxes === 0);
+
   // --- toggling a privacy setting flips the indicator ---------------------
   await toggleSetting(page, 'profile', 'Masquer mon carnet de citations');
-  await goto(page, `/profile/${slug}/stories`);
-  let quotes = (await tabStrip(page)).find((t) => t.key === 'quotes');
-  check('after hiding: owner keeps the tab', Boolean(quotes));
-  check('after hiding: strip icon flips', quotes?.icon === 'visibility_off', quotes?.icon);
+  await goto(page, `/profile/${slug}/quotes`);
+  check('after hiding: indicator flips to visibility_off',
+    (await indicator(page)).icon === 'visibility_off', (await indicator(page)).icon);
   await shot(page, 'owner-quotes-hidden');
 
   await toggleSetting(page, 'profile', 'Masquer mon carnet de citations');
-  await goto(page, `/profile/${slug}/stories`);
-  quotes = (await tabStrip(page)).find((t) => t.key === 'quotes');
-  check('after restoring: strip icon back to visible', quotes?.icon === 'visibility', quotes?.icon);
+  await goto(page, `/profile/${slug}/quotes`);
+  check('after restoring: indicator back to visible',
+    (await indicator(page)).icon === 'visibility', (await indicator(page)).icon);
 
   // --- as a guest ---------------------------------------------------------
   const guest = await (await browser.newContext()).newPage();

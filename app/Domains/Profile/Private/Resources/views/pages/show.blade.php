@@ -124,7 +124,7 @@
                     <div class="flex justify-end" data-test-id="profile-tab-visibility">
                         <x-shared::popover placement="bottom">
                             <x-slot name="trigger">
-                                <span class="material-symbols-outlined text-xl text-gray-400 leading-none">
+                                <span class="material-symbols-outlined text-xl text-tertiary leading-none">
                                     {{ $activeTabVisibility['hidden'] ? 'visibility_off' : 'visibility' }}
                                 </span>
                             </x-slot>

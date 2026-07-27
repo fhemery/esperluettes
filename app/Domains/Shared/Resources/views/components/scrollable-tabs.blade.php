@@ -69,14 +69,6 @@
                         <span class="material-symbols-outlined">{{ $tab['icon'] }}</span>
                     @endif
                     {{ $tab['label'] }}
-                    @if(isset($tab['visibility']))
-                        {{-- Non-interactive on purpose: an anchor must not wrap a control. --}}
-                        <span class="material-symbols-outlined text-base text-gray-400 leading-none"
-                            title="{{ $tab['visibility']['label'] }}"
-                            aria-label="{{ $tab['visibility']['label'] }}">
-                            {{ $tab['visibility']['hidden'] ? 'visibility_off' : 'visibility' }}
-                        </span>
-                    @endif
                 </a>
             @else
                 <button type="button"

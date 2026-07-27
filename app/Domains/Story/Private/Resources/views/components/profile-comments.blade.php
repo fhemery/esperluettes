@@ -1,25 +1,9 @@
 @if(!$isAllowed)
 {{-- Component should not be rendered for non-confirmed users --}}
 @else
+{{-- The owner-facing visibility indicator is rendered by the profile page from
+     the tab's ProfileTabPrivacy declaration, not here. --}}
 <div class="flex flex-col gap-4">
-    @if($isOwn)
-    <div class="flex justify-end" data-comments-visibility-indicator>
-        <x-shared::popover placement="bottom">
-            <x-slot name="trigger">
-                <span class="material-symbols-outlined text-xl text-gray-400 leading-none">
-                    {{ $isHidden ? 'visibility_off' : 'visibility' }}
-                </span>
-            </x-slot>
-            <div class="text-sm">
-                <p>{{ $isHidden ? __('story::profile.visibility.hidden') : __('story::profile.visibility.visible') }}</p>
-                <a href="{{ route('settings.index', ['tab' => 'profile']) }}" class="underline text-primary">
-                    {{ __('story::profile.visibility.preferences_link') }}
-                </a>
-            </div>
-        </x-shared::popover>
-    </div>
-    @endif
-
     @if(!$hasComments)
     <div class="text-center text-gray-500 py-8">
         {{ __('story::profile.no-comments') }}

@@ -6,6 +6,7 @@ use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Profile\Private\Models\Profile;
 use App\Domains\Profile\Public\Api\ProfileTabRegistry;
+use App\Domains\Profile\Public\Contracts\ProfileTabDefinition;
 use App\Domains\Profile\Private\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Private\Services\ProfileService;
 use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
@@ -82,7 +83,7 @@ class ProfileController extends Controller
         $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
         $tabs = $this->buildTabStrip($profile, $isOwn, $viewerId);
         $activeTabDefinition = $this->tabs->get($activeTab);
-        $activeTabVisibility = $tabs[$activeTab]['visibility'] ?? null;
+        $activeTabVisibility = $isOwn ? $this->tabVisibility($profile, $activeTabDefinition) : null;
 
         return view('profile::pages.show', compact(
             'profile',
@@ -96,44 +97,46 @@ class ProfileController extends Controller
     }
 
     /**
-     * Build the tab strip: label, link, and — on your own profile — whether a
-     * setting-gated tab is currently exposed to other people.
+     * Build the tab strip: label and link for every tab this viewer may see.
      *
-     * @return array<string, array<string, mixed>> keyed by tab key
+     * @return array<int, array<string, mixed>>
      */
     private function buildTabStrip(Profile $profile, bool $isOwn, ?int $viewerId): array
     {
-        $strip = [];
+        return array_map(fn (ProfileTabDefinition $tab) => [
+            'key' => $tab->key,
+            'label' => __($tab->labelKeyFor($isOwn)),
+            'url' => route('profile.show.tab', [$profile, $tab->key]),
+            'icon' => $tab->icon,
+        ], $this->tabs->visibleFor($profile->user_id, $viewerId));
+    }
 
-        foreach ($this->tabs->visibleFor($profile->user_id, $viewerId) as $tab) {
-            $entry = [
-                'key' => $tab->key,
-                'label' => __($tab->labelKeyFor($isOwn)),
-                'url' => route('profile.show.tab', [$profile, $tab->key]),
-                'icon' => $tab->icon,
-            ];
-
-            if ($isOwn && $tab->privacy !== null) {
-                $isHidden = (bool) $this->settings->getValue(
-                    $profile->user_id,
-                    $tab->privacy->settingsTabId,
-                    $tab->privacy->settingsKey,
-                );
-
-                $entry['visibility'] = [
-                    'hidden' => $isHidden,
-                    'label' => $isHidden
-                        ? __('profile::show.tab_visibility.hidden')
-                        : __('profile::show.tab_visibility.visible'),
-                    'link_url' => route('settings.index', ['tab' => $tab->privacy->settingsTabId]),
-                    'link_label' => __('profile::show.tab_visibility.preferences_link'),
-                ];
-            }
-
-            $strip[$tab->key] = $entry;
+    /**
+     * Whether a setting-gated tab is currently exposed to other people, for the
+     * owner-facing indicator. Null when the tab's visibility is not settings-driven.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function tabVisibility(Profile $profile, ?ProfileTabDefinition $tab): ?array
+    {
+        if ($tab?->privacy === null) {
+            return null;
         }
 
-        return $strip;
+        $isHidden = (bool) $this->settings->getValue(
+            $profile->user_id,
+            $tab->privacy->settingsTabId,
+            $tab->privacy->settingsKey,
+        );
+
+        return [
+            'hidden' => $isHidden,
+            'label' => $isHidden
+                ? __('profile::show.tab_visibility.hidden')
+                : __('profile::show.tab_visibility.visible'),
+            'link_url' => route('settings.index', ['tab' => $tab->privacy->settingsTabId]),
+            'link_label' => __('profile::show.tab_visibility.preferences_link'),
+        ];
     }
 
     /**

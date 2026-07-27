@@ -585,37 +585,8 @@ describe('ProfileCommentsComponent', function () {
     });
 });
 
-describe('Visibility indicator', function () {
-    it('shows visibility_off icon when owner views their hidden tab', function () {
-        $owner = alice($this);
-        app(SettingsPublicApi::class)->setValue($owner->id, 'profile', 'hide-comments-section', true);
-
-        $this->actingAs($owner);
-        $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
-
-        expect($html)->toContain('visibility_off');
-    });
-
-    it('shows visibility icon when owner views their visible tab', function () {
-        $owner = alice($this);
-
-        $this->actingAs($owner);
-        $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
-
-        expect($html)->toContain('visibility')
-            ->and($html)->not->toContain('visibility_off');
-    });
-
-    it('does not show visibility indicator to other users', function () {
-        $owner = alice($this);
-        $viewer = bob($this);
-
-        $this->actingAs($viewer);
-        $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
-
-        expect($html)->not->toContain('data-comments-visibility-indicator');
-    });
-});
+// The owner-facing visibility indicator is rendered by the profile page, not by
+// this component; it is covered in Profile's ProfileTabsRoutingTest.
 
 describe('ProfileCommentsApiController', function () {
     it('returns comments for a story by user', function () {

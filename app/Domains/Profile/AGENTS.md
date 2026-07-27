@@ -60,7 +60,7 @@ Things to know before touching it:
 - **Visibility must not count content.** It runs for every tab on every profile render. An empty tab is still shown and renders its own empty state.
 - **Tab components get exactly one prop, `ownerUserId`,** and hydrate themselves (including `?page` and `isOwn`). Class components only.
 - **`isDefault` marks the landing tab** (`stories`), and the registry throws if a second tab claims it.
-- **`ProfileTabPrivacy` is optional** and purely informative: it renders the owner-facing eye icon in the strip and the popover above the content. It does not affect visibility, and nothing enforces that a setting-gated tab declares it.
+- **`ProfileTabPrivacy` is optional** and purely informative: it renders the owner-facing popover above the tab content. It does not affect visibility, and nothing enforces that a setting-gated tab declares it. Profile owns this indicator — do not add another one inside a tab component, which is how the comments tab ended up rendering two. Its icon uses `text-tertiary`; never hardcode a colour, it breaks dark mode.
 
 ## Registry integrations
 
