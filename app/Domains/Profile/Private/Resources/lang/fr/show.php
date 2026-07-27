@@ -8,8 +8,6 @@ return [
     'edit_profile' => 'Modifier le profil',
     'failed_to_load_stories' => 'Échec du chargement des histoires.',
     'about' => 'À propos',
-    'stories' => 'Histoires',
-    'my-stories' => 'Mes histoires',
     'loading' => 'Chargement…',
     'title' => 'Profil de :name',
 ];

@@ -46,7 +46,7 @@ describe('Profile page', function () {
         $response->assertDontSee('profile::show.about');
 
         // Guests should see Stories tab label
-        $response->assertSee('profile::show.stories');
+        $response->assertSee('story::profile.stories');
     });
 
     it('shows About tab to any authenticated user when viewing someone else\'s profile', function () {
@@ -65,7 +65,7 @@ describe('Profile page', function () {
         // Assert: About tab is visible to authenticated users
         $response->assertOk();
         $response->assertSee('profile::show.about');
-        $response->assertSee('profile::show.stories');
+        $response->assertSee('story::profile.stories');
     });
 
 
@@ -96,7 +96,7 @@ describe('Profile page', function () {
         $user = alice($this);
 
         $this->actingAs($user)->get('/profile')
-            ->assertSee('profile::show.my-stories');
+            ->assertSee('story::profile.my-stories');
     });
 
     describe('Moderation', function () {
@@ -166,7 +166,7 @@ describe('Profile page', function () {
 
             $this->actingAs($user)->get('/profile')
                 ->assertSee('aria-selected="true"', false)
-                ->assertSee(__('profile::show.my-stories'));
+                ->assertSee(__('story::profile.my-stories'));
         });
 
         it('displays stories component on own profile default view', function () {
@@ -184,7 +184,7 @@ describe('Profile page', function () {
 
             $this->actingAs($bob)->get("/profile/{$profile->slug}/stories")
                 ->assertOk()
-                ->assertSee(__('story::profile.stories'));
+                ->assertSee('data-test-id="profile-stories"', false);
         });
 
         it('does not display stories component on about tab', function () {
@@ -192,9 +192,11 @@ describe('Profile page', function () {
             $bob = bob($this);
             $profile = Profile::where('user_id', $alice->id)->firstOrFail();
 
+            // The label now also names the tab in the strip, so assert on the
+            // component itself rather than on its heading text.
             $this->actingAs($bob)->get("/profile/{$profile->slug}/about")
                 ->assertOk()
-                ->assertDontSee(__('story::profile.stories'));
+                ->assertDontSee('data-test-id="profile-stories"', false);
         });
     });
 

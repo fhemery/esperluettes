@@ -17,6 +17,5 @@ return [
         ],
     ],
     'privacy' => [
-        'comments-hidden' => 'Désolé, cette personne ne souhaite pas lister ses commentaires publiquement.',
     ],
 ];

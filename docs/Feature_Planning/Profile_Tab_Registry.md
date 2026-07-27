@@ -73,7 +73,8 @@ Resolved from the container, so implementations inject their own services. **One
 |---|---|---|
 | `AlwaysVisible` | `true` | `stories` (default value) |
 | `AuthenticatedOnly` | `$viewerId !== null` | `about` |
-| `RoleBasedVisibility` | viewer holds one of N roles | `comments` (`user-confirmed`) — needs a per-tab subclass or a small factory, since the roles must be baked in |
+
+A `RoleBasedVisibility` base was drafted for the `comments` role check and then deleted unused: `ProfilePublicApi::canViewComments()` already encodes the confirmed-user requirement *and* the owner case, the moderator bypass and the hide-comments setting, so `CommentsTabVisibility` is a one-line delegation. Add the base back when a second tab genuinely needs a bare role check.
 
 Domains with real logic (`following`, `quotes`) implement the interface themselves and delegate to their existing `canViewFollowingTab()` / `canViewQuoteBook()` API methods.
 
@@ -268,7 +269,7 @@ Success criteria: full suite green with **no test modified** through step 4 exce
 | D1 | Default tab | Explicit `isDefault` flag on `stories`, not "first visible" (§2.6). Visitors now land on `stories` instead of `about`. |
 | D2 | Comments two-level privacy | Collapsed to one level: no access ⇒ no tab. Access but no content ⇒ tab shown with its own empty state. Visibility never counts rows (§2.5). |
 | D3 | Data loading | Every tab component self-hydrates from the request. No `dataProvider` hook; `quote::profile-tab` becomes a class component (§2.5). |
-| D4 | `requiredRoles` / `requiresAuth` | Dropped. One `ProfileTabVisibility` implementation per tab, with `AlwaysVisible` / `AuthenticatedOnly` / `RoleBasedVisibility` shipped by Profile for the trivial cases (§2.1). |
+| D4 | `requiredRoles` / `requiresAuth` | Dropped. One `ProfileTabVisibility` implementation per tab, with `AlwaysVisible` / `AuthenticatedOnly` shipped by Profile for the trivial cases (§2.1). |
 | D5 | Owner visibility indicator | Declarative `ProfileTabPrivacy` on the definition, rendered by Profile in the tab strip; replaces the two hand-rolled indicators in Follow and Quote (§2.8). |
 | D6 | Guest on a protected tab | Redirect to login (not 403), preserving today's `auth` middleware behaviour. The catch-all route accepts any unclaimed segment and the controller decides, per tab, whether this viewer must log in. |
 | D7 | Unknown or invisible tab key | Redirect to the default tab, for both `/profile/x/banana` and a tab hidden from this viewer. No 403/404 branch to design. |
@@ -276,7 +277,7 @@ Success criteria: full suite green with **no test modified** through step 4 exce
 | D15 | Indicator wording | Owned by Profile (`profile::show.tab_visibility.*`), not per-domain. Follow's copy is already domain-neutral and moves across; Quote's duplicate is deleted. Removes both label keys — and, with the Quote flip, the polarity flag — from `ProfileTabPrivacy` (§2.8). |
 | D16 | Indicator is optional | A tab may be gated by a setting without declaring `ProfileTabPrivacy`. The indicator is a nicety, not a guarantee; no test enforces it. |
 | D8 | Badge / counts in the strip | Not needed. No count callback in the contract — keeps profile rendering free of counting queries. |
-| D9 | Moderator-only tabs | Not a use case; such needs go to a dedicated admin screen. `RoleBasedVisibility` still covers the `comments` role check. |
+| D9 | Moderator-only tabs | Not a use case; such needs go to a dedicated admin screen. |
 | D10 | Route names | Centralise on `profile.show.tab` in Profile; drop the per-tab aliases. |
 | D11 | Registry state | Container singleton with instance state. **Done** — see §7. |
 | D12 | Tab components | Class components only. |

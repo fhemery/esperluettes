@@ -203,14 +203,12 @@ describe('Profile comments tab visibility', function () {
         // Get profile slug
         $profile = \App\Domains\Profile\Private\Models\Profile::where('user_id', $profileOwner->id)->first();
 
-        $response = $this->actingAs($viewer)->get(route('profile.show.comments', $profile->slug));
+        $response = $this->actingAs($viewer)->get(route('profile.show.tab', [$profile->slug, 'comments']));
 
         $response->assertOk();
-        // Should not see the hidden message
-        $response->assertDontSee(__('profile::settings.privacy.comments-hidden'));
     });
 
-    it('shows hidden message when setting is enabled for regular users', function () {
+    it('hides the tab when the setting is enabled for regular users', function () {
         $profileOwner = alice($this, roles: [Roles::USER_CONFIRMED]);
         $viewer = bob($this, roles: [Roles::USER_CONFIRMED]);
 
@@ -225,10 +223,11 @@ describe('Profile comments tab visibility', function () {
             true
         );
 
-        $response = $this->actingAs($viewer)->get(route('profile.show.comments', $profile->slug));
+        $response = $this->actingAs($viewer)->get(route('profile.show.tab', [$profile->slug, 'comments']));
 
-        $response->assertOk();
-        $response->assertSee(__('profile::settings.privacy.comments-hidden'));
+        // The tab is hidden outright rather than shown with a "comments hidden"
+        // placeholder, so the viewer lands back on the default tab.
+        $response->assertRedirect(route('profile.show', $profile->slug));
     });
 
     it('shows comments to profile owner even when hidden', function () {
@@ -245,10 +244,9 @@ describe('Profile comments tab visibility', function () {
             true
         );
 
-        $response = $this->actingAs($profileOwner)->get(route('profile.show.comments', $profile->slug));
+        $response = $this->actingAs($profileOwner)->get(route('profile.show.tab', [$profile->slug, 'comments']));
 
         $response->assertOk();
-        $response->assertDontSee(__('profile::settings.privacy.comments-hidden'));
     });
 
     it('shows comments to moderators even when hidden', function () {
@@ -266,9 +264,8 @@ describe('Profile comments tab visibility', function () {
             true
         );
 
-        $response = $this->actingAs($moderator)->get(route('profile.show.comments', $profile->slug));
+        $response = $this->actingAs($moderator)->get(route('profile.show.tab', [$profile->slug, 'comments']));
 
         $response->assertOk();
-        $response->assertDontSee(__('profile::settings.privacy.comments-hidden'));
     });
 });

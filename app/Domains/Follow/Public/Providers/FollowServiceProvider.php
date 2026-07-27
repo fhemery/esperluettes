@@ -2,6 +2,10 @@
 
 namespace App\Domains\Follow\Public\Providers;
 
+use App\Domains\Follow\Public\Visibility\FollowingTabVisibility;
+use App\Domains\Profile\Public\Api\ProfileTabRegistry;
+use App\Domains\Profile\Public\Contracts\ProfileTabDefinition;
+use App\Domains\Profile\Public\Contracts\ProfileTabPrivacy;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Follow\Private\Listeners\RemoveFollowsOnUserDeleted;
@@ -35,6 +39,18 @@ class FollowServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(app_path('Domains/Follow/Private/Resources/views'), 'follow');
         Blade::componentNamespace('App\\Domains\\Follow\\Private\\Views\\Components', 'follow');
+
+        app(ProfileTabRegistry::class)->register(new ProfileTabDefinition(
+            key: 'following',
+            order: 40,
+            component: 'follow::following-tab',
+            labelKey: 'follow::follow.following_tab.label',
+            visibility: FollowingTabVisibility::class,
+            privacy: new ProfileTabPrivacy(
+                settingsTabId: self::TAB_PROFILE,
+                settingsKey: self::KEY_HIDE_FOLLOWING_TAB,
+            ),
+        ));
 
         $eventBus = app(EventBus::class);
         $eventBus->registerEvent(UserFollowed::name(), UserFollowed::class);

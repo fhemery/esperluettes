@@ -4,8 +4,8 @@ namespace App\Domains\Profile\Private\Controllers;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Follow\Public\Api\FollowPublicApi;
 use App\Domains\Profile\Private\Models\Profile;
+use App\Domains\Profile\Public\Api\ProfileTabRegistry;
 use App\Domains\Profile\Private\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Private\Services\ProfileService;
 use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
@@ -22,78 +22,54 @@ class ProfileController extends Controller
     public function __construct(
         private ProfileService $profileService,
         private ProfileAvatarUrlService $avatarUrlService,
-        private AuthPublicApi $authApi
+        private AuthPublicApi $authApi,
+        private ProfileTabRegistry $tabs,
     ) {
     }
 
     /**
-     * Display the specified user's profile (default tab based on context).
-     * For own profile: shows stories tab.
-     * For logged-in users viewing others: shows about tab.
-     * For non-logged users: shows stories tab (about is not visible).
+     * Display a profile on its default tab.
      */
-    public function show(Profile $profile): View
+    public function show(Profile $profile): View|RedirectResponse
     {
-        if (!Auth::check()) {
-            $activeTab = 'stories';
-        } else {
-            $isOwn = $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
-            $activeTab = $isOwn ? 'stories' : 'about';
+        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
+        $tab = $this->tabs->defaultFor($profile->user_id, $viewerId);
+
+        if ($tab === null) {
+            abort(404);
         }
-        
-        return $this->renderProfile($profile, $activeTab);
+
+        return $this->renderProfile($profile, $tab->key);
     }
 
     /**
-     * Display the about tab of a user's profile.
+     * Display one tab of a profile.
+     *
+     * Access is decided here rather than by route middleware, because a single
+     * route serves every registered tab.
      */
-    public function showAbout(Profile $profile): View
-    {
-        return $this->renderProfile($profile, 'about');
-    }
-
-    /**
-     * Display the stories tab of a user's profile.
-     */
-    public function showStories(Profile $profile): View
-    {
-        return $this->renderProfile($profile, 'stories');
-    }
-
-    /**
-     * Display the comments tab of a user's profile.
-     */
-    public function showComments(Profile $profile): View
-    {
-        return $this->renderProfile($profile, 'comments');
-    }
-
-    /**
-     * Display the quotes tab of a user's profile.
-     */
-    public function showQuotes(Profile $profile): View
-    {
-        return $this->renderProfile($profile, 'quotes');
-    }
-
-    /**
-     * Display the following tab of a user's profile.
-     */
-    public function showFollowing(Profile $profile): View
+    public function showTab(Profile $profile, string $tab): View|RedirectResponse
     {
         $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
 
-        if (!app(FollowPublicApi::class)->canViewFollowingTab($profile->user_id, $viewerId)) {
-            abort(403);
+        if ($this->tabs->isVisible($tab, $profile->user_id, $viewerId)) {
+            return $this->renderProfile($profile, $tab);
         }
 
-        return $this->renderProfile($profile, 'following');
+        // A guest denied a tab that exists is invited to log in, as the auth
+        // middleware used to do when each tab had its own route.
+        if ($viewerId === null && $this->tabs->has($tab)) {
+            return redirect()->guest(route('login'));
+        }
+
+        // Unknown tab, or one this viewer may not see: fall back to the default.
+        return redirect()->route('profile.show', $profile);
     }
 
     /**
      * Render the profile page with the specified active tab.
      */
-    private function renderProfile(Profile $profile, string $activeTab, array $extra = []): View
+    private function renderProfile(Profile $profile, string $activeTab): View
     {
         $isOwn = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
         $isModerator = $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]);
@@ -101,13 +77,24 @@ class ProfileController extends Controller
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
 
-        return view('profile::pages.show', array_merge(compact('profile', 'isOwn', 'isModerator', 'activeTab'), $extra));
+        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
+        $tabs = $this->tabs->visibleFor($profile->user_id, $viewerId);
+        $activeTabDefinition = $this->tabs->get($activeTab);
+
+        return view('profile::pages.show', compact(
+            'profile',
+            'isOwn',
+            'isModerator',
+            'activeTab',
+            'tabs',
+            'activeTabDefinition',
+        ));
     }
 
     /**
      * Display the current user's profile.
      */
-    public function showOwn(): View
+    public function showOwn(): View|RedirectResponse
     {
         $user = Auth::user();
         $profile = $this->profileService->getProfile($user->id);

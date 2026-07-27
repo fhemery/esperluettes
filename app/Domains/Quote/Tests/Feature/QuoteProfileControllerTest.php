@@ -146,7 +146,7 @@ describe('Quotes profile tab — visibility indicator', function () {
         $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
 
         $html = $this->actingAs($owner)
-            ->get(route('profile.show.quotes', $slug))
+            ->get(route('profile.show.tab', [$slug, 'quotes']))
             ->assertOk()
             ->getContent();
 
@@ -165,7 +165,7 @@ describe('Quotes profile tab — visibility indicator', function () {
         $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
 
         $this->actingAs($owner)
-            ->get(route('profile.show.quotes', $slug))
+            ->get(route('profile.show.tab', [$slug, 'quotes']))
             ->assertOk()
             ->assertSee('visibility_off');
     });
@@ -176,7 +176,7 @@ describe('Quotes profile tab — visibility indicator', function () {
         $slug = \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $owner->id)->firstOrFail()->slug;
 
         $this->actingAs($viewer)
-            ->get(route('profile.show.quotes', $slug))
+            ->get(route('profile.show.tab', [$slug, 'quotes']))
             ->assertOk()
             ->assertDontSee('data-quote-visibility-indicator', false);
     });

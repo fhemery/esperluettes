@@ -116,75 +116,22 @@
         <div class="w-full">
             <div class="lg:col-span-2">
                 @php
-                    $tabs = [];
-                    if (Auth::check()) {
-                        $tabs[] = [
-                            'key' => 'about',
-                            'label' => __('profile::show.about'),
-                            'url' => route('profile.show.about', $profile),
-                        ];
-                    }
-                    $tabs[] = [
-                        'key' => 'stories',
-                        'label' => $isOwn ? __('profile::show.my-stories') : __('profile::show.stories'),
-                        'url' => route('profile.show.stories', $profile),
-                    ];
-                    // Comments tab only visible to USER_CONFIRMED
-                    $viewerIsConfirmed = Auth::check() && app(\App\Domains\Auth\Public\Api\AuthPublicApi::class)->hasAnyRole([\App\Domains\Auth\Public\Api\Roles::USER_CONFIRMED]);
-                    if ($viewerIsConfirmed) {
-                        $tabs[] = [
-                            'key' => 'comments',
-                            'label' => $isOwn ? __('story::profile.my-comments') : __('story::profile.comments'),
-                            'url' => route('profile.show.comments', $profile),
-                        ];
-                    }
-
-                    // Following tab visible to authenticated users if not hidden by privacy setting
-                    $followApi = app(\App\Domains\Follow\Public\Api\FollowPublicApi::class);
-                    $canViewFollowing = $followApi->canViewFollowingTab($profile->user_id, Auth::id());
-                    if ($canViewFollowing) {
-                        $tabs[] = [
-                            'key' => 'following',
-                            'label' => $isOwn ? __('follow::follow.following_tab.label') : __('follow::follow.following_tab.label'),
-                            'url' => route('profile.show.following', $profile),
-                        ];
-                    }
-
-                    // Check if viewer can see comments content (privacy setting)
-                    $privacyService = app(\App\Domains\Profile\Private\Services\ProfilePrivacyService::class);
-                    $canViewComments = $privacyService->canViewComments($profile->user_id, Auth::id());
-
-                    // Quotes tab: visible to owner, and to others if book is public
-                    $quoteViewerId = Auth::id() !== null ? (int) Auth::id() : null;
-                    $canViewQuotes = app(\App\Domains\Quote\Public\Api\QuotePublicApi::class)->canViewQuoteBook($profile->user_id, $quoteViewerId);
-                    if ($canViewQuotes) {
-                        $tabs[] = [
-                            'key' => 'quotes',
-                            'label' => $isOwn ? __('quote::ui.profile_tab.my_quotes') : __('quote::ui.profile_tab.quotes'),
-                            'url' => route('profile.show.quotes', $profile),
-                        ];
-                    }
+                    $tabStrip = array_map(fn ($tab) => [
+                        'key' => $tab->key,
+                        'label' => __($tab->labelKeyFor($isOwn)),
+                        'url' => route('profile.show.tab', [$profile, $tab->key]),
+                        'icon' => $tab->icon,
+                    ], $tabs);
                 @endphp
 
                 <!-- Tab Navigation -->
-                <x-shared::scrollable-tabs :tabs="$tabs" :active-tab="$activeTab" mode="link" />
+                <x-shared::scrollable-tabs :tabs="$tabStrip" :active-tab="$activeTab" mode="link" />
 
                 <!-- Tab Content -->
                 <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
-                    @if($activeTab === 'about' && Auth::check())
-                        <x-profile::about-panel :owner-user-id="$profile->user_id" />
-                    @elseif($activeTab === 'stories')
-                        <x-story::profile-stories-component :owner-user-id="$profile->user_id" />
-                    @elseif($activeTab === 'comments')
-                        @if($canViewComments)
-                            <x-story::profile-comments-component :owner-user-id="$profile->user_id" />
-                        @else
-                            <p class="text-center text-gray-500 py-8">{{ __('profile::settings.privacy.comments-hidden') }}</p>
-                        @endif
-                    @elseif($activeTab === 'following' && $canViewFollowing)
-                        <x-follow::following-tab :owner-user-id="$profile->user_id" />
-                    @elseif($activeTab === 'quotes')
-                        <x-quote::profile-tab :owner-user-id="$profile->user_id" />
+                    @if($activeTabDefinition)
+                        <x-dynamic-component :component="$activeTabDefinition->component"
+                            :owner-user-id="$profile->user_id" />
                     @endif
                 </div>
             </div>

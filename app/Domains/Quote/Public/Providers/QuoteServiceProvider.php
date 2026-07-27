@@ -2,6 +2,10 @@
 
 namespace App\Domains\Quote\Public\Providers;
 
+use App\Domains\Profile\Public\Api\ProfileTabRegistry;
+use App\Domains\Profile\Public\Contracts\ProfileTabDefinition;
+use App\Domains\Profile\Public\Contracts\ProfileTabPrivacy;
+use App\Domains\Quote\Public\Visibility\QuotesTabVisibility;
 use App\Domains\Auth\Public\Events\UserDeactivated;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Auth\Public\Events\UserReactivated;
@@ -47,6 +51,19 @@ class QuoteServiceProvider extends ServiceProvider
         $this->loadViewsFrom(app_path('Domains/Quote/Private/Resources/views'), 'quote');
         Blade::anonymousComponentPath(app_path('Domains/Quote/Private/Resources/views/components'), 'quote');
         Blade::componentNamespace('App\\Domains\\Quote\\Private\\View\\Components', 'quote');
+
+        app(ProfileTabRegistry::class)->register(new ProfileTabDefinition(
+            key: 'quotes',
+            order: 50,
+            component: 'quote::profile-tab',
+            labelKey: 'quote::ui.profile_tab.quotes',
+            ownLabelKey: 'quote::ui.profile_tab.my_quotes',
+            visibility: QuotesTabVisibility::class,
+            privacy: new ProfileTabPrivacy(
+                settingsTabId: self::TAB_PROFILE,
+                settingsKey: self::KEY_HIDE_QUOTES_TAB,
+            ),
+        ));
 
         $eventBus = app(EventBus::class);
         $this->registerNotifications();
