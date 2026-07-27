@@ -1,22 +1,6 @@
+{{-- The owner-facing visibility indicator is rendered by the profile page from
+     the tab's ProfileTabPrivacy declaration, not here. --}}
 <div class="flex flex-col gap-4">
-    @if($isOwn)
-    <div class="flex justify-end" data-follow-visibility-indicator>
-        <x-shared::popover placement="bottom">
-            <x-slot name="trigger">
-                <span class="material-symbols-outlined text-xl text-gray-400 leading-none">
-                    {{ $isHidden ? 'visibility_off' : 'visibility' }}
-                </span>
-            </x-slot>
-            <div class="text-sm">
-                <p>{{ $isHidden ? __('follow::follow.visibility.hidden') : __('follow::follow.visibility.visible') }}</p>
-                <a href="{{ route('settings.index', ['tab' => 'profile']) }}" class="underline text-primary">
-                    {{ __('follow::follow.visibility.preferences_link') }}
-                </a>
-            </div>
-        </x-shared::popover>
-    </div>
-    @endif
-
     @if(count($following) > 0)
         <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach($following as $profile)

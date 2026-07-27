@@ -143,7 +143,7 @@ describe('Following tab — visibility indicator', function () {
         $this->actingAs($viewer)
             ->get(route('profile.show.tab', [$slug, 'following']))
             ->assertOk()
-            ->assertDontSee('data-follow-visibility-indicator', false);
+            ->assertDontSee('data-test-id="profile-tab-visibility"', false);
     });
 });
 

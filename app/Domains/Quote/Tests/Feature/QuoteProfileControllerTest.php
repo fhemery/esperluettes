@@ -178,6 +178,6 @@ describe('Quotes profile tab — visibility indicator', function () {
         $this->actingAs($viewer)
             ->get(route('profile.show.tab', [$slug, 'quotes']))
             ->assertOk()
-            ->assertDontSee('data-quote-visibility-indicator', false);
+            ->assertDontSee('data-test-id="profile-tab-visibility"', false);
     });
 });

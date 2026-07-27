@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Profile\Private\Models\Profile;
+use App\Domains\Profile\Public\Providers\ProfileServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -25,6 +27,28 @@ function assertActiveTab(Illuminate\Testing\TestResponse $response, string $expe
     }
 
     expect($selected)->toBe([$expectedKey]);
+}
+
+/**
+ * The visibility icon shown on a tab in the strip, or null when that tab
+ * carries no indicator.
+ */
+function tabStripIndicator(Illuminate\Testing\TestResponse $response, string $tabKey): ?string
+{
+    foreach ($response->getElements('nav[role="tablist"] a[role="tab"]') as $tab) {
+        if (basename((string) parse_url($tab->getAttribute('href'), PHP_URL_PATH)) !== $tabKey) {
+            continue;
+        }
+
+        foreach ($tab->getElementsByTagName('span') as $span) {
+            $icon = trim($span->textContent);
+            if (in_array($icon, ['visibility', 'visibility_off'], true)) {
+                return $icon;
+            }
+        }
+    }
+
+    return null;
 }
 
 describe('Profile tab routing', function () {
@@ -180,6 +204,47 @@ describe('Profile tab routing', function () {
                 ->get("/profile/{$profile->slug}/stories")
                 ->assertOk()
                 ->assertSee(__('story::profile.my-stories'));
+        });
+    });
+
+    describe('Owner visibility indicator', function () {
+        it('flags a hidden tab in the strip while the owner is on another tab', function () {
+            $alice = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $profile = Profile::where('user_id', $alice->id)->firstOrFail();
+
+            setSettingsValue(
+                $alice->id,
+                ProfileServiceProvider::TAB_PROFILE,
+                ProfileServiceProvider::KEY_HIDE_COMMENTS_SECTION,
+                true,
+            );
+
+            // The whole point of moving the indicator into the strip: the owner
+            // sees the comments tab is hidden without opening it.
+            $response = $this->actingAs($alice)->get("/profile/{$profile->slug}/stories")->assertOk();
+
+            expect(tabStripIndicator($response, 'comments'))->toBe('visibility_off')
+                ->and(tabStripIndicator($response, 'stories'))->toBeNull();
+        });
+
+        it('marks a setting-gated tab as visible when it is not hidden', function () {
+            $alice = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $profile = Profile::where('user_id', $alice->id)->firstOrFail();
+
+            $response = $this->actingAs($alice)->get("/profile/{$profile->slug}/stories")->assertOk();
+
+            expect(tabStripIndicator($response, 'comments'))->toBe('visibility');
+        });
+
+        it('never shows the indicator to other people', function () {
+            $alice = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $bob = bob($this, roles: [Roles::USER_CONFIRMED]);
+            $profile = Profile::where('user_id', $alice->id)->firstOrFail();
+
+            $response = $this->actingAs($bob)->get("/profile/{$profile->slug}/stories")->assertOk();
+
+            expect(tabStripIndicator($response, 'comments'))->toBeNull();
+            $response->assertDontSee('data-test-id="profile-tab-visibility"', false);
         });
     });
 });

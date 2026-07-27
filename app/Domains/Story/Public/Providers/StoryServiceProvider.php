@@ -25,6 +25,8 @@ use App\Domains\Story\Public\Events\StoryCoverModerated;
 use Illuminate\Support\Facades\Blade;
 use App\Domains\Profile\Public\Api\ProfileTabRegistry;
 use App\Domains\Profile\Public\Contracts\ProfileTabDefinition;
+use App\Domains\Profile\Public\Contracts\ProfileTabPrivacy;
+use App\Domains\Profile\Public\Providers\ProfileServiceProvider;
 use App\Domains\Story\Public\Visibility\CommentsTabVisibility;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -289,6 +291,10 @@ class StoryServiceProvider extends ServiceProvider
             labelKey: 'story::profile.comments',
             ownLabelKey: 'story::profile.my-comments',
             visibility: CommentsTabVisibility::class,
+            privacy: new ProfileTabPrivacy(
+                settingsTabId: ProfileServiceProvider::TAB_PROFILE,
+                settingsKey: ProfileServiceProvider::KEY_HIDE_COMMENTS_SECTION,
+            ),
         ));
     }
 }

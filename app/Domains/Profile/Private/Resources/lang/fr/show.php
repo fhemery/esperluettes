@@ -10,4 +10,9 @@ return [
     'about' => 'À propos',
     'loading' => 'Chargement…',
     'title' => 'Profil de :name',
+    'tab_visibility' => [
+        'visible' => 'Cet onglet est visible des autres utilisateurices.',
+        'hidden' => 'Cet onglet est invisible des autres utilisateurices.',
+        'preferences_link' => 'Vos préférences',
+    ],
 ];

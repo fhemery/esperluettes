@@ -9,11 +9,6 @@ return [
         'label' => 'Abonnements',
         'empty' => 'Aucun abonnement pour le moment.',
     ],
-    'visibility' => [
-        'visible' => 'Cet onglet est visible des autres utilisateurices.',
-        'hidden' => 'Cet onglet est invisible des autres utilisateurices.',
-        'preferences_link' => 'Vos préférences',
-    ],
     'settings' => [
         'params' => [
             'hide-following-tab' => [

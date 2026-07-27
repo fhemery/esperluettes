@@ -1,7 +1,7 @@
-# Profile Tab Registry — Proposed Design
+# Profile Tab Registry
 
-Status: **draft / for discussion**
-Date: 2026-07-26
+Status: **implemented** on `refactor/profile-tabs-registry`
+Date: 2026-07-26, updated 2026-07-27
 
 ## 1. Problem
 
@@ -236,10 +236,16 @@ Two simplifications since the first draft:
 
 Profile resolves it through `SettingsPublicApi` (already a `ProfilePrivate` dependency) and renders, **only when `$isOwn`**, a small `visibility` / `visibility_off` icon next to the tab label, with a popover linking to `route('settings.index', ['tab' => $settingsTabId])`.
 
-Implications:
-- `x-shared::scrollable-tabs` needs an optional per-tab trailing slot or an `indicator` field in its tab array — currently it only supports `key`/`label`/`url`/`icon`. Smallest change: accept an optional `badge` string of pre-rendered markup, or a `hidden` bool the component turns into the icon itself. Prefer the latter (no HTML in arrays).
-- The `comments` tab gets one for free (`profile.privacy` setting), which it does not have today.
-- It stays purely informative: the actual visibility decision remains the `ProfileTabVisibility` implementation. The risk is the two drifting — a tab could declare `privacy` pointing at a setting its visibility rule ignores. Mitigation: a test per tab asserting "indicator says hidden ⇒ a stranger's `visibleFor()` excludes the tab".
+As built, it renders in **two places**, because the two serve different jobs:
+
+- **In the tab strip**, an `visibility` / `visibility_off` icon on every setting-gated tab. This is the new capability: the owner sees at a glance which of their tabs are exposed, without opening each one. It is deliberately non-interactive — an `<a role="tab">` must not wrap a control — so it carries the explanation in `title` / `aria-label` only.
+- **Above the active tab's content**, the popover with the same wording plus the link to the setting. This is the existing Follow/Quote indicator, relocated and generalised: one implementation in Profile instead of two hand-rolled copies, and now covering `comments` too.
+
+`x-shared::scrollable-tabs` gained one optional per-tab key, `visibility` (`hidden` bool + `label`), and stays generic — the URL and copy are passed in, so Shared learns nothing about settings.
+
+The strip data is assembled by `ProfileController::buildTabStrip()`, not in Blade, so the view holds no logic at all.
+
+It stays purely informative: the actual decision remains the `ProfileTabVisibility` implementation. The two can drift — a tab could declare `privacy` pointing at a setting its visibility rule ignores — and per D16 nothing enforces the pairing.
 
 ## 3. Deptrac impact
 
@@ -249,18 +255,22 @@ Add `ProfilePublic` to: `StoryPublic`, `QuotePublic`, `FollowPublic` (registrati
 
 Net: the coupling stops being hidden in Blade and becomes a declared, correctly-directed dependency.
 
-## 4. Migration plan
+## 4. Migration plan — **done**
 
-1. Add contracts + registry + registry unit tests. No behaviour change.
-2. Add the catch-all route and `showTab()`; register the five existing tabs from their own domains; keep the old routes as aliases. Feature tests (`ProfileTabsRoutingTest`) must stay green untouched.
-3. Normalise the four content components to the `(ownerUserId, isOwn)` contract; convert `quote::profile-tab` to a class component.
-4. Delete the `@php` block and the `@if/@elseif` chain from `show.blade.php`; delete `showAbout/showStories/showComments/showQuotes/showFollowing`.
-5. Move the `comments` privacy check into `CommentsTabVisibility` (expose `canViewComments` on `ProfilePublicApi`); delete the "comments hidden" branch and its translation key.
-6. Add `ProfileTabPrivacy` + the indicator slot in `x-shared::scrollable-tabs`; delete the two hand-rolled indicators in `follow::following-tab` and `quote::profile-tab`.
-7. Drop the deptrac entries; run `sail composer deptrac`.
-8. Migrate the `route('profile.show.stories', …)` call sites (2 non-test files + ~30 test occurrences) and remove the aliases.
+Shipped in five commits on `refactor/profile-tabs-registry`:
 
-Success criteria: full suite green with **no test modified** through step 4 except those asserting on the removed controller methods; the two behaviour changes (visitor landing tab §2.6, hidden comments tab §2.5) covered by updated tests in steps 4–5; deptrac clean; adding the Statistics tab touches zero Profile files.
+| # | Commit | What |
+|---|---|---|
+| 0 | `refactor(settings)` | Prerequisite: registry singleton instead of static state (§7). |
+| 0b | `feat(quote)` | Prerequisite: quote book visible by default via `hide-quotes-tab` (§8). |
+| 1 | `feat(profile): add the profile tab registry…` | Contracts, registry, visibility helpers, 15 unit tests. Purely additive. |
+| 2 | `refactor(profile): give every profile tab…` | All four tab components take a single `ownerUserId` and self-hydrate; Quote and About become class components. |
+| 3 | `feat(profile): drive the profile tabs from the registry` | Registration from each owning domain, catch-all route, `@php` block and `@if/@elseif` chain deleted, deptrac flipped. |
+| 4 | `feat(profile): show tab visibility to the owner` | `ProfileTabPrivacy` rendered in the strip and above the content; the two hand-rolled indicators deleted. |
+
+The original plan ordered routing before component normalisation. That was wrong: the catch-all route cannot render Quote's tab while Quote still depends on controller-supplied data, so steps 2 and 3 were swapped. Route aliases were never kept — D10 settled on migrating the call sites outright, and there turned out to be only two non-test files.
+
+Success criteria, checked: full suite green (2326); deptrac clean; adding the Statistics tab now touches zero Profile files.
 
 ## 5. Decisions taken
 

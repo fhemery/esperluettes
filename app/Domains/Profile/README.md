@@ -6,7 +6,7 @@ Manages the public-facing user profile: display name, avatar/picture, bio descri
 
 - Profile creation on user registration (generates a deterministic SVG avatar)
 - Profile editing: display name, bio, profile picture upload/removal, social links
-- Profile display: tab-based public page (stories, about, comments tabs)
+- Profile display: tab-based public page, where the tabs are contributed by other domains through `ProfileTabRegistry` (Profile owns only the `about` tab)
 - Avatar generation and URL resolution (custom upload or generated SVG fallback)
 - Profile slug management (derived from display name, used in URLs)
 - Profile caching (10-minute TTL, invalidated on every mutation)
@@ -41,6 +41,15 @@ Manages the public-facing user profile: display name, avatar/picture, bio descri
 ```
 Profile/
   Public/
+    Api/
+      ProfileTabRegistry.php         # Profile tabs, registered by their owning domains
+    Contracts/
+      ProfileTabDefinition.php       # A tab: key, order, component, label, visibility
+      ProfileTabPrivacy.php          # Optional owner-facing "is this tab visible?" indicator
+      ProfileTabVisibility.php       # Per-tab access rule
+    Visibility/
+      AlwaysVisible.php              # Everyone, guests included
+      AuthenticatedOnly.php          # Any logged-in user
     Events/
       AvatarChanged.php              # Emitted when avatar is uploaded or removed
       AvatarModerated.php            # Emitted when moderator removes avatar
@@ -76,7 +85,7 @@ Profile/
           inline-names.blade.php
           profile-and-role-picker.blade.php
         pages/
-          show.blade.php             # Public profile page (tabs: stories, about, comments)
+          show.blade.php             # Public profile page (tab strip + active tab component)
           edit.blade.php             # Profile edit form
     Services/
       ProfileService.php             # Core business logic (CRUD, avatar, slug, caching)
@@ -162,15 +171,39 @@ All routes are prefixed `/profile`.
 | GET | `/profile/` | `profile.show.own` | Authenticated users (`user`, `user-confirmed`) |
 | GET | `/profile/edit` | `profile.edit` | Authenticated users (`user`, `user-confirmed`) |
 | PUT | `/profile/` | `profile.update` | Authenticated users (`user`, `user-confirmed`) |
-| GET | `/profile/{slug}` | `profile.show` | Public |
-| GET | `/profile/{slug}/stories` | `profile.show.stories` | Public |
-| GET | `/profile/{slug}/about` | `profile.show.about` | Authenticated + compliant |
-| GET | `/profile/{slug}/comments` | `profile.show.comments` | `user-confirmed` + compliant |
+| GET | `/profile/{slug}` | `profile.show` | Public; redirects to the default tab |
+| GET | `/profile/{slug}/{tab}` | `profile.show.tab` | Per tab, decided by `ProfileTabRegistry` |
 | POST | `/profile/{slug}/moderation/remove-image` | `profile.moderation.remove-image` | Moderator / Admin |
 | POST | `/profile/{slug}/moderation/empty-about` | `profile.moderation.empty-about` | Moderator / Admin |
 | POST | `/profile/{slug}/moderation/empty-social` | `profile.moderation.empty-social` | Moderator / Admin |
 | GET | `/profile/lookup` | `profiles.lookup` | Authenticated + compliant (throttle 60/min) |
 | GET | `/profile/lookup/by-ids` | `profiles.lookup.by_ids` | Authenticated + compliant (throttle 60/min) |
+
+`profile.show.tab` is a single catch-all serving every registered tab, declared last so the routes above it match first. An unknown tab, or one this viewer may not see, redirects to the default tab; a guest denied a tab that exists is sent to login.
+
+## Adding a profile tab
+
+Your domain owns the tab: register it from your own service provider, and Profile renders it. Nothing in the Profile domain needs to change.
+
+```php
+// In YourServiceProvider::boot()
+app(ProfileTabRegistry::class)->register(new ProfileTabDefinition(
+    key: 'statistics',                          // URL segment: /profile/{slug}/statistics
+    order: 60,                                  // 10-point spacing by convention
+    component: 'statistics::profile-tab',       // class component, one prop: ownerUserId
+    labelKey: 'statistics::profile.statistics',
+    ownLabelKey: 'statistics::profile.my-statistics',   // optional
+    visibility: StatisticsTabVisibility::class, // defaults to AlwaysVisible
+    privacy: new ProfileTabPrivacy(             // optional owner-facing indicator
+        settingsTabId: ProfileServiceProvider::TAB_PROFILE,
+        settingsKey: 'hide-statistics-tab',
+    ),
+));
+```
+
+Then add `ProfilePublic` to your domain's `deptrac.yaml` ruleset.
+
+The component must be a class component taking a single `ownerUserId` prop and hydrating everything else itself (pagination from the request, `isOwn` from `Auth`). Visibility must not depend on how much content there is: an empty tab is still shown and renders its own empty state.
 
 ## Registry Integrations
 

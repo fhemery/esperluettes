@@ -115,20 +115,29 @@
         <!-- Profile Content - Route-based tabs -->
         <div class="w-full">
             <div class="lg:col-span-2">
-                @php
-                    $tabStrip = array_map(fn ($tab) => [
-                        'key' => $tab->key,
-                        'label' => __($tab->labelKeyFor($isOwn)),
-                        'url' => route('profile.show.tab', [$profile, $tab->key]),
-                        'icon' => $tab->icon,
-                    ], $tabs);
-                @endphp
-
                 <!-- Tab Navigation -->
-                <x-shared::scrollable-tabs :tabs="$tabStrip" :active-tab="$activeTab" mode="link" />
+                <x-shared::scrollable-tabs :tabs="$tabs" :active-tab="$activeTab" mode="link" />
 
                 <!-- Tab Content -->
                 <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
+                    @if($activeTabVisibility)
+                    <div class="flex justify-end" data-test-id="profile-tab-visibility">
+                        <x-shared::popover placement="bottom">
+                            <x-slot name="trigger">
+                                <span class="material-symbols-outlined text-xl text-gray-400 leading-none">
+                                    {{ $activeTabVisibility['hidden'] ? 'visibility_off' : 'visibility' }}
+                                </span>
+                            </x-slot>
+                            <div class="text-sm">
+                                <p>{{ $activeTabVisibility['label'] }}</p>
+                                <a href="{{ $activeTabVisibility['link_url'] }}" class="underline text-primary">
+                                    {{ $activeTabVisibility['link_label'] }}
+                                </a>
+                            </div>
+                        </x-shared::popover>
+                    </div>
+                    @endif
+
                     @if($activeTabDefinition)
                         <x-dynamic-component :component="$activeTabDefinition->component"
                             :owner-user-id="$profile->user_id" />

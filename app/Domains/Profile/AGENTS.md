@@ -47,6 +47,21 @@
 
 **`ProfileSnapshotFormatter::capture()` uses `user_id` as `$entityId`.** When registering a moderation report for a profile, pass the `user_id`, not an auto-increment ID (the model has no auto-increment PK).
 
+**Profile does not own its tabs.** The public profile page renders whatever is in `ProfileTabRegistry`; only `about` is registered by Profile itself. Do not add a tab, a route or a controller method here for another domain's content — that domain registers a `ProfileTabDefinition` from its own service provider (see "Tab registry" below).
+
+## Tab registry
+
+`ProfileTabRegistry` (`Public/Api`) is a container singleton, bound in `ProfileServiceProvider::register()`. Any domain registers a `ProfileTabDefinition` from its `boot()`, and owns that tab's label, visibility rule and component. Currently: `about` (Profile), `stories` + `comments` (Story), `following` (Follow), `quotes` (Quote).
+
+Things to know before touching it:
+
+- **One catch-all route serves every tab**: `/profile/{slug}/{tab}` → `ProfileController::showTab()`. It must stay declared last in the group so `/edit`, `/lookup`, `/search` and the moderation routes match first. There is no per-tab route and no per-tab middleware; `compliant` applies to the whole group and per-tab access is decided by the registry.
+- **Access is binary and lives in one place.** `visibleFor()` drives both the tab strip and the route guard. A tab the viewer cannot see is absent *and* unreachable — a denied guest is redirected to login, a denied authenticated user to the default tab. Never add a "you may not see this" placeholder inside a tab; hide the tab instead.
+- **Visibility must not count content.** It runs for every tab on every profile render. An empty tab is still shown and renders its own empty state.
+- **Tab components get exactly one prop, `ownerUserId`,** and hydrate themselves (including `?page` and `isOwn`). Class components only.
+- **`isDefault` marks the landing tab** (`stories`), and the registry throws if a second tab claims it.
+- **`ProfileTabPrivacy` is optional** and purely informative: it renders the owner-facing eye icon in the strip and the popover above the content. It does not affect visibility, and nothing enforces that a setting-gated tab declares it.
+
 ## Registry integrations
 
 - **ModerationRegistry** (`Moderation` domain) — registers the `'profile'` topic with `ProfileSnapshotFormatter`.
