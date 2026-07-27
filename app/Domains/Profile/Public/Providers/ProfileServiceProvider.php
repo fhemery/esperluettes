@@ -32,6 +32,7 @@ use App\Domains\Profile\Public\Events\AvatarModerated;
 use App\Domains\Profile\Public\Events\AboutModerated;
 use App\Domains\Profile\Public\Events\SocialModerated;
 use App\Domains\Profile\Private\Support\Moderation\ProfileSnapshotFormatter;
+use App\Domains\Profile\Public\Api\ProfileTabRegistry;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -46,6 +47,10 @@ class ProfileServiceProvider extends ServiceProvider
     {
         // Bind Shared contract to Profile implementation
         $this->app->singleton(ProfilePublicApiContract::class, ProfileApi::class);
+
+        // Tabs are registered into this by their owning domains, so every
+        // consumer must share the one instance.
+        $this->app->singleton(ProfileTabRegistry::class);
     }
 
     /**
