@@ -74,7 +74,9 @@ Resolved from the container, so implementations inject their own services. **One
 | `AlwaysVisible` | `true` | `stories` (default value) |
 | `AuthenticatedOnly` | `$viewerId !== null` | `about` |
 
-A `RoleBasedVisibility` base was drafted for the `comments` role check and then deleted unused: `ProfilePublicApi::canViewComments()` already encodes the confirmed-user requirement *and* the owner case, the moderator bypass and the hide-comments setting, so `CommentsTabVisibility` is a one-line delegation. Add the base back when a second tab genuinely needs a bare role check.
+A `RoleBasedVisibility` base was drafted for the `comments` role check and then deleted unused: the comment privacy rule already encodes the confirmed-user requirement *and* the owner case, the moderator bypass and the hide-comments setting, so `CommentsTabVisibility` is a one-line delegation. Add the base back when a second tab genuinely needs a bare role check.
+
+**Follow-up (§9): that rule and its setting moved out of Profile into Story**, where the tab lives.
 
 Domains with real logic (`following`, `quotes`) implement the interface themselves and delegate to their existing `canViewFollowingTab()` / `canViewQuoteBook()` API methods.
 
@@ -310,3 +312,24 @@ Investigated and fixed ahead of the rest, since the new registry should not copy
 **Impact:** two tests in `ThemePreferenceTest` failed — and they were *wrong before*. The `AppearanceService - user preference` block never registered the `appearance` parameter; it only passed because an earlier test in the same file registered it and the static state leaked forward. Added the missing `beforeEach(enableDarkThemeSettingForTesting(...))`, matching the sibling block. Full suite green (2304 passed), deptrac 0 violations. `Settings/AGENTS.md` and `README.md` updated — the AGENTS note previously told every domain to sprinkle `clearSettingsRegistry()` in `beforeEach`/`afterEach` to fight the contamination; that workaround is no longer needed.
 
 `ProfileTabRegistry` follows the same pattern: singleton bound in `ProfileServiceProvider::register()`, instance state, no statics.
+
+## 9. Follow-up: the comments tab's setting moved to Story
+
+The registry made Profile stop *rendering* other domains' tabs, but the `comments` tab was still half-owned by Profile: the `hide-comments-section` setting, its translations, and `ProfilePrivacyService::canViewComments()` all lived there — and `canViewComments` had been pushed onto the **Shared** `ProfilePublicApi` contract so Story could reach it. A rule that gates one Story tab was part of the app-wide profile contract, and Profile still had to know the comments tab existed.
+
+That asymmetry is what made this tab awkward throughout the migration. Follow and Quote each own their setting *and* their rule; only Story did not.
+
+Moved into Story:
+
+| Was | Now |
+|---|---|
+| `ProfileServiceProvider::KEY_HIDE_COMMENTS_SECTION` + registration | `StoryServiceProvider`, registered into Profile's tab from `app->booted()` |
+| `profile::settings.params.hide-comments-section.*` | `story::profile.settings.hide-comments-section.*` |
+| `ProfilePrivacyService` (deleted) | `Story\Private\Services\ProfileCommentsPolicy` |
+| `ProfilePublicApi::canViewComments()` on the **Shared** contract (removed) | internal to Story; `CommentsTabVisibility` and the tab component call the policy directly |
+
+Profile now registers only the settings *tab* and *privacy section*; every parameter inside it belongs to the domain whose tab it gates. Profile no longer contains the word "comments" outside its own tests.
+
+**No data migration.** The setting is still stored under `domain = 'profile'`, `key = 'hide-comments-section'` — the settings tab id did not change, only which provider declares the parameter. Verified by reading a pre-existing row back through the new policy.
+
+Deptrac: `StoryPublic` gains `SettingsPublic` (it now registers a user setting). Nothing was added to Profile.

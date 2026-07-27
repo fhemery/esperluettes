@@ -190,12 +190,9 @@ describe('Profile tab routing', function () {
             $alice = alice($this, roles: [Roles::USER_CONFIRMED]);
             $profile = Profile::where('user_id', $alice->id)->firstOrFail();
 
-            setSettingsValue(
-                $alice->id,
-                ProfileServiceProvider::TAB_PROFILE,
-                ProfileServiceProvider::KEY_HIDE_COMMENTS_SECTION,
-                true,
-            );
+            // Literal key on purpose: this setting belongs to Story, and Profile
+            // must not depend on Story to test its own indicator rendering.
+            setSettingsValue($alice->id, ProfileServiceProvider::TAB_PROFILE, 'hide-comments-section', true);
 
             $this->actingAs($alice)->get("/profile/{$profile->slug}/comments")
                 ->assertOk()

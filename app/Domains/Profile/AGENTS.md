@@ -65,4 +65,4 @@ Things to know before touching it:
 ## Registry integrations
 
 - **ModerationRegistry** (`Moderation` domain) — registers the `'profile'` topic with `ProfileSnapshotFormatter`.
-- **SettingsPublicApi** (`Settings` domain) — registers a `Profile` tab (order 30), a `Privacy` section, and the `hide-comments-section` boolean parameter (default `false`). Constants `TAB_PROFILE`, `SECTION_PRIVACY`, and `KEY_HIDE_COMMENTS_SECTION` live on `ProfileServiceProvider`.
+- **SettingsPublicApi** (`Settings` domain) — registers the `Profile` tab (order 30) and its `Privacy` section, and **nothing else**. Constants `TAB_PROFILE` and `SECTION_PRIVACY` live on `ProfileServiceProvider`. The parameters inside that section belong to the domains whose tabs they gate — `hide-comments-section` (Story), `hide-following-tab` (Follow), `hide-quotes-tab` (Quote) — each registered from its own provider into Profile's tab. Do not add a privacy parameter here for another domain's tab.

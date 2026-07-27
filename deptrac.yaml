@@ -581,6 +581,8 @@ deptrac:
       - AdministrationPublic
       # Registers the stories and comments profile tabs
       - ProfilePublic
+      # Registers the hide-comments-section user setting
+      - SettingsPublic
 
     StoryRefPublic:
       - Shared
