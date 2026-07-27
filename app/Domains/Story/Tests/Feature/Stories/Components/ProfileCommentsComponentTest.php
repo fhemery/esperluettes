@@ -33,7 +33,7 @@ describe('ProfileCommentsComponent', function () {
             // Logout the user to simulate unauthenticated viewer
             auth()->logout();
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $profileUser->id]);
 
             // Should render empty (no content) when viewer is not authenticated
             expect($html)->toBe('');
@@ -53,7 +53,7 @@ describe('ProfileCommentsComponent', function () {
             $nonConfirmedViewer = carol($this, roles: [Roles::USER]);
             $this->actingAs($nonConfirmedViewer);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $profileUser->id]);
 
             // Should render empty (no content) when viewer is not confirmed
             expect($html)->toBe('');
@@ -73,7 +73,7 @@ describe('ProfileCommentsComponent', function () {
             $confirmedViewer = carol($this, roles: [Roles::USER_CONFIRMED]);
             $this->actingAs($confirmedViewer);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $profileUser->id]);
 
             // Should show the comment when viewer is confirmed
             expect($html)
@@ -96,7 +96,7 @@ describe('ProfileCommentsComponent', function () {
             $moderatorViewer = carol($this, roles: [Roles::MODERATOR]);
             $this->actingAs($moderatorViewer);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $profileUser->id]);
 
             // Should show the comment when viewer is moderator
             expect($html)
@@ -119,7 +119,7 @@ describe('ProfileCommentsComponent', function () {
             $adminViewer = carol($this, roles: [Roles::ADMIN]);
             $this->actingAs($adminViewer);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $profileUser->id]);
 
             // Should show the comment when viewer is admin
             expect($html)
@@ -142,7 +142,7 @@ describe('ProfileCommentsComponent', function () {
             $techAdminViewer = carol($this, roles: [Roles::TECH_ADMIN]);
             $this->actingAs($techAdminViewer);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $profileUser->id]);
 
             // Should show the comment when viewer is tech admin
             expect($html)
@@ -162,7 +162,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $chapter->id, generateDummyText(150));
 
             // User should always see their own comments
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $profileUser->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $profileUser->id]);
 
             // Should show the comment when viewing own profile
             expect($html)
@@ -177,7 +177,7 @@ describe('ProfileCommentsComponent', function () {
             // Make sure the viewer is also confirmed
             $this->actingAs($user);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $user->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $user->id]);
 
             expect($html)->toContain(__('story::profile.no-comments'));
         });
@@ -188,7 +188,7 @@ describe('ProfileCommentsComponent', function () {
             // User should see their own profile (even with no comments)
             $this->actingAs($user);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $user->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $user->id]);
 
             // Should show "no comments" when viewing own profile, even if not confirmed
             expect($html)->toContain(__('story::profile.no-comments'));
@@ -211,7 +211,7 @@ describe('ProfileCommentsComponent', function () {
             $this->actingAs($commenter);
             createComment('chapter', $chapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Should render an <img> tag with the themed cover URL, not the default SVG
             expect($html)
@@ -230,7 +230,7 @@ describe('ProfileCommentsComponent', function () {
             $this->actingAs($commenter);
             createComment('chapter', $chapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Default cover renders inline SVG (not an <img> tag)
             expect($html)
@@ -250,7 +250,7 @@ describe('ProfileCommentsComponent', function () {
             $this->actingAs($commenter);
             createComment('chapter', $chapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Should show author name, story title, and comment count
             expect($html)
@@ -271,7 +271,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $chapter1->id, generateDummyText(150));
             createComment('chapter', $chapter2->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Story should appear once with comment count under author
             expect($html)
@@ -293,7 +293,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $chapter1->id, generateDummyText(150));
             createComment('chapter', $chapter2->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Both stories should appear under the same author
             expect($html)
@@ -316,7 +316,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $aliceChapter->id, generateDummyText(150));
             createComment('chapter', $bobChapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Both authors should appear with their stories
             expect($html)
@@ -346,7 +346,7 @@ describe('ProfileCommentsComponent', function () {
             $this->actingAs($commenter);
             createComment('chapter', $chapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Both author names should appear in the same collapsible header
             expect($html)
@@ -377,7 +377,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $chapter1->id, generateDummyText(150));
             createComment('chapter', $chapter2->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Both stories should appear
             expect($html)
@@ -414,7 +414,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $aliceBobChapter->id, generateDummyText(150));
             createComment('chapter', $aliceCharlieChapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // All three stories should appear
             expect($html)
@@ -440,7 +440,7 @@ describe('ProfileCommentsComponent', function () {
             $this->actingAs($commenter);
             createComment('chapter', $chapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Authors should be comma-separated (Alice, Bob or Bob, Alice depending on sort)
             expect($html)->toMatch('/Alice.*,.*Bob|Bob.*,.*Alice/');
@@ -459,7 +459,7 @@ describe('ProfileCommentsComponent', function () {
             $this->actingAs($commenter);
             createComment('chapter', $chapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Alice should appear before Zara (alphabetical)
             $alicePos = strpos($html, 'Alice');
@@ -485,7 +485,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $publicChapter->id, generateDummyText(150));
             createComment('chapter', $privateChapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             expect($html)
                 ->toContain('Public Story')
@@ -502,7 +502,7 @@ describe('ProfileCommentsComponent', function () {
             $this->actingAs($commenter);
             createComment('chapter', $chapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             expect($html)->toContain('Community Story');
         });
@@ -519,7 +519,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $publishedChapter->id, generateDummyText(150));
             createComment('chapter', $unpublishedChapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             // Should show story with count (only published chapter counted)
             expect($html)
@@ -544,7 +544,7 @@ describe('ProfileCommentsComponent', function () {
             createComment('chapter', $chapter->id, generateDummyText(150), $rootId);
 
             // Replier's profile should show empty state (only has a reply, no root comments)
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $replier->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $replier->id]);
 
             expect($html)->toContain(__('story::profile.no-comments'));
         });
@@ -561,7 +561,7 @@ describe('ProfileCommentsComponent', function () {
 
             Chapter::where('id', $chapter->id)->update(['status' => Chapter::STATUS_NOT_PUBLISHED]);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             expect($html)->toContain(__('story::profile.no-comments'));
         });
@@ -578,44 +578,15 @@ describe('ProfileCommentsComponent', function () {
 
             Story::where('id', $story->id)->update(['visibility' => Story::VIS_PRIVATE]);
 
-            $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-comments-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             expect($html)->toContain(__('story::profile.no-comments'));
         });
     });
 });
 
-describe('Visibility indicator', function () {
-    it('shows visibility_off icon when owner views their hidden tab', function () {
-        $owner = alice($this);
-        app(SettingsPublicApi::class)->setValue($owner->id, 'profile', 'hide-comments-section', true);
-
-        $this->actingAs($owner);
-        $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $owner->id]);
-
-        expect($html)->toContain('visibility_off');
-    });
-
-    it('shows visibility icon when owner views their visible tab', function () {
-        $owner = alice($this);
-
-        $this->actingAs($owner);
-        $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $owner->id]);
-
-        expect($html)->toContain('visibility')
-            ->and($html)->not->toContain('visibility_off');
-    });
-
-    it('does not show visibility indicator to other users', function () {
-        $owner = alice($this);
-        $viewer = bob($this);
-
-        $this->actingAs($viewer);
-        $html = Blade::render('<x-story::profile-comments-component :user-id="$userId" />', ['userId' => $owner->id]);
-
-        expect($html)->not->toContain('data-comments-visibility-indicator');
-    });
-});
+// The owner-facing visibility indicator is rendered by the profile page, not by
+// this component; it is covered in Profile's ProfileTabsRoutingTest.
 
 describe('ProfileCommentsApiController', function () {
     it('returns comments for a story by user', function () {

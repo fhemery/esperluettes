@@ -292,6 +292,10 @@ describe('ThemeService - settings page integration', function () {
 });
 
 describe('AppearanceService - user preference', function () {
+    beforeEach(function () {
+        enableDarkThemeSettingForTesting($this);
+    });
+
     it('returns light appearance for guests', function () {
         $appearanceService = app(AppearanceService::class);
 

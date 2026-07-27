@@ -8,8 +8,11 @@ return [
     'edit_profile' => 'Modifier le profil',
     'failed_to_load_stories' => 'Échec du chargement des histoires.',
     'about' => 'À propos',
-    'stories' => 'Histoires',
-    'my-stories' => 'Mes histoires',
     'loading' => 'Chargement…',
     'title' => 'Profil de :name',
+    'tab_visibility' => [
+        'visible' => 'Cet onglet est visible des autres utilisateurices.',
+        'hidden' => 'Cet onglet est invisible des autres utilisateurices.',
+        'preferences_link' => 'Vos préférences',
+    ],
 ];

@@ -21,6 +21,7 @@ class ProfileStoriesComponent extends Component
     public bool $canEdit;
     public bool $canCreateStory;
     public int $profileUserId;
+    public bool $isOwn;
     public int $availableChapterCredits;
     public bool $showCredits;
 
@@ -29,9 +30,10 @@ class ProfileStoriesComponent extends Component
         private StoryViewModelBuilder $vmBuilder,
         private AuthPublicApi $authApi,
         private ChapterCreditService $credits,
-        int $userId,
+        int $ownerUserId,
     ) {
-        $this->profileUserId = $userId;
+        $this->profileUserId = $ownerUserId;
+        $this->isOwn = Auth::id() !== null && (int) Auth::id() === $ownerUserId;
         $this->hydrate();
     }
 
@@ -46,7 +48,6 @@ class ProfileStoriesComponent extends Component
             $vis = [Story::VIS_PUBLIC, Story::VIS_COMMUNITY, Story::VIS_PRIVATE];
         }
 
-        $isOwner = Auth::id() !== null && Auth::id() === $this->profileUserId;
         $filter = new StoryFilterAndPagination(
             page: $page,
             perPage: 12,
@@ -61,7 +62,7 @@ class ProfileStoriesComponent extends Component
 
         $this->viewModel = new StoryListViewModel($paginator, $items);
 
-        $this->canEdit = $isOwner;
+        $this->canEdit = $this->isOwn;
         $this->canCreateStory = $this->canEdit && $this->authApi->hasAnyRole([Roles::USER_CONFIRMED]);
 
         $this->availableChapterCredits = $this->credits->availableForUser($this->profileUserId);

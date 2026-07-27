@@ -23,6 +23,11 @@ use App\Domains\Story\Public\Events\StoryModeratedAsPrivate;
 use App\Domains\Story\Public\Events\StorySummaryModerated;
 use App\Domains\Story\Public\Events\StoryCoverModerated;
 use Illuminate\Support\Facades\Blade;
+use App\Domains\Profile\Public\Api\ProfileTabRegistry;
+use App\Domains\Profile\Public\Contracts\ProfileTabDefinition;
+use App\Domains\Profile\Public\Contracts\ProfileTabPrivacy;
+use App\Domains\Profile\Public\Providers\ProfileServiceProvider;
+use App\Domains\Story\Public\Visibility\CommentsTabVisibility;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Auth\Public\Events\UserRegistered;
@@ -103,6 +108,8 @@ class StoryServiceProvider extends ServiceProvider
 
         // Load PHP translations for the Story domain under 'story::'
         $this->loadTranslationsFrom(app_path('Domains/Story/Private/Resources/lang'), 'story');
+
+        $this->registerProfileTabs();
 
         // Register policies
         Gate::policy(Story::class, StoryPolicy::class);
@@ -261,6 +268,33 @@ class StoryServiceProvider extends ServiceProvider
             type: ParameterType::BOOL,
             default: false,
             visibility: ConfigParameterVisibility::ALL_ADMINS,
+        ));
+    }
+
+    private function registerProfileTabs(): void
+    {
+        $registry = app(ProfileTabRegistry::class);
+
+        $registry->register(new ProfileTabDefinition(
+            key: 'stories',
+            order: 20,
+            component: 'story::profile-stories-component',
+            labelKey: 'story::profile.stories',
+            ownLabelKey: 'story::profile.my-stories',
+            isDefault: true,
+        ));
+
+        $registry->register(new ProfileTabDefinition(
+            key: 'comments',
+            order: 30,
+            component: 'story::profile-comments-component',
+            labelKey: 'story::profile.comments',
+            ownLabelKey: 'story::profile.my-comments',
+            visibility: CommentsTabVisibility::class,
+            privacy: new ProfileTabPrivacy(
+                settingsTabId: ProfileServiceProvider::TAB_PROFILE,
+                settingsKey: ProfileServiceProvider::KEY_HIDE_COMMENTS_SECTION,
+            ),
         ));
     }
 }

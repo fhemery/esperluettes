@@ -55,18 +55,18 @@ describe('Following tab route protection', function () {
         $owner = alice($this);
         $slug = profileSlugFromApi($owner->id);
 
-        $this->get(route('profile.show.following', $slug))
+        $this->get(route('profile.show.tab', [$slug, 'following']))
             ->assertRedirect('/login');
     });
 
-    it('returns 403 for a simple USER (not confirmed) viewing someone else\'s tab', function () {
+    it('redirects a simple USER (not confirmed) viewing someone else\'s tab', function () {
         $owner = alice($this);
         $viewer = registerUserThroughForm($this, ['name' => 'Eve', 'email' => 'eve@example.com'], roles: [Roles::USER]);
         $slug = profileSlugFromApi($owner->id);
 
         $this->actingAs($viewer)
-            ->get(route('profile.show.following', $slug))
-            ->assertForbidden();
+            ->get(route('profile.show.tab', [$slug, 'following']))
+            ->assertRedirect(route('profile.show', $slug));
     });
 
     it('returns 200 for an authenticated viewer when privacy is off', function () {
@@ -75,19 +75,19 @@ describe('Following tab route protection', function () {
         $slug = profileSlugFromApi($owner->id);
 
         $this->actingAs($viewer)
-            ->get(route('profile.show.following', $slug))
+            ->get(route('profile.show.tab', [$slug, 'following']))
             ->assertOk();
     });
 
-    it('returns 403 for other users when owner has hidden the tab', function () {
+    it('redirects other users to the default tab when owner has hidden the tab', function () {
         $owner = alice($this);
         $viewer = bob($this);
         app(SettingsPublicApi::class)->setValue($owner->id, 'profile', 'hide-following-tab', true);
         $slug = profileSlugFromApi($owner->id);
 
         $this->actingAs($viewer)
-            ->get(route('profile.show.following', $slug))
-            ->assertForbidden();
+            ->get(route('profile.show.tab', [$slug, 'following']))
+            ->assertRedirect(route('profile.show', $slug));
     });
 
     it('returns 200 for the owner even when they have hidden the tab', function () {
@@ -96,7 +96,7 @@ describe('Following tab route protection', function () {
         $slug = profileSlugFromApi($owner->id);
 
         $this->actingAs($owner)
-            ->get(route('profile.show.following', $slug))
+            ->get(route('profile.show.tab', [$slug, 'following']))
             ->assertOk();
     });
 
@@ -105,7 +105,7 @@ describe('Following tab route protection', function () {
         $slug = profileSlugFromApi($owner->id);
 
         $this->actingAs($owner)
-            ->get(route('profile.show.following', $slug))
+            ->get(route('profile.show.tab', [$slug, 'following']))
             ->assertOk();
     });
 });
@@ -117,7 +117,7 @@ describe('Following tab — visibility indicator', function () {
         $slug = profileSlugFromApi($owner->id);
 
         $this->actingAs($owner)
-            ->get(route('profile.show.following', $slug))
+            ->get(route('profile.show.tab', [$slug, 'following']))
             ->assertOk()
             ->assertSee('visibility_off');
     });
@@ -127,7 +127,7 @@ describe('Following tab — visibility indicator', function () {
         $slug = profileSlugFromApi($owner->id);
 
         $html = $this->actingAs($owner)
-            ->get(route('profile.show.following', $slug))
+            ->get(route('profile.show.tab', [$slug, 'following']))
             ->assertOk()
             ->getContent();
 
@@ -141,9 +141,9 @@ describe('Following tab — visibility indicator', function () {
         $slug = profileSlugFromApi($owner->id);
 
         $this->actingAs($viewer)
-            ->get(route('profile.show.following', $slug))
+            ->get(route('profile.show.tab', [$slug, 'following']))
             ->assertOk()
-            ->assertDontSee('data-follow-visibility-indicator', false);
+            ->assertDontSee('data-test-id="profile-tab-visibility"', false);
     });
 });
 
@@ -157,7 +157,7 @@ describe('Following tab in profile page', function () {
             ->assertOk()
             ->getContent();
 
-        expect($html)->toContain(route('profile.show.following', $slug));
+        expect($html)->toContain(route('profile.show.tab', [$slug, 'following']));
     });
 
     it('does not show the following tab link to a simple USER', function () {
@@ -170,7 +170,7 @@ describe('Following tab in profile page', function () {
             ->assertOk()
             ->getContent();
 
-        expect($html)->not->toContain(route('profile.show.following', $slug));
+        expect($html)->not->toContain(route('profile.show.tab', [$slug, 'following']));
     });
 
     it('shows the following tab link to a USER_CONFIRMED viewer', function () {
@@ -183,7 +183,7 @@ describe('Following tab in profile page', function () {
             ->assertOk()
             ->getContent();
 
-        expect($html)->toContain(route('profile.show.following', $slug));
+        expect($html)->toContain(route('profile.show.tab', [$slug, 'following']));
     });
 });
 

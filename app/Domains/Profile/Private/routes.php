@@ -45,29 +45,14 @@ Route::middleware('web')->prefix('profile')->group(function () {
             ->name('profiles.search');
     });
 
-    // Public profile pages (by slug) - tab-based routes
-    // Default route shows stories for guests, about for authenticated users viewing others
-    Route::get('/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
-    
-    // Stories tab - publicly accessible (anonymous users can view)
-    Route::get('/{profile:slug}/stories', [ProfileController::class, 'showStories'])->name('profile.show.stories');
-    
-    // About tab - accessible to authenticated users only
-    Route::middleware(['auth', 'compliant'])->group(function () {
-        Route::get('/{profile:slug}/about', [ProfileController::class, 'showAbout'])->name('profile.show.about');
+    // Public profile pages (by slug). Tabs come from the ProfileTabRegistry:
+    // one catch-all route, with per-tab access decided by the controller.
+    // Declared last so every other route in this group matches first.
+    Route::middleware(['compliant'])->group(function () {
+        Route::get('/{profile:slug}', [ProfileController::class, 'show'])->name('profile.show');
+
+        Route::get('/{profile:slug}/{tab}', [ProfileController::class, 'showTab'])
+            ->where('tab', '[a-z0-9-]+')
+            ->name('profile.show.tab');
     });
-
-    // Comments tab - accessible only to USER_CONFIRMED
-    Route::middleware(['auth', 'compliant', 'role:' . Roles::USER_CONFIRMED])->group(function () {
-        Route::get('/{profile:slug}/comments', [ProfileController::class, 'showComments'])->name('profile.show.comments');
-    });
-
-    // Following tab - auth + compliant only; role/privacy check is done in the controller via canViewFollowingTab
-    Route::middleware(['auth', 'compliant'])->group(function () {
-        Route::get('/{profile:slug}/following', [ProfileController::class, 'showFollowing'])->name('profile.show.following');
-    });
-
-    // Quotes tab - publicly accessible (visibility controlled by quote book privacy setting)
-    Route::get('/{profile:slug}/quotes', [ProfileController::class, 'showQuotes'])->name('profile.show.quotes');
-
 });

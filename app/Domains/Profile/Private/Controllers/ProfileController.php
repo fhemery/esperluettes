@@ -4,11 +4,13 @@ namespace App\Domains\Profile\Private\Controllers;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Follow\Public\Api\FollowPublicApi;
 use App\Domains\Profile\Private\Models\Profile;
+use App\Domains\Profile\Public\Api\ProfileTabRegistry;
+use App\Domains\Profile\Public\Contracts\ProfileTabDefinition;
 use App\Domains\Profile\Private\Requests\UpdateProfileRequest;
 use App\Domains\Profile\Private\Services\ProfileService;
 use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
 use App\Domains\Shared\ViewModels\PageViewModel;
 use Illuminate\Http\RedirectResponse;
@@ -22,81 +24,55 @@ class ProfileController extends Controller
     public function __construct(
         private ProfileService $profileService,
         private ProfileAvatarUrlService $avatarUrlService,
-        private AuthPublicApi $authApi
+        private AuthPublicApi $authApi,
+        private ProfileTabRegistry $tabs,
+        private SettingsPublicApi $settings,
     ) {
     }
 
     /**
-     * Display the specified user's profile (default tab based on context).
-     * For own profile: shows stories tab.
-     * For logged-in users viewing others: shows about tab.
-     * For non-logged users: shows stories tab (about is not visible).
+     * Display a profile on its default tab.
      */
-    public function show(Profile $profile): View
-    {
-        if (!Auth::check()) {
-            $activeTab = 'stories';
-        } else {
-            $isOwn = $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
-            $activeTab = $isOwn ? 'stories' : 'about';
-        }
-        
-        return $this->renderProfile($profile, $activeTab);
-    }
-
-    /**
-     * Display the about tab of a user's profile.
-     */
-    public function showAbout(Profile $profile): View
-    {
-        return $this->renderProfile($profile, 'about');
-    }
-
-    /**
-     * Display the stories tab of a user's profile.
-     */
-    public function showStories(Profile $profile): View
-    {
-        return $this->renderProfile($profile, 'stories');
-    }
-
-    /**
-     * Display the comments tab of a user's profile.
-     */
-    public function showComments(Profile $profile): View
-    {
-        return $this->renderProfile($profile, 'comments');
-    }
-
-    /**
-     * Display the quotes tab of a user's profile.
-     */
-    public function showQuotes(Profile $profile, Request $request): View
+    public function show(Profile $profile): View|RedirectResponse
     {
         $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
-        $page = max(1, (int) $request->query('page', 1));
-        $quoteList = app(\App\Domains\Quote\Public\Api\QuotePublicApi::class)->getForProfile($profile->user_id, $viewerId, $page);
-        return $this->renderProfile($profile, 'quotes', ['quoteList' => $quoteList]);
+        $tab = $this->tabs->defaultFor($profile->user_id, $viewerId);
+
+        if ($tab === null) {
+            abort(404);
+        }
+
+        return $this->renderProfile($profile, $tab->key);
     }
 
     /**
-     * Display the following tab of a user's profile.
+     * Display one tab of a profile.
+     *
+     * Access is decided here rather than by route middleware, because a single
+     * route serves every registered tab.
      */
-    public function showFollowing(Profile $profile): View
+    public function showTab(Profile $profile, string $tab): View|RedirectResponse
     {
         $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
 
-        if (!app(FollowPublicApi::class)->canViewFollowingTab($profile->user_id, $viewerId)) {
-            abort(403);
+        if ($this->tabs->isVisible($tab, $profile->user_id, $viewerId)) {
+            return $this->renderProfile($profile, $tab);
         }
 
-        return $this->renderProfile($profile, 'following');
+        // A guest denied a tab that exists is invited to log in, as the auth
+        // middleware used to do when each tab had its own route.
+        if ($viewerId === null && $this->tabs->has($tab)) {
+            return redirect()->guest(route('login'));
+        }
+
+        // Unknown tab, or one this viewer may not see: fall back to the default.
+        return redirect()->route('profile.show', $profile);
     }
 
     /**
      * Render the profile page with the specified active tab.
      */
-    private function renderProfile(Profile $profile, string $activeTab, array $extra = []): View
+    private function renderProfile(Profile $profile, string $activeTab): View
     {
         $isOwn = Auth::check() && $this->profileService->canEditProfile(Auth::user()->id, $profile->user_id);
         $isModerator = $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]);
@@ -104,13 +80,69 @@ class ProfileController extends Controller
         $this->adjustProfilePicture($profile);
         $this->adjustProfileRoles($profile);
 
-        return view('profile::pages.show', array_merge(compact('profile', 'isOwn', 'isModerator', 'activeTab'), $extra));
+        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
+        $tabs = $this->buildTabStrip($profile, $isOwn, $viewerId);
+        $activeTabDefinition = $this->tabs->get($activeTab);
+        $activeTabVisibility = $isOwn ? $this->tabVisibility($profile, $activeTabDefinition) : null;
+
+        return view('profile::pages.show', compact(
+            'profile',
+            'isOwn',
+            'isModerator',
+            'activeTab',
+            'tabs',
+            'activeTabDefinition',
+            'activeTabVisibility',
+        ));
+    }
+
+    /**
+     * Build the tab strip: label and link for every tab this viewer may see.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildTabStrip(Profile $profile, bool $isOwn, ?int $viewerId): array
+    {
+        return array_map(fn (ProfileTabDefinition $tab) => [
+            'key' => $tab->key,
+            'label' => __($tab->labelKeyFor($isOwn)),
+            'url' => route('profile.show.tab', [$profile, $tab->key]),
+            'icon' => $tab->icon,
+        ], $this->tabs->visibleFor($profile->user_id, $viewerId));
+    }
+
+    /**
+     * Whether a setting-gated tab is currently exposed to other people, for the
+     * owner-facing indicator. Null when the tab's visibility is not settings-driven.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function tabVisibility(Profile $profile, ?ProfileTabDefinition $tab): ?array
+    {
+        if ($tab?->privacy === null) {
+            return null;
+        }
+
+        $isHidden = (bool) $this->settings->getValue(
+            $profile->user_id,
+            $tab->privacy->settingsTabId,
+            $tab->privacy->settingsKey,
+        );
+
+        return [
+            'hidden' => $isHidden,
+            'label' => $isHidden
+                ? __('profile::show.tab_visibility.hidden')
+                : __('profile::show.tab_visibility.visible'),
+            'link_url' => route('settings.index', ['tab' => $tab->privacy->settingsTabId]),
+            'link_label' => __('profile::show.tab_visibility.preferences_link'),
+        ];
     }
 
     /**
      * Display the current user's profile.
      */
-    public function showOwn(): View
+    public function showOwn(): View|RedirectResponse
     {
         $user = Auth::user();
         $profile = $this->profileService->getProfile($user->id);

@@ -14,7 +14,7 @@ class SettingsRegistryService
      *
      * @var array<string, SettingsTabDefinition>
      */
-    private static array $tabs = [];
+    private array $tabs = [];
 
     /**
      * In-memory registry of section definitions.
@@ -22,7 +22,7 @@ class SettingsRegistryService
      *
      * @var array<string, array<string, SettingsSectionDefinition>>
      */
-    private static array $sections = [];
+    private array $sections = [];
 
     /**
      * In-memory registry of parameter definitions.
@@ -30,7 +30,7 @@ class SettingsRegistryService
      *
      * @var array<string, array<string, SettingsParameterDefinition>>
      */
-    private static array $parameters = [];
+    private array $parameters = [];
 
     /**
      * Register a tab.
@@ -41,11 +41,11 @@ class SettingsRegistryService
     {
         $tabId = strtolower($tab->id);
 
-        if (isset(self::$tabs[$tabId])) {
+        if (isset($this->tabs[$tabId])) {
             throw new InvalidArgumentException("Settings tab '{$tab->id}' is already registered.");
         }
 
-        self::$tabs[$tabId] = $tab;
+        $this->tabs[$tabId] = $tab;
     }
 
     /**
@@ -58,15 +58,15 @@ class SettingsRegistryService
         $tabId = strtolower($section->tabId);
         $sectionId = strtolower($section->id);
 
-        if (!isset(self::$tabs[$tabId])) {
+        if (!isset($this->tabs[$tabId])) {
             throw new InvalidArgumentException("Cannot register section '{$section->id}': tab '{$section->tabId}' does not exist.");
         }
 
-        if (isset(self::$sections[$tabId][$sectionId])) {
+        if (isset($this->sections[$tabId][$sectionId])) {
             throw new InvalidArgumentException("Settings section '{$section->id}' is already registered under tab '{$section->tabId}'.");
         }
 
-        self::$sections[$tabId][$sectionId] = $section;
+        $this->sections[$tabId][$sectionId] = $section;
     }
 
     /**
@@ -80,19 +80,19 @@ class SettingsRegistryService
         $sectionId = strtolower($param->sectionId);
         $key = strtolower($param->key);
 
-        if (!isset(self::$tabs[$tabId])) {
+        if (!isset($this->tabs[$tabId])) {
             throw new InvalidArgumentException("Cannot register parameter '{$param->key}': tab '{$param->tabId}' does not exist.");
         }
 
-        if (!isset(self::$sections[$tabId][$sectionId])) {
+        if (!isset($this->sections[$tabId][$sectionId])) {
             throw new InvalidArgumentException("Cannot register parameter '{$param->key}': section '{$param->sectionId}' does not exist under tab '{$param->tabId}'.");
         }
 
-        if (isset(self::$parameters[$tabId][$key])) {
+        if (isset($this->parameters[$tabId][$key])) {
             throw new InvalidArgumentException("Settings parameter '{$param->key}' is already registered under tab '{$param->tabId}'.");
         }
 
-        self::$parameters[$tabId][$key] = $param;
+        $this->parameters[$tabId][$key] = $param;
     }
 
     /**
@@ -100,7 +100,7 @@ class SettingsRegistryService
      */
     public function getTab(string $tabId): ?SettingsTabDefinition
     {
-        return self::$tabs[strtolower($tabId)] ?? null;
+        return $this->tabs[strtolower($tabId)] ?? null;
     }
 
     /**
@@ -110,7 +110,7 @@ class SettingsRegistryService
      */
     public function getAllTabs(): array
     {
-        $tabs = array_values(self::$tabs);
+        $tabs = array_values($this->tabs);
         usort($tabs, fn ($a, $b) => $a->order <=> $b->order);
 
         return $tabs;
@@ -124,11 +124,11 @@ class SettingsRegistryService
     public function getSectionsForTab(string $tabId): array
     {
         $tabId = strtolower($tabId);
-        if (!isset(self::$sections[$tabId])) {
+        if (!isset($this->sections[$tabId])) {
             return [];
         }
 
-        $sections = array_values(self::$sections[$tabId]);
+        $sections = array_values($this->sections[$tabId]);
         usort($sections, fn ($a, $b) => $a->order <=> $b->order);
 
         return $sections;
@@ -139,7 +139,7 @@ class SettingsRegistryService
      */
     public function getSection(string $tabId, string $sectionId): ?SettingsSectionDefinition
     {
-        return self::$sections[strtolower($tabId)][strtolower($sectionId)] ?? null;
+        return $this->sections[strtolower($tabId)][strtolower($sectionId)] ?? null;
     }
 
     /**
@@ -152,12 +152,12 @@ class SettingsRegistryService
         $tabId = strtolower($tabId);
         $sectionId = strtolower($sectionId);
 
-        if (!isset(self::$parameters[$tabId])) {
+        if (!isset($this->parameters[$tabId])) {
             return [];
         }
 
         $params = array_filter(
-            self::$parameters[$tabId],
+            $this->parameters[$tabId],
             fn ($p) => strtolower($p->sectionId) === $sectionId
         );
 
@@ -172,7 +172,7 @@ class SettingsRegistryService
      */
     public function getParameter(string $tabId, string $key): ?SettingsParameterDefinition
     {
-        return self::$parameters[strtolower($tabId)][strtolower($key)] ?? null;
+        return $this->parameters[strtolower($tabId)][strtolower($key)] ?? null;
     }
 
     /**
@@ -184,11 +184,11 @@ class SettingsRegistryService
     {
         $tabId = strtolower($tabId);
 
-        if (!isset(self::$parameters[$tabId])) {
+        if (!isset($this->parameters[$tabId])) {
             return [];
         }
 
-        $params = array_values(self::$parameters[$tabId]);
+        $params = array_values($this->parameters[$tabId]);
         usort($params, fn ($a, $b) => $a->order <=> $b->order);
 
         return $params;
@@ -198,10 +198,10 @@ class SettingsRegistryService
      * Clear all registered definitions.
      * Used for testing purposes.
      */
-    public static function clearAll(): void
+    public function clear(): void
     {
-        self::$tabs = [];
-        self::$sections = [];
-        self::$parameters = [];
+        $this->tabs = [];
+        $this->sections = [];
+        $this->parameters = [];
     }
 }

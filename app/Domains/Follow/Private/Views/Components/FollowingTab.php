@@ -3,7 +3,6 @@
 namespace App\Domains\Follow\Private\Views\Components;
 
 use App\Domains\Follow\Private\Repositories\FollowRepository;
-use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\ProfileDto;
 use Illuminate\Support\Facades\Auth;
@@ -15,22 +14,17 @@ class FollowingTab extends Component
     /** @var ProfileDto[] */
     public array $following;
     public bool $isOwn;
-    public bool $isHidden;
 
     public function __construct(
-        public int $userId,
         FollowRepository $repository,
         ProfilePublicApi $profileApi,
-        SettingsPublicApi $settings,
+        public int $ownerUserId,
     ) {
-        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
-        $this->isOwn = $viewerId === $userId;
+        $this->isOwn = Auth::id() !== null && (int) Auth::id() === $this->ownerUserId;
 
-        $followingIds = $repository->getFollowingIds($userId);
+        $followingIds = $repository->getFollowingIds($this->ownerUserId);
         $profiles = $followingIds ? $profileApi->getPublicProfiles($followingIds) : [];
         $this->following = array_values($profiles);
-
-        $this->isHidden = (bool) $settings->getValue($userId, 'profile', 'hide-following-tab');
     }
 
     public function render(): View

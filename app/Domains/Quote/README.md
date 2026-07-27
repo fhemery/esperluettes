@@ -14,7 +14,7 @@ Feature spec: [`docs/Feature_Planning/Quotes.md`](../../../docs/Feature_Planning
 - **Note** — an optional, strictly private freeform text attached to a quote. It is visible **only** to the reader who wrote it — never to the author, other readers, moderators, or in notifications. The note is stored as sanitized HTML (bold / italic / custom-emoji only) even though the current input UI is a plain textarea.
 - **Anchor** — how a quote is re-located in the chapter after the author edits it. Each quote stores three immutable plain-text strings: `highlighted_text` plus a short `prefix` and `suffix` (≤5 words each). Re-anchoring runs **client-side on every chapter view** using the shared anchoring JS; the server never re-computes anchors, it only stores them.
 - **Stale quote** — a quote whose anchor can no longer be found in the current chapter body. In-chapter it simply stops being tinted; the quote row survives.
-- **Quote book** — the reader's full collection, shown in a "Citations" tab on their profile. Private by default; can be made public via a user setting, in which case only confirmed users can view it.
+- **Quote book** — the reader's full collection, shown in a "Citations" tab on their profile. Visible to confirmed users by default; the owner can hide it from everyone but themselves via a user setting. Guests never see it.
 
 ## Who can quote
 
@@ -44,7 +44,7 @@ Feature spec: [`docs/Feature_Planning/Quotes.md`](../../../docs/Feature_Planning
 | Story/chapter metadata, author IDs, story access checks, author-or-co-author check | `StoryPublicApi` |
 | Author/quoter display names, avatars, profile slugs | `ProfilePublicApi` (Shared contract) |
 | "Is the viewer confirmed?" role checks | `AuthPublicApi` |
-| `book_public` preference storage + settings-page tab | `SettingsPublicApi` (registered under the Profile tab, Privacy section) |
+| `hide-quotes-tab` preference storage + settings-page tab | `SettingsPublicApi` (registered under the Profile tab, Privacy section) |
 | Author notification when a passage is quoted | `NotificationPublicApi` |
 | Text anchoring / re-anchoring (pure JS) | `Shared/Resources/js/anchoring/` |
 | Floating selection toolbar + `<x-comment::annotable>` host | Comment domain |

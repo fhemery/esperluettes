@@ -3,7 +3,6 @@
 namespace App\Domains\Story\Private\View\Components;
 
 use App\Domains\Comment\Public\Api\CommentPublicApi;
-use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Services\ChapterService;
@@ -21,7 +20,6 @@ class ProfileCommentsComponent extends Component
     public bool $hasComments = false;
     public bool $isAllowed = false;
     public bool $isOwn = false;
-    public bool $isHidden = false;
     public int $profileUserId;
 
     public function __construct(
@@ -29,14 +27,11 @@ class ProfileCommentsComponent extends Component
         private ChapterService $chapterService,
         private ProfilePublicApi $profileApi,
         private CoverService $coverService,
-        private SettingsPublicApi $settings,
-        int $userId,
+        int $ownerUserId,
     ) {
-        $this->profileUserId = $userId;
-        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
-        $this->isOwn = $viewerId === $userId;
-        $this->isHidden = (bool) $this->settings->getValue($userId, 'profile', 'hide-comments-section');
-        $this->hydrate($userId);
+        $this->profileUserId = $ownerUserId;
+        $this->isOwn = Auth::id() !== null && (int) Auth::id() === $ownerUserId;
+        $this->hydrate($ownerUserId);
     }
 
     private function hydrate(int $userId): void
@@ -162,7 +157,6 @@ class ProfileCommentsComponent extends Component
             'hasComments' => $this->hasComments,
             'isAllowed' => $this->isAllowed,
             'isOwn' => $this->isOwn,
-            'isHidden' => $this->isHidden,
             'profileUserId' => $this->profileUserId,
         ]);
     }

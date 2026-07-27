@@ -530,6 +530,8 @@ deptrac:
       - NotificationPublic
       - SettingsPublic
       - StoryPublic
+      # Registers the following profile tab
+      - ProfilePublic
 
     ReadListPublic:
       - Shared
@@ -548,6 +550,8 @@ deptrac:
       - NotificationPublic
       - SettingsPublic
       - StoryPublic
+      # Registers the quotes profile tab
+      - ProfilePublic
 
     SearchPublic:
       - Shared
@@ -575,6 +579,8 @@ deptrac:
       - NotificationPublic
       - ConfigPublic
       - AdministrationPublic
+      # Registers the stories and comments profile tabs
+      - ProfilePublic
 
     StoryRefPublic:
       - Shared
@@ -711,10 +717,8 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
-      - FollowPublic
       - ModerationPublic
       - ProfilePublic
-      - QuotePublic
       - SettingsPublic
 
     SearchPrivate:

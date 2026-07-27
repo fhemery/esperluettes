@@ -29,3 +29,6 @@ Thumbs.db
 TODO.md
 /composer.phar
 /tmp/
+
+# Browser driver screenshots (see .agents/skills/run-app)
+/.agents/skills/run-app/shots/

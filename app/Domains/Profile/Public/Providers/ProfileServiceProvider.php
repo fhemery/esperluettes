@@ -32,6 +32,9 @@ use App\Domains\Profile\Public\Events\AvatarModerated;
 use App\Domains\Profile\Public\Events\AboutModerated;
 use App\Domains\Profile\Public\Events\SocialModerated;
 use App\Domains\Profile\Private\Support\Moderation\ProfileSnapshotFormatter;
+use App\Domains\Profile\Public\Api\ProfileTabRegistry;
+use App\Domains\Profile\Public\Contracts\ProfileTabDefinition;
+use App\Domains\Profile\Public\Visibility\AuthenticatedOnly;
 
 class ProfileServiceProvider extends ServiceProvider
 {
@@ -46,6 +49,10 @@ class ProfileServiceProvider extends ServiceProvider
     {
         // Bind Shared contract to Profile implementation
         $this->app->singleton(ProfilePublicApiContract::class, ProfileApi::class);
+
+        // Tabs are registered into this by their owning domains, so every
+        // consumer must share the one instance.
+        $this->app->singleton(ProfileTabRegistry::class);
     }
 
     /**
@@ -99,6 +106,14 @@ class ProfileServiceProvider extends ServiceProvider
             displayName: __('profile::moderation.topic_name'),
             formatterClass: ProfileSnapshotFormatter::class
         );
+
+        app(ProfileTabRegistry::class)->register(new ProfileTabDefinition(
+            key: 'about',
+            order: 10,
+            component: 'profile::about-panel',
+            labelKey: 'profile::show.about',
+            visibility: AuthenticatedOnly::class,
+        ));
 
         // Register settings after all providers have booted
         $this->app->booted(function () {
