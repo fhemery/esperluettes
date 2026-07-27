@@ -64,11 +64,22 @@ it rather than deciding alone.
 If the gate fails twice for the same reason, stop and report. Do not disable a
 test, loosen an assertion, or add a deptrac exception to get green.
 
+## Related skills
+
+Use them rather than reconstructing the procedure:
+
+- `add-event` — a new domain event and its consumers
+- `add-notification` — a new user notification
+- `add-setting` — a new user preference
+- `fix-deptrac` — a deptrac violation
+- `commit` — the project's commit conventions
+
 ## Finish
 
 1. Tick the phase to `DONE` in the phase index of `03-plan.md`.
 2. Append to `DECISIONS.md` anything you had to decide.
-3. Report: what you built, the tests that prove it, the gate result, anything
+3. Commit the phase — one phase, one commit. Follow the `commit` skill.
+4. Report: what you built, the tests that prove it, the gate result, anything
    that contradicted the plan, and anything you deliberately left out.
 
 Report failure plainly if the phase is not finished. A phase reported `DONE`

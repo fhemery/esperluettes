@@ -82,6 +82,13 @@ when the README points them there.
 
 Templates for each file live in [`templates/`](./templates/).
 
+## Skills the loop leans on
+
+The steps do not restate procedures that already exist. `implement-phase` and
+`wrap-task` defer to `commit` for the commit conventions, and to `add-event`,
+`add-notification`, `add-setting`, `fix-deptrac` and `document-domain` for the
+recurring pieces of work. `verify-visually` defers to `run-app` for the browser.
+
 ## Gate
 
 Every BUILD phase and the VERIFY step end on a green gate:

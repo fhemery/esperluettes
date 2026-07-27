@@ -67,7 +67,12 @@ makes the loop a loop rather than a pipeline.
 - In `interactive` mode, **propose** this and let the user confirm; do not mark
   a task `DONE` on your own authority.
 
-## 6. Report
+## 6. Commit the paperwork
+
+The README, the backlog change and any regenerated domain docs go in one
+`docs(<domain>)` commit. Follow the `commit` skill.
+
+## 7. Report
 
 Five to ten lines: what shipped, what did not, the new backlog rows created, the
 docs that need attention, and the single thing you would tell the next person
