@@ -30,13 +30,12 @@ class ProfileCommentsComponent extends Component
         private ProfilePublicApi $profileApi,
         private CoverService $coverService,
         private SettingsPublicApi $settings,
-        int $userId,
+        int $ownerUserId,
     ) {
-        $this->profileUserId = $userId;
-        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
-        $this->isOwn = $viewerId === $userId;
-        $this->isHidden = (bool) $this->settings->getValue($userId, 'profile', 'hide-comments-section');
-        $this->hydrate($userId);
+        $this->profileUserId = $ownerUserId;
+        $this->isOwn = Auth::id() !== null && (int) Auth::id() === $ownerUserId;
+        $this->isHidden = (bool) $this->settings->getValue($ownerUserId, 'profile', 'hide-comments-section');
+        $this->hydrate($ownerUserId);
     }
 
     private function hydrate(int $userId): void

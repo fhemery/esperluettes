@@ -1,4 +1,3 @@
-@props(['quoteList', 'isOwn' => false, 'profileSlug' => ''])
 @php
     $isHidden = $isOwn && (bool) app(\App\Domains\Settings\Public\Api\SettingsPublicApi::class)->getValue(
         (int) auth()->id(),

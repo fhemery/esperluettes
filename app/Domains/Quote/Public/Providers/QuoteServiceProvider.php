@@ -46,6 +46,7 @@ class QuoteServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(app_path('Domains/Quote/Private/Resources/lang'), 'quote');
         $this->loadViewsFrom(app_path('Domains/Quote/Private/Resources/views'), 'quote');
         Blade::anonymousComponentPath(app_path('Domains/Quote/Private/Resources/views/components'), 'quote');
+        Blade::componentNamespace('App\\Domains\\Quote\\Private\\View\\Components', 'quote');
 
         $eventBus = app(EventBus::class);
         $this->registerNotifications();

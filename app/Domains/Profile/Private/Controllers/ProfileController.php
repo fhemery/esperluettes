@@ -71,12 +71,9 @@ class ProfileController extends Controller
     /**
      * Display the quotes tab of a user's profile.
      */
-    public function showQuotes(Profile $profile, Request $request): View
+    public function showQuotes(Profile $profile): View
     {
-        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
-        $page = max(1, (int) $request->query('page', 1));
-        $quoteList = app(\App\Domains\Quote\Public\Api\QuotePublicApi::class)->getForProfile($profile->user_id, $viewerId, $page);
-        return $this->renderProfile($profile, 'quotes', ['quoteList' => $quoteList]);
+        return $this->renderProfile($profile, 'quotes');
     }
 
     /**

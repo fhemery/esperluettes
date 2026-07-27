@@ -167,13 +167,14 @@ The `@if/@elseif` chain becomes:
 <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
     @if($activeTabDefinition)
         <x-dynamic-component :component="$activeTabDefinition->component"
-                             :owner-user-id="$profile->user_id"
-                             :is-own="$isOwn" />
+                             :owner-user-id="$profile->user_id" />
     @endif
 </div>
 ```
 
-Every tab component gets the same two props: `ownerUserId` and `isOwn`. Nothing else. Domains that need more (profile slug, pagination) derive it themselves.
+Every tab component gets exactly one prop: `ownerUserId`. Nothing else. Anything else it needs — pagination, the profile slug, whether the viewer owns the profile — it derives itself.
+
+The first draft passed `isOwn` too. Dropped during implementation: it is `Auth::id() === $ownerUserId`, which three of the four components already computed internally, so passing it created a second source of truth for no gain. Quote needing the profile *slug* is resolved the same way, via `ProfilePublicApi::getPublicProfile()` from Shared — no `ProfilePublic` dependency required.
 
 **This is the main refactoring cost**, because the tab components are inconsistent today:
 
@@ -273,6 +274,7 @@ Success criteria: full suite green with **no test modified** through step 4 exce
 | D7 | Unknown or invisible tab key | Redirect to the default tab, for both `/profile/x/banana` and a tab hidden from this viewer. No 403/404 branch to design. |
 | D14 | `compliant` middleware | Applied to the whole tab route. It exists to force acceptance of the conditions for logged-in users and is a no-op for guests, so a uniform application is correct (§2.4). |
 | D15 | Indicator wording | Owned by Profile (`profile::show.tab_visibility.*`), not per-domain. Follow's copy is already domain-neutral and moves across; Quote's duplicate is deleted. Removes both label keys — and, with the Quote flip, the polarity flag — from `ProfileTabPrivacy` (§2.8). |
+| D16 | Indicator is optional | A tab may be gated by a setting without declaring `ProfileTabPrivacy`. The indicator is a nicety, not a guarantee; no test enforces it. |
 | D8 | Badge / counts in the strip | Not needed. No count callback in the contract — keeps profile rendering free of counting queries. |
 | D9 | Moderator-only tabs | Not a use case; such needs go to a dedicated admin screen. `RoleBasedVisibility` still covers the `comments` role check. |
 | D10 | Route names | Centralise on `profile.show.tab` in Profile; drop the per-tab aliases. |
@@ -282,15 +284,7 @@ Success criteria: full suite green with **no test modified** through step 4 exce
 
 ## 6. Open questions
 
-**Q1 — Can a domain gate its tab behind a setting *without* declaring `ProfileTabPrivacy`?**
-
-Concretely: Statistics arrives, adds a "hide my statistics" setting, writes a `StatisticsTabVisibility` that reads it — and forgets `privacy: new ProfileTabPrivacy(...)`. The tab then hides correctly, but the owner gets no eye icon on it: nothing on their own profile tells them the tab is hidden from others, and there is no shortcut to the setting. The other three tabs show it, so the strip is silently inconsistent.
-
-Options:
-- **(a) Optional.** Domains may skip it. Simple, but the omission is invisible — it looks like the tab is public.
-- **(b) Mandatory, test-enforced.** A test walks the registry and fails if a tab's visibility reads a user setting but declares no `privacy`. Catches the omission at CI time.
-
-Now that Profile owns the wording (D15), declaring it costs two fields and no copywriting, so **(b)** is cheap. The snag is detecting "reads a user setting" — that lives inside an arbitrary `ProfileTabVisibility` implementation and can't be introspected. The workable version is a hardcoded list in the test: "these tab keys are known to be setting-gated and must declare privacy", which catches regressions on existing tabs but not a brand-new tab that forgets both. Worth it, or accept (a)?
+None outstanding.
 
 ## 7. Prerequisite done: registry state (former Q9)
 

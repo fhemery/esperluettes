@@ -25,7 +25,7 @@ describe('ProfileStoriesComponent', function () {
             $community = communityStory('Guest Community Story', $owner->id);
             $private = privateStory('Guest Private Story', $owner->id);
 
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)
                 ->toContain($public->title)
@@ -42,7 +42,7 @@ describe('ProfileStoriesComponent', function () {
             $private = privateStory('Private Story', $owner->id);
 
             $this->actingAs($viewer);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)
                 ->toContain($public->title)
@@ -56,7 +56,7 @@ describe('ProfileStoriesComponent', function () {
             $private = privateStory('Owner Private', $owner->id);
 
             $this->actingAs($owner);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)->toContain($private->title);
         });
@@ -69,7 +69,7 @@ describe('ProfileStoriesComponent', function () {
             addCollaborator($private->id, $contrib->id, 'betareader');
 
             $this->actingAs($contrib);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)->toContain($private->title);
         });
@@ -82,7 +82,7 @@ describe('ProfileStoriesComponent', function () {
             $foreign = publicStory('Foreign Story', $other->id);
 
             $this->actingAs($other);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)
                 ->toContain($owned->title)
@@ -95,7 +95,7 @@ describe('ProfileStoriesComponent', function () {
             $owner = alice($this);
 
             $this->actingAs($owner);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)->toContain(__('story::profile.new-story'));
         });
@@ -104,7 +104,7 @@ describe('ProfileStoriesComponent', function () {
             $owner = alice($this, roles: [Roles::USER]);
 
             $this->actingAs($owner);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)->not->toContain(__('story::profile.new-story'));
         });
@@ -114,7 +114,7 @@ describe('ProfileStoriesComponent', function () {
             $viewer = bob($this);
 
             $this->actingAs($viewer);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)->not->toContain(__('story::profile.new-story'));
         });
@@ -125,7 +125,7 @@ describe('ProfileStoriesComponent', function () {
             $owner = alice($this);
             publicStory('Some Story', $owner->id);
 
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)->not->toContain(__('story::shared.by'));
         });
@@ -135,7 +135,7 @@ describe('ProfileStoriesComponent', function () {
             $story = publicStory('Some Story', $owner->id);
             createPublishedChapter($this, $story, $owner);
 
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)
                 ->toContain(__('story::shared.metrics.words'))
@@ -146,7 +146,7 @@ describe('ProfileStoriesComponent', function () {
             $owner = alice($this);
             publicStory('No Chapters Story', $owner->id);
 
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)
                 ->not->toContain(__('story::shared.metrics.words'))
@@ -159,7 +159,7 @@ describe('ProfileStoriesComponent', function () {
             $owner = alice($this);
 
             $this->actingAs($owner);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)
                 ->toContain('menu_book')
@@ -172,7 +172,7 @@ describe('ProfileStoriesComponent', function () {
             createUnpublishedChapter($this, $story, $owner, ['title' => 'C1']);
 
             $this->actingAs($owner);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)
                 ->toContain('menu_book')
@@ -184,7 +184,7 @@ describe('ProfileStoriesComponent', function () {
             $viewer = bob($this);
 
             $this->actingAs($viewer);
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)->not->toContain('menu_book');
         });
@@ -199,7 +199,7 @@ describe('ProfileStoriesComponent', function () {
             $this->actingAs($commenter);
             createComment('chapter', $chapter->id, generateDummyText(150));
 
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             expect($html)
                 ->toContain('menu_book')
@@ -217,7 +217,7 @@ describe('ProfileStoriesComponent', function () {
             $commentId = createComment('chapter', $chapter->id, generateDummyText(150));
             createComment('chapter', $chapter->id, generateDummyText(150), $commentId);
 
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $commenter->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $commenter->id]);
 
             expect($html)
                 ->toContain('menu_book')
@@ -236,7 +236,7 @@ describe('ProfileStoriesComponent', function () {
             markAsRead($this, $chapter)->assertNoContent();
 
             Auth::logout();
-            $html = Blade::render('<x-story::profile-stories-component :user-id="$userId" />', ['userId' => $owner->id]);
+            $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
 
             expect($html)
                 ->toContain('Profile Total Reads')

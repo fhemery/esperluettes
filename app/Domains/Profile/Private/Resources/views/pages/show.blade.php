@@ -172,19 +172,19 @@
                 <!-- Tab Content -->
                 <div class="flex flex-col gap-4 p-4 surface-read text-on-surface">
                     @if($activeTab === 'about' && Auth::check())
-                        <x-profile::about-panel :profile="$profile" />
+                        <x-profile::about-panel :owner-user-id="$profile->user_id" />
                     @elseif($activeTab === 'stories')
-                        <x-story::profile-stories-component :user-id="$profile->user_id" />
+                        <x-story::profile-stories-component :owner-user-id="$profile->user_id" />
                     @elseif($activeTab === 'comments')
                         @if($canViewComments)
-                            <x-story::profile-comments-component :user-id="$profile->user_id" />
+                            <x-story::profile-comments-component :owner-user-id="$profile->user_id" />
                         @else
                             <p class="text-center text-gray-500 py-8">{{ __('profile::settings.privacy.comments-hidden') }}</p>
                         @endif
                     @elseif($activeTab === 'following' && $canViewFollowing)
-                        <x-follow::following-tab :user-id="$profile->user_id" />
-                    @elseif($activeTab === 'quotes' && isset($quoteList))
-                        <x-quote::profile-tab :quote-list="$quoteList" :is-own="$isOwn" :profile-slug="$profile->slug" />
+                        <x-follow::following-tab :owner-user-id="$profile->user_id" />
+                    @elseif($activeTab === 'quotes')
+                        <x-quote::profile-tab :owner-user-id="$profile->user_id" />
                     @endif
                 </div>
             </div>

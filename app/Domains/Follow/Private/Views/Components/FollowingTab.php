@@ -14,23 +14,22 @@ class FollowingTab extends Component
 {
     /** @var ProfileDto[] */
     public array $following;
-    public bool $isOwn;
     public bool $isHidden;
+    public bool $isOwn;
 
     public function __construct(
-        public int $userId,
         FollowRepository $repository,
         ProfilePublicApi $profileApi,
         SettingsPublicApi $settings,
+        public int $ownerUserId,
     ) {
-        $viewerId = Auth::id() !== null ? (int) Auth::id() : null;
-        $this->isOwn = $viewerId === $userId;
+        $this->isOwn = Auth::id() !== null && (int) Auth::id() === $this->ownerUserId;
 
-        $followingIds = $repository->getFollowingIds($userId);
+        $followingIds = $repository->getFollowingIds($this->ownerUserId);
         $profiles = $followingIds ? $profileApi->getPublicProfiles($followingIds) : [];
         $this->following = array_values($profiles);
 
-        $this->isHidden = (bool) $settings->getValue($userId, 'profile', 'hide-following-tab');
+        $this->isHidden = (bool) $settings->getValue($this->ownerUserId, 'profile', 'hide-following-tab');
     }
 
     public function render(): View
