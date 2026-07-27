@@ -106,11 +106,8 @@ $this->app->make(ProfileTabRegistry::class)->register(new ProfileTabDefinition(
     ownLabelKey:        'quote::ui.profile_tab.my_quotes',
     visibility:         QuoteBookVisibility::class,
     privacy:            new ProfileTabPrivacy(
-        settingsTabId:   self::TAB_PROFILE,
-        settingsKey:     self::KEY_BOOK_PUBLIC,
-        trueMeansHidden: false,
-        visibleLabelKey: 'quote::ui.visibility.visible',
-        hiddenLabelKey:  'quote::ui.visibility.hidden',
+        settingsTabId: self::TAB_PROFILE,
+        settingsKey:   self::KEY_HIDE_QUOTES_TAB,
     ),
 ));
 ```
@@ -218,20 +215,22 @@ For tabs whose visibility is driven by a user setting, the owner should see — 
 
 This already exists, twice, implemented independently: Follow renders an eye icon inside `following-tab.blade.php` (`data-follow-visibility-indicator`) and Quote does the same in `profile-tab.blade.php`. Both build the same popover: an icon, a "visible/hidden" sentence, and a link to `route('settings.index', ['tab' => 'profile'])`. Moving it into the registry deletes both copies and puts the indicator where it belongs — on the tab itself, visible without opening it.
 
-Declarative, because the two settings have **opposite polarity** (`follow.hide-following-tab`: true = hidden; `quote.book-public`: true = visible) and that cannot be inferred:
+Declarative, and now down to two meaningful fields:
 
 ```php
 final class ProfileTabPrivacy
 {
     public function __construct(
-        public readonly string $settingsTabId,   // Settings tab owning the parameter
-        public readonly string $settingsKey,     // parameter key
-        public readonly bool $trueMeansHidden,   // polarity of the stored value
-        public readonly string $visibleLabelKey, // popover text when exposed
-        public readonly string $hiddenLabelKey,  // popover text when hidden
+        public readonly string $settingsTabId,  // Settings tab owning the parameter
+        public readonly string $settingsKey,    // parameter key
     ) {}
 }
 ```
+
+Two simplifications since the first draft:
+
+- **Wording is owned by Profile** (decided). The popover strings live in `profile::show.tab_visibility.{visible,hidden,preferences_link}` rather than per-domain. Follow's existing copy is already domain-neutral ("Cet onglet est visible des autres utilisateurices.") and moves across verbatim; Quote's duplicate is deleted.
+- **No polarity flag needed any more.** The first draft carried `trueMeansHidden` because `follow.hide-following-tab` and `quote.book_public` disagreed. Flipping Quote to `hide-quotes-tab` (done, see §8) aligned all three profile privacy settings on *true = hidden*, so the flag has nothing left to express. If a future tab ever needs the opposite polarity, the right fix is to rename that setting, not to reintroduce the flag.
 
 Profile resolves it through `SettingsPublicApi` (already a `ProfilePrivate` dependency) and renders, **only when `$isOwn`**, a small `visibility` / `visibility_off` icon next to the tab label, with a popover linking to `route('settings.index', ['tab' => $settingsTabId])`.
 
@@ -273,6 +272,7 @@ Success criteria: full suite green with **no test modified** through step 4 exce
 | D6 | Guest on a protected tab | Redirect to login (not 403), preserving today's `auth` middleware behaviour. The catch-all route accepts any unclaimed segment and the controller decides, per tab, whether this viewer must log in. |
 | D7 | Unknown or invisible tab key | Redirect to the default tab, for both `/profile/x/banana` and a tab hidden from this viewer. No 403/404 branch to design. |
 | D14 | `compliant` middleware | Applied to the whole tab route. It exists to force acceptance of the conditions for logged-in users and is a no-op for guests, so a uniform application is correct (§2.4). |
+| D15 | Indicator wording | Owned by Profile (`profile::show.tab_visibility.*`), not per-domain. Follow's copy is already domain-neutral and moves across; Quote's duplicate is deleted. Removes both label keys — and, with the Quote flip, the polarity flag — from `ProfileTabPrivacy` (§2.8). |
 | D8 | Badge / counts in the strip | Not needed. No count callback in the contract — keeps profile rendering free of counting queries. |
 | D9 | Moderator-only tabs | Not a use case; such needs go to a dedicated admin screen. `RoleBasedVisibility` still covers the `comments` role check. |
 | D10 | Route names | Centralise on `profile.show.tab` in Profile; drop the per-tab aliases. |
@@ -282,9 +282,15 @@ Success criteria: full suite green with **no test modified** through step 4 exce
 
 ## 6. Open questions
 
-**Q1 — Indicator wording.** The visibility popover text lives per-domain today (`follow::follow.visibility.*`, and Quote's equivalent). Keep per-domain keys so each tab phrases it in its own terms ("your quote book is public" vs "your subscriptions are hidden"), or standardise one shared pair of strings in Profile? `ProfileTabPrivacy` above assumes per-domain.
+**Q1 — Can a domain gate its tab behind a setting *without* declaring `ProfileTabPrivacy`?**
 
-**Q2 — Is `ProfileTabPrivacy` mandatory** whenever a tab's visibility depends on a user setting (enforced by a test), or optional? Mandatory keeps the strip honest, but forces every future setting-gated tab to write the copy.
+Concretely: Statistics arrives, adds a "hide my statistics" setting, writes a `StatisticsTabVisibility` that reads it — and forgets `privacy: new ProfileTabPrivacy(...)`. The tab then hides correctly, but the owner gets no eye icon on it: nothing on their own profile tells them the tab is hidden from others, and there is no shortcut to the setting. The other three tabs show it, so the strip is silently inconsistent.
+
+Options:
+- **(a) Optional.** Domains may skip it. Simple, but the omission is invisible — it looks like the tab is public.
+- **(b) Mandatory, test-enforced.** A test walks the registry and fails if a tab's visibility reads a user setting but declares no `privacy`. Catches the omission at CI time.
+
+Now that Profile owns the wording (D15), declaring it costs two fields and no copywriting, so **(b)** is cheap. The snag is detecting "reads a user setting" — that lives inside an arbitrary `ProfileTabVisibility` implementation and can't be introspected. The workable version is a hardcoded list in the test: "these tab keys are known to be setting-gated and must declare privacy", which catches regressions on existing tabs but not a brand-new tab that forgets both. Worth it, or accept (a)?
 
 ## 7. Prerequisite done: registry state (former Q9)
 
