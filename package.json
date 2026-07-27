@@ -11,7 +11,9 @@
         "dep:check": "./vendor/bin/sail composer deptrac",
         "husky:precommit": "node scripts/husky-precommit.js",
         "launch-staged:tests": "node scripts/launch_staged_tests.js",
-        "launch-deptrac": "node scripts/launch_deptrac.js"
+        "launch-deptrac": "node scripts/launch_deptrac.js",
+        "browser:setup": "node .agents/skills/run-app/setup.mjs",
+        "browser:drive": "node .agents/skills/run-app/driver.mjs"
     },
     "devDependencies": {
         "@commitlint/cli": "^20.5.2",
@@ -28,6 +30,7 @@
         "husky": "^9.1.7",
         "js-yaml": "^4.1.1",
         "laravel-vite-plugin": "^2.1.0",
+        "playwright": "^1.62.0",
         "tailwindcss": "^4.2.4",
         "vite": "^7.3.2",
         "vitest": "^3.2.4"
