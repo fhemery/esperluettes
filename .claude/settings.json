@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./vendor/bin/sail composer *)",
+      "Bash(./vendor/bin/sail *)",
+      "Bash(npm install *)",
+      "Bash(npm run gate*)",
+      "Bash(npx vitest *)",
+      "Bash(git *)",
+      "Bash(grep *)",
+      "Bash(xargs cat)",
+      "Bash(xargs ls)",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
