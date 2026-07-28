@@ -158,11 +158,6 @@ class StoryPublicApi
         return in_array($userId, $this->storyService->getAuthorIds($storyId));
     }
 
-    public function isAuthorOrCoAuthor(int $storyId, int $userId): bool
-    {
-        return in_array($userId, $this->storyService->getCollaboratorIds($storyId));
-    }
-
     /**
      * Return list of author user IDs for a story.
      * @return int[]

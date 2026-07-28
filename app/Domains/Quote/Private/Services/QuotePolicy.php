@@ -27,7 +27,7 @@ class QuotePolicy
             return false;
         }
 
-        return !$this->storyApi->isAuthorOrCoAuthor($storyId, $userId);
+        return !$this->storyApi->isAuthor($userId, $storyId);
     }
 
     public function canViewQuoteBook(int $profileUserId, ?int $viewerId): bool
