@@ -53,10 +53,13 @@ an interrupted session resumes cheaply.
 
 The `Mode` column controls how often the loop stops for the user:
 
-- `interactive` (default) — stop at every step boundary for approval
-- `auto` — run all six steps without stopping; report at the end only. For
-  bugfixes and small chores. REFINE and DESIGN degrade to "write down the
-  assumptions and continue" rather than interviewing.
+- `interactive` (default) — stop at every step boundary for approval (typically
+  one step — or one BUILD phase — per chat, then `/continue-task`)
+- `auto` — run all remaining steps in the same session without stopping; report
+  at the end only. For bugfixes and small chores. REFINE and DESIGN degrade to
+  "write down the assumptions and continue" rather than interviewing. Only
+  pause if a blocking question or other stop condition fires. Do not auto-start
+  the next backlog `TODO`.
 
 The orchestrator proposes a mode when the task is created; the user overrides
 it by editing the column.

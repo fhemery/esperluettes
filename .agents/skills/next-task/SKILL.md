@@ -48,9 +48,12 @@ into the backlog row.
 Dispatch each step in order. After each one, update the backlog status, then:
 
 - `interactive` — stop, summarise the step's output in a few lines, and wait for
-  the user's go-ahead.
-- `auto` — continue, recording every judgement call in the "Assumptions" table
-  of `DECISIONS.md`.
+  the user's go-ahead. Prefer **one step per chat** (or one BUILD phase) so
+  context stays clean; tell the user to run `/continue-task` in a new chat.
+- `auto` — **keep going through the remaining steps in this session**. Do not
+  stop between steps and do not ask the user to open a new chat, unless a stop
+  condition in §5 fires. Record every judgement call in the "Assumptions"
+  table of `DECISIONS.md`. A short progress line per step/phase is enough.
 
 | Step | How to run it |
 |------|---------------|
@@ -62,7 +65,8 @@ Dispatch each step in order. After each one, update the backlog status, then:
 | WRAP | spawn the `task-wrapper` agent |
 
 Never run REFINE or DESIGN in a subagent: a subagent cannot talk to the user, so
-the interview would be lost.
+the interview would be lost. If the host cannot spawn agents, run PLAN / BUILD /
+VERIFY / WRAP in this thread via their skills instead.
 
 Between BUILD phases, report the phase result in two lines and keep going —
 the per-phase approval gate is only for `interactive` mode when the phase
@@ -77,7 +81,14 @@ Stop and ask the user when:
 - reality contradicts the plan (a needed API does not exist, a decision turns
   out to be unimplementable);
 - you are about to touch a domain that neither `01-functional.md` nor
-  `02-architecture.md` mentions.
+  `02-architecture.md` mentions;
+- in `auto` mode, a tradeoff is genuinely expensive to reverse (see
+  `design-architecture` auto section) — then stop for that decision only, then
+  resume chaining.
+
+In `auto` mode, when WRAP finishes with no open questions, mark the backlog
+row `DONE` and report the outcome. Do **not** start the next backlog `TODO`
+unless the user asks (`/next-task`).
 
 Never mark a task `DONE` yourself in `interactive` mode — WRAP proposes it, the
 user confirms.

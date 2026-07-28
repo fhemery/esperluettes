@@ -57,7 +57,13 @@ next action is, and anything that looks inconsistent.
 ## 4. Resume
 
 Continue exactly as `next-task` §4, starting at the reconciled step and honouring
-the row's mode.
+the row's mode:
+
+- `interactive` — one step (or one BUILD phase), then stop and ask for
+  `/continue-task` in a new chat.
+- `auto` — chain the remaining steps in this session until the task is `DONE`
+  or a `next-task` §5 stop condition fires. No "open a new chat" pause between
+  steps when nothing needs the user.
 
 If the task was interrupted **mid-phase** (files changed but the phase's
 acceptance criteria are not met), do not restart the phase from scratch: read

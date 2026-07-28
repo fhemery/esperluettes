@@ -91,6 +91,97 @@ describe('POST /quotes', function () {
         $this->assertDatabaseEmpty('quotes');
     });
 
+    it('beta reader can quote a story they beta-read', function () {
+        $author = alice($this);
+        $betaReader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        addCollaborator($story->id, $betaReader->id, 'beta-reader');
+
+        $response = $this->actingAs($betaReader)
+            ->postJson('/quotes', [
+                'chapter_id' => $chapter->id,
+                'story_id' => $story->id,
+                'highlighted_text' => 'A beta-reader passage',
+                'prefix' => 'some words',
+                'suffix' => 'more words',
+                'note' => null,
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('highlighted_text', 'A beta-reader passage');
+
+        $this->assertDatabaseHas('quotes', [
+            'user_id' => $betaReader->id,
+            'chapter_id' => $chapter->id,
+            'story_id' => $story->id,
+            'highlighted_text' => 'A beta-reader passage',
+        ]);
+    });
+
+    it('co-author cannot quote a story they co-author', function () {
+        $author = alice($this);
+        $coAuthor = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        addCollaborator($story->id, $coAuthor->id, 'author');
+
+        $this->actingAs($coAuthor)
+            ->postJson('/quotes', [
+                'chapter_id' => $chapter->id,
+                'story_id' => $story->id,
+                'highlighted_text' => 'A passage',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseEmpty('quotes');
+    });
+
+    it('beta reader can quote a private story', function () {
+        $author = alice($this);
+        $betaReader = bob($this);
+        $story = privateStory('Private Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        addCollaborator($story->id, $betaReader->id, 'beta-reader');
+
+        $response = $this->actingAs($betaReader)
+            ->postJson('/quotes', [
+                'chapter_id' => $chapter->id,
+                'story_id' => $story->id,
+                'highlighted_text' => 'A private passage',
+                'prefix' => 'some words',
+                'suffix' => 'more words',
+                'note' => null,
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('highlighted_text', 'A private passage');
+
+        $this->assertDatabaseHas('quotes', [
+            'user_id' => $betaReader->id,
+            'chapter_id' => $chapter->id,
+            'story_id' => $story->id,
+            'highlighted_text' => 'A private passage',
+        ]);
+    });
+
+    it('confirmed user without story access cannot quote a private story', function () {
+        $author = alice($this);
+        $stranger = bob($this);
+        $story = privateStory('Private Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($stranger)
+            ->postJson('/quotes', [
+                'chapter_id' => $chapter->id,
+                'story_id' => $story->id,
+                'highlighted_text' => 'A passage',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseEmpty('quotes');
+    });
+
     it('requires authentication', function () {
         $this->postJson('/quotes', ['chapter_id' => 1, 'story_id' => 1, 'highlighted_text' => 'text'])
             ->assertUnauthorized();

@@ -26,6 +26,7 @@ import { makeLog, fileExists, runCmd, determineRunner } from './utils.js';
 
 const excludeFoldersOrFiles = [
   '.github',
+  '.gitignore',
   'docs/',
   'scripts/',
   'deptrac.yaml',
@@ -34,7 +35,8 @@ const excludeFoldersOrFiles = [
   '.vscode',
   '.claude/',
   'AGENTS.md',
-  '.agents/'
+  '.agents/',
+  '.cursor'
 ]
 
 const log = makeLog('staged-tests');

@@ -41,7 +41,7 @@ Out of scope for v1: in-chapter author view of who quoted what, moderation of qu
 
 | Concern | Delegated to |
 |---------|--------------|
-| Story/chapter metadata, author IDs, story access checks, author-or-co-author check | `StoryPublicApi` |
+| Story/chapter metadata, author IDs, story access checks, authorship (`isAuthor`) | `StoryPublicApi` |
 | Author/quoter display names, avatars, profile slugs | `ProfilePublicApi` (Shared contract) |
 | "Is the viewer confirmed?" role checks | `AuthPublicApi` |
 | `hide-quotes-tab` preference storage + settings-page tab | `SettingsPublicApi` (registered under the Profile tab, Privacy section) |
