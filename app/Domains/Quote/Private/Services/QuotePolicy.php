@@ -27,7 +27,13 @@ class QuotePolicy
             return false;
         }
 
-        return !$this->storyApi->isAuthor($userId, $storyId);
+        if ($this->storyApi->isAuthor($userId, $storyId)) {
+            return false;
+        }
+
+        $withAccess = $this->storyApi->filterUsersWithAccessToStory([$userId], $storyId);
+
+        return in_array($userId, $withAccess, true);
     }
 
     public function canViewQuoteBook(int $profileUserId, ?int $viewerId): bool

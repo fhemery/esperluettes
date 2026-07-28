@@ -89,6 +89,28 @@ describe('GET /quotes/profile/{profileSlug}', function () {
             ->assertJsonPath('items.0.highlighted_text', 'visible');
     });
 
+    it('shows a private-story quote to a fellow beta reader on the quoter Citations tab', function () {
+        $author = alice($this);
+        $quoter = bob($this);
+        $fellowBeta = carol($this);
+
+        $story = privateStory('Private Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        addCollaborator($story->id, $quoter->id, 'beta-reader');
+        addCollaborator($story->id, $fellowBeta->id, 'beta-reader');
+
+        createQuote($quoter->id, $chapter->id, $story->id, ['highlighted_text' => 'shared private']);
+
+        $response = $this->actingAs($fellowBeta)
+            ->getJson('/quotes/profile/' . \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $quoter->id)->firstOrFail()->slug);
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'items')
+            ->assertJsonPath('total_count', 1)
+            ->assertJsonPath('items.0.highlighted_text', 'shared private')
+            ->assertJsonPath('items.0.note', null);
+    });
+
     it('does not show the book to a confirmed viewer when the owner hid the tab', function () {
         $author = alice($this);
         $reader = bob($this);

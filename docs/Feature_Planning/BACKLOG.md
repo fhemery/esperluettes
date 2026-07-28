@@ -16,7 +16,6 @@ purpose — move or insert one anywhere without touching the others.
 
 | Task                                                              | Folder                          | Mode        | Status                                                                                                                                                                                                           |
 | ----------------------------------------------------------------- | ------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Quote - private quotes not working                                | quote-private-stories           | auto        | WIP:DESIGN                                                                                                                                                                                                       |
 | MultiEdit — migrate the remaining ImageService consumers          | `media-consumer-migration/`     | interactive | TODO                                                                                                                                                                                                             |
 | Extract an Editor domain from Shared                              | `editor-domain/`                | interactive | TODO:do before `chapters-multi-edit/` — it adds block logic that should land in Editor, not Shared                                                                                                               |
 | Chapters — MultiEdit content                                      | `chapters-multi-edit/`          | interactive | TODO                                                                                                                                                                                                             |
@@ -39,6 +38,7 @@ Reference other rows by **folder name**, never by position.
 
 | Task | Folder | Wrapped |
 |------|--------|---------|
+| Quotes — private stories | `quote-private-stories/` | 2026-07-28 |
 | Story — one author check, not two | `story-author-check/` | 2026-07-28 |
 | Profile tab registry | `profile-tab-registry/` | 2026-07-28 |
 | MultiEdit v1 + Media domain | `multiedit/` | 2026-07-28 (adoption unfinished — `media-consumer-migration/`, `editor-domain/`, `chapters-multi-edit/`, `multiedit-static-pages/`) |

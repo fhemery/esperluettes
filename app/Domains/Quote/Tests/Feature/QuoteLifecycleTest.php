@@ -30,6 +30,28 @@ describe('quote notifications', function () {
         expect($targets)->not->toContain($reader->id);
     });
 
+    it('notifies the author when a beta reader quotes a private story', function () {
+        $author = alice($this);
+        $betaReader = bob($this);
+        $story = privateStory('Private Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        addCollaborator($story->id, $betaReader->id, 'beta-reader');
+
+        $this->actingAs($betaReader)->postJson('/quotes', [
+            'chapter_id' => $chapter->id,
+            'story_id' => $story->id,
+            'highlighted_text' => 'A private passage',
+        ])->assertStatus(201);
+
+        expect(countNotificationsByKey('quote.chapter_quoted'))->toBe(1);
+
+        $notification = getLatestNotificationByKey('quote.chapter_quoted');
+        $targets = getNotificationTargetUserIds($notification->id);
+
+        expect($targets)->toContain($author->id);
+        expect($targets)->not->toContain($betaReader->id);
+    });
+
     it('does not emit a notification on note update or delete', function () {
         $author = alice($this);
         $reader = bob($this);
