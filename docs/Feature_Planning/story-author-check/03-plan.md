@@ -57,9 +57,9 @@ Filled by VERIFY. Backend-aligned UI (chapter quote button) — light smoke only
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter show as beta reader (`user-confirmed`) | "Citer" visible; creating a quote succeeds (no 403) | |
-| Chapter show as author | Quote action hidden / cannot create | |
-| N/A — no new UI chrome | — | — |
+| Chapter show as beta reader (`user-confirmed`) | "Citer" visible; creating a quote succeeds (no 403) | ✅ feature test `beta reader can quote…` + Blade `$vm->isAuthor` already author-only (no browser — no UI change) |
+| Chapter show as author | Quote action hidden / cannot create | ✅ feature test `author cannot quote…` + Blade hides when `$vm->isAuthor` |
+| N/A — no new UI chrome | — | ✅ |
 
 ## Open items
 

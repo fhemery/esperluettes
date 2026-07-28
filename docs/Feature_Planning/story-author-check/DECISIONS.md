@@ -30,3 +30,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | 5 | No new public `isCollaborator()` in this task | REFINE | Yes — deferred until a real caller exists |
 | 6 | Single BUILD phase is enough (API + policy + tests + docs) | PLAN | Yes |
 | 7 | VERIFY is a light smoke (beta reader can quote); no new screenshots folder required if run-app is heavy — still attempt checklist | PLAN | Yes |
+| 8 | Skip Playwright for VERIFY — no UI change; checklist filled from feature tests + existing Blade author-only gate | VERIFY | Yes |
