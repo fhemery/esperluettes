@@ -72,6 +72,15 @@ i.e. before the activity opens, unlike planting.
 Changing the grid after an activity has started would strand already-planted
 cells outside the new bounds.
 
+## Accepted behaviour
+
+- **No cleanup on user deletion.** Nothing listens to `Auth::UserDeleted`, so a
+  deleted user's goals, snapshots and planted flowers stay in place, and those
+  flowers render without an owner name. This is deliberate: a garden is a shared
+  artefact of the challenge, and removing one participant's flowers would punch
+  holes in everyone else's map. Do not "fix" it without deciding what the map
+  should look like afterwards.
+
 ## Not done
 
 - **`deselected_at` is never written.** The column and
@@ -81,8 +90,5 @@ cells outside the new bounds.
   snapshot by `story_id`; `JardinoGoal::currentStorySnapshot` on its own can
   return the wrong row once a goal has tracked more than one story. Fix the write
   side before relying on that relation.
-- **No cleanup on user deletion.** Nothing listens to `Auth::UserDeleted`, so a
-  deleted user's goals, snapshots and planted flowers stay in place (the flowers
-  then render without an owner name).
 - Goals can be created and updated but never deleted; there is no way to leave
   the challenge.

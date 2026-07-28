@@ -60,7 +60,8 @@ authored in the shared rich-text editor and rendered as HTML to the recipient.
   `calendar_secret_gift_participants` row; only the test helpers do. In practice
   participants must be inserted by hand before the shuffle, and `preferences` can
   never be filled in from the UI. A non-participant visiting the activity page
-  just sees a "you are not taking part" message.
+  just sees a "you are not taking part" message. The activity is unusable as
+  shipped; this is the one thing to fix before running it again.
 - Gifts cannot be edited once the activity leaves the Active state, and there is
   no notification when the reveal happens — the recipient has to come back to the
   page.
