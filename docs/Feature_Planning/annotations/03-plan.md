@@ -2,9 +2,9 @@
 
 Concrete, phase-by-phase plan for the v1 delivery.
 
-- Functional spec (long-term vision): [`Chapter_Annotations.md`](./Chapter_Annotations.md)
-- Architecture (data model, public API, JS structure): [`Chapter_Annotations_Architecture.md`](./Chapter_Annotations_Architecture.md)
-- v1 scope summary: [§8.1 of the architecture doc](./Chapter_Annotations_Architecture.md#81-v1-scope-the-only-scope-we-commit-to-right-now)
+- Functional spec (long-term vision): [`Chapter_Annotations.md`](./01-functional.md)
+- Architecture (data model, public API, JS structure): [`Chapter_Annotations_Architecture.md`](./02-architecture.md)
+- v1 scope summary: [§8.1 of the architecture doc](./02-architecture.md#81-v1-scope-the-only-scope-we-commit-to-right-now)
 
 ## Working agreement
 
@@ -19,32 +19,37 @@ Concrete, phase-by-phase plan for the v1 delivery.
 
 | Original phase | Status | Delivered by |
 |----------------|--------|--------------|
-| Phase 3 — JS test infrastructure | **Done by Quote Phase 1** | [`Quotes_Implementation_Plan.md` Phase 1](./Quotes_Implementation_Plan.md) |
-| Phase 9 — JS pure core (anchoring functions) | **Done by Quote Phase 2** (`canonical-text`, `extract-anchor`, `reanchor` live in `Shared/Resources/js/anchoring/`) | [`Quotes_Implementation_Plan.md` Phase 2](./Quotes_Implementation_Plan.md) |
-| Phase 10 — `<x-comment::annotable>` component + toolbar slot | **Done by Quote Phase 9** (component exists; toolbar slot wired; generic toolbar JS in Comment domain) | [`Quotes_Implementation_Plan.md` Phase 9](./Quotes_Implementation_Plan.md) |
+| Phase 3 — JS test infrastructure | **Done by Quote Phase 1** | [`Quotes_Implementation_Plan.md` Phase 1](../Quotes_Implementation_Plan.md) |
+| Phase 9 — JS pure core (anchoring functions) | **Done by Quote Phase 2** (`canonical-text`, `extract-anchor`, `reanchor` live in `Shared/Resources/js/anchoring/`) | [`Quotes_Implementation_Plan.md` Phase 2](../Quotes_Implementation_Plan.md) |
+| Phase 10 — `<x-comment::annotable>` component + toolbar slot | **Done by Quote Phase 9** (component exists; toolbar slot wired; generic toolbar JS in Comment domain) | [`Quotes_Implementation_Plan.md` Phase 9](../Quotes_Implementation_Plan.md) |
 
 Annotations phases 3, 9, and 10 below are updated accordingly.
 
 ## Phase index
 
 | # | Phase | Estimated size | Dependencies |
-|---|-------|----------------|--------------|
-| [OK] 1 | Editor refactor (`<x-shared::editor>` toolbar prop) | M | — |
-| 2 | Root-comment draft local storage | S | 1 |
-| [→ Quote] 3 | JS test infrastructure | — | Delivered by Quote Phase 1 |
-| 4 | Schema + model | S | — |
-| 5 | Policy contract + cascade listeners | S | 4 |
-| 6 | PHP services + `AnnotationPublicApi` | M | 4, 5 |
-| 7 | Backend endpoints | M | 6 |
-| 8 | Moderation topic registration | S | 4 |
-| [→ Quote] 9 | JS pure core (anchoring functions) | — | Delivered by Quote Phase 2 |
-| [→ Quote] 10 | `<x-comment::annotable>` bootstrap | S | 1, Quote Phase 9 |
-| 11 | Write mode (toolbar + form + drafts + banner) | M | 10 |
-| 12 | Pop-up modal (drafts mode + server mode) | L | 7, 8, 11 |
-| 13 | Atomic publish wiring | S | 7, 11, 12 |
-| 14 | v1 polish (i18n, a11y, manual QA) | M | 12, 13 |
+|---|-------|----------------|--------------|--------|
+| 1 | Editor refactor (`<x-shared::editor>` toolbar prop) | M | — | **DONE** — shipped; `editor.blade.php` takes `:toolbar` |
+| 2 | Root-comment draft local storage | S | 1 | TODO |
+| 3 | JS test infrastructure | — | — | **DONE by Quote Phase 1** |
+| 4 | Schema + model | S | — | TODO |
+| 5 | Policy contract + cascade listeners | S | 4 | TODO |
+| 6 | PHP services + `AnnotationPublicApi` | M | 4, 5 | TODO |
+| 7 | Backend endpoints | M | 6 | TODO |
+| 8 | Moderation topic registration | S | 4 | TODO |
+| 9 | JS pure core (anchoring functions) | — | — | **DONE by Quote Phase 2** — `Shared/Resources/js/anchoring/` |
+| 10 | `<x-comment::annotable>` bootstrap | S | 1 | **DONE by Quote Phase 9** — component + toolbar slot exist |
+| 11 | Write mode (toolbar + form + drafts + banner) | M | 10 | TODO |
+| 12 | Pop-up modal (drafts mode + server mode) | L | 7, 8, 11 | TODO |
+| 13 | Atomic publish wiring | S | 7, 11, 12 | TODO |
+| 14 | v1 polish (i18n, a11y, manual QA) | M | 12, 13 | TODO |
 
-Total: ~11 PRs (14 minus 3 delivered by Quote). Sizes are rough — S ≈ half a day, M ≈ 1–2 days, L ≈ 2–3 days.
+**10 phases remain** (14 minus 3 delivered by Quote, minus Phase 1 already
+shipped). Sizes are rough — S ≈ half a day, M ≈ 1–2 days, L ≈ 2–3 days.
+
+This task enters the loop at **BUILD**: it was refined, designed and planned
+before the loop existed, and the three documents here are its `01`/`02`/`03`
+artifacts. Re-read them before starting rather than re-running REFINE.
 
 ---
 
@@ -94,7 +99,7 @@ Total: ~11 PRs (14 minus 3 delivered by Quote). Sizes are rough — S ≈ half a
 
 ## Phase 3 — JS test infrastructure *(delivered by Quote)*
 
-> **This phase is complete.** The Vitest + happy-dom + testing-library setup is established by [Quote Phase 1](./Quotes_Implementation_Plan.md). Verify the infrastructure is in place before starting Annotations Phase 9.
+> **This phase is complete.** The Vitest + happy-dom + testing-library setup is established by [Quote Phase 1](../Quotes_Implementation_Plan.md). Verify the infrastructure is in place before starting Annotations Phase 9.
 
 No work required here. The acceptance criteria below serve as a checklist to confirm the Quote phase landed correctly before Annotations JS work begins.
 
@@ -110,7 +115,7 @@ No work required here. The acceptance criteria below serve as a checklist to con
 **Goal.** Single `comment_annotations` table, Eloquent model, scopes, model-level tests.
 
 **Deliverables.**
-- Migration `app/Domains/Comment/Database/Migrations/YYYY_MM_DD_HHMMSS_create_comment_annotations_table.php` matching the schema in [Architecture §2.1](./Chapter_Annotations_Architecture.md#21-comment_annotations-single-table-for-roots--replies).
+- Migration `app/Domains/Comment/Database/Migrations/YYYY_MM_DD_HHMMSS_create_comment_annotations_table.php` matching the schema in [Architecture §2.1](./02-architecture.md#21-comment_annotations-single-table-for-roots--replies).
 - Indexes: `(comment_id, parent_annotation_id, deleted_at)`, `(parent_annotation_id)`.
 - Model `App\Domains\Comment\Private\Models\CommentAnnotation` with `SoftDeletes`, Laravel 13 attribute syntax (`#[Table]`, `#[Fillable]`), `comment()`, `parent()`, `replies()`, `scopeRoots()`, `scopeReplies()`.
 - Working `down()`.
@@ -200,7 +205,7 @@ No work required here. The acceptance criteria below serve as a checklist to con
   - `DELETE /comments/annotations/{annotationId}` → moderator delete
 - Form requests: `StoreAnnotationsWithCommentRequest` (extends the existing root-comment request), `SetAnnotationProcessedRequest`.
 - Controllers: `AnnotationController` (`getForEntity`, `setProcessed`), `AnnotationModerationController` (`delete`). `CommentController::store` extended.
-- Middleware per [Architecture §3.7](./Chapter_Annotations_Architecture.md#37-routes).
+- Middleware per [Architecture §3.7](./02-architecture.md#37-routes).
 
 **Tests.**
 - Feature tests:
@@ -243,11 +248,11 @@ No work required here. The acceptance criteria below serve as a checklist to con
 
 ## Phase 9 — JS pure core *(anchoring functions delivered by Quote)*
 
-> **The three anchoring functions are already delivered.** `buildCanonicalText`, `extractAnchor`, and `findAnchor` live in `app/Domains/Shared/Resources/js/anchoring/` (created by [Quote Phase 2](./Quotes_Implementation_Plan.md)) with full unit-test coverage. This phase only delivers the Annotations-specific `drafts-store`.
+> **The three anchoring functions are already delivered.** `buildCanonicalText`, `extractAnchor`, and `findAnchor` live in `app/Domains/Shared/Resources/js/anchoring/` (created by [Quote Phase 2](../Quotes_Implementation_Plan.md)) with full unit-test coverage. This phase only delivers the Annotations-specific `drafts-store`.
 
 **Remaining deliverable.**
 - `app/Domains/Comment/Resources/js/annotations/stores/drafts-store.js`
-  - Pure reducer over the local-storage drafts shape ([Architecture §4.4](./Chapter_Annotations_Architecture.md#44-local-storage-schema)).
+  - Pure reducer over the local-storage drafts shape ([Architecture §4.4](./02-architecture.md#44-local-storage-schema)).
   - Methods: `load(key)`, `add(state, draft)`, `edit(state, tempId, body)`, `delete(state, tempId)`, `clear(key)`.
 
 The annotation JS modules that need anchoring functions (`toolbar.js`, `inline-form.js`, etc.) import directly from `app/Domains/Shared/Resources/js/anchoring/` — no local copy.
@@ -263,7 +268,7 @@ The annotation JS modules that need anchoring functions (`toolbar.js`, `inline-f
 
 ## Phase 10 — `<x-comment::annotable>` bootstrap
 
-> **The component and toolbar slot already exist** from [Quote Phase 9](./Quotes_Implementation_Plan.md). `<x-comment::annotable>` is registered, the `@slot('toolbar-actions')` is wired, the generic selection → toolbar JS is in place, and `chapters/show.blade.php` already wraps the chapter content. This phase only adds the Annotations-specific JS bootstrap.
+> **The component and toolbar slot already exist** from [Quote Phase 9](../Quotes_Implementation_Plan.md). `<x-comment::annotable>` is registered, the `@slot('toolbar-actions')` is wired, the generic selection → toolbar JS is in place, and `chapters/show.blade.php` already wraps the chapter content. This phase only adds the Annotations-specific JS bootstrap.
 
 **Remaining deliverables.**
 - JS bootstrap `app/Domains/Comment/Resources/js/annotations/index.js`:
@@ -427,4 +432,4 @@ The annotation JS modules that need anchoring functions (`toolbar.js`, `inline-f
 
 ## After v1
 
-The post-v1 roadmap (post-publish editing, replies, gutter, filter, …) is sketched in [Architecture §8.2](./Chapter_Annotations_Architecture.md#82-post-v1-roadmap-not-committed). We won't plan those phases concretely until v1 ships and we see usage.
+The post-v1 roadmap (post-publish editing, replies, gutter, filter, …) is sketched in [Architecture §8.2](./02-architecture.md#82-post-v1-roadmap-not-committed). We won't plan those phases concretely until v1 ships and we see usage.

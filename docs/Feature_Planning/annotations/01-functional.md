@@ -435,9 +435,10 @@ Notes:
 
 ---
 
-## Next steps
+## Next steps — **done**
 
-Once this spec is locked in, the architecture document (`Chapter_Annotations_Architecture.md` in the same folder) will cover:
+This spec is locked. The architecture document
+([`02-architecture.md`](./02-architecture.md)) covers, as planned:
 
 - Domain ownership (annotations live in the Comment domain or in Story?).
 - Data model (a new `chapter_annotations` table vs. reusing `comments`).

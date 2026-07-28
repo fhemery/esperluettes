@@ -2,7 +2,7 @@
 
 Companion to [`Quotes.md`](./Quotes.md). The functional spec is normative; this doc translates it into a concrete implementation plan.
 
-**Quote lands before Annotations.** The common infrastructure established here — JS test tooling, shared anchoring functions, and the `<x-comment::annotable>` toolbar slot — becomes the foundation that the Annotations feature builds on. See [`Chapter_Annotations_Architecture.md`](./Chapter_Annotations_Architecture.md) for how Annotations references these bricks.
+**Quote lands before Annotations.** The common infrastructure established here — JS test tooling, shared anchoring functions, and the `<x-comment::annotable>` toolbar slot — becomes the foundation that the Annotations feature builds on. See [`annotations/02-architecture.md`](./annotations/02-architecture.md) for how Annotations references these bricks.
 
 Conventions:
 - File paths under `app/Domains/<Domain>/Public|Private/...` follow the project's domain layout (see `docs/Domain_Structure.md`).

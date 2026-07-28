@@ -2,7 +2,7 @@
 
 Centralized infrastructure for computing, storing, and displaying aggregate metrics across the platform. Statistics are **precomputed asynchronously** from domain events so page loads never run expensive counts or aggregations. The domain owns both computation and display: other domains embed Blade components rather than calling a public API.
 
-Feature planning doc: [docs/Feature_Planning/Statistics.md](../../../docs/Feature_Planning/Statistics.md) (authoritative for scope and roadmap; some items are still in progress).
+Feature record: [docs/Feature_Planning/statistics/README.md](../../../docs/Feature_Planning/statistics/README.md) — what shipped, what did not, and the open risks.
 
 ## Purpose and scope
 

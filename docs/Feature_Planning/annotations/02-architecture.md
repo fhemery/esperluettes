@@ -1,10 +1,10 @@
 # Chapter Annotations — Architecture
 
-Companion to [`Chapter_Annotations.md`](./Chapter_Annotations.md). The functional spec is normative; this doc translates it into a concrete implementation plan.
+Companion to [`Chapter_Annotations.md`](./01-functional.md). The functional spec is normative; this doc translates it into a concrete implementation plan.
 
 **v1 scope is deliberately narrower than the functional spec.** The MVP loop is "highlight → write comment → save → review via pop-up modal", with no in-chapter visual indicators, no post-publish editing, no replies, no gutter, no filter UI. See §8 for the v1-vs-vNext split. The data model and PHP architecture below are sized for the full spec — only the JS / UI surface and a few API methods are trimmed for v1.
 
-**Quotes ship first.** The Quote feature ([`Quotes_Architecture.md`](./Quotes_Architecture.md)) establishes shared infrastructure that Annotations inherits:
+**Quotes ship first.** The Quote feature ([`Quotes_Architecture.md`](../Quotes_Architecture.md)) establishes shared infrastructure that Annotations inherits:
 - **JS test tooling** (Vitest + happy-dom) — set up by Quote, available to Annotations.
 - **Shared anchoring JS** (`buildCanonicalText`, `extractAnchor`, `findAnchor`) — live in `app/Domains/Shared/Resources/js/anchoring/` after Quote Phase 2. Annotations imports from there instead of owning local copies.
 - **`<x-comment::annotable>` with toolbar slot** — created by Quote Phase 9. Annotations adds its "Annoter" button to the existing `@slot('toolbar-actions')` in `chapters/show.blade.php` alongside the Quote button.
@@ -491,7 +491,7 @@ This is a Shared-domain refactor consumed by Comment and Story (story-form edito
 
 ## 8. Phased delivery — see the implementation plan
 
-The concrete phase-by-phase delivery plan lives in [`Chapter_Annotations_Implementation_Plan.md`](./Chapter_Annotations_Implementation_Plan.md). This section is kept short and only summarises scope so this architecture doc stays a reference for the *contract* (data model, public API, JS structure) rather than a project tracker.
+The concrete phase-by-phase delivery plan lives in [`Chapter_Annotations_Implementation_Plan.md`](./03-plan.md). This section is kept short and only summarises scope so this architecture doc stays a reference for the *contract* (data model, public API, JS structure) rather than a project tracker.
 
 ### 8.1 v1 scope (the only scope we commit to right now)
 
@@ -533,7 +533,7 @@ These are intentionally vague — we'll plan each properly when v1 ships and we 
 | H | Per-annotation Report | Only if user testing surfaces the need. Would add a new moderation topic `chapter-annotation`. |
 | I | In-chapter highlight tint | Subtle background tint on annotated passages. Cheap once D's `reanchor.js` exists. |
 
-The functional spec ([`Chapter_Annotations.md`](./Chapter_Annotations.md)) remains the long-term vision document. The v1-vs-vNext split lives only here so the spec stays a stable target.
+The functional spec ([`Chapter_Annotations.md`](./01-functional.md)) remains the long-term vision document. The v1-vs-vNext split lives only here so the spec stays a stable target.
 
 ## 9. Decisions locked
 

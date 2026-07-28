@@ -135,7 +135,7 @@ Out of scope for v1. The quoted text is verbatim chapter content (not user-gener
 
 ## 5. Anchoring & Re-anchoring
 
-The anchoring mechanism is **identical to Annotations** (Chapter_Annotations.md §5). Each quote stores:
+The anchoring mechanism is **identical to Annotations** (`annotations/01-functional.md` §5). Each quote stores:
 
 - `highlighted_text`: verbatim plain-text selection.
 - `prefix`: up to 5 plain-text words before the selection.

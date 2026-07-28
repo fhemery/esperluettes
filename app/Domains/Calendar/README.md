@@ -2,7 +2,7 @@
 
 This domain manages time-bound activities (writing challenges, contests, collaborative events) with a plugin-based activity-type registry.
 
-See `docs/Feature_Planning/Calendar.md` for the full specification (may be partially outdated).
+See [docs/Feature_Planning/calendar/README.md](../../../docs/Feature_Planning/calendar/README.md) for the feature record: what shipped, the two deferred features, and what the old spec got wrong.
 
 ## Overview
 
