@@ -19,6 +19,7 @@ Read [`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG
   one anyway.
 - If there is no `TODO` row, say so and stop. Do not invent a task.
 - `BLOCKED:*` rows are skipped, but mention them once.
+- Once you have selected the task, if you can, change the conversation title to `Task: <Task name>`
 
 ## 2. Set up
 

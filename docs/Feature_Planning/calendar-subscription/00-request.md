@@ -10,7 +10,7 @@ show who has enrolled.
 
 ## Why
 
-`requires_subscription` and `max_participants` are stored on `activities`, are
+`requires_subscription` and `max_participants` are stored on `calendar_activities`, are
 editable in the admin form, and **enforce nothing**. An admin can set both today
 and get no behaviour at all — the flag is a promise the app does not keep.
 

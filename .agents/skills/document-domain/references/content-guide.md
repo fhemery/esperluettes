@@ -32,6 +32,8 @@ The test for CLAUDE.md: *would an agent cause a bug or architectural violation b
 
 Instead, **fold the content in**. If a planning document records something a future reader of this domain needs — what is not done, a known drift between spec and code, a decision that would otherwise be re-litigated — state it here, in full, in its own short section. A domain's documentation must stand on its own.
 
+**When it is too long for the README**, put it in `app/Domains/<Domain>/Docs/` and link it from the README — see `docs/Domain_Structure.md` §"Where documentation lives". `Docs/` is for depth that genuinely cannot be learnt from the code: architecture rationale, algorithm specs, diagrams, plugin-authoring guides. It is **not an archive**: a design document written before the code is planning material, and once the code exists it is redundant at best and wrong at worst. Strip it to what still earns its place, or delete it. Every file in `Docs/` must be linked from the README.
+
 ### Include when relevant
 
 **Rendering / UI architecture** — For domains with non-trivial front-end logic (lazy loading, fragment loading, Alpine.js state), explain the approach.

@@ -57,10 +57,21 @@ documents are working memory for an in-flight task — they get renamed, split a
 deleted when the task wraps, and a link from `app/Domains/**` into them rots. The
 dependency runs one way only: planning may link to code docs, never the reverse.
 
-So do not leave a pointer — **fold the content in**. Anything a future reader of
-the domain needs (what is not done, a known drift, a decision that would be
-re-litigated) belongs in the domain's own README, stated in full. `npm run gate`
-fails on a violation.
+So do not leave a pointer — **fold the content in**. `npm run gate` fails on a
+violation. Three destinations, in order of preference:
+
+1. **`app/Domains/<D>/README.md`** — anything a future reader of the domain
+   needs: what is not done, a known drift, a decision that would otherwise be
+   re-litigated. Stated in full, not linked.
+2. **`app/Domains/<D>/Docs/`** — only when it is genuinely too long for the
+   README, and only what cannot be learnt by reading the code. Link it from the
+   README. Strip hard: a design document written before the code is planning
+   material, redundant once the code exists.
+3. **Delete it.** Most planning content earns neither of the first two. The
+   folder under `docs/Feature_Planning/` is disposable by design; git keeps it.
+
+A feature spanning several domains has no single home — put its record in the
+domain that owns the core of it, not in a shared dumping ground.
 
 - Touched domains: their `README.md` / `AGENTS.md` under `app/Domains/<D>/` may
   now be wrong. Regenerate with the `document-domain` skill, or flag them if you

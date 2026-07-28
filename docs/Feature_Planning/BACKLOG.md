@@ -17,15 +17,16 @@ Order matters: the top-most `TODO` is the next task. Reorder rows freely.
 |---|------|--------|------|--------|
 | 1 | Story — one author check, not two | `story-author-check/` | auto | TODO |
 | 2 | MultiEdit — migrate the remaining ImageService consumers | `media-consumer-migration/` | interactive | TODO |
-| 3 | Chapters — MultiEdit content | `chapters-multi-edit/` | interactive | TODO |
-| 4 | Quotes — in-chapter author view (vNext) | `quotes-author-view/` | interactive | BLOCKED:chapters must move to MultiEdit first (task #3, decision #21). REFINE/DESIGN/PLAN are **done** — resume at BUILD, re-reading `02-architecture.md` §4 and risk 2 against the new DOM shape. Also needs task #1. |
-| 5 | Chapter annotations | `annotations/` | interactive | TODO:enters at **BUILD** — `01`/`02`/`03` are the pre-loop documents, 10 of 14 phases remain. Overlaps task #3 on per-block anchoring; sequence them deliberately. |
-| 6 | Discord — warn when notifications are on without a linked account | `discord-link-hint/` | auto | TODO |
-| 7 | Statistics — per-user statistics on the profile | `statistics-profile/` | interactive | TODO |
-| 8 | MultiEdit — advanced mode for static pages | `multiedit-static-pages/` | interactive | TODO |
-| 9 | Calendar — activity subscription and participant limits | `calendar-subscription/` | interactive | TODO |
-| 10 | Calendar — activity state-change notifications | `calendar-notifications/` | interactive | TODO |
-| 11 | Quotes — moderation of quotes and notes | `quotes-moderation/` | interactive | TODO |
+| 3 | Extract an Editor domain from Shared | `editor-domain/` | interactive | TODO:do before task #4 — it adds block logic that should land in Editor, not Shared |
+| 4 | Chapters — MultiEdit content | `chapters-multi-edit/` | interactive | TODO |
+| 5 | Quotes — in-chapter author view (vNext) | `quotes-author-view/` | interactive | BLOCKED:chapters must move to MultiEdit first (task #4, decision #21). REFINE/DESIGN/PLAN are **done** — resume at BUILD, re-reading `02-architecture.md` §4 and risk 2 against the new DOM shape. Also needs task #1. |
+| 6 | Chapter annotations | `annotations/` | interactive | TODO:enters at **BUILD** — `01`/`02`/`03` are the pre-loop documents, 10 of 14 phases remain. Overlaps task #4 on per-block anchoring; sequence them deliberately. |
+| 7 | Discord — warn when notifications are on without a linked account | `discord-link-hint/` | auto | TODO |
+| 8 | Statistics — per-user statistics on the profile | `statistics-profile/` | interactive | TODO |
+| 9 | MultiEdit — advanced mode for static pages | `multiedit-static-pages/` | interactive | TODO |
+| 10 | Calendar — activity subscription and participant limits | `calendar-subscription/` | interactive | TODO |
+| 11 | Calendar — activity state-change notifications | `calendar-notifications/` | interactive | TODO |
+| 12 | Quotes — moderation of quotes and notes | `quotes-moderation/` | interactive | TODO |
 
 ## Done
 
