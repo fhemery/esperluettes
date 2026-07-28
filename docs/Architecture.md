@@ -3,15 +3,34 @@
 This document outlines the architecture and folder structure for the application, following Domain-Driven Design (DDD) principles.
 
 More details can be found inside the different modules README.
-- [Admin](../app/Domains/Admin/README.md)
+
+- [Administration](../app/Domains/Administration/README.md)
 - [Auth](../app/Domains/Auth/README.md)
+- [Calendar](../app/Domains/Calendar/README.md)
+- [Comment](../app/Domains/Comment/README.md)
+- [Config](../app/Domains/Config/README.md)
 - [Dashboard](../app/Domains/Dashboard/README.md)
+- [Discord](../app/Domains/Discord/README.md)
+- [Events](../app/Domains/Events/README.md)
+- [FAQ](../app/Domains/FAQ/README.md)
 - [Home](../app/Domains/Home/README.md)
+- [Media](../app/Domains/Media/README.md)
+- [Message](../app/Domains/Message/README.md)
+- [Moderation](../app/Domains/Moderation/README.md)
 - [News](../app/Domains/News/README.md)
+- [Notification](../app/Domains/Notification/README.md)
 - [Profile](../app/Domains/Profile/README.md)
-- [StaticPage](../app/Domains/StaticPage/README.md)
+- [Quote](../app/Domains/Quote/README.md)
+- [ReadList](../app/Domains/ReadList/README.md)
+- [Search](../app/Domains/Search/README.md)
+- [Settings](../app/Domains/Settings/README.md)
 - [Shared](../app/Domains/Shared/README.md)
+- [StaticPage](../app/Domains/StaticPage/README.md)
+- [Statistics](../app/Domains/Statistics/README.md)
+- [Story](../app/Domains/Story/README.md)
 - [StoryRef](../app/Domains/StoryRef/README.md)
+
+`Follow` has no README yet.
 
 To understand code organization, check [Domain Structure](./Domain_Structure.md)
 

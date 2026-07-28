@@ -6,7 +6,9 @@ The Quote domain lets a reader save meaningful passages from chapters to a perso
 
 Out of scope for v1: in-chapter author view of who quoted what, moderation of quotes/notes, organising quotes into collections, and any social interaction on public quote books.
 
-Feature spec: [`docs/Feature_Planning/Quotes.md`](../../../docs/Feature_Planning/Quotes.md) and [`Quotes_Architecture.md`](../../../docs/Feature_Planning/Quotes_Architecture.md). A post-implementation review lives in [`Quotes_Review.md`](../../../docs/Feature_Planning/Quotes_Review.md). The spec is normative but may lag the code — the review lists known deviations (rich-text note editor, margin bookmark icon, and the stale-quote badge are deferred).
+Feature spec: [`docs/Feature_Planning/Quotes.md`](../../../docs/Feature_Planning/Quotes.md) and [`Quotes_Architecture.md`](../../../docs/Feature_Planning/Quotes_Architecture.md). The spec is normative but lags the code in two places: the note editor is a plain `<textarea>`, not the rich-text editor the spec describes, and the margin bookmark icon was never built. The stale-quote badge *is* implemented (`quote::ui.profile_tab.passage_missing`).
+
+The deferred vNext items have their own backlog rows: [`quotes-author-view/`](../../../docs/Feature_Planning/quotes-author-view/) and [`quotes-moderation/`](../../../docs/Feature_Planning/quotes-moderation/).
 
 ## Key concepts
 

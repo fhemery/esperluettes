@@ -2,8 +2,6 @@
 
 The ReadList domain lets authenticated users bookmark stories they want to read later ("Pile à Lire"). It owns the `read_list_entries` table and exposes Blade components for use inside Story views. Read lists are always private to the user; there is no sharing or public visibility.
 
-Feature planning doc: [docs/Feature_Planning/ReadList.md](../../../docs/Feature_Planning/ReadList.md) — note the spec predates implementation and may be partially outdated.
-
 ---
 
 ## Key Concepts
