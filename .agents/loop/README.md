@@ -94,9 +94,12 @@ recurring pieces of work. `verify-visually` defers to `run-app` for the browser.
 Every BUILD phase and the VERIFY step end on a green gate:
 
 ```bash
-npm run gate            # deptrac + php tests + vitest + vite build
+npm run gate            # docs + deptrac + php tests + vitest + vite build
 npm run gate -- --quick # skip the asset build (faster inner loop)
 ```
+
+The `docs` step enforces that no `app/Domains/**/{README,AGENTS}.md` references
+`docs/Feature_Planning`, and that every relative markdown link resolves.
 
 Honours `LOCAL_RUNNER` (`php` or `sail`) like the husky hooks. A phase is not
 finished until the gate is green — this is rule #4 of `AGENTS.md` made

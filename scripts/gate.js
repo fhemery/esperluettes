@@ -7,9 +7,9 @@
   every BUILD phase, and usable by hand before opening a PR.
 
   Usage:
-    npm run gate                 # deptrac + php tests + js tests + asset build
+    npm run gate                 # docs + deptrac + php tests + js tests + asset build
     npm run gate -- --quick      # skip the asset build
-    npm run gate -- --only=php   # run a single step (deptrac|php|js|build)
+    npm run gate -- --only=php   # run a single step (docs|deptrac|php|js|build)
 
   Honours LOCAL_RUNNER (php|sail) exactly like the husky hooks.
 */
@@ -48,6 +48,7 @@ function main() {
   const tests = artisan(runner, ['test:parallel']);
 
   const steps = [
+    { id: 'docs', label: 'Documentation consistency', cmd: 'node', args: [path.join('scripts', 'check-docs.js')] },
     { id: 'deptrac', label: 'Deptrac (architecture boundaries)', cmd: 'node', args: [path.join('scripts', 'launch_deptrac.js')] },
     { id: 'php', label: 'PHP test suite', cmd: tests.cmd, args: tests.args },
     { id: 'js', label: 'JS test suite (vitest)', cmd: 'npx', args: ['vitest', 'run'] },

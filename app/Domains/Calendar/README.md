@@ -2,7 +2,9 @@
 
 This domain manages time-bound activities (writing challenges, contests, collaborative events) with a plugin-based activity-type registry.
 
-See [docs/Feature_Planning/calendar/README.md](../../../docs/Feature_Planning/calendar/README.md) for the feature record: what shipped, the two deferred features, and what the old spec got wrong.
+**Not done.** `requires_subscription` and `max_participants` are stored on `activities` and editable in the admin form but **enforce nothing** — there is no enrolment logic, no cap and no participant list. Nothing announces an activity opening or closing either; state is derived from dates and there is no cron, so no transition event exists to notify on.
+
+**Known drift.** The activity controller still calls `Shared\Services\ImageService` directly, and the Media scope declared as `calendar` does not match the real folder on disk, `activities/`.
 
 ## Overview
 

@@ -25,9 +25,14 @@ tool-agnostic — `.claude/` only holds shims.
 Finished features are summarised in `docs/Feature_Planning/<slug>/README.md`.
 Read that first; the full `01`–`03` documents only when it points you there.
 
+**A domain's `README.md` / `AGENTS.md` must never reference
+`docs/Feature_Planning`.** Planning docs are working memory for a task in
+flight — renamed, split and deleted when it wraps. Fold what matters into the
+domain's own docs instead. Planning may link to code docs, never the reverse.
+
 ## Definition of done
-- `npm run gate` — deptrac + PHP tests + vitest + asset build. Green, or the
-  work is not finished. `-- --quick` skips the asset build.
+- `npm run gate` — docs + deptrac + PHP tests + vitest + asset build. Green, or
+  the work is not finished. `-- --quick` skips the asset build.
 
 # Functional knowledge
 - a Confirmed user is a user with role `user-confirmed`

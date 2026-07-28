@@ -52,6 +52,16 @@ makes the loop a loop rather than a pipeline.
 
 ## 4. Update the surrounding docs
 
+**A domain's docs must never reference `docs/Feature_Planning`.** Planning
+documents are working memory for an in-flight task — they get renamed, split and
+deleted when the task wraps, and a link from `app/Domains/**` into them rots. The
+dependency runs one way only: planning may link to code docs, never the reverse.
+
+So do not leave a pointer — **fold the content in**. Anything a future reader of
+the domain needs (what is not done, a known drift, a decision that would be
+re-litigated) belongs in the domain's own README, stated in full. `npm run gate`
+fails on a violation.
+
 - Touched domains: their `README.md` / `AGENTS.md` under `app/Domains/<D>/` may
   now be wrong. Regenerate with the `document-domain` skill, or flag them if you
   cannot.

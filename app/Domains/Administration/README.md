@@ -66,6 +66,3 @@ The logs viewer reads files from `storage/logs/*.log`. It displays the last 1 00
 | Business admin operations (users, moderation, FAQ, etc.) | Their respective domains, which register pages via the registry |
 | Filament admin panel | Admin domain (`app/Domains/Admin`) |
 
-## Feature Planning
-
-No feature planning document exists for this domain under `docs/Feature_Planning/`.

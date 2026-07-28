@@ -5,7 +5,7 @@
 
 Read this before touching the bot API or the notification channel registry. The
 bot-facing contract is documented separately in
-[`../Discord_Api_Usage.md`](../Discord_Api_Usage.md) — that file is user
+[`docs/Discord_Api_Usage.md`](../../Discord_Api_Usage.md) — that file is user
 documentation for bot developers and is maintained by hand.
 
 ## What it does
