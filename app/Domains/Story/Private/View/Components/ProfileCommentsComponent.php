@@ -7,6 +7,7 @@ use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\CoverService;
+use App\Domains\Story\Private\Services\ProfileCommentsPolicy;
 use App\Domains\Story\Private\ViewModels\ProfileCommentsAuthorViewModel;
 use App\Domains\Story\Private\ViewModels\ProfileCommentsStoryViewModel;
 use Illuminate\Contracts\View\View as ViewContract;
@@ -27,6 +28,7 @@ class ProfileCommentsComponent extends Component
         private ChapterService $chapterService,
         private ProfilePublicApi $profileApi,
         private CoverService $coverService,
+        private ProfileCommentsPolicy $commentsPolicy,
         int $ownerUserId,
     ) {
         $this->profileUserId = $ownerUserId;
@@ -36,9 +38,8 @@ class ProfileCommentsComponent extends Component
 
     private function hydrate(int $userId): void
     {
-        // Check if comments are viewable using the Profile API
-        $viewerUserId = Auth::check() ? Auth::id() : null;
-        if (!$this->profileApi->canViewComments($userId, $viewerUserId)) {
+        $viewerUserId = Auth::check() ? (int) Auth::id() : null;
+        if (!$this->commentsPolicy->canViewComments($userId, $viewerUserId)) {
             $this->isAllowed = false;
             return;
         }

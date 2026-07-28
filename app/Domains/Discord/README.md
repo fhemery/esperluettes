@@ -10,7 +10,7 @@ The Discord domain manages the integration between the website and the external 
 
 Out of scope: Discord OAuth flows, and any Discord-specific permission enforcement beyond role look-up.
 
-See [docs/Feature_Planning/Discord_Api_Usage.md](../../../docs/Feature_Planning/Discord_Api_Usage.md) for the full API specification (may be partially ahead of the current implementation).
+See [docs/Discord_Api_Usage.md](../../../docs/Discord_Api_Usage.md) for the bot-facing API contract. That document is written for bot developers and is maintained by hand — keep it in step with any change to these endpoints.
 
 ## Key concepts
 

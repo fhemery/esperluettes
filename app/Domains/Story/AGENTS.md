@@ -84,3 +84,5 @@
 - **NotificationFactory** (`Notification` domain) — registers 7 notification types: `ChapterCommentNotification`, `CoAuthorChapterCreated/Updated/DeletedNotification`, `CollaboratorRoleGiven/Removed/LeftNotification`.
 - **ConfigPublicApi** (`Config` domain) — registers feature toggles `story.theme_covers_enabled` and `story.custom_covers_enabled` (both default `false`).
 - **AdminNavigationRegistry** (`Administration` domain) — registers the story moderation index page under admin navigation (priority 10, roles: moderator/admin/tech-admin).
+- **ProfileTabRegistry** (`Profile` domain) — registers the `stories` tab (order 20, the profile's default landing tab) and the `comments` tab (order 30, gated by `CommentsTabVisibility`).
+- **SettingsPublicApi** (`Settings` domain) — registers the `hide-comments-section` boolean (default `false`) into *Profile's* settings tab and privacy section, inside `app->booted()` so those exist first. Story owns it because it gates Story's comments tab; `ProfileCommentsPolicy` is the only reader. The stored `domain` column is `profile` (the settings tab id), not `story`.

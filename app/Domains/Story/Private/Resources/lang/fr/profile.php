@@ -12,4 +12,10 @@ return [
     'comments-count' => '{1} :count commentaire|[2,*] :count commentaires',
     'collapse' => 'Réduire',
     'loading-comments' => 'Chargement des commentaires...',
+    'settings' => [
+        'hide-comments-section' => [
+            'name' => 'Cacher l\'onglet commentaire',
+            'description' => 'Si cette option est activée, seul·e·s vous, les Cadratins et les Majuscules pourront accéder à la liste de vos commentaires sur votre profil.',
+        ],
+    ],
 ];

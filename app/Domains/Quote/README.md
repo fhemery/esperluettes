@@ -6,7 +6,7 @@ The Quote domain lets a reader save meaningful passages from chapters to a perso
 
 Out of scope for v1: in-chapter author view of who quoted what, moderation of quotes/notes, organising quotes into collections, and any social interaction on public quote books.
 
-Feature spec: [`docs/Feature_Planning/Quotes.md`](../../../docs/Feature_Planning/Quotes.md) and [`Quotes_Architecture.md`](../../../docs/Feature_Planning/Quotes_Architecture.md). A post-implementation review lives in [`Quotes_Review.md`](../../../docs/Feature_Planning/Quotes_Review.md). The spec is normative but may lag the code — the review lists known deviations (rich-text note editor, margin bookmark icon, and the stale-quote badge are deferred).
+**Not done.** The note editor is a plain `<textarea>` rather than a rich-text editor, and the margin bookmark icon was never built. The in-chapter author view (showing an author which passages were quoted) and moderation of quotes and notes are both deferred; the reader's private note must never become visible to the author through either.
 
 ## Key concepts
 

@@ -3,10 +3,8 @@
 namespace App\Domains\Profile\Public\Providers;
 
 use App\Domains\Settings\Public\Api\SettingsPublicApi;
-use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
-use App\Domains\Shared\Contracts\ParameterType;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
@@ -40,7 +38,6 @@ class ProfileServiceProvider extends ServiceProvider
 {
     public const TAB_PROFILE = 'profile';
     public const SECTION_PRIVACY = 'privacy';
-    public const KEY_HIDE_COMMENTS_SECTION = 'hide-comments-section';
 
     /**
      * Register services.
@@ -147,16 +144,8 @@ class ProfileServiceProvider extends ServiceProvider
             descriptionKey: 'profile::settings.sections.privacy.description',
         ));
 
-        // Register "Hide comments section" parameter
-        $settingsApi->registerParameter(new SettingsParameterDefinition(
-            tabId: self::TAB_PROFILE,
-            sectionId: self::SECTION_PRIVACY,
-            key: self::KEY_HIDE_COMMENTS_SECTION,
-            type: ParameterType::BOOL,
-            default: false,
-            order: 10,
-            nameKey: 'profile::settings.params.hide-comments-section.name',
-            descriptionKey: 'profile::settings.params.hide-comments-section.description',
-        ));
+        // The parameters in this section belong to the domains that own the
+        // tabs they gate (Story, Follow, Quote); Profile only provides the tab
+        // and the section for them to register into.
     }
 }

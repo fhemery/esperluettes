@@ -91,7 +91,6 @@ Profile/
       ProfileService.php             # Core business logic (CRUD, avatar, slug, caching)
       ProfileAvatarUrlService.php    # Resolves public avatar URL with SVG fallback
       ProfileCacheService.php        # Cache layer keyed by user_id (TTL: 10 min)
-      ProfilePrivacyService.php      # Comments tab visibility logic
     Support/
       AvatarGenerator.php            # Deterministic SVG avatar generation from initials
       Moderation/
@@ -139,7 +138,6 @@ The domain exposes `ProfilePublicApi` (contract in `Shared`), bound in `ProfileS
 | `getFullProfile(int $userId): ?FullProfileDto` | Returns full profile including join date and roles |
 | `searchDisplayNames(string $query, int $limit): array` | Returns `[user_id => display_name]` map |
 | `searchPublicProfiles(string $query, int $limit): array` | Returns `['items' => ProfileSearchResultDto[], 'total' => int]` |
-| `canViewComments(int $profileUserId, ?int $viewerUserId): bool` | Privacy gate for comments tab |
 
 ## Events Emitted
 
@@ -208,7 +206,7 @@ The component must be a class component taking a single `ownerUserId` prop and h
 ## Registry Integrations
 
 - **ModerationRegistry** (`Moderation` domain) — registers the `'profile'` topic with `ProfileSnapshotFormatter`.
-- **SettingsPublicApi** (`Settings` domain) — registers a `Profile` tab (order 30) with a `Privacy` section and the `hide-comments-section` boolean parameter (default `false`).
+- **SettingsPublicApi** (`Settings` domain) — registers the `Profile` tab (order 30) and its `Privacy` section. The parameters in that section are registered by the domains that own the tabs they gate (Story, Follow, Quote), not by Profile.
 
 ## Key Design Decisions
 

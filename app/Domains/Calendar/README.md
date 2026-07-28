@@ -2,7 +2,9 @@
 
 This domain manages time-bound activities (writing challenges, contests, collaborative events) with a plugin-based activity-type registry.
 
-See `docs/Feature_Planning/Calendar.md` for the full specification (may be partially outdated).
+**Not done.** `requires_subscription` and `max_participants` are stored on `calendar_activities` and editable in the admin form but **enforce nothing** — there is no enrolment logic, no cap and no participant list. Nothing announces an activity opening or closing either; state is derived from dates and there is no cron, so no transition event exists to notify on.
+
+**Known drift.** The activity controller still calls `Shared\Services\ImageService` directly, and the Media scope declared as `calendar` does not match the real folder on disk, `activities/`.
 
 ## Overview
 
@@ -45,31 +47,17 @@ The registry is populated at boot time in `CalendarServiceProvider`.
 
 ## Built-in Activity Types
 
-### Jardino
+Each type documents itself; the core knows nothing about what they do.
 
-A word-count challenge where participants set a writing goal, select stories to track, and watch their progress grow on a virtual garden map.
-
-- Users create a **goal** (target word count) and link it to one or more stories.
-- Progress is tracked via **story snapshots**: when a goal-linked story gets a chapter event (created, updated, deleted), a listener computes the word delta and updates the snapshot's `current_word_count`.
-- The garden UI maps progress onto a grid of garden cells (`JardinoGardenCell`), where flowers bloom as words are written.
-- Word count deltas come from the Story domain's `ChapterCreated`, `ChapterUpdated`, and `ChapterDeleted` events.
-
-### Secret Gift
-
-A secret-santa-style exchange where participants sign up, and an admin runs a shuffle to assign each participant a recipient.
-
-- Participants enroll by visiting the activity page while it is Active.
-- An admin manually triggers the shuffle via the Artisan command `secret-gift:shuffle {activity_id}`.
-- After shuffle, each giver can prepare a gift (text, image, optionally a sound file) stored on the local disk.
-- Gift assets (image, sound) are revealed to recipients only once the activity transitions to Ended or Archived state.
-- Files are stored on the `local` disk under `calendar/secret-gift/{activity_id}/`.
+- [Jardino](Private/Activities/Jardino/README.md) — a word-count writing challenge with a shared garden map.
+- [Secret Gift](Private/Activities/SecretGift/README.md) — a secret-santa-style gift exchange.
 
 ## Architecture Decisions
 
 - **State is computed, not stored.** This avoids stale state bugs from missed cron jobs and keeps the data model simple. The trade-off is that any query requiring state must load all activities in memory and filter in PHP (see `getAllActivitiesSortedByState()`). Index `ca_type_active_idx` partially mitigates this.
 - **Activity type is immutable after creation.** Enforced in `CalendarPublicApi::update()` — changing the type would orphan type-specific data rows referencing the activity.
 - **No FK to `users`.** `created_by_user_id` is stored as a plain integer column per the project's cross-domain FK rule. Type-specific tables (Jardino goals, Secret Gift participants/assignments) follow the same rule for their user references.
-- **Each activity type is its own sub-module.** Views, translations, migrations, routes, models, and services for a type live entirely under `Private/Activities/<TypeName>/`. This keeps the core domain stable when adding new types.
+- **Each activity type is its own sub-module, not its own domain.** Views, translations, migrations, routes, models, and services for a type live entirely under `Private/Activities/<TypeName>/`. Promoting them to domains was rejected: an activity is not independently useful, it always hangs off an `Activity` row, and it would need a Public API nobody would call. Living under Calendar's `Private/` also means Deptrac lets a type reach Calendar's own models and services directly. Revisit only if a type ever needs to be consumed from outside Calendar.
 - **Secret Gift shuffle is an Artisan command, not an automated trigger.** An admin runs it manually after the registration phase closes, allowing them to review participant count before committing.
 
 ## Cross-Domain Delegation
@@ -82,7 +70,7 @@ A secret-santa-style exchange where participants sign up, and an admin runs a sh
 
 ## Admin Panel
 
-There is currently no Filament resource for Calendar activities in `app/Domains/Admin/`. Activity CRUD is exposed through `CalendarPublicApi` for programmatic use. The Secret Gift shuffle is triggered via the Artisan command.
+Activity CRUD lives in this domain: `Private/Controllers/Admin/ActivityController.php`, routed under the `admin/calendar` prefix (`calendar.admin.*`) with views in `Private/Resources/views/pages/admin/activities/`. It uses the custom `Administration` panel — there is no Filament here. `CalendarPublicApi` exposes the same operations programmatically. The Secret Gift shuffle is a separate Artisan command.
 
 ## Adding a New Activity Type (Checklist)
 

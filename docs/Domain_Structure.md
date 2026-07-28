@@ -43,6 +43,9 @@ app/
       Tests/                      # Domain-specific tests
         Unit/
         Feature/
+
+      Docs/                       # Optional. Depth linked *from* README.md
+        Diagrams/                 # PlantUML sources + rendered images
 ```
 
 To sum up: 
@@ -51,6 +54,33 @@ To sum up:
 
 Note that the folders might vary based on the domain needs. For example, Shared domains will have mostly public
 elements (for example a Public `Support` folder), and that's ok.
+
+## Where documentation lives
+
+Three destinations, in order of preference. Always prefer the earlier one.
+
+| Destination | Holds |
+|---|---|
+| `app/Domains/<D>/README.md` | The entry point. Self-sufficient for the common case: what the domain does, its public API, what is *not* done. |
+| `app/Domains/<D>/Docs/` | Depth linked **from** the README: architecture rationale, algorithm specs, diagrams, plugin-authoring guides. Optional — most domains never need it. |
+| `docs/Feature_Planning/<slug>/` | Working memory for a task **in flight**. Disposable; deleted when the task wraps. |
+
+Rules:
+
+- **Domain docs must never reference `docs/Feature_Planning`.** Planning
+  documents are renamed, split and deleted as tasks wrap, so a link from
+  `app/Domains` into them rots by design. The dependency runs one way only:
+  planning may link to code docs, never the reverse. `npm run gate` enforces it.
+- **`Docs/` is not an archive.** Write down only what cannot be learnt by
+  reading the code, and is not already in the README. A design document written
+  *before* the code is planning material — once the code exists it is at best
+  redundant and at worst wrong. Strip it to what still earns its place, or
+  delete it.
+- **Every file in `Docs/` is linked from the README.** An unlinked file is
+  invisible and will rot.
+- Nested plugins (a Calendar activity, for instance) follow the same three
+  destinations at their own level: their own `README.md` first, their own
+  `Docs/` only if something genuinely remains.
 
 ## Naming Conventions
 

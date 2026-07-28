@@ -44,7 +44,7 @@ Write for a **human developer** joining the project. See `references/content-gui
 - Key concepts that need explanation (business rules, non-trivial mechanics)
 - Architecture decisions and their rationale
 - Cross-domain delegation map (what this domain outsources and why)
-- Link to feature planning doc if one exists under `docs/Feature_Planning/`
+- **Never link to `docs/Feature_Planning/`** — fold what matters into the README instead (see the content guide)
 
 If a README already exists, preserve accurate content and extend or correct it rather than rewriting from scratch.
 

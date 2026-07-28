@@ -8,7 +8,6 @@ use App\Domains\Shared\Dto\FullProfileDto;
 use App\Domains\Shared\Dto\ProfileSearchResultDto;
 use App\Domains\Profile\Private\Services\ProfileService;
 use App\Domains\Profile\Private\Services\ProfileAvatarUrlService;
-use App\Domains\Profile\Private\Services\ProfilePrivacyService;
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 
 class ProfileApi implements ProfilePublicApiContract
@@ -17,7 +16,6 @@ class ProfileApi implements ProfilePublicApiContract
         private readonly ProfileService $profiles,
         private readonly ProfileAvatarUrlService $avatars,
         private readonly AuthPublicApi $authApi,
-        private readonly ProfilePrivacyService $privacy,
     )
     {
     }
@@ -141,8 +139,4 @@ class ProfileApi implements ProfilePublicApiContract
         ];
     }
 
-    public function canViewComments(int $profileUserId, ?int $viewerUserId = null): bool
-    {
-        return $this->privacy->canViewComments($profileUserId, $viewerUserId);
-    }
 }

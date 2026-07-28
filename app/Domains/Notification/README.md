@@ -4,7 +4,7 @@
 
 Centralize user-facing notifications across the platform. Provides a stable extensibility contract (`NotificationContent`) for domain-specific payloads that are persisted, reconstructed, and rendered for display. Exposes a public API to create targeted and broadcast notifications with validation and backfilling support. Supports per-user, per-type, per-channel delivery preferences via an extensible channel registry.
 
-Feature planning doc: [docs/Feature_Planning/Notification_Preferences.md](../../../docs/Feature_Planning/Notification_Preferences.md) (may be partially outdated once implemented).
+Delivery preferences are documented below in [Delivery Channels](#delivery-channels) and [User Preferences](#user-preferences). The Discord channel is registered by the Discord domain — see [its README](../Discord/README.md).
 
 ## Key concepts
 

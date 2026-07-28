@@ -2,7 +2,9 @@
 
 Centralized infrastructure for computing, storing, and displaying aggregate metrics across the platform. Statistics are **precomputed asynchronously** from domain events so page loads never run expensive counts or aggregations. The domain owns both computation and display: other domains embed Blade components rather than calling a public API.
 
-Feature planning doc: [docs/Feature_Planning/Statistics.md](../../../docs/Feature_Planning/Statistics.md) (authoritative for scope and roadmap; some items are still in progress).
+**Not done.** The per-user surface was never delivered: `UserTotalStories`, `UserTotalChapters` and `UserTotalWords` are computed but displayed nowhere, no `x-statistics::` component is rendered outside the admin page, and `Private/Resources/lang/fr/profile.php` holds five translation keys nothing uses. The three per-user comment definitions the design called for do not exist.
+
+**Open risks.** `DECIMAL(20,4)` may be overkill for counts (`BIGINT` would do), and recompute assumes today's event payloads — there is no answer for backfilling across a changed event shape.
 
 ## Purpose and scope
 

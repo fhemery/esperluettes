@@ -14,6 +14,26 @@
 - Deptrac : `./vendor/bin/sail composer deptrac`
 - Artisan commands: `./vendor/bin/sail artisan`
 
+# How work is organised
+
+Features go through a six-step loop defined in `.agents/loop/README.md`:
+REFINE → DESIGN → PLAN → BUILD → VERIFY → WRAP. The backlog is
+`docs/Feature_Planning/BACKLOG.md`; entry points are `/next-task` and `/continue-task`.
+Per-step instructions live in `.agents/skills/<step>/SKILL.md` and are
+tool-agnostic — `.claude/` only holds shims.
+
+Finished features are summarised in `docs/Feature_Planning/<slug>/README.md`.
+Read that first; the full `01`–`03` documents only when it points you there.
+
+**A domain's `README.md` / `AGENTS.md` must never reference
+`docs/Feature_Planning`.** Planning docs are working memory for a task in
+flight — renamed, split and deleted when it wraps. Fold what matters into the
+domain's own docs instead. Planning may link to code docs, never the reverse.
+
+## Definition of done
+- `npm run gate` — docs + deptrac + PHP tests + vitest + asset build. Green, or
+  the work is not finished. `-- --quick` skips the asset build.
+
 # Functional knowledge
 - a Confirmed user is a user with role `user-confirmed`
 - a non-confirmed user is a user with role `user`

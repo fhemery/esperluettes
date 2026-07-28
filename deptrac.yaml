@@ -17,22 +17,6 @@ deptrac:
         - type: directory
           value: 'app/Domains/Shared/Testing/'
 
-    # Admin Domain
-    - name: AdminPrivate
-      collectors:
-        - type: bool
-          must_not:
-            - type: directory
-              value: app/Domains/Admin/Tests/
-          must:
-            - type: directory
-              value: app/Domains/Admin/
-
-    - name: AdminTests
-      collectors:
-        - type: directory
-          value: 'app/Domains/Admin/Tests/'
-
     # Administration Domain
     # This is the domain that will replace admin (Filament) on the long run
     - name: AdministrationPublic
@@ -581,6 +565,8 @@ deptrac:
       - AdministrationPublic
       # Registers the stories and comments profile tabs
       - ProfilePublic
+      # Registers the hide-comments-section user setting
+      - SettingsPublic
 
     StoryRefPublic:
       - Shared
@@ -592,35 +578,6 @@ deptrac:
     # ###################################################
     # Private domains - can access Shared + other domain Public APIs + events
     # ###################################################
-
-    # [Exception] Admin can use both Public and Private parts
-    # This is because the Admin dashboards are centered in this module
-    # But they actually could be spread in their own modules
-    AdminPrivate:
-      - Shared
-      - AuthPublic
-      - AuthPrivate
-      - NewsPublic
-      - NewsPrivate
-      - ProfilePublic
-      - ProfilePrivate
-      - StaticPagePublic
-      - StaticPagePrivate
-      - StoryPublic
-      - StoryPrivate
-      - StoryRefPublic
-      - StoryRefPrivate
-      - HomePrivate
-      - EventsPublic
-      - EventsPrivate
-      - ConfigPublic
-      - ConfigPrivate
-      - ModerationPublic
-      - ModerationPrivate
-      - FAQPublic
-      - FAQPrivate
-      - CalendarPublic
-      - CalendarPrivate
 
     AdministrationPrivate:
       - Shared
@@ -927,18 +884,6 @@ deptrac:
       - TestHelpers
       - StoryRefPrivate
       - StoryRefPublic
-
-    AdminTests:
-      - Shared
-      - TestHelpers
-      - AdminPrivate
-      - AuthPublic
-      - NewsPublic
-      - ProfilePublic
-      - StaticPagePublic
-      - StoryPublic
-      - StoryRefPublic
-      - StoryRefPrivate
 
     # Media Domain
     MediaPublic:

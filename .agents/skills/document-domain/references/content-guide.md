@@ -28,7 +28,11 @@ The test for CLAUDE.md: *would an agent cause a bug or architectural violation b
 
 **Cross-domain delegation map** — What this domain intentionally outsources to others, and why. This prevents developers from accidentally re-implementing something that already exists.
 
-**Link to feature planning doc** — If `docs/Feature_Planning/<Domain>.md` exists, link it. Note if the spec may be outdated.
+**Never reference `docs/Feature_Planning/`.** Planning documents are working memory for an in-flight task: they are renamed, split and deleted when the task wraps, so a link from a domain README rots. The dependency runs one way only — planning may link to code docs, never the reverse. `npm run gate` fails on a violation.
+
+Instead, **fold the content in**. If a planning document records something a future reader of this domain needs — what is not done, a known drift between spec and code, a decision that would otherwise be re-litigated — state it here, in full, in its own short section. A domain's documentation must stand on its own.
+
+**When it is too long for the README**, put it in `app/Domains/<Domain>/Docs/` and link it from the README — see `docs/Domain_Structure.md` §"Where documentation lives". `Docs/` is for depth that genuinely cannot be learnt from the code: architecture rationale, algorithm specs, diagrams, plugin-authoring guides. It is **not an archive**: a design document written before the code is planning material, and once the code exists it is redundant at best and wrong at worst. Strip it to what still earns its place, or delete it. Every file in `Docs/` must be linked from the README.
 
 ### Include when relevant
 

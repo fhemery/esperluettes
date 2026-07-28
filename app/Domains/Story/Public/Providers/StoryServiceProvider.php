@@ -70,6 +70,8 @@ use App\Domains\Story\Private\Console\PublishScheduledChaptersCommand;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
+use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
 use App\Domains\Shared\Contracts\ParameterType;
 use App\Domains\Story\Private\Support\FeatureToggles;
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
@@ -78,6 +80,11 @@ use App\Domains\Auth\Public\Api\Roles;
 
 class StoryServiceProvider extends ServiceProvider
 {
+    /** Profile's settings tab and privacy section, which this domain registers into. */
+    public const TAB_PROFILE = 'profile';
+    public const SECTION_PRIVACY = 'privacy';
+    public const KEY_HIDE_COMMENTS_SECTION = 'hide-comments-section';
+
     public function boot(): void
     {
         // Register commands
@@ -110,6 +117,11 @@ class StoryServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(app_path('Domains/Story/Private/Resources/lang'), 'story');
 
         $this->registerProfileTabs();
+
+        // After all providers boot, so Profile's settings tab/section exist.
+        $this->app->booted(function () {
+            $this->registerSettings();
+        });
 
         // Register policies
         Gate::policy(Story::class, StoryPolicy::class);
@@ -292,9 +304,34 @@ class StoryServiceProvider extends ServiceProvider
             ownLabelKey: 'story::profile.my-comments',
             visibility: CommentsTabVisibility::class,
             privacy: new ProfileTabPrivacy(
-                settingsTabId: ProfileServiceProvider::TAB_PROFILE,
-                settingsKey: ProfileServiceProvider::KEY_HIDE_COMMENTS_SECTION,
+                settingsTabId: self::TAB_PROFILE,
+                settingsKey: self::KEY_HIDE_COMMENTS_SECTION,
             ),
+        ));
+    }
+
+    /**
+     * The "hide my comments" preference lives under Profile's settings tab, but
+     * belongs to Story: it gates Story's comments tab and nothing else. Same
+     * arrangement as follow.hide-following-tab and quote.hide-quotes-tab.
+     */
+    private function registerSettings(): void
+    {
+        $settingsApi = app(SettingsPublicApi::class);
+
+        if ($settingsApi->getParameter(self::TAB_PROFILE, self::KEY_HIDE_COMMENTS_SECTION) !== null) {
+            return;
+        }
+
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_PROFILE,
+            sectionId: self::SECTION_PRIVACY,
+            key: self::KEY_HIDE_COMMENTS_SECTION,
+            type: ParameterType::BOOL,
+            default: false,
+            order: 10,
+            nameKey: 'story::profile.settings.hide-comments-section.name',
+            descriptionKey: 'story::profile.settings.hide-comments-section.description',
         ));
     }
 }

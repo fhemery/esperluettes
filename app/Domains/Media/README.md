@@ -6,7 +6,7 @@ The Media domain owns **image handling** for the whole application: uploading, g
 
 Its defining choice is that **an image is identified by its storage path** — there is no asset id, no reference table, and the domain owns **no database tables**. The content that uses an image (a column like `image_path`, or an image block inside `content_blocks`) *is* the record of that usage. This keeps a single source of truth and avoids a denormalized reference cache that could drift.
 
-This domain grew out of the **MultiEdit** feature. See the planning docs under [docs/Feature_Planning/](../../../docs/Feature_Planning/): `MultiEdit.md` (functional), `MultiEdit_Architecture.md` (technical), `MultiEdit_Planning.md` (delivery), and `MultiEdit_Consumer_Migration.md` (migrating the remaining `ImageService` consumers).
+This domain grew out of the **MultiEdit** feature, which introduced block-based content (`<x-shared::multi-editor>` and `Shared\Support\ContentBlocksRenderer`) alongside it. Media handles the images; Shared owns the editor and renderer.
 
 ## Key concepts
 
@@ -53,7 +53,7 @@ The reuse picker is backed by the authenticated `GET /media/library?scope=…` e
 
 **Cleanup reads the truth, it doesn't cache it.** Usage is computed on demand by fanning out over registered `MediaUsageProvider`s, not maintained on every save. The cost moves from every write to a scheduled batch sweep, which is the right place to pay it. The residual risk — a domain that stores paths but forgets to register a provider — is contained by the 7-day grace window and the unclaimed-scope skip guard.
 
-**`ImageService` stays in `Shared` for now.** To keep every migration step non-breaking, `ImageService` remains in `Shared/Services` and `MediaService` delegates to it while unmigrated consumers still reference it directly. It will be relocated into `Media/Private/Services` only once the last consumer calls `MediaPublicApi` exclusively (see `MultiEdit_Consumer_Migration.md`).
+**`ImageService` stays in `Shared` for now.** To keep every migration step non-breaking, `ImageService` remains in `Shared/Services` and `MediaService` delegates to it while unmigrated consumers still reference it directly. It will be relocated into `Media/Private/Services` only once the last consumer calls `MediaPublicApi` exclusively.
 
 **Media owns its Blade components.** Display and upload components live in this domain rather than in `Shared`, so all image UI is cohesive. Consumers (including the `Shared` multi-editor) depend on `MediaPublic` for them — the same `Shared → MediaPublic` shape already accepted for Config/Settings.
 
@@ -65,4 +65,6 @@ The reuse picker is backed by the authenticated `GET /media/library?scope=…` e
 | Knowing which files are still used | Each consumer registers a `MediaUsageProvider` in its `ServiceProvider::boot()` |
 | Rendering variant URLs | Assembled only inside `<x-media::image>` / `MediaPublicApi::variantUrl` |
 
-Consumers currently on Media: **FAQ** (question image) and **News** (header image + advanced content blocks). Remaining `ImageService` consumers (StaticPage header, Calendar, Profile) are scheduled in `MultiEdit_Consumer_Migration.md`.
+Consumers currently on Media: **FAQ** (question image) and **News** (header image + advanced content blocks). **StaticPage, Calendar and Profile still call `Shared\Services\ImageService` directly** and are not yet migrated. Note that Profile is a deliberate special case: its avatar is a single 200×200 JPEG with no responsive variants, so `<x-media::image>` does not apply and only `saveSquareJpg` needs exposing.
+
+⚠️ The `calendar` scope declared in `MediaService::FLAT_SCOPES` is wrong — Calendar's real folder on disk is `activities/`.
