@@ -37,6 +37,8 @@
 
 **Avatar fallback path.** If `profile_picture_path` is `null`, `ProfileAvatarUrlService` falls back to `profile_pictures/{user_id}.svg` on the `public` disk. This SVG is generated at registration by `AvatarGenerator` and stored once. Deleting a custom picture resets the column to `null` — it does not delete the fallback SVG.
 
+**Avatars use Media but stay out of the Media lifecycle.** `ProfileService` calls `MediaPublicApi::saveSquareJpg($targetPath, …)` — the one deliberately non-scoped Media method, where the caller owns the path. Profile registers **no** `MediaUsageProvider`, has no Media scope, and is therefore not swept by `media:gc`; it still deletes its own avatar files synchronously. Do not "fix" this by enrolling avatars in the sweep — it was decided against, because a 200×200 single-file avatar has none of the reuse semantics the sweep exists for.
+
 **Description sanitization happens in the service, not the form request.** `ProfileService::updateProfileWithPicture()` runs `clean($data['description'], 'strict')` before saving. Do not add sanitization logic in the request class.
 
 **Slug changes on every display name change.** `ProfileService::applyDisplayName()` always regenerates the slug via `SimpleSlug::normalize()`. URLs using the old slug will break. There is currently no redirect table.
