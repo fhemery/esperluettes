@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Media scope corrections (`FLAT_SCOPES`) | S | — | DONE |
-| 2 | Calendar → `MediaPublicApi` | M | 1 | TODO |
+| 2 | Calendar → `MediaPublicApi` | M | 1 | DONE |
 | 3 | StaticPage → `MediaPublicApi` | M | 1 | TODO |
 | 4 | Profile → `MediaPublicApi::saveSquareJpg` | S | — | TODO |
 | 5 | Relocate `ImageService` into Media | S | 2, 3, 4 | TODO |

@@ -58,13 +58,15 @@
 <div class="surface-bg p-6 rounded-lg flex flex-col gap-4">
     <h2 class="text-base font-semibold">{{ __('calendar::admin.sections.media') }}</h2>
 
-    <x-shared::image-upload
+    <x-media::image-field
         name="image"
-        id="image"
-        :currentPath="$activity?->image_path"
+        scope="activities"
+        :path="old('image.path', $activity?->image_path)"
+        :show-alt="false"
+        :show-caption="false"
         :label="__('calendar::admin.fields.image')"
-        :helpText="__('shared::image-upload.max_size', ['size' => 5])"
     />
+    <x-shared::input-error :messages="$errors->get('image.file')" class="mt-1" />
 </div>
 
 {{-- Section: Restrictions & Settings --}}

@@ -428,6 +428,7 @@ deptrac:
       - CalendarPrivate
       - AuthPublic
       - AdministrationPublic
+      - MediaPublic
 
     CommentPublic: 
       - Shared
@@ -597,6 +598,7 @@ deptrac:
       - AuthPublic
       - StoryPublic
       - EventsPublic
+      - MediaPublic
  
     CommentPrivate:
       - Shared

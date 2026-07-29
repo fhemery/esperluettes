@@ -20,10 +20,13 @@ default => ['color' => 'neutral', 'label' => __('calendar::activity.state.draft'
     <div class="w-[230px] h-[220px] mx-auto overflow-hidden">
         <a href="{{ route('calendar.activities.show', $activity->slug) }}" class="block">
             @if($activity->image_path)
-            <img
-                src="{{ asset('storage/' . $activity->image_path) }}"
-                alt="{{ $activity->name }}"
-                class="w-[230px] h-[220px] object-cover">
+            {{-- display:contents keeps the component's <figure> out of the fixed-size box --}}
+            <x-media::image
+                :path="$activity->image_path"
+                :alt="$activity->name"
+                class="contents"
+                sizes="230px"
+                img-class="w-[230px] h-[220px] object-cover" />
             @else
             <div class="w-[230px] h-[220px] surface-neutral flex items-center justify-center">
                 <span class="material-symbols-outlined text-6xl text-on-surface/30">event</span>
