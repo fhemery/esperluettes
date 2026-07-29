@@ -10,7 +10,7 @@ import fsp from 'fs/promises';
 import path from 'path';
 import readline from 'readline';
 import { fileURLToPath } from 'url';
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import { makeLog, run, determineRunner, runCapture } from './utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -276,7 +276,7 @@ async function zipDist(sourceDir, zipName) {
   } catch {}
   await new Promise((resolve, reject) => {
     const output = fs.createWriteStream(zipPath);
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = new ZipArchive({ zlib: { level: 9 } });
     output.on('close', resolve);
     archive.on('error', reject);
     archive.pipe(output);
