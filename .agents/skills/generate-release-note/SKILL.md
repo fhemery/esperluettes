@@ -1,233 +1,209 @@
 ---
 name: generate-release-note
-description: This skill should be used when the user asks to "generate a release note", "generate release notes", "write the release note between two versions", or "diff versions and generate the user release note". Accepts optional tag inputs like "from: 1.9.2 to: 1.9.3" and an optional explicit "À retester:" override.
+description: This skill should be used when the user asks to "generate a release note", "generate release notes", "write the release note between two versions", or "diff versions and generate the user release note". Accepts optional tag inputs like "from: 1.9.2 to: 1.9.3". Produces a French user-facing note plus a separate "À retester" section deduced from all commits that touch product features (including refactors).
 ---
 
 # Generate a user release note
 
-Create a French, user-facing release note by diffing two git tags (`X.Y.Z`) and
-transforming the resulting commits into the bracketed category style used on
-`jd-esperluettes.fr/versions`.
+Diff two git tags (`X.Y.Z`) and produce **two distinct sections** in the chat:
 
-The release note must include only functional/user-visible changes.
+1. **Release note** — French, user-facing, same style as
+   `jd-esperluettes.fr/versions`. Functional content only.
+2. **À retester** — for the deployer. Skim **all** commits in the range
+   (including `refactor`, and other technical work that still touches a product
+   domain) and list which features / domains need a smoke retest. This section
+   exists precisely because refactors do **not** appear in the release note.
 
-## 1) Inputs and follow-up questions
+Do not conflate the two filters.
 
-### Supported inputs (from the user message)
+## 1) Inputs
 
-The skill should read the user message for:
+Read the user message for:
 
-- `from:` / `to:` tag values in `X.Y.Z` format, or two raw tags (e.g. `1.9.2`
-  and `1.9.3`)
-- an optional explicit `À retester:` override (free text). When provided, the
-  skill should use it verbatim instead of deducing retest items.
+- `from:` / `to:` tag values in `X.Y.Z` format, or two raw tags
+  (e.g. `1.9.2` and `1.9.3`)
+- an optional explicit `À retester:` override (free text). When provided, use
+  it verbatim instead of deducing retest items.
 
 ## 2) Resolve the tag range
 
 ### Case A — user provides `from` and `to`
 
-Use the provided tags as `<fromTag>` and `<toTag>`.
+Use them as `<fromTag>` and `<toTag>`.
 
-Validate that both tags match `^\\d+\\.\\d+\\.\\d+$` (e.g. `1.9.3`).
-If either tag does not exist, stop and ask the user to confirm the correct
-tags.
+Validate both match `^\d+\.\d+\.\d+$`. If either tag is missing, stop and ask.
 
 ### Case B — no versions provided
 
-Select `<toTag>` as the latest tag by git *creation date*.
-Select `<fromTag>` as the tag immediately before it by creation date.
-
-In git, list tags sorted by creation date with:
+Select `<toTag>` as the latest tag by git *creation date*, and `<fromTag>` as
+the tag immediately before it:
 
 ```bash
 git tag --sort=-creatordate
 ```
 
-Take the first two entries as `<toTag>` and `<fromTag>`.
-
-The skill should propose this range to the user (e.g. "Proposition : `<fromTag>` → `<toTag>`")
-and proceed with it unless the user provides an override in the same message.
+Propose the range (e.g. `Proposition : 1.9.2 → 1.9.3`) and proceed unless the
+user overrides in the same message.
 
 ## 3) Collect commits between tags
 
-Use the range `<fromTag>..<toTag>` so the note describes what changed in
-`<toTag>` relative to `<fromTag>`.
-
-Collect commits without merge commits and include both subject and body:
-
 ```bash
-git log --no-merges --format=%s%x1f%b%x1e <fromTag>..<toTag>
+git log --no-merges --name-only --format=%H%x1f%s%x1f%b%x1e <fromTag>..<toTag>
 ```
 
-The skill should parse each record as:
+Parse each record as: hash, subject, body, and changed file paths.
 
-- subject line (`%s`)
-- body (`%b`)
+Changed paths help when a `refactor(media)` subject is opaque — the files under
+`app/Domains/<Domain>/` reveal which product surface to retest.
 
-If git output is empty for the range, generate a short note with only the
-header and an empty bullets section and ask the user whether they meant a
-different tag range.
+If the range is empty, say so and ask whether a different range was intended.
 
-## 4) Filter to functional/user-visible changes only
+## 4) Release note filter (functional only)
 
-Each commit subject in this repo typically follows the conventional commit
-format:
+Conventional commit form: `<type>(<scope>): <subject>`.
 
-`<type>(<scope>): <subject>`
+### Keep for the release note
 
-Where:
+- `feat` and `fix` that change user-visible behaviour
 
-- `<type>` is one of `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, …
-- `<scope>` is usually a domain name (e.g. `profile`, `discord`, `settings`,
-  `quote`, `quotes`, `news`, …) or `dev`
+### Drop from the release note
 
-### Primary rule (based on your convention)
+- `docs`, `chore`, `refactor`, `test`
+- scope `dev`
+- anything whose subject/body is clearly technical only (`deptrac`, `ci`,
+  `lint`, browser driver, playwright harness, pure schema migration mechanics,
+  …)
 
-Keep commits where `<type>` is:
+When unsure whether a `feat`/`fix` is user-visible, prefer dropping it from the
+**release note**. Do **not** apply this preference to the retest section.
 
-- `feat`
-- `fix`
+## 5) Map scopes to French bracket categories
 
-Drop commits where `<type>` is:
+Use for **both** sections:
 
-- `docs`
-- `chore`
-- `refactor`
-- `test`
+| Scope | Category |
+|-------|----------|
+| `profile` | `[Profil]` |
+| `settings` | `[Préférences]` |
+| `quote`, `quotes` | `[Citations]` |
+| `story`, `stories` | `[Histoires]` |
+| `discord` | `[Discord]` |
+| `notification`, `notifications` | `[Notifications]` |
+| `news`, `actualites` | `[Actualités]` |
+| `media`, `medias` | `[Médias]` |
+| `moderation` | `[Modération]` |
+| `admin`, `administration` | `[Admin]` |
+| `search` | `[Recherche]` |
+| `readlist`, `pal` | `[Pile à lire]` |
+| `comment`, `comments` | `[Commentaires]` |
+| `calendar`, `jardino` | `[Calendrier]` |
+| `editor` | `[Éditeur]` |
+| `auth` | `[Auth]` |
+| `dashboard` | `[Tableau de bord]` |
+| `faq` | `[FAQ]` |
+| `staticpage` | `[Pages statiques]` |
+| `statistics`, `stats` | `[Statistiques]` |
+| `shared` (user-visible UI only) | `[Divers]` |
+| `dev` or unknown tooling | skip for retest unless files touch a domain |
 
-Rationale: the versions page is for users, and these types usually indicate
-maintenance rather than user-visible shipped work.
+Multi-scope subjects like `feat(settings, notifications, discord): …` produce
+one category per product scope (or one bullet that names the main user-facing
+surface).
 
-### Secondary exclusion rules (technical keywords)
+## 6) Write the release-note bullets
 
-Even if a commit is `feat`/`fix`, drop it if the subject/body strongly
-signals purely technical work. Use these heuristics:
+For each commit kept by §4:
 
-- drop if `<scope>` is `dev`
-- drop if subject/body contains any of:
-  - `deptrac`
-  - `ci`
-  - `lint`
-  - `build` (as a technical build step)
-  - `browser driver`
-  - `playwright` (tests/automation)
-  - `migration` (when clearly about DB/schema migration mechanics rather
-    than user-facing functionality)
+1. Translate into one short French, user-facing sentence.
+2. Describe behaviour, not implementation.
+3. No class names, files, or internal wording.
 
-### If unsure: prefer dropping
+Format:
 
-When a commit is borderline and would require code inspection to decide user
-visibility, prefer dropping it rather than including technical noise. The
-generator should only include borderline items if their subject/body contains
-clear user language (features, UI changes, behavior changes, new screens,
-notifications, etc.).
+`* [Catégorie] <phrase>`
 
-## 5) Map commit scope to bracketed French categories
+Deduplicate incremental commits that are the same user-visible change into one
+bullet.
 
-Convert each kept commit to a French category label in the bracket style:
+## 7) Header (versions-page style)
 
-- `[Profil]` for scope `profile`
-- `[Préférences]` for scope `settings`
-- `[Citations]` for scope `quote` or `quotes`
-- `[Histoires]` for scope `story` (and also `stories` if it appears)
-- `[Discord]` for scope `discord`
-- `[Notifications]` for scope `notification` or `notifications`
-- `[Actualités]` for scope `news` or `actualites`
-- `[Médias]` for scope `media` or `medias`
-- `[Modération]` for scope `moderation`
-- `[Admin]` for scope `admin` or `administration`
-- `[Recherche]` for scope `search`
-- `[Technique]` for any other scope not in the list above
+```text
+Version X.Y.Z
 
-Only `[Technique]` items may still be dropped later by the functional-only
-filter. In other words, `[Technique]` is a fallback category label, not a
-permission to include technical-only changes.
+_(DD mois YYYY)_
+```
 
-## 6) Translate the change into functional French bullets
+Date = tag creation / tagger date. French months: janvier, février, mars,
+avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre.
 
-For each kept commit:
+If the date cannot be parsed, use today and ask the user to confirm.
 
-1. Read the English subject (and body if needed).
-2. Write a single bullet in French, user-facing, short, starting with an
-   uppercase phrase.
-3. The bullet should describe the behavior change, not the code refactor.
-4. The bullet should not mention internal class names, files, or technical
-   implementation details.
+## 8) À retester — separate, broader filter
 
-Then format it as:
+This section is **not** the release note. Its job is: after a deploy, what
+product surfaces should be smoke-tested?
 
-`* [Catégorie] <French user-visible sentence>`
+### Source set
 
-### De-duplication
+Skim **every** commit in the range, including types dropped from the release
+note:
 
-If multiple commits describe the same user-visible change in small increments,
-group them under one bullet. Otherwise produce one bullet per commit.
+- `refactor` — **include** (this is the main reason the section exists)
+- `feat`, `fix` — include
+- `chore` — include only if the scope or changed files touch a product domain
+  (e.g. `chore(profile): …`), not pure `dev` / CI / lint tooling
+- `docs`, `test` — usually skip unless the commit clearly renames or moves a
+  user-facing surface
 
-## 7) Header: match `jd-esperluettes.fr/versions`
+### How to deduce items
 
-### Version line
+1. Read subject + body for each candidate commit.
+2. If the subject is vague, glance at changed paths under `app/Domains/` (and
+   relevant public routes/views) to identify the product surface.
+3. Map to a bracket category (§5).
+4. Write a short retest instruction: what to open / click / verify, not how the
+   code was restructured.
+5. **Group and dedupe by feature/domain** — several `refactor(profile)` commits
+   become one `[Profil]` retest line covering the affected surface (e.g. onglets
+   de profil, avatar, …), not one line per commit.
+6. Aim for 3–8 bullets. Prefer breadth of surfaces over commit-by-commit
+   noise.
 
-Generate:
+### Example
 
-`Version X.Y.Z`
+Commits in range:
 
-### Date line
+- `feat(quote): show the quote book by default…` → release note **and** retest
+- `refactor(profile): give every profile tab the same component contract` →
+  **retest only** (`[Profil] onglets de profil`)
+- `chore(dev): add a browser driver skill…` → neither
 
-Compute the tag’s creation date (or tagger date) and format it in French as:
+### Override
 
-`_(DD mois YYYY)_`
-
-French month names:
-
-- janvier, février, mars, avril, mai, juin,
-- juillet, août, septembre, octobre, novembre, décembre
-
-If tag date parsing fails, fall back to “today” (current date) but ask a
-follow-up question after generating to confirm the correct date.
-
-## 8) Add the retest scope section (deduced from commits)
-
-Insert after the header and before the bullets:
-
-`À retester :`
-
-If the user provided an explicit `À retester:` override, keep it verbatim.
-Otherwise deduce retest items from the kept commits:
-
-1. Use the same per-commit filtering and category mapping as for the bullets.
-2. Convert each kept commit into a short "vérifier ..." retest instruction.
-3. Group retest items by category and keep the list to 3–8 bullets total.
-
-Retest bullets should remain functional and user-facing (UI behavior,
-visibility rules, notifications sent/shown, settings toggles, etc.). Avoid
-technical implementation language.
-
-Example formatting:
-
-`À retester :
-* [Profil] la visibilité des indicateurs d’onglet pour le propriétaire
-* [Discord] le lien compte Discord non lié (notifications)
-`
+If the user supplied an explicit `À retester:` block, keep it verbatim.
 
 ## 9) Final output shape
-
-The skill should output exactly this structure:
 
 ```text
 Version X.Y.Z
 
 _(DD mois YYYY)_
 
-À retester :
-<retest details deduced from commits, or kept verbatim from the user override>
+* [Catégorie] <bullet fonctionnel 1>
+* [Catégorie] <bullet fonctionnel 2>
+…
 
-* [Catégorie] <bullet 1>
-* [Catégorie] <bullet 2>
-...
+À retester :
+* [Catégorie] <surface / parcours à vérifier>
+* [Catégorie] <…>
 ```
 
-If no commits survive the functional-only filter, output the header and an
-empty bullets section and set `À retester :` to a short line such as "aucune
-vérification spécifique déduite", then ask the user whether those commits
-were intentionally technical.
+Order:
 
+1. Header (versions-page style)
+2. Functional release-note bullets (may be empty)
+3. `À retester :` (almost always non-empty when refactors touched domains)
+
+If the release-note filter keeps nothing, still emit the header and an empty
+bullet list, then fill `À retester` from the broader set. If even the retest
+set is empty, write `aucune vérification spécifique déduite`.
