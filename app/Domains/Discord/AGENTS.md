@@ -4,7 +4,7 @@
 
 ## Public API
 
-This domain has no `Public/Api/` class exposing a programmatic API to other domains. Cross-domain access is achieved through the two public events below.
+- [DiscordPublicApi](Public/Api/DiscordPublicApi.php) — `isLinked(int $userId): bool`
 
 ## Events emitted
 

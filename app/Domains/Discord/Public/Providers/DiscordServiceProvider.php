@@ -7,6 +7,7 @@ use App\Domains\Discord\Private\Listeners\CleanDiscordNotificationsOnDisconnect;
 use App\Domains\Discord\Private\Listeners\RemoveDiscordAssociationsOnUserDeleted;
 use App\Domains\Discord\Private\Services\DiscordNotificationQueueService;
 use App\Domains\Discord\Private\Support\DiscordFeatureToggles;
+use App\Domains\Discord\Public\Api\DiscordPublicApi;
 use App\Domains\Discord\Public\Events\DiscordConnected;
 use App\Domains\Discord\Public\Events\DiscordDisconnected;
 use App\Domains\Auth\Public\Events\UserDeleted;
@@ -55,6 +56,12 @@ class DiscordServiceProvider extends ServiceProvider
                     DiscordFeatureToggles::NOTIFICATIONS,
                     DiscordFeatureToggles::DOMAIN
                 );
+            },
+            warningForUser:      function (int $userId) {
+                if (app(DiscordPublicApi::class)->isLinked($userId)) {
+                    return null;
+                }
+                return __('discord::notifications.not_linked_warning');
             },
         ));
 
