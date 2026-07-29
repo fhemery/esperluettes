@@ -86,13 +86,16 @@
     <div class="surface-read text-on-surface p-6 rounded-lg">
         <h2 class="text-lg font-semibold mb-4">{{ __('static::admin.form.media_section') }}</h2>
         
-        <x-shared::image-upload
+        <x-media::image-field
             name="header_image"
-            :currentPath="$page?->header_image_path"
+            scope="static-pages"
+            :path="old('header_image.path', $page?->header_image_path)"
+            :show-alt="false"
+            :show-caption="false"
             :label="__('static::admin.form.header_image')"
-            :helpText="__('static::admin.form.header_image_help')"
-            aspectRatio="16:9"
+            :help-text="__('static::admin.form.header_image_help')"
         />
+        <x-shared::input-error :messages="$errors->get('header_image.file')" class="mt-1" />
     </div>
 
     {{-- Settings section --}}

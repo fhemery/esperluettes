@@ -36,7 +36,7 @@ Page content submitted through the admin form is sanitized using `Purifier::clea
 
 ### Header image management
 
-Pages may carry an optional header image. The `Shared::ImageService` processes uploads into multiple responsive widths (400px and 800px variants) stored under `public/static-pages/{year}/{month}/`. When an image is replaced or removed, the previous file and all its responsive variants are deleted from storage.
+Pages may carry an optional header image, handled entirely by `Media::MediaPublicApi` on the `static-pages` scope. New uploads land flat under `static-pages/` with 400px and 800px responsive variants; the admin form uses `<x-media::image-field>` (reuse picker included) and the public page renders `<x-media::image>`. Replacing, removing or deleting a page never deletes a file: `media:gc` reclaims paths no page references anymore, and `StaticPageMediaUsageProvider` keeps it honest. Images uploaded before the migration still live under `static-pages/{year}/{month}/`; they render normally, are never swept, and do not show up in the picker.
 
 ### Creator attribution and user deletion
 
@@ -59,7 +59,7 @@ The `created_by` column records which admin created the page. It is intentionall
 | Concern | Delegated to | Why |
 |---|---|---|
 | HTML sanitization | `Shared::HtmlLinkUtils`, `Mews\Purifier` | Central sanitization config lives in Shared |
-| Image upload and resizing | `Shared::ImageService` | Reusable responsive image pipeline |
+| Header image storage, rendering and GC | `Media::MediaPublicApi` | Media is the sole entry point for managed images |
 | Admin sidebar navigation | `Administration::AdminNavigationRegistry` | Shared admin nav managed centrally |
 | Domain event bus | `Events::EventBus` | Cross-domain event backbone |
 | User role checks (admin preview) | `Auth::AuthPublicApi`, `Auth::Roles` | Auth domain owns role resolution |

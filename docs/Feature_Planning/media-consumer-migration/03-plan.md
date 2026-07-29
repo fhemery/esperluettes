@@ -14,7 +14,7 @@
 |---|-------|------|------------|--------|
 | 1 | Media scope corrections (`FLAT_SCOPES`) | S | — | DONE |
 | 2 | Calendar → `MediaPublicApi` | M | 1 | DONE |
-| 3 | StaticPage → `MediaPublicApi` | M | 1 | TODO |
+| 3 | StaticPage → `MediaPublicApi` | M | 1 | DONE |
 | 4 | Profile → `MediaPublicApi::saveSquareJpg` | S | — | TODO |
 | 5 | Relocate `ImageService` into Media | S | 2, 3, 4 | TODO |
 
@@ -346,6 +346,7 @@ else.
 | Activity card (mobile, ~375px) | guest | Card does not overflow or reflow; the `display:contents` figure introduces no extra box or centring artefact | |
 | Activity card, activity with **no** image | guest | No empty figure, no broken image, no layout hole — the component renders nothing when `$path` is null | |
 | Activity show page | guest | Image renders at a sensible size with `alt` = activity name; responsive variant served (check `srcset` in devtools, not the full-size original) | |
+| Activity show page — **known width change** (found in phase 2) | guest | The old `<img>` was a direct flex item of a `flex flex-col gap-4` column, so `align-items: stretch` widened it to the container. Under the component's `<figure>` the img is inline and centred at its natural width, capped by `max-w-full`. Confirm the narrower, centred image is acceptable — it is inherent to the plain swap decision #7 authorised, but it *is* visible. If not acceptable, pass `img-class="w-full h-auto"` | |
 | Activity show page, **grandfathered** dated image (`activities/2026/07/…`) | guest | Still displays; its `-400w`/`-800w` variants resolve | |
 | Static page show, page with a header | guest | Header is full-bleed as before (`w-full h-auto`), no double `<figure>`, no leftover wrapper margin; compare against the previous hand-rolled `<picture>` | |
 | Static page show, page with **no** header | guest | Renders cleanly, no gap | |

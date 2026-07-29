@@ -28,8 +28,10 @@ class StaticPageRequest extends FormRequest
             ],
             'summary' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
-            'header_image' => ['nullable', 'image', 'max:2048'],
-            'header_image_remove' => ['nullable'],
+            // Media image-field payload: a new upload (file) xor a reused/kept path.
+            'header_image' => ['nullable', 'array'],
+            'header_image.file' => ['nullable', 'image', 'max:2048'],
+            'header_image.path' => ['nullable', 'string', 'max:1024'],
             'status' => ['required', Rule::in(['draft', 'published'])],
             'meta_description' => ['nullable', 'string', 'max:160'],
         ];
@@ -44,15 +46,5 @@ class StaticPageRequest extends FormRequest
             'slug.unique' => __('static::admin.validation.slug_unique'),
             'content.required' => __('static::admin.validation.content_required'),
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        // Convert checkbox/hidden boolean values
-        if ($this->has('header_image_remove')) {
-            $this->merge([
-                'header_image_remove' => filter_var($this->header_image_remove, FILTER_VALIDATE_BOOLEAN),
-            ]);
-        }
     }
 }

@@ -552,6 +552,7 @@ deptrac:
       - StaticPagePrivate
       - EventsPublic
       - AdministrationPublic
+      - MediaPublic
 
     StoryPublic:
       - CommentPublic
@@ -723,6 +724,7 @@ deptrac:
       - AuthPublic
       - EventsPublic
       - StaticPagePublic
+      - MediaPublic
 
     StoryPrivate:
       - Shared
