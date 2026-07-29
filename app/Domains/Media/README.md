@@ -6,7 +6,7 @@ The Media domain owns **image handling** for the whole application: uploading, g
 
 Its defining choice is that **an image is identified by its storage path** — there is no asset id, no reference table, and the domain owns **no database tables**. The content that uses an image (a column like `image_path`, or an image block inside `content_blocks`) *is* the record of that usage. This keeps a single source of truth and avoids a denormalized reference cache that could drift.
 
-This domain grew out of the **MultiEdit** feature, which introduced block-based content (`<x-shared::multi-editor>` and the block renderer) alongside it. Media handles the images; the `Editor` domain owns the block renderer.
+This domain grew out of the **MultiEdit** feature, which introduced block-based content (`<x-editor::multi>` and the block renderer) alongside it. Media handles the images; the `Editor` domain owns both the component and the renderer.
 
 ## Key concepts
 

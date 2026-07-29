@@ -92,7 +92,7 @@
             }
             $meMode = old('mode', ($news?->content_blocks ? 'advanced' : 'simple'));
         @endphp
-        <x-shared::multi-editor
+        <x-editor::multi
             name="blocks"
             content-name="content"
             :content-value="old('content', $news?->content ?? '')"

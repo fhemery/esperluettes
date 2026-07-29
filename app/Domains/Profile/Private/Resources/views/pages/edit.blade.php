@@ -57,7 +57,7 @@
                 <!-- Description -->
                 <div class="flex flex-col gap-2">
                     <x-input-label for="description" :value="__('profile::edit.description.label')" class="text-on-surface" />
-                    <x-shared::editor name="description" id="editor" max="1000" nbLines="10" defaultValue="{{ old('description', $profile->description) }}" />
+                    <x-editor::rich-text name="description" id="editor" max="1000" nbLines="10" defaultValue="{{ old('description', $profile->description) }}" />
                     <x-input-error :messages="$errors->get('description')" class="error-on-surface" />
                 </div>
 

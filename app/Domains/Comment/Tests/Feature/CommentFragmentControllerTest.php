@@ -246,7 +246,7 @@ describe('Comment list partial display', function () {
                 'per_page' => 2,
             ]));
 
-            $response->assertSee(__('shared::editor.min-characters', ['count' => 10]));
+            $response->assertSee(__('editor::rich-text.min-characters', ['count' => 10]));
         });
 
         it('should show a maximum number of character in the editor if specified ', function () {

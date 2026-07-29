@@ -421,7 +421,6 @@ deptrac:
     Shared:
       - SettingsPublic
       - ConfigPublic
-      - MediaPublic
 
     # Test helpers - accessible by all domain tests
     TestHelpers: [ ]

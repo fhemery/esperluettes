@@ -26,5 +26,5 @@
         <textarea class="hidden" name="{{ $name }}[{{ $uid }}][html]" id="quill-editor-area-{{ $editorId }}">{!! $html ?? '' !!}</textarea>
     </div>
 
-    @include('shared::components.multi-editor._insert-affordance')
+    @include('editor::components.multi._insert-affordance')
 </div>

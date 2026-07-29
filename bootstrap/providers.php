@@ -9,6 +9,8 @@ return [
     App\Domains\Config\Public\Providers\ConfigServiceProvider::class,
     // Media must be early so other domains can register usage providers
     App\Domains\Media\Public\Providers\MediaServiceProvider::class,
+    // Editor components compose <x-media::image-field>, so it comes after Media
+    App\Domains\Editor\Public\Providers\EditorServiceProvider::class,
 
     // Notification domain should be on top as well because other modules might register
     // notifications channels

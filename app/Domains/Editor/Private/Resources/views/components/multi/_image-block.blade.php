@@ -24,5 +24,5 @@
         :allow-keep-original="true"
         :keep-original="$keepOriginal ?? false" />
 
-    @include('shared::components.multi-editor._insert-affordance')
+    @include('editor::components.multi._insert-affordance')
 </div>

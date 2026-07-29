@@ -13,7 +13,7 @@
     <div x-data="{ showAuthorNote: {{ old('author_note', $chapter->author_note ?? '') ? 'true' : 'false' }} }">
         <div x-show="showAuthorNote" class="flex flex-col gap-1">
             <x-input-label for="author_note" size="md" color="secondary" :value="__('story::chapters.form.author_note.label')" />
-            <x-shared::editor id="chapter-author-note-editor" name="author_note"
+            <x-editor::rich-text id="chapter-author-note-editor" name="author_note"
                 :nbLines="5" max="1000"
                 :toolbar="['bold','italic','underline','strike','blockquote','align','list','custom-emoji','link','spoiler']"
                 class="mt-1 block w-full"
@@ -29,7 +29,7 @@
     <!-- Content -->
     <div>
         <x-input-label for="content" required="true" size="md" color="secondary" :value="__('story::chapters.form.content.label')" />
-        <x-shared::editor id="chapter-content-editor" name="content"
+        <x-editor::rich-text id="chapter-content-editor" name="content"
             :nbLines="15"
             :toolbar="['bold','italic','underline','strike','blockquote','align','list','custom-emoji','link']"
             class="mt-1 block w-full" defaultValue="{{ old('content', $chapter->content ?? '') }}"

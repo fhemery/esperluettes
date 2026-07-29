@@ -10,10 +10,11 @@ It owns **no database table**. Content belongs to the domain that stores it
 (News, Story, FAQ…); Editor only knows how a block document is shaped and how it
 becomes HTML.
 
-> Extraction in progress: today the domain holds the block renderer and its
-> public API. The `<x-shared::editor>` / `<x-shared::multi-editor>` components,
-> their lang files and the Quill bundle still live in `Shared` and move here in
-> later steps.
+> Extraction in progress: today the domain holds the block renderer, its public
+> API, the two authoring components and their translations. The Quill bundle
+> (`Shared/Resources/js/editor-bundle.js`) and the editor CSS still live in
+> `Shared`, and consumer pages still `@vite` the bundle by hand — both move here
+> in later steps.
 
 ## Block schema
 
@@ -55,6 +56,40 @@ for images, a `<x-media::image>` carrying `class="ce-block ce-block--image"`.
 
 It is a concrete class resolved from the container (no interface, no binding) —
 inject it by type, as `NewsService` does.
+
+## Blade components
+
+Two anonymous components, registered by `EditorServiceProvider` under the
+`editor` namespace. **Only the prefixed form exists** — there is deliberately no
+unprefixed `<x-editor>` alias.
+
+### `<x-editor::rich-text>`
+
+A single Quill field: a hidden `textarea[name]` the form submits, plus a counter.
+
+| Prop | Default | Purpose |
+|------|---------|---------|
+| `name` | *required* | Submitted field name |
+| `id` | *required* | DOM id; also keys `quill-editor-area-{id}` and `quill-counter-{id}` |
+| `defaultValue` | `''` | Initial HTML (`old()` wins) |
+| `min` / `max` | `null` | Character bounds, shown in the counter and enforced client-side |
+| `nbLines` | `5` | Height in lines |
+| `placeholder` | `''` | Placeholder text |
+| `isMandatory` | `false` | Marks the field required client-side |
+| `indentParagraphs` | `false` | Adds `ql-indent` to the surface |
+| `resizable` | `true` | Vertically resizable |
+| `toolbar` | `bold, italic, underline, strike, blockquote, align, list, custom-emoji` | Token list; `link` and `spoiler` enable extra wiring |
+
+### `<x-editor::multi>`
+
+The opt-in block editor: a mode toggle between one `rich-text` field (*simple*)
+and an ordered stack of text/image blocks (*advanced*) serialized as
+`name[uid][…]` alongside `mode` and `name_order`. Image blocks compose
+`<x-media::image-field>`; the server branches on `mode` (see `NewsService`).
+Props are documented in the component's own header comment.
+
+Translations live in `Private/Resources/lang/fr/` under the `editor::` namespace:
+`editor::rich-text.*` and `editor::multi.*`.
 
 ## What this domain does not do
 

@@ -67,7 +67,7 @@
         <x-shared::input-label for="answer" :required="true">
             {{ __('faq::admin.questions.form.answer') }}
         </x-shared::input-label>
-        <x-shared::editor
+        <x-editor::rich-text
             name="answer"
             id="answer"
             :defaultValue="old('answer', $faqQuestion?->answer ?? '')"

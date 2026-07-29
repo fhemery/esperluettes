@@ -41,7 +41,7 @@
 
     <div>
         <x-shared::input-label for="description">{{ __('calendar::admin.fields.description') }}</x-shared::input-label>
-        <x-shared::editor
+        <x-editor::rich-text
             name="description"
             id="description"
             :defaultValue="old('description', $activity?->description ?? '')"

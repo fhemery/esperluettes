@@ -97,7 +97,7 @@
 
             {{-- Text Editor --}}
             <div x-show="giftMode === 'text'" x-cloak class="mb-6">
-                <x-shared::editor
+                <x-editor::rich-text
                     id="gift-text-editor"
                     name="gift_text"
                     :defaultValue="old('gift_text', $assignment->gift_text ?? '')"

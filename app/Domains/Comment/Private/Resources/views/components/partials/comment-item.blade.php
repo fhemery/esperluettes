@@ -106,7 +106,7 @@
           @csrf
           @method('PATCH')
           @php($isChild = $isChild ?? false)
-          <x-shared::editor
+          <x-editor::rich-text
             id="edit-editor-{{ $comment->id }}"
             name="body"
             class="mt-1 block w-full"
@@ -156,7 +156,7 @@
           <input type="hidden" name="entity_type" value="{{ $comment->entityType }}">
           <input type="hidden" name="entity_id" value="{{ $comment->entityId }}">
           <input type="hidden" name="parent_comment_id" value="{{ $replyId }}">
-          <x-shared::editor
+          <x-editor::rich-text
             id="reply-editor-{{ $replyId }}"
             name="body"
             class="mt-1 block w-full"

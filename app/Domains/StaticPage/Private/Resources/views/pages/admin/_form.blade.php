@@ -70,7 +70,7 @@
             <x-shared::input-label for="content-editor" :required="true">
                 {{ __('static::admin.form.content') }}
             </x-shared::input-label>
-            <x-shared::editor
+            <x-editor::rich-text
                 name="content"
                 id="content-editor"
                 :defaultValue="old('content', $page?->content ?? '')"
