@@ -12,7 +12,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Media scope corrections (`FLAT_SCOPES`) | S | — | TODO |
+| 1 | Media scope corrections (`FLAT_SCOPES`) | S | — | DONE |
 | 2 | Calendar → `MediaPublicApi` | M | 1 | TODO |
 | 3 | StaticPage → `MediaPublicApi` | M | 1 | TODO |
 | 4 | Profile → `MediaPublicApi::saveSquareJpg` | S | — | TODO |

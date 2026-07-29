@@ -32,6 +32,13 @@ describe('folderFor', function () {
         expect($svc->folderFor('news'))->toBe('news');
         expect($svc->folderFor('faq'))->toBe('faq');
         expect($svc->folderFor('static-pages'))->toBe('static-pages');
+        expect($svc->folderFor('activities'))->toBe('activities');
+    });
+
+    it('rejects the phantom scopes that never matched a folder', function () {
+        $svc = app(MediaService::class);
+        expect(fn () => $svc->folderFor('calendar'))->toThrow(InvalidArgumentException::class);
+        expect(fn () => $svc->folderFor('profile'))->toThrow(InvalidArgumentException::class);
     });
 
     it('returns per-author chapter scope as-is', function () {
@@ -153,5 +160,28 @@ describe('gc', function () {
         expect($result['skipped'])->toContain('news');
         expect($result['deleted'])->toBeEmpty();
         Storage::disk('public')->assertExists('news/orphan.jpg');
+    });
+
+    it('never descends into dated subfolders of the activities scope', function () {
+        Storage::disk('public')->put('activities/2026/07/legacy.jpg', 'x');
+        Storage::disk('public')->put('activities/2026/07/legacy-400w.webp', 'x');
+        // No provider claims anything.
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toBeEmpty();
+        expect($result['skipped'])->not->toContain('activities');
+        Storage::disk('public')->assertExists('activities/2026/07/legacy.jpg');
+        Storage::disk('public')->assertExists('activities/2026/07/legacy-400w.webp');
+    });
+
+    it('skips the activities scope when a flat original has no provider', function () {
+        Storage::disk('public')->put('activities/orphan.jpg', 'x');
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['skipped'])->toContain('activities');
+        expect($result['deleted'])->toBeEmpty();
+        Storage::disk('public')->assertExists('activities/orphan.jpg');
     });
 });

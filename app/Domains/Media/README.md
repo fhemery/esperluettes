@@ -23,7 +23,7 @@ A **scope** is a logical bucket that maps to a folder on the `public` disk:
 | `news` | `news/` | shared among News editors |
 | `faq` | `faq/` | shared |
 | `static-pages` | `static-pages/` | shared |
-| `profile`, `calendar` | same-named folders | as today |
+| `activities` | `activities/` | shared among Calendar admins |
 | `chapters/{userId}` | `chapters/{userId}/` | per author |
 
 The caller builds the scope string; `folderFor()` resolves the folder and rejects unknown scopes. The reuse picker (`listByScope`) lists originals **directly under** the scope folder — it is **non-recursive**, so it never descends into dated subfolders left by pre-migration uploads.
@@ -67,4 +67,4 @@ The reuse picker is backed by the authenticated `GET /media/library?scope=…` e
 
 Consumers currently on Media: **FAQ** (question image) and **News** (header image + advanced content blocks). **StaticPage, Calendar and Profile still call `Shared\Services\ImageService` directly** and are not yet migrated. Note that Profile is a deliberate special case: its avatar is a single 200×200 JPEG with no responsive variants, so `<x-media::image>` does not apply and only `saveSquareJpg` needs exposing.
 
-⚠️ The `calendar` scope declared in `MediaService::FLAT_SCOPES` is wrong — Calendar's real folder on disk is `activities/`.
+The `activities` scope is declared ahead of Calendar's migration: no consumer stores into it yet, and because `listByScope`/GC are non-recursive it is inert while the folder holds only pre-migration dated subfolders. Profile will never get a scope — its avatars stay outside the sweep.

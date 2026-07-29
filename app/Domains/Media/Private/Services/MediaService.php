@@ -21,7 +21,7 @@ class MediaService
     public const DISK = 'public';
 
     /** Flat scopes that map 1:1 to a folder of the same name. */
-    private const FLAT_SCOPES = ['news', 'faq', 'static-pages', 'profile', 'calendar'];
+    private const FLAT_SCOPES = ['news', 'faq', 'static-pages', 'activities'];
 
     public function __construct(
         private readonly ImageService $imageService,
