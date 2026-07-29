@@ -25,7 +25,6 @@
 | `Support/SlugWithId.php` | Canonical `{base}-{id}` slug format used by Story and Chapter routes |
 | `Support/SimpleSlug.php` | Profile slug normalisation (lowercase, dashes) |
 | `Support/Seo.php` | Strip-and-truncate for meta description excerpts |
-| `Services/ImageService.php` | Responsive image processing (variants at multiple widths; square crop for avatars) |
 | `Validation/CustomValidators.php` | Registers `maxstripped`, `minstripped`, `required_trimmed` rules |
 | `Validation/Rules/UniqueProfileDisplayName.php` | Cross-domain display name uniqueness rule |
 | `Http/BackToCommentsRedirector.php` | Reconstruct `#comments` redirect after comment post |
@@ -52,5 +51,3 @@
 **Custom validator registration.** `CustomValidators::register()` must be called from a service provider `boot()` method. It is not auto-registered.
 
 **`BackToCommentsRedirector` only uses the path and query string.** Browsers never send the fragment in the `Referer` header; the `#comments` anchor is always appended by the helper, not read from the request.
-
-**`ImageService` generates both JPG and WebP for each requested width.** Variant filenames follow the pattern `{original_name}-{width}w.jpg` / `.webp`. `deleteWithVariants` uses a regex to match and delete all of them.

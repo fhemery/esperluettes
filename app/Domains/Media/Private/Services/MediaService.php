@@ -7,7 +7,6 @@ namespace App\Domains\Media\Private\Services;
 use App\Domains\Media\Public\Contracts\Dto\MediaPathDto;
 use App\Domains\Media\Public\Contracts\Dto\MediaPathPageDto;
 use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
-use App\Domains\Shared\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;

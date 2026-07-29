@@ -53,18 +53,15 @@ The reuse picker is backed by the authenticated `GET /media/library?scope=…` e
 
 **Cleanup reads the truth, it doesn't cache it.** Usage is computed on demand by fanning out over registered `MediaUsageProvider`s, not maintained on every save. The cost moves from every write to a scheduled batch sweep, which is the right place to pay it. The residual risk — a domain that stores paths but forgets to register a provider — is contained by the 7-day grace window and the unclaimed-scope skip guard.
 
-**`ImageService` stays in `Shared` for now.** To keep every migration step non-breaking, `ImageService` remains in `Shared/Services` and `MediaService` delegates to it while unmigrated consumers still reference it directly. It will be relocated into `Media/Private/Services` only once the last consumer calls `MediaPublicApi` exclusively.
-
 **Media owns its Blade components.** Display and upload components live in this domain rather than in `Shared`, so all image UI is cohesive. Consumers (including the `Shared` multi-editor) depend on `MediaPublic` for them — the same `Shared → MediaPublic` shape already accepted for Config/Settings.
 
 ## Cross-domain delegation map
 
 | Concern | Delegated to / mechanism |
 |---------|--------------------------|
-| Image processing, variant generation, file deletion | `Shared::ImageService` (delegated by `MediaService`) |
 | Knowing which files are still used | Each consumer registers a `MediaUsageProvider` in its `ServiceProvider::boot()` |
 | Rendering variant URLs | Assembled only inside `<x-media::image>` / `MediaPublicApi::variantUrl` |
 
-Consumers currently on Media: **FAQ** (question image) and **News** (header image + advanced content blocks). **StaticPage, Calendar and Profile still call `Shared\Services\ImageService` directly** and are not yet migrated. Note that Profile is a deliberate special case: its avatar is a single 200×200 JPEG with no responsive variants, so `<x-media::image>` does not apply and only `saveSquareJpg` needs exposing.
+Every consumer now goes through `MediaPublicApi`: **FAQ** (question image), **News** (header image + advanced content blocks), **Calendar** (activity image), **StaticPage** (header image) and **Profile**. Image processing itself is internal — `ImageService` lives in `Media/Private/Services` and `MediaService` is its only caller.
 
-The `activities` scope is declared ahead of Calendar's migration: no consumer stores into it yet, and because `listByScope`/GC are non-recursive it is inert while the folder holds only pre-migration dated subfolders. Profile will never get a scope — its avatars stay outside the sweep.
+Profile is a deliberate special case: its avatar is a single 200×200 JPEG with no responsive variants, so `<x-media::image>` does not apply and only `saveSquareJpg` is exposed. It registers no usage provider and gets no scope — avatars stay outside the sweep, and Profile keeps deleting its own files synchronously.

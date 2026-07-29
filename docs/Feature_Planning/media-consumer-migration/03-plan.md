@@ -16,7 +16,7 @@
 | 2 | Calendar → `MediaPublicApi` | M | 1 | DONE |
 | 3 | StaticPage → `MediaPublicApi` | M | 1 | DONE |
 | 4 | Profile → `MediaPublicApi::saveSquareJpg` | S | — | DONE |
-| 5 | Relocate `ImageService` into Media | S | 2, 3, 4 | TODO |
+| 5 | Relocate `ImageService` into Media | S | 2, 3, 4 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
