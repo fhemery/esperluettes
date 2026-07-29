@@ -36,6 +36,20 @@ rather than quietly changing it.
    something on screen early, insert a thin vertical slice as an explicit
    phase — do not reorder the safety phases away.
 
+## Each phase is read alone
+
+A `phase-implementer` subagent reads **its phase and nothing else** of this
+document — not the neighbouring phases, and of `02-architecture.md` only the
+sections your phase names. So each phase must stand on its own: name the
+architecture sections it depends on (`architecture §3.5`), and state the
+outcome of earlier phases it builds on in a clause rather than assuming the
+reader saw them.
+
+This document owns the **file-by-file detail**. `02-architecture.md` gives shape
+and contracts; you turn that into paths, signatures and named tests. Reference
+its sections instead of restating their prose — but do not send BUILD hunting
+through it for something you could have written in a line.
+
 ## Per phase, write
 
 - **Goal** — one sentence.

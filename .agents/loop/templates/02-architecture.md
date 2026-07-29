@@ -2,6 +2,11 @@
 
 > DESIGN output. Describes **how** the feature is built. Every tradeoff the user
 > arbitrated is recorded in §7 with the rejected options.
+>
+> Scope: **shape and contracts, not a change list.** Signatures, data shapes,
+> enforcement points, deptrac edges. The file-by-file list of edits belongs to
+> `03-plan.md` and must not be duplicated here — when the two disagree, the
+> plan is the one BUILD reads, and the duplicate is what made them disagree.
 
 - Functional spec: [`01-functional.md`](./01-functional.md)
 
@@ -77,7 +82,10 @@ the default; unit tests only where the logic is genuinely isolated.
 
 ## 8. File layout
 
-Tree of files to create or modify, following `docs/Domain_Structure.md`.
+Where the **new** classes land, as a tree, following `docs/Domain_Structure.md`
+— enough to check the structure is legal. Existing files that need editing are
+named where §1.1–§4 already discuss them; do not restate them as a change list,
+that is `03-plan.md`'s job.
 
 ## 9. Risks acknowledged
 

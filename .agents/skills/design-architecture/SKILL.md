@@ -89,6 +89,19 @@ Fill the template. Non-negotiables for this codebase:
 §7 records every tradeoff **with the rejected options** — that is what stops the
 question being re-opened in three months.
 
+### Stay on your side of the line
+
+You write **shape and contracts**: signatures, data shapes, enforcement points,
+deptrac edges, the reasoning behind each. You do not write the change list —
+"in `ActivityController`, replace the `ImageService` dependency, delete the
+`deleteWithVariants()` call, add `resolveImage()`" is PLAN's sentence, not
+yours. Yours is "activity image storage moves behind `MediaPublicApi`;
+deletion is deferred to the sweep."
+
+The test: if a line would be copied verbatim into a phase's Deliverables, it
+belongs in `03-plan.md` only. Duplicating it does not help BUILD — BUILD reads
+the plan — and guarantees the two drift.
+
 Hand back a five-line summary: placement, data model in one line, the tradeoffs
 locked, and any new deptrac edge.
 

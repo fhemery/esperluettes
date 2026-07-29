@@ -35,9 +35,14 @@ Also check reality, not just files:
 
 - `git status` and `git log` since the task started — was work done that the
   plan table does not reflect?
-- `npm run gate -- --quick` if the last recorded phase claims to be `DONE` but
-  you have any doubt. A red gate on resume means the previous session did not
-  actually finish; fix that before moving on.
+- the gate, if the last recorded phase claims to be `DONE` but you have any
+  doubt. A red gate on resume means the previous session did not actually
+  finish; dispatch a `phase-implementer` to fix it before moving on. Keep the
+  output out of your thread:
+
+  ```bash
+  npm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+  ```
 
 If the files and the status column disagree, **fix the column** and say so in
 one line. Do not re-run a step whose artifact already exists — read it instead.
@@ -56,15 +61,17 @@ next action is, and anything that looks inconsistent.
 
 ## 4. Resume
 
-Continue exactly as `next-task` §4, starting at the reconciled step and honouring
-the row's mode:
+Continue exactly as `next-task` §4 — including its orchestrator rule: you
+dispatch PLAN / BUILD / VERIFY / WRAP to subagents and do not edit code
+yourself. Start at the reconciled step and honour the row's mode:
 
-- `interactive` — one step (or one BUILD phase), then stop and ask for
-  `/continue-task` in a new chat.
-- `auto` — chain the remaining steps in this session until the task is `DONE`
-  or a `next-task` §5 stop condition fires. No "open a new chat" pause between
-  steps when nothing needs the user.
+- `interactive` — one step (or one BUILD phase), then stop and ask the user to
+  `/clear` and run `/continue-task` in a new chat.
+- `auto` — keep dispatching the remaining steps until the task is `DONE` or a
+  `next-task` §5 stop condition fires. Still one subagent per step and per
+  phase; `auto` drops the approval stops, not the context boundaries.
 
 If the task was interrupted **mid-phase** (files changed but the phase's
-acceptance criteria are not met), do not restart the phase from scratch: read
-the diff, finish what is missing, then run the gate.
+acceptance criteria are not met), do not restart the phase from scratch:
+dispatch a `phase-implementer` told to read the diff, finish what is missing,
+and run the gate.

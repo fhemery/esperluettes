@@ -1,7 +1,9 @@
 # <Task title> — implementation plan
 
 > PLAN output. The phase index at the top is the summary; everything below is
-> detail. BUILD reads one phase at a time.
+> detail. BUILD reads **one phase at a time** and nothing else of this file, so
+> every phase must stand alone: name the `02-architecture.md` sections it needs,
+> and state what earlier phases left behind rather than assuming it was read.
 
 - Functional spec: [`01-functional.md`](./01-functional.md)
 - Architecture: [`02-architecture.md`](./02-architecture.md)

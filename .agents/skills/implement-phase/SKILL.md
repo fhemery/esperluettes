@@ -10,11 +10,15 @@ of the next one.
 
 ## Read first, in this order
 
-1. `03-plan.md` — your phase, and the phase index for what already exists.
+1. `03-plan.md` — **your phase and the phase index only.** Your phase is
+   self-contained by design; do not read the other phases' bodies.
 2. `DECISIONS.md` — every settled question. Never re-decide one of these.
-3. `02-architecture.md` — the sections your phase touches.
+3. `02-architecture.md` — only the sections your phase names.
 4. `01-functional.md` — only when a behaviour is ambiguous.
 5. The nearest existing implementation in the codebase. Match it.
+
+Read the section you need, not the whole file. Your context is finite and you
+carry everything you open until the phase ends.
 
 You cannot ask the user anything. If the phase is genuinely underspecified, do
 the part that is clear, stop, and report precisely what is blocking. Do not
@@ -50,11 +54,18 @@ response body for a non-owner, not merely hidden by Blade.
 
 ## The gate
 
+**Never let a test or gate run print into your context.** A green run is worth
+one word; a red one is worth its failures. Redirect, then read only what broke:
+
 ```bash
-npm run gate            # deptrac + php tests + vitest + vite build
-npm run gate -- --quick # skip the asset build while iterating
-npm run gate -- --only=php
+npm run gate > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+npm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+./vendor/bin/sail artisan test --filter=X > /tmp/test.log 2>&1 && echo PASS || tail -30 /tmp/test.log
 ```
+
+`--quick` skips the asset build while iterating; `--only=php` narrows further.
+Grep the log for a specific failure rather than re-running the suite — the log
+is still on disk and costs nothing to search.
 
 Run the full gate before declaring the phase done. On a deptrac violation, use
 the `fix-deptrac` skill — and remember that adding an edge to `deptrac.yaml` is

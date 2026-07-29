@@ -55,14 +55,53 @@ The `Mode` column controls how often the loop stops for the user:
 
 - `interactive` (default) — stop at every step boundary for approval (typically
   one step — or one BUILD phase — per chat, then `/continue-task`)
-- `auto` — run all remaining steps in the same session without stopping; report
-  at the end only. For bugfixes and small chores. REFINE and DESIGN degrade to
-  "write down the assumptions and continue" rather than interviewing. Only
-  pause if a blocking question or other stop condition fires. Do not auto-start
-  the next backlog `TODO`.
+- `auto` — run all remaining steps without stopping for approval; report at the
+  end only. For bugfixes and small chores. REFINE and DESIGN degrade to "write
+  down the assumptions and continue" rather than interviewing. Only pause if a
+  blocking question or other stop condition fires. Do not auto-start the next
+  backlog `TODO`.
+
+`auto` removes the **approval** stops, not the **context** boundaries. It still
+dispatches one subagent per step and per BUILD phase, exactly as `interactive`
+does. An `auto` task that runs twelve phases inline in the orchestrator's thread
+is the single most expensive thing this loop can do — see "Context discipline".
 
 The orchestrator proposes a mode when the task is created; the user overrides
 it by editing the column.
+
+## Context discipline
+
+Cost is `requests × context size`, and context only ever grows within a thread.
+A 700-request session whose context climbs to 450k tokens pays that 450k on
+every late request — roughly four times what the same work costs split across
+fresh contexts. Measured on this project's own transcripts: 97% of all tokens
+spent are re-reads of accumulated context. Written output is 0.6%. Reading
+planning docs and source files, all sessions combined, is 0.1%.
+
+So verbosity in the artifacts is nearly free, and **thread length is what
+costs**. Three rules follow:
+
+1. **The orchestrator never edits code.** `/next-task` and `/continue-task`
+   select, dispatch, record status, and report. Every file-modifying step —
+   PLAN, BUILD, VERIFY, WRAP — happens in a subagent with a fresh context. If
+   you catch yourself opening an Edit in the orchestrator thread, that is the
+   bug.
+2. **One step per thread, one phase per subagent.** REFINE and DESIGN each end
+   with `/clear`, then `/continue-task`. DESIGN needs `01-functional.md` and
+   `DECISIONS.md` — about 8k tokens — not the REFINE interview transcript that
+   produced them. That transcript is usually the largest object in the window
+   and it carries no information the artifact does not.
+3. **Command output is not a document.** Never let a full test run or gate run
+   land in the transcript; it stays there and is re-read for the rest of the
+   session. Redirect and read only what failed:
+
+   ```bash
+   npm run gate > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+   ```
+
+The artifacts exist to make these boundaries cheap. A step that cannot resume
+from its predecessor's artifact alone is a badly written artifact — fix the
+artifact rather than keeping the thread alive.
 
 ## Task folder
 

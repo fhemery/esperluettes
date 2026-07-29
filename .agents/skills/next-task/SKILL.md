@@ -45,15 +45,12 @@ into the backlog row.
 
 ## 4. Run the loop
 
-Dispatch each step in order. After each one, update the backlog status, then:
-
-- `interactive` — stop, summarise the step's output in a few lines, and wait for
-  the user's go-ahead. Prefer **one step per chat** (or one BUILD phase) so
-  context stays clean; tell the user to run `/continue-task` in a new chat.
-- `auto` — **keep going through the remaining steps in this session**. Do not
-  stop between steps and do not ask the user to open a new chat, unless a stop
-  condition in §5 fires. Record every judgement call in the "Assumptions"
-  table of `DECISIONS.md`. A short progress line per step/phase is enough.
+**You are an orchestrator, not an implementer.** You select, dispatch, update
+the backlog, and report. You do not write code, tests or planning artifacts
+yourself — every file-modifying step runs in a subagent with a fresh context.
+Reaching for Edit or Write in this thread (outside `Feature_Planning`) means you have stopped orchestrating. See "Context discipline"
+in [`.agents/loop/README.md`](../../loop/README.md) for why this is the loop's
+most expensive rule to break.
 
 | Step | How to run it |
 |------|---------------|
@@ -65,12 +62,34 @@ Dispatch each step in order. After each one, update the backlog status, then:
 | WRAP | spawn the `task-wrapper` agent |
 
 Never run REFINE or DESIGN in a subagent: a subagent cannot talk to the user, so
-the interview would be lost. If the host cannot spawn agents, run PLAN / BUILD /
-VERIFY / WRAP in this thread via their skills instead.
+the interview would be lost. Conversely, never run PLAN / BUILD / VERIFY / WRAP
+in this thread — they need no user input, so there is nothing to gain and a
+whole context to lose. Only if the host genuinely cannot spawn agents do you run
+them here via their skills, and then you say so explicitly.
+
+Delegate research to read-only `Explore` agents too. "How does the FAQ image
+flow work?" costs the orchestrator one paragraph instead of six file reads it
+will then carry for the rest of the session.
+
+Dispatch each step in order. After each one, update the backlog status, then:
+
+- `interactive` — stop, summarise the step's output in a few lines, and tell the
+  user to `/clear` and run `/continue-task`. **One step per chat**, or one BUILD
+  phase. The next step reads the artifact, not this conversation.
+- `auto` — **keep dispatching the remaining steps without stopping for
+  approval.** Do not ask the user to open a new chat unless a stop condition in
+  §5 fires. Record every judgement call in the "Assumptions" table of
+  `DECISIONS.md`. A short progress line per step/phase is enough.
+
+`auto` changes when you stop for the *user*, never how you dispatch. One
+subagent per step and per phase either way — the whole point is that your own
+thread stays small enough to run the loop to the end.
 
 Between BUILD phases, report the phase result in two lines and keep going —
 the per-phase approval gate is only for `interactive` mode when the phase
-changed something the plan did not foresee.
+changed something the plan did not foresee. Keep each phase report to what the
+next phase needs: what shipped, gate result, anything that contradicted the
+plan. Never paste a subagent's full output into your thread.
 
 ## 5. Stop conditions
 
