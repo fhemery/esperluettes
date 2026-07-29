@@ -10,7 +10,7 @@ use App\Domains\Profile\Private\Support\AvatarGenerator;
 use App\Domains\Profile\Private\Services\ProfileCacheService;
 use App\Domains\Shared\Support\SimpleSlug;
 use Illuminate\Support\Facades\Storage;
-use App\Domains\Shared\Services\ImageService;
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Events\Public\Api\EventBus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
@@ -18,7 +18,7 @@ use Illuminate\Http\UploadedFile;
 class ProfileService
 {
     public function __construct(
-        private readonly ImageService $images, 
+        private readonly MediaPublicApi $media,
         private readonly ProfileCacheService $cache,
         private readonly EventBus $eventBus,
     ) {
@@ -239,8 +239,8 @@ class ProfileService
         // Generate unique filename
         $filename = 'profile_pictures/' . $profile->user_id . '_' . time() . '.jpg';
         
-        // Process and save image using shared ImageService
-        $path = $this->images->saveSquareJpg('public', $filename, $file, size: 200, quality: 85);
+        // Process and save image through Media (non-scoped: Profile owns the file)
+        $path = $this->media->saveSquareJpg($filename, $file, size: 200, quality: 85);
         
         // Update profile with new picture path
         $profile->update(['profile_picture_path' => $path]);

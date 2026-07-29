@@ -15,7 +15,7 @@
 | 1 | Media scope corrections (`FLAT_SCOPES`) | S | — | DONE |
 | 2 | Calendar → `MediaPublicApi` | M | 1 | DONE |
 | 3 | StaticPage → `MediaPublicApi` | M | 1 | DONE |
-| 4 | Profile → `MediaPublicApi::saveSquareJpg` | S | — | TODO |
+| 4 | Profile → `MediaPublicApi::saveSquareJpg` | S | — | DONE |
 | 5 | Relocate `ImageService` into Media | S | 2, 3, 4 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
@@ -355,6 +355,7 @@ else.
 | Activity admin form — edit, existing image | admin | Current image previews; Remove clears the preview and, after save, the activity shows no image | |
 | Activity picker, `activities` scope | admin | On day one the list is **empty** (all existing files are in dated folders) — confirm the empty state is not a broken/blank panel; after one upload the new image appears | |
 | Static page admin form — create + edit | admin | Same three actions, same absent fields, picker lists the `static-pages` scope | |
+| Static page admin form — **lost 16:9 preview frame** (found in phase 3) | admin | The old `<x-shared::image-upload aspectRatio="16:9">` framed the preview; `<x-media::image-field>` has no such prop, so the preview is now unconstrained. There was never server-side aspect enforcement, so nothing behavioural changed — confirm the unframed preview is acceptable | |
 | Both admin forms, validation error replay | admin | After a failed save, the chosen/uploaded path survives via `old('image.path')` — the image is not silently lost | |
 | Both admin forms (mobile) | admin | `<x-media::image-field>` layout usable at ~375px (inherited from FAQ/News, confirm not regressed) | |
 | Profile picture edit | user-confirmed | Upload still produces a 200×200 avatar; it appears immediately everywhere the avatar shows | |

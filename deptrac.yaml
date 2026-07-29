@@ -677,6 +677,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - MediaPublic
       - ModerationPublic
       - ProfilePublic
       - SettingsPublic

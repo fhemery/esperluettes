@@ -55,6 +55,15 @@ class MediaService
     }
 
     /**
+     * Save a square-cropped JPEG at a caller-chosen path on the managed disk.
+     * Deliberately non-scoped: no variants, no GC — see MediaPublicApi.
+     */
+    public function saveSquareJpg(string $targetPath, UploadedFile $file, int $size = 200, int $quality = 85): string
+    {
+        return $this->imageService->saveSquareJpg(self::DISK, $targetPath, $file, $size, $quality);
+    }
+
+    /**
      * Build a variant URL from an original path by naming convention.
      */
     public function variantUrl(string $path, int $width, string $format = 'webp'): string

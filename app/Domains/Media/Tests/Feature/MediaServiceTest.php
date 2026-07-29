@@ -65,6 +65,39 @@ describe('store', function () {
     });
 });
 
+describe('saveSquareJpg', function () {
+    it('writes at the given path on the managed disk as a square JPEG, with no variants', function () {
+        $path = app(MediaPublicApi::class)->saveSquareJpg(
+            'profile_pictures/7_1234567890.jpg',
+            UploadedFile::fake()->image('avatar.png', 640, 480),
+        );
+
+        expect($path)->toBe('profile_pictures/7_1234567890.jpg');
+        Storage::disk('public')->assertExists($path);
+
+        [$width, $height, $type] = getimagesizefromstring(Storage::disk('public')->get($path));
+        expect($width)->toBe(200);
+        expect($height)->toBe(200);
+        expect($type)->toBe(IMAGETYPE_JPEG);
+
+        // No responsive variant is generated next to it: this path is not managed.
+        expect(Storage::disk('public')->files('profile_pictures'))
+            ->toBe(['profile_pictures/7_1234567890.jpg']);
+    });
+
+    it('honours a custom size', function () {
+        $path = app(MediaPublicApi::class)->saveSquareJpg(
+            'profile_pictures/8.jpg',
+            UploadedFile::fake()->image('avatar.jpg', 300, 300),
+            size: 64,
+        );
+
+        [$width, $height] = getimagesizefromstring(Storage::disk('public')->get($path));
+        expect($width)->toBe(64);
+        expect($height)->toBe(64);
+    });
+});
+
 describe('variantUrl', function () {
     it('builds a variant URL by naming convention', function () {
         $url = app(MediaPublicApi::class)->variantUrl('news/sep-abc.jpg', 800, 'webp');
