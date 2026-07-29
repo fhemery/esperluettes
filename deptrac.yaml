@@ -400,6 +400,22 @@ deptrac:
         - type: directory
           value: 'app/Domains/Media/Tests/'
 
+    # Editor Domain
+    - name: EditorPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Editor/Public/'
+
+    - name: EditorPrivate
+      collectors:
+        - type: directory
+          value: 'app/Domains/Editor/Private/'
+
+    - name: EditorTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Editor/Tests/'
+
   ruleset:
     # Shared contracts and DTOs - accessible by all domains
     Shared:
@@ -662,6 +678,7 @@ deptrac:
     NewsPrivate:
       - Shared
       - AuthPublic
+      - EditorPublic
       - EventsPublic
       - MediaPublic
       - NewsPublic
@@ -904,3 +921,18 @@ deptrac:
       - TestHelpers
       - MediaPrivate
       - MediaPublic
+
+    EditorPublic:
+      - Shared
+      - EditorPrivate
+
+    EditorPrivate:
+      - Shared
+      - EditorPublic
+      - MediaPublic
+
+    EditorTests:
+      - Shared
+      - TestHelpers
+      - EditorPrivate
+      - EditorPublic

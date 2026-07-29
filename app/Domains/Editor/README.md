@@ -1,0 +1,63 @@
+# Editor Domain
+
+## Purpose and scope
+
+The Editor domain owns **rich-text and block-based content authoring**: the
+rendering of block documents to sanitized HTML, and (progressively) the Blade
+components, translations and assets that produce those documents.
+
+It owns **no database table**. Content belongs to the domain that stores it
+(News, Story, FAQ…); Editor only knows how a block document is shaped and how it
+becomes HTML.
+
+> Extraction in progress: today the domain holds the block renderer and its
+> public API. The `<x-shared::editor>` / `<x-shared::multi-editor>` components,
+> their lang files and the Quill bundle still live in `Shared` and move here in
+> later steps.
+
+## Block schema
+
+A block document is an **ordered array of plain arrays** — deliberately untyped,
+so a new block type costs one branch and no DTO. Two types exist:
+
+```php
+['type' => 'text',  'html' => '<p>…</p>']
+
+['type'  => 'image',
+ 'path'  => 'news/x.jpg',   // Media storage path
+ 'alt'   => '…',
+ 'caption'       => '…',    // optional
+ 'keep_original' => bool]   // optional; true = no responsive variants
+```
+
+Rules:
+
+- Order in the array is order on the page.
+- Text HTML is sanitized with the `multiedit-text` Purifier profile — `<img>` is
+  stripped, so images only ever come from image blocks.
+- A text block that sanitizes to an empty string is skipped; an image block
+  without a `path` is skipped.
+- `path` is a **Media** path. Editor never uploads or deletes files — the storing
+  domain calls `MediaPublicApi` and registers its `MediaUsageProvider`.
+
+Rendered output wraps each block in `<div class="ce-block ce-block--text">` or,
+for images, a `<x-media::image>` carrying `class="ce-block ce-block--image"`.
+
+## Public API
+
+`EditorPublicApi` is the only entry point other domains use:
+
+| Method | Purpose |
+|--------|---------|
+| `render(array $blocks): string` | Block document → sanitized HTML |
+| `sanitizeText(string $html): string` | One text block's HTML through the `multiedit-text` profile |
+| `plainTextLength(array $blocks): int` | Character count across **text** blocks only, for min/max validation |
+
+It is a concrete class resolved from the container (no interface, no binding) —
+inject it by type, as `NewsService` does.
+
+## What this domain does not do
+
+- No routes, no controllers, no policies, no events.
+- No image storage or deletion — that is Media's.
+- No persistence of documents — the consuming domain owns the column.

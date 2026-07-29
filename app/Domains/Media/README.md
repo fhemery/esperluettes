@@ -6,7 +6,7 @@ The Media domain owns **image handling** for the whole application: uploading, g
 
 Its defining choice is that **an image is identified by its storage path** — there is no asset id, no reference table, and the domain owns **no database tables**. The content that uses an image (a column like `image_path`, or an image block inside `content_blocks`) *is* the record of that usage. This keeps a single source of truth and avoids a denormalized reference cache that could drift.
 
-This domain grew out of the **MultiEdit** feature, which introduced block-based content (`<x-shared::multi-editor>` and `Shared\Support\ContentBlocksRenderer`) alongside it. Media handles the images; Shared owns the editor and renderer.
+This domain grew out of the **MultiEdit** feature, which introduced block-based content (`<x-shared::multi-editor>` and the block renderer) alongside it. Media handles the images; the `Editor` domain owns the block renderer.
 
 ## Key concepts
 
@@ -42,7 +42,7 @@ Deletion is therefore always **deferred and swept**, never synchronous: removing
 
 ### Components
 
-- `<x-media::image>` — read-only responsive display by path, with a `raw` mode that serves the original at natural size (used by keep-original images and the shared `ContentBlocksRenderer`).
+- `<x-media::image>` — read-only responsive display by path, with a `raw` mode that serves the original at natural size (used by keep-original images and Editor's block renderer).
 - `<x-media::image-field>` — the editable control: upload, remove, "Choose existing" picker, alt/caption, optional usage count, optional "keep original" checkbox.
 
 The reuse picker is backed by the authenticated `GET /media/library?scope=…` endpoint.

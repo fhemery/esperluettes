@@ -11,7 +11,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | PHP core — renderer, `EditorPublicApi`, News, deptrac layers | S | — | TODO |
+| 1 | PHP core — renderer, `EditorPublicApi`, News, deptrac layers | S | — | DONE |
 | 2 | Blade components, lang and the 11 call sites | M | 1 | TODO |
 | 3 | Toolbar presets | S | 2 | TODO |
 | 4 | JS bundle move + self-loading components + 15 `@vite` deletions | M | 2 | TODO |

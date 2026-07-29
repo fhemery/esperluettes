@@ -55,6 +55,7 @@ domain's own docs instead. Planning may link to code docs, never the reverse.
 | **Config** | `app/Domains/Config` | Site configuration and feature toggles, readable by other domains via `ConfigPublicApi` |
 | **Dashboard** | `app/Domains/Dashboard` | Authenticated user dashboard page |
 | **Discord** | `app/Domains/Discord` | Discord bot integration; user connection via code exchange |
+| **Editor** | `app/Domains/Editor` | Rich-text and block-based content authoring; renders block documents to sanitized HTML via `EditorPublicApi`; owns no table | *(none)* |
 | **Events** | `app/Domains/Events` | Domain event bus and audit log infrastructure; cross-domain communication backbone |
 | **FAQ** | `app/Domains/FAQ` | FAQ categories and questions with admin panel |
 | **Home** | `app/Domains/Home` | Home page, aggregates data from multiple domains |

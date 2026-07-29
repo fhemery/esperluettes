@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Shared\Support\ContentBlocksRenderer;
+use App\Domains\Editor\Private\Support\ContentBlocksRenderer;
 use Tests\TestCase;
 
 uses(TestCase::class);
