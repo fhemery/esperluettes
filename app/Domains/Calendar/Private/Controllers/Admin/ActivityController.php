@@ -9,22 +9,42 @@ use App\Domains\Calendar\Public\Api\CalendarPublicApi;
 use App\Domains\Calendar\Public\Api\CalendarRegistry;
 use App\Domains\Calendar\Public\Contracts\ActivityToCreateDto;
 use App\Domains\Calendar\Public\Contracts\ActivityToUpdateDto;
-use App\Domains\Shared\Services\ImageService;
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class ActivityController extends Controller
 {
+    private const SCOPE = 'activities';
+
     public function __construct(
         private readonly CalendarPublicApi $api,
         private readonly CalendarRegistry $registry,
         private readonly AuthPublicApi $authApi,
-        private readonly ImageService $imageService,
+        private readonly MediaPublicApi $media,
     ) {}
+
+    /**
+     * Resolve the image_path from the media-image-field payload.
+     * A new upload is stored; otherwise the (possibly reused or kept) path is
+     * used; empty means the image was removed. Files are never deleted here —
+     * the Media GC reclaims any path no activity references anymore.
+     *
+     * @param array<string,mixed> $data validated request data
+     */
+    private function resolveImage(Request $request, array $data): ?string
+    {
+        $file = $request->file('image.file');
+
+        return $file
+            ? $this->media->store(self::SCOPE, $file)
+            : (($data['image']['path'] ?? null) ?: null);
+    }
 
     public function index(): View
     {
@@ -45,15 +65,7 @@ class ActivityController extends Controller
     {
         $data = $request->validated();
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $this->imageService->process(
-                'public',
-                'activities/' . date('Y/m'),
-                $request->file('image'),
-                [400, 800]
-            );
-        }
+        $imagePath = $this->resolveImage($request, $data);
 
         $dto = new ActivityToCreateDto(
             name: $data['name'],
@@ -88,19 +100,7 @@ class ActivityController extends Controller
     {
         $data = $request->validated();
 
-        $imagePath = $activity->image_path;
-        if ($request->boolean('image_remove')) {
-            $this->imageService->deleteWithVariants('public', $activity->image_path);
-            $imagePath = null;
-        } elseif ($request->hasFile('image')) {
-            $this->imageService->deleteWithVariants('public', $activity->image_path);
-            $imagePath = $this->imageService->process(
-                'public',
-                'activities/' . date('Y/m'),
-                $request->file('image'),
-                [400, 800]
-            );
-        }
+        $imagePath = $this->resolveImage($request, $data);
 
         $dto = new ActivityToUpdateDto(
             name: $data['name'],

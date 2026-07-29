@@ -31,4 +31,19 @@ describe('GET /media/library', function () {
             ->getJson('/media/library?scope=bogus')
             ->assertStatus(422);
     });
+
+    it('rejects the retired calendar and profile scopes', function () {
+        $user = alice($this);
+        $this->actingAs($user)->getJson('/media/library?scope=calendar')->assertStatus(422);
+        $this->actingAs($user)->getJson('/media/library?scope=profile')->assertStatus(422);
+    });
+
+    it('accepts the activities scope', function () {
+        Storage::disk('public')->put('activities/a.jpg', 'x');
+
+        $this->actingAs(alice($this))
+            ->getJson('/media/library?scope=activities')
+            ->assertOk()
+            ->assertJsonPath('items.0.path', 'activities/a.jpg');
+    });
 });

@@ -50,4 +50,4 @@ Slugs are auto-generated from the article title using `spatie/laravel-sluggable`
 | User notifications on publish | [Notification](../Notification/README.md) via `NotificationPublicApi::createBroadcastNotification()` | Central delivery pipeline shared across all domains |
 | Domain event bus | [Events](../Events/README.md) via `EventBus::emit()` | Cross-domain audit log and event routing |
 | Admin sidebar registration | [Administration](../Administration/README.md) via `AdminNavigationRegistry` | Shared admin layout owns navigation state |
-| Image processing and variants | [Shared](../Shared/README.md) via `ImageService` | Shared image resize/storage utility used across domains |
+| Image storage, variants and display | [Media](../Media/README.md) via `MediaPublicApi` | Media owns image handling for every domain; News stores paths only |

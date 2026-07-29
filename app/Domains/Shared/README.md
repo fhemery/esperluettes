@@ -23,7 +23,7 @@ Shared/
       errors/         # Custom error pages (404, 419, 500)
       layouts/        # Application layouts (app.blade.php, guest.blade.php)
         partials/     # Layout partials (head, navigation)
-  Services/           # Shared services (ImageService)
+  Services/           # Shared services (appearance, theme, fonts, interline)
   Support/            # Pure PHP utility classes (text, slugs, sorting, SEO)
   Validation/         # Custom validators and validation rules
   ViewModels/         # View model classes (breadcrumbs, page, SEO, ref)
@@ -151,22 +151,6 @@ Backed string enum: `WINTER`, `SPRING`, `SUMMER`, `AUTUMN`. `Theme::seasonal()` 
 | `SlugWithId` | `build(string, int): string`, `extractId(string): ?int`, `isCanonical(string, string): bool` | Canonical slug format `{base}-{id}` used by Story and Chapter routes. |
 | `SimpleSlug` | `normalize(string): string` | Profile slug: lowercased, non-alnum replaced with dashes. |
 | `Seo` | `excerpt(?string $html, int $max = 160): string` | Strips HTML, collapses whitespace, truncates at word boundary for meta descriptions. |
-
----
-
-## Services
-
-### `ImageService`
-
-Processes uploaded images and generates responsive variants.
-
-| Method | Description |
-|--------|-------------|
-| `process(string $disk, string $folder, UploadedFile\|string, int[] $widths, ?string $ext): string` | Save original + generate JPG and WebP variants at each requested width (e.g. `400w.jpg`, `400w.webp`). Returns relative path of original. |
-| `deleteWithVariants(string $disk, ?string $originalPath): void` | Deletes original and all `{name}-{width}w.{ext}` variants from storage. |
-| `saveSquareJpg(string $disk, string $targetPath, ..., int $size, int $quality): string` | Cover-crops to a square JPEG. Used for avatars. |
-
-Depends on `Intervention\Image` (via `Image` facade).
 
 ---
 

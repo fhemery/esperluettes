@@ -28,9 +28,10 @@ $stateLabel = match($activity->state) {
                 @endif
             </div>
 
-            @if($activity->image_path)
-                <img src="{{ asset('storage/' . $activity->image_path) }}" alt="{{ $activity->name }}" class="max-w-full h-auto max-h-[300px] object-cover object-center rounded">
-            @endif
+            <x-media::image
+                :path="$activity->image_path"
+                :alt="$activity->name"
+                img-class="max-w-full h-auto max-h-[300px] object-cover object-center rounded" />
 
             <div class="prose max-w-none">
                 {!! $activity->description !!}

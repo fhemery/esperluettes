@@ -23,24 +23,11 @@
         </x-shared::badge>
         @endif
 
-        @if($page->header_image_path)
-        <figure class="mb-6" style="max-width:800px; margin-left:auto; margin-right:auto;">
-            @php
-            $path = pathinfo($page->header_image_path ?? '', PATHINFO_DIRNAME);
-            $name = pathinfo($page->header_image_path ?? '', PATHINFO_FILENAME);
-            @endphp
-            <picture>
-                <source type="image/webp" srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.webp') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.webp') }} 400w">
-                <img
-                    class="max-w-full h-auto mx-auto"
-                    src="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }}"
-                    srcset="{{ asset('storage/'.$path.'/'.$name.'-800w.jpg') }} 800w, {{ asset('storage/'.$path.'/'.$name.'-400w.jpg') }} 400w"
-                    sizes="(max-width: 640px) 100vw, 800px"
-                    alt=""
-                    loading="lazy">
-            </picture>
-        </figure>
-        @endif
+        <x-media::image
+            :path="$page->header_image_path"
+            alt=""
+            class="mb-6"
+            img-class="w-full h-auto" />
 
         <style>
             .static-content p {

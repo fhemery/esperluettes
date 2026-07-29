@@ -32,6 +32,13 @@ describe('folderFor', function () {
         expect($svc->folderFor('news'))->toBe('news');
         expect($svc->folderFor('faq'))->toBe('faq');
         expect($svc->folderFor('static-pages'))->toBe('static-pages');
+        expect($svc->folderFor('activities'))->toBe('activities');
+    });
+
+    it('rejects the phantom scopes that never matched a folder', function () {
+        $svc = app(MediaService::class);
+        expect(fn () => $svc->folderFor('calendar'))->toThrow(InvalidArgumentException::class);
+        expect(fn () => $svc->folderFor('profile'))->toThrow(InvalidArgumentException::class);
     });
 
     it('returns per-author chapter scope as-is', function () {
@@ -55,6 +62,39 @@ describe('store', function () {
         $name = pathinfo($path, PATHINFO_FILENAME);
         Storage::disk('public')->assertExists("{$dir}/{$name}-400w.webp");
         Storage::disk('public')->assertExists("{$dir}/{$name}-800w.jpg");
+    });
+});
+
+describe('saveSquareJpg', function () {
+    it('writes at the given path on the managed disk as a square JPEG, with no variants', function () {
+        $path = app(MediaPublicApi::class)->saveSquareJpg(
+            'profile_pictures/7_1234567890.jpg',
+            UploadedFile::fake()->image('avatar.png', 640, 480),
+        );
+
+        expect($path)->toBe('profile_pictures/7_1234567890.jpg');
+        Storage::disk('public')->assertExists($path);
+
+        [$width, $height, $type] = getimagesizefromstring(Storage::disk('public')->get($path));
+        expect($width)->toBe(200);
+        expect($height)->toBe(200);
+        expect($type)->toBe(IMAGETYPE_JPEG);
+
+        // No responsive variant is generated next to it: this path is not managed.
+        expect(Storage::disk('public')->files('profile_pictures'))
+            ->toBe(['profile_pictures/7_1234567890.jpg']);
+    });
+
+    it('honours a custom size', function () {
+        $path = app(MediaPublicApi::class)->saveSquareJpg(
+            'profile_pictures/8.jpg',
+            UploadedFile::fake()->image('avatar.jpg', 300, 300),
+            size: 64,
+        );
+
+        [$width, $height] = getimagesizefromstring(Storage::disk('public')->get($path));
+        expect($width)->toBe(64);
+        expect($height)->toBe(64);
     });
 });
 
@@ -153,5 +193,28 @@ describe('gc', function () {
         expect($result['skipped'])->toContain('news');
         expect($result['deleted'])->toBeEmpty();
         Storage::disk('public')->assertExists('news/orphan.jpg');
+    });
+
+    it('never descends into dated subfolders of the activities scope', function () {
+        Storage::disk('public')->put('activities/2026/07/legacy.jpg', 'x');
+        Storage::disk('public')->put('activities/2026/07/legacy-400w.webp', 'x');
+        // No provider claims anything.
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toBeEmpty();
+        expect($result['skipped'])->not->toContain('activities');
+        Storage::disk('public')->assertExists('activities/2026/07/legacy.jpg');
+        Storage::disk('public')->assertExists('activities/2026/07/legacy-400w.webp');
+    });
+
+    it('skips the activities scope when a flat original has no provider', function () {
+        Storage::disk('public')->put('activities/orphan.jpg', 'x');
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['skipped'])->toContain('activities');
+        expect($result['deleted'])->toBeEmpty();
+        Storage::disk('public')->assertExists('activities/orphan.jpg');
     });
 });

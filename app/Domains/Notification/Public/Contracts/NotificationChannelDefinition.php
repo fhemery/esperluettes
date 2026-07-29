@@ -15,5 +15,7 @@ final class NotificationChannelDefinition
         public readonly Closure $deliveryCallback,
         /** fn(): bool — null means always active */
         public readonly ?Closure $featureCheck = null,
+        /** fn(int $userId): ?string — returns a warning message or null */
+        public readonly ?Closure $warningForUser = null,
     ) {}
 }

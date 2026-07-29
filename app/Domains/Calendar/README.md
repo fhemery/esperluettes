@@ -4,7 +4,7 @@ This domain manages time-bound activities (writing challenges, contests, collabo
 
 **Not done.** `requires_subscription` and `max_participants` are stored on `calendar_activities` and editable in the admin form but **enforce nothing** — there is no enrolment logic, no cap and no participant list. Nothing announces an activity opening or closing either; state is derived from dates and there is no cron, so no transition event exists to notify on.
 
-**Known drift.** The activity controller still calls `Shared\Services\ImageService` directly, and the Media scope declared as `calendar` does not match the real folder on disk, `activities/`.
+**Images.** Activity images go through `MediaPublicApi` on the `activities` scope: new uploads land flat under `activities/`, the admin form uses `<x-media::image-field>` (reuse picker included) and both public views render `<x-media::image>`. Removing an image only clears `image_path` — the file is reclaimed by `media:gc`, which `ActivityMediaUsageProvider` keeps honest. Images uploaded before the migration still live under `activities/YYYY/MM/`; they render normally, are never swept, and do not show up in the picker.
 
 ## Overview
 

@@ -16,8 +16,10 @@ class ActivityRequest extends FormRequest
         $rules = [
             'name' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'max:5120'],
-            'image_remove' => ['nullable'],
+            // Media image-field payload: a new upload (file) xor a reused/kept path.
+            'image' => ['nullable', 'array'],
+            'image.file' => ['nullable', 'image', 'max:2048'],
+            'image.path' => ['nullable', 'string', 'max:1024'],
             'role_restrictions' => ['nullable', 'array'],
             'role_restrictions.*' => ['nullable', 'string'],
             'requires_subscription' => ['nullable', 'boolean'],

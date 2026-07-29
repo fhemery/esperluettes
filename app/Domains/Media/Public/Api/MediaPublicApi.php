@@ -29,6 +29,20 @@ class MediaPublicApi
     }
 
     /**
+     * Save a square-cropped JPEG at a caller-chosen path on the managed disk.
+     *
+     * The one deliberate exception to the scope invariant: the caller owns the
+     * path *and* the file's lifecycle. Nothing is stored under a managed scope,
+     * no responsive variants are generated, and the file is invisible to the
+     * `media:gc` sweep — the caller must delete it itself. Profile avatars are
+     * the only use case; anything garbage-collectable belongs in store().
+     */
+    public function saveSquareJpg(string $targetPath, UploadedFile $file, int $size = 200, int $quality = 85): string
+    {
+        return $this->media->saveSquareJpg($targetPath, $file, $size, $quality);
+    }
+
+    /**
      * List original images under a scope for the reuse picker (non-recursive).
      */
     public function listByScope(string $scope, int $page = 1, int $perPage = 40): MediaPathPageDto

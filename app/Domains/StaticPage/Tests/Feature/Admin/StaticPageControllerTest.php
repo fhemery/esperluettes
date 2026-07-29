@@ -111,7 +111,7 @@ describe('Static Page Admin Controller', function () {
                     'slug' => 'page-with-image',
                     'content' => '<p>Content</p>',
                     'status' => 'draft',
-                    'header_image' => UploadedFile::fake()->image('header.jpg', 800, 400),
+                    'header_image' => ['file' => UploadedFile::fake()->image('header.jpg', 800, 400)],
                 ]);
 
             $response->assertRedirect(route('static.admin.index'));

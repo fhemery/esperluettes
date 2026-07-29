@@ -24,6 +24,12 @@
                     @foreach($channels as $channel)
                     <th class="text-center py-2 px-1 sm:px-4 min-w-16 sm:min-w-32 font-medium">
                         {{ __($channel->nameTranslationKey) }}
+                        @if($channel->warningForUser)
+                            @php $channelWarning = ($channel->warningForUser)(auth()->id()); @endphp
+                            @if($channelWarning)
+                                <div class="mt-1 text-xs font-normal text-warning">{{ $channelWarning }}</div>
+                            @endif
+                        @endif
                     </th>
                     @endforeach
                 </tr>

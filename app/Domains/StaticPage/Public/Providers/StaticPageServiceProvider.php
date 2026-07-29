@@ -14,6 +14,8 @@ use App\Domains\StaticPage\Public\Events\StaticPageDeleted;
 use App\Domains\Auth\Public\Events\UserDeleted;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\StaticPage\Private\Listeners\RemoveCreatorOnUserDeleted;
+use App\Domains\StaticPage\Private\Support\StaticPageMediaUsageProvider;
+use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 
@@ -35,6 +37,9 @@ class StaticPageServiceProvider extends ServiceProvider
 
         // Model observers
         StaticPage::observe(StaticPageObserver::class);
+
+        // Let Media GC know which image files StaticPage still uses (header images).
+        app(MediaUsageRegistry::class)->register(new StaticPageMediaUsageProvider());
 
         // Register StaticPage domain events mapping with EventBus
         $eventBus = app(EventBus::class);

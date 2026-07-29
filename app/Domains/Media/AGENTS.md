@@ -24,7 +24,7 @@ None. Integration is registry-based, not event-based: consumers push a `MediaUsa
 
 **GC skips whole scopes with zero claimed paths.** `media:gc` never empties a folder that contains files but has no provider reporting any path under it — it treats that as a probable missing provider and skips it. Consequence: a scope that is *legitimately* fully unused won't be collected (mild, safe accumulation), and a scope whose provider you forgot won't be catastrophically wiped. Don't "fix" GC to delete unclaimed scopes.
 
-**Do not reference `Shared\ImageService` from new code.** It still physically lives in `Shared/Services` (delegated to by `MediaService`) only until the last legacy consumer migrates. New callers go through `MediaPublicApi::store` / `variantUrl` / `originalUrl`. When you migrate a consumer, drop its `ImageService` usage and any direct file deletion.
+**`ImageService` is Media-internal and `MediaService` is its only caller.** It lives in `Media/Private/Services`; deptrac makes it unreachable from any other domain. Its `$disk` parameters are a leftover internal detail — every call passes `MediaService::DISK`. All callers outside Media go through `MediaPublicApi::store` / `variantUrl` / `originalUrl` / `saveSquareJpg`.
 
 **`listByScope` and the picker are non-recursive.** They list originals *directly* under the scope folder and exclude `-<width>w` variant files. Pre-migration images under dated subfolders (`news/2025/10/…`) still display and re-save correctly (path-agnostic), but they do not appear in the picker and are outside GC's reach — safe, but not reusable.
 

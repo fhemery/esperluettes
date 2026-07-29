@@ -428,6 +428,7 @@ deptrac:
       - CalendarPrivate
       - AuthPublic
       - AdministrationPublic
+      - MediaPublic
 
     CommentPublic: 
       - Shared
@@ -551,6 +552,7 @@ deptrac:
       - StaticPagePrivate
       - EventsPublic
       - AdministrationPublic
+      - MediaPublic
 
     StoryPublic:
       - CommentPublic
@@ -597,6 +599,7 @@ deptrac:
       - AuthPublic
       - StoryPublic
       - EventsPublic
+      - MediaPublic
  
     CommentPrivate:
       - Shared
@@ -674,6 +677,7 @@ deptrac:
       - Shared
       - AuthPublic
       - EventsPublic
+      - MediaPublic
       - ModerationPublic
       - ProfilePublic
       - SettingsPublic
@@ -721,6 +725,7 @@ deptrac:
       - AuthPublic
       - EventsPublic
       - StaticPagePublic
+      - MediaPublic
 
     StoryPrivate:
       - Shared

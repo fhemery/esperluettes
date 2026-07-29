@@ -7,7 +7,6 @@ namespace App\Domains\Media\Private\Services;
 use App\Domains\Media\Public\Contracts\Dto\MediaPathDto;
 use App\Domains\Media\Public\Contracts\Dto\MediaPathPageDto;
 use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
-use App\Domains\Shared\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
@@ -21,7 +20,7 @@ class MediaService
     public const DISK = 'public';
 
     /** Flat scopes that map 1:1 to a folder of the same name. */
-    private const FLAT_SCOPES = ['news', 'faq', 'static-pages', 'profile', 'calendar'];
+    private const FLAT_SCOPES = ['news', 'faq', 'static-pages', 'activities'];
 
     public function __construct(
         private readonly ImageService $imageService,
@@ -52,6 +51,15 @@ class MediaService
     public function store(string $scope, UploadedFile $file, array $widths = [400, 800]): string
     {
         return $this->imageService->process(self::DISK, $this->folderFor($scope), $file, $widths);
+    }
+
+    /**
+     * Save a square-cropped JPEG at a caller-chosen path on the managed disk.
+     * Deliberately non-scoped: no variants, no GC — see MediaPublicApi.
+     */
+    public function saveSquareJpg(string $targetPath, UploadedFile $file, int $size = 200, int $quality = 85): string
+    {
+        return $this->imageService->saveSquareJpg(self::DISK, $targetPath, $file, $size, $quality);
     }
 
     /**

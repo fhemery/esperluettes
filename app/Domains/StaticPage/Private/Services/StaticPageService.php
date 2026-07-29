@@ -2,8 +2,8 @@
 
 namespace App\Domains\StaticPage\Private\Services;
 
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\StaticPage\Private\Models\StaticPage;
-use App\Domains\Shared\Services\ImageService;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -16,8 +16,11 @@ use App\Domains\StaticPage\Public\Events\StaticPageDeleted;
 
 class StaticPageService
 {
+    private const SCOPE = 'static-pages';
+
     public function __construct(
         private readonly EventBus $eventBus,
+        private readonly MediaPublicApi $media,
     ) {}
 
     public const CACHE_KEY_SLUG_MAP = 'static_pages:slug_map';
@@ -26,10 +29,8 @@ class StaticPageService
     {
         $data['content'] = $this->sanitizeContent($data['content'] ?? '');
 
-        if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
-            $data['header_image_path'] = $this->processHeaderImage($data['header_image']);
-        }
-        unset($data['header_image'], $data['header_image_remove']);
+        $data['header_image_path'] = $this->resolveHeaderImage($data);
+        unset($data['header_image']);
 
         $data['created_by'] = Auth::id();
 
@@ -44,21 +45,8 @@ class StaticPageService
     {
         $data['content'] = $this->sanitizeContent($data['content'] ?? '');
 
-        // Handle header image
-        if (!empty($data['header_image']) && $data['header_image'] instanceof UploadedFile) {
-            // Delete old image if exists
-            if ($page->header_image_path) {
-                $this->deleteHeaderImage($page->header_image_path);
-            }
-            $data['header_image_path'] = $this->processHeaderImage($data['header_image']);
-        } elseif (!empty($data['header_image_remove'])) {
-            // Remove existing image
-            if ($page->header_image_path) {
-                $this->deleteHeaderImage($page->header_image_path);
-            }
-            $data['header_image_path'] = null;
-        }
-        unset($data['header_image'], $data['header_image_remove']);
+        $data['header_image_path'] = $this->resolveHeaderImage($data);
+        unset($data['header_image']);
 
         $page->update($data);
         $this->rebuildSlugMapCache();
@@ -68,11 +56,6 @@ class StaticPageService
 
     public function delete(StaticPage $page): void
     {
-        // Delete header image if exists
-        if ($page->header_image_path) {
-            $this->deleteHeaderImage($page->header_image_path);
-        }
-
         $pageId = $page->id;
         $slug = $page->slug;
         $title = $page->title;
@@ -94,21 +77,26 @@ class StaticPageService
         return HtmlLinkUtils::addTargetBlankToExternalLinks($clean);
     }
 
-    public function processHeaderImage(UploadedFile|string|null $file): ?string
+    /**
+     * Resolve header_image_path from the media-image-field payload.
+     * A new upload is stored; otherwise the (possibly reused or kept) path is
+     * used; empty means the image was removed. Files are never deleted here —
+     * the Media GC reclaims any path no page references anymore.
+     *
+     * @param array<string,mixed> $data validated request data
+     */
+    private function resolveHeaderImage(array $data): ?string
     {
-        if (!$file) {
-            return null;
-        }
-        $disk = 'public';
-        $folder = 'static-pages/' . date('Y/m');
-        return app(ImageService::class)->process($disk, $folder, $file, widths: [400, 800]);
+        $file = $data['header_image']['file'] ?? null;
+
+        return $file instanceof UploadedFile
+            ? $this->processHeaderImage($file)
+            : (($data['header_image']['path'] ?? null) ?: null);
     }
 
-    public function deleteHeaderImage(?string $headerImagePath): void
+    public function processHeaderImage(?UploadedFile $file): ?string
     {
-        if (!$headerImagePath) return;
-        $disk = 'public';
-        app(ImageService::class)->deleteWithVariants($disk, $headerImagePath);
+        return $file ? $this->media->store(self::SCOPE, $file) : null;
     }
 
     public function publish(StaticPage $page): StaticPage

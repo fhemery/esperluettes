@@ -9,6 +9,8 @@ use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Private\Activities\Jardino\JardinoRegistration;
 use App\Domains\Calendar\Private\Activities\SecretGift\SecretGiftRegistration;
+use App\Domains\Calendar\Private\Support\ActivityMediaUsageProvider;
+use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use Illuminate\Support\ServiceProvider;
 use App\Domains\Calendar\Public\Api\CalendarRegistry;
 use Illuminate\Support\Facades\Blade;
@@ -42,6 +44,9 @@ class CalendarServiceProvider extends ServiceProvider
 
         // Register PHP translations under 'calendar' namespace
         $this->loadTranslationsFrom(app_path('Domains/Calendar/Private/Resources/lang'), 'calendar');
+
+        // Let Media GC know which image files Calendar still uses (activity images).
+        app(MediaUsageRegistry::class)->register(new ActivityMediaUsageProvider());
 
         $registry = app(CalendarRegistry::class);
         $registry->register(JardinoRegistration::ACTIVITY_TYPE, new JardinoRegistration());

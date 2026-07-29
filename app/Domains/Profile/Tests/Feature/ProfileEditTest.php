@@ -8,6 +8,8 @@ use App\Domains\Profile\Public\Events\ProfileDisplayNameChanged;
 use App\Domains\Profile\Public\Events\BioUpdated;
 
 use App\Domains\Profile\Private\Api\ProfileApi;
+use App\Domains\Profile\Private\Models\Profile;
+use App\Domains\Profile\Private\Services\ProfileCacheService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -289,6 +291,73 @@ describe('Editing profile', function () {
             expect($event->blueskyHandle)->toBe('someone.bsky.social');
             expect($event->mastodonHandle)->toBe('someone@mastodon.social');
             expect($event->userId)->toBe($user->id);
+        });
+    });
+
+    describe('Avatar storage', function () {
+        beforeEach(function () {
+            Storage::fake('public');
+        });
+
+        it('stores the uploaded avatar at profile_pictures/{userId}_{ts}.jpg', function () {
+            $user = alice($this);
+
+            $this->actingAs($user)
+                ->put('/profile', [
+                    'display_name' => 'Alice',
+                    'profile_picture' => UploadedFile::fake()->image('avatar.png', 640, 480),
+                ])
+                ->assertRedirect('/profile');
+
+            $path = Profile::where('user_id', $user->id)->value('profile_picture_path');
+            expect($path)->toMatch('#^profile_pictures/' . $user->id . '_\d+\.jpg$#');
+            Storage::disk('public')->assertExists($path);
+
+            [$width, $height, $type] = getimagesizefromstring(Storage::disk('public')->get($path));
+            expect($width)->toBe(200);
+            expect($height)->toBe(200);
+            expect($type)->toBe(IMAGETYPE_JPEG);
+        });
+
+        it('generates no responsive variants for an avatar', function () {
+            $user = alice($this);
+
+            $this->actingAs($user)
+                ->put('/profile', [
+                    'display_name' => 'Alice',
+                    'profile_picture' => UploadedFile::fake()->image('avatar.jpg', 300, 300),
+                ])
+                ->assertRedirect('/profile');
+
+            $files = Storage::disk('public')->files('profile_pictures');
+            $variants = array_values(array_filter(
+                $files,
+                fn (string $f) => preg_match('/-\d+w\.(jpg|jpeg|png|webp)$/i', $f) === 1,
+            ));
+            expect($variants)->toBe([]);
+        });
+
+        it('deletes the previous avatar file immediately when a new one is uploaded', function () {
+            $user = alice($this);
+
+            // Give Alice a custom avatar under a name that cannot collide with the
+            // time()-based one the service generates for the new upload.
+            $oldPath = 'profile_pictures/' . $user->id . '_old.jpg';
+            Storage::disk('public')->put($oldPath, 'old-bytes');
+            Profile::where('user_id', $user->id)->update(['profile_picture_path' => $oldPath]);
+            app(ProfileCacheService::class)->forgetByUserId($user->id);
+
+            $this->actingAs($user)
+                ->put('/profile', [
+                    'display_name' => 'Alice',
+                    'profile_picture' => UploadedFile::fake()->image('avatar.jpg', 300, 300),
+                ])
+                ->assertRedirect('/profile');
+
+            $newPath = Profile::where('user_id', $user->id)->value('profile_picture_path');
+            expect($newPath)->not->toBe($oldPath);
+            Storage::disk('public')->assertExists($newPath);
+            Storage::disk('public')->assertMissing($oldPath);
         });
     });
 

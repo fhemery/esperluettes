@@ -52,6 +52,12 @@ The `<x-discord::discord />` Blade component supports a restricted-preview mode:
 
 An earlier design instead required every `NotificationContent` class to implement `getUrl()`/`getActorName()`/`getTargetDescription()`. Those methods were never added, yet the controller read `data['url']`, `data['actor']` and `data['target']`, so all three were permanently `null`. Do not reintroduce derived keys here.
 
+## Public API
+
+`DiscordPublicApi` exposes a single method to other domains:
+
+- `isLinked(int $userId): bool` — returns whether the user has a linked Discord account. Used by the Notification domain to show a warning on the preferences page when a user has opted in to Discord delivery without linking.
+
 ## Cross-domain delegation
 
 | What | Delegated to | Why |
