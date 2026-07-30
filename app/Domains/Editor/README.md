@@ -11,10 +11,10 @@ It owns **no database table**. Content belongs to the domain that stores it
 becomes HTML.
 
 > Extraction in progress: today the domain holds the block renderer, its public
-> API, the two authoring components and their translations. The Quill bundle
-> (`Shared/Resources/js/editor-bundle.js`) and the editor CSS still live in
-> `Shared`, and consumer pages still `@vite` the bundle by hand — both move here
-> in later steps.
+> API, the two authoring components, their translations and the Quill bundle
+> (`Private/Resources/js/editor-bundle.js`, pushed by the components themselves).
+> The editor CSS still lives in `Shared/Resources/css/app.css` — it moves here in
+> a later step.
 
 ## Block schema
 

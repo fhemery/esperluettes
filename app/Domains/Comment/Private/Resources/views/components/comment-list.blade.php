@@ -85,7 +85,6 @@
 @once
   @if(!$isGuest)
     @push('scripts')
-      @vite('app/Domains/Shared/Resources/js/editor-bundle.js')
       @vite('app/Domains/Comment/Resources/js/comment-draft/index.js')
     @endpush
   @endif

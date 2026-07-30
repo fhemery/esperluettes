@@ -177,25 +177,14 @@ Checks that a display name produces a unique profile slug. Accepts an optional `
 | File | Exported / Global | Purpose |
 |------|-------------------|---------|
 | `app.js` | Alpine, window globals | Main entrypoint. Boots Alpine, registers plugins (`intersect`), mounts `popover` store, spoiler reveal delegate. |
-| `editor-bundle.js` | `window.initQuillEditor`, `window.Quill`, `window.Delta` | Quill rich-text editor factory. Configurable per-instance: headings, links, spoiler format, min/max character counting, image paste blocking, custom emoji blots. |
 | `tooltip.js` | `registerTooltip(Alpine)` | Alpine `popover` data component: hover + click-to-pin, viewport-aware positioning (right/left/top/bottom with fallback), exclusive single-open via Alpine store. |
 | `countdown-timer.js` | `window.countdownTimer` | Alpine-compatible countdown timer. Reads `data-end-time`, `data-show-seconds`, and translation keys from element dataset. |
 | `badge-overflow.js` | `window.BadgeOverflow` | Detects overflowing badge lists and shows a `+N` overflow indicator. |
 | `date-utils.js` | `window.DateUtils` | Date formatting utilities. |
 | `bootstrap.js` | — | Axios setup, CSRF header. |
 
-### Quill editor
-
-The rich-text editor is Quill (installed as an npm package, not CDN). The `editor-bundle.js` entry exposes `window.initQuillEditor(id, options)`. Features enabled per-instance via `data-*` attributes or the `options` object:
-
-- `data-with-headings="true"` — adds H2/H3 toolbar buttons
-- `data-with-links="true"` — adds link toolbar button
-- `data-with-spoiler="true"` — adds spoiler format (custom inline blot, renders as `<span class="ql-spoiler">`)
-- `data-max` / `data-min` — character limits, wired to a counter display and `editor-valid` custom event
-- `data-nb-lines` — sets editor height in lines
-- `data-resizable="true"` — makes the editor vertically resizable
-
-Images are blocked on paste and drop.
+The rich-text editor bundle lives in the **Editor** domain
+([app/Domains/Editor/README.md](../Editor/README.md)), not here.
 
 ---
 

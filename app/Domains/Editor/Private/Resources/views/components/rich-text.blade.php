@@ -14,6 +14,8 @@
 
 @use(App\Domains\Editor\Private\Support\ToolbarPresets)
 
+@include('editor::components._assets')
+
 @php
   // A string names a preset; an array is used as-is (presets bypassed).
   $toolbar = ToolbarPresets::resolve($toolbar);

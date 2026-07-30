@@ -29,7 +29,6 @@
 | `Validation/Rules/UniqueProfileDisplayName.php` | Cross-domain display name uniqueness rule |
 | `Http/BackToCommentsRedirector.php` | Reconstruct `#comments` redirect after comment post |
 | `Helpers/VersionHelper.php` | Read and cache `version.json` for display in footer |
-| `Resources/js/editor-bundle.js` | Quill editor factory (`window.initQuillEditor`) |
 | `Resources/js/tooltip.js` | Alpine `popover` component with viewport-aware positioning |
 
 ## Non-obvious rules
@@ -43,10 +42,6 @@
 **`Theme::seasonal()` uses the system clock.** It can be frozen in tests via `Carbon::setTestNow()`.
 
 **The layout applies two extra Blade attributes.** `AppLayout` passes `seasonal-background` and `display-ribbon` as boolean attributes to `layouts.app`; they must be passed via `PageViewModel` flags (`withSeasonalBackground`, `withSeasonalRibbon`).
-
-**`initQuillEditor` is idempotent.** It checks `container.dataset.quillInited` and skips if already initialised. Always call it by the container's `id`.
-
-**Quill images are always blocked.** The editor-bundle drops pasted and dropped images at the Quill level. Do not attempt to add image upload support through the Quill toolbar.
 
 **Custom validator registration.** `CustomValidators::register()` must be called from a service provider `boot()` method. It is not auto-registered.
 

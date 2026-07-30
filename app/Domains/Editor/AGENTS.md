@@ -27,4 +27,12 @@ None.
 
 **Rendered HTML is a derived cache.** Consumers that store blocks (News's `content_blocks`) also persist a rendered `content` column. The block array is the source of truth; the cache is rewritten from it on every save and never edited independently.
 
+**The components load their own assets — never hand-write `@vite` for the editor.** `rich-text` and `multi` both `@include('editor::components._assets')`, a single `@once` + `@push('scripts')` holding the `@vite` of `Private/Resources/js/editor-bundle.js`. The `@once` lives in the shared partial on purpose: it is keyed per call site, so one guard per component would push twice on a page rendering both. A page with no editor now loads no editor asset.
+
+**A `@push` inside an AJAX-rendered fragment is discarded** — there is no layout to flush the stack into. Comment's fragments carry editors and work only because `comment-list.blade.php` renders a page-level editor first. A domain that renders an editor *only* inside a fragment must push the assets from the page itself.
+
+**`initQuillEditor` is idempotent.** It checks `container.dataset.quillInited` and skips if already initialised. Always call it by the container's `id`.
+
+**Quill images are always blocked.** `editor-bundle.js` drops pasted and dropped images at the Quill level. Do not attempt to add image upload support through the Quill toolbar.
+
 **Text sanitization uses the global `multiedit-text` Purifier profile** in `config/purifier.php` — framework configuration, not domain code. It forbids `<img>` on purpose: images must be image blocks so Media can track their paths.

@@ -34,6 +34,8 @@
 
 @use(App\Domains\Editor\Private\Support\ToolbarPresets)
 
+@include('editor::components._assets')
+
 @php
     // Resolved once here, so both panes and every text block share one list.
     $toolbar = ToolbarPresets::resolve($toolbar);
