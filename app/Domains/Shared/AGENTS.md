@@ -30,6 +30,8 @@
 | `Http/BackToCommentsRedirector.php` | Reconstruct `#comments` redirect after comment post |
 | `Helpers/VersionHelper.php` | Read and cache `version.json` for display in footer |
 | `Resources/js/tooltip.js` | Alpine `popover` component with viewport-aware positioning |
+| `Resources/js/anchoring/` | Read-side quote anchoring: `buildCanonicalText`, `extractAnchor`, `findAnchor` |
+| `Resources/css/app.css` | Site-wide styles, including the read-side rules for stored rich content |
 
 ## Non-obvious rules
 
@@ -44,5 +46,9 @@
 **The layout applies two extra Blade attributes.** `AppLayout` passes `seasonal-background` and `display-ribbon` as boolean attributes to `layouts.app`; they must be passed via `PageViewModel` flags (`withSeasonalBackground`, `withSeasonalRibbon`).
 
 **Custom validator registration.** `CustomValidators::register()` must be called from a service provider `boot()` method. It is not auto-registered.
+
+**The editor is not here — but the read side is.** The Quill bundle, the editor chrome CSS and the `<x-editor::…>` components belong to the `Editor` domain. What stays in Shared is everything a page needs to *display* stored content without an editor: the `.rich-content` / `.ql-align-*` / `.ql-custom-emoji*` / read-only spoiler rules in `Resources/css/app.css`, and the `app.js` spoiler-reveal delegate. Moving one of those to Editor silently breaks read-only pages, since they load no editor asset.
+
+**`Resources/js/anchoring/` stays in Shared.** Canonical text, anchor extraction and re-anchoring run on *rendered* pages, for Quote (and later annotations) — they are a read-side concern with different consumers and a different lifecycle from authoring. This is deliberate, not an unfinished extraction: do not move it into `Editor`.
 
 **`BackToCommentsRedirector` only uses the path and query string.** Browsers never send the fragment in the `Referer` header; the `#comments` anchor is always appended by the helper, not read from the request.

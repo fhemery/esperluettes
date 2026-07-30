@@ -2,17 +2,17 @@
 
 ## Purpose and scope
 
-The Editor domain owns **rich-text and block-based content authoring**: the
-rendering of block documents to sanitized HTML, and (progressively) the Blade
-components, translations and assets that produce those documents.
+The Editor domain owns **rich-text and block-based content authoring**: the two
+Blade components that produce content, their translations and their editing
+assets (Quill and the editor chrome stylesheet), and the rendering of block
+documents to sanitized HTML.
 
 It owns **no database table**. Content belongs to the domain that stores it
 (News, Story, FAQ…); Editor only knows how a block document is shaped and how it
 becomes HTML.
 
-> Extraction in progress: today the domain holds the block renderer, its public
-> API, the two authoring components, their translations and both editing assets
-> (see *Assets* below). Only the domain documentation pass remains.
+Other domains reach it two ways only: the `EditorPublicApi` class in PHP, and
+the `<x-editor::…>` components in Blade.
 
 ## Block schema
 
@@ -102,9 +102,23 @@ component wiring (`data-link-*`, `data-spoiler-label`).
 
 The opt-in block editor: a mode toggle between one `rich-text` field (*simple*)
 and an ordered stack of text/image blocks (*advanced*) serialized as
-`name[uid][…]` alongside `mode` and `name_order`. Image blocks compose
-`<x-media::image-field>`; the server branches on `mode` (see `NewsService`).
-Props are documented in the component's own header comment.
+`name[uid][…]` alongside `mode` and `name_order` (the visual order of uids). The
+server branches on `mode` (see `NewsService`). Image blocks compose
+`<x-media::image-field>`, so the storing domain — not Editor — owns the upload
+and the `MediaUsageProvider` that keeps the file alive.
+
+| Prop | Default | Purpose |
+|------|---------|---------|
+| `scope` | *required* | Media scope for image uploads and the reuse picker |
+| `name` | `'blocks'` | Base field name for the advanced blocks |
+| `contentName` | `'content'` | Field name of the simple-mode editor |
+| `contentValue` | `''` | Current simple-mode HTML |
+| `blocks` | `[]` | Stored blocks; a non-empty array opens in advanced mode |
+| `mode` | `'simple'` | Initial mode when `blocks` is empty |
+| `blockTypes` | `['text', 'image']` | Types the insert affordance offers |
+| `toolbar` | `'default'` | Preset name or token array, resolved once and shared by both panes and every text block |
+| `min` / `max` | `null` | Bounds on the **summed** text length |
+| `placeholder` | `''` | Placeholder text |
 
 Translations live in `Private/Resources/lang/fr/` under the `editor::` namespace:
 `editor::rich-text.*` and `editor::multi.*`.
@@ -127,11 +141,18 @@ if a page that never loads the editor needs it.** That leaves Shared with the
 family — all of them present in *stored* HTML. A misfiled rule silently degrades
 a read-only page, so add a comment stating which side a new Quill rule belongs to.
 
-Caveat: a `@push` executed while rendering an AJAX fragment is discarded, so a
-page that renders an editor *only* inside a fragment must push the assets itself.
+Both entries are declared in `vite.config.js`. Caveat: a `@push` executed while
+rendering an AJAX fragment is discarded, so a page that renders an editor *only*
+inside a fragment must push the assets itself (see
+[AGENTS.md](AGENTS.md)).
 
 ## What this domain does not do
 
 - No routes, no controllers, no policies, no events.
-- No image storage or deletion — that is Media's.
-- No persistence of documents — the consuming domain owns the column.
+- No image storage, upload or deletion — that is Media's.
+- No persistence of documents — the consuming domain owns the column, and the
+  rendered HTML it may cache alongside it.
+- No block-type registry and no typed block DTOs: a third block type is the day
+  to introduce the registry, not before.
+- No read-side rendering of stored HTML beyond `render()` — the `.rich-content`
+  typography that displays it belongs to `Shared`.

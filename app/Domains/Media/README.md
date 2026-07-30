@@ -53,7 +53,7 @@ The reuse picker is backed by the authenticated `GET /media/library?scope=…` e
 
 **Cleanup reads the truth, it doesn't cache it.** Usage is computed on demand by fanning out over registered `MediaUsageProvider`s, not maintained on every save. The cost moves from every write to a scheduled batch sweep, which is the right place to pay it. The residual risk — a domain that stores paths but forgets to register a provider — is contained by the 7-day grace window and the unclaimed-scope skip guard.
 
-**Media owns its Blade components.** Display and upload components live in this domain rather than in `Shared`, so all image UI is cohesive. Consumers (including the `Shared` multi-editor) depend on `MediaPublic` for them — the same `Shared → MediaPublic` shape already accepted for Config/Settings.
+**Media owns its Blade components.** Display and upload components live in this domain rather than in `Shared`, so all image UI is cohesive. Consumers (including `Editor`'s block editor and its block renderer) depend on `MediaPublic` for them.
 
 ## Cross-domain delegation map
 

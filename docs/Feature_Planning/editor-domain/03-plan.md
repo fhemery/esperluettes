@@ -16,7 +16,7 @@
 | 3 | Toolbar presets | S | 2 | DONE |
 | 4 | JS bundle move + self-loading components + 15 `@vite` deletions | M | 2 | DONE |
 | 5 | CSS split into its own Vite entry | S | 4 | DONE |
-| 6 | Domain documentation | S | 5 | TODO |
+| 6 | Domain documentation | S | 5 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
