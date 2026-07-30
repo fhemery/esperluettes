@@ -21,6 +21,7 @@ a new row that supersedes it and note the number.
 | 11 | 2026-07-29 | DESIGN | deptrac only analyses PHP, so 10 of 11 consumers create no analysable edge. Grant `EditorPublic` to all nine domains anyway? | No — add it only where PHP references Editor (`NewsPrivate` today). An allowance for an edge that cannot exist is config that lies and pre-approves unreviewed coupling. Consequence accepted: the request's "consumers become deptrac-enforceable" payoff is not obtainable; the real payoff is deleting `Shared → MediaPublic` | — |
 | 12 | 2026-07-29 | DESIGN | How do the 11 call sites name a toolbar preset? | A string preset name (`toolbar="editorial"`) resolved inside the component, with `:toolbar="[…]"` still accepted. Not a PHP constants class — no FQCN in Blade for a list of strings | — |
 | 13 | 2026-07-29 | DESIGN | Regression net for the 15 deleted `@vite` lines | A component-level asset test (tags emitted, emitted once, absent when no editor renders) plus browser coverage at VERIFY. Not an assertion added to every consumer domain's page tests | — |
+| 14 | 2026-07-30 | WRAP | O6 — assumption **A3** (grant `EditorPublic` to all nine consumer domains) is contradicted by decision #11 but was never formally superseded | A3 is superseded. The shipped `deptrac.yaml` grants `EditorPublic` to `NewsPrivate` only, per #11. Recorded here rather than by rewriting A3, so the append-only rule holds | A3 |
 
 ## Assumptions made without asking
 

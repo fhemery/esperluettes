@@ -51,3 +51,4 @@ Slugs are auto-generated from the article title using `spatie/laravel-sluggable`
 | Domain event bus | [Events](../Events/README.md) via `EventBus::emit()` | Cross-domain audit log and event routing |
 | Admin sidebar registration | [Administration](../Administration/README.md) via `AdminNavigationRegistry` | Shared admin layout owns navigation state |
 | Image storage, variants and display | [Media](../Media/README.md) via `MediaPublicApi` | Media owns image handling for every domain; News stores paths only |
+| Block sanitization, rendering and text length | [Editor](../Editor/README.md) via `EditorPublicApi` (`sanitizeText`, `render`, `plainTextLength`) | Editor owns the block schema and the authoring components; News owns the `content_blocks` column and the derived `content` cache |
