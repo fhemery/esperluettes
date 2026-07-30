@@ -14,7 +14,7 @@
       mode         'simple' | 'advanced' (initial)
       blockTypes   allowed types, default ['text','image']
       scope        Media scope for image uploads/picker (required)
-      toolbar      editor toolbar config (passed to each text block)
+      toolbar      preset name or explicit token array (passed to each text block)
       min / max    summed-text constraints
       placeholder  editor placeholder
 --}}
@@ -26,13 +26,17 @@
     'mode' => 'simple',
     'blockTypes' => ['text', 'image'],
     'scope',
-    'toolbar' => ['bold', 'italic', 'underline', 'strike', 'blockquote', 'align', 'list', 'custom-emoji'],
+    'toolbar' => 'default',
     'min' => null,
     'max' => null,
     'placeholder' => '',
 ])
 
+@use(App\Domains\Editor\Private\Support\ToolbarPresets)
+
 @php
+    // Resolved once here, so both panes and every text block share one list.
+    $toolbar = ToolbarPresets::resolve($toolbar);
     $simpleId = 'me-simple-' . Str::random(6);
     $blocks = is_array($blocks) ? $blocks : [];
     // A document with stored blocks opens in advanced mode.

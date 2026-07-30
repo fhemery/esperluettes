@@ -47,7 +47,7 @@
             :defaultValue="old('description', $activity?->description ?? '')"
             :nbLines="10"
             :resizable="true"
-            :toolbar="['bold','italic','underline','strike','blockquote','align','list','custom-emoji','link']"
+            toolbar="links"
             class="mt-1"
         />
         <x-shared::input-error :messages="$errors->get('description')" class="mt-1" />

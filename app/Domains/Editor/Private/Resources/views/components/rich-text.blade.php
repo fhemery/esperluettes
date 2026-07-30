@@ -9,11 +9,14 @@
   'isMandatory' => false,
   'indentParagraphs' => false,
   'resizable' => true,
-  'toolbar' => ['bold', 'italic', 'underline', 'strike', 'blockquote', 'align', 'list', 'custom-emoji'],
+  'toolbar' => 'default',
 ])
 
+@use(App\Domains\Editor\Private\Support\ToolbarPresets)
+
 @php
-  $toolbar = array_values($toolbar);
+  // A string names a preset; an array is used as-is (presets bypassed).
+  $toolbar = ToolbarPresets::resolve($toolbar);
   $hasLink = in_array('link', $toolbar, true);
   $hasSpoiler = in_array('spoiler', $toolbar, true);
   $toolbarJson = json_encode($toolbar, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

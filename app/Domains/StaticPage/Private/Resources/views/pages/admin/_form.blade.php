@@ -76,7 +76,7 @@
                 :defaultValue="old('content', $page?->content ?? '')"
                 :nbLines="15"
                 :isMandatory="true"
-                :toolbar="['bold','italic','underline','strike','header','blockquote','align','list','custom-emoji','link']"
+                toolbar="editorial"
             />
             <x-shared::input-error :messages="$errors->get('content')" class="mt-1" />
         </div>

@@ -15,7 +15,7 @@
             <x-input-label for="author_note" size="md" color="secondary" :value="__('story::chapters.form.author_note.label')" />
             <x-editor::rich-text id="chapter-author-note-editor" name="author_note"
                 :nbLines="5" max="1000"
-                :toolbar="['bold','italic','underline','strike','blockquote','align','list','custom-emoji','link','spoiler']"
+                toolbar="narrative"
                 class="mt-1 block w-full"
                 defaultValue="{{ old('author_note', $chapter->author_note ?? '') }}"
                 placeholder="{{ __('story::chapters.form.author_note.placeholder') }}"/>
@@ -31,7 +31,7 @@
         <x-input-label for="content" required="true" size="md" color="secondary" :value="__('story::chapters.form.content.label')" />
         <x-editor::rich-text id="chapter-content-editor" name="content"
             :nbLines="15"
-            :toolbar="['bold','italic','underline','strike','blockquote','align','list','custom-emoji','link']"
+            toolbar="links"
             class="mt-1 block w-full" defaultValue="{{ old('content', $chapter->content ?? '') }}"
             :indentParagraphs="true"  />
         <x-input-error :messages="$errors->get('content')" class="mt-2" />

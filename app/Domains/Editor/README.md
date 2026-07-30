@@ -78,7 +78,27 @@ A single Quill field: a hidden `textarea[name]` the form submits, plus a counter
 | `isMandatory` | `false` | Marks the field required client-side |
 | `indentParagraphs` | `false` | Adds `ql-indent` to the surface |
 | `resizable` | `true` | Vertically resizable |
-| `toolbar` | `bold, italic, underline, strike, blockquote, align, list, custom-emoji` | Token list; `link` and `spoiler` enable extra wiring |
+| `toolbar` | `'default'` | Preset name (see below) or an explicit token array |
+
+### Toolbar presets
+
+Both components take `toolbar` as a **preset name** resolved by
+`Private/Support/ToolbarPresets`:
+
+| Preset | Tokens |
+|--------|--------|
+| `default` | `bold, italic, underline, strike, blockquote, align, list, custom-emoji` |
+| `links` | `default` + `link` |
+| `editorial` | `bold, italic, underline, strike, header, blockquote, align, list, custom-emoji, link` |
+| `narrative` | `default` + `link` + `spoiler` |
+
+Presets are named after the **capability** they add, never after the domain that
+uses them — Editor does not encode who its consumers are. An unknown name falls
+back to `default`. `:toolbar="['bold', …]"` still passes an explicit token list
+and bypasses presets entirely.
+
+The `link` and `spoiler` tokens are not decoration: they switch on extra
+component wiring (`data-link-*`, `data-spoiler-label`).
 
 ### `<x-editor::multi>`
 

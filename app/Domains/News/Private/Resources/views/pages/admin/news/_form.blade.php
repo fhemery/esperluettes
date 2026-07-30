@@ -99,7 +99,7 @@
             :blocks="$meBlocks"
             :mode="$meMode"
             scope="news"
-            :toolbar="['bold','italic','underline','strike','header','blockquote','align','list','custom-emoji','link']"
+            toolbar="editorial"
             class="mt-1"
         />
         <x-shared::input-error :messages="$errors->get('content')" class="mt-1" />
