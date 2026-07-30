@@ -11,10 +11,8 @@ It owns **no database table**. Content belongs to the domain that stores it
 becomes HTML.
 
 > Extraction in progress: today the domain holds the block renderer, its public
-> API, the two authoring components, their translations and the Quill bundle
-> (`Private/Resources/js/editor-bundle.js`, pushed by the components themselves).
-> The editor CSS still lives in `Shared/Resources/css/app.css` — it moves here in
-> a later step.
+> API, the two authoring components, their translations and both editing assets
+> (see *Assets* below). Only the domain documentation pass remains.
 
 ## Block schema
 
@@ -110,6 +108,27 @@ Props are documented in the component's own header comment.
 
 Translations live in `Private/Resources/lang/fr/` under the `editor::` namespace:
 `editor::rich-text.*` and `editor::multi.*`.
+
+## Assets
+
+The components load their own Vite entries — **consumer pages never write an
+`@vite` line for the editor**. `Private/Resources/views/components/_assets.blade.php`
+pushes both, CSS first, inside a single `@once` shared by the two components:
+
+| Entry | Holds |
+|-------|-------|
+| `Private/Resources/css/editor.css` | Editor **chrome**: `.ql-toolbar` rules, the `.ql-tooltip[data-label-*]` translations, the `.ql-editor` writing surface, the editing-side spoiler styling |
+| `Private/Resources/js/editor-bundle.js` | Quill, the custom emoji blot and picker, the spoiler format; it pulls Quill's own `snow` stylesheet |
+
+The chrome/read-side boundary: **a rule stays in `Shared/Resources/css/app.css`
+if a page that never loads the editor needs it.** That leaves Shared with the
+`.ql-align-*` classes, `.rich-content` and its descendants, the
+`.ql-spoiler:not(.ql-editor …)` read-only variants and the `.ql-custom-emoji*`
+family — all of them present in *stored* HTML. A misfiled rule silently degrades
+a read-only page, so add a comment stating which side a new Quill rule belongs to.
+
+Caveat: a `@push` executed while rendering an AJAX fragment is discarded, so a
+page that renders an editor *only* inside a fragment must push the assets itself.
 
 ## What this domain does not do
 

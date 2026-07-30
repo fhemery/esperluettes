@@ -1,0 +1,73 @@
+/*
+ * Editor chrome.
+ *
+ * Everything here styles the *editing* surface: the Quill toolbar, its tooltip,
+ * and the `.ql-editor` writing area. It is loaded only by the editor components
+ * (see `Private/Resources/views/components/_assets.blade.php`), so it must never
+ * be needed by a page that renders stored content without an editor. Rules that
+ * style stored content live in `Shared/Resources/css/app.css`.
+ */
+
+/* Translate Quill link tooltip strings via data attributes injected by JS onto the tooltip elements */
+.ql-snow .ql-tooltip[data-label-visit]::before {
+  content: attr(data-label-visit);
+}
+
+.ql-snow .ql-tooltip[data-label-enter][data-mode=link]::before {
+  content: attr(data-label-enter);
+}
+
+.ql-snow .ql-tooltip a.ql-action[data-label-edit]::after {
+  content: attr(data-label-edit);
+}
+
+.ql-snow .ql-tooltip.ql-editing a.ql-action[data-label-save]::after {
+  content: attr(data-label-save);
+}
+
+.ql-snow .ql-tooltip a.ql-remove[data-label-remove]::before {
+  content: attr(data-label-remove);
+}
+
+/* The writing area when the editor sits inside a .rich-content wrapper */
+.rich-content .ql-editor {
+  font-size: 1rem;
+  line-height: var(--content-line-height);
+}
+.rich-content .ql-editor p {
+  padding-bottom: 0.75rem;
+}
+.rich-content .ql-editor p:last-of-type {
+  padding-bottom: 0;
+}
+.rich-content .ql-editor.ql-blank::before {
+  font-style: normal;
+}
+
+/* Cancel the paragraph indent for the toolbar inside an indented editor */
+.rich-content .ql-indent .ql-toolbar {
+  text-indent: none;
+}
+
+/* Spoiler format, editing side */
+/* In the Quill editor: light grey background to signal spoiler content */
+.ql-editor .ql-spoiler {
+  background-color: rgba(128, 128, 128, 0.25);
+  border-radius: 2px;
+  cursor: text;
+}
+
+.ql-toolbar button.ql-spoiler {
+  background-color: rgba(128, 128, 128, 0.25) !important;
+}
+
+/* Spoiler toolbar button icon */
+.ql-snow .ql-toolbar button.ql-spoiler svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.ql-snow .ql-toolbar button.ql-spoiler.ql-active {
+  color: #06c;
+}

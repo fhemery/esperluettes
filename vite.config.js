@@ -45,6 +45,7 @@ export default defineConfig(({ mode }) => {
                 input: [
                     'app/Domains/Shared/Resources/css/app.css',
                     'app/Domains/Shared/Resources/js/app.js',
+                    'app/Domains/Editor/Private/Resources/css/editor.css',
                     'app/Domains/Editor/Private/Resources/js/editor-bundle.js',
                     'app/Domains/Comment/Resources/js/comment-draft/index.js',
                     'app/Domains/Comment/Resources/js/annotable/toolbar.js',

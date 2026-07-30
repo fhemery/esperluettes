@@ -271,27 +271,6 @@ html {
   text-decoration: underline;
 }
 
-/* Translate Quill link tooltip strings via data attributes injected by JS onto the tooltip elements */
-.ql-snow .ql-tooltip[data-label-visit]::before {
-  content: attr(data-label-visit);
-}
-
-.ql-snow .ql-tooltip[data-label-enter][data-mode=link]::before {
-  content: attr(data-label-enter);
-}
-
-.ql-snow .ql-tooltip a.ql-action[data-label-edit]::after {
-  content: attr(data-label-edit);
-}
-
-.ql-snow .ql-tooltip.ql-editing a.ql-action[data-label-save]::after {
-  content: attr(data-label-save);
-}
-
-.ql-snow .ql-tooltip a.ql-remove[data-label-remove]::before {
-  content: attr(data-label-remove);
-}
-
 .rich-content h2, .rich-content h3 {
   color: rgb(var(--color-accent));
 }
@@ -317,50 +296,14 @@ p.ql-align-center {
   text-align: justify;
 }
 
-.rich-content .ql-editor {
-  font-size: 1rem;
-  line-height: var(--content-line-height);
-}
-.rich-content .ql-editor p {
-  padding-bottom: 0.75rem;
-}
-.rich-content .ql-editor p:last-of-type {
-  padding-bottom: 0;
-}
-.rich-content .ql-editor.ql-blank::before {
-  font-style: normal;
-}
-
+/* Indent class emitted by Quill and stored in the content */
 .rich-content .ql-indent p {
   text-indent: 2rem;
 }
-.rich-content .ql-indent .ql-toolbar {
-  text-indent: none;
-}
 
-/* Spoiler format */
-/* In the Quill editor: light grey background to signal spoiler content */
-.ql-editor .ql-spoiler {
-  background-color: rgba(128, 128, 128, 0.25);
-  border-radius: 2px;
-  cursor: text;
-}
-
-.ql-toolbar button.ql-spoiler {
-  background-color: rgba(128, 128, 128, 0.25) !important;
-}
-
-/* Spoiler toolbar button icon */
-.ql-snow .ql-toolbar button.ql-spoiler svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
-}
-
-.ql-snow .ql-toolbar button.ql-spoiler.ql-active {
-  color: #06c;
-}
-
+/* Spoiler format, read-only side. The `:not(.ql-editor …)` guard stays here:
+   it is what makes the rule apply on pages that never load the editor, and the
+   editing-side counterpart lives in Editor's own stylesheet. */
 /* On read-only pages: hide text by matching text color to background */
 .ql-spoiler:not(.ql-editor .ql-spoiler) {
   background-color: currentColor;
@@ -379,7 +322,9 @@ p.ql-align-center {
   -webkit-text-fill-color: unset;
 }
 
-/* Custom emoji (esper-*): rendered as inline spans with background-image so they survive HTMLPurifier */
+/* Custom emoji (esper-*): rendered as inline spans with background-image so they survive HTMLPurifier.
+   Stays here — these classes are in the stored HTML and must render on read-only pages; none of them
+   is scoped under .ql-toolbar (the emoji picker is styled by the bundled quill-emoji package). */
 .ql-custom-emoji {
   display: inline-block;
   width: 1.2em;
