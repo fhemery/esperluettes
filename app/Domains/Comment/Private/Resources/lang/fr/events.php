@@ -8,4 +8,10 @@ return [
     'comment_edited' => [
         'summary' => "Commentaire (id: :id) modifié sur :entity #:entity_id.",
     ],
+    'comment_content_moderated' => [
+        'summary' => "Contenu du commentaire (id: :id) modéré.",
+    ],
+    'comment_deleted_by_moderation' => [
+        'summary' => "Commentaire (id: :id) supprimé par la modération.",
+    ],
 ];

@@ -32,7 +32,7 @@ describe('Viewing chapter comments', function () {
         $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
         $resp->assertOk();
         
-        $resp->assertSeeInOrder(['comment-list', __('comment::comments.members_only'), __('comment::comments.actions.login')], false);
+        $resp->assertSeeInOrder(['comment-list', __('comment::comments.errors.members_only'), __('comment::comments.actions.login')], false);
         $resp->assertDontSee('form');
     });
 
