@@ -6,6 +6,7 @@ touched, so specs are free to create, edit and delete whatever they need.
 
 ```bash
 npm run e2e                    # everything, headless
+npm run e2e:core               # only the permanent net
 npm run e2e -- --headed        # watch it happen
 npm run e2e -- editor          # only specs matching "editor"
 npm run e2e:ui                 # Playwright's interactive runner
@@ -14,6 +15,38 @@ E2E_SKIP_RESET=1 npm run e2e   # keep the current database between runs
 ```
 
 One-time: `npm run e2e:setup` (downloads the Chromium binary).
+
+## What belongs in a browser at all
+
+**If a PHP integration test can assert it, it does not belong here.** A feature
+test runs in milliseconds against a real request; a browser test costs seconds
+and a maintenance burden. Authorisation rules, validation, what gets stored,
+what a Blade template renders — all of that is cheaper and more precise in
+`app/Domains/*/Tests/`.
+
+What is left, and what this suite is for:
+
+- client-side behaviour — Alpine, Quill, counters, drag-and-drop,
+- which assets a page actually loads,
+- anything that only exists after JavaScript has run,
+- layout that breaks at a real viewport.
+
+## Two kinds of spec
+
+| | `tests/core/` | `tests/features/` |
+|---|---|---|
+| Lifetime | permanent | deleted at WRAP |
+| Runs | every `npm run e2e` | while the feature is in flight |
+| Bar to entry | guards something used across the app and breakable from anywhere | verifies one feature once |
+
+`core/` is the net that must stay green after every feature, so it is kept
+small on purpose — every spec in it costs everyone seconds on every run.
+Everything else starts in `features/` and is expected to die there; see
+[`tests/features/README.md`](tests/features/README.md).
+
+Logging in is not a core spec: `support/auth.setup.ts` already logs every role
+in and asserts each one reaches the dashboard, before any spec runs. If login
+breaks, the whole suite fails first.
 
 ## How it hangs together
 
@@ -45,15 +78,13 @@ Roles available as fixtures: `guest`, `user`, `confirmed`, `author`,
 `moderator`, `admin`. Each gets its own browser context, so one role's session
 can never leak into another's assertions.
 
-Rules that keep this cheap to own:
+New specs go in `tests/features/`. Rules that keep this cheap to own:
 
 - **Selectors belong in `pages/`.** A spec that contains a CSS selector is a
-  spec that breaks when the markup moves.
-- **Prefer ids and roles over translated strings.** A label in a tab strip is
+  spec that breaks when the markup moves. Add a `data-testid` to the markup
+  rather than reaching for a clever selector.
+- **Prefer test ids over translated strings.** A label in a tab strip is
   present whatever tab is open, so text assertions pass vacuously.
-- **Only test what a browser can prove** — client-side behaviour, asset
-  loading, role-dependent visibility. Rendering, validation and authorisation
-  rules belong in the PHP suite, which is far faster.
 - **Never clean up after yourself.** The database is rebuilt before every run;
   cleanup code is just another thing to get wrong.
 - **Screenshots on failure only.** Playwright captures them, plus a trace you
