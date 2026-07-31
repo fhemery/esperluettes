@@ -154,7 +154,15 @@
     @push('scripts')
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('multiEditor', (cfg) => ({
+            Alpine.data('multiEditor', (cfg) => {
+                // Captured once at init, from the component root. Block controls
+                // call these methods from inside their own block, and Alpine
+                // resolves $refs by walking up from the calling element: as soon
+                // as a block is detached (removeBlock), $refs.container would be
+                // undefined and the state would stop syncing.
+                let containerEl = null;
+
+            return {
                 mode: cfg.mode,
                 scope: cfg.scope,
                 labels: cfg.labels,
@@ -165,6 +173,7 @@
                 orderCsv: '',
 
                 init() {
+                    containerEl = this.$refs.container;
                     // Initialize Quill on the server-rendered text blocks. Done here
                     // (not via inline scripts) so it can't run before the editor
                     // bundle has loaded — the cause of blank editors on the edit page.
@@ -183,7 +192,7 @@
                     if (attempt > 60) return; // give up after ~3s
                     setTimeout(() => this._ensureEditor(id, attempt + 1), 50);
                 },
-                _container() { return this.$refs.container; },
+                _container() { return containerEl; },
                 _blocks() { return Array.from(this._container().querySelectorAll('[data-block]')); },
                 _newUid() { return 'n' + (this.seq++); },
                 _make(type, uid) {
@@ -264,7 +273,8 @@
                     this.mode = 'simple';
                     this.syncState();
                 },
-            }));
+            };
+            });
         });
     </script>
     @endpush
