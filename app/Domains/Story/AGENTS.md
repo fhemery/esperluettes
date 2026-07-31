@@ -75,11 +75,14 @@
 
 **`StoryService::searchStories` enforces role-based visibility.** The service always removes `community` from the visibility filter when the current user does not have the `user-confirmed` role, regardless of what the caller passed in. Do not bypass this by calling the repository directly.
 
+**Every stored chapter image path must be reported by `ChapterMediaUsageProvider`.** Registering that provider makes `chapters/{userId}` a *claimed* folder, and the Media GC only spares a folder in which nothing at all is claimed. So any new place that stores an image path outside `story_chapters.content_blocks` must be added to `usedPaths()` **in the same commit**, or the GC deletes the files it never heard about. The query is `withTrashed()` on purpose: soft-deleted chapters keep their blocks, and sweeping their images would make a restore bring back a chapter full of dead images. Under-reporting destroys user data; over-reporting only leaks a file — when in doubt, report.
+
 **Chapter deletion purges comments.** `ChapterService::deleteChapter` calls `CommentMaintenancePublicApi::deleteFor('chapter', $id)` before `forceDelete()`. Story deletion in `StoryService::deleteStory` also calls this for each chapter. This is the only way to clean cross-domain comment data.
 
 ## Registry integrations
 
 - **CommentPolicyRegistry** (`Comment` domain) — registers `'chapter'` policy with `ChapterCommentPolicy`.
+- **MediaUsageRegistry** (`Media` domain) — registers `ChapterMediaUsageProvider`, which reports the image paths of every chapter (including soft-deleted ones) so the Media GC does not sweep them.
 - **ModerationRegistry** (`Moderation` domain) — registers `'story'` and `'chapter'` topics with `StorySnapshotFormatter` and `ChapterSnapshotFormatter`.
 - **NotificationFactory** (`Notification` domain) — registers 7 notification types: `ChapterCommentNotification`, `CoAuthorChapterCreated/Updated/DeletedNotification`, `CollaboratorRoleGiven/Removed/LeftNotification`.
 - **ConfigPublicApi** (`Config` domain) — registers feature toggles `story.theme_covers_enabled` and `story.custom_covers_enabled` (both default `false`).
