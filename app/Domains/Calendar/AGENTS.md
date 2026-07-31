@@ -21,7 +21,9 @@
 
 **Jardino snapshot word counts are updated via delta, not recalculated.** `JardinoProgressService::updateSnapshotWordCount()` adds a delta to `current_word_count`. If a chapter event is missed, the snapshot drifts permanently — there is no reconciliation job.
 
-**Secret Gift files are on the `local` disk, not `public`.** Access is gated by `SecretGiftService::canViewImage()` / `canViewSound()`. Do not move these to a public disk or the visibility rules become unenforceable.
+**Secret Gift files are never on the `public` disk.** Access is gated by `SecretGiftService::canViewImage()` / `canViewSound()`; moving them to a public disk makes the visibility rules unenforceable. Sounds are raw files on the `local` disk. Images are Media-domain images on Media's `private` disk under `secret-gift/{activity_id}/`, stored with `MediaPublicApi::storePrivate()` and served with `MediaPublicApi::stream()` after `canViewImage()` — Media itself does no authorization, and `originalUrl()` / `variantUrl()` throw for a private path.
+
+**Secret Gift never deletes a gift image.** Replacing or removing one only rewrites `gift_image_path`; `media:gc` reclaims the file after the grace window. That depends on `SecretGiftServiceProvider` keeping `SecretGiftMediaUsageProvider` registered on `MediaUsageRegistry` — Media's zero-claim guard sits at the `secret-gift/` **root**, so if the provider goes missing the whole root stops being swept and every orphan accumulates silently.
 
 **Secret Gift shuffle is destructive on re-run.** `ShuffleService::performShuffle()` deletes all existing assignments (and their uploaded gift assets) before creating new ones. The Artisan command prompts for confirmation, but programmatic callers have no guard.
 

@@ -45,11 +45,28 @@ Archived; before that, only the giver can reach their own files. The check is in
 file request — the file routes are not guessable-but-public, they are authorised
 per request.
 
-**Gift assets are private files, not Media-domain images.** They are written to
-the `local` disk under `calendar/secret-gift/{activity_id}/` and streamed back
-through the controller. This is deliberate: the whole point is that they must not
-be publicly addressable before the reveal. The sound endpoint implements HTTP
-Range requests so the browser can seek.
+**Gift assets are never publicly addressable** — the whole point is that they
+must stay unreachable before the reveal — but image and sound take two different
+routes to that.
+
+*Images* are Media-domain images on Media's **private** disk, under
+`secret-gift/{activity_id}/`. `SecretGiftService::saveGiftImage()` calls
+`MediaPublicApi::storePrivate()`, and the controller serves them with
+`MediaPublicApi::stream()` *after* `canViewImage()` — Media performs no
+authorization of its own and cannot build a URL for a private path. Consequently
+**Calendar never deletes a gift image**: replacing or removing one only rewrites
+`gift_image_path`, and `media:gc` reclaims the file once
+`SecretGiftMediaUsageProvider` stops claiming it (which is why that provider must
+stay registered in `SecretGiftServiceProvider`).
+
+*Sound* is still a raw file on the `local` disk under
+`calendar/secret-gift/{activity_id}/`, deleted synchronously on replace/removal
+and streamed by the controller with HTTP Range support so the browser can seek.
+
+Gift images written before the move live on `local` under the old
+`calendar/secret-gift/…` layout; the data migration
+`move_secret_gift_images_to_media_private` relocates them (see
+`LegacyGiftImageMover`, which is reversible).
 
 **Gift text is purified on save** with the `strict` HTMLPurifier profile — it is
 authored in the shared rich-text editor and rendered as HTML to the recipient.

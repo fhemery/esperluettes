@@ -15,6 +15,8 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('SecretGift - Save Gift', function () {
     beforeEach(function () {
         Storage::fake('local');
+        Storage::fake('private');
+        Storage::fake('public');
     });
 
     it('allows a participant to save text gift', function () {
@@ -66,6 +68,9 @@ describe('SecretGift - Save Gift', function () {
 
         $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
 
+        $localBefore = Storage::disk('local')->allFiles();
+        $publicBefore = Storage::disk('public')->allFiles();
+
         $response = $this->post(route('secret-gift.save-gift', $result->activity), [
             'gift_image' => $file,
         ]);
@@ -74,8 +79,63 @@ describe('SecretGift - Save Gift', function () {
         $response->assertSessionHas('success');
 
         $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
-        expect($assignment->gift_image_path)->not->toBeNull();
-        Storage::disk('local')->assertExists($assignment->gift_image_path);
+        expect($assignment->gift_image_path)->toStartWith('secret-gift/' . $result->id . '/');
+        Storage::disk('private')->assertExists($assignment->gift_image_path);
+        expect(Storage::disk('local')->allFiles())->toBe($localBefore);
+        expect(Storage::disk('public')->allFiles())->toBe($publicBefore);
+    });
+
+    it('does not delete the previous file when an image is replaced', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => UploadedFile::fake()->image('first.jpg', 400, 300),
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        $firstPath = $assignment->gift_image_path;
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => UploadedFile::fake()->image('second.jpg', 400, 300),
+        ]);
+
+        $assignment->refresh();
+        expect($assignment->gift_image_path)->not->toBe($firstPath);
+        Storage::disk('private')->assertExists($assignment->gift_image_path);
+        // Media GC reclaims the orphan later; Calendar never deletes it.
+        Storage::disk('private')->assertExists($firstPath);
+    });
+
+    it('clears the path without deleting the file when the image is removed', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => UploadedFile::fake()->image('gift.jpg', 400, 300),
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        $path = $assignment->gift_image_path;
+
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image_remove' => true,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $assignment->refresh();
+        expect($assignment->gift_image_path)->toBeNull();
+        Storage::disk('private')->assertExists($path);
     });
 
     it('rejects non-participant from saving gift', function () {
