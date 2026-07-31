@@ -69,8 +69,10 @@ Continue exactly as `next-task` §4 — including its orchestrator rule: you
 dispatch PLAN / BUILD / VERIFY / WRAP to subagents and do not edit code
 yourself. Start at the reconciled step and honour the row's mode:
 
-- `interactive` — one step (or one BUILD phase), then stop and ask the user to
-  `/clear` and run `/continue-task` in a new chat.
+- `interactive` — one step, then stop and ask the user to `/clear` and run
+  `/continue-task` in a new chat. **BUILD is the exception**: chain its remaining
+  phases in this chat, one `phase-implementer` each, two lines of report per
+  phase, and stop once they are all `DONE` (or when a §5 condition fires).
 - `auto` — keep dispatching the remaining steps until the task is `DONE` or a
   `next-task` §5 stop condition fires. Still one subagent per step and per
   phase; `auto` drops the approval stops, not the context boundaries.

@@ -16,7 +16,6 @@ purpose — move or insert one anywhere without touching the others.
 
 | Task                                                            | Folder                          | Mode        | Status                                                                                                                                                                                                                |
 | --------------------------------------------------------------- | ------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Extract an Editor domain from Shared                            | `editor-domain/`                | interactive | WIP:WRAP — code + docs done, `README.md` written. **Proposed DONE (wrapped 2026-07-30), awaiting the user's confirmation**; VERIFY was skipped, leftover pushed to `editor-domain-visual-qa/`                          |
 | Editor — record the skipped visual QA                           | `editor-domain-visual-qa/`      | interactive | TODO:leftover from `editor-domain/`. Four Playwright flows + seed fixtures are in the folder; the 20-row checklist in `editor-domain/03-plan.md` has never been filled. Cheapest before `chapters-multi-edit/` moves the DOM again |
 | Chapters — MultiEdit content                                    | `chapters-multi-edit/`          | interactive | TODO                                                                                                                                                                                                                  |
 | Quotes — in-chapter author view (vNext)                         | `quotes-author-view/`           | interactive | BLOCKED:needs `chapters-multi-edit/` first (decision #21). `story-author-check/` is done. REFINE/DESIGN/PLAN are **done** — resume at BUILD, re-reading `02-architecture.md` §4 and risk 2 against the new DOM shape. |
@@ -39,6 +38,7 @@ Reference other rows by **folder name**, never by position.
 
 | Task | Folder | Wrapped |
 |------|--------|---------|
+| Extract an Editor domain from Shared | `editor-domain/` | 2026-07-30 (VERIFY skipped — `editor-domain-visual-qa/`) |
 | Discord — preferences hint for unlinked account | `discord-link-hint/` | 2026-07-29 |
 | MultiEdit — migrate the remaining ImageService consumers | `media-consumer-migration/` | 2026-07-29 (leftover — `shared-image-upload-cleanup/`) |
 | Quotes — private stories | `quote-private-stories/` | 2026-07-28 |
