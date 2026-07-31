@@ -95,7 +95,10 @@ deletion).
   testable after `Storage::fake`.
 - **The Shared `image-upload` lang file survives its component** (A6) — Story's
   `cover-tab-custom.blade.php` borrows `drop_or_click`, `max_size` and
-  `size_error` and never used the widget.
+  `size_error` and never used the widget. *No longer true:*
+  [`shared-upload-lang-ownership/`](../shared-upload-lang-ownership/README.md)
+  moved those three keys into `story::shared.cover.custom_*` and deleted the
+  Shared file.
 - A first attempt collapsed the Shared widgets into SecretGift and was
   **reverted** (#1/#6, commits `6260fe45` / `580d1024`). Do not revive it.
 
@@ -139,3 +142,4 @@ mover reports missing sources instead of failing, so a mismatch is survivable.
   storage or a Media sound capability) and retire `<x-shared::sound-upload>`.
 - `shared-upload-lang-ownership/` — Shared now ships an `image-upload` lang file
   with no component; move the three borrowed keys into Story and delete it.
+  **Done** 2026-07-31.
