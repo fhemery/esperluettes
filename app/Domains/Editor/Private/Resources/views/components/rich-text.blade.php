@@ -24,7 +24,7 @@
   $toolbarJson = json_encode($toolbar, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 @endphp
 
-<div {{ $attributes->merge(['class' => 'rich-content w-full']) }} @if($hasLink) data-link-visit="{{ __('editor::rich-text.link_visit') }}" data-link-enter="{{ __('editor::rich-text.link_enter') }}" data-link-edit="{{ __('editor::rich-text.link_edit') }}" data-link-save="{{ __('editor::rich-text.link_save') }}" data-link-remove="{{ __('editor::rich-text.link_remove') }}" @endif>
+<div data-testid="rich-text-{{ $id }}" {{ $attributes->merge(['class' => 'rich-content w-full']) }} @if($hasLink) data-link-visit="{{ __('editor::rich-text.link_visit') }}" data-link-enter="{{ __('editor::rich-text.link_enter') }}" data-link-edit="{{ __('editor::rich-text.link_edit') }}" data-link-save="{{ __('editor::rich-text.link_save') }}" data-link-remove="{{ __('editor::rich-text.link_remove') }}" @endif>
     <div class="surface-read text-on-surface w-full {{ $indentParagraphs ? 'ql-indent' : '' }}">
       <div id="{{ $id }}" data-placeholder="{{ $placeholder }}" data-nb-lines="{{ $nbLines }}" data-is-mandatory="{{ $isMandatory ? 'true' : 'false' }}" data-clean-label="{{ __('editor::rich-text.clean') }}" data-resizable="{{ $resizable ? 'true' : 'false' }}" data-toolbar="{{ $toolbarJson }}" @if($hasSpoiler) data-spoiler-label="{{ __('editor::rich-text.spoiler') }}" @endif @if($min) data-min="{{ (int) $min }}" @endif @if($max) data-max="{{ (int) $max }}" @endif></div>
     </div>

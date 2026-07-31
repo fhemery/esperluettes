@@ -14,12 +14,17 @@
         "husky:precommit": "node scripts/husky-precommit.js",
         "launch-staged:tests": "node scripts/launch_staged_tests.js",
         "launch-deptrac": "node scripts/launch_deptrac.js",
+        "e2e": "playwright test",
+        "e2e:ui": "playwright test --ui",
+        "e2e:report": "playwright show-report",
+        "e2e:setup": "playwright install chromium",
         "browser:setup": "node .agents/skills/run-app/setup.mjs",
         "browser:drive": "node .agents/skills/run-app/driver.mjs"
     },
     "devDependencies": {
         "@commitlint/cli": "^20.5.2",
         "@commitlint/config-conventional": "^20.5.0",
+        "@playwright/test": "^1.62.1",
         "@tailwindcss/forms": "^0.5.11",
         "@tailwindcss/vite": "^4.2.4",
         "@testing-library/dom": "^10.4.0",
@@ -34,6 +39,7 @@
         "laravel-vite-plugin": "^2.1.0",
         "playwright": "^1.62.0",
         "tailwindcss": "^4.2.4",
+        "typescript": "^5.9.3",
         "vite": "^7.3.2",
         "vitest": "^3.2.4"
     },

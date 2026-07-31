@@ -3,12 +3,12 @@
         class="h-full flex flex-col py-8
     surface-secondary gap-4 w-full sm:max-w-2xl mx-auto px-6 py-4 overflow-hidden ">
         <x-shared::title class="text-white">{{ __('auth::shared.accept_terms.title') }}</x-shared::title>
-        <form method="POST" action="{{ route('compliance.terms.accept') }}">
+        <form method="POST" action="{{ route('compliance.terms.accept') }}" data-testid="accept-terms-form">
             @csrf
 
             <div class="block mb-4">
                 <label for="accept_terms" class="inline-flex items-center text-on-surface">
-                    <input id="accept_terms" type="checkbox"
+                    <input id="accept_terms" type="checkbox" data-testid="accept-terms"
                         class="rounded border-accent/90 text-on-surface/90 shadow-sm focus:ring-accent"
                         name="accept_terms" value="1" required>
                     <span class="ms-2 text-sm">{!! __('auth::shared.accept_terms.label') !!}</span>
@@ -18,7 +18,7 @@
 
             <div class="flex items-center justify-center">
 
-                <x-shared::button color="accent" type="submit">
+                <x-shared::button color="accent" type="submit" data-testid="accept-terms-submit">
                     {{ __('auth::shared.accept_terms.submit') }}
                 </x-shared::button>
             </div>
