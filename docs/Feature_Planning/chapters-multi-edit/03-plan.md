@@ -15,7 +15,7 @@
 |---|-------|------|------------|--------|
 | 1 | Editor — profile-aware sanitizing + `multiedit-narrative` + `plainText()` | M | — | DONE |
 | 2 | Editor — `<x-editor::multi>` writing-surface props (`nbLines`, `indentParagraphs`) | S | — | DONE |
-| 3 | Story — `content_blocks` column, model cast, snapshot reads persisted counts | S | — | TODO |
+| 3 | Story — `content_blocks` column, model cast, snapshot reads persisted counts | S | — | DONE |
 | 4 | Story — content resolver, request branching, counts from text blocks, moderation | M | 1, 3 | TODO |
 | 5 | Story — media usage provider (the data-loss surface) | M | 3, 4 | TODO |
 | 6 | Story — chapter form swaps to MultiEdit + read-side CSS re-scoping | S | 2, 4, 5 | TODO |

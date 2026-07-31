@@ -2,7 +2,6 @@
 
 namespace App\Domains\Story\Public\Events\DTO;
 
-use App\Domains\Shared\Support\WordCounter;
 use App\Domains\Story\Private\Models\Chapter;
 
 final class ChapterSnapshot
@@ -19,17 +18,14 @@ final class ChapterSnapshot
 
     public static function fromModel(Chapter $chapter): self
     {
-        $wordCount = WordCounter::count($chapter->content);
-        $charCount = mb_strlen(strip_tags($chapter->content));
-
         return new self(
             id: (int) $chapter->id,
             title: (string) $chapter->title,
             slug: (string) $chapter->slug,
             sortOrder: (int) $chapter->sort_order,
             status: (string) $chapter->status,
-            wordCount: (int) $wordCount,
-            charCount: (int) $charCount,
+            wordCount: (int) $chapter->word_count,
+            charCount: (int) $chapter->character_count,
         );
     }
 
