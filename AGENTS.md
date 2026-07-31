@@ -61,7 +61,7 @@ domain's own docs instead. Planning may link to code docs, never the reverse.
 | **Events** | `app/Domains/Events` | Domain event bus and audit log infrastructure; cross-domain communication backbone |
 | **FAQ** | `app/Domains/FAQ` | FAQ categories and questions with admin panel |
 | **Home** | `app/Domains/Home` | Home page, aggregates data from multiple domains |
-| **Media** | `app/Domains/Media` | Path-addressed image handling: upload, responsive variants, reuse picker, usage-provider registry + swept GC (`media:gc`), and the `<x-media::image>` / `<x-media::image-field>` components. Sole entry point `MediaPublicApi`; owns no tables. | *(none)* |
+| **Media** | `app/Domains/Media` | Path-addressed image handling: upload, responsive variants, reuse picker, usage-provider registry + swept GC (`media:gc`), and the `<x-media::image>` / `<x-media::image-field>` components. Also a private half — images stored off the public disk, with no URL and no variants, streamed back by the consumer after its own authorization check. Sole entry point `MediaPublicApi`; owns no tables. | *(none)* |
 | **Message** | `app/Domains/Message` | Private messages between users (incomplete) |
 | **Moderation** | `app/Domains/Moderation` | User reporting with pluggable topic registry; moderators review reports in the admin panel |
 | **News** | `app/Domains/News` | News articles with publish/unpublish workflow and homepage carousel |
