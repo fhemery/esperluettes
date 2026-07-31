@@ -246,7 +246,18 @@ Located in `Resources/lang/fr/`. Referenced with the `shared::` namespace.
 | `errors.php` | Error page messages |
 | `fields.php` | Generic field labels for Settings/Config fields |
 | `footer.php` | Footer text |
+| `image-upload.php`, `sound-upload.php` | Upload-widget chrome — **kept although Shared owns no upload component**, see below |
 | `validation.php` | Custom validator messages (`maxstripped`, `minstripped`, `unique_profile_display_name`, etc.) |
+
+`image-upload.php` and `sound-upload.php` outlive their components on purpose.
+The widgets themselves moved to the SecretGift activity plugin (their sole
+consumer) and still resolve `shared::image-upload.*` / `shared::sound-upload.*`
+rather than carrying Calendar copies. Independently, Story's
+`cover-tab-custom.blade.php` borrows three `image-upload` keys
+(`drop_or_click`, `max_size`, `size_error`) without ever rendering the widget —
+so these files cannot be deleted along with the component. Do not re-add an
+`image-upload` or `sound-upload` Blade component here: a Shared unit test
+(`Tests/Unit/SharedUploadComponentsRemovedTest.php`) fails if one reappears.
 
 ---
 
