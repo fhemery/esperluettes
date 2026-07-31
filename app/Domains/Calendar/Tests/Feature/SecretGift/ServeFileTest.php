@@ -157,7 +157,7 @@ describe('SecretGift - Serve Files', function () {
             $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => $file,
+                'gift_image' => ['file' => $file],
             ]);
 
             $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
@@ -179,7 +179,7 @@ describe('SecretGift - Serve Files', function () {
             $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => $file,
+                'gift_image' => ['file' => $file],
             ]);
 
             $assignment = getSecretGiftAssignmentAsRecipient($result->id, $user2->id);
@@ -201,7 +201,7 @@ describe('SecretGift - Serve Files', function () {
             $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => $file,
+                'gift_image' => ['file' => $file],
             ]);
 
             $assignment = getSecretGiftAssignmentAsRecipient($result->id, $user2->id);
@@ -229,7 +229,7 @@ describe('SecretGift - Serve Files', function () {
             $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => $file,
+                'gift_image' => ['file' => $file],
             ]);
 
             $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
@@ -249,7 +249,7 @@ describe('SecretGift - Serve Files', function () {
 
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => UploadedFile::fake()->image('gift.jpg', 800, 600),
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
             ]);
 
             $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
@@ -286,7 +286,7 @@ describe('SecretGift - Serve Files', function () {
 
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => UploadedFile::fake()->image('gift.jpg', 800, 600),
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
             ]);
 
             $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
@@ -309,7 +309,7 @@ describe('SecretGift - Serve Files', function () {
 
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => UploadedFile::fake()->image('gift.jpg', 800, 600),
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
             ]);
 
             expect(Storage::disk('public')->allFiles())->toBe($publicBefore);

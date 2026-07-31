@@ -6,6 +6,8 @@ use App\Domains\Auth\Private\Models\User;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Profile\Private\Models\Profile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -59,6 +61,47 @@ describe('Secret Gift Page Display', function () {
         // Assert save button is present and enabled
         $response->assertSee(__('secret-gift::secret-gift.save_gift'))
             ->assertSee('type="submit"', false);
+    });
+
+    it('renders the media image field without the reuse picker for the giver', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $response = $this->actingAs($user1)
+            ->get(route('calendar.activities.show', $result->activity->slug));
+
+        $response->assertOk();
+
+        $response->assertSee('name="gift_image[file]"', false)
+            ->assertSee('name="gift_image[path]"', false)
+            ->assertDontSee(__('media::image-field.choose_existing'))
+            ->assertDontSee(__('media::image-field.picker_title'));
+    });
+
+    it('previews an existing gift image through the gated route', function () {
+        Storage::fake('private');
+
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1)->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 400, 300)],
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+
+        $response = $this->actingAs($user1)
+            ->get(route('calendar.activities.show', $result->activity->slug));
+
+        $response->assertOk();
+
+        $expected = route('secret-gift.image', [$result->activity, $assignment]);
+        $response->assertSee(str_replace('/', '\/', $expected), false)
+            ->assertDontSee('/storage/secret-gift', false);
     });
 
     it('should show gift will be revealed message in received gift tab when activity is not ended', function () {

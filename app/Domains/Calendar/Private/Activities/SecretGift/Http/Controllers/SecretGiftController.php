@@ -45,14 +45,20 @@ class SecretGiftController
             $this->service->saveGiftText($assignment, $purified);
         }
 
-        // Handle image removal
-        if ($request->boolean('gift_image_remove')) {
-            $this->service->removeGiftImage($assignment);
-        }
+        // Resolve the <x-media::image-field> payload. A new upload wins; otherwise a
+        // non-empty path means "keep what is stored" — the submitted path is never
+        // adopted, since with the reuse picker disabled the only legitimate value is
+        // the current one, and trusting it would let a giver read another gift's
+        // file. An empty path with no file is the removal. Nothing is deleted here:
+        // Media GC reclaims any path no assignment references anymore.
+        if ($request->has('gift_image')) {
+            $file = $request->file('gift_image.file');
 
-        // Handle new image upload
-        if ($request->hasFile('gift_image')) {
-            $this->service->saveGiftImage($assignment, $request->file('gift_image'));
+            if ($file) {
+                $this->service->saveGiftImage($assignment, $file);
+            } elseif (!$request->input('gift_image.path')) {
+                $this->service->removeGiftImage($assignment);
+            }
         }
 
         // Handle sound removal

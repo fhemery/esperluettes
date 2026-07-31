@@ -51,4 +51,6 @@
 
 **`Resources/js/anchoring/` stays in Shared.** Canonical text, anchor extraction and re-anchoring run on *rendered* pages, for Quote (and later annotations) — they are a read-side concern with different consumers and a different lifecycle from authoring. This is deliberate, not an unfinished extraction: do not move it into `Editor`.
 
+**The `shared::image-upload` lang file has no component.** The `image-upload` Blade component was deleted once Media's `<x-media::image-field>` covered every case; the lang file stays because Story's `cover-tab-custom.blade.php` borrows `drop_or_click`, `max_size` and `size_error` for its own dropzone. Deleting it breaks the Story cover tab. Do not reintroduce an image upload widget here — image handling belongs to Media. `sound-upload` is still Shared's, until sound gets the same treatment.
+
 **`BackToCommentsRedirector` only uses the path and query string.** Browsers never send the fragment in the `Referer` header; the `#comments` anchor is always appended by the helper, not read from the request.

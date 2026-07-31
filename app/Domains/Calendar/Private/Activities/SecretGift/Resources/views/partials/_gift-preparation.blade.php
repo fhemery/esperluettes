@@ -108,14 +108,18 @@
 
             {{-- Image Upload --}}
             <div x-show="giftMode === 'image'" x-cloak class="mb-6">
-                <x-shared::image-upload
+                <x-media::image-field
                     name="gift_image"
-                    :label="__('secret-gift::secret-gift.upload_image')"
-                    :currentUrl="$assignment->gift_image_path ? route('secret-gift.image', [$activity, $assignment]) : null"
-                    :currentPath="$assignment->gift_image_path"
-                    :maxSize="5120"
+                    :scope="'secret-gift/'.$activity->id"
+                    :path="$assignment->gift_image_path"
+                    :preview-url="$assignment->gift_image_path ? route('secret-gift.image', [$activity, $assignment]) : null"
+                    :allow-library="false"
+                    :show-alt="false"
+                    :show-caption="false"
+                    :max-size="5120"
                     accept="image/jpeg,image/png"
-                    :helpText="__('secret-gift::secret-gift.image_help')"
+                    :label="__('secret-gift::secret-gift.upload_image')"
+                    :help-text="__('secret-gift::secret-gift.image_help')"
                 />
             </div>
 
