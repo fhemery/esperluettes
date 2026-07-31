@@ -25,5 +25,6 @@ class SecretGiftServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(app_path('Domains/Calendar/Private/Activities/SecretGift/Http/routes.php'));
 
         Blade::componentNamespace('App\\Domains\\Calendar\\Private\\Activities\\SecretGift\\View\\Components', 'secret-gift');
+        Blade::anonymousComponentPath(app_path('Domains/Calendar/Private/Activities/SecretGift/Resources/views/components'), 'secret-gift');
     }
 }

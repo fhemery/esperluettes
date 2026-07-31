@@ -108,7 +108,7 @@
 
             {{-- Image Upload --}}
             <div x-show="giftMode === 'image'" x-cloak class="mb-6">
-                <x-shared::image-upload
+                <x-secret-gift::image-upload
                     name="gift_image"
                     :label="__('secret-gift::secret-gift.upload_image')"
                     :currentUrl="$assignment->gift_image_path ? route('secret-gift.image', [$activity, $assignment]) : null"
@@ -121,7 +121,7 @@
 
             {{-- Sound Upload --}}
             <div x-show="giftMode === 'sound'" x-cloak class="mb-6">
-                <x-shared::sound-upload
+                <x-secret-gift::sound-upload
                     name="gift_sound"
                     :label="__('secret-gift::secret-gift.upload_sound')"
                     :currentUrl="$assignment->gift_sound_path ? route('secret-gift.sound', [$activity, $assignment]) : null"
