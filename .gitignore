@@ -37,6 +37,8 @@ TODO.md
 # Claude Code's own scratch worktrees. Whole checkouts — never commit them.
 # Runnable worktrees go beside the repo instead (see docs/Working_With_Agents.md).
 /.claude/worktrees/
+# Subagent working memory. Local notes, not project documentation.
+/.claude/agent-memory/
 # Throwaway SQLite databases (test suite, e2e)
 /database/*.sqlite
 
