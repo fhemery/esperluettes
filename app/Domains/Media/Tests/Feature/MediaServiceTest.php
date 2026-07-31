@@ -15,6 +15,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     Storage::fake('public');
+    Storage::fake('private');
 });
 
 /** A provider returning a fixed list of used paths (occurrences included). */
@@ -216,5 +217,63 @@ describe('gc', function () {
         expect($result['skipped'])->toContain('activities');
         expect($result['deleted'])->toBeEmpty();
         Storage::disk('public')->assertExists('activities/orphan.jpg');
+    });
+
+    it('garbage collects an unclaimed private gift image past the grace window', function () {
+        Storage::disk('private')->put('secret-gift/7/keep.jpg', 'x');
+        Storage::disk('private')->put('secret-gift/9/gone.jpg', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['secret-gift/7/keep.jpg']));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toContain('secret-gift/9/gone.jpg');
+        Storage::disk('private')->assertMissing('secret-gift/9/gone.jpg');
+    });
+
+    it('keeps a claimed private image', function () {
+        Storage::disk('private')->put('secret-gift/7/keep.jpg', 'x');
+        Storage::disk('private')->put('secret-gift/7/gone.jpg', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['secret-gift/7/keep.jpg']));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->not->toContain('secret-gift/7/keep.jpg');
+        Storage::disk('private')->assertExists('secret-gift/7/keep.jpg');
+    });
+
+    it('keeps a private image inside the grace window', function () {
+        Storage::disk('private')->put('secret-gift/7/keep.jpg', 'x');
+        Storage::disk('private')->put('secret-gift/7/fresh.jpg', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['secret-gift/7/keep.jpg']));
+
+        $result = app(MediaService::class)->gc(7);
+
+        expect($result['deleted'])->toBeEmpty();
+        Storage::disk('private')->assertExists('secret-gift/7/fresh.jpg');
+    });
+
+    it('skips the private root when no provider claims anything under it', function () {
+        Storage::disk('private')->put('secret-gift/7/orphan.jpg', 'x');
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['skipped'])->toContain('secret-gift');
+        expect($result['deleted'])->toBeEmpty();
+        Storage::disk('private')->assertExists('secret-gift/7/orphan.jpg');
+    });
+
+    it('collects an orphan in an activity folder whose other gifts are all gone', function () {
+        // Activity 7 has no claimed path at all (a re-shuffle wiped its
+        // assignments); activity 9 still does. The zero-claim guard applies at
+        // the secret-gift root, so 7's orphan is still collectable.
+        Storage::disk('private')->put('secret-gift/7/orphan.jpg', 'x');
+        Storage::disk('private')->put('secret-gift/9/keep.jpg', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['secret-gift/9/keep.jpg']));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toContain('secret-gift/7/orphan.jpg');
+        Storage::disk('private')->assertMissing('secret-gift/7/orphan.jpg');
+        Storage::disk('private')->assertExists('secret-gift/9/keep.jpg');
     });
 });

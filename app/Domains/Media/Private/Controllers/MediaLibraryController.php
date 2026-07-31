@@ -25,12 +25,14 @@ class MediaLibraryController
         $page = max(1, (int) $request->query('page', 1));
 
         try {
-            // folderFor validates the scope; unknown scopes are rejected.
+            // folderFor validates the scope; listByScope additionally rejects a
+            // private scope, which the picker must not expose.
             $this->media->folderFor($scope);
+            $results = $this->media->listByScope($scope, $page);
         } catch (InvalidArgumentException) {
             return response()->json(['message' => 'Unknown scope'], 422);
         }
 
-        return response()->json($this->media->listByScope($scope, $page)->toArray());
+        return response()->json($results->toArray());
     }
 }

@@ -9,7 +9,15 @@
       {name}[caption]  text   — caption (when showCaption)
 
     Props: name, path, alt, caption, scope (required), showUsage, usageCount,
-           showAlt, showCaption, altRequired, maxSize (KB), accept, label, helpText.
+           showAlt, showCaption, altRequired, maxSize (KB), accept, label, helpText,
+           allowLibrary, previewUrl.
+
+    allowLibrary (default true) — when false, the "choose existing" button and the
+      picker modal are not rendered: the scope has no reusable library.
+    previewUrl (default null) — initial preview URL supplied by the consumer. When
+      set, no Media URL is built for `path`, which is what makes the field usable
+      for a private image (private paths have no public URL and their URL helpers
+      throw).
 --}}
 @props([
     'name',
@@ -17,6 +25,8 @@
     'alt' => '',
     'caption' => '',
     'scope',
+    'allowLibrary' => true,
+    'previewUrl' => null,
     'showUsage' => false,
     'usageCount' => null,
     'showAlt' => true,
@@ -33,7 +43,7 @@
 @php
     $uid = 'media-field-' . Str::random(8);
     $api = app(\App\Domains\Media\Public\Api\MediaPublicApi::class);
-    $currentUrl = $path ? ($keepOriginal ? $api->originalUrl($path) : $api->variantUrl($path, 400, 'webp')) : null;
+    $currentUrl = $previewUrl ?: ($path ? ($keepOriginal ? $api->originalUrl($path) : $api->variantUrl($path, 400, 'webp')) : null);
     if ($showUsage && $usageCount === null && $path) {
         $usageCount = $api->countUsages($path);
     }
@@ -95,11 +105,13 @@
             <span class="material-symbols-outlined text-[18px]">upload</span>
             {{ __('media::image-field.upload') }}
         </button>
-        <button type="button" x-on:click="openPicker()"
-            class="text-sm text-primary hover:underline flex items-center gap-1">
-            <span class="material-symbols-outlined text-[18px]">photo_library</span>
-            {{ __('media::image-field.choose_existing') }}
-        </button>
+        @if($allowLibrary)
+            <button type="button" x-on:click="openPicker()"
+                class="text-sm text-primary hover:underline flex items-center gap-1">
+                <span class="material-symbols-outlined text-[18px]">photo_library</span>
+                {{ __('media::image-field.choose_existing') }}
+            </button>
+        @endif
         @if($showUsage)
             <span class="text-xs text-fg/60" x-show="path"
                   title="{{ __('media::image-field.usage_hint') }}">
@@ -149,6 +161,7 @@
     @endif
     <p x-show="sizeError" x-cloak class="text-sm text-error" x-text="sizeError"></p>
 
+    @if($allowLibrary)
     {{-- Picker modal --}}
     <div x-show="pickerOpen" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -177,6 +190,7 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 
 @once
