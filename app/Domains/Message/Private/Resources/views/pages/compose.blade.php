@@ -42,8 +42,8 @@
                 {{-- Content --}}
                 <div class="mb-6">
                     <x-input-label for="content" :value="__('message::messages.message_content')" />
-                    <x-editor 
-                        name="content" 
+                    <x-editor::rich-text
+                        name="content"
                         id="content" 
                         :value="old('content')" 
                         maxlength="1000"

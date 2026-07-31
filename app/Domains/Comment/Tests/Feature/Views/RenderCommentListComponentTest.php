@@ -88,7 +88,7 @@ describe('CommentListComponent', function () {
             ]);
 
 
-            expect($html)->toContain(__('shared::editor.min-characters', ['count' => 10]));
+            expect($html)->toContain(__('editor::rich-text.min-characters', ['count' => 10]));
         });
 
         it('should show a maximum number of character in the editor if specified ', function () {

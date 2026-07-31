@@ -20,7 +20,7 @@ describe('Viewing chapter comments', function () {
         $resp->assertOk();
         
         $resp->assertSeeInOrder(['comment-list', 'form'], false);
-        $resp->assertSee(__('shared::editor.min-characters', ['min' => 140]));
+        $resp->assertSee(__('editor::rich-text.min-characters', ['min' => 140]));
     });
 
     it('should not show the comment form to guests', function() {
@@ -32,7 +32,7 @@ describe('Viewing chapter comments', function () {
         $resp = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
         $resp->assertOk();
         
-        $resp->assertSeeInOrder(['comment-list', __('comment::comments.members_only'), __('comment::comments.actions.login')], false);
+        $resp->assertSeeInOrder(['comment-list', __('comment::comments.errors.members_only'), __('comment::comments.actions.login')], false);
         $resp->assertDontSee('form');
     });
 

@@ -110,7 +110,7 @@ describe('Secret Gift Page Display', function () {
 
         // Assert received gift is displayed
         $response->assertSee('Happy holidays!')
-            ->assertDontSee(__('secret-gift::secret-gift.no_gift_yet'));
+            ->assertDontSee(__('secret-gift::secret-gift.no_gift_received'));
     });
 
     it('should show no gift received when activity is finished and no gift was contributed', function () {

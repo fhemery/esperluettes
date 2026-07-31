@@ -67,14 +67,14 @@
         <x-shared::input-label for="answer" :required="true">
             {{ __('faq::admin.questions.form.answer') }}
         </x-shared::input-label>
-        <x-shared::editor
+        <x-editor::rich-text
             name="answer"
             id="answer"
             :defaultValue="old('answer', $faqQuestion?->answer ?? '')"
             :nbLines="10"
             :isMandatory="true"
             :resizable="true"
-            :toolbar="['bold','italic','underline','strike','header','blockquote','align','list','custom-emoji','link']"
+            toolbar="editorial"
             class="mt-1"
         />
         <x-shared::input-error :messages="$errors->get('answer')" class="mt-1" />

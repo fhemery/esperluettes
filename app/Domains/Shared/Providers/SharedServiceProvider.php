@@ -63,7 +63,7 @@ class SharedServiceProvider extends ServiceProvider
             'shared'
         );
 
-        // Register anonymous components, both unprefixed (<x-editor>) and prefixed (<x-shared::editor>)
+        // Register anonymous components, both unprefixed (<x-input-error>) and prefixed (<x-shared::input-error>)
         Blade::anonymousComponentPath(app_path('Domains/Shared/Resources/views/components'));
         Blade::anonymousComponentPath(app_path('Domains/Shared/Resources/views/components'), 'shared');
 

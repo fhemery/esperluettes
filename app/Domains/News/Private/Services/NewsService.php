@@ -9,7 +9,7 @@ use App\Domains\News\Public\Events\NewsUnpublished;
 use App\Domains\News\Public\Notifications\NewsPublishedNotification;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
-use App\Domains\Shared\Support\ContentBlocksRenderer;
+use App\Domains\Editor\Public\Api\EditorPublicApi;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +25,7 @@ class NewsService
     public function __construct(
         private readonly EventBus $eventBus,
         private readonly NotificationPublicApi $notificationApi,
-        private readonly ContentBlocksRenderer $renderer,
+        private readonly EditorPublicApi $editor,
         private readonly MediaPublicApi $media,
     ) {}
 
@@ -68,7 +68,7 @@ class NewsService
             $type = $b['type'] ?? null;
 
             if ($type === 'text') {
-                $html = $this->renderer->sanitizeText((string) ($b['html'] ?? ''));
+                $html = $this->editor->sanitizeText((string) ($b['html'] ?? ''));
                 if (trim(strip_tags($html)) === '') {
                     continue; // drop empty text block
                 }
@@ -113,7 +113,7 @@ class NewsService
         }
 
         return [
-            'content' => $this->renderer->render($blocks),
+            'content' => $this->editor->render($blocks),
             'content_blocks' => $blocks,
         ];
     }

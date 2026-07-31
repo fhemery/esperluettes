@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Shared\Support;
+namespace App\Domains\Editor\Private\Support;
 
 use Illuminate\Support\Facades\Blade;
 use Mews\Purifier\Facades\Purifier;

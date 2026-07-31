@@ -33,6 +33,8 @@ domain's own docs instead. Planning may link to code docs, never the reverse.
 ## Definition of done
 - `npm run gate` — docs + deptrac + PHP tests + vitest + asset build. Green, or
   the work is not finished. `-- --quick` skips the asset build.
+- `npm run e2e` — Playwright, for features with browser-only behaviour. Kept
+  out of the gate because it needs the app running; see `e2e/README.md`.
 
 # Functional knowledge
 - a Confirmed user is a user with role `user-confirmed`
@@ -55,6 +57,7 @@ domain's own docs instead. Planning may link to code docs, never the reverse.
 | **Config** | `app/Domains/Config` | Site configuration and feature toggles, readable by other domains via `ConfigPublicApi` |
 | **Dashboard** | `app/Domains/Dashboard` | Authenticated user dashboard page |
 | **Discord** | `app/Domains/Discord` | Discord bot integration; user connection via code exchange |
+| **Editor** | `app/Domains/Editor` | Rich-text and block-based content authoring: the `<x-editor::rich-text>` / `<x-editor::multi>` components with their self-loaded Quill assets and toolbar presets, and block-document rendering to sanitized HTML via `EditorPublicApi`; owns no table | *(none)* |
 | **Events** | `app/Domains/Events` | Domain event bus and audit log infrastructure; cross-domain communication backbone |
 | **FAQ** | `app/Domains/FAQ` | FAQ categories and questions with admin panel |
 | **Home** | `app/Domains/Home` | Home page, aggregates data from multiple domains |

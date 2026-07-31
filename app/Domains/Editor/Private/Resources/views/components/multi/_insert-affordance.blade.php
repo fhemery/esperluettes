@@ -14,11 +14,11 @@
             class="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-20 flex flex-col surface-read bg-white border border-border rounded-md shadow-md overflow-hidden">
             <button type="button" x-on:click="insertAfter($el, 'text'); open = false"
                 class="px-3 py-1.5 text-sm text-left hover:bg-primary/5 flex items-center gap-2 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[18px]">notes</span>{{ __('shared::multi-editor.add_text') }}
+                <span class="material-symbols-outlined text-[18px]">notes</span>{{ __('editor::multi.add_text') }}
             </button>
             <button type="button" x-on:click="insertAfter($el, 'image'); open = false"
                 class="px-3 py-1.5 text-sm text-left hover:bg-primary/5 flex items-center gap-2 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[18px]">image</span>{{ __('shared::multi-editor.add_image') }}
+                <span class="material-symbols-outlined text-[18px]">image</span>{{ __('editor::multi.add_image') }}
             </button>
         </div>
     </div>

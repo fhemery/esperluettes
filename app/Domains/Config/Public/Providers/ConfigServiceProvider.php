@@ -30,7 +30,7 @@ class ConfigServiceProvider extends ServiceProvider
         Blade::anonymousComponentPath(app_path('Domains/Config/Private/Resources/views/components'), 'config');
 
         // Load translations for the Config domain
-        $this->loadTranslationsFrom(app_path('Domains/Config/Public/Resources/lang'), 'config');
+        $this->loadTranslationsFrom(app_path('Domains/Config/Private/Resources/lang'), 'config');
 
         // Register Config domain events
         $eventBus = app(EventBus::class);

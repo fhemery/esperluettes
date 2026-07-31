@@ -13,10 +13,6 @@
     /** @var ?object $giverProfile */
 @endphp
 
-@push('scripts')
-    @vite('app/Domains/Shared/Resources/js/editor-bundle.js')
-@endpush
-
 <div class="secret-gift-activity">
     @if(!$isParticipant)
         <div class="surface-read p-6 rounded-lg text-center">

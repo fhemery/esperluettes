@@ -92,14 +92,14 @@
             }
             $meMode = old('mode', ($news?->content_blocks ? 'advanced' : 'simple'));
         @endphp
-        <x-shared::multi-editor
+        <x-editor::multi
             name="blocks"
             content-name="content"
             :content-value="old('content', $news?->content ?? '')"
             :blocks="$meBlocks"
             :mode="$meMode"
             scope="news"
-            :toolbar="['bold','italic','underline','strike','header','blockquote','align','list','custom-emoji','link']"
+            toolbar="editorial"
             class="mt-1"
         />
         <x-shared::input-error :messages="$errors->get('content')" class="mt-1" />

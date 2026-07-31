@@ -1,7 +1,7 @@
 {{--
-    <x-shared::multi-editor> — opt-in advanced block editor.
+    <x-editor::multi> — opt-in advanced block editor.
 
-    Simple mode (default) renders the usual single <x-shared::editor> bound to
+    Simple mode (default) renders the usual single <x-editor::rich-text> bound to
     `contentName`. Advanced mode renders an ordered stack of typed blocks (text /
     image) that serialize as `name[uid][...]` plus `mode` and `name_order` (the
     visual order of uids). The server branches on `mode` (see NewsService).
@@ -14,7 +14,7 @@
       mode         'simple' | 'advanced' (initial)
       blockTypes   allowed types, default ['text','image']
       scope        Media scope for image uploads/picker (required)
-      toolbar      editor toolbar config (passed to each text block)
+      toolbar      preset name or explicit token array (passed to each text block)
       min / max    summed-text constraints
       placeholder  editor placeholder
 --}}
@@ -26,13 +26,19 @@
     'mode' => 'simple',
     'blockTypes' => ['text', 'image'],
     'scope',
-    'toolbar' => ['bold', 'italic', 'underline', 'strike', 'blockquote', 'align', 'list', 'custom-emoji'],
+    'toolbar' => 'default',
     'min' => null,
     'max' => null,
     'placeholder' => '',
 ])
 
+@use(App\Domains\Editor\Private\Support\ToolbarPresets)
+
+@include('editor::components._assets')
+
 @php
+    // Resolved once here, so both panes and every text block share one list.
+    $toolbar = ToolbarPresets::resolve($toolbar);
     $simpleId = 'me-simple-' . Str::random(6);
     $blocks = is_array($blocks) ? $blocks : [];
     // A document with stored blocks opens in advanced mode.
@@ -45,12 +51,12 @@
         scope: @js($scope),
         simpleId: @js($simpleId),
         labels: {
-            up: @js(__('shared::multi-editor.move_up')),
-            down: @js(__('shared::multi-editor.move_down')),
-            delete: @js(__('shared::multi-editor.delete')),
-            insert: @js(__('shared::multi-editor.insert')),
-            imgWarning: @js(__('shared::multi-editor.img_warning')),
-            toSimpleDisabled: @js(__('shared::multi-editor.to_simple_disabled')),
+            up: @js(__('editor::multi.move_up')),
+            down: @js(__('editor::multi.move_down')),
+            delete: @js(__('editor::multi.delete')),
+            insert: @js(__('editor::multi.insert')),
+            imgWarning: @js(__('editor::multi.img_warning')),
+            toSimpleDisabled: @js(__('editor::multi.to_simple_disabled')),
         },
     })"
     {{ $attributes->merge(['class' => 'multi-editor']) }}
@@ -65,18 +71,18 @@
             :title="(mode === 'advanced' && !canGoSimple) ? labels.toSimpleDisabled : ''"
             class="px-3 py-1 text-sm rounded-md border border-border disabled:opacity-40"
             :class="mode === 'simple' ? 'bg-primary text-white' : 'text-fg'">
-            {{ __('shared::multi-editor.simple') }}
+            {{ __('editor::multi.simple') }}
         </button>
         <button type="button" x-on:click="goAdvanced()"
             class="px-3 py-1 text-sm rounded-md border border-border"
             :class="mode === 'advanced' ? 'bg-primary text-white' : 'text-fg'">
-            {{ __('shared::multi-editor.advanced') }}
+            {{ __('editor::multi.advanced') }}
         </button>
     </div>
 
     {{-- Simple pane --}}
     <div x-show="mode === 'simple'">
-        <x-shared::editor
+        <x-editor::rich-text
             :name="$contentName"
             :id="$simpleId"
             :defaultValue="$contentValue"
@@ -91,13 +97,13 @@
         <div x-ref="container" class="multi-editor__blocks">
             @foreach ($blocks as $i => $block)
                 @if (($block['type'] ?? 'text') === 'image')
-                    @include('shared::components.multi-editor._image-block', [
+                    @include('editor::components.multi._image-block', [
                         'name' => $name, 'uid' => 'b' . $i, 'scope' => $scope,
                         'path' => $block['path'] ?? null, 'alt' => $block['alt'] ?? '', 'caption' => $block['caption'] ?? '',
                         'keepOriginal' => $block['keep_original'] ?? false,
                     ])
                 @else
-                    @include('shared::components.multi-editor._text-block', [
+                    @include('editor::components.multi._text-block', [
                         'name' => $name, 'uid' => 'b' . $i, 'toolbar' => $toolbar,
                         'min' => $min, 'max' => $max, 'html' => $block['html'] ?? '', 'placeholder' => $placeholder,
                     ])
@@ -110,13 +116,13 @@
             @if (in_array('text', $blockTypes, true))
                 <button type="button" x-on:click="appendBlock('text')"
                     class="px-3 py-1.5 text-sm rounded-md border border-border text-primary hover:bg-primary/5 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[18px]">notes</span>{{ __('shared::multi-editor.add_text') }}
+                    <span class="material-symbols-outlined text-[18px]">notes</span>{{ __('editor::multi.add_text') }}
                 </button>
             @endif
             @if (in_array('image', $blockTypes, true))
                 <button type="button" x-on:click="appendBlock('image')"
                     class="px-3 py-1.5 text-sm rounded-md border border-border text-primary hover:bg-primary/5 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[18px]">image</span>{{ __('shared::multi-editor.add_image') }}
+                    <span class="material-symbols-outlined text-[18px]">image</span>{{ __('editor::multi.add_image') }}
                 </button>
             @endif
         </div>
@@ -124,13 +130,13 @@
 
     {{-- Hidden templates for dynamically added blocks --}}
     <template x-ref="tplText">
-        @include('shared::components.multi-editor._text-block', [
+        @include('editor::components.multi._text-block', [
             'name' => $name, 'uid' => '__UID__', 'toolbar' => $toolbar,
             'min' => $min, 'max' => $max, 'html' => '', 'placeholder' => $placeholder,
         ])
     </template>
     <template x-ref="tplImage">
-        @include('shared::components.multi-editor._image-block', [
+        @include('editor::components.multi._image-block', [
             'name' => $name, 'uid' => '__UID__', 'scope' => $scope, 'path' => null, 'alt' => '', 'caption' => '',
             'keepOriginal' => false,
         ])

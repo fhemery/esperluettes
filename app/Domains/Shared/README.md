@@ -16,7 +16,9 @@ Shared/
   Helpers/            # Miscellaneous helpers (VersionHelper)
   Http/               # HTTP utility classes (BackToCommentsRedirector)
   Resources/
+    css/              # app.css — site-wide styles, incl. read-side rich-content rules
     js/               # JS entrypoints and modules
+      anchoring/      # Read-side quote anchoring (canonical text, extract, re-anchor)
     lang/fr/          # French translations shared across domains
     views/
       components/     # Anonymous Blade components (UI primitives)
@@ -177,25 +179,22 @@ Checks that a display name produces a unique profile slug. Accepts an optional `
 | File | Exported / Global | Purpose |
 |------|-------------------|---------|
 | `app.js` | Alpine, window globals | Main entrypoint. Boots Alpine, registers plugins (`intersect`), mounts `popover` store, spoiler reveal delegate. |
-| `editor-bundle.js` | `window.initQuillEditor`, `window.Quill`, `window.Delta` | Quill rich-text editor factory. Configurable per-instance: headings, links, spoiler format, min/max character counting, image paste blocking, custom emoji blots. |
 | `tooltip.js` | `registerTooltip(Alpine)` | Alpine `popover` data component: hover + click-to-pin, viewport-aware positioning (right/left/top/bottom with fallback), exclusive single-open via Alpine store. |
 | `countdown-timer.js` | `window.countdownTimer` | Alpine-compatible countdown timer. Reads `data-end-time`, `data-show-seconds`, and translation keys from element dataset. |
 | `badge-overflow.js` | `window.BadgeOverflow` | Detects overflowing badge lists and shows a `+N` overflow indicator. |
 | `date-utils.js` | `window.DateUtils` | Date formatting utilities. |
 | `bootstrap.js` | — | Axios setup, CSRF header. |
+| `anchoring/canonical-text.js` | `buildCanonicalText(rootEl)` | Normalised text extraction from rendered content. |
+| `anchoring/extract-anchor.js` | `extractAnchor(range, rootEl, canonicalText)` | Builds a quote anchor (prefix / highlighted / suffix) from a selection. |
+| `anchoring/reanchor.js` | `findAnchor(canonicalText, anchor)` | Re-locates a stored anchor in edited text. |
 
-### Quill editor
+The rich-text editor bundle lives in the **Editor** domain
+([app/Domains/Editor/README.md](../Editor/README.md)), not here.
 
-The rich-text editor is Quill (installed as an npm package, not CDN). The `editor-bundle.js` entry exposes `window.initQuillEditor(id, options)`. Features enabled per-instance via `data-*` attributes or the `options` object:
-
-- `data-with-headings="true"` — adds H2/H3 toolbar buttons
-- `data-with-links="true"` — adds link toolbar button
-- `data-with-spoiler="true"` — adds spoiler format (custom inline blot, renders as `<span class="ql-spoiler">`)
-- `data-max` / `data-min` — character limits, wired to a counter display and `editor-valid` custom event
-- `data-nb-lines` — sets editor height in lines
-- `data-resizable="true"` — makes the editor vertically resizable
-
-Images are blocked on paste and drop.
+`Resources/js/anchoring/` **stays in Shared** and is not editor code: canonical
+text, anchor extraction and re-anchoring are *read-side* concerns, consumed by
+Quote (and later annotations) on rendered pages that load no editor at all.
+Different consumers, different lifecycle — do not move it into `Editor`.
 
 ---
 
@@ -283,6 +282,10 @@ The authenticated layout includes inline JS that:
 ### `SparseReorder` algorithm
 
 Attempts to minimise DB writes when reordering. For each item in the new order, it checks whether the existing `sort_order` already fits strictly between its new neighbours. Only items that must move are included in the returned change map. If any slot has no integer room (left >= right - 1), the algorithm falls back to a full sequential rebalance using `$step` (default 100).
+
+### Read-side styling of stored rich content
+
+`Resources/css/app.css` keeps the rules that style **stored** content on pages that never load an editor: `.rich-content` typography, the `.ql-align-*` classes, the `.ql-custom-emoji*` family and the read-only spoiler variants. The editing chrome (toolbar, tooltip, `.ql-editor` surface) lives in the Editor domain's own stylesheet — see [app/Domains/Editor/README.md](../Editor/README.md). When adding a Quill-related rule, say in a comment which of the two sides it belongs to.
 
 ### Quill spoiler format
 

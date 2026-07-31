@@ -48,7 +48,7 @@
       @csrf
       <input type="hidden" name="entity_type" value="{{ $entityType }}">
       <input type="hidden" name="entity_id" value="{{ $entityId }}">
-      <x-shared::editor
+      <x-editor::rich-text
         id="comment-body-editor"
         name="body"
         :nbLines="10"
@@ -85,7 +85,6 @@
 @once
   @if(!$isGuest)
     @push('scripts')
-      @vite('app/Domains/Shared/Resources/js/editor-bundle.js')
       @vite('app/Domains/Comment/Resources/js/comment-draft/index.js')
     @endpush
   @endif

@@ -23,5 +23,16 @@ class DatabaseSeeder extends Seeder
             // Moderation domain seeders
             \App\Domains\Moderation\Database\Seeders\ModerationSeeder::class,
         ]);
+
+        // Browser-test fixtures: only ever in the throwaway e2e database.
+        // Each domain owns its own, in dependency order.
+        if (app()->environment('e2e')) {
+            $this->call([
+                \App\Domains\Auth\Database\Seeders\E2eAccountsSeeder::class,
+                \App\Domains\Profile\Database\Seeders\E2eProfilesSeeder::class,
+                \App\Domains\Story\Database\Seeders\E2eStorySeeder::class,
+                \App\Domains\News\Database\Seeders\E2eNewsSeeder::class,
+            ]);
+        }
     }
 }

@@ -4,10 +4,10 @@ use Tests\TestCase;
 
 uses(TestCase::class);
 
-describe('<x-shared::multi-editor>', function () {
+describe('<x-editor::multi>', function () {
     it('renders simple pane by default with the content field', function () {
         $html = $this->blade(
-            '<x-shared::multi-editor name="blocks" content-name="content" scope="news" />'
+            '<x-editor::multi name="blocks" content-name="content" scope="news" />'
         );
 
         $html->assertSee('name="mode"', false);
@@ -21,7 +21,7 @@ describe('<x-shared::multi-editor>', function () {
 
     it('renders initial advanced blocks and serializes by uid', function () {
         $html = $this->blade(
-            '<x-shared::multi-editor name="blocks" scope="news" :blocks="$blocks" />',
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" />',
             ['blocks' => [
                 ['type' => 'text', 'html' => '<p>Intro</p>'],
                 ['type' => 'image', 'path' => 'news/a.jpg', 'alt' => 'A'],
@@ -38,7 +38,7 @@ describe('<x-shared::multi-editor>', function () {
     });
 
     it('exposes text and image palette buttons', function () {
-        $this->blade('<x-shared::multi-editor name="blocks" scope="news" />')
+        $this->blade('<x-editor::multi name="blocks" scope="news" />')
             ->assertSee("appendBlock('text')", false)
             ->assertSee("appendBlock('image')", false);
     });
@@ -46,7 +46,7 @@ describe('<x-shared::multi-editor>', function () {
     it('offers both block types in the insert affordance popover', function () {
         // The insert "+" lets the author choose the type to insert at that spot.
         $this->blade(
-            '<x-shared::multi-editor name="blocks" scope="news" :blocks="$blocks" />',
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" />',
             ['blocks' => [['type' => 'text', 'html' => '<p>x</p>']]]
         )
             ->assertSee("insertAfter(\$el, 'text')", false)

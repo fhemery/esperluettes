@@ -57,7 +57,7 @@
                 <!-- Description -->
                 <div class="flex flex-col gap-2">
                     <x-input-label for="description" :value="__('profile::edit.description.label')" class="text-on-surface" />
-                    <x-shared::editor name="description" id="editor" max="1000" nbLines="10" defaultValue="{{ old('description', $profile->description) }}" />
+                    <x-editor::rich-text name="description" id="editor" max="1000" nbLines="10" defaultValue="{{ old('description', $profile->description) }}" />
                     <x-input-error :messages="$errors->get('description')" class="error-on-surface" />
                 </div>
 
@@ -203,9 +203,6 @@
             </div>
         </div>
     </form>
-    @push('scripts')
-        @vite('app/Domains/Shared/Resources/js/editor-bundle.js')
-    @endpush
     @push('scripts')
     <script>
       window.ensureMaxFileSize = function(e, maxMB){

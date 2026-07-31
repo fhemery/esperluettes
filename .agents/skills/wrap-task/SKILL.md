@@ -50,7 +50,18 @@ Then **push the ones worth doing back to `docs/Feature_Planning/BACKLOG.md`** as
 `TODO` rows with their own folder, and link them from the README. This is what
 makes the loop a loop rather than a pipeline.
 
-## 4. Update the surrounding docs
+## 4. Retire the feature's e2e specs
+
+Any spec this task left in `e2e/tests/features/` is now due. For each one,
+**delete it** — the default, no justification needed — or **promote it to
+`e2e/tests/core/`** if it guards something used across the app and breakable
+from anywhere, writing the reason into the spec's header comment. Record the
+decision in the README's "Not done" section.
+
+`e2e/tests/core/` is the net that runs after every future feature, so it stays
+small on purpose. A feature spec left behind is a bug in the process.
+
+## 5. Update the surrounding docs
 
 **A domain's docs must never reference `docs/Feature_Planning`.** Planning
 documents are working memory for an in-flight task — they get renamed, split and
@@ -81,19 +92,19 @@ domain that owns the core of it, not in a shared dumping ground.
 - New notification type → `docs/notification-types.md`.
 - New deptrac edge → make sure `02-architecture.md` §5 explains it.
 
-## 5. Close the backlog row
+## 6. Close the backlog row
 
 - Move the row to the `## Done` table with the date, or set it to
   `BLOCKED:<reason>` if it is genuinely not finished.
 - In `interactive` mode, **propose** this and let the user confirm; do not mark
   a task `DONE` on your own authority.
 
-## 6. Commit the paperwork
+## 7. Commit the paperwork
 
 The README, the backlog change and any regenerated domain docs go in one
 `docs(<domain>)` commit. Follow the `commit` skill.
 
-## 7. Report
+## 8. Report
 
 Five to ten lines: what shipped, what did not, the new backlog rows created, the
 docs that need attention, and the single thing you would tell the next person

@@ -27,7 +27,7 @@ class MediaServiceProvider extends ServiceProvider
         Blade::anonymousComponentPath(app_path('Domains/Media/Private/Resources/views/components'), 'media');
 
         // Translations
-        $this->loadTranslationsFrom(app_path('Domains/Media/Public/Resources/lang'), 'media');
+        $this->loadTranslationsFrom(app_path('Domains/Media/Private/Resources/lang'), 'media');
 
         // Console
         if ($this->app->runningInConsole()) {

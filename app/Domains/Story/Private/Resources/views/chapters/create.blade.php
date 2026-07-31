@@ -16,7 +16,4 @@
             </div>
         </form>
     </div>
-    @push('scripts')
-        @vite('app/Domains/Shared/Resources/js/editor-bundle.js')
-    @endpush
 </x-app-layout>

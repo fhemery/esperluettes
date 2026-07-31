@@ -11,12 +11,12 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | PHP core — renderer, `EditorPublicApi`, News, deptrac layers | S | — | TODO |
-| 2 | Blade components, lang and the 11 call sites | M | 1 | TODO |
-| 3 | Toolbar presets | S | 2 | TODO |
-| 4 | JS bundle move + self-loading components + 15 `@vite` deletions | M | 2 | TODO |
-| 5 | CSS split into its own Vite entry | S | 4 | TODO |
-| 6 | Domain documentation | S | 5 | TODO |
+| 1 | PHP core — renderer, `EditorPublicApi`, News, deptrac layers | S | — | DONE |
+| 2 | Blade components, lang and the 11 call sites | M | 1 | DONE |
+| 3 | Toolbar presets | S | 2 | DONE |
+| 4 | JS bundle move + self-loading components + 15 `@vite` deletions | M | 2 | DONE |
+| 5 | CSS split into its own Vite entry | S | 4 | DONE |
+| 6 | Domain documentation | S | 5 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

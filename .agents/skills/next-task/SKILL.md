@@ -84,8 +84,15 @@ Dispatch each step in order. After each one, update the backlog status — your
 own row only, never another session's — then:
 
 - `interactive` — stop, summarise the step's output in a few lines, and tell the
-  user to `/clear` and run `/continue-task`. **One step per chat**, or one BUILD
-  phase. The next step reads the artifact, not this conversation.
+  user to `/clear` and run `/continue-task`. **One step per chat.** The next step
+  reads the artifact, not this conversation.
+  **BUILD is the exception: chain its phases in one chat.** Each phase runs in
+  its own `phase-implementer`, so the orchestrator only ever carries a two-line
+  report per phase — clearing between them buys nothing and costs a re-read of
+  the backlog, the plan and `DECISIONS.md` every time. Stop between phases only
+  when a §5 condition fires, or when a phase contradicted the plan in a way the
+  user should arbitrate before the next one builds on it. Stop again once all
+  phases are `DONE`, before VERIFY.
 - `auto` — **keep dispatching the remaining steps without stopping for
   approval.** Do not ask the user to open a new chat unless a stop condition in
   §5 fires. Record every judgement call in the "Assumptions" table of
@@ -95,9 +102,9 @@ own row only, never another session's — then:
 subagent per step and per phase either way — the whole point is that your own
 thread stays small enough to run the loop to the end.
 
-Between BUILD phases, report the phase result in two lines and keep going —
-the per-phase approval gate is only for `interactive` mode when the phase
-changed something the plan did not foresee. Keep each phase report to what the
+Between BUILD phases, in both modes, report the phase result in two lines and
+keep going — the per-phase approval gate is only for `interactive` mode when the
+phase changed something the plan did not foresee. Keep each phase report to what the
 next phase needs: what shipped, gate result, anything that contradicted the
 plan. Never paste a subagent's full output into your thread.
 
