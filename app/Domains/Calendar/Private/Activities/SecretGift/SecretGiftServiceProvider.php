@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Calendar\Private\Activities\SecretGift;
 
 use App\Domains\Calendar\Private\Activities\SecretGift\Console\ShuffleSecretGiftCommand;
+use App\Domains\Calendar\Private\Activities\SecretGift\Support\SecretGiftMediaUsageProvider;
+use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 
@@ -25,5 +27,8 @@ class SecretGiftServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(app_path('Domains/Calendar/Private/Activities/SecretGift/Http/routes.php'));
 
         Blade::componentNamespace('App\\Domains\\Calendar\\Private\\Activities\\SecretGift\\View\\Components', 'secret-gift');
+
+        // Let Media GC know which private image files gifts still use.
+        app(MediaUsageRegistry::class)->register(new SecretGiftMediaUsageProvider());
     }
 }

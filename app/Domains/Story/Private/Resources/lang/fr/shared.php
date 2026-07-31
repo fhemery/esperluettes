@@ -27,6 +27,9 @@ return [
         'custom_ai_warning' => 'Les couvertures générées par IA ne sont pas autorisées.',
         'custom_upload_label' => 'Image de couverture',
         'custom_dimensions' => 'Dimensions recommandées : 900×1200px',
+        'custom_drop_or_click' => 'Glissez une image ici ou cliquez pour parcourir',
+        'custom_max_size' => 'Taille max : :size Mo',
+        'custom_size_error' => 'Fichier trop volumineux (max :max Mo).',
         'custom_rights_label' => 'Je confirme que cette image est libre de droits, et n\'est pas générée par IA.',
     ],
     'visibility' => [

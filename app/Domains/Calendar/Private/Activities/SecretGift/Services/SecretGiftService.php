@@ -7,12 +7,17 @@ namespace App\Domains\Calendar\Private\Activities\SecretGift\Services;
 use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftAssignment;
 use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftParticipant;
 use App\Domains\Calendar\Private\Models\Activity;
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\Domains\Calendar\Public\Contracts\ActivityState;
 
 class SecretGiftService
 {
+    public function __construct(private readonly MediaPublicApi $media)
+    {
+    }
+
     public function getParticipant(int $activityId, int $userId): ?SecretGiftParticipant
     {
         return SecretGiftParticipant::where('activity_id', $activityId)
@@ -40,17 +45,13 @@ class SecretGiftService
         $assignment->save();
     }
 
+    /**
+     * Store a gift image on Media's private disk and point the row at it.
+     * The previous file is left alone: Media GC reclaims it once no row claims it.
+     */
     public function saveGiftImage(SecretGiftAssignment $assignment, UploadedFile $file): string
     {
-        // Delete old image if exists
-        if ($assignment->gift_image_path) {
-            Storage::disk('local')->delete($assignment->gift_image_path);
-        }
-
-        $extension = $file->getClientOriginalExtension();
-        $path = "calendar/secret-gift/{$assignment->activity_id}/{$assignment->giver_user_id}.{$extension}";
-
-        Storage::disk('local')->put($path, file_get_contents($file->getRealPath()));
+        $path = $this->media->storePrivate('secret-gift/' . $assignment->activity_id, $file);
 
         $assignment->gift_image_path = $path;
         $assignment->save();
@@ -58,10 +59,10 @@ class SecretGiftService
         return $path;
     }
 
+    /** Clears the reference only — the file is Media GC's to delete. */
     public function removeGiftImage(SecretGiftAssignment $assignment): void
     {
         if ($assignment->gift_image_path) {
-            Storage::disk('local')->delete($assignment->gift_image_path);
             $assignment->gift_image_path = null;
             $assignment->save();
         }

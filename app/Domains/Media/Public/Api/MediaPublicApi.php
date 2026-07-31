@@ -7,10 +7,16 @@ namespace App\Domains\Media\Public\Api;
 use App\Domains\Media\Private\Services\MediaService;
 use App\Domains\Media\Public\Contracts\Dto\MediaPathPageDto;
 use Illuminate\Http\UploadedFile;
+use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Sole entry point other domains use for managed images.
  * Images are addressed by storage path — no ids, no reference table.
+ *
+ * Two halves: public images have variants and URLs; private images
+ * (storePrivate) have neither and are only ever streamed back by the domain
+ * that owns their visibility rules.
  */
 class MediaPublicApi
 {
@@ -26,6 +32,40 @@ class MediaPublicApi
     public function store(string $scope, UploadedFile $file, array $widths = [400, 800]): string
     {
         return $this->media->store($scope, $file, $widths);
+    }
+
+    /**
+     * Store an uploaded image on the private disk; returns its stored path.
+     *
+     * A private image has **no URL and no variants**: nothing can link to it.
+     * The owning domain serves it by calling stream() from behind its own
+     * authorization check.
+     *
+     * @param int[] $widths Empty by default — the original only.
+     */
+    public function storePrivate(string $scope, UploadedFile $file, array $widths = []): string
+    {
+        return $this->media->storePrivate($scope, $file, $widths);
+    }
+
+    /**
+     * Stream a stored file back, resolving its disk from its path.
+     *
+     * Performs **no** authorization — the caller must already have decided the
+     * requester may see these bytes. Supplied headers win over the defaults
+     * (`Content-Type`, `Content-Length`, inline `Content-Disposition`).
+     */
+    public function stream(string $path, array $headers = []): StreamedResponse
+    {
+        return $this->media->stream($path, $headers);
+    }
+
+    /**
+     * Whether a stored file is present on the disk its path resolves to.
+     */
+    public function exists(string $path): bool
+    {
+        return $this->media->exists($path);
     }
 
     /**
@@ -52,6 +92,7 @@ class MediaPublicApi
 
     /**
      * Absolute URL of a responsive variant for a stored path.
+     * Throws for a private path — it has no variants and no public URL.
      */
     public function variantUrl(string $path, int $width, string $format = 'webp'): string
     {
@@ -85,9 +126,14 @@ class MediaPublicApi
 
     /**
      * Absolute URL of the stored original file (no resizing).
+     * Throws for a private path: the bytes are not web-reachable, so a
+     * /storage/… URL would be a broken image at best.
      */
     public function originalUrl(string $path): string
     {
+        if ($this->media->isPrivatePath($path)) {
+            throw new InvalidArgumentException("Private media path has no public URL: {$path}");
+        }
         return asset('storage/' . ltrim($path, '/'));
     }
 }

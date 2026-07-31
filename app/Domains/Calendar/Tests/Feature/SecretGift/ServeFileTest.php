@@ -15,6 +15,8 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('SecretGift - Serve Files', function () {
     beforeEach(function () {
         Storage::fake('local');
+        Storage::fake('private');
+        Storage::fake('public');
     });
 
     describe('Serve Sound', function () {
@@ -155,7 +157,7 @@ describe('SecretGift - Serve Files', function () {
             $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => $file,
+                'gift_image' => ['file' => $file],
             ]);
 
             $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
@@ -177,7 +179,7 @@ describe('SecretGift - Serve Files', function () {
             $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => $file,
+                'gift_image' => ['file' => $file],
             ]);
 
             $assignment = getSecretGiftAssignmentAsRecipient($result->id, $user2->id);
@@ -199,7 +201,7 @@ describe('SecretGift - Serve Files', function () {
             $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => $file,
+                'gift_image' => ['file' => $file],
             ]);
 
             $assignment = getSecretGiftAssignmentAsRecipient($result->id, $user2->id);
@@ -227,7 +229,7 @@ describe('SecretGift - Serve Files', function () {
             $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
             $this->actingAs($user1);
             $this->post(route('secret-gift.save-gift', $result->activity), [
-                'gift_image' => $file,
+                'gift_image' => ['file' => $file],
             ]);
 
             $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
@@ -237,6 +239,80 @@ describe('SecretGift - Serve Files', function () {
             $response = $this->get(route('secret-gift.image', [$result->activity, $assignment]));
 
             $response->assertStatus(403);
+        });
+
+        it('streams the image bytes from the private disk', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
+            ]);
+
+            $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+
+            $response = $this->get(route('secret-gift.image', [$result->activity, $assignment]));
+
+            $response->assertStatus(200);
+            $response->assertHeader('Content-Type', 'image/jpeg');
+            expect($response->streamedContent())
+                ->toBe(Storage::disk('private')->get($assignment->gift_image_path));
+        });
+
+        it('404s when the row points at a file that no longer exists', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+            $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+
+            $assignment->gift_image_path = 'secret-gift/' . $result->id . '/gone.jpg';
+            $assignment->save();
+
+            $this->actingAs($user1);
+            $response = $this->get(route('secret-gift.image', [$result->activity, $assignment]));
+
+            $response->assertStatus(404);
+        });
+
+        it('sends a download disposition on the download route', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
+            ]);
+
+            $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+
+            $response = $this->get(route('secret-gift.download-image', [$result->activity, $assignment]));
+
+            $response->assertStatus(200);
+            expect($response->headers->get('Content-Disposition'))
+                ->toContain('attachment')
+                ->toContain('gift-image-' . $user1->id . '-' . $assignment->id . '.jpg');
+        });
+
+        it('never exposes a gift image under a public storage url', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            $publicBefore = Storage::disk('public')->allFiles();
+
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
+            ]);
+
+            expect(Storage::disk('public')->allFiles())->toBe($publicBefore);
         });
     });
 });

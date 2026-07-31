@@ -10,6 +10,7 @@ use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Path-addressed image domain: storage, variant URLs, reuse listing and GC.
@@ -18,9 +19,16 @@ use InvalidArgumentException;
 class MediaService
 {
     public const DISK = 'public';
+    public const PRIVATE_DISK = 'private';
 
     /** Flat scopes that map 1:1 to a folder of the same name. */
     private const FLAT_SCOPES = ['news', 'faq', 'static-pages', 'activities'];
+
+    /**
+     * Scope roots living on the private disk: no public URL, no variants, and
+     * bytes reachable only by streaming through the owning domain's own gate.
+     */
+    private const PRIVATE_SCOPE_ROOTS = ['secret-gift'];
 
     public function __construct(
         private readonly ImageService $imageService,
@@ -29,7 +37,8 @@ class MediaService
 
     /**
      * Resolve a scope string to its base folder on the disk.
-     * Per-author chapter scopes ("chapters/{userId}") are already folder paths.
+     * Per-author chapter scopes ("chapters/{userId}") are already folder paths,
+     * as are per-activity private scopes ("secret-gift/{activityId}").
      */
     public function folderFor(string $scope): string
     {
@@ -39,7 +48,27 @@ class MediaService
         if (preg_match('#^chapters/\d+$#', $scope) === 1) {
             return $scope;
         }
+        if (preg_match('#^secret-gift/\d+$#', $scope) === 1) {
+            return $scope;
+        }
         throw new InvalidArgumentException("Unknown media scope: {$scope}");
+    }
+
+    public function isPrivateScope(string $scope): bool
+    {
+        return $this->isPrivatePath($scope);
+    }
+
+    /** A path is private when its first segment is a private scope root. */
+    public function isPrivatePath(string $path): bool
+    {
+        $root = explode('/', ltrim($path, '/'))[0];
+        return in_array($root, self::PRIVATE_SCOPE_ROOTS, true);
+    }
+
+    public function diskFor(string $scopeOrPath): string
+    {
+        return $this->isPrivatePath($scopeOrPath) ? self::PRIVATE_DISK : self::DISK;
     }
 
     /**
@@ -50,7 +79,40 @@ class MediaService
      */
     public function store(string $scope, UploadedFile $file, array $widths = [400, 800]): string
     {
+        if ($this->isPrivateScope($scope)) {
+            throw new InvalidArgumentException("Private scope must go through storePrivate(): {$scope}");
+        }
         return $this->imageService->process(self::DISK, $this->folderFor($scope), $file, $widths);
+    }
+
+    /**
+     * Store an uploaded image on the private disk; returns its path.
+     * Defaults to the original only — private images have no variants because
+     * nothing can build a URL for them.
+     *
+     * @param int[] $widths
+     */
+    public function storePrivate(string $scope, UploadedFile $file, array $widths = []): string
+    {
+        if (!$this->isPrivateScope($scope)) {
+            throw new InvalidArgumentException("Not a private media scope: {$scope}");
+        }
+        return $this->imageService->process(self::PRIVATE_DISK, $this->folderFor($scope), $file, $widths);
+    }
+
+    /**
+     * Stream a stored file back, on whichever disk its path resolves to.
+     * Performs **no** authorization: the caller has already decided the
+     * requester may see these bytes.
+     */
+    public function stream(string $path, array $headers = []): StreamedResponse
+    {
+        return Storage::disk($this->diskFor($path))->response($path, null, $headers);
+    }
+
+    public function exists(string $path): bool
+    {
+        return Storage::disk($this->diskFor($path))->exists($path);
     }
 
     /**
@@ -64,9 +126,13 @@ class MediaService
 
     /**
      * Build a variant URL from an original path by naming convention.
+     * Throws for a private path: it has neither variants nor a public URL.
      */
     public function variantUrl(string $path, int $width, string $format = 'webp'): string
     {
+        if ($this->isPrivatePath($path)) {
+            throw new InvalidArgumentException("Private media path has no public URL: {$path}");
+        }
         $dir = pathinfo($path, PATHINFO_DIRNAME);
         $name = pathinfo($path, PATHINFO_FILENAME);
         $rel = ($dir === '' || $dir === '.') ? "{$name}-{$width}w.{$format}" : "{$dir}/{$name}-{$width}w.{$format}";
@@ -76,14 +142,19 @@ class MediaService
     /**
      * List original images directly under a scope's folder (non-recursive),
      * excluding generated -<width>w variants. Paginated, newest first.
+     * Private scopes are rejected: the picker would hand out unusable URLs.
      */
     public function listByScope(string $scope, int $page = 1, int $perPage = 40): MediaPathPageDto
     {
+        if ($this->isPrivateScope($scope)) {
+            throw new InvalidArgumentException("Private scope is not reusable: {$scope}");
+        }
+
         $page = max(1, $page);
-        $originals = $this->originalsIn($this->folderFor($scope));
+        $originals = $this->originalsIn(self::DISK, $this->folderFor($scope));
 
         // Newest first by mtime.
-        usort($originals, fn (string $a, string $b) => $this->mtime($b) <=> $this->mtime($a));
+        usort($originals, fn (string $a, string $b) => $this->mtime(self::DISK, $b) <=> $this->mtime(self::DISK, $a));
 
         $offset = ($page - 1) * $perPage;
         $slice = array_slice($originals, $offset, $perPage);
@@ -134,35 +205,37 @@ class MediaService
         $deleted = [];
         $skipped = [];
 
-        foreach ($this->managedFolders() as $folder) {
-            $originals = $this->originalsIn($folder);
-            if ($originals === []) {
-                continue;
-            }
-
-            $folderIsClaimed = false;
-            foreach ($live as $claimedPath => $_) {
-                if (str_starts_with($claimedPath, $folder . '/')) {
-                    $folderIsClaimed = true;
-                    break;
-                }
-            }
-            if (!$folderIsClaimed) {
-                $skipped[] = $folder;
-                continue;
-            }
-
-            foreach ($originals as $path) {
-                if (isset($live[$path])) {
+        foreach ([self::DISK, self::PRIVATE_DISK] as $disk) {
+            foreach ($this->managedFolders($disk) as $folder) {
+                $originals = $this->originalsIn($disk, $folder);
+                if ($originals === []) {
                     continue;
                 }
-                if ($this->mtime($path) >= $cutoff) {
-                    continue; // within grace window
+
+                $folderIsClaimed = false;
+                foreach ($live as $claimedPath => $_) {
+                    if (str_starts_with($claimedPath, $folder . '/')) {
+                        $folderIsClaimed = true;
+                        break;
+                    }
                 }
-                if (!$dryRun) {
-                    $this->imageService->deleteWithVariants(self::DISK, $path);
+                if (!$folderIsClaimed) {
+                    $skipped[] = $folder;
+                    continue;
                 }
-                $deleted[] = $path;
+
+                foreach ($originals as $path) {
+                    if (isset($live[$path])) {
+                        continue;
+                    }
+                    if ($this->mtime($disk, $path) >= $cutoff) {
+                        continue; // within grace window
+                    }
+                    if (!$dryRun) {
+                        $this->imageService->deleteWithVariants($disk, $path);
+                    }
+                    $deleted[] = $path;
+                }
             }
         }
 
@@ -170,21 +243,36 @@ class MediaService
     }
 
     /**
-     * All folders GC may sweep: the flat scopes plus every per-author chapter folder.
+     * All folders GC may sweep on a disk: on `public` the flat scopes plus every
+     * per-author chapter folder; on `private` the scope roots themselves.
+     *
+     * A private root is one managed folder, not one per activity subfolder: the
+     * zero-claim guard must sit where the provider does, or an activity whose
+     * gifts were all removed would become permanently unsweepable.
      *
      * @return list<string>
      */
-    private function managedFolders(): array
+    private function managedFolders(string $disk): array
     {
-        $disk = Storage::disk(self::DISK);
+        $fs = Storage::disk($disk);
         $folders = [];
+
+        if ($disk === self::PRIVATE_DISK) {
+            foreach (self::PRIVATE_SCOPE_ROOTS as $root) {
+                if ($fs->exists($root)) {
+                    $folders[] = $root;
+                }
+            }
+            return $folders;
+        }
+
         foreach (self::FLAT_SCOPES as $folder) {
-            if ($disk->exists($folder)) {
+            if ($fs->exists($folder)) {
                 $folders[] = $folder;
             }
         }
-        if ($disk->exists('chapters')) {
-            foreach ($disk->directories('chapters') as $sub) {
+        if ($fs->exists('chapters')) {
+            foreach ($fs->directories('chapters') as $sub) {
                 $folders[] = $sub; // e.g. "chapters/123"
             }
         }
@@ -192,18 +280,21 @@ class MediaService
     }
 
     /**
-     * Original images directly under a folder (non-recursive), variants excluded.
+     * Original images under a folder, variants excluded. Non-recursive on the
+     * public disk; recursive under a private root, whose images live one level
+     * down in per-scope subfolders.
      *
      * @return list<string>
      */
-    private function originalsIn(string $folder): array
+    private function originalsIn(string $disk, string $folder): array
     {
-        $disk = Storage::disk(self::DISK);
-        if (!$disk->exists($folder)) {
+        $fs = Storage::disk($disk);
+        if (!$fs->exists($folder)) {
             return [];
         }
+        $files = $disk === self::PRIVATE_DISK ? $fs->allFiles($folder) : $fs->files($folder);
         $originals = [];
-        foreach ($disk->files($folder) as $file) {
+        foreach ($files as $file) {
             $base = pathinfo($file, PATHINFO_BASENAME);
             if (preg_match('/-\d+w\.(jpg|jpeg|png|webp)$/i', $base) === 1) {
                 continue; // a generated variant
@@ -216,8 +307,8 @@ class MediaService
         return $originals;
     }
 
-    private function mtime(string $path): int
+    private function mtime(string $disk, string $path): int
     {
-        return (int) Storage::disk(self::DISK)->lastModified($path);
+        return (int) Storage::disk($disk)->lastModified($path);
     }
 }

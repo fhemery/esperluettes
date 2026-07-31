@@ -8,6 +8,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     Storage::fake('public');
+    Storage::fake('private');
 });
 
 describe('GET /media/library', function () {
@@ -36,6 +37,15 @@ describe('GET /media/library', function () {
         $user = alice($this);
         $this->actingAs($user)->getJson('/media/library?scope=calendar')->assertStatus(422);
         $this->actingAs($user)->getJson('/media/library?scope=profile')->assertStatus(422);
+    });
+
+    it('does not expose a private scope through the library endpoint', function () {
+        Storage::disk('private')->put('secret-gift/7/gift.jpg', 'x');
+
+        $this->actingAs(alice($this))
+            ->getJson('/media/library?scope=secret-gift/7')
+            ->assertStatus(422)
+            ->assertJsonMissingPath('items');
     });
 
     it('accepts the activities scope', function () {

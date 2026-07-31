@@ -28,8 +28,7 @@ purpose — move or insert one anywhere without touching the others.
 | Quotes — moderation of quotes and notes                         | `quotes-moderation/`            | interactive | TODO                                                                                                                                                                                                                  |
 | Secret Gift — participants cannot enrol                         | `secret-gift-enrolment/`        | interactive | TODO:may be absorbed by `calendar-subscription/` rather than needing its own mechanism                                                                                                                                |
 | Jardino — `deselected_at` is never written                      | `jardino-snapshot-deselection/` | auto        | TODO                                                                                                                                                                                                                  |
-| `<x-shared::image-upload>` — one consumer left, decide its fate | `shared-image-upload-cleanup/`  | auto        | TODO:from `media-consumer-migration/` decision #9. SecretGift is the only user (private `local` disk, no Media semantics). Its lang file is also borrowed by Story's cover tab — do not delete that.                  |
-
+| Gift sound on Media, retire `<x-shared::sound-upload>`          | `media-sound-upload/`           | interactive | TODO:leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out |
 ## Done
 
 Each folder holds a compact `README.md` — read that, not the phase documents.
@@ -38,6 +37,8 @@ Reference other rows by **folder name**, never by position.
 
 | Task | Folder | Wrapped |
 |------|--------|---------|
+| Shared `image-upload` lang file has no component | `shared-upload-lang-ownership/` | 2026-07-31 (VERIFY skipped — copy-only, user smoke-checks the Story cover tab) |
+| `<x-shared::image-upload>` — one consumer left, decide its fate | `shared-image-upload-cleanup/` | 2026-07-31 (VERIFY skipped — user smoke-checks; leftovers — `media-sound-upload/`, `shared-upload-lang-ownership/`) |
 | Extract an Editor domain from Shared | `editor-domain/` | 2026-07-30 (VERIFY skipped — `editor-domain-visual-qa/`) |
 | Discord — preferences hint for unlinked account | `discord-link-hint/` | 2026-07-29 |
 | MultiEdit — migrate the remaining ImageService consumers | `media-consumer-migration/` | 2026-07-29 (leftover — `shared-image-upload-cleanup/`) |

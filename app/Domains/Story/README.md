@@ -64,6 +64,8 @@ Stories support three cover modes, controlled by `cover_type`:
 
 Use `CoverService` to resolve cover URLs. On a themed genre removal during story update, the cover reverts to `default` automatically. Both `themed` and `custom` supports an HD version for lightbox display.
 
+The custom tab is **not** a Media component: `cover-tab-custom.blade.php` is a bespoke Alpine dropzone that owns its own copy under `story::shared.cover.custom_*` (it used to borrow three strings from a Shared `image-upload` lang namespace whose component no longer exists). Its 2 MB limit is hard-coded at four unsynchronised sites — `StoryRequest`'s `max:2048`, the Blade's `['size' => 2]` and `['max' => 2]`, and the JS `maxKb = 2048`. Rebuilding the tab on `<x-media::image-field>` would collapse all four, and has not been done.
+
 ---
 
 ## Architecture Decisions

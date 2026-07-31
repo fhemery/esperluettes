@@ -9,6 +9,7 @@ use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftAssignme
 use App\Domains\Calendar\Private\Activities\SecretGift\Services\SecretGiftService;
 use App\Domains\Calendar\Private\Models\Activity;
 use App\Domains\Calendar\Public\Contracts\ActivityState;
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -16,8 +17,10 @@ use Mews\Purifier\Facades\Purifier;
 
 class SecretGiftController
 {
-    public function __construct(private SecretGiftService $service)
-    {
+    public function __construct(
+        private SecretGiftService $service,
+        private MediaPublicApi $media,
+    ) {
     }
 
     public function saveGift(SaveGiftRequest $request, Activity $activity)
@@ -42,14 +45,20 @@ class SecretGiftController
             $this->service->saveGiftText($assignment, $purified);
         }
 
-        // Handle image removal
-        if ($request->boolean('gift_image_remove')) {
-            $this->service->removeGiftImage($assignment);
-        }
+        // Resolve the <x-media::image-field> payload. A new upload wins; otherwise a
+        // non-empty path means "keep what is stored" — the submitted path is never
+        // adopted, since with the reuse picker disabled the only legitimate value is
+        // the current one, and trusting it would let a giver read another gift's
+        // file. An empty path with no file is the removal. Nothing is deleted here:
+        // Media GC reclaims any path no assignment references anymore.
+        if ($request->has('gift_image')) {
+            $file = $request->file('gift_image.file');
 
-        // Handle new image upload
-        if ($request->hasFile('gift_image')) {
-            $this->service->saveGiftImage($assignment, $request->file('gift_image'));
+            if ($file) {
+                $this->service->saveGiftImage($assignment, $file);
+            } elseif (!$request->input('gift_image.path')) {
+                $this->service->removeGiftImage($assignment);
+            }
         }
 
         // Handle sound removal
@@ -79,28 +88,20 @@ class SecretGiftController
 
         $path = $assignment->gift_image_path;
 
-        if (!Storage::disk('local')->exists($path)) {
+        if (!$this->media->exists($path)) {
             abort(404);
         }
 
-        $content = Storage::disk('local')->get($path);
-        $fullPath = Storage::disk('local')->path($path);
-        $mimeType = File::mimeType($fullPath);
-        
-        // Check if this is a download request
-        $isDownload = request()->routeIs('secret-gift.download-image');
-        
-        $headers = [
-            'Content-Type' => $mimeType,
-            'Cache-Control' => 'private, max-age=3600',
-        ];
-        
-        if ($isDownload) {
+        $headers = ['Cache-Control' => 'private, max-age=3600'];
+
+        // The stream defaults to an inline disposition under the stored (hashed)
+        // basename, so the download route has to name the file itself.
+        if (request()->routeIs('secret-gift.download-image')) {
             $filename = 'gift-image-' . $assignment->giver_user_id . '-' . $assignment->id . '.' . pathinfo($path, PATHINFO_EXTENSION);
             $headers['Content-Disposition'] = 'attachment; filename="' . $filename . '"';
         }
 
-        return response($content, 200, $headers);
+        return $this->media->stream($path, $headers);
     }
 
     public function streamSound(Activity $activity, SecretGiftAssignment $assignment)

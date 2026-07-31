@@ -16,17 +16,34 @@ This domain grew out of the **MultiEdit** feature, which introduced block-based 
 
 ### Scopes and folders
 
-A **scope** is a logical bucket that maps to a folder on the `public` disk:
+A **scope** is a logical bucket that maps to a folder on a disk:
 
-| Scope | Folder | Sharing |
-|-------|--------|---------|
-| `news` | `news/` | shared among News editors |
-| `faq` | `faq/` | shared |
-| `static-pages` | `static-pages/` | shared |
-| `activities` | `activities/` | shared among Calendar admins |
-| `chapters/{userId}` | `chapters/{userId}/` | per author |
+| Scope | Disk | Folder | Sharing |
+|-------|------|--------|---------|
+| `news` | `public` | `news/` | shared among News editors |
+| `faq` | `public` | `faq/` | shared |
+| `static-pages` | `public` | `static-pages/` | shared |
+| `activities` | `public` | `activities/` | shared among Calendar admins |
+| `chapters/{userId}` | `public` | `chapters/{userId}/` | per author |
+| `secret-gift/{activityId}` | `private` | `secret-gift/{activityId}/` | per activity, not reusable |
 
-The caller builds the scope string; `folderFor()` resolves the folder and rejects unknown scopes. The reuse picker (`listByScope`) lists originals **directly under** the scope folder — it is **non-recursive**, so it never descends into dated subfolders left by pre-migration uploads.
+The caller builds the scope string; `folderFor()` resolves the folder and rejects unknown scopes. The disk is implied by the scope's first segment — no caller passes a disk. The reuse picker (`listByScope`) lists originals **directly under** the scope folder — it is **non-recursive**, so it never descends into dated subfolders left by pre-migration uploads.
+
+### Private images
+
+Some images must not be web-reachable at all — a Secret Gift picture is confidential until the activity ends. Those live on the `private` disk (`storage/app/private`, `serve => false`), reached through a separate half of the API:
+
+| | Public images | Private images |
+|---|---|---|
+| Stored by | `store($scope, $file)` | `storePrivate($scope, $file)` |
+| Variants | `-400w` / `-800w`, jpg + webp | **none** — the original only |
+| Displayed by | `originalUrl()` / `variantUrl()` → `/storage/…` | **no URL exists**; the consumer streams it |
+| In the reuse picker | yes | no |
+| Collected by `media:gc` | yes | yes |
+
+`originalUrl()`, `variantUrl()` and `listByScope()` **throw** on a private path rather than inventing a `/storage/…` URL to a file that is not served. `store()` and `storePrivate()` likewise refuse each other's scopes, so bytes cannot land on the wrong disk by a typo in a scope string.
+
+A private image is served by the domain that owns its visibility rules: it checks its own rule, then calls `MediaPublicApi::stream($path, $headers)`, which returns a `StreamedResponse` with the right `Content-Type` and **performs no authorization of its own**. Media never learns a consumer's rules; the consumer never touches a disk. `exists($path)` resolves the same disk, so a 404 for a missing file is the consumer's own check.
 
 ### Responsive variants vs. "keep original"
 
@@ -40,10 +57,12 @@ Media never learns which files are in use by scanning other domains' tables. Ins
 
 Deletion is therefore always **deferred and swept**, never synchronous: removing an image from a document merely stops the content from referencing its path; the file is reclaimed later, if still unused. A guard makes this safe against a forgotten provider — a whole scope folder that holds files but has *zero* claimed paths is treated as an unclaimed scope and **skipped**, not emptied.
 
+The sweep covers both disks. On `public` it walks each scope folder non-recursively. On `private` it walks each scope **root** (`secret-gift/`) recursively, and applies the zero-claim guard at that root rather than per `secret-gift/{activityId}` subfolder — otherwise an activity whose gifts were all removed would have no claimed path, be skipped forever, and leak its orphans permanently.
+
 ### Components
 
 - `<x-media::image>` — read-only responsive display by path, with a `raw` mode that serves the original at natural size (used by keep-original images and Editor's block renderer).
-- `<x-media::image-field>` — the editable control: upload, remove, "Choose existing" picker, alt/caption, optional usage count, optional "keep original" checkbox.
+- `<x-media::image-field>` — the editable control: upload, remove, "Choose existing" picker, alt/caption, optional usage count, optional "keep original" checkbox. Two props tune it for scopes that have no reusable library: `allowLibrary` (default `true`; when `false` neither the "Choose existing" button nor the picker modal is rendered) and `previewUrl` (default `null`; when set it is used as the initial preview instead of a Media-built URL — which is what makes the field usable for an image whose bytes are not web-reachable).
 
 The reuse picker is backed by the authenticated `GET /media/library?scope=…` endpoint.
 

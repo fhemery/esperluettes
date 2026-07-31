@@ -15,6 +15,8 @@ uses(TestCase::class, RefreshDatabase::class);
 describe('SecretGift - Save Gift', function () {
     beforeEach(function () {
         Storage::fake('local');
+        Storage::fake('private');
+        Storage::fake('public');
     });
 
     it('allows a participant to save text gift', function () {
@@ -56,7 +58,7 @@ describe('SecretGift - Save Gift', function () {
         expect($assignment->gift_text)->toContain('Hello');
     });
 
-    it('allows a participant to upload an image gift', function () {
+    it('uploads a gift image through the media image field shape', function () {
         $user1 = alice($this);
         $user2 = bob($this);
 
@@ -66,16 +68,148 @@ describe('SecretGift - Save Gift', function () {
 
         $file = UploadedFile::fake()->image('gift.jpg', 800, 600);
 
+        $localBefore = Storage::disk('local')->allFiles();
+        $publicBefore = Storage::disk('public')->allFiles();
+
         $response = $this->post(route('secret-gift.save-gift', $result->activity), [
-            'gift_image' => $file,
+            'gift_image' => ['path' => '', 'file' => $file],
         ]);
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
 
         $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
-        expect($assignment->gift_image_path)->not->toBeNull();
-        Storage::disk('local')->assertExists($assignment->gift_image_path);
+        expect($assignment->gift_image_path)->toStartWith('secret-gift/' . $result->id . '/');
+        Storage::disk('private')->assertExists($assignment->gift_image_path);
+        expect(Storage::disk('local')->allFiles())->toBe($localBefore);
+        expect(Storage::disk('public')->allFiles())->toBe($publicBefore);
+    });
+
+    it('keeps the current image when only the path is submitted', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 400, 300)],
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        $path = $assignment->gift_image_path;
+        $filesBefore = Storage::disk('private')->allFiles();
+
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['path' => $path],
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $assignment->refresh();
+        expect($assignment->gift_image_path)->toBe($path);
+        expect(Storage::disk('private')->allFiles())->toBe($filesBefore);
+    });
+
+    it('removes the image when an empty path is submitted with no file', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 400, 300)],
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        $path = $assignment->gift_image_path;
+
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['path' => ''],
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $assignment->refresh();
+        expect($assignment->gift_image_path)->toBeNull();
+        Storage::disk('private')->assertExists($path);
+    });
+
+    it('prefers a new upload over a submitted path', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['file' => UploadedFile::fake()->image('first.jpg', 400, 300)],
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        $firstPath = $assignment->gift_image_path;
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => [
+                'path' => $firstPath,
+                'file' => UploadedFile::fake()->image('second.jpg', 400, 300),
+            ],
+        ]);
+
+        $assignment->refresh();
+        expect($assignment->gift_image_path)->not->toBe($firstPath);
+        Storage::disk('private')->assertExists($assignment->gift_image_path);
+        // Media GC reclaims the orphan later; Calendar never deletes it.
+        Storage::disk('private')->assertExists($firstPath);
+    });
+
+    it('leaves the gift image alone when the field is not submitted', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        $this->actingAs($user1);
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 400, 300)],
+        ]);
+
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        $path = $assignment->gift_image_path;
+
+        $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_text' => '<p>Only words this time.</p>',
+        ]);
+
+        $assignment->refresh();
+        expect($assignment->gift_image_path)->toBe($path);
+    });
+
+    it('ignores a submitted path that is not the stored one', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+        // Bob stores his own gift image; Alice must not be able to claim it.
+        $this->actingAs($user2)->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['file' => UploadedFile::fake()->image('bob.jpg', 400, 300)],
+        ]);
+        $bobPath = getSecretGiftAssignmentAsGiver($result->id, $user2->id)->gift_image_path;
+
+        $this->actingAs($user1)->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_image' => ['path' => $bobPath],
+        ]);
+
+        $alice = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        expect($alice->gift_image_path)->toBeNull();
     });
 
     it('rejects non-participant from saving gift', function () {
@@ -112,7 +246,7 @@ describe('SecretGift - Save Gift', function () {
         $response->assertSessionHas('error');
     });
 
-    it('validates image file type', function () {
+    it('still rejects a non image file', function () {
         $user1 = alice($this);
         $user2 = bob($this);
 
@@ -123,13 +257,13 @@ describe('SecretGift - Save Gift', function () {
         $file = UploadedFile::fake()->create('gift.pdf', 100, 'application/pdf');
 
         $response = $this->post(route('secret-gift.save-gift', $result->activity), [
-            'gift_image' => $file,
+            'gift_image' => ['file' => $file],
         ]);
 
-        $response->assertSessionHasErrors('gift_image');
+        $response->assertSessionHasErrors('gift_image.file');
     });
 
-    it('validates image file size', function () {
+    it('still rejects a file over 5 MB', function () {
         $user1 = alice($this);
         $user2 = bob($this);
 
@@ -140,10 +274,10 @@ describe('SecretGift - Save Gift', function () {
         $file = UploadedFile::fake()->image('gift.jpg')->size(6000); // 6MB > 5MB limit
 
         $response = $this->post(route('secret-gift.save-gift', $result->activity), [
-            'gift_image' => $file,
+            'gift_image' => ['file' => $file],
         ]);
 
-        $response->assertSessionHasErrors('gift_image');
+        $response->assertSessionHasErrors('gift_image.file');
     });
 
     it('allows saving both text and image together', function () {
@@ -158,7 +292,7 @@ describe('SecretGift - Save Gift', function () {
 
         $response = $this->post(route('secret-gift.save-gift', $result->activity), [
             'gift_text' => '<p>A poem for you!</p>',
-            'gift_image' => $file,
+            'gift_image' => ['file' => $file],
         ]);
 
         $response->assertRedirect();
