@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -51,5 +52,61 @@ describe('<x-editor::multi>', function () {
         )
             ->assertSee("insertAfter(\$el, 'text')", false)
             ->assertSee("insertAfter(\$el, 'image')", false);
+    });
+
+    it('defaults text blocks to five lines and no indent', function () {
+        // Regression guard: consumers that pass neither prop (News) must keep
+        // rendering exactly what they rendered before the props existed.
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" />',
+            ['blocks' => [['type' => 'text', 'html' => '<p>Intro</p>']]]
+        );
+
+        expect($html)->toContain('data-nb-lines="5"')
+            ->and($html)->not->toContain('data-nb-lines="15"')
+            ->and($html)->not->toContain('ql-indent')
+            ->and(substr_count($html, 'class="surface-read text-on-surface w-full"'))->toBe(2);
+    });
+
+    it('applies nbLines to every text block', function () {
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" :nbLines="15" />',
+            ['blocks' => [
+                ['type' => 'text', 'html' => '<p>One</p>'],
+                ['type' => 'text', 'html' => '<p>Two</p>'],
+            ]]
+        );
+
+        // Two server-rendered blocks, the <template> new blocks are cloned from,
+        // and the simple pane — the same writing surface in the same form.
+        expect(substr_count($html, 'data-nb-lines="15"'))->toBe(4)
+            ->and($html)->not->toContain('data-nb-lines="5"');
+    });
+
+    it('applies indentParagraphs to every text block', function () {
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" :indentParagraphs="true" />',
+            ['blocks' => [
+                ['type' => 'text', 'html' => '<p>One</p>'],
+                ['type' => 'text', 'html' => '<p>Two</p>'],
+            ]]
+        );
+
+        // Same breakdown as above; `ql-indent` is the class <x-editor::rich-text>
+        // emits for this prop.
+        expect(substr_count($html, 'ql-indent'))->toBe(4);
+    });
+
+    it('gives dynamically added text blocks the same writing surface', function () {
+        // New blocks are cloned from the Blade <template x-ref="tplText">, so the
+        // props only have to reach that template for JS-inserted blocks to match.
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :nbLines="15" :indentParagraphs="true" />'
+        );
+
+        $tpl = Str::between($html, '<template x-ref="tplText">', '</template>');
+
+        expect($tpl)->toContain('data-nb-lines="15"')
+            ->and($tpl)->toContain('ql-indent');
     });
 });

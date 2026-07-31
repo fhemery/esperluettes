@@ -145,6 +145,8 @@ and the `MediaUsageProvider` that keeps the file alive.
 | `toolbar` | `'default'` | Preset name or token array, resolved once and shared by both panes and every text block |
 | `min` / `max` | `null` | Bounds on the **summed** text length |
 | `placeholder` | `''` | Placeholder text |
+| `nbLines` | `5` | Height in lines of every writing surface — the simple pane and each text block |
+| `indentParagraphs` | `false` | Adds `ql-indent` to every writing surface |
 
 Translations live in `Private/Resources/lang/fr/` under the `editor::` namespace:
 `editor::rich-text.*` and `editor::multi.*`.

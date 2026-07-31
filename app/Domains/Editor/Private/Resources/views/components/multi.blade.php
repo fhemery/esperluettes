@@ -17,6 +17,8 @@
       toolbar      preset name or explicit token array (passed to each text block)
       min / max    summed-text constraints
       placeholder  editor placeholder
+      nbLines      height in lines of every writing surface (simple + each block)
+      indentParagraphs  adds `ql-indent` to every writing surface
 --}}
 @props([
     'name' => 'blocks',
@@ -30,6 +32,8 @@
     'min' => null,
     'max' => null,
     'placeholder' => '',
+    'nbLines' => 5,
+    'indentParagraphs' => false,
 ])
 
 @use(App\Domains\Editor\Private\Support\ToolbarPresets)
@@ -89,6 +93,8 @@
             :toolbar="$toolbar"
             :min="$min"
             :max="$max"
+            :nbLines="$nbLines"
+            :indentParagraphs="$indentParagraphs"
             :placeholder="$placeholder" />
     </div>
 
@@ -106,6 +112,7 @@
                     @include('editor::components.multi._text-block', [
                         'name' => $name, 'uid' => 'b' . $i, 'toolbar' => $toolbar,
                         'min' => $min, 'max' => $max, 'html' => $block['html'] ?? '', 'placeholder' => $placeholder,
+                        'nbLines' => $nbLines, 'indentParagraphs' => $indentParagraphs,
                     ])
                 @endif
             @endforeach
@@ -133,6 +140,7 @@
         @include('editor::components.multi._text-block', [
             'name' => $name, 'uid' => '__UID__', 'toolbar' => $toolbar,
             'min' => $min, 'max' => $max, 'html' => '', 'placeholder' => $placeholder,
+            'nbLines' => $nbLines, 'indentParagraphs' => $indentParagraphs,
         ])
     </template>
     <template x-ref="tplImage">
