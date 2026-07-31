@@ -16,7 +16,10 @@ retire `<x-shared::sound-upload>` — the last upload widget left in Shared.
 behind, so SecretGift now writes to two different disks for the same feature:
 images to Media's `private`, sound raw to `local` under
 `calendar/secret-gift/{activity_id}/`, deleted synchronously. Shared still hosts
-an upload widget that duplicates Media's field.
+an upload widget that duplicates Media's field. The orphan leak the image half
+fixed is also still open for sound: a shuffle deletes assignment rows without
+touching files, so every sound uploaded before a re-shuffle stays on disk
+forever.
 
 ## Constraints or ideas I already have
 
