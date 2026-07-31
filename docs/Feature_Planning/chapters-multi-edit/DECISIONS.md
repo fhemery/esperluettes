@@ -44,6 +44,8 @@ the user may want to reverse — surface these in the WRAP summary.
 | A9 | Mode is derived from `content_blocks IS NULL`; no `mode` column is added. A second source of truth could disagree with the first. | DESIGN | Expensive — would need a migration and a backfill |
 | A10 | `<x-editor::multi>` gains `nbLines` and `indentParagraphs` props, threaded to every text block. Without them Advanced mode is a visibly worse writing surface than Simple mode in the same form (chapters pass `nbLines=15`, `indentParagraphs=true` today; text blocks hardcode 5 and no indent). | DESIGN | Yes |
 | A11 | `.rich-content p:last-of-type { padding-bottom: 0 }` is re-scoped in `Shared/Resources/css/app.css` so it applies to the last paragraph of the last block, not of every block. Left alone, spacing collapses at every block boundary — a §4.5.2 violation. | DESIGN | Yes |
+| A12 | The chapter form rebuilds its blocks from old input on a failed validation re-render, exactly as News's `_form.blade.php` does. The plan's snippet passed `old('blocks', …)` straight through, but that array is keyed by uid, so the component would derive uids from the keys and lose the submitted order — and an author who trips the alt-text rule would get the *stored* blocks back, silently discarding the edit. | BUILD (phase 6) | Yes |
+| A13 | `<x-editor::multi>` keeps its generated simple-pane id; the e2e `ChapterEditPage` reaches that pane through the component root instead. Adding an `id` prop to a shared Editor component only so a test selector keeps working would be test pressure on production markup; `RichTextEditor` now accepts a locator as well as an id. | BUILD (phase 6) | Yes |
 
 ## Spec open questions closed at DESIGN
 

@@ -7,6 +7,7 @@ use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -181,5 +182,163 @@ describe('Chapter advanced mode', function () {
         ]), advancedChapterPayload())->assertRedirect(route('dashboard'));
 
         expect($chapter->fresh()->content_blocks)->toBeNull();
+    });
+});
+
+describe('Chapter form and reading page under advanced mode', function () {
+
+    function advancedChapter(TestCase $t, array $blocks): Chapter
+    {
+        $order = [];
+        $payload = [];
+        foreach (array_values($blocks) as $i => $block) {
+            $uid = 'b' . $i;
+            $order[] = $uid;
+            $payload[$uid] = $block;
+        }
+
+        $t->post(route('chapters.store', ['storySlug' => $t->story->slug]), [
+            'title' => 'Advanced Chapter',
+            'mode' => 'advanced',
+            'blocks_order' => implode(',', $order),
+            'blocks' => $payload,
+            'published' => '1',
+        ])->assertRedirect();
+
+        return Chapter::query()->latest('id')->firstOrFail();
+    }
+
+    it('reopens an advanced chapter in advanced mode', function () {
+        $chapter = advancedChapter($this, [
+            ['type' => 'text', 'html' => '<p>Premier bloc</p>'],
+            ['type' => 'text', 'html' => '<p>Second bloc</p>'],
+        ]);
+
+        $html = $this->get(route('chapters.edit', [
+            'storySlug' => $this->story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]))->assertOk()->getContent();
+
+        // The MultiEdit mount, opened on the advanced pane by its stored blocks.
+        expect($html)->toContain('multi-editor');
+        expect($html)->toContain('name="mode"');
+        expect($html)->toContain("mode: 'advanced'");
+        // Both stored blocks are rendered, in order, with their HTML.
+        expect($html)->toContain('name="blocks[b0][html]"');
+        expect($html)->toContain('name="blocks[b1][html]"');
+        expect($html)->toContain('Premier bloc');
+        expect($html)->toContain('Second bloc');
+        // Not the bare rich-text field the form used before.
+        expect($html)->not->toContain('rich-text-chapter-content-editor');
+    });
+
+    it('reopens a simple chapter in simple mode', function () {
+        $chapter = createPublishedChapter($this, $this->story, $this->author, [
+            'content' => '<p>Du texte simple</p>',
+        ]);
+
+        $html = $this->get(route('chapters.edit', [
+            'storySlug' => $this->story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]))->assertOk()->getContent();
+
+        expect($html)->toContain('multi-editor');
+        expect($html)->toContain("mode: 'simple'");
+        expect($html)->toContain('Du texte simple');
+        // No server-rendered block: the advanced pane is empty.
+        expect($html)->not->toContain('name="blocks[b0][html]"');
+    });
+
+    it('opens a new chapter form in simple mode', function () {
+        $html = $this->get(route('chapters.create', ['storySlug' => $this->story->slug]))
+            ->assertOk()->getContent();
+
+        expect($html)->toContain('multi-editor');
+        expect($html)->toContain("mode: 'simple'");
+        expect($html)->not->toContain('name="blocks[b0][html]"');
+    });
+
+    it('gives every text block fifteen lines and indented paragraphs', function () {
+        $chapter = advancedChapter($this, [
+            ['type' => 'text', 'html' => '<p>Premier bloc</p>'],
+            ['type' => 'text', 'html' => '<p>Second bloc</p>'],
+        ]);
+
+        $html = $this->get(route('chapters.edit', [
+            'storySlug' => $this->story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]))->assertOk()->getContent();
+
+        // Two stored blocks + the hidden template new blocks are cloned from,
+        // plus the simple pane — every writing surface gets the same props.
+        expect(substr_count($html, 'data-nb-lines="15"'))->toBe(4);
+        expect(substr_count($html, 'ql-indent'))->toBe(4);
+    });
+
+    it('re-renders the submitted blocks in order after a validation error', function () {
+        Storage::disk('public')->put('chapters/' . $this->author->id . '/sep.jpg', 'x');
+
+        $this->from(route('chapters.create', ['storySlug' => $this->story->slug]))
+            ->post(route('chapters.store', ['storySlug' => $this->story->slug]), [
+                'title' => 'Advanced Chapter',
+                'mode' => 'advanced',
+                'blocks_order' => 'n1,n0',
+                'blocks' => [
+                    'n0' => ['type' => 'text', 'html' => '<p>Deuxième</p>'],
+                    'n1' => ['type' => 'text', 'html' => '<p>Premier</p>'],
+                    'n2' => [
+                        'type' => 'image',
+                        'path' => 'chapters/' . $this->author->id . '/sep.jpg',
+                        'alt' => '   ',
+                    ],
+                ],
+                'published' => '1',
+            ])->assertSessionHasErrors();
+
+        $html = $this->get(route('chapters.create', ['storySlug' => $this->story->slug]))
+            ->assertOk()->getContent();
+
+        expect($html)->toContain("mode: 'advanced'");
+        expect(strpos($html, 'Premier'))->toBeLessThan(strpos($html, 'Deuxième'));
+    });
+
+    it('keeps the author note a simple rich-text field', function () {
+        $chapter = createPublishedChapter($this, $this->story, $this->author, [
+            'author_note' => '<p>Une note</p>',
+        ]);
+
+        $html = $this->get(route('chapters.edit', [
+            'storySlug' => $this->story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]))->assertOk()->getContent();
+
+        expect($html)->toContain('rich-text-chapter-author-note-editor');
+        expect($html)->toContain('name="author_note"');
+    });
+
+    it('prints advanced content in a single quote root', function () {
+        Storage::disk('public')->put('chapters/' . $this->author->id . '/sep.jpg', 'x');
+
+        $chapter = advancedChapter($this, [
+            ['type' => 'text', 'html' => '<p>Avant l\'image</p>'],
+            [
+                'type' => 'image',
+                'path' => 'chapters/' . $this->author->id . '/sep.jpg',
+                'alt' => 'Séparateur',
+            ],
+            ['type' => 'text', 'html' => '<p>Après l\'image</p>'],
+        ]);
+
+        $html = $this->get(route('chapters.show', [
+            'storySlug' => $this->story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]))->assertOk()->getContent();
+
+        expect(substr_count($html, 'data-quote-article'))->toBe(1);
+
+        $article = Str::between($html, 'data-quote-article', '</article>');
+        expect($article)->toContain('Avant l\'image');
+        expect($article)->toContain('Après l\'image');
+        expect($article)->toContain('ce-block--image');
     });
 });

@@ -8,6 +8,9 @@ import { RichTextEditor } from './RichTextEditor';
  * Carries two rich-text editors — the author note (hidden behind a button
  * until asked for) and the content — so both are exposed by name rather than
  * by position.
+ *
+ * The content field is `<x-editor::multi>`: `content` is its simple pane,
+ * which carries a generated id and so is reached through the component root.
  */
 export class ChapterEditPage {
   readonly content: RichTextEditor;
@@ -18,7 +21,7 @@ export class ChapterEditPage {
     private readonly storySlug: string = STORY.slug,
     private readonly chapterSlug: string = STORY.publishedChapter.slug,
   ) {
-    this.content = new RichTextEditor(page, 'chapter-content-editor');
+    this.content = new RichTextEditor(page, page.locator('.multi-editor [data-testid^="rich-text-me-simple-"]'));
     this.authorNote = new RichTextEditor(page, 'chapter-author-note-editor');
   }
 

@@ -18,7 +18,7 @@
 | 3 | Story — `content_blocks` column, model cast, snapshot reads persisted counts | S | — | DONE |
 | 4 | Story — content resolver, request branching, counts from text blocks, moderation | M | 1, 3 | DONE |
 | 5 | Story — media usage provider (the data-loss surface) | M | 3, 4 | DONE |
-| 6 | Story — chapter form swaps to MultiEdit + read-side CSS re-scoping | S | 2, 4, 5 | TODO |
+| 6 | Story — chapter form swaps to MultiEdit + read-side CSS re-scoping | S | 2, 4, 5 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

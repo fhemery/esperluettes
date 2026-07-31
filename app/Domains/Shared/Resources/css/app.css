@@ -263,7 +263,15 @@ html {
   white-space-collapse: preserve;
   word-break: break-word;
 }
-.rich-content p:last-of-type {
+/* Only the very last paragraph of the content drops its bottom padding.
+   `:last-of-type` is scoped to the paragraph's parent, so the plain
+   `.rich-content p:last-of-type` would fire once per block on MultiEdit
+   advanced content — where each block is a `div.ce-block--text` parent — and
+   collapse the spacing at every block boundary. The child combinator keeps the
+   first rule to unblocked content, the second to the last block only.
+   Edit-side surfaces have their own rule in the Editor domain's editor.css. */
+.rich-content > p:last-of-type,
+.rich-content > .ce-block:last-child p:last-of-type {
   padding-bottom: 0;
 }
 

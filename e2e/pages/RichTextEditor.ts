@@ -3,16 +3,17 @@ import { expect, type Locator, type Page } from '@playwright/test';
 /**
  * Component object for `<x-editor::rich-text>`.
  *
- * Anchored on the wrapper's `data-testid`, which the component derives from
- * the `id` it is given. Everything else is scoped inside it, so a page with
- * several editors never mixes them up.
+ * Anchored on the wrapper, given either as the `id` the component derives its
+ * `data-testid` from, or as a ready-made locator — `<x-editor::multi>` builds
+ * its simple pane with a generated id, so it can only be reached positionally.
+ * Everything else is scoped inside that wrapper, so a page with several
+ * editors never mixes them up.
  */
 export class RichTextEditor {
-  constructor(private readonly page: Page, private readonly id: string) {}
+  readonly root: Locator;
 
-  /** The component wrapper: toolbar, editor and counter all live in here. */
-  get root(): Locator {
-    return this.page.getByTestId(`rich-text-${this.id}`);
+  constructor(private readonly page: Page, target: string | Locator) {
+    this.root = typeof target === 'string' ? page.getByTestId(`rich-text-${target}`) : target;
   }
 
   /** Quill's contenteditable surface. */
@@ -31,7 +32,7 @@ export class RichTextEditor {
   }
 
   get counter(): Locator {
-    return this.page.locator(`#quill-counter-${this.id}`);
+    return this.root.locator('[id^="quill-counter-"]:not([id^="quill-counter-wrap-"])');
   }
 
   /** Resolves once Quill has booted and replaced the div — i.e. the bundle ran. */

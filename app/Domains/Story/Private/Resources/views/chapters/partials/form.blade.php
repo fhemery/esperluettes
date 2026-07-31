@@ -29,12 +29,39 @@
     <!-- Content -->
     <div>
         <x-input-label for="content" required="true" size="md" color="secondary" :value="__('story::chapters.form.content.label')" />
-        <x-editor::rich-text id="chapter-content-editor" name="content"
-            :nbLines="15"
+        @php
+            // Non-empty blocks reopen the component in advanced mode, so the mode is
+            // restored from the stored data with no extra field.
+            $chapterBlocks = $chapter->content_blocks ?? [];
+            // On a failed validation re-render, rebuild the blocks from old input, in
+            // the submitted order (uploaded files are not repopulated by the browser
+            // and must be re-picked).
+            if (old('mode') === 'advanced' && is_array(old('blocks'))) {
+                $chapterBlocks = [];
+                foreach (array_filter(explode(',', (string) old('blocks_order', ''))) as $uid) {
+                    $oldBlock = old('blocks')[$uid] ?? null;
+                    if (!is_array($oldBlock)) { continue; }
+                    $chapterBlocks[] = [
+                        'type' => $oldBlock['type'] ?? 'text',
+                        'html' => $oldBlock['html'] ?? '',
+                        'path' => $oldBlock['path'] ?? null,
+                        'alt' => $oldBlock['alt'] ?? '',
+                        'caption' => $oldBlock['caption'] ?? '',
+                        'keep_original' => !empty($oldBlock['keep_original']),
+                    ];
+                }
+            }
+        @endphp
+        <x-editor::multi
+            scope="chapters/{{ auth()->id() }}"
+            name="blocks" contentName="content"
+            :contentValue="old('content', $chapter->content ?? '')"
+            :blocks="$chapterBlocks"
             toolbar="links"
-            class="mt-1 block w-full" defaultValue="{{ old('content', $chapter->content ?? '') }}"
-            :indentParagraphs="true"  />
+            class="mt-1 block w-full"
+            :nbLines="15" :indentParagraphs="true" />
         <x-input-error :messages="$errors->get('content')" class="mt-2" />
+        <x-input-error :messages="$errors->get('blocks')" class="mt-2" />
     </div>
 
     <!-- Published toggle + scheduled publication -->
