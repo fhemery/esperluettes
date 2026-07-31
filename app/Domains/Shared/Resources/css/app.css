@@ -275,6 +275,16 @@ html {
   padding-bottom: 0;
 }
 
+/* Reading surfaces indent their paragraphs by setting `text-indent` on the
+   whole article, and `text-indent` is inherited: it also shifts the first
+   inline line box of an image block — the `<picture>` inside
+   `figure.media-image` — 2rem past its own figure, defeating `text-center` and
+   adding a horizontal scrollbar on a phone. The figure opts out; paragraphs,
+   which must stay indented, are untouched. */
+.rich-content .media-image {
+  text-indent: 0;
+}
+
 .rich-content a {
   text-decoration: underline;
 }
