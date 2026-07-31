@@ -32,6 +32,20 @@ function advancedChapterPayload(array $overrides = []): array
 
 describe('Chapter advanced mode', function () {
 
+    it('serves both chapter forms as multipart, so an image block can carry its file', function () {
+        $chapter = createUnpublishedChapter($this, $this->story, $this->author);
+
+        $create = $this->get(route('chapters.create', ['storySlug' => $this->story->slug]))
+            ->assertOk()->getContent();
+        expect($create)->toContain('enctype="multipart/form-data"');
+
+        $edit = $this->get(route('chapters.edit', [
+            'storySlug' => $this->story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]))->assertOk()->getContent();
+        expect($edit)->toContain('enctype="multipart/form-data"');
+    });
+
     it('stores the blocks and the rendered content', function () {
         Storage::disk('public')->put('chapters/' . $this->author->id . '/sep.jpg', 'x');
 
