@@ -32,8 +32,10 @@ so a new block type costs one branch and no DTO. Two types exist:
 Rules:
 
 - Order in the array is order on the page.
-- Text HTML is sanitized with the `multiedit-text` Purifier profile — `<img>` is
-  stripped, so images only ever come from image blocks.
+- Text HTML is sanitized with a Purifier profile the consumer chooses,
+  `multiedit-text` by default (see [Sanitizing profiles](#sanitizing-profiles)).
+  Every MultiEdit profile strips `<img>`, so images only ever come from image
+  blocks.
 - A text block that sanitizes to an empty string is skipped; an image block
   without a `path` is skipped.
 - `path` is a **Media** path. Editor never uploads or deletes files — the storing
@@ -48,12 +50,36 @@ for images, a `<x-media::image>` carrying `class="ce-block ce-block--image"`.
 
 | Method | Purpose |
 |--------|---------|
-| `render(array $blocks): string` | Block document → sanitized HTML |
-| `sanitizeText(string $html): string` | One text block's HTML through the `multiedit-text` profile |
+| `render(array $blocks, string $profile = 'multiedit-text'): string` | Block document → sanitized HTML |
+| `sanitizeText(string $html, string $profile = 'multiedit-text'): string` | One text block's HTML through the given profile |
 | `plainTextLength(array $blocks): int` | Character count across **text** blocks only, for min/max validation |
+| `plainText(array $blocks): string` | Concatenated `html` of **text** blocks only, in order, **unmodified** |
 
 It is a concrete class resolved from the container (no interface, no binding) —
 inject it by type, as `NewsService` does.
+
+`plainText()` and `plainTextLength()` are not two spellings of the same thing.
+`plainTextLength()` strips tags, decodes entities, collapses whitespace runs and
+trims — the right normalisation for a min/max bound, the wrong one for a count
+that must not move. `plainText()` returns the stored strings byte-identically, so
+a consumer can run its own counter and get the same number before and after a
+document is converted into a single text block.
+
+### Sanitizing profiles
+
+Profiles live in `config/purifier.php` — framework configuration, not domain
+code — and are **named after the capability, never after the consumer**, exactly
+like the toolbar presets. Editor does not encode who its consumers are.
+
+| Profile | Allows | Use |
+|---------|--------|-----|
+| `multiedit-text` | headings, `a` with `rel`/`target` (so external links pass), `span.style`; **no** `class` attributes | The default: admin-ish content (News) |
+| `multiedit-narrative` | `p.class` / `span.class` with the `ql-align-*`, `ql-spoiler`, `ql-custom-emoji-*` whitelist; `a.href` **without** `rel`/`target` | Prose written with the `links` / `narrative` toolbars, where alignment, spoilers and emoji must survive |
+
+Neither allows `<img>`. `multiedit-narrative` is `strict-with-links` minus
+`<img>`; its class whitelist is copied from it, not a hand-picked subset.
+Stripping *external* links is a content policy a consumer applies to the HTML
+before storing it, not something a profile does.
 
 ## Blade components
 

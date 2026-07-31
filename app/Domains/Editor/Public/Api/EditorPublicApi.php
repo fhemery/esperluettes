@@ -21,18 +21,29 @@ final class EditorPublicApi
      * Render an ordered array of typed blocks to sanitized HTML.
      *
      * @param array<int, array<string, mixed>> $blocks
+     * @param string $profile Purifier profile applied to text blocks
      */
-    public function render(array $blocks): string
+    public function render(array $blocks, string $profile = 'multiedit-text'): string
     {
-        return $this->renderer->render($blocks);
+        return $this->renderer->render($blocks, $profile);
     }
 
     /**
-     * Sanitize one text block's HTML with the no-img MultiEdit profile.
+     * Sanitize one text block's HTML with a no-img MultiEdit profile.
      */
-    public function sanitizeText(string $html): string
+    public function sanitizeText(string $html, string $profile = 'multiedit-text'): string
     {
-        return $this->renderer->sanitizeText($html);
+        return $this->renderer->sanitizeText($html, $profile);
+    }
+
+    /**
+     * Concatenated `html` of text blocks only, in order, unmodified.
+     *
+     * @param array<int, array<string, mixed>> $blocks
+     */
+    public function plainText(array $blocks): string
+    {
+        return $this->renderer->plainText($blocks);
     }
 
     /**

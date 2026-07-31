@@ -72,6 +72,67 @@ describe('ContentBlocksRenderer::render', function () {
     });
 });
 
+describe('ContentBlocksRenderer profiles', function () {
+    $document = [
+        ['type' => 'text', 'html' => '<p class="ql-align-center">Hi <span class="ql-spoiler">boo</span></p>'],
+    ];
+
+    it('defaults to the multiedit-text profile', function () use ($document) {
+        expect(renderer()->render($document))
+            ->toBe('<div class="ce-block ce-block--text"><p>Hi <span>boo</span></p></div>');
+    });
+
+    it('honours a passed profile', function () use ($document) {
+        expect(renderer()->render($document, 'multiedit-narrative'))
+            ->toBe('<div class="ce-block ce-block--text"><p class="ql-align-center">Hi <span class="ql-spoiler">boo</span></p></div>');
+    });
+
+    it('preserves alignment, spoiler and emoji classes under multiedit-narrative', function () {
+        $html = renderer()->sanitizeText(
+            '<p class="ql-align-right">A<span class="ql-spoiler">s</span>'
+                . '<span class="ql-custom-emoji ql-custom-emoji-esperamour">e</span></p>',
+            'multiedit-narrative'
+        );
+
+        expect($html)
+            ->toContain('class="ql-align-right"')
+            ->toContain('class="ql-spoiler"')
+            ->toContain('ql-custom-emoji-esperamour');
+    });
+
+    it('strips <img> under multiedit-narrative', function () {
+        $html = renderer()->sanitizeText('<p>Before<img src="/x.jpg" alt="x">After</p>', 'multiedit-narrative');
+
+        expect($html)->not->toContain('<img');
+        expect($html)->toContain('Before');
+        expect($html)->toContain('After');
+    });
+
+    it('still permits internal anchor markup under multiedit-narrative', function () {
+        $html = renderer()->sanitizeText('<p><a href="/stories/1">Chapitre</a></p>', 'multiedit-narrative');
+
+        expect($html)->toContain('<a href="/stories/1">Chapitre</a>');
+    });
+});
+
+describe('ContentBlocksRenderer::plainText', function () {
+    it('returns text blocks only, in order', function () {
+        $text = renderer()->plainText([
+            ['type' => 'text', 'html' => '<p>One</p>'],
+            ['type' => 'image', 'path' => 'news/a.jpg', 'alt' => 'ignored caption'],
+            ['type' => 'text', 'html' => '<p>Two</p>'],
+        ]);
+
+        expect($text)->toBe('<p>One</p><p>Two</p>');
+    });
+
+    it('does not collapse or trim whitespace', function () {
+        $html = "  <p>Deux   mots</p>\n\n<p>Et\tune tabulation</p>  ";
+
+        expect(renderer()->plainText([['type' => 'text', 'html' => $html]]))->toBe($html);
+    });
+});
+
 describe('ContentBlocksRenderer::plainTextLength', function () {
     it('sums plain-text length of text blocks only', function () {
         $len = renderer()->plainTextLength([

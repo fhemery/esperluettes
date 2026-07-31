@@ -4,7 +4,7 @@
 
 ## Public API
 
-- [EditorPublicApi](Public/Api/EditorPublicApi.php) — the **only** PHP entry point other domains use: `render`, `sanitizeText`, `plainTextLength`. Autowired concrete class; nothing to bind.
+- [EditorPublicApi](Public/Api/EditorPublicApi.php) — the **only** PHP entry point other domains use: `render`, `sanitizeText`, `plainTextLength`, `plainText`. Autowired concrete class; nothing to bind.
 - `<x-editor::rich-text>` and `<x-editor::multi>` — the authoring components (see README). Registered by [EditorServiceProvider](Public/Providers/EditorServiceProvider.php).
 
 ## Events emitted
@@ -41,4 +41,6 @@ None.
 
 **Quill images are always blocked.** `editor-bundle.js` drops pasted and dropped images at the Quill level. Do not attempt to add image upload support through the Quill toolbar.
 
-**Text sanitization uses the global `multiedit-text` Purifier profile** in `config/purifier.php` — framework configuration, not domain code. It forbids `<img>` on purpose: images must be image blocks so Media can track their paths.
+**Text sanitization profiles are global Purifier config** in `config/purifier.php` — framework configuration, not domain code. `render()` and `sanitizeText()` take an optional `$profile`, defaulting to `multiedit-text`, so adding a profile can never change an existing consumer's output. `multiedit-narrative` is the second one: `strict-with-links` minus `<img>`, keeping `p.class`/`span.class` so `ql-align-*`, `ql-spoiler` and `ql-custom-emoji-*` survive. Every MultiEdit profile forbids `<img>` on purpose: images must be image blocks so Media can track their paths. Like toolbar presets, **profiles are named after the capability, never after the consumer** — there is no `multiedit-chapter`.
+
+**`plainText()` is not `plainTextLength()` with the count removed.** `plainTextLength()` normalises (strip tags, decode entities, collapse whitespace, trim) for min/max validation; `plainText()` returns the stored `html` of text blocks concatenated **byte-identically**. A consumer whose counts must not shift when a document is converted into a single text block needs the latter — normalising first would move `character_count`. Do not "simplify" one into the other.
