@@ -20,22 +20,15 @@ export class ChapterEditPage {
   constructor(
     private readonly page: Page,
     private readonly storySlug: string = STORY.slug,
-    private readonly chapterSlug: string | null = STORY.publishedChapter.slug,
+    private readonly chapterSlug: string = STORY.publishedChapter.slug,
   ) {
     this.blocks = new MultiEditor(page);
     this.content = this.blocks.simple;
     this.authorNote = new RichTextEditor(page, 'chapter-author-note-editor');
   }
 
-  /** The create form, which has no chapter yet. */
-  static create(page: Page, storySlug: string = STORY.slug): ChapterEditPage {
-    return new ChapterEditPage(page, storySlug, null);
-  }
-
   get path(): string {
-    return this.chapterSlug === null
-      ? `/stories/${this.storySlug}/chapters/create`
-      : `/stories/${this.storySlug}/chapters/${this.chapterSlug}/edit`;
+    return `/stories/${this.storySlug}/chapters/${this.chapterSlug}/edit`;
   }
 
   get title(): Locator {
@@ -48,16 +41,6 @@ export class ChapterEditPage {
 
   get saveButton(): Locator {
     return this.page.getByTestId('chapter-save');
-  }
-
-  /**
-   * Flip the publish toggle. The input is `sr-only`, so Playwright cannot
-   * click it — the label is the clickable surface (see the run-app gotchas).
-   */
-  async setPublished(on: boolean): Promise<void> {
-    if ((await this.publishedToggle.isChecked()) === on) return;
-    await this.page.locator('label:has(#published)').click();
-    await expect(this.publishedToggle).toBeChecked({ checked: on });
   }
 
   /** Navigate without asserting — for the role checks, where a 403 is the point. */
@@ -75,12 +58,6 @@ export class ChapterEditPage {
   async save(): Promise<void> {
     await this.saveButton.click();
     await this.page.waitForLoadState('networkidle');
-    await expect(this.page, 'still on the edit form after saving').not.toHaveURL(/\/(edit|create)$/);
-  }
-
-  /** Submit and stay wherever the app lands — for the cases where saving must fail. */
-  async trySave(): Promise<void> {
-    await this.saveButton.click();
-    await this.page.waitForLoadState('networkidle');
+    await expect(this.page, 'still on the edit form after saving').not.toHaveURL(/\/edit$/);
   }
 }

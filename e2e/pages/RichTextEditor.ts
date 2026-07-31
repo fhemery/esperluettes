@@ -26,23 +26,6 @@ export class RichTextEditor {
     return this.root.locator('.ql-toolbar');
   }
 
-  /** The sized box around the writing surface — the editor bundle sets its height. */
-  get container(): Locator {
-    return this.root.locator('.ql-container');
-  }
-
-  /**
-   * How many lines of text the writing surface shows, which is what `nbLines`
-   * buys: the bundle sizes `.ql-container` at `nbLines × line-height`.
-   */
-  async visibleLines(): Promise<number> {
-    return this.container.evaluate((el) => {
-      const surface = el.querySelector('.ql-editor');
-      const lineHeight = parseFloat(getComputedStyle(surface ?? el).lineHeight) || 24;
-      return Math.round(el.getBoundingClientRect().height / lineHeight);
-    });
-  }
-
   /** The hidden textarea the form actually submits. */
   get input(): Locator {
     return this.root.locator('textarea');

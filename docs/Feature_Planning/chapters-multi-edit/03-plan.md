@@ -490,26 +490,93 @@ is presentation only: no service, request or resolver change.
 Filled by VERIFY. Run the app per `.agents/skills/run-app`; screenshots go to
 `shots/`.
 
+Covered by `e2e/tests/features/chapters-multi-edit.spec.ts` (authoring) and
+`chapters-multi-edit-reading.spec.ts` (reading). 30 of the 31 tests are green;
+the one red is the new `a chapter carrying an image does not scroll sideways
+either`, which cannot run until the chapter *create* form carries a
+`data-testid` on its submit button — see the note under the defects. **D1**,
+**D2** and **D3** are fixed and re-verified; **D4** stays open and goes to the
+backlog.
+
+Two problems in the specs themselves were fixed on the way, neither of them a
+product defect: the inline 2×2 PNG used for uploads had a corrupt IDAT checksum
+(GD refused it and the upload 500'd inside `ImageService::generateVariants()`),
+and `ImageBlock.openPicker()` read the picker before its `/media/library` fetch
+had returned. Both live in `e2e/pages/MultiEditor.ts`.
+
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter edit form, unconverted chapter (author) | Opens in Simple mode with the `links` toolbar, 15 visible lines, indented paragraphs — indistinguishable from before the feature | |
-| Chapter edit form, new chapter (author) | Opens in Simple mode, empty, toggle available | |
-| Chapter edit form — conversion | Clicking **Avancé** turns the existing HTML into one text block with no visible content change | |
-| Chapter edit form — block controls | Add / reorder / delete text and image blocks under Alpine; each new text block has the same height and indentation as the first | |
-| Chapter edit form — return to Simple | **Simple** is disabled with its French tooltip when there is more than one block or any image; enabled and working with exactly one text block | |
-| Image block — upload | Upload lands in `chapters/{my user id}`; preview renders; caption optional | |
-| Image block — reuse picker | Shows only my own chapter images; the same image can be inserted twice | |
-| Image block — missing alt | Saving with a blank alt shows the French validation error and does not save | |
-| **Typography, side by side** (risk 5, open question 3) | An unconverted chapter and a converted one with 3+ text blocks, screenshotted together: paragraph indent (2rem), inter-paragraph spacing, and spacing **across a block boundary** are identical | |
-| Reading page — converted chapter | Text and images interleave; images are responsive; captions render below | |
-| Reading page — quotes | Selecting text on a converted chapter still opens the quote affordance; existing quotes on an *unconverted* chapter are still highlighted | |
-| Reading page — mobile (375px) | Blocks, images and captions stack correctly; no horizontal scroll | |
-| Chapter edit form — mobile (375px) | Toggle and block controls reachable and usable | |
-| Word count display | The chapter's displayed word count is unchanged immediately after a no-op conversion | |
-| Guest / non-confirmed reader | Sees the converted chapter exactly as before; no edit affordance anywhere | |
-| Moderation panel | A converted chapter's snapshot still shows its rendered content; "empty content" leaves the chapter blank and it stays blank after the author saves again | |
-| Co-authored story | A co-author converting a chapter uploads into *their own* folder; both authors' images render on the reading page | |
-| Soft-deleted then restored chapter | After a delete + restore cycle (and a `media:gc` run), the chapter's images still display | |
+| Chapter edit form, unconverted chapter (author) | Opens in Simple mode with the `links` toolbar, 15 visible lines, indented paragraphs — indistinguishable from before the feature | ✅ `links` preset (link button present, no image button), `.ql-container` sized at exactly 15 lines, surface inside `.ql-indent`. `shots/edit-form-simple-desktop.png` |
+| Chapter edit form, new chapter (author) | Opens in Simple mode, empty, toggle available | ✅ |
+| Chapter edit form — conversion | Clicking **Avancé** turns the existing HTML into one text block with no visible content change | ✅ one text block, text identical before/after |
+| Chapter edit form — block controls | Add / reorder / delete text and image blocks under Alpine; each new text block has the same height and indentation as the first | ✅ **D2 fixed and re-verified.** Add, insert, reorder and delete all work; an added block still matches the first to the pixel (height + `.ql-indent` + `links` toolbar). After deleting the second of two blocks, `blocks_order` submits exactly the surviving uid and the remaining editor keeps its text |
+| Chapter edit form — return to Simple | **Simple** is disabled with its French tooltip when there is more than one block or any image; enabled and working with exactly one text block | ✅ **D2 fixed and re-verified.** Disabled + tooltip correct with 2 blocks and with an image; deleting back down to one text block re-enables it, and going back to Simple carries the text into the simple pane unchanged |
+| Image block — upload | Upload lands in `chapters/{my user id}`; preview renders; caption optional | ✅ **D1 fixed and re-verified.** The upload saves and comes back on reopening the form: preview `storage/chapters/4/…-400w.webp` (author is user 4), alt and caption round-trip, and a blank caption saves fine. `shots/edit-form-image-block-desktop.png` |
+| Image block — reuse picker | Shows only my own chapter images; the same image can be inserted twice | ✅ six items, **every one under `chapters/4/`** — the acting author's own folder and nothing else; picking the same item into two blocks yields the same `[path]` in both. (The picker fetches asynchronously; the page object now waits for `/media/library` before reading it) |
+| Image block — missing alt | Saving with a blank alt shows the French validation error and does not save | ✅ for alt itself: the input goes `:invalid` as soon as the block carries an image and the form does not submit; server-side rule covered by `ChapterAdvancedModeTest::rejects an image block without alt text`. ❌ **D4** — a file the server rejects still prints the raw key `validation.image`; D1's disappearance narrowed this, it did not fix it |
+| **Typography, side by side** (risk 5, open question 3) | An unconverted chapter and a converted one with 3+ text blocks, screenshotted together: paragraph indent (2rem), inter-paragraph spacing, and spacing **across a block boundary** are identical | ✅ **no difference at all.** Two seeded chapters carrying the same six paragraphs, one plain and one split 2/2/2 across three text blocks: `text-indent` 32px on all six in both, `padding-bottom` 12px on paragraphs 1–5 and 0px on the last in both, and the laid-out gaps between consecutive paragraphs are equal — including paragraphs 2→3 and 4→5, which straddle a block boundary. Open question 3 is answered yes; assumption A11's re-scoped `p:last-of-type` rule works. `shots/typography-side-by-side-desktop.png`, `typography-{simple,advanced}-desktop.png` |
+| Reading page — converted chapter | Text and images interleave; images are responsive; captions render below | ✅ three text blocks render in order inside a single `[data-quote-article]` and read as one continuous text; blocks come out `text, image, text`, the `<img>` carries a `srcset` of `-400w`/`-800w` variants and the caption prints below. **D3 fixed and re-measured** at 1280px: figure **310→960**, image **310→960** — the right edges coincide and the image is centred to the pixel (was 342→992), with the figure's computed `text-indent` `0px` while the paragraphs keep `32px`. `shots/reading-image-desktop.png` |
+| Reading page — quotes | Selecting text on a converted chapter still opens the quote affordance; existing quotes on an *unconverted* chapter are still highlighted | ✅ drag-selecting inside the *second* block opens the toolbar with the Citer button; a quote saved on an unconverted chapter is still highlighted after a reload |
+| Reading page — mobile (375px) | Blocks, images and captions stack correctly; no horizontal scroll | ✅ **D3 fixed and re-measured.** Text-only chapters stack with `scrollWidth` 365 ≤ 375 as before (`shots/typography-advanced-mobile.png`), and a chapter **with an image** now measures `scrollWidth` **365** vs `clientWidth` 375 (was 381): the figure spans 16→349 and the image exactly 16→349, caption centred below. `shots/reading-image-mobile.png` |
+| Chapter edit form — mobile (375px) | Toggle and block controls reachable and usable | ✅ toggle in viewport, move/delete/insert controls visible and inside 375px, a reorder works. `shots/edit-form-advanced-mobile.png` |
+| Word count display | The chapter's displayed word count is unchanged immediately after a no-op conversion | ✅ 7 mots / 33 SEC before and after. ⚠️ the comparison must be taken after a Simple-mode save: raw seed HTML that never went through `strict-with-links` counts one character less than the same text after a Purifier round trip, and that is the seed's formatting, not the conversion's |
+| Guest / non-confirmed reader | Sees the converted chapter exactly as before; no edit affordance anywhere | ✅ both a guest and a non-confirmed `user` get the six paragraphs and no edit link |
+| Moderation panel | A converted chapter's snapshot still shows its rendered content; "empty content" leaves the chapter blank and it stays blank after the author saves again | n/a in a browser — nothing client-side. Covered by `ChapterModerationEmptyContentTest` (`clears the blocks of an advanced chapter as well as its content`, `does not resurrect the moderated text on a subsequent save`); the snapshot prints the stored rendered `content`, which decision 8 keeps populated |
+| Co-authored story | A co-author converting a chapter uploads into *their own* folder; both authors' images render on the reading page | ✅ **D1 fixed and re-verified.** The co-author gets the same block editor and their conversion is what the other author reopens; the co-author's upload and then the author's own upload land in **two different `chapters/{id}` folders** and both render side by side on the reading page |
+| Soft-deleted then restored chapter | After a delete + restore cycle (and a `media:gc` run), the chapter's images still display | n/a in a browser — `media:gc` is an artisan command. Covered by `ChapterMediaUsageProviderTest` (`reports paths from soft deleted chapters`, `leaves a soft deleted chapters image alone`) |
+
+### Defects found and fixed
+
+**D1 — the chapter form was not `multipart/form-data`, so no image block could
+ever be saved.** Fixed by adding `enctype="multipart/form-data"` to the `<form>`
+in `chapters/create.blade.php` and `chapters/edit.blade.php`. Re-verified: an
+upload now stores under `chapters/{acting user id}`, comes back on reopening the
+form, and renders on the reading page.
+
+**D2 — deleting a block threw, leaving the block editor's state stale.**
+`removeBlock()` in `<x-editor::multi>` resynced through `$refs.container`, which
+Alpine resolves from the *calling* element — undefined once the block had been
+detached. Fixed by capturing the container element in `init()` and using it
+throughout. Re-verified: `blocks_order` no longer names the deleted block, and
+**Simple** re-enables after deleting back down to one text block. The fix is in
+the Editor domain, so News's block editor gets it too.
+
+D1 and D2 were found by the first VERIFY pass; **D3** below by the second, once
+D1's fix made it possible to put an image on a reading page at all.
+
+**D3 — image blocks inherited the reading article's `text-indent`, so they sat
+32px too far right and overflowed at 375px.** `<article class="prose
+rich-content max-w-none [text-indent:2rem] text-xl">` sets `text-indent: 32px`,
+which applies to the first inline line box — and the image block renders as
+`<figure class="media-image text-center ce-block ce-block--image">` around an
+**inline** `<picture>`. Measured before the fix: at 1280px the figure spanned
+310→960 while the image spanned 342→992, 32px past its own container, so
+`text-center` did nothing; at 375px the `<picture>` reached `right: 381`
+against a `clientWidth` of 375 and the page gained a horizontal scrollbar
+(`scrollWidth` 381, where the same chapters without images measure 365). Fixed
+with `.rich-content .media-image { text-indent: 0 }` in
+`app/Domains/Shared/Resources/css/app.css`, in the same block assumption A11
+touched and scoped to `.rich-content` so it cannot reach News or static pages,
+where no ancestor sets `text-indent` anyway. Re-measured after the fix: figure
+and image right edges coincide at 1280px (both 310→960, centring offset 0px)
+and at 375px (both 16→349), `scrollWidth` back to 365 ≤ 375, the figure's
+computed `text-indent` `0px` — while all six paragraphs of both the converted
+and the unconverted chapter keep `text-indent: 32px`, `padding-bottom` 12px on
+paragraphs 1–5 and 0px on the last, and identical laid-out gaps.
+
+### Defects still open
+
+**D4 — `blocks.*.file` has no validation messages, so a rejected image prints
+the raw key `validation.image`.** `ChapterRequest::rules()` adds
+`'blocks.*.file' => ['nullable', 'image', 'max:2048']` but `messages()` only
+overrides `blocks.*.alt.required_if`; the app publishes no `lang/*/validation.php`,
+so both the `image` and the `max` failures surface untranslated. D1 used to
+trigger this on *every* image save, which is why the first pass logged it as
+D1 noise; with the enctype fixed it is narrower but still reachable — upload a
+file that is not a decodable image, or one over 2 Mo. `NewsRequest` has the
+same gap on its own `blocks.*.file` (admin-only, pre-existing).
+**Resolution: the user decided this goes to the backlog rather than being fixed
+in this feature.** Carry it into WRAP as a backlog entry, not as a fix.
 
 ## Open items
 

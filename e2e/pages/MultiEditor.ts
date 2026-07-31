@@ -24,7 +24,7 @@ export class MultiEditor {
   /**
    * Resolves once the component has booted, whichever mode it opened in: the
    * Simple pane is `x-show`-hidden on an advanced document, so waiting for it
-   * unconditionally would hang on exactly the chapters this feature adds.
+   * unconditionally would hang on a chapter stored as blocks.
    */
   async waitUntilReady(): Promise<void> {
     await expect(this.root).toBeVisible();
@@ -56,24 +56,12 @@ export class MultiEditor {
     return this.root.locator('button[x-on\\:click="goAdvanced()"]');
   }
 
-  get simplePane(): Locator {
-    return this.root.locator('div[x-show="mode === \'simple\'"]');
-  }
-
-  get advancedPane(): Locator {
-    return this.root.locator('div[x-show="mode === \'advanced\'"]');
-  }
-
   get blocks(): Locator {
     return this.root.locator('.multi-editor__blocks > [data-block]');
   }
 
   get textBlocks(): Locator {
     return this.root.locator('.multi-editor__blocks > [data-block][data-type="text"]');
-  }
-
-  get imageBlocks(): Locator {
-    return this.root.locator('.multi-editor__blocks > [data-block][data-type="image"]');
   }
 
   block(index: number): Locator {
@@ -83,11 +71,6 @@ export class MultiEditor {
   /** The Quill surface of the nth text block. */
   textBlockEditor(index: number): RichTextEditor {
     return new RichTextEditor(this.page, this.textBlocks.nth(index));
-  }
-
-  /** The hidden textarea the nth text block submits. */
-  textBlockInput(index: number): Locator {
-    return this.textBlocks.nth(index).locator('textarea');
   }
 
   async goAdvanced(): Promise<void> {
@@ -116,10 +99,6 @@ export class MultiEditor {
     await expect(this.blocks).toHaveCount(before + 1);
   }
 
-  async moveUp(index: number): Promise<void> {
-    await this.block(index).locator('button[x-on\\:click="moveUp($el)"]').click();
-  }
-
   async moveDown(index: number): Promise<void> {
     await this.block(index).locator('button[x-on\\:click="moveDown($el)"]').click();
   }
@@ -129,91 +108,4 @@ export class MultiEditor {
     await this.block(index).locator('button[x-on\\:click="removeBlock($el)"]').click();
     await expect(this.blocks).toHaveCount(before - 1);
   }
-
-  /** The image controls of a block, addressed by its position among all blocks. */
-  image(index: number): ImageBlock {
-    return new ImageBlock(this.page, this.block(index));
-  }
-}
-
-/** The `<x-media::image-field>` inside one image block. */
-export class ImageBlock {
-  constructor(private readonly page: Page, readonly root: Locator) {}
-
-  get fileInput(): Locator {
-    return this.root.locator('input[type="file"]');
-  }
-
-  get pathInput(): Locator {
-    return this.root.locator('input[name$="[path]"]');
-  }
-
-  get alt(): Locator {
-    return this.root.locator('input[name$="[alt]"]');
-  }
-
-  get caption(): Locator {
-    return this.root.locator('input[name$="[caption]"]');
-  }
-
-  get preview(): Locator {
-    return this.root.locator('img[alt]:not([alt=""])').first();
-  }
-
-  /** Upload a PNG generated on the fly — no binary fixture in the repo. */
-  async upload(name = 'e2e.png'): Promise<void> {
-    await this.fileInput.setInputFiles({ name, mimeType: 'image/png', buffer: pngBuffer() });
-    await expect(this.preview).toBeVisible();
-  }
-
-  /**
-   * Open the reuse picker and wait for its library to have arrived: the modal
-   * is shown synchronously and only then does Alpine `fetch` the library, so
-   * reading the items straight after the click reports an empty picker.
-   */
-  async openPicker(): Promise<Locator> {
-    const library = this.page.waitForResponse(
-      (response) => response.url().includes('/media/library') && response.status() === 200,
-    );
-    await this.root.locator('button[x-on\\:click="openPicker()"]').click();
-    const modal = this.root.locator('div[x-show="pickerOpen"]');
-    await expect(modal).toBeVisible();
-    await library;
-    // …and then for Alpine to have rendered it: either the grid has items or
-    // the "library is empty" paragraph is up. Until one of the two is true the
-    // picker is still loading and reading the items reports nothing.
-    await expect
-      .poll(async () => (await this.pickerItems.count()) > 0 || (await this.pickerEmptyMessage.count()) > 0, {
-        message: 'the picker never finished loading',
-      })
-      .toBe(true);
-    return modal;
-  }
-
-  get pickerItems(): Locator {
-    return this.root.locator('div[x-show="pickerOpen"] button[x-on\\:click="chooseExisting(item)"] img');
-  }
-
-  /** The `x-if` paragraph shown when the scope holds no reusable image. */
-  get pickerEmptyMessage(): Locator {
-    return this.root.locator('div[x-show="pickerOpen"] p.text-center');
-  }
-
-  async chooseFromPicker(index = 0): Promise<void> {
-    await this.pickerItems.nth(index).click();
-    await expect(this.preview).toBeVisible();
-  }
-}
-
-/**
- * A 2×2 red PNG. Small enough to stay under any size limit, and — unlike the
- * usual copy-pasted one-liners — with a valid IDAT checksum: GD refuses to
- * decode a PNG whose zlib check fails, and the upload then 500s inside
- * `ImageService::generateVariants()` rather than failing as a bad request.
- */
-export function pngBuffer(): Buffer {
-  return Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR42mP4z8AARAwQCgAf7gP9Y167WwAAAABJRU5ErkJggg==',
-    'base64',
-  );
 }
