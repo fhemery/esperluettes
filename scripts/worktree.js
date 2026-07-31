@@ -128,8 +128,10 @@ function main() {
 
   console.log('');
   log('vendor/ and node_modules/ are gitignored — install them before the gate:');
+  log('Initialize following the docs/ whether you are using sail or php directly');
+  log('Then:')
   console.log(`         cd ${dest}`);
-  console.log('         composer install && npm install');
+  console.log('         composer install && npm install && npm run build');
   console.log('         ./vendor/bin/sail up -d');
 }
 
