@@ -23,9 +23,18 @@ describe('Shared upload components', function () {
             ->assertSee(__('shared::sound-upload.drop_or_click'));
     });
 
-    it('keeps the shared image-upload lang keys for the story cover tab', function () {
+    it('no longer ships the image upload lang file', function () {
+        expect(file_exists(base_path('app/Domains/Shared/Resources/lang/fr/image-upload.php')))
+            ->toBeFalse();
+
         foreach (['drop_or_click', 'max_size', 'size_error'] as $key) {
-            expect(Lang::has('shared::image-upload.' . $key, 'fr'))->toBeTrue();
+            expect(Lang::has('shared::image-upload.' . $key, 'fr'))->toBeFalse();
+        }
+    });
+
+    it('leaves the story cover tab owning its own dropzone copy', function () {
+        foreach (['custom_drop_or_click', 'custom_max_size', 'custom_size_error'] as $key) {
+            expect(Lang::has('story::shared.cover.' . $key, 'fr'))->toBeTrue();
         }
     });
 });

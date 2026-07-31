@@ -221,8 +221,7 @@ Located in `Resources/views/components/`. Referenced as `<x-shared::component-na
 - `fields/time-field`, `fields/range-field`, `fields/multi-select-field`
 
 **Uploads**
-- `sound-upload` — the only upload widget left here. Images are handled by the Media domain's `<x-media::image-field>`, which owns paths, variants and garbage collection; there is no `image-upload` component anymore.
-- The `shared::image-upload` **lang file** survives the component's removal: Story's `cover-tab-custom` borrows `drop_or_click`, `max_size` and `size_error` for its own dropzone.
+- `sound-upload` — the only upload widget left here. Images are handled by the Media domain's `<x-media::image-field>`, which owns paths, variants and garbage collection; there is no `image-upload` component or lang file anymore.
 
 **UI primitives**
 - `badge`, `badge-overflow`, `metric-badge` — badge display

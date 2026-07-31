@@ -29,7 +29,7 @@ purpose — move or insert one anywhere without touching the others.
 | Secret Gift — participants cannot enrol                         | `secret-gift-enrolment/`        | interactive | TODO:may be absorbed by `calendar-subscription/` rather than needing its own mechanism                                                                                                                                |
 | Jardino — `deselected_at` is never written                      | `jardino-snapshot-deselection/` | auto        | TODO                                                                                                                                                                                                                  |
 | Gift sound on Media, retire `<x-shared::sound-upload>`          | `media-sound-upload/`           | interactive | TODO:leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out |
-| Shared `image-upload` lang file has no component                | `shared-upload-lang-ownership/` | auto        | TODO:leftover from `shared-image-upload-cleanup/`. Story's cover tab borrows three keys from a lang namespace whose component was deleted — move them to Story and delete the file                                     |
+| Shared `image-upload` lang file has no component                | `shared-upload-lang-ownership/` | auto        | WIP:WRAP — leftover from `shared-image-upload-cleanup/`. Story's three keys moved, Shared file deleted; BUILD 1/1 done |
 
 ## Done
 

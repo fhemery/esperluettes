@@ -45,9 +45,9 @@
             >
                 <div class="flex flex-col items-center gap-2 text-fg/60">
                     <span class="material-symbols-outlined text-[36px]">add_photo_alternate</span>
-                    <p class="text-xs text-center">{{ __('shared::image-upload.drop_or_click') }}</p>
+                    <p class="text-xs text-center">{{ __('story::shared.cover.custom_drop_or_click') }}</p>
                     <p class="text-xs text-center">{{ __('story::shared.cover.custom_dimensions') }}</p>
-                    <p class="text-xs text-center">{{ __('shared::image-upload.max_size', ['size' => 2]) }}</p>
+                    <p class="text-xs text-center">{{ __('story::shared.cover.custom_max_size', ['size' => 2]) }}</p>
                 </div>
             </div>
 
@@ -134,7 +134,7 @@ if (!window.customCoverTab) {
             checkSize(file) {
                 const maxKb = 2048;
                 if (file.size > maxKb * 1024) {
-                    this.sizeError = @js(__('shared::image-upload.size_error', ['max' => 2]));
+                    this.sizeError = @js(__('story::shared.cover.custom_size_error', ['max' => 2]));
                     this.$refs.customFileInput.value = '';
                     return false;
                 }
