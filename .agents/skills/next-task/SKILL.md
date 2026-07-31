@@ -11,9 +11,18 @@ not already in context — it defines the steps, statuses and folder layout.
 
 ## 1. Select
 
-Read [`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
+`git pull --rebase` first, then read
+[`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
 
-- Take the **first row with status `TODO`**, top to bottom.
+- **If the user named a task** (`/next-task annotations`), that is the task,
+  whatever its position or status. This is the normal form when two sessions
+  run in parallel — see "Parallel sessions" in
+  [`.agents/loop/README.md`](../../loop/README.md).
+- Otherwise take the **first row with status `TODO`**, top to bottom. Before
+  doing so, check `git worktree list`: if the repository has more than one
+  worktree, another session may be running, and picking a row unilaterally is
+  how two sessions end up on the same one. Say which row you would take and ask
+  the user to confirm, rather than guessing.
 - If a row is `WIP:*`, do not silently skip it — tell the user there is a task
   in progress and ask whether to finish it (`/continue-task`) or start the new
   one anyway.
@@ -71,7 +80,8 @@ Delegate research to read-only `Explore` agents too. "How does the FAQ image
 flow work?" costs the orchestrator one paragraph instead of six file reads it
 will then carry for the rest of the session.
 
-Dispatch each step in order. After each one, update the backlog status, then:
+Dispatch each step in order. After each one, update the backlog status — your
+own row only, never another session's — then:
 
 - `interactive` — stop, summarise the step's output in a few lines, and tell the
   user to `/clear` and run `/continue-task`. **One step per chat**, or one BUILD

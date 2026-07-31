@@ -11,10 +11,14 @@ resume logic differ.
 
 ## 1. Select
 
-Read [`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
+`git pull --rebase`, then read
+[`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
 
 - One `WIP:*` row → that is the task.
-- Several → list them and ask which one.
+- Several → normal when two sessions run in parallel worktrees, not an anomaly.
+  Prefer the row whose task folder *this* worktree's branch has been touching
+  (`git log --oneline main.. -- docs/Feature_Planning/`); if that is ambiguous,
+  list them and ask. Never resume another session's row.
 - None → say so and offer `/next-task`.
 - If the user named a task, use it whatever its status.
 

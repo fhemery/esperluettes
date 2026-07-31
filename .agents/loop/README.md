@@ -124,6 +124,46 @@ when the README points them there.
 
 Templates for each file live in [`templates/`](./templates/).
 
+## Parallel sessions
+
+Two sessions can run the loop at once, each in its own git worktree. Setting one
+up is the user's job, not an agent's — see
+[`docs/Working_With_Agents.md`](../../docs/Working_With_Agents.md). What follows
+is only what changes for *you* when a second session exists.
+
+The checkouts isolate themselves: Compose derives its project name from the
+directory basename, so each worktree has its own containers and MySQL volume,
+and PHP tests run on in-memory SQLite (`phpunit.xml`). Two gates never contend.
+
+What is *not* isolated is [`BACKLOG.md`](../../docs/Feature_Planning/BACKLOG.md).
+Task folders are per-slug and never collide; the backlog is one table where each
+task is a single line. Two rules keep that manageable:
+
+**The user names the task, the session does not choose it.** When more than one
+session is running, `/next-task <folder>` is given the folder explicitly:
+
+```
+/next-task annotations
+```
+
+Selection is the user's, made once, out loud, before either session starts —
+there is no protocol for two agents to agree on a row, because they never race
+for one. A bare `/next-task` still takes the first `TODO`, and is fine for a
+single session; with two open it is a bug, and the orchestrator says so rather
+than guessing.
+
+**Do not run overlapping tasks together.** The backlog's status column records
+the overlaps on purpose — `chapters-multi-edit/` and `annotations/` both touch
+per-block anchoring, and `editor-domain-visual-qa/` is meant to land before
+`chapters-multi-edit/` moves the DOM again. Two sessions on tasks like those
+merge badly whatever the backlog mechanics. Pick rows from different domains.
+
+Status updates then need no ceremony: `git pull --rebase` before editing the
+backlog, and let the row change ride along with the step's normal commit. Each
+session only ever touches its own row. They still land on two branches, so if
+the rows sit within a few lines of each other git may raise a one-line conflict
+when the second branch merges — take both rows and move on.
+
 ## Skills the loop leans on
 
 The steps do not restate procedures that already exist. `implement-phase` and

@@ -7,6 +7,7 @@
         "dev": "vite",
         "test": "vitest run",
         "gate": "node scripts/gate.js",
+        "worktree": "node scripts/worktree.js",
         "package": "node scripts/package.js",
         "prepare": "husky",
         "dep:check": "./vendor/bin/sail composer deptrac",

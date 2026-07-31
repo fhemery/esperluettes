@@ -6,6 +6,8 @@ The documentation will improve as the project progresses. For now, you can have 
 - How to setup [Setup](docs/Setup.md) the environment locally to work with it
 - How to [Deploy](docs/Deploying.md) the application
 - The current chosen [Architecture](docs/Architecture.md).
+- How to [work with agents](docs/Working_With_Agents.md) — the six-step feature
+  loop, and how to run two agent sessions in parallel worktrees.
 
 ## Contributing
 

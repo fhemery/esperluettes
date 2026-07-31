@@ -33,3 +33,7 @@ TODO.md
 
 # Browser driver screenshots (see .agents/skills/run-app)
 /.agents/skills/run-app/shots/
+
+# Claude Code's own scratch worktrees. Whole checkouts — never commit them.
+# Runnable worktrees go beside the repo instead (see docs/Working_With_Agents.md).
+/.claude/worktrees/
