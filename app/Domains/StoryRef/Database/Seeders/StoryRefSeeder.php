@@ -3,13 +3,13 @@
 namespace App\Domains\StoryRef\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Domains\StoryRef\Private\Services\GenreService;
-use App\Domains\StoryRef\Private\Services\AudienceService;
-use App\Domains\StoryRef\Private\Services\TypeService;
-use App\Domains\StoryRef\Private\Services\StatusService;
-use App\Domains\StoryRef\Private\Services\CopyrightService;
-use App\Domains\StoryRef\Private\Services\TriggerWarningService;
-use App\Domains\StoryRef\Private\Services\FeedbackService;
+use App\Domains\StoryRef\Private\Services\GenreRefService;
+use App\Domains\StoryRef\Private\Services\AudienceRefService;
+use App\Domains\StoryRef\Private\Services\TypeRefService;
+use App\Domains\StoryRef\Private\Services\StatusRefService;
+use App\Domains\StoryRef\Private\Services\CopyrightRefService;
+use App\Domains\StoryRef\Private\Services\TriggerWarningRefService;
+use App\Domains\StoryRef\Private\Services\FeedbackRefService;
 use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 use App\Domains\StoryRef\Private\Models\StoryRefAudience;
 use App\Domains\StoryRef\Private\Models\StoryRefType;
@@ -24,7 +24,7 @@ class StoryRefSeeder extends Seeder
     {
         // Genres (only if empty)
         if (!StoryRefGenre::query()->exists()) {
-            app(GenreService::class)->create([
+            app(GenreRefService::class)->create([
                 'name' => 'Fantasy',
                 'description' => 'Imaginary worlds filled with dragons',
                 // slug will auto-generate
@@ -34,7 +34,7 @@ class StoryRefSeeder extends Seeder
 
         // Audiences (only if empty)
         if (!StoryRefAudience::query()->exists()) {
-            app(AudienceService::class)->create([
+            app(AudienceRefService::class)->create([
                 'name' => 'All audiences',
                 'is_active' => true,
             ]);
@@ -42,7 +42,7 @@ class StoryRefSeeder extends Seeder
 
         // Types (only if empty)
         if (!StoryRefType::query()->exists()) {
-            app(TypeService::class)->create([
+            app(TypeRefService::class)->create([
                 'name' => 'Novel',
                 'is_active' => true,
             ]);
@@ -50,7 +50,7 @@ class StoryRefSeeder extends Seeder
 
         // Statuses (only if empty)
         if (!StoryRefStatus::query()->exists()) {
-            app(StatusService::class)->create([
+            app(StatusRefService::class)->create([
                 'name' => 'First draft',
                 'description' => null,
                 'is_active' => true,
@@ -59,7 +59,7 @@ class StoryRefSeeder extends Seeder
 
         // Copyrights (only if empty)
         if (!StoryRefCopyright::query()->exists()) {
-            app(CopyrightService::class)->create([
+            app(CopyrightRefService::class)->create([
                 'name' => 'All rights reserved',
                 'description' => null,
                 'is_active' => true,
@@ -68,7 +68,7 @@ class StoryRefSeeder extends Seeder
 
         // Trigger Warnings (only if empty)
         if (!StoryRefTriggerWarning::query()->exists()) {
-            app(TriggerWarningService::class)->create([
+            app(TriggerWarningRefService::class)->create([
                 'name' => 'Physical Violence',
                 'description' => 'People are getting hurt, be it with punches or weapons',
                 'is_active' => true,
@@ -77,7 +77,7 @@ class StoryRefSeeder extends Seeder
 
         // Feedbacks (only if empty)
         if (!StoryRefFeedback::query()->exists()) {
-            app(FeedbackService::class)->create([
+            app(FeedbackRefService::class)->create([
                 'name' => 'Gentle please',
                 'is_active' => true,
             ]);
