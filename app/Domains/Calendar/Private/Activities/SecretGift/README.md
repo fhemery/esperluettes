@@ -15,9 +15,7 @@ restrictions, the registry — are documented in the
 - `SecretGiftRegistration` (type key `secret-gift`) exposes the display
   component `secret-gift::secret-gift-component`; no config component.
 - `SecretGiftServiceProvider` loads the activity's own views (`secret-gift::`),
-  translations, migrations, routes and the shuffle command. It registers the
-  `secret-gift` prefix twice: `componentNamespace` for class components, and
-  `anonymousComponentPath` for the Blade files in `Resources/views/components/`.
+  translations, migrations, routes and the shuffle command.
 - It listens to no domain events.
 
 ## Tables
@@ -34,18 +32,7 @@ the participants and assigns each one the next in the list, wrapping around. Thi
 guarantees in one pass that nobody draws themselves and that everyone both gives
 and receives exactly once. It needs at least two participants. Re-running it
 deletes every existing assignment for the activity — and with it the gifts
-already prepared, since the gift lives on the assignment row. The *rows* go; the
-uploaded files under `calendar/secret-gift/{activity_id}/` do not. `ShuffleService`
-never touches the disk, so every re-run leaves orphaned images and sounds behind.
-
-**The upload widgets belong to this plugin, but their strings do not.**
-`Resources/views/components/image-upload.blade.php` and `sound-upload.blade.php`
-are anonymous components used only by the gift-preparation form; they moved here
-from Shared once they had no other consumer. They still resolve
-`shared::image-upload.*` / `shared::sound-upload.*` for their own chrome — the
-lang files stayed in Shared because Story's cover tab borrows three of those keys
-without rendering the widget. Adding a Calendar copy of those strings would leave
-two sources for the same text.
+already prepared, since the gift lives on the assignment row.
 
 **The shuffle is triggered manually**, by an admin running
 `sail artisan secret-gift:shuffle {activity_id}`. There is no scheduler, so the
