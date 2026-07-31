@@ -747,6 +747,8 @@ deptrac:
       - Shared
       - AuthPublic
       - CommentPublic
+      - EditorPublic
+      - MediaPublic
       - ModerationPublic
       - ProfilePublic
       - EventsPublic
