@@ -27,6 +27,14 @@ class AuthorHeat extends Component
      */
     public array $markerLabels = ['one' => '', 'other' => ''];
 
+    /**
+     * Same trick for the tint's accessible label, which names how many quotes
+     * cover the tinted text.
+     *
+     * @var array{one: string, other: string}
+     */
+    public array $tintLabels = ['one' => '', 'other' => ''];
+
     public function __construct(
         private QuotePublicApi $quoteApi,
         public int $chapterId,
@@ -38,6 +46,10 @@ class AuthorHeat extends Component
             $this->markerLabels = [
                 'one' => trans_choice('quote::ui.author_marker.label', 1, ['count' => '{count}']),
                 'other' => trans_choice('quote::ui.author_marker.label', 2, ['count' => '{count}']),
+            ];
+            $this->tintLabels = [
+                'one' => trans_choice('quote::ui.author_tint.label', 1, ['count' => '{count}']),
+                'other' => trans_choice('quote::ui.author_tint.label', 2, ['count' => '{count}']),
             ];
         }
     }

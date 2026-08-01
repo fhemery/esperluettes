@@ -51,6 +51,24 @@ describe('author view — badge and heat root on the chapter page', function () 
             ->assertSee('data-quote-author-badge', false);
     });
 
+    it('renders the passage popover only for the author', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        createQuote($reader->id, $chapter->id, $story->id);
+
+        $this->actingAs($author)
+            ->get(chapterUrl($story, $chapter))
+            ->assertOk()
+            ->assertSee('quoteAuthorPassagePanel(', false);
+
+        $this->actingAs($reader)
+            ->get(chapterUrl($story, $chapter))
+            ->assertOk()
+            ->assertDontSee('quoteAuthorPassagePanel(', false);
+    });
+
     it('renders no badge and no heat root for a confirmed reader', function () {
         $author = alice($this);
         $reader = bob($this);

@@ -58,7 +58,7 @@ need one, the phase is wrong — stop and report instead of adding it.
 | 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | DONE |
 | 5b | Reader — reject multi-block selections at capture | S | — | DONE |
 | 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5, 5b | DONE |
-| 7 | UI — passage popover (reader list) | M | 6 | TODO |
+| 7 | UI — passage popover (reader list) | M | 6 | DONE |
 | 8 | UI — chapter summary popup & focus flow | M | 6, 7 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.

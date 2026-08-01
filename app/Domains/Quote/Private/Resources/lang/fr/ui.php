@@ -24,6 +24,13 @@ return [
     'author_marker' => [
         'label' => '{1} :count citation sur ce passage|[2,*] :count citations sur ce passage',
     ],
+    'author_tint' => [
+        'label' => '{1} Passage cité par :count lecteurice|[2,*] Passage cité par :count lecteurices',
+    ],
+    'author_panel' => [
+        'title' => '{1} Cité par :count lecteurice|[2,*] Cité par :count lecteurices',
+        'close' => 'Fermer',
+    ],
     'toolbar' => [
         'label' => 'Actions sur la sélection',
     ],

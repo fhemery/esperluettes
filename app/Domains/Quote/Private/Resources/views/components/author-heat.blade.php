@@ -3,7 +3,9 @@
      data-quote-author-heat
      x-data="quoteAuthorHeat({
         markerLabelOne: {!! e(json_encode($markerLabels['one'])) !!},
-        markerLabelOther: {!! e(json_encode($markerLabels['other'])) !!}
+        markerLabelOther: {!! e(json_encode($markerLabels['other'])) !!},
+        tintLabelOne: {!! e(json_encode($tintLabels['one'])) !!},
+        tintLabelOther: {!! e(json_encode($tintLabels['other'])) !!}
      })">
 
     {{-- Below md the gutter is display:none, so no marker is ever built. --}}
@@ -11,6 +13,8 @@
          class="hidden md:block absolute inset-y-0 right-0 w-6 translate-x-1/2 pointer-events-none"></div>
 
     {{ $slot }}
+
+    <x-quote::author-passage-panel />
 </div>
 
 @once

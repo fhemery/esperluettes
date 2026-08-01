@@ -19,14 +19,22 @@ function depthClass(depth) {
  * Everything is derived from the `quoteAggregate` store: nothing is rendered
  * until the author turns the heat on, and turning it off removes it all.
  */
-export function quoteAuthorHeat({ markerLabelOne = '', markerLabelOther = '' } = {}) {
+export function quoteAuthorHeat({
+    markerLabelOne = '',
+    markerLabelOther = '',
+    tintLabelOne = '',
+    tintLabelOther = '',
+} = {}) {
     return {
         markerLabelOne,
         markerLabelOther,
+        tintLabelOne,
+        tintLabelOther,
         _stopEffect: null,
         _articleEl: null,
         _gutterEl: null,
         _groups: [],
+        _resolved: [],
         _markers: [],
         _resizeObserver: null,
         _onViewportChange: null,
@@ -86,6 +94,8 @@ export function quoteAuthorHeat({ markerLabelOne = '', markerLabelOther = '' } =
                 };
             });
 
+            this._resolved = resolved;
+
             const liveRanges = resolved.filter(r => r.range).map(r => r.range);
             if (!liveRanges.length) return;
 
@@ -117,9 +127,18 @@ export function quoteAuthorHeat({ markerLabelOne = '', markerLabelOther = '' } =
                 if (nodeStart >= nodeEnd) continue;
 
                 const mark = document.createElement('mark');
-                mark.className = `quote-heat text-inherit ${depthClass(segment.depth)}`;
+                mark.className = `quote-heat text-inherit cursor-pointer ${depthClass(segment.depth)}`;
                 mark.dataset.quoteStart = String(segment.start);
                 mark.dataset.quoteDepth = String(segment.depth);
+                mark.setAttribute('tabindex', '0');
+                mark.setAttribute('role', 'button');
+                mark.setAttribute('aria-label', this._tintLabel(segment.depth));
+                mark.addEventListener('click', () => this._openPanel(this._quotesCovering(segment)));
+                mark.addEventListener('keydown', event => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    event.preventDefault();
+                    this._openPanel(this._quotesCovering(segment));
+                });
 
                 try {
                     const range = document.createRange();
@@ -132,9 +151,35 @@ export function quoteAuthorHeat({ markerLabelOne = '', markerLabelOther = '' } =
             }
         },
 
+        /**
+         * Every quote whose live range covers the given canonical segment —
+         * which, on the deepest segment of a pile of overlapping quotes, is all
+         * of them. Newest first (A4).
+         */
+        _quotesCovering({ start, end }) {
+            return this._sortNewestFirst(
+                this._resolved.filter(r => r.range && r.range.start <= start && r.range.end >= end)
+            );
+        },
+
+        _sortNewestFirst(quotes) {
+            return quotes.slice().sort((a, b) => new Date(b.created_at ?? 0) - new Date(a.created_at ?? 0));
+        },
+
+        /**
+         * The panel lives outside this component, so it is opened by event. The
+         * payload carries the aggregate rows as the server sent them: they have
+         * no note field at all, by design of `AggregateQuoteDto`.
+         */
+        _openPanel(quotes) {
+            if (!quotes.length) return;
+            window.dispatchEvent(new CustomEvent('quote:open-author-panel', { detail: { quotes } }));
+        },
+
         _clear() {
             this._removeMarkers();
             this._groups = [];
+            this._resolved = [];
             this._articleEl.querySelectorAll('mark.quote-heat').forEach(mark => {
                 mark.replaceWith(...mark.childNodes);
             });
@@ -163,12 +208,14 @@ export function quoteAuthorHeat({ markerLabelOne = '', markerLabelOther = '' } =
                 );
                 if (!mark) continue;
 
-                const el = document.createElement('div');
+                const el = document.createElement('button');
+                el.type = 'button';
                 el.className = 'absolute right-0 -translate-y-1/2 pointer-events-auto inline-flex items-center '
                     + 'justify-center min-w-5 h-5 px-1 rounded-full text-xs font-bold surface-accent text-on-surface';
                 el.textContent = String(group.count);
                 el.setAttribute('aria-label', this._markerLabel(group.count));
                 el.dataset.quoteMarker = group.key;
+                el.addEventListener('click', () => this._openPanel(this._sortNewestFirst(group.rows)));
 
                 this._gutterEl.appendChild(el);
                 this._markers.push({ el, mark });
@@ -190,6 +237,64 @@ export function quoteAuthorHeat({ markerLabelOne = '', markerLabelOther = '' } =
         _markerLabel(count) {
             const template = count > 1 ? this.markerLabelOther : this.markerLabelOne;
             return template.replace('{count}', String(count));
+        },
+
+        _tintLabel(count) {
+            const template = count > 1 ? this.tintLabelOther : this.tintLabelOne;
+            return template.replace('{count}', String(count));
+        },
+    };
+}
+
+/**
+ * The author's passage popover: who quoted the passage, and when. Distinct from
+ * `quotePanel`, which is the reader's own note/edit/delete panel — this one has
+ * no note to show, because the payload has no note field.
+ */
+export function quoteAuthorPassagePanel({ titleOne = '', titleOther = '' } = {}) {
+    return {
+        titleOne,
+        titleOther,
+        open: false,
+        quotes: [],
+
+        show(quotes) {
+            this.quotes = quotes ?? [];
+            this.open = this.quotes.length > 0;
+        },
+
+        close() {
+            this.open = false;
+            this.quotes = [];
+        },
+
+        title() {
+            const template = this.quotes.length > 1 ? this.titleOther : this.titleOne;
+            return template.replace('{count}', String(this.quotes.length));
+        },
+
+        profileUrl(quote) {
+            return `/profile/${quote.quoter.slug}`;
+        },
+
+        /** Relative date — « il y a 3 jours » — in the document's language. */
+        relativeDate(iso) {
+            const date = new Date(iso);
+            if (Number.isNaN(date.getTime())) return '';
+
+            const seconds = Math.round((date.getTime() - Date.now()) / 1000);
+            const units = [
+                ['year', 31536000], ['month', 2592000], ['week', 604800],
+                ['day', 86400], ['hour', 3600], ['minute', 60],
+            ];
+            const formatter = new Intl.RelativeTimeFormat(document.documentElement.lang || undefined, {
+                numeric: 'auto',
+            });
+
+            for (const [unit, size] of units) {
+                if (Math.abs(seconds) >= size) return formatter.format(Math.round(seconds / size), unit);
+            }
+            return formatter.format(seconds, 'second');
         },
     };
 }
