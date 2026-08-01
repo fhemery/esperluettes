@@ -15,22 +15,23 @@ use Mews\Purifier\Facades\Purifier;
  *   ['type' => 'text',  'html' => '<p>…</p>']
  *   ['type' => 'image', 'path' => 'news/x.jpg', 'alt' => '…', 'caption' => '…'?]
  *
- * Text is sanitized with the `multiedit-text` Purifier profile (no <img>);
- * images render via the shared <x-media::image> component (responsive picture).
+ * Text is sanitized with a no-<img> Purifier profile — `multiedit-text` by
+ * default, or any profile the consumer passes; images render via the shared
+ * <x-media::image> component (responsive picture).
  */
 class ContentBlocksRenderer
 {
     /**
      * @param array<int, array<string, mixed>> $blocks
      */
-    public function render(array $blocks): string
+    public function render(array $blocks, string $profile = 'multiedit-text'): string
     {
         $out = '';
         foreach ($blocks as $block) {
             $type = $block['type'] ?? null;
 
             if ($type === 'text') {
-                $clean = $this->sanitizeText((string) ($block['html'] ?? ''));
+                $clean = $this->sanitizeText((string) ($block['html'] ?? ''), $profile);
                 if ($clean !== '') {
                     $out .= '<div class="ce-block ce-block--text">' . $clean . '</div>';
                 }
@@ -54,11 +55,32 @@ class ContentBlocksRenderer
     }
 
     /**
-     * Sanitize one text block's HTML with the no-img MultiEdit profile.
+     * Sanitize one text block's HTML with a no-img MultiEdit profile.
      */
-    public function sanitizeText(string $html): string
+    public function sanitizeText(string $html, string $profile = 'multiedit-text'): string
     {
-        return (string) Purifier::clean($html, 'multiedit-text');
+        return (string) Purifier::clean($html, $profile);
+    }
+
+    /**
+     * Concatenated `html` of text blocks only, in document order, returned
+     * exactly as stored: no tag stripping, no whitespace collapsing, no
+     * trimming. Consumers apply their own counter to it — unlike
+     * plainTextLength(), which normalises and so cannot be used for counts that
+     * must stay stable across a conversion.
+     *
+     * @param array<int, array<string, mixed>> $blocks
+     */
+    public function plainText(array $blocks): string
+    {
+        $out = '';
+        foreach ($blocks as $block) {
+            if (($block['type'] ?? null) !== 'text') {
+                continue;
+            }
+            $out .= (string) ($block['html'] ?? '');
+        }
+        return $out;
     }
 
     /**

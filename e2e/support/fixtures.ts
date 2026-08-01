@@ -42,6 +42,19 @@ export const STORY = {
   title: 'Histoire E2E',
   publishedChapter: { slug: 'chapitre-publie-1', title: 'Chapitre publié' },
   draftChapter: { slug: 'chapitre-brouillon-2', title: 'Chapitre brouillon' },
+  /** Simple mode, six paragraphs — the typography reference. Never mutated. */
+  simpleChapter: { slug: 'chapitre-simple-3', title: 'Chapitre simple' },
+  /** The same six paragraphs, split 2/2/2 across three text blocks. Never mutated. */
+  advancedChapter: { slug: 'chapitre-avance-4', title: 'Chapitre avancé' },
+  /** Used only for the no-op-conversion word-count check. */
+  countedChapter: { slug: 'chapitre-compte-5', title: 'Chapitre compté' },
+} as const;
+
+/** Story 2: co-authored by `author` and `confirmed`. */
+export const COAUTHORED_STORY = {
+  slug: 'histoire-coecrite-2',
+  title: 'Histoire coécrite E2E',
+  chapter: { slug: 'chapitre-coecrit-6', title: 'Chapitre coécrit' },
 } as const;
 
 export const NEWS = { slug: 'actualite-e2e', title: 'Actualité E2E' } as const;

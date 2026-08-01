@@ -1,15 +1,19 @@
 import { expect, type Locator, type Page, type Response } from '@playwright/test';
 import { STORY } from '../support/fixtures';
+import { MultiEditor } from './MultiEditor';
 import { RichTextEditor } from './RichTextEditor';
 
 /**
  * The chapter edit form.
  *
- * Carries two rich-text editors — the author note (hidden behind a button
- * until asked for) and the content — so both are exposed by name rather than
- * by position.
+ * Carries two editors — the author note (a plain rich-text field, hidden
+ * behind a button until asked for) and the content, which is
+ * `<x-editor::multi>`. `content` stays that component's Simple pane, so specs
+ * written before the MultiEdit work keep reading as they did; `blocks` is the
+ * component as a whole.
  */
 export class ChapterEditPage {
+  readonly blocks: MultiEditor;
   readonly content: RichTextEditor;
   readonly authorNote: RichTextEditor;
 
@@ -18,7 +22,8 @@ export class ChapterEditPage {
     private readonly storySlug: string = STORY.slug,
     private readonly chapterSlug: string = STORY.publishedChapter.slug,
   ) {
-    this.content = new RichTextEditor(page, 'chapter-content-editor');
+    this.blocks = new MultiEditor(page);
+    this.content = this.blocks.simple;
     this.authorNote = new RichTextEditor(page, 'chapter-author-note-editor');
   }
 
@@ -47,7 +52,7 @@ export class ChapterEditPage {
   async goto(): Promise<void> {
     const response = await this.tryGoto();
     expect(response?.status(), `GET ${this.path}`).toBe(200);
-    await this.content.waitUntilReady();
+    await this.blocks.waitUntilReady();
   }
 
   async save(): Promise<void> {

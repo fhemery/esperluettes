@@ -32,7 +32,8 @@ domain's own docs instead. Planning may link to code docs, never the reverse.
 
 ## Definition of done
 - `npm run gate` — docs + deptrac + PHP tests + vitest + asset build. Green, or
-  the work is not finished. `-- --quick` skips the asset build.
+  the work is not finished. `-- --quick` skips the asset build. Steps are scoped
+  to what the branch changed; `-- --all` forces the full run.
 - `npm run e2e` — Playwright, for features with browser-only behaviour. Kept
   out of the gate because it needs the app running; see `e2e/README.md`.
 

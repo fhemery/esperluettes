@@ -584,6 +584,8 @@ deptrac:
       - ProfilePublic
       # Registers the hide-comments-section user setting
       - SettingsPublic
+      # Registers the chapter media usage provider with the Media GC
+      - MediaPublic
 
     StoryRefPublic:
       - Shared
@@ -747,6 +749,8 @@ deptrac:
       - Shared
       - AuthPublic
       - CommentPublic
+      - EditorPublic
+      - MediaPublic
       - ModerationPublic
       - ProfilePublic
       - EventsPublic

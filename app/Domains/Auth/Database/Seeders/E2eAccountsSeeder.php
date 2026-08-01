@@ -36,6 +36,7 @@ class E2eAccountsSeeder extends Seeder
 
     public const AUTHOR_EMAIL = 'author@e2e.test';
     public const ADMIN_EMAIL = 'admin@e2e.test';
+    public const CONFIRMED_EMAIL = 'confirmed@e2e.test';
 
     public function run(): void
     {

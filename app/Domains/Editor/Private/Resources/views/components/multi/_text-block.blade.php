@@ -4,7 +4,9 @@
     by the parent multiEditor Alpine component (init / _afterInsert), not here,
     so load order can't leave an uninitialized editor.
 
-    Vars: $name (base), $uid, $toolbar (array), $min, $max, $html, $placeholder
+    Vars: $name (base), $uid, $toolbar (array), $min, $max, $html, $placeholder,
+          $nbLines, $indentParagraphs — the last two mirror <x-editor::rich-text>
+          so a block is the same writing surface as a simple-mode field.
 --}}
 @php
     $editorId = preg_replace('/[^A-Za-z0-9_]/', '_', $name . '__' . $uid);
@@ -20,8 +22,8 @@
     <input type="hidden" name="{{ $name }}[{{ $uid }}][type]" value="text">
 
     <div class="rich-content w-full">
-        <div class="surface-read text-on-surface w-full">
-            <div id="{{ $editorId }}" data-placeholder="{{ $placeholder ?? '' }}" data-nb-lines="5" data-is-mandatory="false" data-resizable="true" data-toolbar="{{ $toolbarJson }}" @if($min) data-min="{{ (int) $min }}" @endif @if($max) data-max="{{ (int) $max }}" @endif></div>
+        <div class="surface-read text-on-surface w-full{{ ($indentParagraphs ?? false) ? ' ql-indent' : '' }}">
+            <div id="{{ $editorId }}" data-placeholder="{{ $placeholder ?? '' }}" data-nb-lines="{{ $nbLines ?? 5 }}" data-is-mandatory="false" data-resizable="true" data-toolbar="{{ $toolbarJson }}" @if($min) data-min="{{ (int) $min }}" @endif @if($max) data-max="{{ (int) $max }}" @endif></div>
         </div>
         <textarea class="hidden" name="{{ $name }}[{{ $uid }}][html]" id="quill-editor-area-{{ $editorId }}">{!! $html ?? '' !!}</textarea>
     </div>

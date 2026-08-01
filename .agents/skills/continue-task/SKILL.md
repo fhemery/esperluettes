@@ -11,8 +11,9 @@ resume logic differ.
 
 ## 1. Select
 
-`git pull --rebase`, then read
-[`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
+Read [`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
+Never `git pull` or `git rebase` — the user keeps the working copy where it
+should be.
 
 - One `WIP:*` row → that is the task.
 - Several → normal when two sessions run in parallel worktrees, not an anomaly.
@@ -37,6 +38,10 @@ resume logic differ.
 
 Also check reality, not just files:
 
+- the current branch (`git rev-parse --abbrev-ref HEAD`). If it is `main`,
+  create a task branch (`git checkout -b <type>/<folder>`) and say so. On any
+  other branch, stay on it — assume it is the right one and do not pull, rebase
+  or switch.
 - `git status` and `git log` since the task started — was work done that the
   plan table does not reflect?
 - the gate, if the last recorded phase claims to be `DONE` but you have any

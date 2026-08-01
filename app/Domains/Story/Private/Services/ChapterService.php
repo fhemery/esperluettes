@@ -23,6 +23,7 @@ use App\Domains\Story\Public\Notifications\ChapterScheduledPublishedNotification
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Story\Private\Services\ChapterCreditService;
+use App\Domains\Story\Private\Support\ChapterContentResolver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -34,13 +35,14 @@ class ChapterService
         private readonly ChapterCreditService $credits,
         private readonly NotificationPublicApi $notifications,
         private readonly ProfilePublicApi $profiles,
+        private readonly ChapterContentResolver $contentResolver,
     ) {}
 
     public function createChapter(Story $story, ChapterRequest $request, int $userId): Chapter
     {
         $title = (string) $request->input('title');
         $authorNoteHtml = $request->input('author_note');
-        $contentHtml = (string) $request->input('content');
+        $content = $this->contentResolver->resolve($request->all(), $userId);
         $published = (bool)($request->boolean('published', false));
         $publishAt = (!$published && $request->input('publish_at'))
             ? now()->parse($request->input('publish_at'))
@@ -51,7 +53,7 @@ class ChapterService
             throw new \Illuminate\Auth\Access\AuthorizationException('No chapter credits left. Comment other chapters to earn more.');
         }
 
-        return DB::transaction(function () use ($story, $title, $authorNoteHtml, $contentHtml, $published, $publishAt, $userId) {
+        return DB::transaction(function () use ($story, $title, $authorNoteHtml, $content, $published, $publishAt, $userId) {
             // compute sparse sort order
             $maxOrder = (int) (Chapter::where('story_id', $story->id)->max('sort_order') ?? 0);
             $sortOrder = $maxOrder + 100;
@@ -68,7 +70,8 @@ class ChapterService
             $tmpSlug = Str::limit($slugBase, 240, '') . '-' . Str::lower(Str::random(12));
             $chapter->slug = $tmpSlug; // will update with id suffix after save
             $chapter->author_note = $authorNoteHtml;
-            $chapter->content = $contentHtml;
+            $chapter->content = $content['content'];
+            $chapter->content_blocks = $content['content_blocks'];
             $chapter->sort_order = $sortOrder;
             $chapter->status = $published ? Chapter::STATUS_PUBLISHED : Chapter::STATUS_NOT_PUBLISHED;
 
@@ -129,7 +132,11 @@ class ChapterService
                 throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Chapter not found');
             }
 
+            // Both fields must go: clearing only `content` would leave the
+            // moderated text in the blocks, and the next ordinary save would
+            // render it back.
             $chapter->content = '';
+            $chapter->content_blocks = null;
             $chapter->save();
 
             $this->eventBus->emit(new ChapterContentModerated(
@@ -213,13 +220,13 @@ class ChapterService
     {
         $title = (string) $request->input('title');
         $authorNoteHtml = $request->input('author_note'); // purified or null
-        $contentHtml = (string) $request->input('content'); // purified
+        $content = $this->contentResolver->resolve($request->all(), $userId);
         $published = (bool)($request->boolean('published', false));
         $publishAt = (!$published && $request->input('publish_at'))
             ? now()->parse($request->input('publish_at'))
             : null;
 
-        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $contentHtml, $published, $publishAt, $userId) {
+        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $content, $published, $publishAt, $userId) {
             // Snapshot BEFORE changes
             $before = ChapterSnapshot::fromModel($chapter);
             $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
@@ -228,7 +235,8 @@ class ChapterService
             // Update basics
             $chapter->title = $title;
             $chapter->author_note = $authorNoteHtml;
-            $chapter->content = $contentHtml;
+            $chapter->content = $content['content'];
+            $chapter->content_blocks = $content['content_blocks'];
             $chapter->status = $published ? Chapter::STATUS_PUBLISHED : Chapter::STATUS_NOT_PUBLISHED;
 
             // Handle first publish timestamp and publish_at scheduling

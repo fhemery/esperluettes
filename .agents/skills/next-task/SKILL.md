@@ -11,8 +11,9 @@ not already in context — it defines the steps, statuses and folder layout.
 
 ## 1. Select
 
-`git pull --rebase` first, then read
-[`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
+Read [`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
+Never `git pull` or `git rebase` — the user keeps the working copy where it
+should be.
 
 - **If the user named a task** (`/next-task annotations`), that is the task,
   whatever its position or status. This is the normal form when two sessions
@@ -32,6 +33,10 @@ not already in context — it defines the steps, statuses and folder layout.
 
 ## 2. Set up
 
+- Check the current branch (`git rev-parse --abbrev-ref HEAD`). If it is `main`,
+  create a task branch (`git checkout -b <type>/<folder>`) and say so. On any
+  other branch, stay on it — assume it is the right one and do not pull, rebase
+  or switch.
 - Ensure `docs/Feature_Planning/<folder>/` exists.
 - If `00-request.md` is missing, ask the user for the request before doing
   anything else — the loop has no input otherwise. Offer

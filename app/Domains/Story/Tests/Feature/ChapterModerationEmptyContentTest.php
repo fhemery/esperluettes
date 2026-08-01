@@ -102,6 +102,67 @@ describe('Chapter moderation - Empty Content', function () {
             expect($event->chapterId)->toBe($this->chapter->id);
         });
 
+        it('clears the blocks of an advanced chapter as well as its content', function () {
+            $this->actingAs($this->author);
+            $this->put(route('chapters.update', [
+                'storySlug' => $this->story->slug,
+                'chapterSlug' => $this->chapter->slug,
+            ]), [
+                'title' => 'Chapter With Content',
+                'mode' => 'advanced',
+                'blocks_order' => 'b0',
+                'blocks' => ['b0' => ['type' => 'text', 'html' => '<p>Some text</p>']],
+                'published' => '1',
+            ])->assertRedirect();
+
+            $this->chapter->refresh();
+            expect($this->chapter->content_blocks)->not->toBeNull();
+
+            $moderatorUser = moderator($this);
+            $this->actingAs($moderatorUser)
+                ->post("/chapters/{$this->chapter->slug}/moderation/empty-content")
+                ->assertRedirect();
+
+            $this->chapter->refresh();
+            expect($this->chapter->content)->toBe('');
+            expect($this->chapter->content_blocks)->toBeNull();
+        });
+
+        it('does not resurrect the moderated text on a subsequent save', function () {
+            $this->actingAs($this->author);
+            $this->put(route('chapters.update', [
+                'storySlug' => $this->story->slug,
+                'chapterSlug' => $this->chapter->slug,
+            ]), [
+                'title' => 'Chapter With Content',
+                'mode' => 'advanced',
+                'blocks_order' => 'b0',
+                'blocks' => ['b0' => ['type' => 'text', 'html' => '<p>Some text</p>']],
+                'published' => '1',
+            ])->assertRedirect();
+
+            $moderatorUser = moderator($this);
+            $this->actingAs($moderatorUser)
+                ->post("/chapters/{$this->chapter->slug}/moderation/empty-content")
+                ->assertRedirect();
+
+            // The author saves again, in simple mode with empty-ish content.
+            $this->actingAs($this->author);
+            $this->put(route('chapters.update', [
+                'storySlug' => $this->story->slug,
+                'chapterSlug' => $this->chapter->fresh()->slug,
+            ]), [
+                'title' => 'Chapter With Content',
+                'mode' => 'simple',
+                'content' => '<p>Nouveau texte</p>',
+                'published' => '1',
+            ])->assertRedirect();
+
+            $this->chapter->refresh();
+            expect($this->chapter->content)->not->toContain('Some text');
+            expect($this->chapter->content_blocks)->toBeNull();
+        });
+
         it('is a no-op if already empty (keeps content as empty string)', function () {
             $this->chapter->update(['content' => '']);
 

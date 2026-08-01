@@ -36,7 +36,9 @@ const excludeFoldersOrFiles = [
   '.claude/',
   'AGENTS.md',
   '.agents/',
-  '.cursor'
+  '.cursor',
+  'e2e/',
+  'playwright.config'
 ]
 
 const log = makeLog('staged-tests');
@@ -183,40 +185,30 @@ function testsDirsForTestLayers(testLayers) {
 
 // determineRunner imported from utils
 
-function runStagedTests(skipBranchCheck = false) {
-  // Skip entirely if not on main
-  const branch = getCurrentBranch();
-  if (branch && branch !== 'main' && !skipBranchCheck) {
-    log(`Current branch is '${branch}'. Skipping staged tests (only run on 'main').`);
-    return 0;
-  }
+/*
+  Decide which PHP tests a set of changed files requires.
 
-  const modified = getModifiedFiles();
-  if (modified.length === 0) {
-    log('No modified files; running full test suite.');
-    const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
+  Returns one of:
+  - { mode: 'all',  reason }            -> run the full suite
+  - { mode: 'none', reason }            -> nothing to run
+  - { mode: 'dirs', dirs, reason }      -> run `artisan test <dirs...>`
+*/
+function resolvePhpTestPlan(files, logger = log, { maxDirs = 5 } = {}) {
+  if (files.length === 0) {
+    return { mode: 'all', reason: 'no changed files detected' };
   }
 
   const deptrac = readDeptracConfig();
   if (!deptrac) {
-    log('deptrac.yaml not found or invalid; running full test suite.');
-    const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
+    return { mode: 'all', reason: 'deptrac.yaml not found or invalid' };
   }
 
-  const { domains, runAll } = extractDomainsFromFiles(modified);
+  const { domains, runAll } = extractDomainsFromFiles(files);
   if (runAll) {
-    log('Changes include files outside app/Domains (and not ignored); running full test suite.');
-    const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
+    return { mode: 'all', reason: 'changes include files outside app/Domains (and not ignored)' };
   }
   if (domains.length === 0) {
-    log('Changes contain only non code files, ignoring the  full test suite.');
-    return 0;
+    return { mode: 'none', reason: 'changes contain only non-code files' };
   }
 
   // Build domain-level reverse dependency graph and its transitive closure
@@ -227,29 +219,47 @@ function runStagedTests(skipBranchCheck = false) {
   const impactedDomains = new Set(domains);
   for (const d of domains) for (const dep of closure.get(d) || []) impactedDomains.add(dep);
 
-  // Print required info
-  log(`Impacted domains (from modified files): ${[...new Set(domains)].join(', ')}`);
-  // Print deptrac impacts (closure) succinctly
-  for (const [src, deps] of closure.entries()) {
-    if (deps.size > 0) log(`dep-impact ${src} -> ${[...deps].join(', ')}`);
+  logger(`Impacted domains (from changed files): ${[...new Set(domains)].join(', ')}`);
+  logger(`Impacted domains (with deptrac dependents): ${[...impactedDomains].join(', ')}`);
+
+  const dirs = Array.from(new Set(testsDirsForDomains([...impactedDomains])));
+  if (dirs.length === 0 || dirs.length > maxDirs) {
+    return { mode: 'all', reason: 'no specific test directories (or too many of them) resolved' };
+  }
+  return { mode: 'dirs', dirs, reason: `${dirs.length} impacted test directories` };
+}
+
+function runFullSuite() {
+  const runner = determineRunner();
+  return (runner === 'php')
+    ? runCmd('php', ['artisan', 'test:parallel'])
+    : runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']);
+}
+
+function runStagedTests(skipBranchCheck = false) {
+  // Skip entirely if not on main
+  const branch = getCurrentBranch();
+  if (branch && branch !== 'main' && !skipBranchCheck) {
+    log(`Current branch is '${branch}'. Skipping staged tests (only run on 'main').`);
+    return 0;
   }
 
-  const testDirs = testsDirsForDomains([...impactedDomains]);
+  const plan = resolvePhpTestPlan(getModifiedFiles());
 
-  if (testDirs.length === 0 || testDirs.length > 5) {
-    log('No specific test directories (or too many of them) resolved; running full test suite.');
-    const runner = determineRunner();
-    if (runner === 'php') return runCmd('php', ['artisan', 'test:parallel']) ? 0 : 1;
-    else return runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test:parallel']) ? 0 : 1;
+  if (plan.mode === 'all') {
+    log(`Running full test suite (${plan.reason}).`);
+    return runFullSuite() ? 0 : 1;
+  }
+  if (plan.mode === 'none') {
+    log(`Skipping tests (${plan.reason}).`);
+    return 0;
   }
 
-  // Deduplicate and run
-  const uniqueDirs = Array.from(new Set(testDirs));
-  log(`Running tests for: ${uniqueDirs.join(' ')}`);
+  log(`Running tests for: ${plan.dirs.join(' ')}`);
   const runner = determineRunner();
   const ok = (runner === 'php')
-    ? runCmd('php', ['artisan', 'test', ...uniqueDirs])
-    : runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', ...uniqueDirs]);
+    ? runCmd('php', ['artisan', 'test', ...plan.dirs])
+    : runCmd(path.join('vendor', 'bin', 'sail'), ['artisan', 'test', ...plan.dirs]);
   return ok ? 0 : 1;
 }
 
@@ -260,4 +270,4 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   process.exit(code);
 }
 
-export { runStagedTests };
+export { runStagedTests, resolvePhpTestPlan, getModifiedFiles };

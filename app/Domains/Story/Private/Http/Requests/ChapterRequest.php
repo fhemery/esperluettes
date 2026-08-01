@@ -5,6 +5,7 @@ namespace App\Domains\Story\Private\Http\Requests;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Mews\Purifier\Facades\Purifier;
 
 class ChapterRequest extends FormRequest
@@ -17,13 +18,36 @@ class ChapterRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'title' => ['required_trimmed', 'max:255'],
             'author_note' => ['nullable', 'maxstripped:1000'],
-            'content' => ['required'],
             'published' => ['nullable', 'boolean'],
             'publish_at' => ['nullable', 'date', 'after:now'],
+            'mode' => ['nullable', Rule::in(['simple', 'advanced'])],
         ];
+
+        if ($this->isAdvanced()) {
+            // Advanced (MultiEdit): blocks are the source, content is derived.
+            $rules['content'] = ['nullable', 'string'];
+            $rules['blocks_order'] = ['nullable', 'string'];
+            $rules['blocks'] = ['required', 'array', 'min:1'];
+            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image'])];
+            $rules['blocks.*.html'] = ['nullable', 'string'];
+            $rules['blocks.*.path'] = ['nullable', 'string', 'max:1024'];
+            $rules['blocks.*.alt'] = ['required_if:blocks.*.type,image', 'nullable', 'string', 'max:255'];
+            $rules['blocks.*.caption'] = ['nullable', 'string', 'max:255'];
+            $rules['blocks.*.keep_original'] = ['nullable'];
+            $rules['blocks.*.file'] = ['nullable', 'image', 'max:2048'];
+        } else {
+            $rules['content'] = ['required'];
+        }
+
+        return $rules;
+    }
+
+    private function isAdvanced(): bool
+    {
+        return $this->input('mode') === 'advanced';
     }
 
     protected function prepareForValidation(): void
@@ -53,16 +77,51 @@ class ChapterRequest extends FormRequest
             }
         }
 
-        $this->merge([
+        $merge = [
             'title' => $title,
             'author_note' => $authorNote !== null
                 ? HtmlLinkUtils::stripExternalLinks(Purifier::clean((string) $authorNote, 'strict-with-links'))
                 : null,
-            'content' => HtmlLinkUtils::stripExternalLinks(
-                Purifier::clean((string) ($content ?? ''), 'strict-with-links')
-            ),
             'publish_at' => $resolvedPublishAt,
-        ]);
+        ];
+
+        if ($this->isAdvanced()) {
+            // Block HTML is purified exactly once, in the resolver, with the
+            // narrative profile. Purifying here too would let the two policies
+            // diverge silently. Only the alt/caption strings are trimmed, so
+            // that a whitespace-only alt fails `required_if`.
+            $merge['blocks'] = $this->trimmedBlockLabels();
+        } else {
+            $merge['content'] = HtmlLinkUtils::stripExternalLinks(
+                Purifier::clean((string) ($content ?? ''), 'strict-with-links')
+            );
+        }
+
+        $this->merge($merge);
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    private function trimmedBlockLabels(): array
+    {
+        $blocks = $this->input('blocks');
+        if (!is_array($blocks)) {
+            return [];
+        }
+
+        foreach ($blocks as $uid => $block) {
+            if (!is_array($block)) {
+                continue;
+            }
+            foreach (['alt', 'caption'] as $key) {
+                if (isset($block[$key]) && is_string($block[$key])) {
+                    $blocks[$uid][$key] = trim($block[$key]);
+                }
+            }
+        }
+
+        return $blocks;
     }
 
     public function messages(): array
@@ -72,6 +131,9 @@ class ChapterRequest extends FormRequest
             'author_note.maxstripped' => __('story::validation.chapter.author_note_too_long'),
             'content.required' => __('story::validation.chapter.content.required'),
             'publish_at.after' => __('story::validation.chapter.publish_at.after'),
+            'blocks.required' => __('story::validation.chapter.blocks.required'),
+            'blocks.min' => __('story::validation.chapter.blocks.required'),
+            'blocks.*.alt.required_if' => __('story::validation.chapter.blocks.image_alt_required'),
         ];
     }
 }

@@ -52,7 +52,12 @@ reports once. Use `auto` for bugfixes and chores.
 ```bash
 npm run gate            # docs + deptrac + php tests + vitest + vite build
 npm run gate -- --quick # skip the asset build
+npm run gate -- --all   # ignore change detection, run everything
 ```
+
+The gate scopes itself to what the branch changed (commits since `main` plus
+the working tree): PHP tests run for the impacted domains and their deptrac
+dependents, and vitest/vite are skipped when no JS or CSS was touched.
 
 Green, or the work is not finished. Every BUILD phase ends here.
 

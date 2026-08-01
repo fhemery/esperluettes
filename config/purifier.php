@@ -102,6 +102,33 @@ return [
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,
         ],
+        // Text blocks of the MultiEdit advanced editor when the content is
+        // narrative prose (chapters): the element and class set of
+        // `strict-with-links`, WITHOUT <img> for the same reason as
+        // `multiedit-text` — image blocks are the only image source, which keeps
+        // the set of used image paths enumerable from the blocks alone.
+        // Unlike `multiedit-text` it keeps p.class / span.class, so the
+        // `ql-align-*`, `ql-spoiler` and `ql-custom-emoji-*` classes the `links`
+        // toolbar produces survive; and it does not allow a.rel / a.target.
+        // Named after the capability, never after the consuming domain.
+        'multiedit-narrative' => [
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.AllowedElements' => 'p,strong,em,ul,ol,li,br,span,u,s,blockquote,a',
+            'HTML.AllowedAttributes' => 'p.style,p.class,span.style,span.class,li.class,ul.class,ol.class,a.href,a.title',
+            'CSS.AllowedProperties' => 'text-align',
+            'Attr.AllowedClasses' => [
+                'ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify', 'ql-spoiler',
+                'ql-custom-emoji',
+                'ql-custom-emoji-esperamour', 'ql-custom-emoji-esperbravo', 'ql-custom-emoji-esperclindoeil',
+                'ql-custom-emoji-espercolere', 'ql-custom-emoji-esperfourire', 'ql-custom-emoji-esperlunettes',
+                'ql-custom-emoji-espersnob', 'ql-custom-emoji-espersourire', 'ql-custom-emoji-espertriste',
+            ],
+            'AutoFormat.AutoParagraph' => true,
+            'Attr.EnableID' => false,
+            'HTML.SafeIframe' => false,
+            'Core.CollectErrors' => false,
+            'AutoFormat.RemoveEmpty' => false,
+        ],
 
         'quote-note' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',

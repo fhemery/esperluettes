@@ -55,6 +55,35 @@ describe('EditorPublicApi', function () {
         expect($html)->toContain('After');
     });
 
+    it('defaults render to the multiedit-text profile', function () {
+        $blocks = [['type' => 'text', 'html' => '<p class="ql-align-center">Hi <span class="ql-spoiler">boo</span></p>']];
+
+        expect(editorApi()->render($blocks))
+            ->toBe('<div class="ce-block ce-block--text"><p>Hi <span>boo</span></p></div>');
+    });
+
+    it('forwards a profile to render', function () {
+        $blocks = [['type' => 'text', 'html' => '<p class="ql-align-center">Hi <span class="ql-spoiler">boo</span></p>']];
+
+        expect(editorApi()->render($blocks, 'multiedit-narrative'))
+            ->toBe('<div class="ce-block ce-block--text"><p class="ql-align-center">Hi <span class="ql-spoiler">boo</span></p></div>');
+    });
+
+    it('forwards a profile to sanitizeText', function () {
+        expect(editorApi()->sanitizeText('<p class="ql-align-right">Hi</p>', 'multiedit-narrative'))
+            ->toContain('class="ql-align-right"');
+    });
+
+    it('delegates plainText over text blocks only, unmodified', function () {
+        $text = editorApi()->plainText([
+            ['type' => 'text', 'html' => '  <p>One</p> '],
+            ['type' => 'image', 'path' => 'news/a.jpg', 'alt' => 'ignored caption'],
+            ['type' => 'text', 'html' => '<p>Two</p>'],
+        ]);
+
+        expect($text)->toBe('  <p>One</p> <p>Two</p>');
+    });
+
     it('delegates plainTextLength over text blocks only', function () {
         $len = editorApi()->plainTextLength([
             ['type' => 'text', 'html' => '<p>Hello</p>'],

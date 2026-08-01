@@ -158,8 +158,8 @@ per-block anchoring, and `editor-domain-visual-qa/` is meant to land before
 `chapters-multi-edit/` moves the DOM again. Two sessions on tasks like those
 merge badly whatever the backlog mechanics. Pick rows from different domains.
 
-Status updates then need no ceremony: `git pull --rebase` before editing the
-backlog, and let the row change ride along with the step's normal commit. Each
+Status updates then need no ceremony: edit the row and let the change ride along
+with the step's normal commit — no pull, no rebase, ever. Each
 session only ever touches its own row. They still land on two branches, so if
 the rows sit within a few lines of each other git may raise a one-line conflict
 when the second branch merges — take both rows and move on.

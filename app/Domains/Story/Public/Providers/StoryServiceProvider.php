@@ -3,6 +3,8 @@
 namespace App\Domains\Story\Public\Providers;
 
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
+use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
+use App\Domains\Story\Private\Support\ChapterMediaUsageProvider;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Observers\ChapterObserver;
@@ -129,6 +131,9 @@ class StoryServiceProvider extends ServiceProvider
 
         // Register model observers
         Chapter::observe(ChapterObserver::class);
+
+        // Let Media GC know which image files chapters still use (block images).
+        app(MediaUsageRegistry::class)->register(new ChapterMediaUsageProvider());
 
         // Register policies
         $registry = app(CommentPolicyRegistry::class);

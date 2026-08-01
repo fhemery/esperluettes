@@ -17,6 +17,8 @@
       toolbar      preset name or explicit token array (passed to each text block)
       min / max    summed-text constraints
       placeholder  editor placeholder
+      nbLines      height in lines of every writing surface (simple + each block)
+      indentParagraphs  adds `ql-indent` to every writing surface
 --}}
 @props([
     'name' => 'blocks',
@@ -30,6 +32,8 @@
     'min' => null,
     'max' => null,
     'placeholder' => '',
+    'nbLines' => 5,
+    'indentParagraphs' => false,
 ])
 
 @use(App\Domains\Editor\Private\Support\ToolbarPresets)
@@ -89,6 +93,8 @@
             :toolbar="$toolbar"
             :min="$min"
             :max="$max"
+            :nbLines="$nbLines"
+            :indentParagraphs="$indentParagraphs"
             :placeholder="$placeholder" />
     </div>
 
@@ -106,6 +112,7 @@
                     @include('editor::components.multi._text-block', [
                         'name' => $name, 'uid' => 'b' . $i, 'toolbar' => $toolbar,
                         'min' => $min, 'max' => $max, 'html' => $block['html'] ?? '', 'placeholder' => $placeholder,
+                        'nbLines' => $nbLines, 'indentParagraphs' => $indentParagraphs,
                     ])
                 @endif
             @endforeach
@@ -133,6 +140,7 @@
         @include('editor::components.multi._text-block', [
             'name' => $name, 'uid' => '__UID__', 'toolbar' => $toolbar,
             'min' => $min, 'max' => $max, 'html' => '', 'placeholder' => $placeholder,
+            'nbLines' => $nbLines, 'indentParagraphs' => $indentParagraphs,
         ])
     </template>
     <template x-ref="tplImage">
@@ -146,7 +154,15 @@
     @push('scripts')
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('multiEditor', (cfg) => ({
+            Alpine.data('multiEditor', (cfg) => {
+                // Captured once at init, from the component root. Block controls
+                // call these methods from inside their own block, and Alpine
+                // resolves $refs by walking up from the calling element: as soon
+                // as a block is detached (removeBlock), $refs.container would be
+                // undefined and the state would stop syncing.
+                let containerEl = null;
+
+            return {
                 mode: cfg.mode,
                 scope: cfg.scope,
                 labels: cfg.labels,
@@ -157,6 +173,7 @@
                 orderCsv: '',
 
                 init() {
+                    containerEl = this.$refs.container;
                     // Initialize Quill on the server-rendered text blocks. Done here
                     // (not via inline scripts) so it can't run before the editor
                     // bundle has loaded — the cause of blank editors on the edit page.
@@ -175,7 +192,7 @@
                     if (attempt > 60) return; // give up after ~3s
                     setTimeout(() => this._ensureEditor(id, attempt + 1), 50);
                 },
-                _container() { return this.$refs.container; },
+                _container() { return containerEl; },
                 _blocks() { return Array.from(this._container().querySelectorAll('[data-block]')); },
                 _newUid() { return 'n' + (this.seq++); },
                 _make(type, uid) {
@@ -256,7 +273,8 @@
                     this.mode = 'simple';
                     this.syncState();
                 },
-            }));
+            };
+            });
         });
     </script>
     @endpush

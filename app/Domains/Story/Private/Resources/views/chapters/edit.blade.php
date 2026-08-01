@@ -5,7 +5,7 @@
         <x-shared::title>{{ __('story::chapters.edit.heading', ['story' => $story->title]) }}</x-shared::title>
 
         <form method="POST" action="{{ route('chapters.update', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]) }}"
-            class="flex flex-col gap-4">
+            enctype="multipart/form-data" class="flex flex-col gap-4">
             @csrf
             @method('PUT')
 
