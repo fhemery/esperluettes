@@ -42,6 +42,8 @@ a new row that supersedes it and note the number.
 | ~~D2~~ | ~~Derive the story from the quote rows' denormalised `story_id`.~~ **Overturned by the user — see decision #18.** Inferring the story from Quote's own rows was a workaround for a question Story should simply answer; it also broke down on a chapter with no quotes. | — |
 | D3 | How to render overlapping heat? | Segment by depth, wrap each segment once | Nested `<mark>` per quote is not implementable — `Range.surroundContents()` throws on partially overlapping ranges. |
 | D4 | Summary grouping key | Normalised exact `highlighted_text` | Decision #10 asks for one row per passage; partial overlap has no well-defined "same passage". Overlap stays a heat concern. |
+| D5 | Is the grouping key case-folded? (phase 5's test list mentions "case-insensitive-trim", the deliverable and §4.2 of the architecture say only trimmed + whitespace collapsed) | **Case-sensitive** — trim and whitespace collapse only | Two passages differing by case are different text in the chapter, and the summary displays that text. Folding would merge them and force an arbitrary choice of which casing to show. Reversible in one line of `normalise()`. |
+| D6 | How does a pure `groupPassages()` know a row is stale, without touching the DOM? | The caller annotates each row with a resolved `range` (`{start,end}` or `null`) before calling; a group with no live row is `stale` | Keeps the function pure and unit-testable — re-anchoring stays in phase 6's Alpine component, which owns the DOM. |
 
 ## Assumptions made without asking
 

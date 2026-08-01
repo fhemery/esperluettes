@@ -8,12 +8,39 @@
 - Decisions log: [`DECISIONS.md`](./DECISIONS.md)
 
 > **UNBLOCKED 2026-08-01.** Both prerequisites of decision #21 have landed:
-> `../chapters-multi-edit/` and `../story-author-check/` are wrapped. Phases 1–4
-> are backend-only and start as written. **Phases 5–8 must still be re-validated
-> against the new chapter DOM before implementing them**: an advanced chapter now
-> renders as `div.ce-block.ce-block--text` wrappers inside the single
-> `[data-quote-article]` root, and `groupPassages()`, `segmentByDepth()` and the
-> marker positioning were written assuming a flat root.
+> `../chapters-multi-edit/` and `../story-author-check/` are wrapped.
+>
+> **DOM re-validation of phases 5–8, done 2026-08-01.** An advanced chapter now
+> renders `div.ce-block.ce-block--text > p` (and `figure.media-image.ce-block`)
+> inside the still-single `[data-quote-article]` root. Verdicts:
+>
+> - **Phase 5 is unaffected — build it as written.** The canonical offset space
+>   is still one flat string over the whole article, and `DIV` is already in
+>   `BLOCK_TAGS` (`Shared/Resources/js/anchoring/canonical-text.js`), so a
+>   `ce-block` contributes the same single boundary space a `<p>` already did.
+>   Per-block anchoring was explicitly a non-goal of `chapters-multi-edit/`.
+> - **Phase 6, tint wrapping — valid but must be explicit.** `segmentByDepth()`
+>   returns *canonical* ranges; they must be re-split per `nodeMap` entry exactly
+>   as `chapter-highlights.js::_applyHighlight` does today. One segment yields N
+>   marks across N `ce-block` divs. Never one `Range.surroundContents()` per
+>   segment.
+> - **Phase 6, margin markers — needs adjusting.** Advanced chapters contain
+>   lazily-loaded `<img>` in the article, so line positions move long after
+>   `document.fonts.ready`. Risk 4's mitigation is promoted to a deliverable: a
+>   `ResizeObserver` on the article plus recompute on image `load`, not just
+>   fonts + resize.
+> - **Risk 2 was misdiagnosed and is now rewritten.** v1 already wraps per text
+>   node, so no segment crosses an element boundary — italics/bold cause no gap.
+>   The real seam is the synthetic boundary space the canonical text inserts
+>   between blocks: it maps to no text node, so a passage spanning two blocks
+>   shows a 1-char untinted hole per boundary. Pre-existing at `<p>` boundaries,
+>   but more frequent with `ce-block` and more visible under a depth-graded tint
+>   than under the flat yellow. **Decision for phase 6 below.**
+> - Two facts phases 6–8 must account for: `<figure>`/`<figcaption>` are *not* in
+>   `BLOCK_TAGS`, so a caption sits inside the offset space and glues to the next
+>   block's first word; and reordering blocks shifts every offset, which is the
+>   accepted silent detachment (`chapters-multi-edit/` decision #4) — those rows
+>   land in phase 8's stale list.
 
 **No migration, no schema change, no `deptrac.yaml` change.** If a phase seems to
 need one, the phase is wrong — stop and report instead of adding it.
@@ -26,7 +53,7 @@ need one, the phase is wrong — stop and report instead of adding it.
 | 2 | Lifecycle — delete quotes on account deletion | S | — | DONE |
 | 3 | Read path — DTOs, service, public API | M | — | DONE |
 | 4 | Endpoint — policy, route, controller | M | 1, 3 | DONE |
-| 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | TODO |
+| 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | DONE |
 | 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5 | TODO |
 | 7 | UI — passage popover (reader list) | M | 6 | TODO |
 | 8 | UI — chapter summary popup & focus flow | M | 6, 7 | TODO |
