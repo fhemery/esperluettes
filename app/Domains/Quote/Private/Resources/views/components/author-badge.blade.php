@@ -44,9 +44,12 @@
                         </template>
                         <template x-if="group.stale">
                             <div class="flex items-start gap-2 px-1 py-0.5 text-gray-500">
-                                <span class="grow line-clamp-2 italic">
-                                    <span x-text="group.text"></span>
-                                    <span class="not-italic">— {{ __('quote::ui.profile_tab.passage_missing') }}</span>
+                                {{-- The explanation sits outside the clamp: it is
+                                     the part the reader most needs, so it must
+                                     never be the part that gets truncated. --}}
+                                <span class="grow">
+                                    <span class="block line-clamp-2 italic" x-text="group.text"></span>
+                                    <span class="block text-xs">{{ __('quote::ui.profile_tab.passage_missing') }}</span>
                                 </span>
                                 <span class="shrink-0 font-bold"
                                       :aria-label="countLabel(group.count)"

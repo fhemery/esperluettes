@@ -89,6 +89,37 @@ describe('author view — badge and heat root on the chapter page', function () 
             ->assertDontSee('data-quote-author-summary', false);
     });
 
+    it('keeps the stale wording out of the clamped passage text', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        createQuote($reader->id, $chapter->id, $story->id);
+
+        $html = $this->actingAs($author)
+            ->get(chapterUrl($story, $chapter))
+            ->assertOk()
+            ->getContent();
+
+        $wording = __('quote::ui.profile_tab.passage_missing');
+        expect($html)->toContain($wording);
+
+        $previous = libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        // The explanation must never sit inside a truncating element, or the
+        // clamp cuts away the very words that explain the untinted passage.
+        $clamped = (new DOMXPath($dom))->query('//*[contains(@class, "line-clamp")]');
+        expect($clamped->length)->toBeGreaterThan(0);
+
+        foreach ($clamped as $node) {
+            expect($node->textContent)->not->toContain($wording);
+        }
+    });
+
     it('renders no badge and no heat root for a confirmed reader', function () {
         $author = alice($this);
         $reader = bob($this);
