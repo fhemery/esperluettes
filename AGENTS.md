@@ -68,7 +68,7 @@ domain's own docs instead. Planning may link to code docs, never the reverse.
 | **News** | `app/Domains/News` | News articles with publish/unpublish workflow and homepage carousel |
 | **Notification** | `app/Domains/Notification` | Cross-domain user notification system with extensible content types |
 | **Profile** | `app/Domains/Profile` | User profile, picture, bio, social links |
-| **Quote** | `app/Domains/Quote` | Personal reader "quote book": save chapter passages with a private note, client-side re-anchoring, public/private profile Citations tab, author notification | `quotes` |
+| **Quote** | `app/Domains/Quote` | Personal reader "quote book": save chapter passages with a private note, client-side re-anchoring, public/private profile Citations tab, author notification, in-chapter author heat map/summary of quoted passages (note-free) | `quotes` |
 | **ReadList** | `app/Domains/ReadList` | Reading bookmarks ("pile à lire") with progress tracking and infinite scroll |
 | **Search** | `app/Domains/Search` | Global search across stories and profiles; renders inline results below top bar |
 | **Settings** | `app/Domains/Settings` | Extensible user preferences system; other domains register their own tabs/parameters |
