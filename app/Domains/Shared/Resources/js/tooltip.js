@@ -137,6 +137,16 @@ export default function registerTooltip(Alpine) {
         this.updateOpen();
       }
     },
+    onTriggerKeydown(event) {
+      // The trigger is a focusable `role="button"`: Enter and Space must
+      // activate it exactly like a click does.
+      const key = event && event.key;
+      if (key !== 'Enter' && key !== ' ' && key !== 'Spacebar') return;
+      // Space would scroll the page, Enter would submit an enclosing form.
+      event.preventDefault();
+      event.stopPropagation();
+      this.onTriggerMouseDown();
+    },
     onTriggerBlur() {
       setTimeout(() => { if (!this.pinned) { this.hoverOpen = false; this.updateOpen(); } }, 220);
     },

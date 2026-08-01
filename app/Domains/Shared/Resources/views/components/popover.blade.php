@@ -8,8 +8,9 @@
 <div class="flex items-center align-middle select-none z-10 cursor-pointer">
     <div class="ml-0 relative cursor-pointer" x-data="popover" x-init="mountRoot()" @keydown.escape.window="hoverOpen = false; pinned = false; updateOpen()">
         <div
-            class="flex items-center leading-none cursor-pointer"
+            class="flex items-center leading-none cursor-pointer rounded-sm focus:outline-hidden focus:ring-2 focus:ring-primary"
             role="button"
+            tabindex="0"
             style="cursor: pointer;"
             aria-haspopup="dialog"
             :aria-expanded="(hoverOpen || pinned) ? 'true' : 'false'"
@@ -17,6 +18,7 @@
             x-on:mouseenter="{{ $displayOnHover ? 'onTriggerEnter()' : '' }}"
             x-on:mouseleave="{{ $displayOnHover ? 'onTriggerLeave()' : '' }}"
             x-on:mousedown.stop.prevent="onTriggerMouseDown()"
+            x-on:keydown="onTriggerKeydown($event)"
             x-on:click.stop.prevent
             x-on:blur="onTriggerBlur()">
             {{ $trigger ?? '' }}
