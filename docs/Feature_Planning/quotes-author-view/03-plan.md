@@ -23,7 +23,7 @@ need one, the phase is wrong — stop and report instead of adding it.
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Story — `getStoryIdByChapterId()` | S | — | DONE |
-| 2 | Lifecycle — delete quotes on account deletion | S | — | TODO |
+| 2 | Lifecycle — delete quotes on account deletion | S | — | DONE |
 | 3 | Read path — DTOs, service, public API | M | — | TODO |
 | 4 | Endpoint — policy, route, controller | M | 1, 3 | TODO |
 | 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | TODO |

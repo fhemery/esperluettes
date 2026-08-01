@@ -12,12 +12,12 @@
 
 ## Listens to (wired in QuoteServiceProvider)
 
-- `Auth::UserDeleted` → nullify `user_id` on the user's quote rows (raw UPDATE, keeps the rows).
+- `Auth::UserDeleted` → hard-delete the user's quote rows (raw DELETE, bypassing the soft-delete scope so rows soft-deleted by a prior deactivation go too).
 - `Auth::UserDeactivated` → soft-delete the user's quotes.
 - `Auth::UserReactivated` → restore the soft-deleted quotes.
 - `Quote::ChapterPassageQuoted` → `NotifyAuthorsOnQuoteCreated`, which notifies each chapter author/co-author (excluding the quoter) via `NotificationPublicApi`.
 
-These are four separate listeners, not one handler — deactivation and deletion are intentionally different (recoverable soft-delete vs. permanent nullify).
+These are four separate listeners, not one handler — deactivation and deletion are intentionally different (recoverable soft-delete vs. permanent hard delete).
 
 ## Registrations
 
@@ -30,7 +30,7 @@ These are four separate listeners, not one handler — deactivation and deletion
 - **Anchor fields are immutable.** `highlighted_text`, `prefix`, `suffix` are set at creation and never rewritten; re-anchoring is client-side and read-only against them. Only `note` is mutable after creation.
 - **Profile visibility filtering happens before pagination for non-owners.** `getForProfile` loads all rows, filters out unavailable-chapter / inaccessible-story entries, then slices the page and reports the filtered total. Do not switch non-owners back to DB-level `paginate()` — it makes totals and pages wrong. Owner path keeps DB pagination (no filtering needed). Story access is resolved once per unique story, not per row.
 - **`canQuote` takes a story ID, not a chapter ID**. It requires `user-confirmed`, story read access via `StoryPublicApi::filterUsersWithAccessToStory`, and blocks authors (including co-authors — same `author` role) via `StoryPublicApi::isAuthor`. Beta readers with access are allowed.
-- **No FK to `users`, `chapters`, or `stories`** — cross-domain by rule. `user_id` nullable; `story_id` denormalised. Never add a constraint; resolve references through `StoryPublicApi` and treat missing ones as "unavailable".
+- **No FK to `users`, `chapters`, or `stories`** — cross-domain by rule. `user_id` is nullable in the schema but **no orphan row exists**: a quote is hard-deleted with its owner, so `user_id` always points at a live user. `story_id` denormalised. Never add a constraint; resolve references through `StoryPublicApi` and treat missing ones as "unavailable".
 
 ## Cross-domain UI contribution (not a PHP dependency)
 
