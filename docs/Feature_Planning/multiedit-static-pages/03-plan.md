@@ -409,25 +409,25 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| StaticPage admin — create form, admin | Fields appear in the order title → slug → header image → summary → body; no standalone "Média" section; body starts in Simple with the editorial toolbar | |
-| StaticPage admin — create form, empty state | A brand-new page shows an empty Simple body, no blocks, and saves with `content_blocks` null | |
-| StaticPage admin — switch to Avancé | Existing body HTML becomes exactly one text block, nothing lost | |
-| StaticPage admin — add an image block | Upload works, the reuse picker lists `static-pages` images, alt is required, caption renders | |
-| StaticPage admin — reorder / delete blocks | Move up/down and delete behave as on News; order survives save | |
-| StaticPage admin — Simple control disabled | With 2+ blocks or any image block, the "Simple" control is disabled and shows the existing French tooltip | |
-| StaticPage admin — back to Simple | With exactly one text block, switching to Simple and saving clears `content_blocks` and keeps the text | |
-| StaticPage admin — validation error re-render | Advanced submit with a blank alt: French error shown, form still Advanced, blocks rebuilt (image file must be re-picked) | |
-| StaticPage admin — legacy page (pre-feature row) | A page created before this feature opens in Simple with its content intact and saves unchanged | |
-| StaticPage admin — tech-admin | A `tech-admin` account sees and can use the same form as `admin` | |
-| StaticPage admin — non-admin | A `user-confirmed` account hitting `/admin/...` static page URLs is redirected to the dashboard | |
-| StaticPage public — advanced page, published | Header image plus interleaved text and images render inside `.static-content`; images are responsive (or raw for keep-original) | |
-| StaticPage public — simple page, guest | An untouched pre-existing page renders exactly as before | |
-| StaticPage public — draft preview | Admin sees a draft advanced page with the draft badge; a guest gets the usual not-found | |
-| StaticPage — unpublish / republish | Blocks and mode survive the round trip; the public page disappears and comes back | |
-| StaticPage — delete | Page gone from the public site; body images are still on disk (GC reclaims later) | |
-| StaticPage admin — mobile (narrow viewport) | Block controls, the mode toggle and the image picker are usable on a phone-width screen | |
-| News admin — create/edit form | New field order; an existing advanced article still opens in Advanced and saves unchanged | |
-| News public — article | An advanced article renders exactly as it did before the reorder | |
+| StaticPage admin — create form, admin | Fields appear in the order title → slug → header image → summary → body; no standalone "Média" section; body starts in Simple with the editorial toolbar | ✅ order / no Média: `StaticPageFormRendersMultiEditorTest`; editorial toolbar boot: `e2e/tests/features/multiedit-static-pages.spec.ts` |
+| StaticPage admin — create form, empty state | A brand-new page shows an empty Simple body, no blocks, and saves with `content_blocks` null | n/a — `StaticPageAdvancedModeTest` / `StaticPageAdvancedRequestTest` (persist null blocks); create form Simple empty: e2e create-form boot |
+| StaticPage admin — switch to Avancé | Existing body HTML becomes exactly one text block, nothing lost | ✅ e2e `switching to Avancé…` |
+| StaticPage admin — add an image block | Upload works, the reuse picker lists `static-pages` images, alt is required, caption renders | ✅ e2e image-block UI (upload preview, alt*, caption, reuse modal); persist/alt rejection: `StaticPageAdvancedModeTest` / `StaticPageAdvancedRequestTest` |
+| StaticPage admin — reorder / delete blocks | Move up/down and delete behave as on News; order survives save | n/a — shared Alpine covered by `e2e/tests/core/multi-editor.spec.ts`; order survives save: `StaticPageAdvancedModeTest` |
+| StaticPage admin — Simple control disabled | With 2+ blocks or any image block, the "Simple" control is disabled and shows the existing French tooltip | ✅ e2e (two text blocks + image block paths) |
+| StaticPage admin — back to Simple | With exactly one text block, switching to Simple and saving clears `content_blocks` and keeps the text | ✅ Alpine switch: e2e; clearing `content_blocks` on save: `StaticPageAdvancedModeTest` |
+| StaticPage admin — validation error re-render | Advanced submit with a blank alt: French error shown, form still Advanced, blocks rebuilt (image file must be re-picked) | n/a — `StaticPageAdvancedRequestTest` surfaces missing-alt; Blade rebuild from `old()` is server-rendered (phase 4 form) |
+| StaticPage admin — legacy page (pre-feature row) | A page created before this feature opens in Simple with its content intact and saves unchanged | n/a — `StaticPageFormRendersMultiEditorTest` + `StaticPageAdvancedModeTest` simple branch |
+| StaticPage admin — tech-admin | A `tech-admin` account sees and can use the same form as `admin` | n/a — route middleware `role:admin,tech-admin`; draft preview already asserts tech-admin in `StaticPagePublicTest` |
+| StaticPage admin — non-admin | A `user-confirmed` account hitting `/admin/...` static page URLs is redirected to the dashboard | n/a — `StaticPageControllerTest` / `StaticPageAdvancedRequestTest` |
+| StaticPage public — advanced page, published | Header image plus interleaved text and images render inside `.static-content`; images are responsive (or raw for keep-original) | n/a — rendered HTML cache from `EditorPublicApi::render`; covered by advanced mode persist tests + public show of `content` |
+| StaticPage public — simple page, guest | An untouched pre-existing page renders exactly as before | n/a — `StaticPagePublicTest` |
+| StaticPage public — draft preview | Admin sees a draft advanced page with the draft badge; a guest gets the usual not-found | n/a — `StaticPagePublicTest` |
+| StaticPage — unpublish / republish | Blocks and mode survive the round trip; the public page disappears and comes back | n/a — publish/unpublish controller tests; blocks live in `content_blocks` independent of status |
+| StaticPage — delete | Page gone from the public site; body images are still on disk (GC reclaims later) | n/a — `StaticPageControllerTest` / `StaticPageImageTest` |
+| StaticPage admin — mobile (narrow viewport) | Block controls, the mode toggle and the image picker are usable on a phone-width screen | ✅ e2e phone viewport |
+| News admin — create/edit form | New field order; an existing advanced article still opens in Advanced and saves unchanged | n/a — `NewsFormRendersMultiEditorTest` (order); existing News advanced tests |
+| News public — article | An advanced article renders exactly as it did before the reorder | n/a — reorder is admin form only; public unchanged |
 
 ## Open items
 

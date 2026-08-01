@@ -7,6 +7,7 @@
  *   app/Domains/Auth/Database/Seeders/E2eAccountsSeeder.php
  *   app/Domains/Story/Database/Seeders/E2eStorySeeder.php
  *   app/Domains/News/Database/Seeders/E2eNewsSeeder.php
+ *   app/Domains/StaticPage/Database/Seeders/E2eStaticPageSeeder.php
  *
  * Specs must read fixtures from here rather than hard-coding slugs, so that a
  * change to a seeder breaks compilation instead of a selector three files away.
@@ -90,6 +91,14 @@ export const QUOTES = {
 } as const;
 
 export const NEWS = { slug: 'actualite-e2e', title: 'Actualité E2E' } as const;
+
+/** Legacy simple static page — `content_blocks` null. Never mutated by specs that only drive Alpine. */
+export const STATIC_PAGE = {
+  id: 1,
+  slug: 'page-e2e',
+  title: 'Page E2E',
+  body: 'Corps simple de la page E2E.',
+} as const;
 
 /** Where auth.setup.ts parks each role's cookies. */
 export function storageStatePath(role: RoleName): string {
