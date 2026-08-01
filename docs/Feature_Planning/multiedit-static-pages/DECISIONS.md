@@ -14,6 +14,7 @@ a new row that supersedes it and note the number.
 | 4 | 2026-08-01 | REFINE | Final scope confirmation after replay? | Only two deliverables: (1) StaticPage body → MultiEdit (News mirror); (2) reorder StaticPage and News create/edit forms. Nothing else. | — |
 | 5 | 2026-08-01 | DESIGN | Extract shared MultiEdit persistence into Editor, or copy News’s service pattern into StaticPage? | **A** — Duplicate the News pattern in StaticPage (service / request / form / usage provider). Do not extract in this task. | — |
 | 6 | 2026-08-01 | DESIGN | Add a backlog refactor to share MultiEdit persistence across News, Chapters, StaticPage, future FAQ? | **No.** A full shared `resolveContent` does not apply everywhere: Chapters diverge (profile `multiedit-narrative`, strip external links, `chapters/{userId}` scope, simple-mode purify in the request, alt via `required_if`). FAQ is rich-text only today. News+StaticPage could share a narrow advanced helper later; that is not worth a backlog row until a third News-like consumer exists (e.g. FAQ adopts blocks). | — |
+| 7 | 2026-08-01 | BUILD | Phase 4 test used `__('static::admin.form.media_section')` after deleting that lang key; `TranslationKeysExistTest` rejects dead keys referenced via `__()`. | Assert the raw key string instead (`APP_LOCALE=zz` renders keys literally). Keep the plan's `assertDontSee` intent without resurrecting the lang key. | — |
 
 ## Assumptions made without asking
 

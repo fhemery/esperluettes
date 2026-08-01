@@ -59,7 +59,6 @@ return [
     // Form
     'form' => [
         'content_section' => 'Contenu',
-        'media_section' => 'Média',
         'settings_section' => 'Paramètres',
         'title' => 'Titre',
         'slug' => 'Slug',
