@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Public\Events\UserDeactivated;
 use App\Domains\Auth\Public\Events\UserReactivated;
 use App\Domains\Quote\Public\Api\Contracts\AggregateQuoteDto;
@@ -200,5 +201,189 @@ describe('chapter aggregate — note privacy', function () {
         foreach ($quoteQueries as $sql) {
             expect($sql)->not->toContain('note');
         }
+    });
+});
+
+describe('GET /quotes/chapter-aggregate', function () {
+    it('redirects a guest', function () {
+        $author = alice($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->post('/logout');
+
+        $this->get('/quotes/chapter-aggregate?chapter_id=' . $chapter->id)
+            ->assertRedirect(route('login'));
+    });
+
+    it('forbids a confirmed reader who is not an author', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($reader)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id)
+            ->assertForbidden();
+    });
+
+    it('forbids a moderator', function () {
+        $author = alice($this);
+        $moderator = moderator($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($moderator)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id)
+            ->assertForbidden();
+    });
+
+    it('forbids an admin', function () {
+        $author = alice($this);
+        $admin = admin($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($admin)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id)
+            ->assertForbidden();
+    });
+
+    it('allows the author', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        $quote = createQuote($reader->id, $chapter->id, $story->id, [
+            'highlighted_text' => 'A memorable passage',
+        ]);
+
+        $response = $this->actingAs($author)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id);
+
+        $response->assertOk()
+            ->assertJsonPath('total_count', 1)
+            ->assertJsonCount(1, 'items')
+            ->assertJsonPath('items.0.id', (int) $quote->id)
+            ->assertJsonPath('items.0.highlighted_text', 'A memorable passage')
+            ->assertJsonPath('items.0.prefix', 'words before')
+            ->assertJsonPath('items.0.suffix', 'words after')
+            ->assertJsonPath('items.0.quoter.user_id', $reader->id);
+    });
+
+    it('returns an empty aggregate for a chapter with no quotes', function () {
+        $author = alice($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($author)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id)
+            ->assertOk()
+            ->assertJsonPath('total_count', 0)
+            ->assertJsonCount(0, 'items');
+    });
+
+    it('allows a co-author', function () {
+        $author = alice($this);
+        $coAuthor = carol($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        addCollaborator($story->id, $coAuthor->id, 'author');
+
+        $this->actingAs($coAuthor)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id)
+            ->assertOk();
+    });
+
+    it('forbids a beta reader of the story', function () {
+        $author = alice($this);
+        $betaReader = carol($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        addCollaborator($story->id, $betaReader->id, 'beta-reader');
+
+        $this->actingAs($betaReader)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id)
+            ->assertForbidden();
+    });
+
+    it('denies an author who is not a confirmed user', function () {
+        $author = alice($this);
+        $nonConfirmedAuthor = daniel($this, roles: [Roles::USER]);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        addCollaborator($story->id, $nonConfirmedAuthor->id, 'author');
+
+        $response = $this->actingAs($nonConfirmedAuthor)
+            ->get('/quotes/chapter-aggregate?chapter_id=' . $chapter->id);
+
+        $response->assertRedirect(route('dashboard'));
+    });
+
+    it('forbids a chapter belonging to another authors story', function () {
+        $author = alice($this);
+        $otherAuthor = carol($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        $otherStory = publicStory('Other story', $otherAuthor->id);
+        createPublishedChapter($this, $otherStory, $otherAuthor);
+
+        $this->actingAs($otherAuthor)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id)
+            ->assertForbidden();
+    });
+
+    it('ignores a forged story_id parameter', function () {
+        $author = alice($this);
+        $otherAuthor = carol($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        $otherStory = publicStory('Other story', $otherAuthor->id);
+
+        $this->actingAs($otherAuthor)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id . '&story_id=' . $otherStory->id)
+            ->assertForbidden();
+    });
+
+    it('forbids an unknown chapter id', function () {
+        $author = alice($this);
+
+        $this->actingAs($author)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=999999')
+            ->assertForbidden();
+    });
+
+    it('rejects a missing chapter_id', function () {
+        $author = alice($this);
+
+        $this->actingAs($author)
+            ->getJson('/quotes/chapter-aggregate')
+            ->assertStatus(422);
+    });
+
+    it('rejects a non-numeric chapter_id', function () {
+        $author = alice($this);
+
+        $this->actingAs($author)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=abc')
+            ->assertStatus(422);
+    });
+
+    it('returns no note key anywhere in the response body', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $secondReader = carol($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        createQuote($reader->id, $chapter->id, $story->id, ['note' => 'a private note']);
+        createQuote($secondReader->id, $chapter->id, $story->id, ['note' => 'another private note']);
+
+        $response = $this->actingAs($author)
+            ->getJson('/quotes/chapter-aggregate?chapter_id=' . $chapter->id);
+
+        $response->assertOk()->assertJsonCount(2, 'items');
+
+        expect($response->getContent())->not->toContain('note');
+        expect($response->getContent())->not->toContain('private');
     });
 });

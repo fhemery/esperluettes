@@ -47,6 +47,11 @@ class QuotePublicApi
         return $this->service->getChapterAggregate($chapterId);
     }
 
+    public function canViewChapterAggregate(int $chapterId, int $userId): bool
+    {
+        return $this->policy->canViewChapterAggregate($chapterId, $userId);
+    }
+
     public function getForProfile(int $profileUserId, ?int $viewerId, int $page): QuoteListDto
     {
         return $this->service->getForProfile($profileUserId, $viewerId, $page);
