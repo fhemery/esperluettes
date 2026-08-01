@@ -1,5 +1,6 @@
 import { buildCanonicalText } from '../../../../../Shared/Resources/js/anchoring/canonical-text.js';
 import { extractAnchor } from '../../../../../Shared/Resources/js/anchoring/extract-anchor.js';
+import { closestBlock } from '../../../../../Shared/Resources/js/anchoring/block-elements.js';
 import { createQuote } from '../api/client.js';
 
 export function quoteMiniForm() {
@@ -8,6 +9,7 @@ export function quoteMiniForm() {
         saving: false,
         error: null,
         tooLong: false,
+        multiBlock: false,
         note: '',
         selectedText: '',
         _anchor: null,
@@ -25,6 +27,11 @@ export function quoteMiniForm() {
                 : range.commonAncestorContainer?.closest?.('.annotable-region');
 
             if (!region) return;
+
+            // A quote must stay inside a single block: the canonical text inserts a
+            // synthetic space at every block boundary, which maps to no text node and
+            // would leave an untinted hole in the highlight.
+            const spansSeveralBlocks = closestBlock(range.startContainer) !== closestBlock(range.endContainer);
 
             const { text: canonicalText, nodeMap } = buildCanonicalText(region);
             const anchor = extractAnchor(range, region, { text: canonicalText, nodeMap });
@@ -54,7 +61,10 @@ export function quoteMiniForm() {
 
             const maxLength = Number(this.$el.dataset.highlightMaxLength);
             this.tooLong = anchor.highlighted.length > maxLength;
-            this.error = this.tooLong ? this.$el.dataset.errorHighlightTooLong : null;
+            this.multiBlock = spansSeveralBlocks;
+            this.error = this.tooLong
+                ? this.$el.dataset.errorHighlightTooLong
+                : (this.multiBlock ? this.$el.dataset.errorHighlightMultiBlock : null);
             this.open = true;
         },
 
@@ -64,7 +74,7 @@ export function quoteMiniForm() {
         },
 
         async save() {
-            if (!this._anchor || this.saving || this.tooLong) return;
+            if (!this._anchor || this.saving || this.tooLong || this.multiBlock) return;
 
             this.saving = true;
             this.error = null;

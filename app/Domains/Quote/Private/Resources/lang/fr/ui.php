@@ -29,6 +29,7 @@ return [
     'errors' => [
         'save_quote' => 'Impossible de sauvegarder la citation. Veuillez réessayer.',
         'highlight_too_long' => 'Le passage sélectionné est trop long (:max caractères maximum).',
+        'highlight_multi_block' => 'La sélection doit rester dans un seul paragraphe.',
         'save_note' => 'Impossible de sauvegarder la note.',
         'delete_quote' => 'Impossible de supprimer la citation.',
         'load_more' => 'Impossible de charger davantage de citations.',

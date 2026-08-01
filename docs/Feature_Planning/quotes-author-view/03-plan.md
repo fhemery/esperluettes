@@ -35,7 +35,9 @@
 >   between blocks: it maps to no text node, so a passage spanning two blocks
 >   shows a 1-char untinted hole per boundary. Pre-existing at `<p>` boundaries,
 >   but more frequent with `ce-block` and more visible under a depth-graded tint
->   than under the flat yellow. **Decision for phase 6 below.**
+>   than under the flat yellow. **Resolved by decisions #22/#23: multi-block
+>   quotes are prevented at capture time (new phase 5b), so phase 6 carries no
+>   seam-handling logic and no cross-block quote can exist.**
 > - Two facts phases 6–8 must account for: `<figure>`/`<figcaption>` are *not* in
 >   `BLOCK_TAGS`, so a caption sits inside the offset space and glues to the next
 >   block's first word; and reordering blocks shifts every offset, which is the
@@ -54,7 +56,8 @@ need one, the phase is wrong — stop and report instead of adding it.
 | 3 | Read path — DTOs, service, public API | M | — | DONE |
 | 4 | Endpoint — policy, route, controller | M | 1, 3 | DONE |
 | 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | DONE |
-| 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5 | TODO |
+| 5b | Reader — reject multi-block selections at capture | S | — | DONE |
+| 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5, 5b | TODO |
 | 7 | UI — passage popover (reader list) | M | 6 | TODO |
 | 8 | UI — chapter summary popup & focus flow | M | 6, 7 | TODO |
 
@@ -277,6 +280,54 @@ before any UI consumes them.
 - ✅ Both functions are pure — the test file imports nothing but the module.
 - ✅ The partial-overlap case yields exactly three segments with depths 1, 2, 1.
 - ✅ `npm run gate` green (vitest included).
+
+---
+
+## Phase 5b — Reader: reject multi-block selections at capture
+
+**Goal.** Make a cross-block quote impossible to create, so the author heat never
+has to render one (decisions #22/#23). This is a **reader-side** change: it
+touches the existing quote capture flow, not the author view.
+
+**Deliverables.**
+- `app/Domains/Shared/Resources/js/anchoring/` — export a block test rather than
+  reusing the module-private `BLOCK_TAGS` set of `canonical-text.js` verbatim.
+  That set contains `DIV`, so a decorative inner `div` would falsely split a
+  selection; the exported helper must treat as a block only what actually is one
+  (`P`, `BLOCKQUOTE`, `H1`–`H6`, `LI`, `PRE`, and `div.ce-block`).
+- `app/Domains/Quote/Resources/js/quote/ui/mini-form.js` — in `openForm()`, after
+  the region is resolved, compare the block ancestor of `range.startContainer`
+  with that of `range.endContainer`. When they differ, set the error the same way
+  the too-long case does at `:55-57` — a distinct flag beside `tooLong`, with
+  `save()` early-returning on it.
+- `app/Domains/Quote/Private/Resources/views/components/mini-form.blade.php` — a
+  `data-error-*` attribute beside the existing `data-error-highlight-too-long`.
+  The inline error paragraph and the disabled save button are **reused as they
+  are**; no new error UI.
+- `app/Domains/Quote/Private/Resources/lang/fr/ui.php` — one key under
+  `errors.`, sibling of `highlight_too_long`.
+
+**Not in this phase.** No server-side validation: `CreateQuoteRequest` never sees
+the chapter HTML and `StoryChapterDto` carries no `content`, so enforcing this on
+the server would mean a new Story accessor plus DOM parsing — disproportionate
+for a guard whose failure mode is a 1-char cosmetic gap. This is a UX guard, not
+an invariant, and the plan says so on purpose.
+
+**Tests.** Vitest, beside the existing anchoring tests:
+- the exported block helper: returns true for `p`/`li`/`div.ce-block`, false for a
+  plain decorative `div` and for inline `em`/`strong`.
+- a selection inside one paragraph is accepted; one spanning two paragraphs is
+  rejected; one spanning two `div.ce-block` wrappers is rejected; one spanning
+  `<em>` inside a single paragraph is **accepted** (this is the case risk 2
+  wrongly blamed).
+
+**Acceptance.**
+- ✅ Selecting across two paragraphs shows the inline error and leaves save
+  disabled; no quote is created.
+- ✅ Selecting across italics or bold **within** one paragraph still saves.
+- ✅ No new error component — the existing inline paragraph carries the message.
+- ✅ The reader's own highlight and note flow are otherwise unchanged.
+- ✅ `npm run gate` green.
 
 ---
 
