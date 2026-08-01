@@ -69,6 +69,26 @@ describe('author view — badge and heat root on the chapter page', function () 
             ->assertDontSee('quoteAuthorPassagePanel(', false);
     });
 
+    it('renders the chapter summary, with the stale wording, only for the author', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        createQuote($reader->id, $chapter->id, $story->id);
+
+        $this->actingAs($author)
+            ->get(chapterUrl($story, $chapter))
+            ->assertOk()
+            ->assertSee('data-quote-author-summary', false)
+            ->assertSee(__('quote::ui.author_summary.title'), false)
+            ->assertSee(__('quote::ui.profile_tab.passage_missing'), false);
+
+        $this->actingAs($reader)
+            ->get(chapterUrl($story, $chapter))
+            ->assertOk()
+            ->assertDontSee('data-quote-author-summary', false);
+    });
+
     it('renders no badge and no heat root for a confirmed reader', function () {
         $author = alice($this);
         $reader = bob($this);

@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { groupPassages, segmentByDepth } from './author-summary.js';
+import { quoteAuthorSummary } from './author-summary-panel.js';
+import { createAggregateStore } from '../stores/aggregate-store.js';
 
 function row(id, text, quoterId, range = { start: 0, end: 1 }) {
     return {
@@ -152,5 +154,120 @@ describe('segmentByDepth', () => {
             { start: 9, end: 12, depth: 2 },
             { start: 12, end: 15, depth: 1 },
         ]);
+    });
+});
+
+describe('author summary — chapter popup', () => {
+    /**
+     * The popup is exercised without Alpine: only the global `Alpine.store()`
+     * lookup and the article element are stubbed, so the component's own logic
+     * (load → resolve → group, and what a row does when selected) is what runs.
+     */
+    function mount(html, rows) {
+        document.body.innerHTML = `<article data-quote-article>${html}</article>`;
+        const store = createAggregateStore();
+        store.rows = rows;
+        store.loaded = true;
+        globalThis.Alpine = { store: () => store };
+
+        const summary = quoteAuthorSummary({
+            chapterId: 7,
+            countLabelOne: '{count} citation sur ce passage',
+            countLabelOther: '{count} citations sur ce passage',
+        });
+        return { summary, store };
+    }
+
+    function passage(id, text, quoterId) {
+        return {
+            id,
+            highlighted_text: text,
+            prefix: '',
+            suffix: '',
+            created_at: '2026-01-0' + id + 'T10:00:00Z',
+            quoter: { user_id: quoterId, display_name: `Reader ${quoterId}`, slug: `reader-${quoterId}` },
+        };
+    }
+
+    beforeEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    afterEach(() => {
+        delete globalThis.Alpine;
+    });
+
+    it('loads the rows the first time it is opened, with the heat still off', async () => {
+        const { summary, store } = mount('<div class="ce-block"><p>le chat dort</p></div>', [
+            passage(1, 'le chat', 10),
+        ]);
+        const spy = vi.spyOn(store, 'ensureLoaded');
+
+        await summary.load();
+
+        expect(spy).toHaveBeenCalledWith(7);
+        expect(store.visible).toBe(false);
+        expect(summary.groups.map(g => g.key)).toEqual(['le chat']);
+    });
+
+    it('lists stale passages last with the stale badge', async () => {
+        const { summary } = mount('<div class="ce-block"><p>le chat dort sur le toit</p></div>', [
+            passage(1, 'le chien aboie', 10),
+            passage(2, 'le chat', 11),
+            passage(3, 'le chat', 12),
+        ]);
+
+        await summary.load();
+
+        expect(summary.groups.map(g => [g.key, g.count, g.stale])).toEqual([
+            ['le chat', 2, false],
+            ['le chien aboie', 1, true],
+        ]);
+    });
+
+    it('turns the heat on when focusing a live row', async () => {
+        const focused = [];
+        const handler = event => focused.push(event.detail.groupKey);
+        window.addEventListener('quote:focus-passage', handler);
+
+        const { summary, store } = mount('<div class="ce-block"><p>le chat dort</p></div>', [
+            passage(1, 'le chat', 10),
+        ]);
+        await summary.load();
+
+        summary.pinned = true;
+        summary.select(summary.groups[0]);
+
+        expect(store.visible).toBe(true);
+        expect(focused).toEqual(['le chat']);
+        expect(summary.pinned).toBe(false);
+
+        window.removeEventListener('quote:focus-passage', handler);
+    });
+
+    it('exposes no action on a stale row', async () => {
+        const focused = [];
+        const handler = event => focused.push(event.detail.groupKey);
+        window.addEventListener('quote:focus-passage', handler);
+
+        const { summary, store } = mount('<div class="ce-block"><p>le chat dort</p></div>', [
+            passage(1, 'le chien aboie', 10),
+        ]);
+        await summary.load();
+
+        summary.select(summary.groups[0]);
+
+        expect(summary.groups[0].stale).toBe(true);
+        expect(store.visible).toBe(false);
+        expect(focused).toEqual([]);
+
+        window.removeEventListener('quote:focus-passage', handler);
+    });
+
+    it('labels a row count with the counted string', async () => {
+        const { summary } = mount('<div class="ce-block"><p>le chat dort</p></div>', []);
+
+        expect(summary.countLabel(1)).toBe('1 citation sur ce passage');
+        expect(summary.countLabel(3)).toBe('3 citations sur ce passage');
     });
 });

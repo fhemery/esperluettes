@@ -6,7 +6,8 @@
         markerLabelOther: {!! e(json_encode($markerLabels['other'])) !!},
         tintLabelOne: {!! e(json_encode($tintLabels['one'])) !!},
         tintLabelOther: {!! e(json_encode($tintLabels['other'])) !!}
-     })">
+     })"
+     @quote:focus-passage.window="$nextTick(() => focusGroup($event.detail.groupKey))">
 
     {{-- Below md the gutter is display:none, so no marker is ever built. --}}
     <div x-ref="gutter"

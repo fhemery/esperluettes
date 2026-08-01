@@ -3,6 +3,7 @@ import { createAggregateStore } from './stores/aggregate-store.js';
 import { quoteMiniForm } from './ui/mini-form.js';
 import { quoteHighlighter } from './ui/chapter-highlights.js';
 import { quoteAuthorHeat, quoteAuthorPassagePanel } from './ui/author-heat.js';
+import { quoteAuthorSummary } from './ui/author-summary-panel.js';
 import { quotePanel } from './ui/panel.js';
 import { quoteList } from './profile/quote-list.js';
 
@@ -13,6 +14,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('quoteHighlighter', quoteHighlighter);
     Alpine.data('quoteAuthorHeat', quoteAuthorHeat);
     Alpine.data('quoteAuthorPassagePanel', quoteAuthorPassagePanel);
+    Alpine.data('quoteAuthorSummary', quoteAuthorSummary);
     Alpine.data('quotePanel', quotePanel);
     Alpine.data('quoteList', quoteList);
 });

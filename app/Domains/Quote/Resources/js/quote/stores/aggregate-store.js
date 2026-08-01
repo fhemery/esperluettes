@@ -37,5 +37,15 @@ export function createAggregateStore() {
             this.visible = !this.visible;
             if (this.visible) await this.ensureLoaded(chapterId);
         },
+
+        /**
+         * Focus one passage of the chapter summary: turn the heat on if it was
+         * off, then let the heat — which owns the DOM — scroll to the passage
+         * and open its popover.
+         */
+        focus(groupKey) {
+            this.visible = true;
+            window.dispatchEvent(new CustomEvent('quote:focus-passage', { detail: { groupKey } }));
+        },
     };
 }

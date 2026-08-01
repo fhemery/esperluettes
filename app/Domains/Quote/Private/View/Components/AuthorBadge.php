@@ -19,6 +19,15 @@ class AuthorBadge extends Component
     public bool $canView;
     public int $count = 0;
 
+    /**
+     * The accessible label of a summary row's count, rendered once per plural
+     * form with a `{count}` placeholder the Alpine component fills in —
+     * trans_choice cannot run in the browser.
+     *
+     * @var array{one: string, other: string}
+     */
+    public array $countLabels = ['one' => '', 'other' => ''];
+
     public function __construct(
         private QuotePublicApi $quoteApi,
         public int $chapterId,
@@ -28,6 +37,10 @@ class AuthorBadge extends Component
 
         if ($this->canView) {
             $this->count = $this->quoteApi->countForChapter($this->chapterId);
+            $this->countLabels = [
+                'one' => trans_choice('quote::ui.author_marker.label', 1, ['count' => '{count}']),
+                'other' => trans_choice('quote::ui.author_marker.label', 2, ['count' => '{count}']),
+            ];
         }
     }
 

@@ -4,9 +4,11 @@
 
 The Quote domain lets a reader save meaningful passages from chapters to a personal **quote book** ("Citations"). A quote is a personal keepsake — the reader collects passages that resonate with them and can attach a private note. It is deliberately **not** a feedback tool aimed at the author (that is what the future Annotations feature is for); the author only learns a passage was quoted through a notification.
 
-Out of scope for v1: in-chapter author view of who quoted what, moderation of quotes/notes, organising quotes into collections, and any social interaction on public quote books.
+The domain also carries the **in-chapter author view**: on their own chapter, an author (or co-author) can turn on a heat map of the passages readers quoted, see who quoted each one, and open a chapter summary listing every quoted passage with its count. **Notes are never part of it** — the aggregate payload has no note field at all.
 
-**Not done.** The note editor is a plain `<textarea>` rather than a rich-text editor, and the margin bookmark icon was never built. The in-chapter author view (showing an author which passages were quoted) and moderation of quotes and notes are both deferred; the reader's private note must never become visible to the author through either.
+Out of scope: moderation of quotes/notes, organising quotes into collections, and any social interaction on public quote books.
+
+**Not done.** The note editor is a plain `<textarea>` rather than a rich-text editor, and the margin bookmark icon was never built. Moderation of quotes and notes is deferred; the reader's private note must never become visible to the author.
 
 ## Key concepts
 
@@ -22,6 +24,10 @@ Out of scope for v1: in-chapter author view of who quoted what, moderation of qu
 - **Authors/co-authors cannot quote their own story** (story-level block, not just the chapter). They can quote other people's chapters.
 - Guests and unconfirmed users cannot quote and never see a quote book (even a public one).
 
+## Who can see the author view
+
+- Only the story's **authors** (`role = 'author'`, so the author and any co-author), and only on their own chapters. Nobody else: not guests, not other readers, not beta readers, not moderators, not admins. The same `canViewChapterAggregate()` check gates the badge, the heat root and the endpoint, so they can never disagree.
+
 ## Architecture decisions
 
 - **Standalone domain.** Quotes are a personal reading artefact with their own table, service, and public API. They are not comments (no comment dependency), not story content, and Profile only renders them — so none of those domains own the data.
@@ -35,6 +41,7 @@ Out of scope for v1: in-chapter author view of who quoted what, moderation of qu
 - The chapter reading page wraps the chapter body in the Comment domain's `<x-comment::annotable>` component and drops `<x-quote::toolbar-button>` into its `toolbar-actions` slot. Selecting text surfaces a generic floating toolbar (owned by Comment); clicking "Citer" opens the quote mini-form.
 - On save, the client extracts the anchor, POSTs the quote, and adds it to the `quotes` Alpine store. A reactive effect re-tints matched passages (yellow) and a click on a tint opens a popover with the note plus edit/delete.
 - The profile "Citations" tab is an Alpine component (`quoteList`) rendered by `<x-quote::profile-tab>`, hardcoded into Profile's `show.blade.php`. It renders the first page server-side (as JSON seed) and supports load-more, owner-only inline note editing, and deletion.
+- The author view is client-aggregated: the badge's count is a server-side `COUNT`, but the rows are fetched on demand from `GET /quotes/chapter-aggregate?chapter_id=…` the first time the heat or the summary is opened, then grouped in the browser (`ui/author-summary.js`). Staleness is only knowable after re-anchoring, which is client-side by design — a server-computed grouping could not mark a stale passage. The heat toggle is **never persisted**: it is off on every page load.
 - The JS bundle entry is `app/Domains/Quote/Resources/js/quote/index.js` (Vite), loaded by the toolbar button, mini-form, and profile tab components.
 
 ## Cross-domain delegation map

@@ -59,7 +59,7 @@ need one, the phase is wrong — stop and report instead of adding it.
 | 5b | Reader — reject multi-block selections at capture | S | — | DONE |
 | 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5, 5b | DONE |
 | 7 | UI — passage popover (reader list) | M | 6 | DONE |
-| 8 | UI — chapter summary popup & focus flow | M | 6, 7 | TODO |
+| 8 | UI — chapter summary popup & focus flow | M | 6, 7 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

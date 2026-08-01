@@ -21,6 +21,9 @@ return [
         'tooltip' => 'Citations enregistrées par les lecteurices sur ce chapitre.',
         'toggle' => 'Afficher les passages cités',
     ],
+    'author_summary' => [
+        'title' => 'Passages cités',
+    ],
     'author_marker' => [
         'label' => '{1} :count citation sur ce passage|[2,*] :count citations sur ce passage',
     ],

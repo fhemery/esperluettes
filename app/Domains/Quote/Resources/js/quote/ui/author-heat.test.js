@@ -136,4 +136,34 @@ describe('author heat — passage popover', () => {
 
         window.removeEventListener('quote:open-author-panel', handler);
     });
+
+    it('scrolls to a passage focused from the summary and opens its popover', () => {
+        const handler = listen();
+        const heat = heatOver('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+
+        heat._render([row(1, 'chat dort'), row(2, 'chat dort')]);
+
+        const scrolled = [];
+        marks().forEach(mark => { mark.scrollIntoView = () => scrolled.push(mark.textContent); });
+
+        heat.focusGroup('chat dort');
+
+        expect(scrolled).toEqual(['chat dort']);
+        expect(opened).toHaveLength(1);
+        expect(opened[0].quotes.map(q => q.id)).toEqual([2, 1]);
+
+        window.removeEventListener('quote:open-author-panel', handler);
+    });
+
+    it('does nothing when the focused passage is stale', () => {
+        const handler = listen();
+        const heat = heatOver('<div class="ce-block"><p>le chat dort</p></div>');
+
+        heat._render([row(1, 'le chien aboie')]);
+        heat.focusGroup('le chien aboie');
+
+        expect(opened).toHaveLength(0);
+
+        window.removeEventListener('quote:open-author-panel', handler);
+    });
 });

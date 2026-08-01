@@ -1,5 +1,5 @@
 import { buildCanonicalText } from '../../../../../Shared/Resources/js/anchoring/canonical-text.js';
-import { findAnchor } from '../../../../../Shared/Resources/js/anchoring/reanchor.js';
+import { annotateRanges } from './author-anchoring.js';
 import { groupPassages, segmentByDepth } from './author-summary.js';
 
 /**
@@ -80,19 +80,7 @@ export function quoteAuthorHeat({
             if (!rows.length) return;
 
             const canonical = buildCanonicalText(this._articleEl);
-
-            const resolved = rows.map(row => {
-                const result = findAnchor(canonical, {
-                    prefix: row.prefix ?? '',
-                    highlighted: row.highlighted_text ?? '',
-                    suffix: row.suffix ?? '',
-                });
-
-                return {
-                    ...row,
-                    range: result.status === 'missing' ? null : { start: result.start, end: result.end },
-                };
-            });
+            const resolved = annotateRanges(canonical, rows);
 
             this._resolved = resolved;
 
@@ -149,6 +137,24 @@ export function quoteAuthorHeat({
                     // Defensive: a piece that is not wrappable is simply not tinted.
                 }
             }
+        },
+
+        /**
+         * A row of the chapter summary was selected: scroll its passage into
+         * view and open its popover. The heat has just been turned on by the
+         * store, so the marks exist by the time this runs.
+         */
+        focusGroup(groupKey) {
+            const group = this._groups.find(g => g.key === groupKey);
+            if (!group || group.stale) return;
+
+            const liveRow = group.rows.find(r => r.range);
+            const mark = this._articleEl.querySelector(
+                `mark.quote-heat[data-quote-start="${liveRow.range.start}"]`
+            );
+            mark?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+
+            this._openPanel(this._sortNewestFirst(group.rows));
         },
 
         /**
