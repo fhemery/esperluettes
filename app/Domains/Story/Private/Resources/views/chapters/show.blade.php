@@ -155,6 +155,8 @@
                             class="ml-2"
                             :nb-words="$vm->wordCount"
                             :nb-characters="$vm->characterCount" />
+
+                        <x-quote::author-badge :chapter-id="$vm->chapter->id" />
                     </div>
                     @if($vm->isAuthor)
                     <div class="flex items-center gap-3">
@@ -214,9 +216,11 @@
                             />
                         </x-slot:toolbar-actions>
 
-                        <article data-quote-article class="prose rich-content max-w-none [text-indent:2rem] text-xl">
-                            {!! $vm->chapter->content !!}
-                        </article>
+                        <x-quote::author-heat :chapter-id="$vm->chapter->id">
+                            <article data-quote-article class="prose rich-content max-w-none [text-indent:2rem] text-xl">
+                                {!! $vm->chapter->content !!}
+                            </article>
+                        </x-quote::author-heat>
                     </x-comment::annotable>
 
                     <x-quote::mini-form />

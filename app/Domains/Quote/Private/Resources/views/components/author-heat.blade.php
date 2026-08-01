@@ -1,0 +1,23 @@
+@if($canView)
+<div class="relative"
+     data-quote-author-heat
+     x-data="quoteAuthorHeat({
+        markerLabelOne: {!! e(json_encode($markerLabels['one'])) !!},
+        markerLabelOther: {!! e(json_encode($markerLabels['other'])) !!}
+     })">
+
+    {{-- Below md the gutter is display:none, so no marker is ever built. --}}
+    <div x-ref="gutter"
+         class="hidden md:block absolute inset-y-0 right-0 w-6 translate-x-1/2 pointer-events-none"></div>
+
+    {{ $slot }}
+</div>
+
+@once
+    @push('head-scripts')
+        @vite('app/Domains/Quote/Resources/js/quote/index.js')
+    @endpush
+@endonce
+@else
+{{ $slot }}
+@endif

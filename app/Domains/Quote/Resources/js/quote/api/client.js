@@ -45,6 +45,19 @@ export async function deleteQuote(quoteId) {
     if (!res.ok) throw new Error(await res.text());
 }
 
+/**
+ * The author-only aggregate of a chapter: every quote of the chapter, without
+ * its reader's note. The chapter id is the only parameter — the story is
+ * resolved server-side.
+ */
+export async function getChapterAggregate(chapterId) {
+    const res = await fetch(`/quotes/chapter-aggregate?chapter_id=${chapterId}`, {
+        headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
 export async function getQuotesForChapter(chapterId, storyId) {
     const res = await fetch(`/quotes?chapter_id=${chapterId}&story_id=${storyId}`, {
         headers: { 'Accept': 'application/json' },

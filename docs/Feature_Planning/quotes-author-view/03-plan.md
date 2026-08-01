@@ -57,7 +57,7 @@ need one, the phase is wrong — stop and report instead of adding it.
 | 4 | Endpoint — policy, route, controller | M | 1, 3 | DONE |
 | 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | DONE |
 | 5b | Reader — reject multi-block selections at capture | S | — | DONE |
-| 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5, 5b | TODO |
+| 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5, 5b | DONE |
 | 7 | UI — passage popover (reader list) | M | 6 | TODO |
 | 8 | UI — chapter summary popup & focus flow | M | 6, 7 | TODO |
 

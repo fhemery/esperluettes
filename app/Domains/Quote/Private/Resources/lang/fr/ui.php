@@ -16,6 +16,14 @@ return [
     'mark' => [
         'label' => 'Voir la citation',
     ],
+    'author_badge' => [
+        'label' => '{0} :count citation|{1} :count citation|[2,*] :count citations',
+        'tooltip' => 'Citations enregistrées par les lecteurices sur ce chapitre.',
+        'toggle' => 'Afficher les passages cités',
+    ],
+    'author_marker' => [
+        'label' => '{1} :count citation sur ce passage|[2,*] :count citations sur ce passage',
+    ],
     'toolbar' => [
         'label' => 'Actions sur la sélection',
     ],
