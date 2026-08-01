@@ -5,12 +5,12 @@ import { expect, test } from '../../support/test';
 /**
  * CORE — the MultiEdit block editor.
  *
- * `<x-editor::multi>` is shared authoring machinery: News, chapters and (next)
- * static pages all mount the same Alpine component, so a break here breaks
- * authoring on surfaces whose own specs never touch it. It earns a place in
- * core because it is entirely client-side — adding, reordering and deleting a
- * block, and the state resync those must trigger, exist only after Alpine has
- * run and cannot be reached from a PHP request.
+ * `<x-editor::multi>` is shared authoring machinery: News, chapters and static
+ * pages all mount the same Alpine component, so a break here breaks authoring
+ * on surfaces whose own specs never touch it. It earns a place in core because
+ * it is entirely client-side — adding, reordering and deleting a block, and the
+ * state resync those must trigger, exist only after Alpine has run and cannot
+ * be reached from a PHP request.
  *
  * `chapters-multi-edit/` shipped a regression of exactly this shape (defect
  * D2): `removeBlock()` resolved `$refs.container` from the *calling* element,

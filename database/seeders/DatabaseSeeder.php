@@ -33,9 +33,7 @@ class DatabaseSeeder extends Seeder
                 \App\Domains\Story\Database\Seeders\E2eStorySeeder::class,
                 \App\Domains\Quote\Database\Seeders\E2eQuotesSeeder::class,
                 \App\Domains\News\Database\Seeders\E2eNewsSeeder::class,
-                \App\Domains\StaticPage\Database\Seeders\E2eStaticPageSeeder::class,
             ]);
-
         }
     }
 }

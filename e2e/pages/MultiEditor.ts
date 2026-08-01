@@ -108,28 +108,4 @@ export class MultiEditor {
     await this.block(index).locator('button[x-on\\:click="removeBlock($el)"]').click();
     await expect(this.blocks).toHaveCount(before - 1);
   }
-
-  get imageBlocks(): Locator {
-    return this.root.locator('.multi-editor__blocks > [data-block][data-type="image"]');
-  }
-
-  imageBlock(index: number): Locator {
-    return this.imageBlocks.nth(index);
-  }
-
-  /** Alt input inside the nth image block (Media image-field). */
-  imageBlockAlt(index: number): Locator {
-    return this.imageBlock(index).locator('input[name$="[alt]"]');
-  }
-
-  /** Caption input inside the nth image block. */
-  imageBlockCaption(index: number): Locator {
-    return this.imageBlock(index).locator('input[name$="[caption]"]');
-  }
-
-  /** Opens the reuse picker on the nth image block. */
-  async openImageLibrary(index: number): Promise<void> {
-    await this.imageBlock(index).getByRole('button', { name: 'Choisir une image existante' }).click();
-    await expect(this.page.getByRole('heading', { name: /Bibliothèque d.images/ })).toBeVisible();
-  }
 }
