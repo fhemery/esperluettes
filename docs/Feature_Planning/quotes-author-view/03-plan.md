@@ -24,7 +24,7 @@ need one, the phase is wrong — stop and report instead of adding it.
 |---|-------|------|------------|--------|
 | 1 | Story — `getStoryIdByChapterId()` | S | — | DONE |
 | 2 | Lifecycle — delete quotes on account deletion | S | — | DONE |
-| 3 | Read path — DTOs, service, public API | M | — | TODO |
+| 3 | Read path — DTOs, service, public API | M | — | DONE |
 | 4 | Endpoint — policy, route, controller | M | 1, 3 | TODO |
 | 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | TODO |
 | 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5 | TODO |

@@ -6,6 +6,8 @@ use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Quote\Public\Events\ChapterPassageQuoted;
 use App\Domains\Quote\Private\Models\Quote;
 use App\Domains\Quote\Private\Support\QuoteNoteSanitizer;
+use App\Domains\Quote\Public\Api\Contracts\AggregateQuoteDto;
+use App\Domains\Quote\Public\Api\Contracts\ChapterAggregateDto;
 use App\Domains\Quote\Public\Api\Contracts\CreateQuoteDto;
 use App\Domains\Quote\Public\Api\Contracts\QuoteDto;
 use App\Domains\Quote\Public\Api\Contracts\QuoteListDto;
@@ -103,6 +105,59 @@ class QuoteService
             page: 1,
             totalCount: count($items),
         );
+    }
+
+    /**
+     * Number of live quotes on a chapter. No authorisation: the caller is
+     * already behind the chapter-aggregate policy.
+     */
+    public function countForChapter(int $chapterId): int
+    {
+        return Quote::query()
+            ->where('chapter_id', $chapterId)
+            ->count();
+    }
+
+    /**
+     * The chapter's quotes as their author sees them: no note, ever — neither
+     * in the DTO nor in the SELECT.
+     */
+    public function getChapterAggregate(int $chapterId): ChapterAggregateDto
+    {
+        $rows = Quote::query()
+            ->select(['id', 'user_id', 'highlighted_text', 'prefix', 'suffix', 'created_at'])
+            ->where('chapter_id', $chapterId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($rows->isEmpty()) {
+            return new ChapterAggregateDto([], 0);
+        }
+
+        $userIds = $rows->pluck('user_id')->filter()->unique()->values()->all();
+        $profiles = $userIds ? $this->profileApi->getPublicProfiles($userIds) : [];
+
+        $items = [];
+        foreach ($rows as $row) {
+            $quoter = $profiles[$row->user_id] ?? null;
+
+            // Defensive: quotes are hard-deleted with their owner, so a row
+            // without a resolvable profile should not exist.
+            if ($quoter === null) {
+                continue;
+            }
+
+            $items[] = new AggregateQuoteDto(
+                id: (int) $row->id,
+                highlightedText: $row->highlighted_text,
+                prefix: $row->prefix,
+                suffix: $row->suffix,
+                createdAt: $row->created_at,
+                quoter: $quoter,
+            );
+        }
+
+        return new ChapterAggregateDto($items, count($items));
     }
 
     public function getForProfile(int $profileUserId, ?int $viewerId, int $page): QuoteListDto
