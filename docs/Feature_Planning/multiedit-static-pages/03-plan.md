@@ -15,7 +15,7 @@
 |---|-------|------|------------|--------|
 | 1 | `content_blocks` column, model cast, usage provider | S | — | DONE |
 | 2 | `StaticPageService` advanced-mode resolution + deptrac edge | M | 1 | DONE |
-| 3 | `StaticPageRequest` advanced rules (HTTP surface) | S | 2 | TODO |
+| 3 | `StaticPageRequest` advanced rules (HTTP surface) | S | 2 | DONE |
 | 4 | StaticPage admin form — MultiEdit + field reorder | M | 3 | TODO |
 | 5 | News admin form — field reorder only | S | — | TODO |
 

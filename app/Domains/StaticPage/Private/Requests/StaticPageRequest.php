@@ -16,8 +16,9 @@ class StaticPageRequest extends FormRequest
     public function rules(): array
     {
         $pageId = $this->route('staticPage')?->id;
+        $isAdvanced = $this->input('mode') === 'advanced';
 
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:200'],
             'slug' => [
                 'required',
@@ -27,14 +28,32 @@ class StaticPageRequest extends FormRequest
                 Rule::unique('static_pages', 'slug')->ignore($pageId),
             ],
             'summary' => ['nullable', 'string', 'max:500'],
-            'content' => ['required', 'string'],
             // Media image-field payload: a new upload (file) xor a reused/kept path.
             'header_image' => ['nullable', 'array'],
             'header_image.file' => ['nullable', 'image', 'max:2048'],
             'header_image.path' => ['nullable', 'string', 'max:1024'],
             'status' => ['required', Rule::in(['draft', 'published'])],
             'meta_description' => ['nullable', 'string', 'max:160'],
+            'mode' => ['nullable', Rule::in(['simple', 'advanced'])],
         ];
+
+        if ($isAdvanced) {
+            // Advanced (MultiEdit): content is a generated cache, blocks are the source.
+            $rules['content'] = ['nullable', 'string'];
+            $rules['blocks_order'] = ['nullable', 'string'];
+            $rules['blocks'] = ['required', 'array', 'min:1'];
+            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image'])];
+            $rules['blocks.*.html'] = ['nullable', 'string'];
+            $rules['blocks.*.path'] = ['nullable', 'string', 'max:1024'];
+            $rules['blocks.*.alt'] = ['nullable', 'string', 'max:255'];
+            $rules['blocks.*.caption'] = ['nullable', 'string', 'max:255'];
+            $rules['blocks.*.keep_original'] = ['nullable'];
+            $rules['blocks.*.file'] = ['nullable', 'image', 'max:2048'];
+        } else {
+            $rules['content'] = ['required', 'string'];
+        }
+
+        return $rules;
     }
 
     public function messages(): array
