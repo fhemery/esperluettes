@@ -29,4 +29,29 @@ describe('News admin form renders the multi-editor', function () {
             ->assertSee("mode: 'advanced'", false)
             ->assertSee('name="blocks[b0][html]"', false);
     });
+
+    it('orders the fields title, slug, header image, summary, body', function () {
+        $news = News::create([
+            'title' => 'Ordered', 'slug' => 'ordered-' . uniqid(), 'summary' => 's',
+            'status' => 'draft', 'content' => '<p>body</p>',
+        ]);
+
+        $order = [
+            'name="title"',
+            'name="slug"',
+            'name="header_image[path]"',
+            'name="summary"',
+            'multiEditor(',
+        ];
+
+        $this->actingAs(admin($this))
+            ->get(route('news.admin.create'))
+            ->assertOk()
+            ->assertSeeInOrder($order, false);
+
+        $this->actingAs(admin($this))
+            ->get(route('news.admin.edit', $news))
+            ->assertOk()
+            ->assertSeeInOrder($order, false);
+    });
 });

@@ -17,7 +17,7 @@
 | 2 | `StaticPageService` advanced-mode resolution + deptrac edge | M | 1 | DONE |
 | 3 | `StaticPageRequest` advanced rules (HTTP surface) | S | 2 | DONE |
 | 4 | StaticPage admin form — MultiEdit + field reorder | M | 3 | DONE |
-| 5 | News admin form — field reorder only | S | — | TODO |
+| 5 | News admin form — field reorder only | S | — | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
