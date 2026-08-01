@@ -119,6 +119,16 @@ class ChapterService
         return Chapter::query()->find($chapterId);
     }
 
+    /**
+     * Return the id of the story owning the given chapter, or null if unknown.
+     */
+    public function getStoryIdByChapterId(int $chapterId): ?int
+    {
+        $storyId = Chapter::query()->whereKey($chapterId)->value('story_id');
+
+        return $storyId === null ? null : (int) $storyId;
+    }
+
 
     /**
      * Empty the chapter content (set to empty string, not null) by slug.

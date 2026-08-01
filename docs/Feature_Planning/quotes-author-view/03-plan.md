@@ -7,12 +7,13 @@
 - Architecture: [`02-architecture.md`](./02-architecture.md)
 - Decisions log: [`DECISIONS.md`](./DECISIONS.md)
 
-> **BLOCKED — do not start BUILD** (decision #21). Chapters must move to
-> MultiEdit first (`../chapters-multi-edit/`), and the author-check prequel
-> (`../story-author-check/`) must land. When unblocked, re-validate phases 5–8
-> against the new chapter DOM before implementing them: `groupPassages()`,
-> `segmentByDepth()` and the marker positioning all assume a single
-> `[data-quote-article]` root. Phases 1–4 are backend-only and unaffected.
+> **UNBLOCKED 2026-08-01.** Both prerequisites of decision #21 have landed:
+> `../chapters-multi-edit/` and `../story-author-check/` are wrapped. Phases 1–4
+> are backend-only and start as written. **Phases 5–8 must still be re-validated
+> against the new chapter DOM before implementing them**: an advanced chapter now
+> renders as `div.ce-block.ce-block--text` wrappers inside the single
+> `[data-quote-article]` root, and `groupPassages()`, `segmentByDepth()` and the
+> marker positioning were written assuming a flat root.
 
 **No migration, no schema change, no `deptrac.yaml` change.** If a phase seems to
 need one, the phase is wrong — stop and report instead of adding it.
@@ -21,7 +22,7 @@ need one, the phase is wrong — stop and report instead of adding it.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Story — `getStoryIdByChapterId()` | S | — | TODO |
+| 1 | Story — `getStoryIdByChapterId()` | S | — | DONE |
 | 2 | Lifecycle — delete quotes on account deletion | S | — | TODO |
 | 3 | Read path — DTOs, service, public API | M | — | TODO |
 | 4 | Endpoint — policy, route, controller | M | 1, 3 | TODO |

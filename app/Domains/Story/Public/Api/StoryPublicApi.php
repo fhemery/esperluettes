@@ -4,6 +4,7 @@ namespace App\Domains\Story\Public\Api;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\StorySearchResultDto;
+use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Private\Services\StorySearchService;
 use App\Domains\Story\Private\Services\StoryService;
@@ -44,6 +45,7 @@ class StoryPublicApi
         private readonly ProfilePublicApi $profiles,
         private readonly StorySearchService $search,
         private readonly StoryService $storyService,
+        private readonly ChapterService $chapterService,
         private readonly StoryAccessService $accessService,
         private readonly StoryRefPublicApi $storyRefs,
         private readonly CoverService $coverService,
@@ -165,6 +167,16 @@ class StoryPublicApi
     public function getAuthorIds(int $storyId): array
     {
         return array_values(array_map('intval', $this->storyService->getAuthorIds($storyId)));
+    }
+
+    /**
+     * Return the id of the story the given chapter belongs to, or null when the
+     * chapter does not exist. Lets other domains authorise from a chapter id
+     * alone, without inferring the chapter -> story relation themselves.
+     */
+    public function getStoryIdByChapterId(int $chapterId): ?int
+    {
+        return $this->chapterService->getStoryIdByChapterId($chapterId);
     }
 
     public function countAuthoredStories(int $userId): int
