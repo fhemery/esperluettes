@@ -9,6 +9,7 @@ use Tests\TestCase;
 use App\Domains\Calendar\Private\Models\Activity;
 require_once __DIR__ . '/Feature/Jardino/helpers.php';
 require_once __DIR__ . '/Feature/SecretGift/helpers.php';
+require_once __DIR__ . '/Feature/QuoteContest/helpers.php';
 
 class FakeActivityRegistration implements ActivityRegistrationInterface
 {

@@ -3,4 +3,5 @@
 return [
     'jardino' => 'Jardin des mots',
     'secret-gift' => 'Cadeau mystère',
+    'quote-contest' => 'Concours de citations',
 ];
