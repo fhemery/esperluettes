@@ -16,5 +16,9 @@
             @csrf
             @include('calendar::pages.admin.activities._form')
         </form>
+
+        {{-- Same stack as the edit page, so a type's out-of-form panels render
+             identically on both. Nothing pushes here before the activity exists. --}}
+        @stack('activity-config-extras')
     </div>
 </x-admin::layout>

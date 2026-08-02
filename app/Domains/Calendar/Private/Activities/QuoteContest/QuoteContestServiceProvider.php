@@ -16,6 +16,7 @@ class QuoteContestServiceProvider extends ServiceProvider
         $this->loadViewsFrom($base . '/Resources/views', 'quote-contest');
         $this->loadTranslationsFrom($base . '/Resources/lang', 'quote-contest');
         $this->loadMigrationsFrom($base . '/Database/Migrations');
+        $this->loadRoutesFrom($base . '/Http/routes.php');
 
         // The reader page is a class component; the admin config panel is an
         // anonymous one. Both answer to the same `quote-contest::` prefix.

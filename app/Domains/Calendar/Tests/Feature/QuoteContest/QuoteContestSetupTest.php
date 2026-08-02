@@ -50,6 +50,12 @@ describe('Quote contest setup', function () {
             ->post(route('calendar.admin.activities.store'), [
                 'name' => 'Concours de citations',
                 'activity_type' => QuoteContestRegistration::ACTIVITY_TYPE,
+                'active_starts_at' => '2026-09-01T10:00',
+                'active_ends_at' => '2026-10-01T10:00',
+                'quote_contest' => [
+                    'submissions_end_at' => '2026-09-10T10:00',
+                    'votes_start_at' => '2026-09-15T10:00',
+                ],
             ])
             ->assertRedirect(route('calendar.admin.activities.index'));
 
