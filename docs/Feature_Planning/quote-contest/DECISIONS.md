@@ -1,0 +1,52 @@
+# Quote contest — decisions log
+
+Append-only. Every question the user arbitrated, with the answer as given.
+BUILD reads this before asking anything already settled.
+
+Format: one row per decision. Never edit a row — if a decision is reversed, add
+a new row that supersedes it and note the number.
+
+| # | Date | Step | Question | Decision | Supersedes |
+|---|------|------|----------|----------|------------|
+| 1 | 2026-08-02 | REFINE | What does a non-confirmed `user` see of the contest? | Nothing — the activity is hidden from them entirely, via Calendar's `role_restrictions`. | — |
+| 2 | 2026-08-02 | REFINE | Is the submitter's identity visible during voting? | Anonymous to everyone but admins and moderators. | — |
+| 3 | 2026-08-02 | REFINE | Can a user vote for a quote they submitted themselves? | Yes, allowed. Blocking it would only hint at their own entry. | — |
+| 4 | 2026-08-02 | REFINE | What happens to a submitted entry when the quote, story or chapter changes? | Snapshot at submission, with a privacy escape hatch: the entry is withdrawn and its votes dropped if the story turns private or becomes excluded from events. Everything else (quote edited, quote deleted, chapter deleted) leaves the entry untouched. | — |
+| 5 | 2026-08-02 | REFINE | Can the admin change categories once submissions are open? | Add and edit freely at any time; delete only while the category holds no entry. | — |
+| 6 | 2026-08-02 | REFINE | Do voters see vote counts during the voting period? | No — hidden from readers throughout. Counts live only in the moderator/admin *Résultats* tab. | — |
+| 7 | 2026-08-02 | REFINE | What happens to the entries and votes of a deactivated or deleted user? | Both stay. Entries are anonymous to readers anyway; tallies stay stable. | — |
+| 8 | 2026-08-02 | REFINE | Which of the reader's quotes appear on the submission screen? | All of them; ineligible ones greyed with the reason (*histoire privée*, *histoire exclue des événements*). | — |
+| 9 | 2026-08-02 | REFINE | The lifecycle notifications overlap the `calendar-notifications/` backlog row. Where do they live? | Contest-owned now, driven by the contest's own dates. `calendar-notifications/` stays on the backlog and generalises later from this example. | — |
+| 10 | 2026-08-02 | REFINE | Who receives the broadcast notifications, and which ones? | Confirmed users only. Four broadcasts: submissions open, 24 h before submissions close, voting opens, 24 h before voting closes. All link to the activity page. | — |
+| 11 | 2026-08-02 | REFINE | Is moderation deletion of an entry silent? | No — the submitter is notified that their entry in category X was removed and the slot is free again. | — |
+| 12 | 2026-08-02 | REFINE | Can a reader withdraw an entry without replacing it? | Yes, freely, until submissions close. | — |
+| 13 | 2026-08-02 | REFINE | May two readers enter the same passage in the same category? | Yes — allowed; it is signal, and moderation arbitrates via entry deletion. | — |
+| 14 | 2026-08-02 | REFINE | What do users see between the close of submissions and the opening of votes? | The submission view, read-only, with their entries visible and a countdown to the vote. | — |
+| 15 | 2026-08-02 | REFINE | Where does the QuoteContest activity live, and does it need a new tab mechanism? | In Calendar, as a sub-activity under `Private/Activities/`, following SecretGift exactly: one page, one component, internal tabs via `<x-shared::tabs>`. No new mechanism. | — |
+| 16 | 2026-08-02 | DESIGN | How does the admin configure the contest — a contest-owned admin page, or wire the dead `configComponentKey()` hook for real? | Wire it for real: a dedicated config sub-view inside the generic activity create/edit page. This was missed when the first activities were built, for lack of time, and the contest is the right occasion to do it properly. `ActivityRegistrationInterface` gains `configRules()` and `persistConfig()`; the activity write and the plugin config save in one transaction. | — |
+| 17 | 2026-08-02 | DESIGN | Where does the contest description live? | Reuse `calendar_activities.description` — it already exists, is rich text, and is already rendered above the plugin component. No second description field. | — |
+| 18 | 2026-08-02 | DESIGN | How is an entry withdrawn when its story loses eligibility — hard delete, or a soft flag? | A `withdrawn_at` soft flag. Votes stay in the table but are excluded from every count and every listing. Refines decision #4: votes are dropped from the *count*, not from the database, so an accidental visibility toggle is recoverable. | refines #4 |
+| 19 | 2026-08-02 | DESIGN | Are the authors of a snapshotted entry frozen by name, or resolved live? | Store `author_user_ids` on the entry; resolve display names live via `ProfilePublicApi`, as every other surface does. A renamed author shows their current name; a deleted one is omitted and the entry stands. | — |
+| 20 | 2026-08-02 | DESIGN | Cache the rendered vote screen (the user's own parked note #5)? | No cache. Because entries are full snapshots the listing is already one indexed SELECT plus a batched profile lookup — there is no cross-domain read left to save, and a cache would cost three invalidation paths to protect a query that is not slow. | supersedes note #5 |
+| 21 | 2026-08-02 | DESIGN | The *Mes citations* picker on a long quote book (open question #1)? | Load the whole quote book and filter client-side with Alpine. One query, instant picking, no round trips. Revisit if real books run into the thousands. | resolves OQ#1 |
+| 22 | 2026-08-02 | DESIGN | In what order does a voter see a category's entries (open question #2)? | Shuffled, seeded on (reader, category). No positional advantage for early submitters, and the order is identical on every reload so the entry a reader was considering never moves. | resolves OQ#2 |
+
+## Assumptions made without asking
+
+Used in `auto` mode, or when the user was unavailable. Each one is a decision
+the user may want to reverse — surface these in the WRAP summary.
+
+Replayed to the user at the end of REFINE and not vetoed.
+
+| # | Assumption | Made at | Reversible? |
+|---|------------|---------|-------------|
+| A1 | The reader's private *note* on a quote never enters the contest and is shown nowhere, including the *Résultats* tab. | REFINE | Yes — additive. |
+| A2 | "Not private" means the quote's story visibility is `public` or `community` **and** `is_excluded_from_events` is false. | REFINE | Yes. |
+| A3 | A category's description is plain text, not rich text. | REFINE | Costly — changes storage and rendering. |
+| A4 | The admin form enforces `début activité ≤ fin soumissions ≤ début votes ≤ fin activité`. | REFINE | Yes. |
+| A5 | Access uses Calendar's existing `role_restrictions` (`user-confirmed`, `moderator`, `admin`) rather than per-action gating. | REFINE | Yes. |
+| A6 | Exactly three tabs: *Mes citations*, *Votes*, *Résultats* (moderator/admin only). No fourth screen. | REFINE | Yes — additive. |
+| A7 | Before the activity starts, confirmed users see description + categories, read-only. | REFINE | Yes. |
+| A8 | No minimum entry count for a category to be votable; an empty category shows empty. Nothing marks or stores a winner. | REFINE | Yes. |
+| A9 | Replacing or withdrawing an entry drops any votes on it. | REFINE | Yes. |
+| A10 | No abstention is recorded — "has not voted" and "chose not to vote" are the same state. | REFINE | Yes. |
