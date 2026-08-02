@@ -1,39 +1,12 @@
 <?php
 
 use App\Domains\Calendar\Private\Activities\QuoteContest\Models\QuoteContestCategory;
-use App\Domains\Calendar\Private\Activities\QuoteContest\Models\QuoteContestEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-function makeCategory(int $activityId, string $title, int $position = 1): QuoteContestCategory
-{
-    return QuoteContestCategory::create([
-        'activity_id' => $activityId,
-        'title' => $title,
-        'description' => 'Une description.',
-        'position' => $position,
-    ]);
-}
-
-function makeEntryIn(QuoteContestCategory $category, array $overrides = []): QuoteContestEntry
-{
-    return QuoteContestEntry::create(array_merge([
-        'activity_id' => $category->activity_id,
-        'category_id' => $category->id,
-        'user_id' => 42,
-        'quote_id' => 7,
-        'story_id' => 3,
-        'highlighted_text' => 'Un passage mémorable.',
-        'story_title' => 'Mon histoire',
-        'story_slug' => '3-mon-histoire',
-        'chapter_id' => 11,
-        'chapter_title' => 'Chapitre premier',
-        'chapter_slug' => '11-chapitre-premier',
-        'author_user_ids' => [42],
-    ], $overrides));
-}
+// `makeCategory()` and `makeEntryIn()` live in this folder's helpers.php.
 
 describe('Quote contest category administration', function () {
 

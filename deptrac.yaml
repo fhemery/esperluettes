@@ -615,9 +615,10 @@ deptrac:
       - CalendarPublic
       - AuthPublic
       - StoryPublic
+      - QuotePublic        # QuoteContest reads the reader's own quote book for the picker
       - EventsPublic
       - MediaPublic
- 
+
     CommentPrivate:
       - Shared
       - AuthPublic

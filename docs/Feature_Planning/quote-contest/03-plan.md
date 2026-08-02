@@ -18,7 +18,7 @@
 | 2 | Cross-domain reads: Story eligibility flag + Quote owner reads | S | — | DONE |
 | 3 | QuoteContest skeleton: tables, models, registration, phase service | M | 1 | DONE |
 | 4 | Admin configuration: settings panel + category CRUD | M | 1, 3 | DONE |
-| 5 | Reader page shell + *Mes citations*, read-only | M | 2, 3, 4 | TODO |
+| 5 | Reader page shell + *Mes citations*, read-only | M | 2, 3, 4 | DONE |
 | 6 | Submissions: submit / replace / withdraw | M | 5 | TODO |
 | 7 | Story-eligibility listeners: withdrawal on visibility loss | S | 6 | TODO |
 | 8 | Voting: ballot, seeded shuffle, *Votes* tab | M | 6 | TODO |

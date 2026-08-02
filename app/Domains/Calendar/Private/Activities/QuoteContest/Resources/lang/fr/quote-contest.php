@@ -5,6 +5,32 @@ return [
     'tab_votes' => 'Votes',
     'tab_results' => 'Résultats',
 
+    'phase' => [
+        'before_start' => 'Les soumissions ouvriront le :date.',
+        'before_start_undated' => 'Les soumissions ne sont pas encore ouvertes.',
+        'submissions' => 'Les soumissions sont ouvertes jusqu\'au :date.',
+        'interlude' => 'Les soumissions sont closes. Les votes ouvriront le :date.',
+        'voting' => 'Les soumissions sont closes : les votes sont en cours.',
+        'ended' => 'Le concours est terminé.',
+    ],
+
+    'my_quotes' => [
+        'no_categories' => 'Ce concours n\'a pas encore de catégorie : il n\'y a rien à quoi soumettre pour l\'instant.',
+        'categories_title' => 'Catégories',
+        'your_entry' => 'Votre citation',
+        'no_entry' => 'Vous n\'avez rien soumis dans cette catégorie.',
+        'picker_title' => 'Votre carnet de citations',
+        'picker_empty' => 'Votre carnet de citations est vide : surlignez un passage dans un chapitre pour commencer à en collectionner.',
+        'filter_label' => 'Filtrer vos citations',
+        'filter_placeholder' => 'Un passage, une histoire, un chapitre…',
+        'ineligible_prefix' => 'Non éligible :',
+    ],
+
+    'ineligible' => [
+        'private_story' => 'Histoire privée',
+        'excluded_from_events' => 'Histoire exclue des événements',
+    ],
+
     'config' => [
         'section_title' => 'Concours de citations',
         'timeline_hint' => 'Le concours suit les dates de l\'activité : les soumissions ouvrent à son début, les votes ferment à sa fin.',
