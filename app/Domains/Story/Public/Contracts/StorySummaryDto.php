@@ -15,6 +15,7 @@ class StorySummaryDto
         public string $cover_type,
         public string $cover_url,
         public int $word_count,
+        public bool $is_excluded_from_events,
     ) {
     }
 
@@ -30,6 +31,7 @@ class StorySummaryDto
             cover_type: (string) ($story->cover_type ?? Story::COVER_DEFAULT),
             cover_url: $coverService->getCoverUrl($story),
             word_count: (int) $story->chapters()->sum('word_count'),
+            is_excluded_from_events: (bool) $story->is_excluded_from_events,
         );
     }
 }

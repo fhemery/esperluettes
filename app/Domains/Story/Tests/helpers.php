@@ -29,6 +29,7 @@ function createStoryForAuthor(int $authorId, array $attributes = []): Story
         'story_ref_copyright_id' => $attributes['story_ref_copyright_id'] ?? defaultRefCopyright()->id,
         'story_ref_status_id' => $attributes['story_ref_status_id'] ?? null,
         'story_ref_feedback_id' => $attributes['story_ref_feedback_id'] ?? null,
+        'is_excluded_from_events' => $attributes['is_excluded_from_events'] ?? false,
     ]);
     $story->save();
 

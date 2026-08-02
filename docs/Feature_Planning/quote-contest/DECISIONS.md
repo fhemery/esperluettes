@@ -51,3 +51,4 @@ Replayed to the user at the end of REFINE and not vetoed.
 | A9 | Replacing or withdrawing an entry drops any votes on it. | REFINE | Yes. |
 | A10 | No abstention is recorded — "has not voted" and "chose not to vote" are the same state. | REFINE | Yes. |
 | A11 | The type config panel renders after the *Dates* section, just above the save button, and receives `:activity` (null on create) as its only prop. | BUILD phase 1 | Yes. |
+| A12 | `getOwnedQuote()` builds its DTO through the same `buildProfileItems()` path as `getAllForOwner()`, so a single owned quote carries story/chapter titles and author profiles (not the bare chapter-shaped DTO). The submission snapshot in phase 6 can therefore read titles from it; slugs still come from `StoryPublicApi` (open item O1, preferred path). | BUILD phase 2 | Yes. |
