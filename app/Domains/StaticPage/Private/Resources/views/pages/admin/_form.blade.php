@@ -50,6 +50,20 @@
             </div>
         </div>
 
+        {{-- Header Image --}}
+        <div class="mt-4">
+            <x-media::image-field
+                name="header_image"
+                scope="static-pages"
+                :path="old('header_image.path', $page?->header_image_path)"
+                :show-alt="false"
+                :show-caption="false"
+                :label="__('static::admin.form.header_image')"
+                :help-text="__('static::admin.form.header_image_help')"
+            />
+            <x-shared::input-error :messages="$errors->get('header_image.file')" class="mt-1" />
+        </div>
+
         {{-- Summary --}}
         <div class="mt-4">
             <x-shared::input-label for="summary">
@@ -65,37 +79,45 @@
             <x-shared::input-error :messages="$errors->get('summary')" class="mt-1" />
         </div>
 
-        {{-- Content (Rich Editor) --}}
+        {{-- Content (Multi Editor) --}}
         <div class="mt-4">
-            <x-shared::input-label for="content-editor" :required="true">
+            <x-shared::input-label for="content" :required="true">
                 {{ __('static::admin.form.content') }}
             </x-shared::input-label>
-            <x-editor::rich-text
-                name="content"
-                id="content-editor"
-                :defaultValue="old('content', $page?->content ?? '')"
-                :nbLines="15"
-                :isMandatory="true"
+            @php
+                // On a failed validation re-render, rebuild the advanced blocks from old input
+                // (uploaded files are not repopulated by the browser and must be re-picked).
+                $meBlocks = $page?->content_blocks ?? [];
+                if (old('mode') === 'advanced' && is_array(old('blocks'))) {
+                    $meBlocks = [];
+                    foreach (array_filter(explode(',', (string) old('blocks_order', ''))) as $uid) {
+                        $ob = old('blocks')[$uid] ?? null;
+                        if (!is_array($ob)) { continue; }
+                        $meBlocks[] = [
+                            'type' => $ob['type'] ?? 'text',
+                            'html' => $ob['html'] ?? '',
+                            'path' => $ob['path'] ?? null,
+                            'alt' => $ob['alt'] ?? '',
+                            'caption' => $ob['caption'] ?? '',
+                            'keep_original' => !empty($ob['keep_original']),
+                        ];
+                    }
+                }
+                $meMode = old('mode', ($page?->content_blocks ? 'advanced' : 'simple'));
+            @endphp
+            <x-editor::multi
+                name="blocks"
+                content-name="content"
+                :content-value="old('content', $page?->content ?? '')"
+                :blocks="$meBlocks"
+                :mode="$meMode"
+                scope="static-pages"
                 toolbar="editorial"
+                :nbLines="15"
             />
             <x-shared::input-error :messages="$errors->get('content')" class="mt-1" />
+            <x-shared::input-error :messages="$errors->get('blocks')" class="mt-1" />
         </div>
-    </div>
-
-    {{-- Media section --}}
-    <div class="surface-read text-on-surface p-6 rounded-lg">
-        <h2 class="text-lg font-semibold mb-4">{{ __('static::admin.form.media_section') }}</h2>
-        
-        <x-media::image-field
-            name="header_image"
-            scope="static-pages"
-            :path="old('header_image.path', $page?->header_image_path)"
-            :show-alt="false"
-            :show-caption="false"
-            :label="__('static::admin.form.header_image')"
-            :help-text="__('static::admin.form.header_image_help')"
-        />
-        <x-shared::input-error :messages="$errors->get('header_image.file')" class="mt-1" />
     </div>
 
     {{-- Settings section --}}

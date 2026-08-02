@@ -49,6 +49,21 @@
         <x-shared::input-error :messages="$errors->get('slug')" class="mt-1" />
     </div>
 
+    {{-- Header Image --}}
+    <div>
+        <x-media::image-field
+            name="header_image"
+            scope="news"
+            :path="old('header_image.path', $news?->header_image_path)"
+            :show-alt="false"
+            :show-caption="false"
+            :show-usage="false"
+            :label="__('news::admin.form.header_image')"
+            :help-text="__('news::admin.form.header_image_help')"
+        />
+        <x-shared::input-error :messages="$errors->get('header_image.file')" class="mt-1" />
+    </div>
+
     {{-- Summary --}}
     <div>
         <x-shared::input-label for="summary" :required="true">
@@ -104,23 +119,6 @@
         />
         <x-shared::input-error :messages="$errors->get('content')" class="mt-1" />
         <x-shared::input-error :messages="$errors->get('blocks')" class="mt-1" />
-    </div>
-
-    <hr class="border-border" />
-
-    {{-- Header Image --}}
-    <div>
-        <x-media::image-field
-            name="header_image"
-            scope="news"
-            :path="old('header_image.path', $news?->header_image_path)"
-            :show-alt="false"
-            :show-caption="false"
-            :show-usage="false"
-            :label="__('news::admin.form.header_image')"
-            :help-text="__('news::admin.form.header_image_help')"
-        />
-        <x-shared::input-error :messages="$errors->get('header_image.file')" class="mt-1" />
     </div>
 
     <hr class="border-border" />

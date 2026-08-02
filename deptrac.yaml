@@ -744,6 +744,7 @@ deptrac:
       - EventsPublic
       - StaticPagePublic
       - MediaPublic
+      - EditorPublic
 
     StoryPrivate:
       - Shared

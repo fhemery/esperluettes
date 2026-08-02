@@ -143,6 +143,40 @@ describe('StaticPageMediaUsageProvider', function () {
         Storage::disk('public')->assertExists('static-pages/used.jpg');
         Storage::disk('public')->assertMissing('static-pages/orphan.jpg');
     });
+
+    it('reports advanced body image paths alongside the header path', function () {
+        StaticPage::factory()->create([
+            'slug' => 'avancee',
+            'header_image_path' => 'static-pages/header.jpg',
+            'content_blocks' => [
+                ['type' => 'text', 'html' => '<p>x</p>'],
+                ['type' => 'image', 'path' => 'static-pages/body.jpg', 'alt' => 'A'],
+            ],
+        ]);
+
+        $paths = iterator_to_array((function () {
+            yield from (new StaticPageMediaUsageProvider())->usedPaths();
+        })());
+
+        expect($paths)->toContain('static-pages/header.jpg');
+        expect($paths)->toContain('static-pages/body.jpg');
+    });
+
+    it('protects an advanced body image from GC', function () {
+        Storage::disk('public')->put('static-pages/body.jpg', 'x');
+        Storage::disk('public')->put('static-pages/orphan.jpg', 'x');
+        StaticPage::factory()->create([
+            'slug' => 'avancee-gc',
+            'content_blocks' => [
+                ['type' => 'image', 'path' => 'static-pages/body.jpg', 'alt' => 'A'],
+            ],
+        ]);
+
+        app(\App\Domains\Media\Private\Services\MediaService::class)->gc(-1);
+
+        Storage::disk('public')->assertExists('static-pages/body.jpg');
+        Storage::disk('public')->assertMissing('static-pages/orphan.jpg');
+    });
 });
 
 describe('Static page admin image endpoints authorization', function () {

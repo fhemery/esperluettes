@@ -79,11 +79,11 @@ reuse `calendar` — see `../media-consumer-migration/00-request.md`.
   `Profile\ProfileService`. Until they are migrated, `ImageService` cannot move
   into Media and the domain is not the sole entry point it claims to be.
   → [`../media-consumer-migration/`](../media-consumer-migration/)
-- **Advanced mode for static pages** (planned Phase 5a).
-  → [`../multiedit-static-pages/`](../multiedit-static-pages/)
-- **Advanced mode for chapters** (planned Phase 5b), including per-block
-  `[data-annotable]` regions and summed word counts.
-  → [`../chapters-multi-edit/`](../chapters-multi-edit/)
+- **Advanced mode for static pages** — shipped; compact record in
+  [`../multiedit-static-pages/README.md`](../multiedit-static-pages/README.md).
+- **Advanced mode for chapters** — shipped; compact record in
+  [`../chapters-multi-edit/README.md`](../chapters-multi-edit/README.md).
+  Per-block `[data-annotable]` regions remain with `annotations/`.
 - Profile's avatar is a deliberate special case: a single 200×200 JPEG with no
   responsive variants, so `<x-media::image>` does not apply. The recommendation
   carried forward is to migrate it last and minimally.

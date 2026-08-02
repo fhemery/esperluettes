@@ -2,12 +2,14 @@
 
 namespace App\Domains\StaticPage\Private\Services;
 
+use App\Domains\Editor\Public\Api\EditorPublicApi;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\StaticPage\Private\Models\StaticPage;
 use App\Domains\Shared\Support\HtmlLinkUtils;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Validation\ValidationException;
 use Mews\Purifier\Facades\Purifier;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\StaticPage\Public\Events\StaticPagePublished;
@@ -20,14 +22,100 @@ class StaticPageService
 
     public function __construct(
         private readonly EventBus $eventBus,
+        private readonly EditorPublicApi $editor,
         private readonly MediaPublicApi $media,
     ) {}
 
     public const CACHE_KEY_SLUG_MAP = 'static_pages:slug_map';
 
+    /**
+     * Resolve the persisted content fields from the submitted payload.
+     *
+     * Simple mode: `content` = sanitized author HTML, `content_blocks` = null.
+     * Advanced mode: build the normalized block list (store new image uploads,
+     * reuse existing paths, drop empties, sanitize text), persist it in
+     * `content_blocks`, and render it into `content` as the display cache.
+     *
+     * @param array<string,mixed> $data
+     * @return array{content:string, content_blocks:?array<int,array<string,mixed>>}
+     */
+    private function resolveContent(array $data): array
+    {
+        if (($data['mode'] ?? 'simple') !== 'advanced') {
+            return [
+                'content' => $this->sanitizeContent($data['content'] ?? ''),
+                'content_blocks' => null,
+            ];
+        }
+
+        $order = array_values(array_filter(explode(',', (string) ($data['blocks_order'] ?? '')), fn ($u) => $u !== ''));
+        $raw = is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
+
+        $blocks = [];
+        foreach ($order as $uid) {
+            $b = $raw[$uid] ?? null;
+            if (!is_array($b)) {
+                continue;
+            }
+            $type = $b['type'] ?? null;
+
+            if ($type === 'text') {
+                $html = $this->editor->sanitizeText((string) ($b['html'] ?? ''));
+                if (trim(strip_tags($html)) === '') {
+                    continue; // drop empty text block
+                }
+                $blocks[] = ['type' => 'text', 'html' => $html];
+            } elseif ($type === 'image') {
+                $keep = !empty($b['keep_original']);
+                $file = $b['file'] ?? null;
+                if ($file instanceof UploadedFile) {
+                    // "keep original" stores the file without generating variants.
+                    $path = $this->media->store(self::SCOPE, $file, $keep ? [] : [400, 800]);
+                } else {
+                    $path = !empty($b['path']) ? (string) $b['path'] : null;
+                    // A reused image with no variants must render raw, whatever the box says.
+                    if ($path && !$keep && !$this->media->hasVariants($path)) {
+                        $keep = true;
+                    }
+                }
+                if (!$path) {
+                    continue; // drop empty image block
+                }
+                $alt = trim((string) ($b['alt'] ?? ''));
+                if ($alt === '') {
+                    throw ValidationException::withMessages([
+                        'blocks' => __('static::admin.validation.image_alt_required'),
+                    ]);
+                }
+                $block = ['type' => 'image', 'path' => $path, 'alt' => $alt];
+                if ($keep) {
+                    $block['keep_original'] = true;
+                }
+                if (!empty($b['caption'])) {
+                    $block['caption'] = (string) $b['caption'];
+                }
+                $blocks[] = $block;
+            }
+        }
+
+        if ($blocks === []) {
+            throw ValidationException::withMessages([
+                'blocks' => __('static::admin.validation.blocks_required'),
+            ]);
+        }
+
+        return [
+            'content' => $this->editor->render($blocks),
+            'content_blocks' => $blocks,
+        ];
+    }
+
     public function create(array $data): StaticPage
     {
-        $data['content'] = $this->sanitizeContent($data['content'] ?? '');
+        $resolved = $this->resolveContent($data);
+        $data['content'] = $resolved['content'];
+        $data['content_blocks'] = $resolved['content_blocks'];
+        unset($data['blocks'], $data['blocks_order'], $data['mode']);
 
         $data['header_image_path'] = $this->resolveHeaderImage($data);
         unset($data['header_image']);
@@ -43,7 +131,10 @@ class StaticPageService
 
     public function update(StaticPage $page, array $data): StaticPage
     {
-        $data['content'] = $this->sanitizeContent($data['content'] ?? '');
+        $resolved = $this->resolveContent($data);
+        $data['content'] = $resolved['content'];
+        $data['content_blocks'] = $resolved['content_blocks'];
+        unset($data['blocks'], $data['blocks_order'], $data['mode']);
 
         $data['header_image_path'] = $this->resolveHeaderImage($data);
         unset($data['header_image']);

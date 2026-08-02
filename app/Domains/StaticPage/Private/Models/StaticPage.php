@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 
 #[Table('static_pages')]
-#[Fillable(['title', 'slug', 'summary', 'content', 'header_image_path', 'status', 'meta_description', 'published_at', 'created_by'])]
+#[Fillable(['title', 'slug', 'summary', 'content', 'content_blocks', 'header_image_path', 'status', 'meta_description', 'published_at', 'created_by'])]
 class StaticPage extends Model
 {
     use HasSlug, HasFactory;
@@ -21,6 +21,7 @@ class StaticPage extends Model
     protected $casts = [
         'published_at' => 'datetime',
         'created_by' => 'integer',
+        'content_blocks' => 'array',
     ];
 
     public function getSlugOptions(): SlugOptions
