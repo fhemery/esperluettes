@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestCategoryController;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestEntryController;
 use Illuminate\Support\Facades\Route;
 
 // Category CRUD only: the contest's dates ride along with the activity form.
@@ -20,4 +21,18 @@ Route::middleware(['web', 'auth', 'role:' . Roles::ADMIN . ',' . Roles::TECH_ADM
 
         Route::delete('/categories/{category}', [QuoteContestCategoryController::class, 'destroy'])
             ->name('categories.destroy');
+    });
+
+// Reader routes. The activity's own `role_restrictions` gate the page; these
+// re-check phase and ownership themselves, since a forged POST never went past
+// a rendered page.
+Route::middleware(['web', 'auth', 'verified'])
+    ->prefix('calendar/quote-contest/{activity}')
+    ->name('quote-contest.')
+    ->group(function () {
+        Route::post('/entries', [QuoteContestEntryController::class, 'store'])
+            ->name('entries.store');
+
+        Route::delete('/entries/{entry}', [QuoteContestEntryController::class, 'destroy'])
+            ->name('entries.destroy');
     });

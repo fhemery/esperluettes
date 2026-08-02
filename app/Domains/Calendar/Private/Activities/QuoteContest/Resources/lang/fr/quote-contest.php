@@ -24,6 +24,18 @@ return [
         'filter_label' => 'Filtrer vos citations',
         'filter_placeholder' => 'Un passage, une histoire, un chapitre…',
         'ineligible_prefix' => 'Non éligible :',
+
+        'select_quote' => 'Choisir cette citation',
+        'selected_quote' => 'Citation choisie',
+        'pick_one_first' => 'Choisissez d\'abord une citation dans votre carnet, plus bas.',
+        'submit' => 'Soumettre la citation choisie',
+        'replace' => 'Remplacer par la citation choisie',
+        'withdraw' => 'Retirer du concours',
+        'replace_confirm_title' => 'Remplacer votre citation',
+        'replace_confirm_body' => 'Dans « :category », cette citation est actuellement en lice :',
+        'replace_confirm_new' => 'Elle sera définitivement remplacée par celle que vous venez de choisir :',
+        'replace_confirm_cancel' => 'Annuler',
+        'replace_confirm_confirm' => 'Remplacer',
     ],
 
     'ineligible' => [
@@ -61,6 +73,8 @@ return [
         'category_created' => 'Catégorie ajoutée.',
         'category_updated' => 'Catégorie mise à jour.',
         'category_deleted' => 'Catégorie supprimée.',
+        'entry_submitted' => 'Votre citation est en lice.',
+        'entry_withdrawn' => 'Votre citation a été retirée du concours.',
         'category_not_empty' => 'Impossible de supprimer cette catégorie : elle contient déjà des citations, retirées ou non.',
     ],
 
@@ -73,5 +87,7 @@ return [
         'category_title_max' => 'Le titre de la catégorie ne peut pas dépasser 160 caractères.',
         'category_description_max' => 'La description de la catégorie ne peut pas dépasser 2000 caractères.',
         'category_position_integer' => 'L\'ordre doit être un nombre entier.',
+        'category_required' => 'Choisissez une catégorie.',
+        'quote_required' => 'Choisissez une citation à soumettre.',
     ],
 ];

@@ -19,7 +19,7 @@
 | 3 | QuoteContest skeleton: tables, models, registration, phase service | M | 1 | DONE |
 | 4 | Admin configuration: settings panel + category CRUD | M | 1, 3 | DONE |
 | 5 | Reader page shell + *Mes citations*, read-only | M | 2, 3, 4 | DONE |
-| 6 | Submissions: submit / replace / withdraw | M | 5 | TODO |
+| 6 | Submissions: submit / replace / withdraw | M | 5 | DONE |
 | 7 | Story-eligibility listeners: withdrawal on visibility loss | S | 6 | TODO |
 | 8 | Voting: ballot, seeded shuffle, *Votes* tab | M | 6 | TODO |
 | 9 | Moderation: *Résultats* tab, entry deletion, submitter notification | M | 8 | TODO |
@@ -951,7 +951,7 @@ integration tests.
 
 Each names the phase that must resolve it before starting.
 
-**O1 — `QuoteDto` gives URLs, not slugs. (Phase 6.)**
+**O1 — `QuoteDto` gives URLs, not slugs. (Phase 6.) — RESOLVED, see A24.**
 The entries table stores `story_slug` and `chapter_slug` (architecture §2.1), but
 `App\Domains\Quote\Public\Api\Contracts\QuoteDto` exposes `storyUrl` and
 `chapterUrl` — the slugs are consumed inside `QuoteService::buildProfileItems()`

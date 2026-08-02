@@ -21,6 +21,8 @@ final class MyQuotesViewModel
      * @param array<int, PickerQuoteViewModel> $quotes
      */
     public function __construct(
+        /** The submit and withdraw routes are built from it. */
+        public readonly int $activityId,
         public readonly QuoteContestPhase $phase,
         public readonly array $categories,
         public readonly array $quotes,

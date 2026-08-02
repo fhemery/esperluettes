@@ -59,6 +59,7 @@ class QuoteContestComponent extends Component
             ->all();
 
         $myQuotes = new MyQuotesViewModel(
+            activityId: $activityId,
             phase: $phase,
             categories: $categories,
             // Outside the submission phase there is nothing to pick, so the
