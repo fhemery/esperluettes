@@ -83,6 +83,56 @@ describe('author heat — tint', () => {
     });
 });
 
+describe('author heat — gutter markers', () => {
+    beforeEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    function gutteredHeat(html) {
+        const heat = heatOver(html);
+        const gutter = document.createElement('div');
+        document.querySelector('div').appendChild(gutter);
+        gutter.getBoundingClientRect = () => ({ top: 0, height: 500 });
+        heat._gutterEl = gutter;
+        return heat;
+    }
+
+    /** jsdom lays nothing out: the line each mark sits on has to be dictated. */
+    function layOut(topByText) {
+        marks().forEach(mark => {
+            const top = topByText[mark.textContent] ?? 0;
+            mark.getBoundingClientRect = () => ({ top, height: 20 });
+        });
+    }
+
+    function markerTops() {
+        return Array.from(document.querySelectorAll('[data-quote-marker]'))
+            .map(el => parseFloat(el.style.top));
+    }
+
+    it('keeps two passages starting on the same line from stacking', () => {
+        const heat = gutteredHeat('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+
+        heat._render([row(1, 'le chat'), row(2, 'chat dort')]);
+        layOut({ 'le ': 100, 'chat': 100, ' dort': 100 });
+        heat._positionMarkers();
+
+        const tops = markerTops().sort((a, b) => a - b);
+        expect(tops).toHaveLength(2);
+        expect(tops[1] - tops[0]).toBeGreaterThanOrEqual(20);
+    });
+
+    it('leaves passages on distinct lines where they are', () => {
+        const heat = gutteredHeat('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+
+        heat._render([row(1, 'le chat'), row(2, 'sur le toit')]);
+        layOut({ 'le chat': 100, 'sur le toit': 300 });
+        heat._positionMarkers();
+
+        expect(markerTops().sort((a, b) => a - b)).toEqual([110, 310]);
+    });
+});
+
 describe('author heat — passage popover', () => {
     let opened;
 

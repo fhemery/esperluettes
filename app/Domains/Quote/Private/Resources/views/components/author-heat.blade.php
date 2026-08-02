@@ -11,7 +11,7 @@
 
     {{-- Below md the gutter is display:none, so no marker is ever built. --}}
     <div x-ref="gutter"
-         class="hidden md:block absolute inset-y-0 right-0 w-6 translate-x-1/2 pointer-events-none"></div>
+         class="hidden md:block absolute inset-y-0 right-0 w-6 translate-x-full pointer-events-none"></div>
 
     {{ $slot }}
 

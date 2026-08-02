@@ -6,7 +6,7 @@
 
     <x-shared::popover placement="top" maxWidth="20rem">
         <x-slot name="trigger">
-            <x-shared::badge color="neutral" size="xs" icon="format_quote">
+            <x-shared::badge color="neutral" size="xs" icon="bookmark_star">
                 {{ $count }}
             </x-shared::badge>
         </x-slot>
@@ -63,7 +63,7 @@
     </x-shared::popover>
 
     <button type="button"
-            class="inline-flex items-center leading-none text-accent hover:text-accent/80"
+            class="inline-flex items-center leading-none text-accent hover:text-accent/80 cursor-pointer"
             :class="$store.quoteAggregate.visible || 'opacity-60'"
             :aria-pressed="$store.quoteAggregate.visible ? 'true' : 'false'"
             aria-label="{{ __('quote::ui.author_badge.toggle') }}"

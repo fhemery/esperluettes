@@ -8,6 +8,9 @@ import { groupPassages, segmentByDepth } from './author-summary.js';
  */
 const DEPTH_CLASSES = ['bg-accent/15', 'bg-accent/30', 'bg-accent/45', 'bg-accent/60'];
 
+/** Marker height (`h-5`) plus a hairline, so nudged markers stay legible. */
+const MARKER_MIN_GAP = 22;
+
 function depthClass(depth) {
     return DEPTH_CLASSES[Math.min(depth, DEPTH_CLASSES.length) - 1];
 }
@@ -230,13 +233,30 @@ export function quoteAuthorHeat({
             this._positionMarkers();
         },
 
+        /**
+         * Two passages starting on the same line get the same natural `top` and
+         * would stack into what reads as a single marker — the very case the
+         * author most needs to see. Walk them top-down and push each one that is
+         * too close down until it clears the previous.
+         */
         _positionMarkers() {
             if (!this._gutterEl || !this._markers.length) return;
             const gutterTop = this._gutterEl.getBoundingClientRect().top;
 
-            for (const { el, mark } of this._markers) {
-                const rect = mark.getBoundingClientRect();
-                el.style.top = `${rect.top - gutterTop + rect.height / 2}px`;
+            const placed = this._markers
+                .map(({ el, mark }) => {
+                    const rect = mark.getBoundingClientRect();
+                    return { el, top: rect.top - gutterTop + rect.height / 2 };
+                })
+                .sort((a, b) => a.top - b.top);
+
+            let previousTop = null;
+            for (const marker of placed) {
+                if (previousTop !== null && marker.top - previousTop < MARKER_MIN_GAP) {
+                    marker.top = previousTop + MARKER_MIN_GAP;
+                }
+                marker.el.style.top = `${marker.top}px`;
+                previousTop = marker.top;
             }
         },
 
