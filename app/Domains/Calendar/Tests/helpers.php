@@ -21,6 +21,16 @@ class FakeActivityRegistration implements ActivityRegistrationInterface
     {
         return null;
     }
+
+    public function configRules(): array
+    {
+        return [];
+    }
+
+    public function persistConfig(int $activityId, array $validated): void
+    {
+        // No type-specific configuration.
+    }
 }
 
 

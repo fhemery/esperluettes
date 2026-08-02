@@ -1,6 +1,7 @@
 @php
     $activity = $activity ?? null;
     $isEdit = $activity !== null;
+    $configComponents = $configComponents ?? [];
 @endphp
 
 {{-- Section: Activity details --}}
@@ -25,7 +26,7 @@
             @endphp
             <p class="mt-1 text-sm text-fg/70 font-medium">{{ $typeLabel }}</p>
         @else
-            <select id="activity_type" name="activity_type"
+            <select id="activity_type" name="activity_type" x-model="activityType"
                 class="mt-1 block w-full rounded-md border-border bg-surface-read text-on-surface"
                 required>
                 <option value="">—</option>
@@ -143,6 +144,21 @@
         </div>
     </div>
 </div>
+
+{{-- Section: Type-specific configuration, contributed by the activity type --}}
+@if($isEdit)
+    @php $configComponent = $configComponents[$activity->activity_type] ?? null; @endphp
+    @if($configComponent)
+        <x-dynamic-component :component="$configComponent" :activity="$activity" />
+    @endif
+@else
+    {{-- The type is picked in this very form, so panels are toggled client-side. --}}
+    @foreach($configComponents as $typeKey => $configComponent)
+        <div x-show="activityType === '{{ $typeKey }}'" x-cloak>
+            <x-dynamic-component :component="$configComponent" :activity="null" />
+        </div>
+    @endforeach
+@endif
 
 <div class="flex gap-4">
     <x-shared::button type="submit" color="primary" icon="save">

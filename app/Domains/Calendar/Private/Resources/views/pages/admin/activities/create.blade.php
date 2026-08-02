@@ -11,6 +11,7 @@
 
         <form method="POST" action="{{ route('calendar.admin.activities.store') }}"
               class="flex flex-col gap-6"
+              x-data="{ activityType: @js(old('activity_type', '')) }"
               enctype="multipart/form-data">
             @csrf
             @include('calendar::pages.admin.activities._form')

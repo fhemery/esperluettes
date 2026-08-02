@@ -50,3 +50,4 @@ Replayed to the user at the end of REFINE and not vetoed.
 | A8 | No minimum entry count for a category to be votable; an empty category shows empty. Nothing marks or stores a winner. | REFINE | Yes. |
 | A9 | Replacing or withdrawing an entry drops any votes on it. | REFINE | Yes. |
 | A10 | No abstention is recorded — "has not voted" and "chose not to vote" are the same state. | REFINE | Yes. |
+| A11 | The type config panel renders after the *Dates* section, just above the save button, and receives `:activity` (null on create) as its only prop. | BUILD phase 1 | Yes. |

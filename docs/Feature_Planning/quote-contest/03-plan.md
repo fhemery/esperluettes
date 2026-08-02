@@ -14,7 +14,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Calendar core — the plugin config contract | M | — | TODO |
+| 1 | Calendar core — the plugin config contract | M | — | DONE |
 | 2 | Cross-domain reads: Story eligibility flag + Quote owner reads | S | — | TODO |
 | 3 | QuoteContest skeleton: tables, models, registration, phase service | M | 1 | TODO |
 | 4 | Admin configuration: settings panel + category CRUD | M | 1, 3 | TODO |

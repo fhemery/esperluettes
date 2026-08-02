@@ -49,3 +49,5 @@ Subscriptions are wired in `JardinoServiceProvider::registerEventListeners()` vi
 | `secret-gift` | `SecretGiftRegistration` | `secret-gift::secret-gift-component` |
 
 New activity types follow the same pattern: implement `ActivityRegistrationInterface`, create a `ServiceProvider`, register both in `CalendarServiceProvider`.
+
+**A type may carry its own configuration.** Beyond `displayComponentKey()`, a registration can return a `configComponentKey()` — a Blade component rendered inside the admin activity create/edit form — and back it with `configRules()` (validation rules merged into `ActivityRequest` for that type only) and `persistConfig(int $activityId, array $validated)`. `ActivityController::store()`/`update()` run the activity write and `persistConfig()` in a single `DB::transaction()`, so an activity can never exist without its type config; throwing from `persistConfig()` rolls the activity back. Both hooks are no-ops for the built-in types. On create the type is chosen in the same form, so every declared config panel is rendered and toggled client-side on the `activity_type` select — only the submitted type's rules are applied server-side.
