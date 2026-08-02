@@ -10,6 +10,7 @@
         </testsuite>
         <testsuite name="Feature">
             <directory suffix="Test.php">app/Domains/*/Tests/Feature</directory>
+            <directory suffix="Test.php">tests/Feature</directory>
         </testsuite>
     </testsuites>
     <source>

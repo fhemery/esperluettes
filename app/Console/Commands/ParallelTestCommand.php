@@ -22,19 +22,42 @@ class ParallelTestCommand extends Command
     public function handle(): int
     {
         $processes = $this->resolveProcessCount();
+        $dirs = $this->argument('dirs') ?? [];
 
-        // TestCommand reads raw $_SERVER['argv'] to build its paratest arguments,
-        // so we inject --parallel and --processes there before delegating.
-        $extraArgs = array_slice($_SERVER['argv'], 2);
-        $_SERVER['argv'] = [
-            $_SERVER['argv'][0],
-            'test',
-            '--parallel',
-            "--processes={$processes}",
-            ...$extraArgs,
-        ];
+        if ($dirs === []) {
+            // TestCommand reads raw $_SERVER['argv'] to build its paratest arguments,
+            // so we inject --parallel and --processes there before delegating.
+            $extraArgs = array_slice($_SERVER['argv'], 2);
+            $_SERVER['argv'] = [
+                $_SERVER['argv'][0],
+                'test',
+                '--parallel',
+                "--processes={$processes}",
+                ...$extraArgs,
+            ];
 
-        return $this->call('test', ['--parallel' => true]);
+            return $this->call('test', ['--parallel' => true]);
+        }
+
+        $firstFailure = 0;
+        $binary = $_SERVER['argv'][0] ?? 'artisan';
+
+        foreach ($dirs as $dir) {
+            $_SERVER['argv'] = [
+                $binary,
+                'test',
+                '--parallel',
+                "--processes={$processes}",
+                $dir,
+            ];
+
+            $code = $this->call('test', ['--parallel' => true]);
+            if ($code !== 0 && $firstFailure === 0) {
+                $firstFailure = $code;
+            }
+        }
+
+        return $firstFailure;
     }
 
     private function resolveProcessCount(): int
