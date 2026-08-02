@@ -132,6 +132,29 @@ describe('listByScope', function () {
         expect($paths)->toContain('news/b.png');
     });
 
+    it('returns a 400w variant URL when variants exist', function () {
+        Storage::disk('public')->put('news/a.jpg', 'x');
+        Storage::disk('public')->put('news/a-800w.webp', 'x');
+
+        $page = app(MediaPublicApi::class)->listByScope('news');
+
+        expect($page->items)->toHaveCount(1);
+        expect($page->items[0]->url)->toContain('storage/news/a-400w.webp');
+    });
+
+    it('returns the original URL for keep-original images without variants', function () {
+        // Chapter "keep original" uploads land with no -400w/-800w files; the
+        // library picker must still show a reachable thumb URL.
+        Storage::disk('public')->put('chapters/42/keep.jpg', 'x');
+
+        $page = app(MediaPublicApi::class)->listByScope('chapters/42');
+
+        expect($page->items)->toHaveCount(1);
+        expect($page->items[0]->path)->toBe('chapters/42/keep.jpg');
+        expect($page->items[0]->url)->toContain('storage/chapters/42/keep.jpg');
+        expect($page->items[0]->url)->not->toContain('-400w');
+    });
+
     it('paginates and reports hasMore', function () {
         for ($i = 0; $i < 45; $i++) {
             Storage::disk('public')->put("news/img{$i}.jpg", 'x');

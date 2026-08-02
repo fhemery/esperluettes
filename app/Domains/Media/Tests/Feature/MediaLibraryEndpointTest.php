@@ -19,12 +19,24 @@ describe('GET /media/library', function () {
     it('returns originals for a scope as JSON', function () {
         Storage::disk('public')->put('news/a.jpg', 'x');
         Storage::disk('public')->put('news/a-400w.webp', 'x');
+        Storage::disk('public')->put('news/a-800w.webp', 'x');
 
         $this->actingAs(alice($this))
             ->getJson('/media/library?scope=news')
             ->assertOk()
             ->assertJsonPath('page', 1)
-            ->assertJsonPath('items.0.path', 'news/a.jpg');
+            ->assertJsonPath('items.0.path', 'news/a.jpg')
+            ->assertJsonPath('items.0.url', asset('storage/news/a-400w.webp'));
+    });
+
+    it('returns the original URL when an image has no variants', function () {
+        Storage::disk('public')->put('chapters/7/keep.jpg', 'x');
+
+        $this->actingAs(alice($this))
+            ->getJson('/media/library?scope=chapters/7')
+            ->assertOk()
+            ->assertJsonPath('items.0.path', 'chapters/7/keep.jpg')
+            ->assertJsonPath('items.0.url', asset('storage/chapters/7/keep.jpg'));
     });
 
     it('rejects an unknown scope', function () {

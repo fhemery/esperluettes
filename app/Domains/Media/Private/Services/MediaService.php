@@ -159,7 +159,16 @@ class MediaService
         $offset = ($page - 1) * $perPage;
         $slice = array_slice($originals, $offset, $perPage);
         $items = array_map(
-            fn (string $path) => new MediaPathDto($path, $this->variantUrl($path, 400, 'webp')),
+            function (string $path): MediaPathDto {
+                // Keep-original uploads have no -400w/-800w files; pointing the
+                // picker at a missing variant yields blank thumbs. Fall back to
+                // the original so selection still shows a reachable preview.
+                $url = $this->hasVariants($path)
+                    ? $this->variantUrl($path, 400, 'webp')
+                    : asset('storage/' . ltrim($path, '/'));
+
+                return new MediaPathDto($path, $url);
+            },
             $slice,
         );
 
