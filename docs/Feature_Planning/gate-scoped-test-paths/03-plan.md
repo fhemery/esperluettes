@@ -92,8 +92,8 @@ No end-user surface. Checklist is documentary; mark rows N/A at VERIFY.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| N/A — no UI | Scoped multi-dir PHP step / direct `test:parallel` with ≥2 dirs | skip browser |
-| N/A — no UI | Full gate `-- --all` still green | skip browser |
+| N/A — no UI | Scoped multi-dir PHP step / direct `test:parallel` with ≥2 dirs | n/a — skip browser; multi-dir fixture smoke exit 0 ✅ |
+| N/A — no UI | Full gate `-- --all` still green | n/a — skip browser; `npm run gate -- --all` PASS ✅ |
 
 ## Open items
 

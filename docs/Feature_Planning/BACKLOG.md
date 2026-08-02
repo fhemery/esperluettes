@@ -27,7 +27,6 @@ purpose — move or insert one anywhere without touching the others.
 | Jardino — `deselected_at` is never written                      | `jardino-snapshot-deselection/` | auto        | TODO                                                                                                                                                                                                                                                                                                                      |
 | Gift sound on Media, retire `<x-shared::sound-upload>`          | `media-sound-upload/`           | interactive | TODO:leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out                                                                                                   |
 | Validation messages — file rules print raw keys                 | `validation-messages/`          | auto        | TODO:from `chapters-multi-edit/` decision #11 (defect D4). No `lang/*/validation.php` is published, so `image` prints `validation.image` and `max` prints nothing. Hits `ChapterRequest` and `NewsRequest` alike; fix it once, app-wide.                                                                                  |
-| Gate — the scoped run breaks on multi-domain branches            | `gate-scoped-test-paths/`       | auto        | WIP:BUILD (1/1) — Multi-dir `test:parallel` + regression                          |
 | `<x-shared::image-upload>` — one consumer left, decide its fate | `shared-image-upload-cleanup/`  | auto        | TODO:from `media-consumer-migration/` decision #9. SecretGift is the only user (private `local` disk, no Media semantics). Its lang file is also borrowed by Story's cover tab — do not delete that.                                                                                                                      |
 
 ## Done
@@ -38,6 +37,7 @@ Reference other rows by **folder name**, never by position.
 
 | Task | Folder | Wrapped |
 |------|--------|---------|
+| Gate — the scoped run breaks on multi-domain branches | `gate-scoped-test-paths/` | 2026-08-02 (VERIFY skipped browser; multi-dir + `--all` green; no leftovers) |
 | Quotes — in-chapter author view (vNext) | `quotes-author-view/` | 2026-08-01 (24/24 QA rows pass; e2e specs retired, seeders kept — decision #24; leftover — `gate-scoped-test-paths/`) |
 | Shared `image-upload` lang file has no component | `shared-upload-lang-ownership/` | 2026-07-31 (VERIFY skipped — copy-only, user smoke-checks the Story cover tab) |
 | `<x-shared::image-upload>` — one consumer left, decide its fate | `shared-image-upload-cleanup/` | 2026-07-31 (VERIFY skipped — user smoke-checks; leftovers — `media-sound-upload/`, `shared-upload-lang-ownership/`) |
