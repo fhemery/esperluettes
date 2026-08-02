@@ -36,6 +36,24 @@ class QuotePolicy
         return in_array($userId, $withAccess, true);
     }
 
+    /**
+     * Only the story's authors (and co-authors) may see the chapter aggregate.
+     *
+     * Deliberately checks getAuthorIds() and not the story's collaborators at
+     * large: a beta reader is a collaborator, and the aggregate exposes reader
+     * identities.
+     */
+    public function canViewChapterAggregate(int $chapterId, int $userId): bool
+    {
+        $storyId = $this->storyApi->getStoryIdByChapterId($chapterId);
+
+        if ($storyId === null) {
+            return false;
+        }
+
+        return in_array($userId, $this->storyApi->getAuthorIds($storyId), true);
+    }
+
     public function canViewQuoteBook(int $profileUserId, ?int $viewerId): bool
     {
         if ($viewerId === $profileUserId) {

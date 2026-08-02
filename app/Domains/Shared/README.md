@@ -187,6 +187,7 @@ Checks that a display name produces a unique profile slug. Accepts an optional `
 | `anchoring/canonical-text.js` | `buildCanonicalText(rootEl)` | Normalised text extraction from rendered content. |
 | `anchoring/extract-anchor.js` | `extractAnchor(range, rootEl, canonicalText)` | Builds a quote anchor (prefix / highlighted / suffix) from a selection. |
 | `anchoring/reanchor.js` | `findAnchor(canonicalText, anchor)` | Re-locates a stored anchor in edited text. |
+| `anchoring/block-elements.js` | `isBlockElement(node)`, `closestBlock(node)` | Tells whether a selection crosses two blocks, so the caller can refuse it. Deliberately a *narrower* block definition than `canonical-text.js` — see note below. |
 
 The rich-text editor bundle lives in the **Editor** domain
 ([app/Domains/Editor/README.md](../Editor/README.md)), not here.
@@ -195,6 +196,16 @@ The rich-text editor bundle lives in the **Editor** domain
 text, anchor extraction and re-anchoring are *read-side* concerns, consumed by
 Quote (and later annotations) on rendered pages that load no editor at all.
 Different consumers, different lifecycle — do not move it into `Editor`.
+
+**Two definitions of "block" live side by side in this folder, on purpose.**
+`canonical-text.js`'s `BLOCK_TAGS` includes `DIV`, because any block-level
+wrapper should contribute a synthetic space to the extracted text. `block-elements.js`'s
+`isBlockElement()` is narrower — it excludes bare `DIV`s and only treats
+`div.ce-block` (the block-editor wrapper) as a block — because its job is
+different: deciding whether a text selection spans two blocks, so the caller
+(currently Quote's mini quote form) can refuse it. A generic decorative `DIV`
+should not split a selection into two blocks; the block-editor's own block
+wrapper should. Keep the two sets aligned in intent, not in content.
 
 ---
 
@@ -227,7 +238,7 @@ Located in `Resources/views/components/`. Referenced as `<x-shared::component-na
 - `badge`, `badge-overflow`, `metric-badge` — badge display
 - `avatar` — user avatar
 - `modal`, `confirm-modal`, `drawer` — overlay/dialog patterns
-- `popover`, `tooltip` — popover/tooltip (backed by `tooltip.js` Alpine component)
+- `popover`, `tooltip` — popover/tooltip (backed by `tooltip.js` Alpine component). The trigger is keyboard-reachable (`tabindex="0"`), opens/closes on Enter and Space exactly like a click, closes on Escape, and exposes `aria-expanded` for assistive tech.
 - `progress` — progress bar
 - `pagination` — paginator
 - `read-toggle`, `read-toggle-script` — reading progress toggle

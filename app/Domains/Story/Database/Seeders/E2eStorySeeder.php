@@ -10,9 +10,11 @@ use App\Domains\StoryRef\Private\Models\StoryRefAudience;
 use App\Domains\StoryRef\Private\Models\StoryRefCopyright;
 use App\Domains\StoryRef\Private\Models\StoryRefGenre;
 use App\Domains\Story\Private\Services\ChapterCreditService;
+use App\Domains\Story\Private\Services\CollaboratorService;
 use App\Domains\StoryRef\Private\Models\StoryRefType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Two public stories for the E2E environment (see .env.e2e), mirrored in
@@ -62,6 +64,12 @@ class E2eStorySeeder extends Seeder
     public const COAUTHORED_CHAPTER_ID = 6;
     public const COAUTHORED_CHAPTER_SLUG = 'chapitre-coecrit-6';
 
+    public const ILLUSTRATED_CHAPTER_ID = 7;
+    public const ILLUSTRATED_CHAPTER_SLUG = 'chapitre-illustre-7';
+
+    /** Fixture image of the illustrated chapter, copied from the repo on seed. */
+    public const ILLUSTRATION_PATH = 'chapters/e2e/illustration.jpg';
+
     /**
      * The six paragraphs shared by the Simple and the Advanced chapter. The
      * Advanced one splits them 2/2/2 across three text blocks, so a spec can
@@ -74,6 +82,17 @@ class E2eStorySeeder extends Seeder
         'Beta deux. La seconde phrase du deuxième bloc, toujours de la même longueur.',
         'Gamma un. La première phrase du troisième bloc, pour finir la comparaison.',
         'Gamma deux. La toute dernière phrase du chapitre, qui ne doit pas avoir de marge basse.',
+    ];
+
+    /**
+     * The illustrated chapter: inline formatting in the first block, then a
+     * lazily-loaded image, then more prose. Quoted passages sit both inside the
+     * formatting and *below* the image, which is what makes it possible to see
+     * whether the author heat's margin markers drift once the image arrives.
+     */
+    private const ILLUSTRATED_BLOCKS_TEXT = [
+        '<p>Delta un. Un paragraphe avec de l\'<em>italique</em> et du <strong>gras</strong> au milieu de la phrase.</p>',
+        '<p>Epsilon un. Le paragraphe qui suit l\'image et qui descend quand elle arrive.</p>',
     ];
 
     public function run(): void
@@ -140,6 +159,7 @@ class E2eStorySeeder extends Seeder
         ], $story->id);
 
         $this->createTypographyPair($story->id);
+        $this->createIllustratedChapter($story->id);
 
         $this->createChapter(self::COUNTED_CHAPTER_ID, 'Chapitre compté', self::COUNTED_CHAPTER_SLUG, [
             'content' => '<p>Trois mots ici.</p><p>Et quatre mots là.</p>',
@@ -184,6 +204,39 @@ class E2eStorySeeder extends Seeder
         ], $storyId);
     }
 
+    /**
+     * An Advanced chapter with a real image block between two text blocks. The
+     * image is served raw (`keep_original`) so it has no width or height in the
+     * markup and only settles on `load` — the reflow the author heat's markers
+     * have to survive.
+     */
+    private function createIllustratedChapter(int $storyId): void
+    {
+        Storage::disk('public')->put(
+            self::ILLUSTRATION_PATH,
+            (string) file_get_contents(public_path('images/story/policier.jpg'))
+        );
+
+        $blocks = [
+            ['type' => 'text', 'html' => self::ILLUSTRATED_BLOCKS_TEXT[0]],
+            [
+                'type' => 'image',
+                'path' => self::ILLUSTRATION_PATH,
+                'alt' => 'Illustration E2E',
+                'keep_original' => true,
+            ],
+            ['type' => 'text', 'html' => self::ILLUSTRATED_BLOCKS_TEXT[1]],
+        ];
+
+        $this->createChapter(self::ILLUSTRATED_CHAPTER_ID, 'Chapitre illustré', self::ILLUSTRATED_CHAPTER_SLUG, [
+            'content' => app(EditorPublicApi::class)->render($blocks, 'multiedit-narrative'),
+            'content_blocks' => $blocks,
+            'sort_order' => 6,
+            'status' => Chapter::STATUS_PUBLISHED,
+            'first_published_at' => now(),
+        ], $storyId);
+    }
+
     private function createCoauthoredStory(int $authorId): void
     {
         $coAuthorId = DB::table('users')
@@ -221,6 +274,23 @@ class E2eStorySeeder extends Seeder
                 'story_id' => $story->id,
                 'user_id' => $userId,
                 'role' => 'author',
+                'invited_by_user_id' => $authorId,
+                'invited_at' => now(),
+                'accepted_at' => now(),
+            ]);
+        }
+
+        // A beta reader, so a spec can prove that being a collaborator is not
+        // enough to see the author view — only `role = 'author'` is.
+        $betaId = DB::table('users')
+            ->where('email', E2eAccountsSeeder::MODERATOR_EMAIL)
+            ->value('id');
+
+        if ($betaId) {
+            DB::table('story_collaborators')->insert([
+                'story_id' => $story->id,
+                'user_id' => $betaId,
+                'role' => CollaboratorService::ROLE_BETA_READER,
                 'invited_by_user_id' => $authorId,
                 'invited_at' => now(),
                 'accepted_at' => now(),

@@ -12,7 +12,7 @@ use App\Domains\Auth\Public\Events\UserReactivated;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Quote\Private\Listeners\NotifyAuthorsOnQuoteCreated;
-use App\Domains\Quote\Private\Listeners\NullifyUserOnUserDeleted;
+use App\Domains\Quote\Private\Listeners\DeleteQuotesOnUserDeleted;
 use App\Domains\Quote\Private\Listeners\RestoreOnUserReactivated;
 use App\Domains\Quote\Private\Listeners\SoftDeleteOnUserDeactivated;
 use App\Domains\Quote\Public\Events\ChapterPassageQuoted;
@@ -67,7 +67,7 @@ class QuoteServiceProvider extends ServiceProvider
 
         $eventBus = app(EventBus::class);
         $this->registerNotifications();
-        $eventBus->subscribe(UserDeleted::class, [app(NullifyUserOnUserDeleted::class), 'handle']);
+        $eventBus->subscribe(UserDeleted::class, [app(DeleteQuotesOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeactivated::class, [app(SoftDeleteOnUserDeactivated::class), 'handle']);
         $eventBus->subscribe(UserReactivated::class, [app(RestoreOnUserReactivated::class), 'handle']);
 

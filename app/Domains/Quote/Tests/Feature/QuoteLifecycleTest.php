@@ -88,7 +88,7 @@ describe('user lifecycle cascades', function () {
         $this->assertDatabaseHas('quotes', ['id' => $quote->id, 'deleted_at' => null]);
     });
 
-    it('nullifies user_id when the owner is deleted', function () {
+    it('deletes the quotes when the owner is deleted', function () {
         $author = alice($this);
         $reader = bob($this);
         $story = publicStory('Story', $author->id);
@@ -97,6 +97,21 @@ describe('user lifecycle cascades', function () {
 
         event(new UserDeleted($reader->id));
 
-        $this->assertDatabaseHas('quotes', ['id' => $quote->id, 'user_id' => null]);
+        $this->assertDatabaseMissing('quotes', ['id' => $quote->id]);
+    });
+
+    it('also deletes quotes already soft-deleted by a prior deactivation', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        $quote = createQuote($reader->id, $chapter->id, $story->id);
+
+        event(new UserDeactivated($reader->id));
+        $this->assertSoftDeleted('quotes', ['id' => $quote->id]);
+
+        event(new UserDeleted($reader->id));
+
+        $this->assertDatabaseMissing('quotes', ['id' => $quote->id]);
     });
 });

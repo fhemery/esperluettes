@@ -13,6 +13,7 @@
 | `getStory(storyId)` | Single story by ID as `StorySummaryDto` or `null` |
 | `isAuthor(userId, storyId)` | Boolean author check |
 | `getAuthorIds(storyId)` | `int[]` of author user IDs |
+| `getStoryIdByChapterId(chapterId)` | Story ID for a chapter, or `null`; lets a caller authorize from a chapter ID without inferring the chapter→story relation itself |
 | `countAuthoredStories(userId)` | Count of stories where user is an author |
 | `searchStories(query, viewerUserId, limit)` | Full-text title search returning `StorySearchResultDto[]` (max 25) |
 | `filterUsersWithAccessToStory(userIds, storyId)` | Filter to users who can access the story under current visibility |
@@ -78,6 +79,8 @@
 **Every stored chapter image path must be reported by `ChapterMediaUsageProvider`.** Registering that provider makes `chapters/{userId}` a *claimed* folder, and the Media GC only spares a folder in which nothing at all is claimed. So any new place that stores an image path outside `story_chapters.content_blocks` must be added to `usedPaths()` **in the same commit**, or the GC deletes the files it never heard about. The query is `withTrashed()` on purpose: soft-deleted chapters keep their blocks, and sweeping their images would make a restore bring back a chapter full of dead images. Under-reporting destroys user data; over-reporting only leaks a file — when in doubt, report.
 
 **Chapter deletion purges comments.** `ChapterService::deleteChapter` calls `CommentMaintenancePublicApi::deleteFor('chapter', $id)` before `forceDelete()`. Story deletion in `StoryService::deleteStory` also calls this for each chapter. This is the only way to clean cross-domain comment data.
+
+**The rendered chapter body must stay a single `[data-quote-article]` root.** In `chapters/show.blade.php`, the Quote domain's `<x-quote::author-heat>` component wraps `<article data-quote-article>{!! $vm->chapter->content !!}</article>`, and both that component and the reader-side quoting toolbar re-anchor saved passages by walking that single DOM subtree. If you split the chapter body across multiple containers, add another rich-text region inside it, or otherwise stop rendering it as one `[data-quote-article]` root, reader quotes and the author heat map silently lose their anchoring. This is not enforced by any test that fails loudly — check it by hand when touching this view.
 
 ## Registry integrations
 

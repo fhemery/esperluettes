@@ -7,12 +7,42 @@
 - Architecture: [`02-architecture.md`](./02-architecture.md)
 - Decisions log: [`DECISIONS.md`](./DECISIONS.md)
 
-> **BLOCKED — do not start BUILD** (decision #21). Chapters must move to
-> MultiEdit first (`../chapters-multi-edit/`), and the author-check prequel
-> (`../story-author-check/`) must land. When unblocked, re-validate phases 5–8
-> against the new chapter DOM before implementing them: `groupPassages()`,
-> `segmentByDepth()` and the marker positioning all assume a single
-> `[data-quote-article]` root. Phases 1–4 are backend-only and unaffected.
+> **UNBLOCKED 2026-08-01.** Both prerequisites of decision #21 have landed:
+> `../chapters-multi-edit/` and `../story-author-check/` are wrapped.
+>
+> **DOM re-validation of phases 5–8, done 2026-08-01.** An advanced chapter now
+> renders `div.ce-block.ce-block--text > p` (and `figure.media-image.ce-block`)
+> inside the still-single `[data-quote-article]` root. Verdicts:
+>
+> - **Phase 5 is unaffected — build it as written.** The canonical offset space
+>   is still one flat string over the whole article, and `DIV` is already in
+>   `BLOCK_TAGS` (`Shared/Resources/js/anchoring/canonical-text.js`), so a
+>   `ce-block` contributes the same single boundary space a `<p>` already did.
+>   Per-block anchoring was explicitly a non-goal of `chapters-multi-edit/`.
+> - **Phase 6, tint wrapping — valid but must be explicit.** `segmentByDepth()`
+>   returns *canonical* ranges; they must be re-split per `nodeMap` entry exactly
+>   as `chapter-highlights.js::_applyHighlight` does today. One segment yields N
+>   marks across N `ce-block` divs. Never one `Range.surroundContents()` per
+>   segment.
+> - **Phase 6, margin markers — needs adjusting.** Advanced chapters contain
+>   lazily-loaded `<img>` in the article, so line positions move long after
+>   `document.fonts.ready`. Risk 4's mitigation is promoted to a deliverable: a
+>   `ResizeObserver` on the article plus recompute on image `load`, not just
+>   fonts + resize.
+> - **Risk 2 was misdiagnosed and is now rewritten.** v1 already wraps per text
+>   node, so no segment crosses an element boundary — italics/bold cause no gap.
+>   The real seam is the synthetic boundary space the canonical text inserts
+>   between blocks: it maps to no text node, so a passage spanning two blocks
+>   shows a 1-char untinted hole per boundary. Pre-existing at `<p>` boundaries,
+>   but more frequent with `ce-block` and more visible under a depth-graded tint
+>   than under the flat yellow. **Resolved by decisions #22/#23: multi-block
+>   quotes are prevented at capture time (new phase 5b), so phase 6 carries no
+>   seam-handling logic and no cross-block quote can exist.**
+> - Two facts phases 6–8 must account for: `<figure>`/`<figcaption>` are *not* in
+>   `BLOCK_TAGS`, so a caption sits inside the offset space and glues to the next
+>   block's first word; and reordering blocks shifts every offset, which is the
+>   accepted silent detachment (`chapters-multi-edit/` decision #4) — those rows
+>   land in phase 8's stale list.
 
 **No migration, no schema change, no `deptrac.yaml` change.** If a phase seems to
 need one, the phase is wrong — stop and report instead of adding it.
@@ -21,14 +51,15 @@ need one, the phase is wrong — stop and report instead of adding it.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Story — `getStoryIdByChapterId()` | S | — | TODO |
-| 2 | Lifecycle — delete quotes on account deletion | S | — | TODO |
-| 3 | Read path — DTOs, service, public API | M | — | TODO |
-| 4 | Endpoint — policy, route, controller | M | 1, 3 | TODO |
-| 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | TODO |
-| 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5 | TODO |
-| 7 | UI — passage popover (reader list) | M | 6 | TODO |
-| 8 | UI — chapter summary popup & focus flow | M | 6, 7 | TODO |
+| 1 | Story — `getStoryIdByChapterId()` | S | — | DONE |
+| 2 | Lifecycle — delete quotes on account deletion | S | — | DONE |
+| 3 | Read path — DTOs, service, public API | M | — | DONE |
+| 4 | Endpoint — policy, route, controller | M | 1, 3 | DONE |
+| 5 | Pure JS — `groupPassages()` / `segmentByDepth()` | S | — | DONE |
+| 5b | Reader — reject multi-block selections at capture | S | — | DONE |
+| 6 | UI — store, badge, heat toggle, tint & markers | M | 4, 5, 5b | DONE |
+| 7 | UI — passage popover (reader list) | M | 6 | DONE |
+| 8 | UI — chapter summary popup & focus flow | M | 6, 7 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
@@ -252,6 +283,54 @@ before any UI consumes them.
 
 ---
 
+## Phase 5b — Reader: reject multi-block selections at capture
+
+**Goal.** Make a cross-block quote impossible to create, so the author heat never
+has to render one (decisions #22/#23). This is a **reader-side** change: it
+touches the existing quote capture flow, not the author view.
+
+**Deliverables.**
+- `app/Domains/Shared/Resources/js/anchoring/` — export a block test rather than
+  reusing the module-private `BLOCK_TAGS` set of `canonical-text.js` verbatim.
+  That set contains `DIV`, so a decorative inner `div` would falsely split a
+  selection; the exported helper must treat as a block only what actually is one
+  (`P`, `BLOCKQUOTE`, `H1`–`H6`, `LI`, `PRE`, and `div.ce-block`).
+- `app/Domains/Quote/Resources/js/quote/ui/mini-form.js` — in `openForm()`, after
+  the region is resolved, compare the block ancestor of `range.startContainer`
+  with that of `range.endContainer`. When they differ, set the error the same way
+  the too-long case does at `:55-57` — a distinct flag beside `tooLong`, with
+  `save()` early-returning on it.
+- `app/Domains/Quote/Private/Resources/views/components/mini-form.blade.php` — a
+  `data-error-*` attribute beside the existing `data-error-highlight-too-long`.
+  The inline error paragraph and the disabled save button are **reused as they
+  are**; no new error UI.
+- `app/Domains/Quote/Private/Resources/lang/fr/ui.php` — one key under
+  `errors.`, sibling of `highlight_too_long`.
+
+**Not in this phase.** No server-side validation: `CreateQuoteRequest` never sees
+the chapter HTML and `StoryChapterDto` carries no `content`, so enforcing this on
+the server would mean a new Story accessor plus DOM parsing — disproportionate
+for a guard whose failure mode is a 1-char cosmetic gap. This is a UX guard, not
+an invariant, and the plan says so on purpose.
+
+**Tests.** Vitest, beside the existing anchoring tests:
+- the exported block helper: returns true for `p`/`li`/`div.ce-block`, false for a
+  plain decorative `div` and for inline `em`/`strong`.
+- a selection inside one paragraph is accepted; one spanning two paragraphs is
+  rejected; one spanning two `div.ce-block` wrappers is rejected; one spanning
+  `<em>` inside a single paragraph is **accepted** (this is the case risk 2
+  wrongly blamed).
+
+**Acceptance.**
+- ✅ Selecting across two paragraphs shows the inline error and leaves save
+  disabled; no quote is created.
+- ✅ Selecting across italics or bold **within** one paragraph still saves.
+- ✅ No new error component — the existing inline paragraph carries the message.
+- ✅ The reader's own highlight and note flow are otherwise unchanged.
+- ✅ `npm run gate` green.
+
+---
+
 ## Phase 6 — UI: store, badge, heat toggle, tint and markers
 
 **Goal.** An author opening their own chapter sees the « n citations » badge and
@@ -384,32 +463,41 @@ Filled by VERIFY. Covers what §6 of the architecture lists as VERIFY-only
 (Alpine does not run in PHPUnit), plus one row per role and per state named in
 §5 of the functional spec.
 
+Filled by VERIFY on 2026-08-01. Browser evidence is
+`e2e/tests/features/quotes-author-view.spec.ts` (25 specs, green) against the
+fixtures added for it — `E2eQuotesSeeder` plus the illustrated Advanced chapter
+`chapitre-illustre-7`. That spec and its screenshots were retired at WRAP
+(decision #24); the observations below are what they established.
+
+Rows marked *(PHP)* are not in the browser on purpose: a feature test settles
+them for less, and every one of them already has a passing test.
+
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Author — chapter header | The « n citations » badge sits in the metric row beside reads and word count, indistinguishable from its `metric-badge` neighbours in size, colour and baseline, and reads the same number as the database | |
-| Author — chapter header, empty state | On a chapter with no quotes the badge reads « 0 citation » and nothing happens on click; no empty-state message appears | |
-| Author — toggle | Off on load; turning it on tints the text, turning it off restores the page exactly as it was; still off after a reload of the same chapter | |
-| Author — heat legibility | Depths 1, 2 and 3+ are distinguishable from one another and from the surrounding prose, and the text stays readable | |
-| Author — heat in dark mode | Same, in dark mode | |
-| Author — heat on formatted prose | A passage spanning italics/bold shows no visible gap in the tint (risk #2) | |
-| Author — margin markers `md+` | Markers are vertically aligned with the line of their passage, do not drift after fonts and images load, and reflow correctly on window resize | |
-| Author — mobile (`< md`) | No margin marker at all; the tint alone is tappable and opens the popover, anchored below the passage | |
-| Author — passage popover | Shows the count, then avatar, display name and relative date per reader, newest first; **no note anywhere**; names link to the reader's profile page | |
-| Author — overlapping quotes | Clicking text covered by several quotes lists every one of them | |
-| Author — chapter summary | Opens from the badge with the heat off; one row per passage with its count, ordered by count descending | |
-| Author — summary, stale row | Stale passages appear below the live ones with « Passage plus présent dans le chapitre », and are visibly inert — no hover affordance, no cursor change, nothing happens on click | |
-| Author — summary, focus flow | Clicking a live row with the heat off closes the popup, turns the heat on, scrolls the passage into view and opens its popover | |
-| Author — keyboard | Badge, toggle, summary rows, tints and markers are reachable by Tab and activate with Enter/Space; each announces its count | |
-| Co-author | A co-author of the story sees exactly the same badge, toggle, heat and popover as the author | |
-| Confirmed reader | On the same chapter, sees only their own quote, own yellow tint and own note; no badge, no toggle, no marker, no aggregate tint | |
-| Beta reader | A beta reader of the story sees the chapter exactly as an ordinary reader does — no badge, no toggle, no heat (decision #19) | |
-| Moderator / admin | Sees exactly what an ordinary reader sees — no badge, no toggle, no heat | |
-| Guest | Chapter page unchanged from today; no badge, no toggle, no extra element in the prose | |
-| Lifecycle — deactivated reader | After a quoter deactivates, their quote leaves the heat, the counts and the popover list | |
-| Lifecycle — reactivated reader | After reactivation it is back in all three | |
-| Lifecycle — deleted reader | After a quoter deletes their account, their quote is gone permanently; no orphan entry is rendered anywhere and the badge count has dropped | |
-| Lifecycle — edited chapter | Editing a quoted passage away leaves it untinted and unmarked, still counted by the badge, and explained in the summary as stale | |
-| Author — unpublished chapter | The view still works on the author's own unpublished chapter | |
+| Author — chapter header | The « n citations » badge sits in the metric row beside reads and word count, indistinguishable from its `metric-badge` neighbours in size, colour and baseline, and reads the same number as the database | ✅ same size, neutral colour and baseline as reads/words; shows the seeded 5 |
+| Author — chapter header, empty state | On a chapter with no quotes the badge reads « 0 citation » and nothing happens on click; no empty-state message appears | ✅ badge reads 0, summary stays hidden with no row, toggle builds no tint |
+| Author — toggle | Off on load; turning it on tints the text, turning it off restores the page exactly as it was; still off after a reload of the same chapter | ✅ article text identical after off; nothing written to `localStorage`; off after reload |
+| Author — heat legibility | Depths 1, 2 and 3+ are distinguishable from one another and from the surrounding prose, and the text stays readable | ✅ three distinct `bg-accent/*` classes on screen at once; depth 1 is faint but visible |
+| Author — heat in dark mode | Same, in dark mode | ✅ verified |
+| Author — heat on formatted prose | *(row rewritten — decisions #22/#23)* A passage spanning italics/bold is tinted continuously, **and** a selection spanning two blocks is refused at capture with an inline error | ✅ unbroken tint across `<em>` and `<strong>`; on a cross-block selection, « La sélection doit rester dans un seul paragraphe. » with save disabled, for two `<p>` and for two `ce-block`s |
+| Author — margin markers `md+` | Markers are vertically aligned with the line of their passage, do not drift after fonts and images load, and reflow correctly on window resize | ✅ tested on `chapitre-illustre-7` with the image request held back: the passage moves 480 px on `load` and its marker follows to within 12 px, and again after a viewport change |
+| Author — mobile (`< md`) | No margin marker at all; the tint alone is tappable and opens the popover, anchored below the passage | ✅ zero marker elements at 375 px |
+| Author — passage popover | Shows the count, then avatar, display name and relative date per reader, newest first; **no note anywhere**; names link to the reader's profile page | ✅ heading, avatar, name linking to `/profile/e2e-confirmed`, « avant-hier »; the seeded notes appear nowhere |
+| Author — overlapping quotes | Clicking text covered by several quotes lists every one of them | ✅ the depth-3 segment lists all three quoters, newest first |
+| Author — chapter summary | Opens from the badge with the heat off; one row per passage with its count, ordered by count descending | ✅ 4 rows, count-2 passage first, heat still off |
+| Author — summary, stale row | Stale passages appear below the live ones with « Passage plus présent dans le chapitre », and are visibly inert — no hover affordance, no cursor change, nothing happens on click | ✅ The row is a `<div>` with no button, no click handler and no hover affordance. The clamp now applies to the passage text alone; « Passage plus présent dans le chapitre » renders as its own line below it and is never truncated. Pinned by `AuthorHeatViewTest::keeps the stale wording out of the clamped passage text`, which asserts no `line-clamp` element contains the wording |
+| Author — summary, focus flow | Clicking a live row with the heat off closes the popup, turns the heat on, scrolls the passage into view and opens its popover | ✅ popup closed, `visible` true, passage in viewport, popover open |
+| Author — keyboard | Badge, toggle, summary rows, tints and markers are reachable by Tab and activate with Enter/Space; each announces its count | ✅ toggle, tint and marker were already focusable, announce their count and activate with Enter. The badge was not: `<x-shared::popover>`'s `<div role="button">` carried no `tabindex`. Fixed in Shared — the trigger is now `tabindex="0"`, activates on Enter/Space, closes on Escape and carries `aria-expanded`. Pinned by a passing e2e spec and by `app/Domains/Shared/Resources/js/tooltip.test.js` |
+| Co-author | A co-author of the story sees exactly the same badge, toggle, heat and popover as the author | ✅ browser, on `chapitre-coecrit-6` |
+| Confirmed reader | On the same chapter, sees only their own quote, own yellow tint and own note; no badge, no toggle, no marker, no aggregate tint | ✅ *(PHP)* `AuthorHeatViewTest::renders no badge and no heat root for a confirmed reader` |
+| Beta reader | A beta reader of the story sees the chapter exactly as an ordinary reader does — no badge, no toggle, no heat (decision #19) | ✅ *(PHP)* `AuthorHeatViewTest` + `ChapterAggregateTest::forbids a beta reader of the story` |
+| Moderator / admin | Sees exactly what an ordinary reader sees — no badge, no toggle, no heat | ✅ *(PHP)* `AuthorHeatViewTest`, both roles |
+| Guest | Chapter page unchanged from today; no badge, no toggle, no extra element in the prose | ✅ *(PHP)* `AuthorHeatViewTest::renders no badge and no heat root for a guest` |
+| Lifecycle — deactivated reader | After a quoter deactivates, their quote leaves the heat, the counts and the popover list | ✅ *(PHP)* `ChapterAggregateTest::omits the quotes of a deactivated reader` — the heat renders only what the endpoint returns |
+| Lifecycle — reactivated reader | After reactivation it is back in all three | ✅ *(PHP)* `ChapterAggregateTest::includes them again once the reader is reactivated` |
+| Lifecycle — deleted reader | After a quoter deletes their account, their quote is gone permanently; no orphan entry is rendered anywhere and the badge count has dropped | ✅ *(PHP)* `QuoteLifecycleTest` — the rows are hard-deleted, so nothing can be rendered |
+| Lifecycle — edited chapter | Editing a quoted passage away leaves it untinted and unmarked, still counted by the badge, and explained in the summary as stale | ✅ browser, via the seeded vanished passage: badge counts 5, only 3 passages tinted and marked, the fourth listed as stale (see the row above for how legibly) |
+| Author — unpublished chapter | The view still works on the author's own unpublished chapter | ✅ browser, on `chapitre-brouillon-2` |
 
 ## Open items
 

@@ -66,6 +66,12 @@ Use `CoverService` to resolve cover URLs. On a themed genre removal during story
 
 The custom tab is **not** a Media component: `cover-tab-custom.blade.php` is a bespoke Alpine dropzone that owns its own copy under `story::shared.cover.custom_*` (it used to borrow three strings from a Shared `image-upload` lang namespace whose component no longer exists). Its 2 MB limit is hard-coded at four unsynchronised sites — `StoryRequest`'s `max:2048`, the Blade's `['size' => 2]` and `['max' => 2]`, and the JS `maxKb = 2048`. Rebuilding the tab on `<x-media::image-field>` would collapse all four, and has not been done.
 
+### Chapter rendering hosts the Quote domain
+
+`chapters/show.blade.php` is not purely a Story view: it also hosts two [Quote](../Quote/README.md) components — `<x-quote::author-badge>` (a metric badge showing quote activity to the author) and `<x-quote::author-heat>`, which wraps the rendered chapter body to paint a heat map of where readers have quoted.
+
+`<x-quote::author-heat>` and the reader-side quoting toolbar both re-anchor saved passages by walking the rendered DOM, and they both assume the chapter body renders as a **single `<article data-quote-article>` root** with nothing else competing for text offsets inside it. Anyone editing chapter rendering (e.g. wrapping the content in additional markup, splitting it across multiple containers, or introducing another rich-text region on the page) must keep the entire quotable body inside that one root, or both reader quotes and the author heat map lose their anchoring.
+
 ---
 
 ## Architecture Decisions
@@ -95,10 +101,12 @@ Other domains interact with Story through `StoryPublicApi` (`Public/Api/StoryPub
 | `getStory(storyId)` | Single story fetch by ID, returns `StorySummaryDto` or `null` |
 | `isAuthor(userId, storyId)` | Check if a user is an author of a given story |
 | `getAuthorIds(storyId)` | Return all author user IDs for a story |
+| `getStoryIdByChapterId(chapterId)` | Resolve the story a chapter belongs to, so a caller can authorize from a chapter ID alone without knowing the chapter→story relation itself |
 | `countAuthoredStories(userId)` | Count stories where user is an author |
 | `searchStories(query, viewerUserId, limit)` | Full-text search returning `StorySearchResultDto[]` |
 | `filterUsersWithAccessToStory(userIds, storyId)` | Filter provided user IDs to those with access (respects visibility rules) |
 | `diffAccessForUsers(userIds, storyId, previousVisibility)` | Compute users who gained/lost access after a visibility change |
+| `getStoriesByIds(storyIds)` / `getChaptersByIds(chapterIds)` / `getAuthorIdsByStoryIds(storyIds)` | Batch lookups by ID, keyed by ID in the returned array |
 
 ### Filter DTO (`StoryQueryFilterDto`)
 
@@ -232,6 +240,7 @@ All routes are under the `web` middleware. Slug parameters use `.*` patterns to 
 | Author display names | Profile | `ProfilePublicApi` |
 | Notification delivery | Notification | `NotificationPublicApi` |
 | User authentication/roles | Auth | `AuthPublicApi` |
+| Reader/author quoting UI on the chapter page | Quote | Blade components rendered directly in `chapters/show.blade.php` (`<x-quote::author-badge>`, `<x-quote::author-heat>`, plus the reader toolbar); Quote calls back into `StoryPublicApi::getStoryIdByChapterId()` to authorize |
 
 ---
 

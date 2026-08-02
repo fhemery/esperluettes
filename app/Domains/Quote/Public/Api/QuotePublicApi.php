@@ -4,6 +4,7 @@ namespace App\Domains\Quote\Public\Api;
 
 use App\Domains\Quote\Private\Services\QuotePolicy;
 use App\Domains\Quote\Private\Services\QuoteService;
+use App\Domains\Quote\Public\Api\Contracts\ChapterAggregateDto;
 use App\Domains\Quote\Public\Api\Contracts\CreateQuoteDto;
 use App\Domains\Quote\Public\Api\Contracts\QuoteDto;
 use App\Domains\Quote\Public\Api\Contracts\QuoteListDto;
@@ -34,6 +35,21 @@ class QuotePublicApi
     public function delete(int $quoteId, int $userId): void
     {
         $this->service->delete($quoteId, $userId);
+    }
+
+    public function countForChapter(int $chapterId): int
+    {
+        return $this->service->countForChapter($chapterId);
+    }
+
+    public function getChapterAggregate(int $chapterId): ChapterAggregateDto
+    {
+        return $this->service->getChapterAggregate($chapterId);
+    }
+
+    public function canViewChapterAggregate(int $chapterId, int $userId): bool
+    {
+        return $this->policy->canViewChapterAggregate($chapterId, $userId);
     }
 
     public function getForProfile(int $profileUserId, ?int $viewerId, int $page): QuoteListDto

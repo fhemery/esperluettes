@@ -16,6 +16,24 @@ return [
     'mark' => [
         'label' => 'Voir la citation',
     ],
+    'author_badge' => [
+        'label' => '{0} :count citation|{1} :count citation|[2,*] :count citations',
+        'tooltip' => 'Citations enregistrées par les lecteurices sur ce chapitre.',
+        'toggle' => 'Afficher les passages cités',
+    ],
+    'author_summary' => [
+        'title' => 'Passages cités',
+    ],
+    'author_marker' => [
+        'label' => '{1} :count citation sur ce passage|[2,*] :count citations sur ce passage',
+    ],
+    'author_tint' => [
+        'label' => '{1} Passage cité par :count lecteurice|[2,*] Passage cité par :count lecteurices',
+    ],
+    'author_panel' => [
+        'title' => '{1} Cité par :count lecteurice|[2,*] Cité par :count lecteurices',
+        'close' => 'Fermer',
+    ],
     'toolbar' => [
         'label' => 'Actions sur la sélection',
     ],
@@ -29,6 +47,7 @@ return [
     'errors' => [
         'save_quote' => 'Impossible de sauvegarder la citation. Veuillez réessayer.',
         'highlight_too_long' => 'Le passage sélectionné est trop long (:max caractères maximum).',
+        'highlight_multi_block' => 'La sélection doit rester dans un seul paragraphe.',
         'save_note' => 'Impossible de sauvegarder la note.',
         'delete_quote' => 'Impossible de supprimer la citation.',
         'load_more' => 'Impossible de charger davantage de citations.',

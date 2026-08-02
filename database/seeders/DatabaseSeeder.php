@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
                 \App\Domains\Auth\Database\Seeders\E2eAccountsSeeder::class,
                 \App\Domains\Profile\Database\Seeders\E2eProfilesSeeder::class,
                 \App\Domains\Story\Database\Seeders\E2eStorySeeder::class,
+                \App\Domains\Quote\Database\Seeders\E2eQuotesSeeder::class,
                 \App\Domains\News\Database\Seeders\E2eNewsSeeder::class,
             ]);
         }

@@ -48,13 +48,45 @@ export const STORY = {
   advancedChapter: { slug: 'chapitre-avance-4', title: 'Chapitre avancé' },
   /** Used only for the no-op-conversion word-count check. */
   countedChapter: { slug: 'chapitre-compte-5', title: 'Chapitre compté' },
+  /** Advanced: inline formatting, then a raw lazily-loaded image, then prose. */
+  illustratedChapter: { slug: 'chapitre-illustre-7', title: 'Chapitre illustré' },
 } as const;
 
-/** Story 2: co-authored by `author` and `confirmed`. */
+/**
+ * Story 2: co-authored by `author` and `confirmed`, beta-read by `moderator` —
+ * the only way to prove that a collaborator who is not an author sees nothing
+ * of the author view.
+ */
 export const COAUTHORED_STORY = {
   slug: 'histoire-coecrite-2',
   title: 'Histoire coécrite E2E',
   chapter: { slug: 'chapitre-coecrit-6', title: 'Chapitre coécrit' },
+} as const;
+
+/**
+ * Reader quotes, written by `app/Domains/Quote/Database/Seeders/E2eQuotesSeeder.php`.
+ * The author cannot quote their own story, so these can only come from a seeder.
+ */
+export const QUOTES = {
+  /** Per chapter slug: how many quotes the badge must show. */
+  countByChapter: {
+    'chapitre-publie-1': 0,
+    'chapitre-brouillon-2': 1,
+    'chapitre-simple-3': 5,
+    'chapitre-coecrit-6': 1,
+    'chapitre-illustre-7': 2,
+  },
+  /** Quoted twice, by `confirmed` and `admin` — one summary row with a count of 2. */
+  sharedPassage: 'La première phrase du premier bloc,',
+  /** Overlaps the tail of `sharedPassage`, taking the tint to depth 3. */
+  overlappingPassage: 'du premier bloc, assez longue',
+  lonePassage: 'à comparer avec la précédente',
+  /** Not in the chapter any more: counted, never tinted. */
+  stalePassage: "Un passage qui n'existe plus dans ce chapitre",
+  /** Spans `<em>` and `<strong>` inside one paragraph. */
+  formattedPassage: "de l'italique et du gras",
+  /** Below the illustrated chapter's lazily-loaded image. */
+  belowImagePassage: "qui suit l'image",
 } as const;
 
 export const NEWS = { slug: 'actualite-e2e', title: 'Actualité E2E' } as const;
