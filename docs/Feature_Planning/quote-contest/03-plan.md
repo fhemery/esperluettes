@@ -21,7 +21,7 @@
 | 5 | Reader page shell + *Mes citations*, read-only | M | 2, 3, 4 | DONE |
 | 6 | Submissions: submit / replace / withdraw | M | 5 | DONE |
 | 7 | Story-eligibility listeners: withdrawal on visibility loss | S | 6 | DONE |
-| 8 | Voting: ballot, seeded shuffle, *Votes* tab | M | 6 | TODO |
+| 8 | Voting: ballot, seeded shuffle, *Votes* tab | M | 6 | DONE |
 | 9 | Moderation: *Résultats* tab, entry deletion, submitter notification | M | 8 | TODO |
 | 10 | Scheduled broadcast notifications + Artisan command | M | 9 | TODO |
 | 11 | Docs, i18n sweep, a11y polish | S | 10 | TODO |

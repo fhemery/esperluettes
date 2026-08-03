@@ -7,9 +7,11 @@ namespace App\Domains\Calendar\Private\Activities\QuoteContest\View\Components;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestConfigService;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestPhaseService;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestSubmissionService;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestVoteService;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Support\QuoteContestPhase;
 use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\ContestCategoryViewModel;
 use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\MyQuotesViewModel;
+use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\VotesViewModel;
 use App\Domains\Calendar\Private\Models\Activity;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -21,8 +23,8 @@ use Illuminate\View\Component;
  *
  * A tab a reader may not see is *absent* from the array, never rendered and
  * then hidden (architecture §3.3, point 4). For now the array holds
- * *Mes citations* alone; *Votes* and *Résultats* arrive with the phases that
- * implement them.
+ * *Mes citations* and *Votes*; *Résultats*, which only moderators see, arrives
+ * with the phase that implements it.
  */
 class QuoteContestComponent extends Component
 {
@@ -31,6 +33,7 @@ class QuoteContestComponent extends Component
         private readonly QuoteContestConfigService $config,
         private readonly QuoteContestPhaseService $phases,
         private readonly QuoteContestSubmissionService $submissions,
+        private readonly QuoteContestVoteService $votes,
     ) {}
 
     public function render(): View
@@ -72,12 +75,28 @@ class QuoteContestComponent extends Component
             votesStartAt: $settings?->votes_start_at,
         );
 
+        $votes = new VotesViewModel(
+            activityId: $activityId,
+            phase: $phase,
+            // Before the votes open there is nothing to choose between, so the
+            // ballot is not built at all — the same economy as the picker's.
+            categories: in_array($phase, [QuoteContestPhase::Voting, QuoteContestPhase::Ended], true)
+                ? $this->votes->ballotFor($activityId, $userId)
+                : [],
+            votesStartAt: $settings?->votes_start_at,
+            votesEndAt: $this->activity->active_ends_at,
+        );
+
         return view('quote-contest::components.quote-contest', [
             'activity' => $this->activity,
+            // The tab keys are the URL hash fragments, so a notification can
+            // deep-link straight to `#votes`.
             'tabs' => [
                 ['key' => 'my-quotes', 'label' => __('quote-contest::quote-contest.tab_my_quotes')],
+                ['key' => 'votes', 'label' => __('quote-contest::quote-contest.tab_votes')],
             ],
             'myQuotes' => $myQuotes,
+            'votes' => $votes,
         ]);
     }
 }

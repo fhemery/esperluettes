@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestCategoryController;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestEntryController;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestVoteController;
 use Illuminate\Support\Facades\Route;
 
 // Category CRUD only: the contest's dates ride along with the activity form.
@@ -35,4 +36,9 @@ Route::middleware(['web', 'auth', 'verified'])
 
         Route::delete('/entries/{entry}', [QuoteContestEntryController::class, 'destroy'])
             ->name('entries.destroy');
+
+        // The ballot is idempotent: one PUT on the category the reader is
+        // voting in, replacing whatever they had chosen there.
+        Route::put('/votes/{category}', [QuoteContestVoteController::class, 'update'])
+            ->name('votes.update');
     });

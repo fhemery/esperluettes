@@ -60,18 +60,17 @@ describe('Quote contest access', function () {
             ->assertSee('La plus émouvante', false);
     });
 
-    it('offers Mes citations as the only tab', function () {
-        // Votes and Résultats arrive in later phases: the tabs array must hold
-        // exactly one entry, and the others must be absent from the DOM rather
-        // than rendered and hidden.
+    it('offers Mes citations and Votes, and no Résultats, to a confirmed user', function () {
+        // Résultats arrives in a later phase, and only for moderators: a tab a
+        // reader may not see is absent from the DOM, never rendered and hidden.
         $contest = createContestInSubmissions($this);
         makeCategory($contest->id, 'La plus drôle');
 
         $html = $this->actingAs(bob($this))->get($contest->url)->assertOk()->getContent();
 
-        expect(substr_count($html, 'role="tab"'))->toBe(1)
+        expect(substr_count($html, 'role="tab"'))->toBe(2)
             ->and($html)->toContain('quote-contest::quote-contest.tab_my_quotes')
-            ->and($html)->not->toContain('quote-contest::quote-contest.tab_votes')
+            ->and($html)->toContain('quote-contest::quote-contest.tab_votes')
             ->and($html)->not->toContain('quote-contest::quote-contest.tab_results');
     });
 

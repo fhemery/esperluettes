@@ -38,6 +38,24 @@ return [
         'replace_confirm_confirm' => 'Remplacer',
     ],
 
+    'votes' => [
+        'opens_at' => 'Les votes ouvriront le :date.',
+        'opens_undated' => 'Les votes ne sont pas encore ouverts.',
+        'open_until' => 'Les votes sont ouverts jusqu\'au :date.',
+        'open_undated' => 'Les votes sont ouverts.',
+        'closed' => 'Les votes sont clos. Vous retrouvez ci-dessous la citation que vous avez choisie ; les résultats ne sont pas publiés ici.',
+        'no_categories' => 'Ce concours n\'a pas de catégorie : il n\'y a rien à départager.',
+        'no_entries' => 'Aucune citation n\'a été soumise dans cette catégorie.',
+        'voted' => 'Vous avez voté',
+        'not_voted' => 'Vous n\'avez pas voté',
+        'choose_entry' => 'Voter pour cette citation',
+        // A prefix, with the names printed beside it: they are data, not part
+        // of the sentence — the same shape as Story's own `by`.
+        'authors_by' => 'Par',
+        'cast' => 'Voter',
+        'change' => 'Modifier mon vote',
+    ],
+
     'ineligible' => [
         'private_story' => 'Histoire privée',
         'excluded_from_events' => 'Histoire exclue des événements',
@@ -75,6 +93,7 @@ return [
         'category_deleted' => 'Catégorie supprimée.',
         'entry_submitted' => 'Votre citation est en lice.',
         'entry_withdrawn' => 'Votre citation a été retirée du concours.',
+        'vote_cast' => 'Votre vote a été enregistré.',
         'category_not_empty' => 'Impossible de supprimer cette catégorie : elle contient déjà des citations, retirées ou non.',
     ],
 
@@ -89,5 +108,6 @@ return [
         'category_position_integer' => 'L\'ordre doit être un nombre entier.',
         'category_required' => 'Choisissez une catégorie.',
         'quote_required' => 'Choisissez une citation à soumettre.',
+        'entry_required' => 'Choisissez la citation pour laquelle vous votez.',
     ],
 ];
