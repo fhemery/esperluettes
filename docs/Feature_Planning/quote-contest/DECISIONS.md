@@ -30,6 +30,7 @@ a new row that supersedes it and note the number.
 | 20 | 2026-08-02 | DESIGN | Cache the rendered vote screen (the user's own parked note #5)? | No cache. Because entries are full snapshots the listing is already one indexed SELECT plus a batched profile lookup — there is no cross-domain read left to save, and a cache would cost three invalidation paths to protect a query that is not slow. | supersedes note #5 |
 | 21 | 2026-08-02 | DESIGN | The *Mes citations* picker on a long quote book (open question #1)? | Load the whole quote book and filter client-side with Alpine. One query, instant picking, no round trips. Revisit if real books run into the thousands. | resolves OQ#1 |
 | 22 | 2026-08-02 | DESIGN | In what order does a voter see a category's entries (open question #2)? | Shuffled, seeded on (reader, category). No positional advantage for early submitters, and the order is identical on every reload so the entry a reader was considering never moves. | resolves OQ#2 |
+| 23 | 2026-08-03 | VERIFY | VERIFY found that a **deactivated** submitter's name and profile link still show in *Résultats* — only a **deleted** account anonymizes to "Compte supprimé" (`ProfilePublicApi::getPublicProfiles()` does not filter on `is_active`). Decision #7 said "both stay" without distinguishing the two. Keep as the code's behaviour, or filter deactivated users out too? | Keep the code's behaviour. Spec (§5, decision #7) amended to say deactivation alone does not anonymize the submitter — only deletion does. | refines #7 |
 
 ## Assumptions made without asking
 

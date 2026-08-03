@@ -924,28 +924,56 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 The last row is the one architecture §6 flags as structurally uncoverable by
 integration tests.
 
+Every row was driven in Chromium against the e2e app. The durable output is
+`e2e/tests/features/quote-contest.spec.ts` (24 specs, green) plus the fixture
+world it needs: `app/Domains/Calendar/Database/Seeders/E2eCalendarSeeder.php`
+(five contests, one per phase) and the additions to the Story, Quote and Auth
+e2e seeders (a private story, a story excluded from events, a 200-quote book,
+a deactivated account).
+
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Admin — activity create | Picking *Concours de citations* in the type select reveals the config panel; picking another type hides it. | |
-| Admin — config panel | *début des soumissions* and *fin des votes* are visibly greyed and read-only; the two editable dates accept input. | |
-| Admin — date violation | A bad date order shows a French error on the right field, and the form keeps what was typed. | |
-| Admin — categories | Add, edit, reorder. Deleting an empty one works; deleting a filled one shows the refusal message, not a stack trace. | |
-| Reader — before start | Description and categories read correctly; the "submissions open on…" line is present and no action is offered. | |
-| Reader — *Mes citations*, empty | A reader with no quotes gets a sensible empty state, not a blank panel. | |
-| Reader — *Mes citations*, long book | The filter box feels instant on a 200+ quote book; typing causes no round trip. | |
-| Reader — ineligible quotes | Greyed rows read correctly: the reason is legible **as text**, and the row cannot be picked by mouse or keyboard. | |
-| Reader — replace flow | Submitting into an occupied category shows the sitting quote in the modal and asks before replacing. | |
-| Reader — interlude | Read-only view with the entries still visible and the countdown to the vote. | |
-| Reader — *Votes* | Radio group is fully keyboard-operable (arrow keys move, space selects); the selected state is announced. | |
-| Reader — *Votes*, links | Story and chapter links open the right pages and stay tappable. | |
-| Reader — after the end | *Votes* is read-only, the reader's own vote is visible, and no result appears anywhere. | |
-| Reader — stale data | A story renamed after submission shows the old title but the link still resolves (slug is `{base}-{id}`). | |
-| Reader — deleted parent | An entry whose source quote was deleted still displays; an entry whose chapter was deleted has a link that 404s gracefully. | |
-| Moderator — *Résultats* | Vote counts and submitter names present; the delete confirmation modal behaves. | |
-| Moderator — deactivated submitter | The entry renders with no identifiable submitter, and nothing crashes. | |
-| Notifications | Each of the five lands in the bell with a working link; the vote ones deep-link to `#votes`. | |
-| Mobile (narrow viewport) | The three tabs scroll rather than overflow; entry cards stack; links stay tappable. | |
-| **Confirmed user — tab list** | **The *Résultats* tab is absent from the rendered page** — not present-and-hidden. Inspect the DOM, not just the screen. | |
+| Admin — activity create | Picking *Concours de citations* in the type select reveals the config panel; picking another type hides it. | ✅ |
+| Admin — config panel | *début des soumissions* and *fin des votes* are visibly greyed and read-only; the two editable dates accept input. | ✅ both mirrors `disabled`, and they follow the activity dates live |
+| Admin — date violation | A bad date order shows a French error on the right field, and the form keeps what was typed. | ✅ *Le début des votes ne peut pas précéder la fin des soumissions.*; name and both dates survive the round trip |
+| Admin — categories | Add, edit, reorder. Deleting an empty one works; deleting a filled one shows the refusal message, not a stack trace. | ✅ |
+| Reader — before start | Description and categories read correctly; the "submissions open on…" line is present and no action is offered. | ✅ no button, no picker |
+| Reader — *Mes citations*, empty | A reader with no quotes gets a sensible empty state, not a blank panel. | ✅ |
+| Reader — *Mes citations*, long book | The filter box feels instant on a 200+ quote book; typing causes no round trip. | ✅ 206 rows, filter to 1, **zero** network requests while typing |
+| Reader — ineligible quotes | Greyed rows read correctly: the reason is legible **as text**, and the row cannot be picked by mouse or keyboard. | ✅ radio `disabled` + `aria-describedby` → the reason; forced click and Space both leave it unchecked. Nit: the greyed row still links to the private story, and that link 404s — see VERIFY note 2 |
+| Reader — replace flow | Submitting into an occupied category shows the sitting quote in the modal and asks before replacing. | ✅ modal names the category and shows both passages |
+| Reader — interlude | Read-only view with the entries still visible and the countdown to the vote. | ✅ |
+| Reader — *Votes* | Radio group is fully keyboard-operable (arrow keys move, space selects); the selected state is announced. | ✅ space selects, arrow moves, the `<legend>` names the group |
+| Reader — *Votes*, links | Story and chapter links open the right pages and stay tappable. | ✅ 200 on both; still tappable at 390 px |
+| Reader — after the end | *Votes* is read-only, the reader's own vote is visible, and no result appears anywhere. | ✅ whole `<fieldset>` disabled, no submit button, own vote checked |
+| Reader — stale data | A story renamed after submission shows the old title but the link still resolves (slug is `{base}-{id}`). | ✅ |
+| Reader — deleted parent | An entry whose source quote was deleted still displays; an entry whose chapter was deleted has a link that 404s gracefully. | ✅ 404 page, no 500 |
+| Moderator — *Résultats* | Vote counts and submitter names present; the delete confirmation modal behaves. | ✅ ordered by count desc; cancel keeps the entry, confirm deletes it and notifies the submitter |
+| Moderator — deactivated submitter | The entry renders with no identifiable submitter, and nothing crashes. | ⚠️ nothing crashes, but a **deactivated** account is named and linked (`E2E Deactivated` → its profile, 200). Only a *deleted* one falls back to *Compte supprimé*. Deviates from 01-functional §5 — see VERIFY note 1 |
+| Notifications | Each of the five lands in the bell with a working link; the vote ones deep-link to `#votes`. | ✅ four broadcasts from `calendar:quote-contest-notify` + the entry-removed one, all linked; the two vote ones end in `#votes` and land on the *Votes* tab |
+| Mobile (narrow viewport) | The three tabs scroll rather than overflow; entry cards stack; links stay tappable. | ✅ at 390×844 |
+| **Confirmed user — tab list** | **The *Résultats* tab is absent from the rendered page** — not present-and-hidden. Inspect the DOM, not just the screen. | ✅ tabs are exactly `['Mes citations','Votes']`; no `qc-results`, no *Soumise par*, no submitter name in the HTML. Proven by inversion: the same spec run as `moderator` fails |
+
+### VERIFY notes
+
+**1 — A deactivated submitter is still named in *Résultats*.** `01-functional.md`
+§5 says a deactivated *or* deleted submitter shows "with no identifiable
+submitter"; the implementation resolves the profile, which a deactivation does
+not remove, so moderation sees the display name and a working profile link.
+Nothing crashes and no reader-facing anonymity is broken. Arguably the better
+behaviour — §4.6.2 asks *Résultats* for "who submitted it" — but it is not what
+the spec says, so it is a decision to take, not a bug to fix silently.
+
+**2 — The picker links to a story the reader cannot open.** A quote greyed as
+*Non éligible : Histoire privée* still renders its story title as a link, and
+that link 404s. Cosmetic: the row already says why in words. Pre-existing shape
+of the quote book rather than contest-specific.
+
+**3 — Two rows were narrowed rather than dropped.** Everything the checklist
+asks that a PHP feature test already covers (who may reach the page, what is
+stored, what a template prints for a given state) stays in
+`app/Domains/Calendar/Tests/Feature/QuoteContest/`; the browser specs assert
+only the part that needs a browser.
 
 ## Open items
 

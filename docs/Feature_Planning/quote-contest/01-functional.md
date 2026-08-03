@@ -186,7 +186,8 @@ Calendar mechanism stays on the backlog as `calendar-notifications/` (decision #
 | The quote's story **turns private** (no longer `public`/`community`) | The entry is **withdrawn** from the contest and its votes are dropped. The passage must not stay on display once the author has made the story private. |
 | The quote's story becomes **excluded from events** | Same: entry withdrawn, votes dropped. |
 | The **chapter is deleted or unpublished** | The entry stands (snapshot). The chapter link may lead nowhere — same behaviour readers already meet in the quote book. |
-| The **submitter is deactivated or deleted** | Entries and votes both **stay**. Entries are anonymous to readers anyway; the *Résultats* tab shows the entry with no identifiable submitter. |
+| The **submitter is deactivated** | Entries and votes both **stay**. Entries are anonymous to readers anyway; the *Résultats* tab still shows the submitter's name and profile link — deactivation alone does not anonymize them, only account deletion does (verified in VERIFY). |
+| The **submitter is deleted** | Entries and votes both **stay**. The *Résultats* tab shows the entry with no identifiable submitter ("Compte supprimé"). |
 | A **voter** is deactivated or deleted | Their ballots stay counted. |
 | An **entry is deleted by moderation** | Its votes are dropped; the submitter is notified; the category slot frees up. |
 | An entry is **replaced or withdrawn** by its submitter | The previous entry and any votes on it are dropped. Only reachable during the submission period, when no vote exists yet — except via the privacy withdrawal above. |
@@ -221,7 +222,7 @@ Calendar mechanism stays on the backlog as `calendar-notifications/` (decision #
 | 4 | What happens to an entry when the quote or its story changes? | Snapshot at submission, with a privacy escape hatch: the entry is withdrawn (votes dropped) if the story turns private or becomes excluded from events. |
 | 5 | Can the admin change categories after submissions open? | Add and edit freely; delete only if the category is empty. |
 | 6 | Do voters see live vote counts? | No — hidden from users throughout, before, during and after. |
-| 7 | What happens to entries and votes of a deactivated/deleted user? | Both stay. |
+| 7 | What happens to entries and votes of a deactivated/deleted user? | Both stay. A deactivated submitter's name and profile link still show in *Résultats* — only a deleted account anonymizes to "Compte supprimé". |
 | 8 | Which quotes appear on the submission screen? | All of the reader's quotes; ineligible ones greyed with the reason. |
 | 9 | Where do the lifecycle notifications live? | Contest-owned now, driven by the contest's own dates. `calendar-notifications/` generalises later. |
 | 10 | Who receives the broadcast notifications? | Confirmed users only. |

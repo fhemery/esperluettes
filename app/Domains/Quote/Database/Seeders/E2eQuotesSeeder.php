@@ -29,11 +29,29 @@ class E2eQuotesSeeder extends Seeder
 {
     private const STORY_ID = 1;
     private const COAUTHORED_STORY_ID = 2;
+    private const PRIVATE_STORY_ID = 3;
+    private const EXCLUDED_STORY_ID = 4;
+    private const LONG_STORY_ID = 5;
 
     private const DRAFT_CHAPTER_ID = 2;
     private const SIMPLE_CHAPTER_ID = 3;
     private const COAUTHORED_CHAPTER_ID = 6;
     private const ILLUSTRATED_CHAPTER_ID = 7;
+    private const PRIVATE_CHAPTER_ID = 8;
+    private const EXCLUDED_CHAPTER_ID = 9;
+    private const LONG_CHAPTER_ID = 10;
+
+    /** Quoted from a private story: the contest picker must grey it with a reason. */
+    public const PRIVATE_STORY_PASSAGE = 'Un passage tiré d\'une histoire privée';
+
+    /** Quoted from a story excluded from events: the other greying reason. */
+    public const EXCLUDED_STORY_PASSAGE = 'Un passage tiré d\'une histoire hors événements';
+
+    /** How many filler quotes `confirmed` owns, so the picker's filter meets a real book. */
+    public const LONG_BOOK_SIZE = 200;
+
+    /** The one filler quote a filter can single out. */
+    public const LONG_BOOK_NEEDLE = 'Passage numéro 137 du carnet';
 
     /** The passage two readers quoted identically — one summary row, count 2. */
     public const SHARED_PASSAGE = 'La première phrase du premier bloc,';
@@ -98,6 +116,13 @@ class E2eQuotesSeeder extends Seeder
                 null, null, null, 6],
             [$admin, self::ILLUSTRATED_CHAPTER_ID, self::STORY_ID, self::BELOW_IMAGE_PASSAGE,
                 null, null, null, 1],
+
+            // Two quotes the quote contest must list but refuse: their story is
+            // private, then excluded from events.
+            [$confirmed, self::PRIVATE_CHAPTER_ID, self::PRIVATE_STORY_ID, self::PRIVATE_STORY_PASSAGE,
+                null, null, 'Une note sur une histoire privée.', 3],
+            [$confirmed, self::EXCLUDED_CHAPTER_ID, self::EXCLUDED_STORY_ID, self::EXCLUDED_STORY_PASSAGE,
+                null, null, null, 3],
         ];
 
         foreach ($rows as [$userId, $chapterId, $storyId, $text, $prefix, $suffix, $note, $daysAgo]) {
@@ -112,6 +137,36 @@ class E2eQuotesSeeder extends Seeder
                 'created_at' => now()->subDays($daysAgo),
                 'updated_at' => now()->subDays($daysAgo),
             ]);
+        }
+
+        $this->seedLongBook($confirmed);
+    }
+
+    /**
+     * A book long enough to be worth filtering. The quote contest renders the
+     * whole of it and filters client-side (decision #21), so "instant on 200+
+     * quotes" is a claim only a real browser can settle.
+     */
+    private function seedLongBook(int $userId): void
+    {
+        $rows = [];
+
+        for ($i = 1; $i <= self::LONG_BOOK_SIZE; $i++) {
+            $rows[] = [
+                'user_id' => $userId,
+                'chapter_id' => self::LONG_CHAPTER_ID,
+                'story_id' => self::LONG_STORY_ID,
+                'highlighted_text' => "Passage numéro {$i} du carnet",
+                'prefix' => null,
+                'suffix' => null,
+                'note' => null,
+                'created_at' => now()->subMinutes($i),
+                'updated_at' => now()->subMinutes($i),
+            ];
+        }
+
+        foreach (array_chunk($rows, 50) as $chunk) {
+            DB::table('quotes')->insert($chunk);
         }
     }
 }

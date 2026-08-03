@@ -4,7 +4,7 @@
 
 ## Public API
 
-- [QuotePublicApi](Public/Api/QuotePublicApi.php) — the only entry point other domains may call (Profile uses it for the tab + `canViewQuoteBook`; Story hosts the author-view components, which call it for `countForChapter` / `getChapterAggregate` / `canViewChapterAggregate`). Do not reach into `Private/`. DTOs are under `Public/Api/Contracts/`.
+- [QuotePublicApi](Public/Api/QuotePublicApi.php) — the only entry point other domains may call (Profile uses it for the tab + `canViewQuoteBook`; Story hosts the author-view components, which call it for `countForChapter` / `getChapterAggregate` / `canViewChapterAggregate`; Calendar's Quote Contest activity calls `getAllForOwner` / `getOwnedQuote` to build its submission picker and validate entries). Do not reach into `Private/`. DTOs are under `Public/Api/Contracts/`.
 
 ## Events emitted
 

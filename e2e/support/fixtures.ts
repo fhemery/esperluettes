@@ -91,6 +91,47 @@ export const QUOTES = {
 
 export const NEWS = { slug: 'actualite-e2e', title: 'Actualité E2E' } as const;
 
+/**
+ * The five *Concours de citations* activities, written by
+ * `app/Domains/Calendar/Database/Seeders/E2eCalendarSeeder.php`.
+ *
+ * A contest's phase comes from the clock alone, so each phase needs its own
+ * activity: there is no way to fast-forward one.
+ */
+export const CONTESTS = {
+  beforeStart: { slug: 'concours-citations-avant' },
+  submissions: { slug: 'concours-citations-soumissions' },
+  interlude: { slug: 'concours-citations-entre-deux' },
+  voting: { slug: 'concours-citations-votes' },
+  ended: { slug: 'concours-citations-termine' },
+} as const;
+
+export const CONTEST = {
+  /** Holds a quote of `confirmed` already — the replace / withdraw path. */
+  filledCategory: 'Meilleure ouverture',
+  /** Left empty on purpose — the first-submission path. */
+  emptyCategory: 'Plus belle métaphore',
+  /** The passage `confirmed` has already entered. */
+  sittingPassage: 'La première phrase du premier bloc,',
+  /** Renamed since the entry was written; the slug still resolves. */
+  staleStoryTitle: "Ancien titre de l'histoire",
+  /** Deleted since the entry was written; the link must 404, not crash. */
+  deadChapterSlug: 'chapitre-supprime-99',
+  /** What `Résultats` prints when the submitter no longer resolves. */
+  unknownSubmitter: 'Compte supprimé',
+  /** Quotes of `confirmed` the picker must list but refuse, with their reason. */
+  ineligible: {
+    privateStory: { passage: "Un passage tiré d'une histoire privée", reason: 'Histoire privée' },
+    excluded: {
+      passage: "Un passage tiré d'une histoire hors événements",
+      reason: 'Histoire exclue des événements',
+    },
+  },
+  /** `confirmed` owns 200 filler quotes; this one is singled out by the filter. */
+  longBookNeedle: 'Passage numéro 137 du carnet',
+  longBookSize: 200,
+} as const;
+
 /** Where auth.setup.ts parks each role's cookies. */
 export function storageStatePath(role: RoleName): string {
   return `e2e/.auth/${role}.json`;
