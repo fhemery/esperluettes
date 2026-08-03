@@ -106,9 +106,17 @@ class QuoteContestComponent extends Component
             $tabs[] = ['key' => 'results', 'label' => __('quote-contest::quote-contest.tab_results')];
         }
 
+        // Once voting has opened, that is where a reader's attention belongs —
+        // the hash from a notification link still wins (tracking=true reads it
+        // after this initial value).
+        $initialTab = in_array($phase, [QuoteContestPhase::Voting, QuoteContestPhase::Ended], true)
+            ? 'votes'
+            : 'my-quotes';
+
         return view('quote-contest::components.quote-contest', [
             'activity' => $this->activity,
             'tabs' => $tabs,
+            'initialTab' => $initialTab,
             'myQuotes' => $myQuotes,
             'votes' => $votes,
             // Null for everyone else: the only view model carrying a submitter

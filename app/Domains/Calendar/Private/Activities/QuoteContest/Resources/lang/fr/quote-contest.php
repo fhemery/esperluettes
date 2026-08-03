@@ -15,6 +15,7 @@ return [
     ],
 
     'my_quotes' => [
+        'intro' => 'Choisissez une citation dans votre carnet ci-dessous, puis sélectionnez la catégorie à laquelle vous voulez la soumettre. Vous pouvez remplacer votre citation à tout moment tant que les soumissions sont ouvertes.',
         'no_categories' => 'Ce concours n\'a pas encore de catégorie : il n\'y a rien à quoi soumettre pour l\'instant.',
         'categories_title' => 'Catégories',
         'your_entry' => 'Votre citation',

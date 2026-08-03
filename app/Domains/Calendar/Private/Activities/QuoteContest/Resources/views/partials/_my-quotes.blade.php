@@ -25,6 +25,12 @@
 >
     <p class="surface-read rounded-lg p-4 text-sm">{{ $banner }}</p>
 
+    @if($model->isSubmissionPhase())
+        <p class="surface-read rounded-lg p-4 text-sm">
+            {{ __('quote-contest::quote-contest.my_quotes.intro') }}
+        </p>
+    @endif
+
     @if(! $model->hasCategories())
         <p class="surface-read rounded-lg p-4 text-sm">
             {{ __('quote-contest::quote-contest.my_quotes.no_categories') }}
