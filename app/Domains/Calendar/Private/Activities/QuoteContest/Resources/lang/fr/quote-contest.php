@@ -25,8 +25,8 @@ return [
         'filter_placeholder' => 'Un passage, une histoire, un chapitre…',
         'ineligible_prefix' => 'Non éligible :',
 
+        'picker_legend' => 'Choisissez la citation à soumettre',
         'select_quote' => 'Choisir cette citation',
-        'selected_quote' => 'Citation choisie',
         'pick_one_first' => 'Choisissez d\'abord une citation dans votre carnet, plus bas.',
         'submit' => 'Soumettre la citation choisie',
         'replace' => 'Remplacer par la citation choisie',

@@ -99,8 +99,10 @@
                             </div>
 
                             @if($category->myEntry)
-                                {{-- Outside every <form> above: nesting them is illegal HTML. --}}
-                                <x-shared::modal name="qc-replace-{{ $category->id }}" maxWidth="md">
+                                {{-- Outside every <form> above: nesting them is illegal
+                                     HTML. `focusable` moves focus inside on open, so
+                                     the keyboard does not stay behind the overlay. --}}
+                                <x-shared::modal name="qc-replace-{{ $category->id }}" maxWidth="md" focusable>
                                     <div class="p-6 flex flex-col gap-3">
                                         <x-shared::title tag="h2">
                                             {{ __('quote-contest::quote-contest.my_quotes.replace_confirm_title') }}
@@ -167,6 +169,16 @@
                                 :placeholder="__('quote-contest::quote-contest.my_quotes.filter_placeholder')" />
                         </div>
 
+                        {{-- A radio group: one choice among N, keyboard operable
+                             and state-announcing for free. The legend names the
+                             group when a screen reader enters it; it is hidden
+                             visually because the section heading already says
+                             it on screen. --}}
+                        <fieldset class="border-0 p-0 m-0">
+                            <legend class="sr-only">
+                                {{ __('quote-contest::quote-contest.my_quotes.picker_legend') }}
+                            </legend>
+
                         <ul class="flex flex-col gap-3 list-none p-0">
                             @foreach($model->quotes as $quote)
                                 <li
@@ -175,14 +187,16 @@
                                     @unless($quote->isEligible()) aria-disabled="true" @endunless
                                     class="rounded-lg p-4 flex flex-col gap-2 {{ $quote->isEligible() ? 'surface-read' : 'surface-read opacity-60' }}"
                                 >
-                                    {{-- A radio group: one choice among N, keyboard
-                                         operable and state-announcing for free.
-                                         An ineligible row carries no reachable
-                                         control, so it cannot be picked at all. --}}
+                                    {{-- An ineligible row carries no reachable
+                                         control, so it cannot be picked at all,
+                                         and points at the reason below. --}}
                                     <label class="flex items-start gap-2 {{ $quote->isEligible() ? 'cursor-pointer' : 'cursor-not-allowed' }}">
                                         <input type="radio" name="qc_selected_quote" class="mt-1"
                                             value="{{ $quote->id }}"
-                                            @unless($quote->isEligible()) disabled @endunless
+                                            @unless($quote->isEligible())
+                                                disabled aria-disabled="true"
+                                                aria-describedby="qc-quote-reason-{{ $quote->id }}"
+                                            @endunless
                                             x-on:change="selectedQuote = {{ $quote->id }}; selectedText = @js($quote->highlightedText)"
                                         />
                                         <span class="sr-only">{{ __('quote-contest::quote-contest.my_quotes.select_quote') }}</span>
@@ -206,8 +220,10 @@
                                     </p>
 
                                     @unless($quote->isEligible())
-                                        {{-- The reason is text, not colour alone (spec §6). --}}
-                                        <p class="text-xs font-medium">
+                                        {{-- The reason is text, not colour alone: read
+                                             on screen, and tied to the disabled radio
+                                             through `aria-describedby`. --}}
+                                        <p class="text-xs font-medium" id="qc-quote-reason-{{ $quote->id }}">
                                             {{ __('quote-contest::quote-contest.my_quotes.ineligible_prefix') }}
                                             @if($quote->ineligibilityReason === \App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestSubmissionService::REASON_EXCLUDED_FROM_EVENTS)
                                                 {{ __('quote-contest::quote-contest.ineligible.excluded_from_events') }}
@@ -219,6 +235,7 @@
                                 </li>
                             @endforeach
                         </ul>
+                        </fieldset>
                     </div>
                 @endif
             </section>

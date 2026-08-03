@@ -92,9 +92,11 @@
                     </div>
 
                     {{-- Outside the table: a fixed-position dialog has no business
-                         inside a <td>, and the form must not nest in one either. --}}
+                         inside a <td>, and the form must not nest in one either.
+                         `focusable` moves focus inside on open, so the keyboard
+                         does not stay behind the overlay. --}}
                     @foreach($category->entries as $entry)
-                        <x-shared::modal name="qc-delete-{{ $entry->id }}" maxWidth="md">
+                        <x-shared::modal name="qc-delete-{{ $entry->id }}" maxWidth="md" focusable>
                             <div class="p-6 flex flex-col gap-3">
                                 <x-shared::title tag="h2">
                                     {{ __('quote-contest::quote-contest.results.delete_confirm_title') }}
