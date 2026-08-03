@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\Calendar\Private\Activities\QuoteContest;
 
+use App\Domains\Calendar\Private\Activities\QuoteContest\Console\NotifyQuoteContestCommand;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Listeners\WithdrawEntriesOnStoryIneligible;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\EntryRemovedNotification;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\SubmissionsClosingNotification;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\SubmissionsOpenNotification;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\VotesClosingNotification;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\VotesOpenNotification;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Story\Public\Events\StoryExcludedFromEvents;
@@ -28,6 +33,11 @@ class QuoteContestServiceProvider extends ServiceProvider
         // anonymous one. Both answer to the same `quote-contest::` prefix.
         Blade::componentNamespace('App\\Domains\\Calendar\\Private\\Activities\\QuoteContest\\View\\Components', 'quote-contest');
         Blade::anonymousComponentPath($base . '/Resources/views/components', 'quote-contest');
+
+        // Scheduled from `bootstrap/app.php`, every five minutes.
+        $this->commands([
+            NotifyQuoteContestCommand::class,
+        ]);
 
         $this->registerEventListeners();
         $this->registerNotifications();
@@ -58,6 +68,36 @@ class QuoteContestServiceProvider extends ServiceProvider
             class: EntryRemovedNotification::class,
             groupId: 'calendar',
             nameKey: 'quote-contest::quote-contest.notification.entry_removed.name',
+        );
+
+        // The four date-triggered broadcasts, sent by
+        // `calendar:quote-contest-notify` to confirmed users (decision #10).
+        $factory->register(
+            type: SubmissionsOpenNotification::type(),
+            class: SubmissionsOpenNotification::class,
+            groupId: 'calendar',
+            nameKey: 'quote-contest::quote-contest.notification.submissions_open.name',
+        );
+
+        $factory->register(
+            type: SubmissionsClosingNotification::type(),
+            class: SubmissionsClosingNotification::class,
+            groupId: 'calendar',
+            nameKey: 'quote-contest::quote-contest.notification.submissions_closing.name',
+        );
+
+        $factory->register(
+            type: VotesOpenNotification::type(),
+            class: VotesOpenNotification::class,
+            groupId: 'calendar',
+            nameKey: 'quote-contest::quote-contest.notification.votes_open.name',
+        );
+
+        $factory->register(
+            type: VotesClosingNotification::type(),
+            class: VotesClosingNotification::class,
+            groupId: 'calendar',
+            nameKey: 'quote-contest::quote-contest.notification.votes_closing.name',
         );
     }
 

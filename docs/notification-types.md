@@ -2,7 +2,7 @@
 
 > **Auto-generated** by `php artisan notifications:export-types-doc`. Do not edit by hand.
 
-Generated at: 2026-08-03T06:55:05+00:00 (`locale`: `fr`)
+Generated at: 2026-08-03T07:18:37+00:00 (`locale`: `fr`)
 
 ## Group: Commentaires (`comments`)
 
@@ -72,6 +72,10 @@ Generated at: 2026-08-03T06:55:05+00:00 (`locale`: `fr`)
 | Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
 | --- | --- | --- | --- | --- | --- |
 | `calendar.quote_contest.entry_removed` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\EntryRemovedNotification` | Une de mes citations a été retirée d'un concours par la modération | `category_title`, `activity_slug`, `activity_name` | no | no |
+| `calendar.quote_contest.submissions_open` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\SubmissionsOpenNotification` | Les soumissions d'un concours de citations sont ouvertes | `activity_name`, `activity_slug` | no | no |
+| `calendar.quote_contest.submissions_closing` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\SubmissionsClosingNotification` | Les soumissions d'un concours de citations ferment bientôt | `activity_name`, `activity_slug` | no | no |
+| `calendar.quote_contest.votes_open` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\VotesOpenNotification` | Les votes d'un concours de citations sont ouverts | `activity_name`, `activity_slug` | no | no |
+| `calendar.quote_contest.votes_closing` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\VotesClosingNotification` | Les votes d'un concours de citations ferment bientôt | `activity_name`, `activity_slug` | no | no |
 
 ## Delivery channels
 

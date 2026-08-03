@@ -78,6 +78,22 @@ return [
             'name' => 'Une de mes citations a été retirée d\'un concours par la modération',
             'display' => 'Votre citation soumise dans la catégorie « :category » du concours <a href=":activity_url">:activity_name</a> a été retirée par la modération. La place est de nouveau libre.',
         ],
+        'submissions_open' => [
+            'name' => 'Les soumissions d\'un concours de citations sont ouvertes',
+            'display' => 'Les soumissions du concours <a href=":activity_url">:activity_name</a> sont ouvertes : venez proposer vos plus belles citations !',
+        ],
+        'submissions_closing' => [
+            'name' => 'Les soumissions d\'un concours de citations ferment bientôt',
+            'display' => 'Il vous reste 24 h pour soumettre vos citations au concours <a href=":activity_url">:activity_name</a>.',
+        ],
+        'votes_open' => [
+            'name' => 'Les votes d\'un concours de citations sont ouverts',
+            'display' => 'Les votes du concours <a href=":activity_url">:activity_name</a> sont ouverts : venez élire vos citations préférées !',
+        ],
+        'votes_closing' => [
+            'name' => 'Les votes d\'un concours de citations ferment bientôt',
+            'display' => 'Il vous reste 24 h pour voter au concours <a href=":activity_url">:activity_name</a>.',
+        ],
     ],
 
     'ineligible' => [

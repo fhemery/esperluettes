@@ -23,7 +23,7 @@
 | 7 | Story-eligibility listeners: withdrawal on visibility loss | S | 6 | DONE |
 | 8 | Voting: ballot, seeded shuffle, *Votes* tab | M | 6 | DONE |
 | 9 | Moderation: *Résultats* tab, entry deletion, submitter notification | M | 8 | DONE |
-| 10 | Scheduled broadcast notifications + Artisan command | M | 9 | TODO |
+| 10 | Scheduled broadcast notifications + Artisan command | M | 9 | DONE |
 | 11 | Docs, i18n sweep, a11y polish | S | 10 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
