@@ -82,7 +82,6 @@ return [
         ],
         'blocks' => [
             'required' => 'Le contenu est requis : ajoutez au moins un bloc.',
-            'image_alt_required' => 'Le texte alternatif est requis pour chaque image.',
         ],
         'publish_at' => [
             'after' => 'La date de publication planifiée doit être dans le futur.',

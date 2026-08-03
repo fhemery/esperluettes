@@ -124,12 +124,19 @@ describe('Static page advanced mode — create', function () {
         expect($page->content_blocks[1]['html'])->toContain('Second');
     });
 
-    it('rejects an image block without alt text', function () {
-        expect(fn () => staticPageSvc()->create(staticPageData([
+    it('accepts an image block without alt text', function () {
+        Storage::disk('public')->put('static-pages/x.jpg', 'x');
+        $page = staticPageSvc()->create(staticPageData([
             'mode' => 'advanced',
             'blocks_order' => 'b0',
             'blocks' => ['b0' => ['type' => 'image', 'path' => 'static-pages/x.jpg', 'alt' => '']],
-        ])))->toThrow(ValidationException::class);
+        ]));
+
+        expect($page->content_blocks[0])->toMatchArray([
+            'type' => 'image',
+            'path' => 'static-pages/x.jpg',
+            'alt' => '',
+        ]);
     });
 
     it('rejects advanced content with no surviving block', function () {

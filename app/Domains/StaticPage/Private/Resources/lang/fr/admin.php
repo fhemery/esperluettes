@@ -83,6 +83,5 @@ return [
         'slug_unique' => 'Ce slug est déjà utilisé.',
         'content_required' => 'Le contenu est obligatoire.',
         'blocks_required' => 'Le contenu doit comporter au moins un bloc.',
-        'image_alt_required' => 'Chaque image doit avoir un texte alternatif.',
     ],
 ];

@@ -59,7 +59,8 @@
             :blocks="$chapterBlocks"
             toolbar="links"
             class="mt-1 block w-full"
-            :nbLines="15" :indentParagraphs="true" />
+            :nbLines="15" :indentParagraphs="true"
+            :needs-property-confirm="true" />
         <x-input-error :messages="$errors->get('content')" class="mt-2" />
         <x-input-error :messages="$errors->get('blocks')" class="mt-2" />
     </div>

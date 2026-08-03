@@ -87,7 +87,6 @@
             :path="old('image.path', $faqQuestion?->image_path)"
             :alt="old('image.alt', $faqQuestion?->image_alt_text ?? '')"
             :show-caption="false"
-            :alt-required="false"
             :show-usage="true"
             :label="__('faq::admin.questions.form.image')"
         />

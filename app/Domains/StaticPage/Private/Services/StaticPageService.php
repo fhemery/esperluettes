@@ -81,13 +81,7 @@ class StaticPageService
                 if (!$path) {
                     continue; // drop empty image block
                 }
-                $alt = trim((string) ($b['alt'] ?? ''));
-                if ($alt === '') {
-                    throw ValidationException::withMessages([
-                        'blocks' => __('static::admin.validation.image_alt_required'),
-                    ]);
-                }
-                $block = ['type' => 'image', 'path' => $path, 'alt' => $alt];
+                $block = ['type' => 'image', 'path' => $path, 'alt' => trim((string) ($b['alt'] ?? ''))];
                 if ($keep) {
                     $block['keep_original'] = true;
                 }

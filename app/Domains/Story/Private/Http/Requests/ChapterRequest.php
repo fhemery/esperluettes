@@ -34,7 +34,7 @@ class ChapterRequest extends FormRequest
             $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image'])];
             $rules['blocks.*.html'] = ['nullable', 'string'];
             $rules['blocks.*.path'] = ['nullable', 'string', 'max:1024'];
-            $rules['blocks.*.alt'] = ['required_if:blocks.*.type,image', 'nullable', 'string', 'max:255'];
+            $rules['blocks.*.alt'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.caption'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.keep_original'] = ['nullable'];
             $rules['blocks.*.file'] = ['nullable', 'image', 'max:2048'];
@@ -88,8 +88,7 @@ class ChapterRequest extends FormRequest
         if ($this->isAdvanced()) {
             // Block HTML is purified exactly once, in the resolver, with the
             // narrative profile. Purifying here too would let the two policies
-            // diverge silently. Only the alt/caption strings are trimmed, so
-            // that a whitespace-only alt fails `required_if`.
+            // diverge silently. Alt/caption strings are trimmed for consistency.
             $merge['blocks'] = $this->trimmedBlockLabels();
         } else {
             $merge['content'] = HtmlLinkUtils::stripExternalLinks(
@@ -133,7 +132,6 @@ class ChapterRequest extends FormRequest
             'publish_at.after' => __('story::validation.chapter.publish_at.after'),
             'blocks.required' => __('story::validation.chapter.blocks.required'),
             'blocks.min' => __('story::validation.chapter.blocks.required'),
-            'blocks.*.alt.required_if' => __('story::validation.chapter.blocks.image_alt_required'),
         ];
     }
 }

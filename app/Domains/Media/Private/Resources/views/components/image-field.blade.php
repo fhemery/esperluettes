@@ -9,8 +9,8 @@
       {name}[caption]  text   — caption (when showCaption)
 
     Props: name, path, alt, caption, scope (required), showUsage, usageCount,
-           showAlt, showCaption, altRequired, maxSize (KB), accept, label, helpText,
-           allowLibrary, previewUrl.
+           showAlt, showCaption, needsPropertyConfirm, maxSize (KB), accept, label,
+           helpText, allowLibrary, previewUrl.
 
     allowLibrary (default true) — when false, the "choose existing" button and the
       picker modal are not rendered: the scope has no reusable library.
@@ -18,6 +18,9 @@
       set, no Media URL is built for `path`, which is what makes the field usable
       for a private image (private paths have no public URL and their URL helpers
       throw).
+    needsPropertyConfirm (default false) — when true, a rights/no-AI checkbox is
+      shown and required only for a fresh file upload (not library reuse, not an
+      already-saved path). Client-side only; nothing is submitted or persisted.
 --}}
 @props([
     'name',
@@ -31,7 +34,7 @@
     'usageCount' => null,
     'showAlt' => true,
     'showCaption' => true,
-    'altRequired' => true,
+    'needsPropertyConfirm' => false,
     'allowKeepOriginal' => false,
     'keepOriginal' => false,
     'maxSize' => 2048,
@@ -138,12 +141,12 @@
     @if($showAlt)
         <div class="flex flex-col gap-1">
             <x-shared::input-label :for="$uid.'-alt'">
-                {{ __('media::image-field.alt_label') }}@if($altRequired) <span class="text-error">*</span>@endif
+                {{ __('media::image-field.alt_label') }}
             </x-shared::input-label>
             <input type="text" id="{{ $uid }}-alt" name="{{ $name }}[alt]" value="{{ $alt }}"
-                   @if($altRequired) x-bind:required="!!path || isNewFile" @endif
                    class="border border-border rounded-md px-3 py-2 text-sm"
                    placeholder="{{ __('media::image-field.alt_placeholder') }}" />
+            <p class="text-xs text-fg/50">{{ __('media::image-field.alt_help') }}</p>
         </div>
     @endif
 
@@ -154,6 +157,15 @@
                    class="border border-border rounded-md px-3 py-2 text-sm"
                    placeholder="{{ __('media::image-field.caption_placeholder') }}" />
         </div>
+    @endif
+
+    @if($needsPropertyConfirm)
+        <label x-show="isNewFile" x-cloak class="flex items-start gap-2 text-sm text-fg/80 cursor-pointer">
+            <input type="checkbox" class="rounded border-border mt-0.5 shrink-0"
+                   x-ref="propertyConfirm"
+                   x-bind:required="isNewFile" />
+            <span>{!! __('media::image-field.property_confirm') !!}</span>
+        </label>
     @endif
 
     @if($helpText)
@@ -244,6 +256,7 @@
                     this.previewUrl = e.target.result;
                     this.isNewFile = true;
                     this.path = ''; // a new upload replaces any reused path
+                    this.resetPropertyConfirm();
                 };
                 reader.readAsDataURL(file);
             },
@@ -252,6 +265,10 @@
                 this.previewUrl = null;
                 this.isNewFile = false;
                 this.$refs.fileInput.value = '';
+                this.resetPropertyConfirm();
+            },
+            resetPropertyConfirm() {
+                if (this.$refs.propertyConfirm) this.$refs.propertyConfirm.checked = false;
             },
             async openPicker() {
                 this.pickerOpen = true;
@@ -283,6 +300,7 @@
                 this.isNewFile = false;
                 this.$refs.fileInput.value = '';
                 this.pickerOpen = false;
+                this.resetPropertyConfirm();
             },
         }));
     });

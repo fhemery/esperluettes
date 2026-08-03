@@ -12,6 +12,8 @@ return [
     'used_in_places' => 'Utilisée à :count endroit(s)',
     'alt_label' => 'Texte alternatif',
     'alt_placeholder' => 'Décrivez l’image pour l’accessibilité',
+    'alt_help' => 'À renseigner uniquement si l’image apporte une information absente du texte. Laissez vide pour une image décorative.',
+    'property_confirm' => '<strong>Je confirme que cette image</strong> est ma propriété ou libre de droit, et qu’elle <strong>n’a pas été générée par IA</strong>',
     'caption_label' => 'Légende',
     'caption_placeholder' => 'Légende affichée sous l’image (optionnel)',
     'keep_original' => 'Conserver la taille d’origine',

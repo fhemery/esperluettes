@@ -109,4 +109,20 @@ describe('<x-editor::multi>', function () {
         expect($tpl)->toContain('data-nb-lines="15"')
             ->and($tpl)->toContain('ql-indent');
     });
+
+    it('forwards needsPropertyConfirm to image blocks and the image template', function () {
+        $with = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="chapters/1" :blocks="$blocks" :needs-property-confirm="true" />',
+            ['blocks' => [['type' => 'image', 'path' => 'chapters/1/a.jpg', 'alt' => '']]]
+        );
+        $without = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" />',
+            ['blocks' => [['type' => 'image', 'path' => 'news/a.jpg', 'alt' => '']]]
+        );
+
+        $confirm = __('media::image-field.property_confirm');
+        expect($with)->toContain($confirm)
+            ->and(Str::between($with, '<template x-ref="tplImage">', '</template>'))->toContain($confirm)
+            ->and($without)->not->toContain($confirm);
+    });
 });

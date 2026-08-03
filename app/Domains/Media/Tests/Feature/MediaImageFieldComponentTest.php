@@ -63,4 +63,22 @@ describe('<x-media::image-field>', function () {
             ['path' => 'secret-gift/1/abc.jpg', 'url' => '/calendar/secret-gift/1/image/2']
         )->assertSee('name="gift_image[file]"', false);
     });
+
+    it('keeps alt optional and shows the decorative-image hint', function () {
+        $html = $this->blade(
+            '<x-media::image-field name="header_image" scope="news" />'
+        );
+
+        $html->assertSee(__('media::image-field.alt_help'));
+        $html->assertDontSee('x-bind:required="!!path || isNewFile"', false);
+        $html->assertDontSee(__('media::image-field.property_confirm'), false);
+    });
+
+    it('renders the property confirm checkbox only when needsPropertyConfirm is true', function () {
+        $this->blade(
+            '<x-media::image-field name="blocks[b0]" scope="chapters/1" :needs-property-confirm="true" />'
+        )->assertSee(__('media::image-field.property_confirm'), false)
+            ->assertSee('x-bind:required="isNewFile"', false)
+            ->assertSee('x-show="isNewFile"', false);
+    });
 });

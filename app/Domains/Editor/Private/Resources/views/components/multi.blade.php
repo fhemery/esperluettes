@@ -19,6 +19,7 @@
       placeholder  editor placeholder
       nbLines      height in lines of every writing surface (simple + each block)
       indentParagraphs  adds `ql-indent` to every writing surface
+      needsPropertyConfirm  forward to each image block's media field (default false)
 --}}
 @props([
     'name' => 'blocks',
@@ -34,6 +35,7 @@
     'placeholder' => '',
     'nbLines' => 5,
     'indentParagraphs' => false,
+    'needsPropertyConfirm' => false,
 ])
 
 @use(App\Domains\Editor\Private\Support\ToolbarPresets)
@@ -107,6 +109,7 @@
                         'name' => $name, 'uid' => 'b' . $i, 'scope' => $scope,
                         'path' => $block['path'] ?? null, 'alt' => $block['alt'] ?? '', 'caption' => $block['caption'] ?? '',
                         'keepOriginal' => $block['keep_original'] ?? false,
+                        'needsPropertyConfirm' => $needsPropertyConfirm,
                     ])
                 @else
                     @include('editor::components.multi._text-block', [
@@ -147,6 +150,7 @@
         @include('editor::components.multi._image-block', [
             'name' => $name, 'uid' => '__UID__', 'scope' => $scope, 'path' => null, 'alt' => '', 'caption' => '',
             'keepOriginal' => false,
+            'needsPropertyConfirm' => $needsPropertyConfirm,
         ])
     </template>
 

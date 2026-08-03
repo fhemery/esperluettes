@@ -127,12 +127,19 @@ describe('News advanced mode — create', function () {
         expect($news->content_blocks[1]['html'])->toContain('Second');
     });
 
-    it('rejects an image block without alt text', function () {
-        expect(fn () => newsSvc()->create(newsData([
+    it('accepts an image block without alt text', function () {
+        Storage::disk('public')->put('news/x.jpg', 'x');
+        $news = newsSvc()->create(newsData([
             'mode' => 'advanced',
             'blocks_order' => 'b0',
             'blocks' => ['b0' => ['type' => 'image', 'path' => 'news/x.jpg', 'alt' => '']],
-        ])))->toThrow(ValidationException::class);
+        ]));
+
+        expect($news->content_blocks[0])->toMatchArray([
+            'type' => 'image',
+            'path' => 'news/x.jpg',
+            'alt' => '',
+        ]);
     });
 
     it('rejects advanced content with no surviving block', function () {

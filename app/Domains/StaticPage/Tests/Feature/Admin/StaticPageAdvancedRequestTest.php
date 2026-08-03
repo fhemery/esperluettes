@@ -89,9 +89,7 @@ describe('Static page advanced mode — HTTP request', function () {
         $response->assertSessionHasErrors(['content']);
     });
 
-    it('surfaces the missing-alt error from the service', function () {
-        $before = StaticPage::count();
-
+    it('accepts an advanced image block without alt text', function () {
         $response = $this->actingAs(admin($this))
             ->post(route('static.admin.store'), advancedStaticPagePayload([
                 'slug' => 'sans-alt',
@@ -105,8 +103,10 @@ describe('Static page advanced mode — HTTP request', function () {
                 ],
             ]));
 
-        $response->assertSessionHasErrors(['blocks']);
-        expect(StaticPage::count())->toBe($before);
+        $response->assertRedirect();
+        $page = StaticPage::query()->where('slug', 'sans-alt')->firstOrFail();
+        expect($page->content_blocks[0]['alt'])->toBe('');
+        expect($page->content_blocks[0]['path'])->not->toBeEmpty();
     });
 
     it('denies a non-admin posting an advanced payload', function () {

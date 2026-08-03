@@ -120,7 +120,7 @@ describe('Chapter advanced mode', function () {
         expect($chapter->content_blocks[0]['html'])->toContain('ql-custom-emoji-espersourire');
     });
 
-    it('rejects an image block without alt text', function () {
+    it('accepts an image block without alt text', function () {
         Storage::disk('public')->put('chapters/' . $this->author->id . '/nude.jpg', 'x');
 
         $this->post(route('chapters.store', ['storySlug' => $this->story->slug]), advancedChapterPayload([
@@ -129,9 +129,15 @@ describe('Chapter advanced mode', function () {
                 'b0' => ['type' => 'text', 'html' => '<p>Texte</p>'],
                 'b1' => ['type' => 'image', 'path' => 'chapters/' . $this->author->id . '/nude.jpg', 'alt' => '   '],
             ],
-        ]))->assertSessionHasErrors('blocks.b1.alt');
+        ]))->assertRedirect();
 
-        expect(Chapter::query()->count())->toBe(0);
+        /** @var Chapter $chapter */
+        $chapter = Chapter::query()->latest('id')->firstOrFail();
+        expect($chapter->content_blocks[1])->toMatchArray([
+            'type' => 'image',
+            'path' => 'chapters/' . $this->author->id . '/nude.jpg',
+            'alt' => '',
+        ]);
     });
 
     it('rejects an advanced save with zero blocks', function () {
@@ -294,7 +300,7 @@ describe('Chapter form and reading page under advanced mode', function () {
 
         $this->from(route('chapters.create', ['storySlug' => $this->story->slug]))
             ->post(route('chapters.store', ['storySlug' => $this->story->slug]), [
-                'title' => 'Advanced Chapter',
+                'title' => '', // force a validation error while keeping the blocks
                 'mode' => 'advanced',
                 'blocks_order' => 'n1,n0',
                 'blocks' => [
@@ -303,7 +309,7 @@ describe('Chapter form and reading page under advanced mode', function () {
                     'n2' => [
                         'type' => 'image',
                         'path' => 'chapters/' . $this->author->id . '/sep.jpg',
-                        'alt' => '   ',
+                        'alt' => 'Séparateur',
                     ],
                 ],
                 'published' => '1',
