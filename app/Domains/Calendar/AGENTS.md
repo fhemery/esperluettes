@@ -29,6 +29,8 @@
 
 **A withdrawn quote-contest entry is a filter, not a deletion.** `calendar_quote_contest_entries.withdrawn_at` is stamped when the quoted story turns private or is excluded from events; the row and its votes stay. Every listing, every tally and the one-per-category check must filter on `withdrawn_at IS NULL` — a read path that forgets it silently resurrects a passage nobody may read any more. There is no database constraint expressing this, so keep the reads inside `QuoteContest*Service`. Nothing ever clears the column: a story returning to public does not restore its entries, the reader re-enters by hand.
 
+**Quote-contest anonymity is a query shape, not a template rule.** A submitter's identity and a vote count exist in exactly one family of view models, `Results*ViewModel`, built only by `QuoteContestVoteService::resultsFor()` and only for `QuoteContestModerationController::ROLES`. `VoteEntryViewModel` and `MyEntryViewModel` have no field for either, and adding one would make a Blade slip enough to leak who submitted what — the *Votes* tab is seen by every confirmed user. The *Résultats* tab is likewise absent from the tabs array for everyone else rather than hidden in the template.
+
 ## Events Emitted
 
 The Calendar domain emits no domain events.

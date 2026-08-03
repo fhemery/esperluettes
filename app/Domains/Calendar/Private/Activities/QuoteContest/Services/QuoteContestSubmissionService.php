@@ -6,13 +6,16 @@ namespace App\Domains\Calendar\Private\Activities\QuoteContest\Services;
 
 use App\Domains\Calendar\Private\Activities\QuoteContest\Models\QuoteContestCategory;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Models\QuoteContestEntry;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\EntryRemovedNotification;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Support\QuoteContestPhase;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Support\SubmissionRefusedException;
 use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\MyEntryViewModel;
 use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\PickerQuoteViewModel;
 use App\Domains\Calendar\Private\Models\Activity;
+use App\Domains\Notification\Public\Api\NotificationPublicApi;
 use App\Domains\Quote\Public\Api\Contracts\QuoteDto;
 use App\Domains\Quote\Public\Api\QuotePublicApi;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use App\Domains\Story\Public\Contracts\StorySummaryDto;
 use App\Domains\Story\Public\Contracts\StoryVisibility;
@@ -40,6 +43,8 @@ class QuoteContestSubmissionService
         private readonly StoryPublicApi $stories,
         private readonly QuoteContestConfigService $config,
         private readonly QuoteContestPhaseService $phases,
+        private readonly NotificationPublicApi $notifications,
+        private readonly ProfilePublicApi $profiles,
     ) {}
 
     /**
@@ -195,6 +200,52 @@ class QuoteContestSubmissionService
         $this->assertSubmissionsOpen((int) $entry->activity_id);
 
         $entry->delete();
+    }
+
+    /**
+     * Delete any entry, as a moderator or an admin — typically a duplicate
+     * (spec §4.6.3).
+     *
+     * A hard delete, and the votes cast on it cascade away with it by foreign
+     * key: unlike a privacy withdrawal, this is an arbitration and there is
+     * nothing to keep recoverable. Allowed at **any point in the contest's
+     * life**: no phase gate here, deliberately — a duplicate found after the
+     * votes close must still be removable.
+     *
+     * The caller has already checked the actor's roles; this method is not the
+     * authorization point. What it owns is the consequence: the submitter is
+     * told their slot is free again (decision #11).
+     *
+     * @throws SubmissionRefusedException when no such entry exists
+     */
+    public function deleteEntryAsModerator(int $entryId, int $actorUserId): void
+    {
+        $entry = QuoteContestEntry::query()->find($entryId);
+
+        if ($entry === null) {
+            throw SubmissionRefusedException::unknownEntry();
+        }
+
+        $submitterId = (int) $entry->user_id;
+        $activity = Activity::query()->find((int) $entry->activity_id);
+
+        // Captured before the delete, because the notification never reads the
+        // database when it is displayed and the entry will be gone by then.
+        $notification = new EntryRemovedNotification(
+            categoryTitle: (string) ($entry->category?->title ?? ''),
+            activitySlug: (string) ($activity?->slug ?? ''),
+            activityName: (string) ($activity?->name ?? ''),
+        );
+
+        $entry->delete();
+
+        // Nobody to tell: the actor already knows what they just did, and a
+        // deleted submitter has no inbox left (decision #7).
+        if ($submitterId === $actorUserId || $this->profiles->getPublicProfile($submitterId) === null) {
+            return;
+        }
+
+        $this->notifications->createNotification([$submitterId], $notification, $actorUserId);
     }
 
     /**

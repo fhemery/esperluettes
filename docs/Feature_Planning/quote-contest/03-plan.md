@@ -22,7 +22,7 @@
 | 6 | Submissions: submit / replace / withdraw | M | 5 | DONE |
 | 7 | Story-eligibility listeners: withdrawal on visibility loss | S | 6 | DONE |
 | 8 | Voting: ballot, seeded shuffle, *Votes* tab | M | 6 | DONE |
-| 9 | Moderation: *Résultats* tab, entry deletion, submitter notification | M | 8 | TODO |
+| 9 | Moderation: *Résultats* tab, entry deletion, submitter notification | M | 8 | DONE |
 | 10 | Scheduled broadcast notifications + Artisan command | M | 9 | TODO |
 | 11 | Docs, i18n sweep, a11y polish | S | 10 | TODO |
 
@@ -962,7 +962,7 @@ resolve the slugs in the snapshot builder from
 `storySlug` / `chapterSlug` to `QuoteDto` in phase 2. **Prefer the first** — it
 keeps phase 2 to two methods and adds no field to a DTO three domains read.
 
-**O2 — Which roles reach the moderation surface? (Phase 9.)**
+**O2 — Which roles reach the moderation surface? (Phase 9.) — RESOLVED, see A32.**
 Spec §3 says *moderator* and *admin*. The codebase also has `Roles::TECH_ADMIN`,
 and Calendar's own admin checks use `[Roles::ADMIN, Roles::TECH_ADMIN]`.
 The plan assumes `[Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]` for the
@@ -970,7 +970,7 @@ The plan assumes `[Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]` for the
 everywhere else in Calendar. If BUILD finds a project convention that says
 otherwise, follow the convention and note it in `DECISIONS.md`.
 
-**O3 — Notification group id and sort order. (Phase 9.)**
+**O3 — Notification group id and sort order. (Phase 9.) — RESOLVED, see A33.**
 `NotificationFactory::registerGroup()` needs an id, a `sortOrder` and a
 translation key (Quote uses `id: 'quote', sortOrder: 60`). The contest's five
 types need a group — most likely a new `calendar` group, so a future

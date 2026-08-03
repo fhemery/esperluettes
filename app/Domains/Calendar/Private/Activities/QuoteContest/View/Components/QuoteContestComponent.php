@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Calendar\Private\Activities\QuoteContest\View\Components;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestModerationController;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestConfigService;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestPhaseService;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestSubmissionService;
@@ -11,6 +13,7 @@ use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestVo
 use App\Domains\Calendar\Private\Activities\QuoteContest\Support\QuoteContestPhase;
 use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\ContestCategoryViewModel;
 use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\MyQuotesViewModel;
+use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\ResultsViewModel;
 use App\Domains\Calendar\Private\Activities\QuoteContest\View\Models\VotesViewModel;
 use App\Domains\Calendar\Private\Models\Activity;
 use Illuminate\Contracts\View\View;
@@ -22,9 +25,9 @@ use Illuminate\View\Component;
  * each tab receives a view model built for it.
  *
  * A tab a reader may not see is *absent* from the array, never rendered and
- * then hidden (architecture §3.3, point 4). For now the array holds
- * *Mes citations* and *Votes*; *Résultats*, which only moderators see, arrives
- * with the phase that implements it.
+ * then hidden (architecture §3.3, point 4). That is how *Résultats* stays out
+ * of a plain reader's page: the tab is not in the array, and the view model
+ * that would carry a submitter identity is not built at all.
  */
 class QuoteContestComponent extends Component
 {
@@ -34,6 +37,7 @@ class QuoteContestComponent extends Component
         private readonly QuoteContestPhaseService $phases,
         private readonly QuoteContestSubmissionService $submissions,
         private readonly QuoteContestVoteService $votes,
+        private readonly AuthPublicApi $auth,
     ) {}
 
     public function render(): View
@@ -87,16 +91,34 @@ class QuoteContestComponent extends Component
             votesEndAt: $this->activity->active_ends_at,
         );
 
+        // The same three roles the moderation controller checks — one constant,
+        // so the tab and the write it offers cannot drift apart (§3.3 point 4).
+        $isModerator = $this->auth->hasAnyRole(QuoteContestModerationController::ROLES);
+
+        // The tab keys are the URL hash fragments, so a notification can
+        // deep-link straight to `#votes`.
+        $tabs = [
+            ['key' => 'my-quotes', 'label' => __('quote-contest::quote-contest.tab_my_quotes')],
+            ['key' => 'votes', 'label' => __('quote-contest::quote-contest.tab_votes')],
+        ];
+
+        if ($isModerator) {
+            $tabs[] = ['key' => 'results', 'label' => __('quote-contest::quote-contest.tab_results')];
+        }
+
         return view('quote-contest::components.quote-contest', [
             'activity' => $this->activity,
-            // The tab keys are the URL hash fragments, so a notification can
-            // deep-link straight to `#votes`.
-            'tabs' => [
-                ['key' => 'my-quotes', 'label' => __('quote-contest::quote-contest.tab_my_quotes')],
-                ['key' => 'votes', 'label' => __('quote-contest::quote-contest.tab_votes')],
-            ],
+            'tabs' => $tabs,
             'myQuotes' => $myQuotes,
             'votes' => $votes,
+            // Null for everyone else: the only view model carrying a submitter
+            // identity is never even built for a reader.
+            'results' => $isModerator
+                ? new ResultsViewModel(
+                    activityId: $activityId,
+                    categories: $this->votes->resultsFor($activityId),
+                )
+                : null,
         ]);
     }
 }

@@ -56,6 +56,30 @@ return [
         'change' => 'Modifier mon vote',
     ],
 
+    'results' => [
+        'intro' => 'Cet onglet n\'est visible que par la modération : il montre qui a soumis quoi, et le nombre de votes reçus.',
+        'no_categories' => 'Ce concours n\'a pas de catégorie.',
+        'no_entries' => 'Aucune citation n\'a été soumise dans cette catégorie.',
+        'entry' => 'Citation',
+        'vote_count' => 'Votes',
+        'submitter' => 'Soumise par',
+        'actions' => 'Actions',
+        'withdrawn' => 'Retirée',
+        'unknown_submitter' => 'Compte supprimé',
+        'delete' => 'Supprimer',
+        'delete_confirm_title' => 'Supprimer cette citation',
+        'delete_confirm_body' => 'Cette citation sera définitivement retirée de « :category », avec les votes reçus. La personne qui l\'a soumise en sera informée.',
+        'delete_confirm_cancel' => 'Annuler',
+        'delete_confirm_confirm' => 'Supprimer',
+    ],
+
+    'notification' => [
+        'entry_removed' => [
+            'name' => 'Une de mes citations a été retirée d\'un concours par la modération',
+            'display' => 'Votre citation soumise dans la catégorie « :category » du concours <a href=":activity_url">:activity_name</a> a été retirée par la modération. La place est de nouveau libre.',
+        ],
+    ],
+
     'ineligible' => [
         'private_story' => 'Histoire privée',
         'excluded_from_events' => 'Histoire exclue des événements',
@@ -94,6 +118,7 @@ return [
         'entry_submitted' => 'Votre citation est en lice.',
         'entry_withdrawn' => 'Votre citation a été retirée du concours.',
         'vote_cast' => 'Votre vote a été enregistré.',
+        'entry_deleted' => 'La citation a été supprimée du concours.',
         'category_not_empty' => 'Impossible de supprimer cette catégorie : elle contient déjà des citations, retirées ou non.',
     ],
 

@@ -46,4 +46,10 @@ final class SubmissionRefusedException extends RuntimeException
     {
         return new self('The entry does not belong to the caller, or is already withdrawn.');
     }
+
+    /** Moderation was pointed at an entry that does not exist. */
+    public static function unknownEntry(): self
+    {
+        return new self('No such entry.');
+    }
 }

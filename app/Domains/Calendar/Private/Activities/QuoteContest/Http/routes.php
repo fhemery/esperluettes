@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestCategoryController;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestEntryController;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestModerationController;
 use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestVoteController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,4 +42,14 @@ Route::middleware(['web', 'auth', 'verified'])
         // voting in, replacing whatever they had chosen there.
         Route::put('/votes/{category}', [QuoteContestVoteController::class, 'update'])
             ->name('votes.update');
+    });
+
+// Moderation. The role check is the controller's, not middleware's, so it reads
+// the same constant as the *Résultats* tab it belongs to (§3.5).
+Route::middleware(['web', 'auth'])
+    ->prefix('calendar/quote-contest/{activity}')
+    ->name('quote-contest.moderation.')
+    ->group(function () {
+        Route::delete('/moderation/entries/{entry}', [QuoteContestModerationController::class, 'destroy'])
+            ->name('entries.destroy');
     });

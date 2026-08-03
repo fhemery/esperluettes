@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Domains\Calendar\Private\Activities\QuoteContest;
 
 use App\Domains\Calendar\Private\Activities\QuoteContest\Listeners\WithdrawEntriesOnStoryIneligible;
+use App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\EntryRemovedNotification;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Story\Public\Events\StoryExcludedFromEvents;
 use App\Domains\Story\Public\Events\StoryVisibilityChanged;
 use Illuminate\Support\Facades\Blade;
@@ -28,6 +30,35 @@ class QuoteContestServiceProvider extends ServiceProvider
         Blade::anonymousComponentPath($base . '/Resources/views/components', 'quote-contest');
 
         $this->registerEventListeners();
+        $this->registerNotifications();
+    }
+
+    /**
+     * The contest owns its notifications (decision #9), under a Calendar-wide
+     * group so a second activity that notifies reuses it rather than adding
+     * one. Sort order 70 is the first free slot after Quote's 60.
+     *
+     * `NotificationFactory` is a bare registry with no constructor: resolving
+     * it here pulls no cross-domain API into the container, unlike the listener
+     * of `registerEventListeners()`.
+     */
+    private function registerNotifications(): void
+    {
+        /** @var NotificationFactory $factory */
+        $factory = app(NotificationFactory::class);
+
+        $factory->registerGroup(
+            id: 'calendar',
+            sortOrder: 70,
+            translationKey: 'calendar::notification.groups.calendar',
+        );
+
+        $factory->register(
+            type: EntryRemovedNotification::type(),
+            class: EntryRemovedNotification::class,
+            groupId: 'calendar',
+            nameKey: 'quote-contest::quote-contest.notification.entry_removed.name',
+        );
     }
 
     /**

@@ -616,6 +616,7 @@ deptrac:
       - AuthPublic
       - StoryPublic
       - QuotePublic        # QuoteContest reads the reader's own quote book for the picker
+      - NotificationPublic # QuoteContest owns its own notifications (decision #9)
       - EventsPublic
       - MediaPublic
 
