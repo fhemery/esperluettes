@@ -35,8 +35,8 @@
             <x-shared::input-label for="qc_submissions_end_at" :required="true">
                 {{ __('quote-contest::quote-contest.config.submissions_end_at') }}
             </x-shared::input-label>
-            <x-shared::text-input id="qc_submissions_end_at" name="quote_contest[submissions_end_at]"
-                type="datetime-local" class="mt-1 block w-full" :value="$submissionsEndAt" />
+            <x-shared::datetime-local-input id="qc_submissions_end_at" name="quote_contest[submissions_end_at]"
+                class="mt-1 block w-full" :value="$submissionsEndAt" />
             <x-shared::input-error :messages="$errors->get('quote_contest.submissions_end_at')" class="mt-1" />
         </div>
 
@@ -44,8 +44,8 @@
             <x-shared::input-label for="qc_votes_start_at" :required="true">
                 {{ __('quote-contest::quote-contest.config.votes_start_at') }}
             </x-shared::input-label>
-            <x-shared::text-input id="qc_votes_start_at" name="quote_contest[votes_start_at]"
-                type="datetime-local" class="mt-1 block w-full" :value="$votesStartAt" />
+            <x-shared::datetime-local-input id="qc_votes_start_at" name="quote_contest[votes_start_at]"
+                class="mt-1 block w-full" :value="$votesStartAt" />
             <x-shared::input-error :messages="$errors->get('quote_contest.votes_start_at')" class="mt-1" />
         </div>
 

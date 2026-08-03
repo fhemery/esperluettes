@@ -113,7 +113,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-shared::input-label for="preview_starts_at">{{ __('calendar::admin.fields.preview_starts_at') }}</x-shared::input-label>
-            <x-shared::text-input id="preview_starts_at" name="preview_starts_at" type="datetime-local"
+            <x-shared::datetime-local-input id="preview_starts_at" name="preview_starts_at"
                 class="mt-1 block w-full"
                 :value="old('preview_starts_at', $activity?->preview_starts_at?->format('Y-m-d\TH:i') ?? '')" />
             <x-shared::input-error :messages="$errors->get('preview_starts_at')" class="mt-1" />
@@ -121,7 +121,7 @@
 
         <div>
             <x-shared::input-label for="active_starts_at">{{ __('calendar::admin.fields.active_starts_at') }}</x-shared::input-label>
-            <x-shared::text-input id="active_starts_at" name="active_starts_at" type="datetime-local"
+            <x-shared::datetime-local-input id="active_starts_at" name="active_starts_at"
                 class="mt-1 block w-full"
                 :value="old('active_starts_at', $activity?->active_starts_at?->format('Y-m-d\TH:i') ?? '')" />
             <x-shared::input-error :messages="$errors->get('active_starts_at')" class="mt-1" />
@@ -129,7 +129,7 @@
 
         <div>
             <x-shared::input-label for="active_ends_at">{{ __('calendar::admin.fields.active_ends_at') }}</x-shared::input-label>
-            <x-shared::text-input id="active_ends_at" name="active_ends_at" type="datetime-local"
+            <x-shared::datetime-local-input id="active_ends_at" name="active_ends_at"
                 class="mt-1 block w-full"
                 :value="old('active_ends_at', $activity?->active_ends_at?->format('Y-m-d\TH:i') ?? '')" />
             <x-shared::input-error :messages="$errors->get('active_ends_at')" class="mt-1" />
@@ -137,7 +137,7 @@
 
         <div>
             <x-shared::input-label for="archived_at">{{ __('calendar::admin.fields.archived_at') }}</x-shared::input-label>
-            <x-shared::text-input id="archived_at" name="archived_at" type="datetime-local"
+            <x-shared::datetime-local-input id="archived_at" name="archived_at"
                 class="mt-1 block w-full"
                 :value="old('archived_at', $activity?->archived_at?->format('Y-m-d\TH:i') ?? '')" />
             <x-shared::input-error :messages="$errors->get('archived_at')" class="mt-1" />
