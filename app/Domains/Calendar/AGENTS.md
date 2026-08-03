@@ -27,6 +27,8 @@
 
 **Secret Gift shuffle is destructive on re-run.** `ShuffleService::performShuffle()` deletes all existing assignment **rows** before creating new ones — the uploaded files are not touched. Gift images survive as unclaimed paths and `media:gc` reclaims them; gift sounds are orphaned on the `local` disk with nothing to collect them. The Artisan command prompts for confirmation, but programmatic callers have no guard.
 
+**A withdrawn quote-contest entry is a filter, not a deletion.** `calendar_quote_contest_entries.withdrawn_at` is stamped when the quoted story turns private or is excluded from events; the row and its votes stay. Every listing, every tally and the one-per-category check must filter on `withdrawn_at IS NULL` — a read path that forgets it silently resurrects a passage nobody may read any more. There is no database constraint expressing this, so keep the reads inside `QuoteContest*Service`. Nothing ever clears the column: a story returning to public does not restore its entries, the reader re-enters by hand.
+
 ## Events Emitted
 
 The Calendar domain emits no domain events.
@@ -37,7 +39,10 @@ The Calendar domain emits no domain events.
 - `Story::ChapterUpdated` → Jardino `UpdateSnapshotWordCount::handleChapterUpdated()` — applies the word delta (`after.wordCount - before.wordCount`) to snapshots.
 - `Story::ChapterDeleted` → Jardino `UpdateSnapshotWordCount::handleChapterDeleted()` — subtracts the deleted chapter's word count from snapshots.
 
-Subscriptions are wired in `JardinoServiceProvider::registerEventListeners()` via `EventBus`.
+- `Story::VisibilityChanged` → QuoteContest `WithdrawEntriesOnStoryIneligible::handleVisibilityChanged()` — stamps `withdrawn_at` on the story's live contest entries unless the new visibility is `public` or `community`. The event carries the new visibility, so no Story read is made.
+- `Story::ExcludedFromEvents` → QuoteContest `WithdrawEntriesOnStoryIneligible::handleExcludedFromEvents()` — withdraws the story's live contest entries unconditionally.
+
+Subscriptions are wired in `JardinoServiceProvider::registerEventListeners()` and `QuoteContestServiceProvider::registerEventListeners()` via `EventBus`.
 
 ## Registry Registrations
 

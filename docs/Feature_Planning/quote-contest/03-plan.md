@@ -20,7 +20,7 @@
 | 4 | Admin configuration: settings panel + category CRUD | M | 1, 3 | DONE |
 | 5 | Reader page shell + *Mes citations*, read-only | M | 2, 3, 4 | DONE |
 | 6 | Submissions: submit / replace / withdraw | M | 5 | DONE |
-| 7 | Story-eligibility listeners: withdrawal on visibility loss | S | 6 | TODO |
+| 7 | Story-eligibility listeners: withdrawal on visibility loss | S | 6 | DONE |
 | 8 | Voting: ballot, seeded shuffle, *Votes* tab | M | 6 | TODO |
 | 9 | Moderation: *Résultats* tab, entry deletion, submitter notification | M | 8 | TODO |
 | 10 | Scheduled broadcast notifications + Artisan command | M | 9 | TODO |

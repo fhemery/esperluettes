@@ -198,6 +198,28 @@ class QuoteContestSubmissionService
     }
 
     /**
+     * Withdraw every live entry drawn from a story that lost its eligibility —
+     * turned private, or excluded from events (§2.3).
+     *
+     * A soft flag, not a delete (decision #18): the votes rows stay, and every
+     * count and every listing filters on `withdrawn_at IS NULL`, so they stop
+     * counting. An accidental visibility toggle is therefore recoverable by
+     * hand, and re-entering stays the reader's own action — nothing here
+     * restores an entry when the story comes back.
+     *
+     * One indexed `UPDATE`, whatever the entry count, and a no-op for the
+     * overwhelming majority of stories, which have no entry at all. Entries
+     * already withdrawn keep their original stamp.
+     */
+    public function withdrawEntriesForStory(int $storyId): void
+    {
+        QuoteContestEntry::query()
+            ->where('story_id', $storyId)
+            ->whereNull('withdrawn_at')
+            ->update(['withdrawn_at' => now()]);
+    }
+
+    /**
      * @throws SubmissionRefusedException unless the contest is taking submissions
      */
     private function assertSubmissionsOpen(int $activityId): void
