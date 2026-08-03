@@ -43,11 +43,26 @@ describe('Activity Admin Controller', function () {
                 ->assertOk()
                 ->assertSee('Activité tech');
         });
+
+        it('displays the list for moderators', function () {
+            $activityId = createActivity($this, ['name' => 'Activité modération']);
+
+            $this->actingAs(moderator($this))
+                ->get(route('calendar.admin.activities.index'))
+                ->assertOk()
+                ->assertSee('Activité modération');
+        });
     });
 
     describe('create', function () {
         it('displays the create form for admins', function () {
             $this->actingAs(admin($this))
+                ->get(route('calendar.admin.activities.create'))
+                ->assertOk();
+        });
+
+        it('displays the create form for moderators', function () {
+            $this->actingAs(moderator($this))
                 ->get(route('calendar.admin.activities.create'))
                 ->assertOk();
         });
@@ -75,6 +90,17 @@ describe('Activity Admin Controller', function () {
             $this->actingAs(admin($this))
                 ->post(route('calendar.admin.activities.store'), [])
                 ->assertSessionHasErrors(['name', 'activity_type']);
+        });
+
+        it('creates an activity as moderator', function () {
+            $this->actingAs(moderator($this))
+                ->post(route('calendar.admin.activities.store'), [
+                    'name' => 'Activité modérateur',
+                    'activity_type' => 'fake',
+                ])
+                ->assertRedirect(route('calendar.admin.activities.index'));
+
+            $this->assertDatabaseHas('calendar_activities', ['name' => 'Activité modérateur']);
         });
 
         it('accepts optional fields', function () {
@@ -107,6 +133,17 @@ describe('Activity Admin Controller', function () {
                 ->assertSee('Existante');
         });
 
+        it('displays the edit form for moderators', function () {
+            $moderatorUser = moderator($this);
+            $this->actingAs($moderatorUser);
+            $activityId = createActivity($this, ['name' => 'Existante modération'], $moderatorUser->id);
+            $activity = Activity::findOrFail($activityId);
+
+            $this->get(route('calendar.admin.activities.edit', $activity))
+                ->assertOk()
+                ->assertSee('Existante modération');
+        });
+
         it('denies access to non-admins', function () {
             $activityId = createActivity($this);
             $activity = Activity::findOrFail($activityId);
@@ -134,6 +171,22 @@ describe('Activity Admin Controller', function () {
             ]);
         });
 
+        it('updates an activity as moderator', function () {
+            $activityId = createActivity($this, ['name' => 'Ancien nom modération']);
+            $activity = Activity::findOrFail($activityId);
+
+            $this->actingAs(moderator($this))
+                ->put(route('calendar.admin.activities.update', $activity), [
+                    'name' => 'Nouveau nom modération',
+                ])
+                ->assertRedirect(route('calendar.admin.activities.index'));
+
+            $this->assertDatabaseHas('calendar_activities', [
+                'id' => $activity->id,
+                'name' => 'Nouveau nom modération',
+            ]);
+        });
+
         it('validates name is required on update', function () {
             $activityId = createActivity($this);
             $activity = Activity::findOrFail($activityId);
@@ -150,6 +203,17 @@ describe('Activity Admin Controller', function () {
             $activity = Activity::findOrFail($activityId);
 
             $this->actingAs(admin($this))
+                ->delete(route('calendar.admin.activities.destroy', $activity))
+                ->assertRedirect(route('calendar.admin.activities.index'));
+
+            $this->assertDatabaseMissing('calendar_activities', ['id' => $activity->id]);
+        });
+
+        it('deletes an activity as moderator', function () {
+            $activityId = createActivity($this);
+            $activity = Activity::findOrFail($activityId);
+
+            $this->actingAs(moderator($this))
                 ->delete(route('calendar.admin.activities.destroy', $activity))
                 ->assertRedirect(route('calendar.admin.activities.index'));
 

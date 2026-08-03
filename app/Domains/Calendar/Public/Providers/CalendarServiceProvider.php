@@ -68,7 +68,7 @@ class CalendarServiceProvider extends ServiceProvider
             'calendar::admin.activities.nav_label',
             AdminRegistryTarget::route('calendar.admin.activities.index'),
             'calendar_month',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
+            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
             1,
         );
     }
