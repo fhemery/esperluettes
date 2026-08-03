@@ -149,6 +149,34 @@ describe('Story public API', function () {
 
     });
 
+    describe('is_excluded_from_events on the story summary', function () {
+        it('is false on a story that is not excluded', function () {
+            $api = app(StoryPublicApi::class);
+            $story = publicStory('Included Story', alice($this)->id, ['is_excluded_from_events' => false]);
+
+            expect($api->getStory($story->id)->is_excluded_from_events)->toBeFalse();
+        });
+
+        it('is true on an excluded story', function () {
+            $api = app(StoryPublicApi::class);
+            $story = publicStory('Excluded Story', alice($this)->id, ['is_excluded_from_events' => true]);
+
+            expect($api->getStory($story->id)->is_excluded_from_events)->toBeTrue();
+        });
+
+        it('is carried by getStoriesByIds for each story of the batch', function () {
+            $api = app(StoryPublicApi::class);
+            $alice = alice($this);
+            $included = publicStory('Included Story', $alice->id, ['is_excluded_from_events' => false]);
+            $excluded = publicStory('Excluded Story', $alice->id, ['is_excluded_from_events' => true]);
+
+            $summaries = $api->getStoriesByIds([$included->id, $excluded->id]);
+
+            expect($summaries[$included->id]->is_excluded_from_events)->toBeFalse();
+            expect($summaries[$excluded->id]->is_excluded_from_events)->toBeTrue();
+        });
+    });
+
     describe('listStories cover data', function () {
         it('returns coverType and coverUrl in StoryDto', function () {
             $api = app(StoryPublicApi::class);

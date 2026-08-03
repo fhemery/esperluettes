@@ -1,6 +1,7 @@
 @php
     $activity = $activity ?? null;
     $isEdit = $activity !== null;
+    $configComponents = $configComponents ?? [];
 @endphp
 
 {{-- Section: Activity details --}}
@@ -25,7 +26,7 @@
             @endphp
             <p class="mt-1 text-sm text-fg/70 font-medium">{{ $typeLabel }}</p>
         @else
-            <select id="activity_type" name="activity_type"
+            <select id="activity_type" name="activity_type" x-model="activityType"
                 class="mt-1 block w-full rounded-md border-border bg-surface-read text-on-surface"
                 required>
                 <option value="">—</option>
@@ -112,7 +113,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-shared::input-label for="preview_starts_at">{{ __('calendar::admin.fields.preview_starts_at') }}</x-shared::input-label>
-            <x-shared::text-input id="preview_starts_at" name="preview_starts_at" type="datetime-local"
+            <x-shared::datetime-local-input id="preview_starts_at" name="preview_starts_at"
                 class="mt-1 block w-full"
                 :value="old('preview_starts_at', $activity?->preview_starts_at?->format('Y-m-d\TH:i') ?? '')" />
             <x-shared::input-error :messages="$errors->get('preview_starts_at')" class="mt-1" />
@@ -120,7 +121,7 @@
 
         <div>
             <x-shared::input-label for="active_starts_at">{{ __('calendar::admin.fields.active_starts_at') }}</x-shared::input-label>
-            <x-shared::text-input id="active_starts_at" name="active_starts_at" type="datetime-local"
+            <x-shared::datetime-local-input id="active_starts_at" name="active_starts_at"
                 class="mt-1 block w-full"
                 :value="old('active_starts_at', $activity?->active_starts_at?->format('Y-m-d\TH:i') ?? '')" />
             <x-shared::input-error :messages="$errors->get('active_starts_at')" class="mt-1" />
@@ -128,7 +129,7 @@
 
         <div>
             <x-shared::input-label for="active_ends_at">{{ __('calendar::admin.fields.active_ends_at') }}</x-shared::input-label>
-            <x-shared::text-input id="active_ends_at" name="active_ends_at" type="datetime-local"
+            <x-shared::datetime-local-input id="active_ends_at" name="active_ends_at"
                 class="mt-1 block w-full"
                 :value="old('active_ends_at', $activity?->active_ends_at?->format('Y-m-d\TH:i') ?? '')" />
             <x-shared::input-error :messages="$errors->get('active_ends_at')" class="mt-1" />
@@ -136,13 +137,28 @@
 
         <div>
             <x-shared::input-label for="archived_at">{{ __('calendar::admin.fields.archived_at') }}</x-shared::input-label>
-            <x-shared::text-input id="archived_at" name="archived_at" type="datetime-local"
+            <x-shared::datetime-local-input id="archived_at" name="archived_at"
                 class="mt-1 block w-full"
                 :value="old('archived_at', $activity?->archived_at?->format('Y-m-d\TH:i') ?? '')" />
             <x-shared::input-error :messages="$errors->get('archived_at')" class="mt-1" />
         </div>
     </div>
 </div>
+
+{{-- Section: Type-specific configuration, contributed by the activity type --}}
+@if($isEdit)
+    @php $configComponent = $configComponents[$activity->activity_type] ?? null; @endphp
+    @if($configComponent)
+        <x-dynamic-component :component="$configComponent" :activity="$activity" />
+    @endif
+@else
+    {{-- The type is picked in this very form, so panels are toggled client-side. --}}
+    @foreach($configComponents as $typeKey => $configComponent)
+        <div x-show="activityType === '{{ $typeKey }}'" x-cloak>
+            <x-dynamic-component :component="$configComponent" :activity="null" />
+        </div>
+    @endforeach
+@endif
 
 <div class="flex gap-4">
     <x-shared::button type="submit" color="primary" icon="save">

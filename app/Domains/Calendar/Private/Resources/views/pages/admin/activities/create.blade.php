@@ -11,9 +11,14 @@
 
         <form method="POST" action="{{ route('calendar.admin.activities.store') }}"
               class="flex flex-col gap-6"
+              x-data="{ activityType: @js(old('activity_type', '')) }"
               enctype="multipart/form-data">
             @csrf
             @include('calendar::pages.admin.activities._form')
         </form>
+
+        {{-- Same stack as the edit page, so a type's out-of-form panels render
+             identically on both. Nothing pushes here before the activity exists. --}}
+        @stack('activity-config-extras')
     </div>
 </x-admin::layout>

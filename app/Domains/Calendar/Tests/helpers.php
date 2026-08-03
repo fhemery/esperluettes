@@ -9,6 +9,7 @@ use Tests\TestCase;
 use App\Domains\Calendar\Private\Models\Activity;
 require_once __DIR__ . '/Feature/Jardino/helpers.php';
 require_once __DIR__ . '/Feature/SecretGift/helpers.php';
+require_once __DIR__ . '/Feature/QuoteContest/helpers.php';
 
 class FakeActivityRegistration implements ActivityRegistrationInterface
 {
@@ -20,6 +21,16 @@ class FakeActivityRegistration implements ActivityRegistrationInterface
     public function configComponentKey(): ?string
     {
         return null;
+    }
+
+    public function configRules(): array
+    {
+        return [];
+    }
+
+    public function persistConfig(int $activityId, array $validated): void
+    {
+        // No type-specific configuration.
     }
 }
 

@@ -202,6 +202,51 @@ class QuoteService
     }
 
     /**
+     * Every quote the user owns, newest first, unpaginated and unfiltered:
+     * the owner is the viewer, so neither the quote-book visibility setting nor
+     * the story-access filter applies. Ineligible quotes are returned too — the
+     * caller decides what to do with them.
+     */
+    public function getAllForOwner(int $userId): QuoteListDto
+    {
+        $rows = Quote::query()
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get()
+            ->all();
+
+        $items = $this->buildProfileItems($rows, true, $userId);
+
+        return new QuoteListDto(
+            items: $items,
+            viewerIsOwner: true,
+            canQuote: false,
+            page: 1,
+            totalCount: count($items),
+        );
+    }
+
+    /**
+     * One quote, only if the user owns it. Returns null — never throws — when
+     * the quote is unknown or belongs to somebody else: this is an
+     * authorisation boundary for callers outside the domain.
+     */
+    public function getOwnedQuote(int $quoteId, int $userId): ?QuoteDto
+    {
+        $quote = Quote::query()
+            ->where('id', $quoteId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($quote === null) {
+            return null;
+        }
+
+        return $this->buildProfileItems([$quote], true, $userId)[0];
+    }
+
+    /**
      * Keep only the quote rows the viewer is allowed to see: chapter must be
      * available (published) and the viewer must have access to the story.
      * Story access is resolved once per unique story, not once per row.

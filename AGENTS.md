@@ -53,7 +53,7 @@ domain's own docs instead. Planning may link to code docs, never the reverse.
 |--------|------|-----------------|--------|
 | **Administration** | `app/Domains/Administration` | Custom admin panel layout, navigation registry (`AdminNavigationRegistry`), logs viewer, maintenance mode |
 | **Auth** | `app/Domains/Auth` | User authentication (Breeze), registration, roles, activation codes, promotion requests |
-| **Calendar** | `app/Domains/Calendar` | Time-bound activities (contests, challenges) with a plugin-based activity-type registry |
+| **Calendar** | `app/Domains/Calendar` | Time-bound activities with a plugin-based activity-type registry; each type is a sub-module under `Private/Activities/`, may own tables, routes, notifications and an admin config panel. Three types: Jardino (word-count challenge), Secret Gift (gift exchange), Quote Contest (*Concours de citations* — readers enter quote-book passages into categories, then vote anonymously) | `calendar_activities` (+ per-type tables) |
 | **Comment** | `app/Domains/Comment` | Pluggable comment system with per-entity policy registry; consumed by Story, News, etc. |
 | **Config** | `app/Domains/Config` | Site configuration and feature toggles, readable by other domains via `ConfigPublicApi` |
 | **Dashboard** | `app/Domains/Dashboard` | Authenticated user dashboard page |

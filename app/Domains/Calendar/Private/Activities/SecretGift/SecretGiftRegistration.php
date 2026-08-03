@@ -19,4 +19,14 @@ class SecretGiftRegistration implements ActivityRegistrationInterface
     {
         return null;
     }
+
+    public function configRules(): array
+    {
+        return [];
+    }
+
+    public function persistConfig(int $activityId, array $validated): void
+    {
+        // Secret Gift has no type-specific configuration.
+    }
 }

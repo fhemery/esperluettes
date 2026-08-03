@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ActivityController extends Controller
@@ -57,6 +58,7 @@ class ActivityController extends Controller
     {
         return view('calendar::pages.admin.activities.create', [
             'activityTypes' => $this->activityTypeOptions(),
+            'configComponents' => $this->configComponentKeys(),
             'roleOptions' => $this->roleOptions(),
         ]);
     }
@@ -81,7 +83,11 @@ class ActivityController extends Controller
             archived_at: $this->parseDate($data['archived_at'] ?? null),
         );
 
-        $this->api->create($dto, (int) Auth::id());
+        // One transaction: an activity never exists without its type config.
+        DB::transaction(function () use ($dto, $data) {
+            $activityId = $this->api->create($dto, (int) Auth::id());
+            $this->persistTypeConfig($data['activity_type'], $activityId, $data);
+        });
 
         return redirect()->route('calendar.admin.activities.index')
             ->with('success', __('calendar::admin.activities.created'));
@@ -92,6 +98,7 @@ class ActivityController extends Controller
         return view('calendar::pages.admin.activities.edit', [
             'activity' => $activity,
             'activityTypes' => $this->activityTypeOptions(),
+            'configComponents' => $this->configComponentKeys(),
             'roleOptions' => $this->roleOptions(),
         ]);
     }
@@ -116,7 +123,11 @@ class ActivityController extends Controller
             archived_at: $this->parseDate($data['archived_at'] ?? null),
         );
 
-        $this->api->update($activity->id, $dto, (int) Auth::id());
+        // One transaction: the activity and its type config move together.
+        DB::transaction(function () use ($activity, $dto, $data) {
+            $this->api->update($activity->id, $dto, (int) Auth::id());
+            $this->persistTypeConfig($activity->activity_type, $activity->id, $data);
+        });
 
         return redirect()->route('calendar.admin.activities.index')
             ->with('success', __('calendar::admin.activities.updated'));
@@ -128,6 +139,38 @@ class ActivityController extends Controller
 
         return redirect()->route('calendar.admin.activities.index')
             ->with('success', __('calendar::admin.activities.deleted'));
+    }
+
+    /**
+     * Hand the validated payload to the type's registration so it can save its
+     * own config. Called from inside the activity transaction.
+     *
+     * @param array<string,mixed> $data validated request data
+     */
+    private function persistTypeConfig(string $activityType, int $activityId, array $data): void
+    {
+        if (! $this->registry->has($activityType)) {
+            return;
+        }
+
+        $this->registry->get($activityType)->persistConfig($activityId, $data);
+    }
+
+    /**
+     * Config component key per activity type, for the types that declare one.
+     *
+     * @return array<string,string>
+     */
+    private function configComponentKeys(): array
+    {
+        $keys = [];
+        foreach ($this->registry->keys() ?? [] as $key) {
+            $component = $this->registry->get($key)->configComponentKey();
+            if ($component !== null) {
+                $keys[$key] = $component;
+            }
+        }
+        return $keys;
     }
 
     private function activityTypeOptions(): array

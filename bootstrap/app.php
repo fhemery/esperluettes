@@ -24,6 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('notifications:cleanup')->daily();
         // Publish chapters whose scheduled publication date has been reached (every 5 min at :00, :05, :10…)
         $schedule->command('story:publish-scheduled-chapters')->cron('*/5 * * * *');
+        // Quote contest lifecycle broadcasts, each fired once when its date is reached
+        $schedule->command('calendar:quote-contest-notify')->cron('*/5 * * * *');
         $schedule->command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping();
         // Garbage-collect unused media, daily at 03:30 (off midnight to avoid the job pile-up)
         $schedule->command('media:gc')->dailyAt('03:30');

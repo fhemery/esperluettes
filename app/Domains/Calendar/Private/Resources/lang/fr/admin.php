@@ -41,5 +41,5 @@ return [
         'ended' => 'Terminé',
         'archived' => 'Archivé',
     ],
-    'timezone_hint' => 'Heure GMT',
+    'timezone_hint' => 'Heures affichées dans votre fuseau horaire local.',
 ];

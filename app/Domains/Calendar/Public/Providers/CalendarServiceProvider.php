@@ -8,6 +8,7 @@ use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Calendar\Private\Activities\Jardino\JardinoRegistration;
+use App\Domains\Calendar\Private\Activities\QuoteContest\QuoteContestRegistration;
 use App\Domains\Calendar\Private\Activities\SecretGift\SecretGiftRegistration;
 use App\Domains\Calendar\Private\Support\ActivityMediaUsageProvider;
 use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
@@ -23,6 +24,7 @@ class CalendarServiceProvider extends ServiceProvider
         // Register activity-specific providers (per-activity assets)
         $this->app->register(\App\Domains\Calendar\Private\Activities\Jardino\JardinoServiceProvider::class);
         $this->app->register(\App\Domains\Calendar\Private\Activities\SecretGift\SecretGiftServiceProvider::class);
+        $this->app->register(\App\Domains\Calendar\Private\Activities\QuoteContest\QuoteContestServiceProvider::class);
     }
 
     public function boot(): void
@@ -51,6 +53,7 @@ class CalendarServiceProvider extends ServiceProvider
         $registry = app(CalendarRegistry::class);
         $registry->register(JardinoRegistration::ACTIVITY_TYPE, new JardinoRegistration());
         $registry->register(SecretGiftRegistration::ACTIVITY_TYPE, new SecretGiftRegistration());
+        $registry->register(QuoteContestRegistration::ACTIVITY_TYPE, new QuoteContestRegistration());
 
         $this->registerAdminNavigation();
     }
@@ -65,7 +68,7 @@ class CalendarServiceProvider extends ServiceProvider
             'calendar::admin.activities.nav_label',
             AdminRegistryTarget::route('calendar.admin.activities.index'),
             'calendar_month',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
+            [Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR],
             1,
         );
     }

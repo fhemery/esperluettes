@@ -13,7 +13,7 @@ Route::middleware(['web', 'auth', 'compliant', 'role:'.Roles::USER.','.Roles::US
             ->name('calendar.activities.show');
     });
 
-Route::middleware(['web', 'auth', 'role:'.Roles::ADMIN.','.Roles::TECH_ADMIN])
+Route::middleware(['web', 'auth', 'role:'.Roles::ADMIN.','.Roles::TECH_ADMIN.','.Roles::MODERATOR])
     ->prefix('admin/calendar')
     ->name('calendar.admin.')
     ->group(function () {

@@ -34,6 +34,13 @@ class E2eAccountsSeeder extends Seeder
         'user@e2e.test' => [Roles::USER],
     ];
 
+    /**
+     * A confirmed account that has since been deactivated. Nothing logs in as
+     * it; it exists so that a surface which outlives its user — a quote-contest
+     * entry, whose submitter the *Résultats* tab names — can be looked at.
+     */
+    public const DEACTIVATED_EMAIL = 'deactivated@e2e.test';
+
     public const AUTHOR_EMAIL = 'author@e2e.test';
     public const ADMIN_EMAIL = 'admin@e2e.test';
     public const CONFIRMED_EMAIL = 'confirmed@e2e.test';
@@ -52,5 +59,17 @@ class E2eAccountsSeeder extends Seeder
 
             $user->roles()->syncWithoutDetaching(Role::whereIn('slug', $roleSlugs)->pluck('id')->all());
         }
+
+        $deactivated = User::firstOrCreate(
+            ['email' => self::DEACTIVATED_EMAIL],
+            [
+                'password' => Hash::make(self::PASSWORD),
+                'email_verified_at' => now(),
+            ]
+        );
+        $deactivated->roles()->syncWithoutDetaching(
+            Role::whereIn('slug', [Roles::USER_CONFIRMED])->pluck('id')->all()
+        );
+        $deactivated->deactivate();
     }
 }

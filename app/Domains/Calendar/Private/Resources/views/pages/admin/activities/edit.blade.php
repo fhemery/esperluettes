@@ -16,5 +16,9 @@
             @method('PUT')
             @include('calendar::pages.admin.activities._form', ['activity' => $activity])
         </form>
+
+        {{-- Panels an activity type manages through its own routes: they need
+             their own <form>, which cannot nest inside the one above. --}}
+        @stack('activity-config-extras')
     </div>
 </x-admin::layout>

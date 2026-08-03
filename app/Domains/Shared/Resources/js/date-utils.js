@@ -64,3 +64,16 @@ export function utcToLocalInput(utcString) {
   const pad = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
+
+/**
+ * Convert a <input type="datetime-local"> value (interpreted as the browser's local time)
+ * to the UTC datetime string the server expects.
+ * @param {string} localString - e.g. "2026-06-21T13:07"
+ * @returns {string} UTC time in "YYYY-MM-DDTHH:mm" format, or "" if unparseable
+ */
+export function localToUtcInput(localString) {
+  const d = new Date(localString);
+  if (isNaN(d)) return '';
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}

@@ -35,8 +35,8 @@ class CalendarPublicApi
      */
     public function create(ActivityToCreateDto $dto, int $actorUserId): int
     {
-        // Authorization: admin or tech-admin only
-        if (! $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        // Authorization: admin, tech-admin or moderator only
+        if (! $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new UnauthorizedException('Not allowed');
         }
 
@@ -86,8 +86,8 @@ class CalendarPublicApi
      */
     public function update(int $id, \App\Domains\Calendar\Public\Contracts\ActivityToUpdateDto $dto, int $actorUserId): void
     {
-        // Auth: admin or tech-admin only
-        if (! $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        // Auth: admin, tech-admin or moderator only
+        if (! $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new UnauthorizedException('Not allowed');
         }
 
@@ -117,8 +117,8 @@ class CalendarPublicApi
      */
     public function delete(int $id, int $actorUserId): void
     {
-        // Auth
-        if (! $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
+        // Auth: admin, tech-admin or moderator only
+        if (! $this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN, Roles::MODERATOR])) {
             throw new UnauthorizedException('Not allowed');
         }
 

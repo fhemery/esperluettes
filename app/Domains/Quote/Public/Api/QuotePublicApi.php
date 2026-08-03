@@ -57,6 +57,18 @@ class QuotePublicApi
         return $this->service->getForProfile($profileUserId, $viewerId, $page);
     }
 
+    /** Every quote this user owns, newest first. No viewer filtering: the owner is the viewer. */
+    public function getAllForOwner(int $userId): QuoteListDto
+    {
+        return $this->service->getAllForOwner($userId);
+    }
+
+    /** One quote, only if $userId owns it; null otherwise. */
+    public function getOwnedQuote(int $quoteId, int $userId): ?QuoteDto
+    {
+        return $this->service->getOwnedQuote($quoteId, $userId);
+    }
+
     public function canViewQuoteBook(int $profileUserId, ?int $viewerId): bool
     {
         return $this->policy->canViewQuoteBook($profileUserId, $viewerId);

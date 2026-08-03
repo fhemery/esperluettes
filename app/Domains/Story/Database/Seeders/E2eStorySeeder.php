@@ -67,6 +67,31 @@ class E2eStorySeeder extends Seeder
     public const ILLUSTRATED_CHAPTER_ID = 7;
     public const ILLUSTRATED_CHAPTER_SLUG = 'chapitre-illustre-7';
 
+    /**
+     * Three stories that exist only to feed the quote-contest picker, which
+     * lists *every* quote the reader owns and greys the ineligible ones with
+     * their reason. The reasons are properties of the story, so they can only
+     * come from stories a reader has quoted.
+     */
+    public const PRIVATE_STORY_ID = 3;
+    public const PRIVATE_STORY_SLUG = 'histoire-privee-3';
+    public const PRIVATE_STORY_TITLE = 'Histoire privée E2E';
+    public const PRIVATE_CHAPTER_ID = 8;
+    public const PRIVATE_CHAPTER_SLUG = 'chapitre-prive-8';
+
+    public const EXCLUDED_STORY_ID = 4;
+    public const EXCLUDED_STORY_SLUG = 'histoire-exclue-4';
+    public const EXCLUDED_STORY_TITLE = 'Histoire exclue des événements E2E';
+    public const EXCLUDED_CHAPTER_ID = 9;
+    public const EXCLUDED_CHAPTER_SLUG = 'chapitre-exclu-9';
+
+    /** The source of the 200-quote book that the picker's filter must survive. */
+    public const LONG_STORY_ID = 5;
+    public const LONG_STORY_SLUG = 'histoire-longue-5';
+    public const LONG_STORY_TITLE = 'Histoire longue E2E';
+    public const LONG_CHAPTER_ID = 10;
+    public const LONG_CHAPTER_SLUG = 'chapitre-long-10';
+
     /** Fixture image of the illustrated chapter, copied from the repo on seed. */
     public const ILLUSTRATION_PATH = 'chapters/e2e/illustration.jpg';
 
@@ -171,6 +196,67 @@ class E2eStorySeeder extends Seeder
         $story->update(['last_chapter_published_at' => now()]);
 
         $this->createCoauthoredStory($authorId);
+        $this->createContestStories($authorId);
+    }
+
+    /**
+     * A private story, a story excluded from events, and a long public one.
+     * The first two make the quote contest's two ineligibility reasons
+     * reachable; the third carries the chapter the 200-quote book points at.
+     */
+    private function createContestStories(int $authorId): void
+    {
+        $specs = [
+            [self::PRIVATE_STORY_ID, self::PRIVATE_STORY_SLUG, self::PRIVATE_STORY_TITLE,
+                self::PRIVATE_CHAPTER_ID, 'Chapitre privé', self::PRIVATE_CHAPTER_SLUG,
+                ['visibility' => Story::VIS_PRIVATE]],
+            [self::EXCLUDED_STORY_ID, self::EXCLUDED_STORY_SLUG, self::EXCLUDED_STORY_TITLE,
+                self::EXCLUDED_CHAPTER_ID, 'Chapitre exclu', self::EXCLUDED_CHAPTER_SLUG,
+                ['visibility' => Story::VIS_PUBLIC, 'is_excluded_from_events' => true]],
+            [self::LONG_STORY_ID, self::LONG_STORY_SLUG, self::LONG_STORY_TITLE,
+                self::LONG_CHAPTER_ID, 'Chapitre long', self::LONG_CHAPTER_SLUG,
+                ['visibility' => Story::VIS_PUBLIC]],
+        ];
+
+        foreach ($specs as [$storyId, $storySlug, $storyTitle, $chapterId, $chapterTitle, $chapterSlug, $attributes]) {
+            $story = new Story(array_merge([
+                'created_by_user_id' => $authorId,
+                'title' => $storyTitle,
+                'slug' => $storySlug,
+                'description' => '<p>Une histoire de test pour le concours de citations.</p>',
+                'tw_disclosure' => Story::TW_NO_TW,
+                'story_ref_type_id' => StoryRefType::value('id'),
+                'story_ref_audience_id' => StoryRefAudience::value('id'),
+                'story_ref_copyright_id' => StoryRefCopyright::value('id'),
+            ], $attributes));
+            $story->id = $storyId;
+            $story->save();
+
+            DB::table('story_genres')->insert([
+                'story_id' => $story->id,
+                'story_ref_genre_id' => StoryRefGenre::value('id'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('story_collaborators')->insert([
+                'story_id' => $story->id,
+                'user_id' => $authorId,
+                'role' => 'author',
+                'invited_by_user_id' => $authorId,
+                'invited_at' => now(),
+                'accepted_at' => now(),
+            ]);
+
+            $this->createChapter($chapterId, $chapterTitle, $chapterSlug, [
+                'content' => '<p>Un chapitre citable.</p>',
+                'sort_order' => 1,
+                'status' => Chapter::STATUS_PUBLISHED,
+                'first_published_at' => now(),
+            ], $story->id);
+
+            $story->update(['last_chapter_published_at' => now()]);
+        }
     }
 
     /**
