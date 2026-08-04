@@ -39,6 +39,8 @@
 
 **Policy registration must happen in `boot()`, not `register()`.** `CommentPolicyRegistry` is a singleton bound in `CommentServiceProvider::register()`. Other domains must register their policies in their own provider's `boot()` to ensure the singleton already exists.
 
+**Editor assets must load on the list shell, not on fragments.** Reply/edit `<x-editor::rich-text>` instances often render only inside `GET /comments/fragments` HTML or when `canCreateRoot` is false — both paths discard `@push`. `comment-list.blade.php` includes `@include('editor::components._assets')` when `!$isGuest && !$error`; Alpine calls `initQuillEditor` when Répondre/Éditer opens. See README § Editor assets and inline composers.
+
 **`CommentMaintenancePublicApi::deleteFor()` is a hard soft-delete on all comments for a target.** It uses `deleteByTarget()` on the repository, which applies Laravel soft deletes to roots and replies in one query. Call this when deleting the owning entity (e.g. a chapter), not when moderating individual comments.
 
 **Moderation actions emit distinct events.** `emptyContentByModeration` emits `CommentContentModerated`; `deleteByModeration` emits `CommentDeletedByModeration`. Story domain listens to `CommentDeletedByModeration` to revoke chapter credits.

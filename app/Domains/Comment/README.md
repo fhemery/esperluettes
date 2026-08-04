@@ -122,6 +122,24 @@ The `CommentListComponent` supports two loading modes:
 
 It also supports **deep linking**: when the request contains a `?comment={id}` query parameter, the component pre-loads pages until the target comment is found, then passes a `targetCommentId` to the Blade template for client-side scroll-and-highlight.
 
+### Editor assets and inline composers
+
+Reply and edit composers use `<x-editor::rich-text>`, but they often appear only
+inside HTML returned by `GET /comments/fragments` (lazy load) or when
+`canCreateRoot` is false (no root composer on the page). A `@push` executed
+while rendering an AJAX fragment is discarded — there is no layout to flush the
+stack into.
+
+The list shell therefore includes `@include('editor::components._assets')` when
+`!$isGuest && !$error`, so Editor Vite entries are on the full-page stack before
+any fragment arrives. The `@once` guard on `_assets` keeps a single load when
+the root composer is also present.
+
+Alpine on the list calls `window.initQuillEditor` when **Répondre** or
+**Éditer** opens (double `requestAnimationFrame`, same pattern as post-fragment
+append). `CommentListEditorAssetsTest` guards asset emission; browser coverage is
+in `e2e/tests/core/chapter-comments.spec.ts`.
+
 ## Routes
 
 | Method | Path | Auth | Description |
