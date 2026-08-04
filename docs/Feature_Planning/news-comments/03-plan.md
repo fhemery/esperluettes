@@ -20,7 +20,7 @@ the phase is wrong — stop and report instead of inventing it. The only
 |---|-------|------|------------|--------|
 | 1 | Policy — `NewsCommentPolicy` + registration + deptrac edges | S | — | DONE |
 | 2 | Lifecycle — cascade-delete comments with the article | S | — | DONE |
-| 3 | Notification — reply fan-out listener, content type, `news-comments` group | M | — | TODO |
+| 3 | Notification — reply fan-out listener, content type, `news-comments` group | M | — | DONE |
 | 4 | UI — comment thread on the article page | S | 1 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
