@@ -92,5 +92,11 @@
         <div class="news-content">
             {!! $news->content !!}
         </div>
+
+        @if($news->status === 'published')
+        <section id="comments" class="mt-10">
+            <x-comment::comment-list-component entity-type="news" entity-id="{{ $news->id }}" page="0" perPage="5" />
+        </section>
+        @endif
     </article>
 </x-app-layout>
