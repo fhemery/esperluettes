@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Editor assets on list shell + reply init | S | — | DONE |
-| 2 | Permanent E2E for reply and edit | M | 1 | TODO |
+| 2 | Permanent E2E for reply and edit | M | 1 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
