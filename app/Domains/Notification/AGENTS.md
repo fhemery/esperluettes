@@ -27,7 +27,7 @@
 
 **Type keys are permanent.** Once a `NotificationContent::type()` string has been stored in the database, it must never change. The factory resolves stored rows by this key at render time. An unrecognized key causes the notification to be silently discarded on display and deleted by the next cleanup run.
 
-**Groups must be registered before types.** `NotificationFactory::register()` throws `InvalidArgumentException` if the `groupId` has not been registered via `registerGroup()` first. The Notification domain registers all groups in its own `ServiceProvider::boot()` (which boots before other domains). Do not call `registerGroup()` from outside the Notification domain.
+**Groups must be registered before types.** `NotificationFactory::register()` throws `InvalidArgumentException` if the `groupId` has not been registered via `registerGroup()` first. Cross-cutting groups (used by types from more than one domain) are registered centrally in `NotificationServiceProvider::boot()`. A group that is owned by a single domain and only ever holds that domain's own types (e.g. Story's `'publication'`, News's `'news-comments'`) is registered locally in that domain's own `ServiceProvider::boot()` instead — the reverse coupling, Notification knowing about domain-specific groups, would be the actual violation. Either way the registering provider must boot before anything calls `register()` for a type in that group.
 
 **`register()` now requires `groupId` and `nameKey`.** The old 2-argument signature (`type`, `class`) is gone. All registrations must pass `groupId`, `nameKey`, and optionally `forcedOnWebsite` and `hideInSettings`. Calling with the old signature causes a PHP error.
 
