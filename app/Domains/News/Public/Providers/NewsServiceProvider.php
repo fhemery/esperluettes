@@ -6,9 +6,11 @@ use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\News\Private\Listeners\RemoveCreatorOnUserDeleted;
 use App\Domains\News\Private\Models\News;
+use App\Domains\News\Private\Services\NewsCommentPolicy;
 use App\Domains\News\Private\Observers\NewsObserver;
 use App\Domains\News\Public\Events\NewsDeleted;
 use App\Domains\News\Public\Events\NewsPublished;
@@ -55,6 +57,9 @@ class NewsServiceProvider extends ServiceProvider
         
         // Subscribe to user deletion to nullify creator id on news
         $eventBus->subscribe(UserDeleted::name(), [RemoveCreatorOnUserDeleted::class, 'handle']);
+
+        // Comments on news articles: published-only, 20-char minimum on root comments
+        app(CommentPolicyRegistry::class)->register('news', app(NewsCommentPolicy::class));
 
         // Register notification types
         app(NotificationFactory::class)->register(
