@@ -35,7 +35,7 @@ export class ChapterCommentsPage {
   async waitForCommentsLoaded(): Promise<void> {
     await this.commentsSection.scrollIntoViewIfNeeded();
 
-    const marker = this.commentList.getByText(COMMENTS.bodyMarker);
+    const marker = this.commentList.getByText(COMMENTS.bodyMarker).first();
     if (await marker.isVisible()) {
       return;
     }
