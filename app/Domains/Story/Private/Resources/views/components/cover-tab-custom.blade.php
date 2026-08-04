@@ -8,7 +8,8 @@
 
 <div x-show="tab === 'custom'" x-cloak
     x-data="customCoverTab(@js($existingCustomCoverUrl))"
-    class="flex flex-col sm:flex-row gap-6 items-start p-4">
+    class="flex flex-col sm:flex-row gap-6 items-start p-4"
+    role="tabpanel" id="tabs-panel-custom" aria-labelledby="tabs-tab-custom">
 
     {{-- Preview --}}
     <div class="shrink-0 w-[150px]">

@@ -2,7 +2,7 @@
     Default cover tab content.
     Emits no events; calls selectDefault() + closes modal directly via Alpine parent scope.
 --}}
-<div x-show="tab === 'default'" class="flex flex-col sm:flex-row gap-6 items-center p-4 h-full">
+<div x-show="tab === 'default'" class="flex flex-col sm:flex-row gap-6 items-center p-4 h-full" role="tabpanel" id="tabs-panel-default" aria-labelledby="tabs-tab-default">
     <div class="shrink-0 mx-auto">
         <x-shared::default-cover class="w-[150px] object-contain" />
     </div>

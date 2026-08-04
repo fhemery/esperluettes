@@ -36,14 +36,14 @@
             initial="users"
             color="primary"
         >
-            <div x-show="tab === 'users'" x-cloak class="flex flex-col gap-6 pt-6 max-w-4xl">
+            <div x-show="tab === 'users'" x-cloak class="flex flex-col gap-6 pt-6 max-w-4xl" role="tabpanel" id="tabs-panel-users" aria-labelledby="tabs-tab-users">
                 <x-statistics::stat-widget
                     statistic-key="global.total_users"
                     :label="__('statistics::admin.users')"
                 />
             </div>
 
-            <div x-show="tab === 'content'" x-cloak class="flex flex-col gap-6 pt-6 max-w-4xl">
+            <div x-show="tab === 'content'" x-cloak class="flex flex-col gap-6 pt-6 max-w-4xl" role="tabpanel" id="tabs-panel-content" aria-labelledby="tabs-tab-content">
                 <x-statistics::stat-widget
                     statistic-key="global.total_stories"
                     :label="__('statistics::admin.stories')"
@@ -58,7 +58,7 @@
                 />
             </div>
 
-            <div x-show="tab === 'comments'" x-cloak class="flex flex-col gap-6 pt-6 max-w-4xl">
+            <div x-show="tab === 'comments'" x-cloak class="flex flex-col gap-6 pt-6 max-w-4xl" role="tabpanel" id="tabs-panel-comments" aria-labelledby="tabs-tab-comments">
                 <x-statistics::stat-widget
                     statistic-key="global.total_comments"
                     :label="__('statistics::admin.comments')"

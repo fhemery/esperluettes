@@ -37,7 +37,7 @@
             tracking
         >
             {{-- Tab: Prepare Gift --}}
-            <div x-show="tab === 'prepare'" x-cloak class="mt-6">
+            <div x-show="tab === 'prepare'" x-cloak class="mt-6" role="tabpanel" id="tabs-panel-prepare" aria-labelledby="tabs-tab-prepare">
                 @include('secret-gift::partials._gift-preparation', [
                     'activity' => $activity,
                     'assignment' => $assignmentAsGiver,
@@ -48,7 +48,7 @@
             </div>
 
             {{-- Tab: Received Gift --}}
-            <div x-show="tab === 'received'" x-cloak class="mt-6">
+            <div x-show="tab === 'received'" x-cloak class="mt-6" role="tabpanel" id="tabs-panel-received" aria-labelledby="tabs-tab-received">
                 @if($isEnded && $assignmentAsRecipient)
                     @include('secret-gift::partials._gift-reveal', [
                         'activity' => $activity,

@@ -28,3 +28,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | A6 | Tabs: Shared stamps tab `id`/`aria-controls`; consumers stamp panel `role`/`id`/`aria-labelledby` under optional `id` prop (default `tabs`). No slot redesign, no runtime ARIA injection. | DESIGN | Yes — redesign tabs later if we want owned panels |
 | A7 | Confirm-modal always forwards `focusable` (no opt-out prop). | DESIGN | Yes |
 | A8 | ConfirmModalA11yTest asserts `firstFocusable().focus()` in rendered HTML, not a literal `focusable` attribute — modal consumes the attribute via `$attributes->has()` and never re-emits it. | BUILD | N/A (finding) |
+| A9 | Phase 2 commit proceeded without waiting for a full `npm run gate` run (user: commit without gate). Smoke test for Search panels had already passed. | BUILD | N/A |

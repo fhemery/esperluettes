@@ -2,7 +2,7 @@
     Themed cover tab content.
     Relies on coverForm Alpine scope: availableGenres, modalPreviewSlug, themedUrl(), selectThemed().
 --}}
-<div x-show="tab === 'themed'" x-cloak class="flex flex-col sm:flex-row gap-6 items-start p-4">
+<div x-show="tab === 'themed'" x-cloak class="flex flex-col sm:flex-row gap-6 items-start p-4" role="tabpanel" id="tabs-panel-themed" aria-labelledby="tabs-tab-themed">
     <div class="shrink-0 w-[150px]">
         <template x-if="modalPreviewSlug">
             <img :src="themedUrl(modalPreviewSlug)" alt="" class="w-[150px] object-contain" loading="lazy" />
