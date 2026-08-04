@@ -12,7 +12,7 @@
       ['key' => 'profiles', 'label' => __('search::results.profiles.label') . ' (' . ($profiles['total'] ?? 0) . ')'],
     ]" color="primary" initial="stories">
 
-    <div x-show="tab==='stories'" x-cloak data-total-stories="{{$stories['total']}}">
+    <div x-show="tab==='stories'" x-cloak data-total-stories="{{$stories['total']}}" role="tabpanel" id="tabs-panel-stories" aria-labelledby="tabs-tab-stories">
       @if(($stories['total'] ?? 0) === 0)
         <div class="py-3 text-sm text-neutral-600 text-center">{{ __('search::results.stories.empty') }}</div>
       @else
@@ -55,7 +55,7 @@
       @endif
     </div>
 
-    <div x-show="tab==='profiles'" x-cloak data-total-profiles="{{$profiles['total']}}">
+    <div x-show="tab==='profiles'" x-cloak data-total-profiles="{{$profiles['total']}}" role="tabpanel" id="tabs-panel-profiles" aria-labelledby="tabs-tab-profiles">
       @if(($profiles['total'] ?? 0) === 0)
         <div class="py-3 text-sm text-neutral-600 text-center">{{ __('search::results.profiles.empty') }}</div>
       @else

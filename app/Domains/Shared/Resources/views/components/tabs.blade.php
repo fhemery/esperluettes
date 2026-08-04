@@ -9,6 +9,8 @@
     'tracking' => false,
     // When true, tabs become horizontally scrollable with arrows on overflow
     'scrollable' => false,
+    // Prefix for tab/panel ids (aria-controls / consumer tabpanel ids)
+    'id' => 'tabs',
 ])
 
 @php
@@ -89,6 +91,8 @@
                 <button
                     type="button"
                     role="tab"
+                    id="{{ $id }}-tab-{{ $key }}"
+                    aria-controls="{{ $id }}-panel-{{ $key }}"
                     :aria-selected="tab === @js($key) ? 'true' : 'false'"
                     :tabindex="tab === @js($key) ? '0' : '-1'"
                     @click="if (!{{ $disabled ? 'true' : 'false' }}) { tab = @js($key); if (tracking) history.replaceState(null, '', '#' + @js($key)); }"

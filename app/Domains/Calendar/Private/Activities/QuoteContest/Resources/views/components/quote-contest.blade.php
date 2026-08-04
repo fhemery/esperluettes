@@ -11,11 +11,11 @@
     {{-- `tracking` puts the active tab in the URL hash, so a notification can
          deep-link straight to it. --}}
     <x-shared::tabs :tabs="$tabs" :initial="$initialTab" color="primary" scrollable tracking>
-        <div x-show="tab === 'my-quotes'" x-cloak class="mt-6">
+        <div x-show="tab === 'my-quotes'" x-cloak class="mt-6" role="tabpanel" id="tabs-panel-my-quotes" aria-labelledby="tabs-tab-my-quotes">
             @include('quote-contest::partials._my-quotes', ['model' => $myQuotes])
         </div>
 
-        <div x-show="tab === 'votes'" x-cloak class="mt-6">
+        <div x-show="tab === 'votes'" x-cloak class="mt-6" role="tabpanel" id="tabs-panel-votes" aria-labelledby="tabs-tab-votes">
             @include('quote-contest::partials._votes', ['model' => $votes])
         </div>
 
@@ -23,7 +23,7 @@
              the moderation view — least of all a submitter's name — is ever
              sent to the browser. --}}
         @if($results)
-            <div x-show="tab === 'results'" x-cloak class="mt-6">
+            <div x-show="tab === 'results'" x-cloak class="mt-6" role="tabpanel" id="tabs-panel-results" aria-labelledby="tabs-tab-results">
                 @include('quote-contest::partials._results', ['model' => $results])
             </div>
         @endif

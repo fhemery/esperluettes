@@ -9,7 +9,7 @@
     'maxWidth' => 'md',
 ])
 
-<x-shared::modal :name="$name" :maxWidth="$maxWidth">
+<x-shared::modal :name="$name" :maxWidth="$maxWidth" focusable>
     <div class="p-6">
         @if($title)
             <x-shared::title tag="h2">{{ $title }}</x-shared::title>

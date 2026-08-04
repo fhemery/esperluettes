@@ -237,7 +237,8 @@ Located in `Resources/views/components/`. Referenced as `<x-shared::component-na
 **UI primitives**
 - `badge`, `badge-overflow`, `metric-badge` — badge display
 - `avatar` — user avatar
-- `modal`, `confirm-modal`, `drawer` — overlay/dialog patterns
+- `modal`, `confirm-modal`, `drawer` — overlay/dialog patterns. `confirm-modal` always forwards `focusable` to `modal`, so opening a confirmation moves keyboard focus into the dialog (same as Auth / Quote Contest direct modals).
+- `tabs` — tab strip with `role="tablist"` / `role="tab"`, arrow-key navigation, optional `id` prop (default `tabs`) used as the prefix for `id="{id}-tab-{key}"` and `aria-controls="{id}-panel-{key}"` on each tab button. Panels stay in the consumer slot: each panel root must set `role="tabpanel"`, `id="{id}-panel-{key}"`, and `aria-labelledby="{id}-tab-{key}"` (keep Alpine `x-show`, do not switch to `x-if`).
 - `popover`, `tooltip` — popover/tooltip (backed by `tooltip.js` Alpine component). The trigger is keyboard-reachable (`tabindex="0"`), opens/closes on Enter and Space exactly like a click, closes on Escape, and exposes `aria-expanded` for assistive tech.
 - `progress` — progress bar
 - `pagination` — paginator
