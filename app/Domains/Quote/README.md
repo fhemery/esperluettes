@@ -8,7 +8,7 @@ The domain also carries the **in-chapter author view**: on their own chapter, an
 
 Out of scope: moderation of quotes/notes, organising quotes into collections, and any social interaction on public quote books.
 
-**Not done.** The note editor is a plain `<textarea>` rather than a rich-text editor, and the margin bookmark icon was never built. Moderation of quotes and notes is deferred; the reader's private note must never become visible to the author.
+**Not done.** The note editor is a plain `<textarea>` rather than a rich-text editor, and the margin bookmark icon was never built. Moderation of quotes and notes is not planned; the reader's private note must never become visible to the author.
 
 ## Key concepts
 
