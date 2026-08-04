@@ -129,12 +129,12 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Quote Contest activity page (confirmed user) | Tabs switch; active panel has `role="tabpanel"` and `aria-labelledby` matching the selected tab's `id` in the a11y tree / DevTools | |
-| Quote Contest admin category delete | Opening confirm moves focus into the dialog; Escape closes; Tab stays inside | |
-| Story cover selector modal | Three cover tabs; each panel stamped; keyboard arrows on tab strip still work | |
-| Search results (stories/profiles tabs) | Both panels stamped; switching tabs still works | |
-| Confirm delete story (or chapter) | Focus enters confirm on open | |
-| Mobile (~375px) Quote Contest tabs | Tab strip + panel association still correct; confirm focus still works if opened | |
+| Quote Contest activity page (confirmed user) | Tabs switch; active panel has `role="tabpanel"` and `aria-labelledby` matching the selected tab's `id` in the a11y tree / DevTools | n/a — covered by Shared feature tests; browser VERIFY skipped (user) |
+| Quote Contest admin category delete | Opening confirm moves focus into the dialog; Escape closes; Tab stays inside | n/a — `focusable` wiring asserted in `ConfirmModalA11yTest`; browser VERIFY skipped (user) |
+| Story cover selector modal | Three cover tabs; each panel stamped; keyboard arrows on tab strip still work | n/a — panel markup stamped in BUILD; browser VERIFY skipped (user) |
+| Search results (stories/profiles tabs) | Both panels stamped; switching tabs still works | ✅ — `TabsConsumerPanelsSmokeTest` |
+| Confirm delete story (or chapter) | Focus enters confirm on open | n/a — same confirm-modal wiring; browser VERIFY skipped (user) |
+| Mobile (~375px) Quote Contest tabs | Tab strip + panel association still correct; confirm focus still works if opened | n/a — browser VERIFY skipped (user) |
 
 ## Open items
 

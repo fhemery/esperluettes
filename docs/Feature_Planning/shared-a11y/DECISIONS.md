@@ -12,6 +12,7 @@ a new row that supersedes it and note the number.
 | 2 | 2026-08-04 | REFINE | Confirm focus | Always move focus into confirm dialogs (same as existing `focusable` on Shared modal); no per-call-site opt-in required. | — |
 | 3 | 2026-08-04 | DESIGN | Who owns tabpanel ARIA? | Shared stamps tab id/aria-controls; consumers stamp panel role/id/aria-labelledby under optional `id` prop (default `tabs`). Rejected: named-slot redesign; runtime ARIA injection. | — |
 | 4 | 2026-08-04 | DESIGN | Confirm focus wiring | Always forward `focusable` on confirm-modal; no opt-out. | — |
+| 5 | 2026-08-04 | VERIFY | Browser / e2e VERIFY? | Skip. Treat task as verified via Shared feature tests; delete temporary e2e files; wrap. | — |
 
 ## Assumptions made without asking
 
