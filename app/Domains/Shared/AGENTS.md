@@ -55,6 +55,10 @@
 
 **The popover trigger must stay keyboard-operable.** `popover.blade.php`'s trigger is `tabindex="0"` with `onTriggerKeydown` handling Enter/Space and an `@keydown.escape.window` closing it; `aria-expanded` is bound to the open state. Any change to the trigger markup or `tooltip.js` must keep all three (Tab reachability, Enter/Space activation, Escape close) — this is covered by `Resources/js/tooltip.test.js`.
 
+**Tabs panel ARIA is a shared contract.** `tabs.blade.php` stamps `id="{id}-tab-{key}"` and `aria-controls="{id}-panel-{key}"` on each tab button (`id` prop defaults to `tabs`). Consumers own the panel markup in the slot and must set `role="tabpanel"`, `id="{id}-panel-{key}"`, and `aria-labelledby="{id}-tab-{key}"` on each panel root. Keep `x-show` for inactive panels. Covered by `Tests/Feature/View/Components/TabsA11yTest.php`.
+
+**Confirm-modal always moves focus on open.** It forwards `focusable` to `modal.blade.php` (no opt-out). Covered by `Tests/Feature/View/Components/ConfirmModalA11yTest.php`.
+
 **No image upload lives here.** The `image-upload` component and its lang file are both gone — Media's `<x-media::image-field>` covers every case, and Story's cover tab owns its own dropzone copy under `story::shared.cover.custom_*`. Do not reintroduce an image upload widget here — image handling belongs to Media. `sound-upload` is still Shared's, until sound gets the same treatment.
 
 **`BackToCommentsRedirector` only uses the path and query string.** Browsers never send the fragment in the `Referer` header; the `#comments` anchor is always appended by the helper, not read from the request.
