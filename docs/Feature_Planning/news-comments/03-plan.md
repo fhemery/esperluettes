@@ -387,26 +387,46 @@ drafts). Do not ship this phase before phase 1 is DONE.
 
 Filled by VERIFY. One row per surface worth looking at with real eyes.
 
+Every row below is covered by a spec in
+`e2e/tests/features/news-comments.spec.ts` (26 tests, all green), run against
+the real app on `:8080` with the real role fixtures. Nothing was pushed back to
+BUILD as a feature test and nothing was left unverified.
+
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Published article, confirmed user, no comments yet | Empty thread renders below the article; root comment editor with the standard toolbar is visible; no error box | |
-| Published article, confirmed user | Thread loads on scroll (lazy), not on page load — watch the network tab for the `/comments/fragments` call | |
-| Root comment form | Submit blocked under 20 characters (counter/validation visible), accepted at 20; posted comment appears immediately | |
-| Root comment, second one | The same user can post a second root comment — no "already commented" block, unlike a chapter | |
-| Article creator (admin) on their own article | Can post a root comment on their own article — form is present, not hidden | |
-| Reply flow | Reply box opens on a root comment, accepts a 1-character reply, and no "reply" control exists on a reply | |
-| Notification | The root author's bell shows the reply notification; its link lands on `/news/{slug}?comment=<id>` and scrolls to the right comment | |
-| Notification, self-reply | Replying to your own thread with no other participant produces no notification for yourself | |
-| Settings → Notifications | A distinct "Commentaires d'actualités" group appears with one toggle, visually separate from Story's "Commentaires" group; unchecking it persists after reload | |
-| Edit own comment | Edit control present on own root comment and own reply, with no time limit; the 20-char rule still applies on a root edit | |
-| Report a comment | Report dialog opens with the shared comment reasons; the report appears in the Moderation admin panel with a working deep link back to the article | |
-| Moderator view | A moderator sees the moderation actions on comments of a published article | |
-| Draft preview (admin) | No comment section at all on an unpublished article — not an empty one, not a disabled one | |
-| Guest, published article | Members-only prompt + login button, same as chapter comments (decision #10) | |
-| Deactivated commenter | A comment from a deactivated account is hidden from the thread; reactivating restores it | |
-| Deleted commenter | A comment whose author was deleted still renders, with the author reference gone and no broken profile link | |
-| Article deleted | After deleting the article from the admin panel, no orphan thread is reachable and no error appears anywhere it was counted | |
-| Mobile (375px) | The thread, editor toolbar and reply controls are usable at mobile width on the article page | |
+| Published article, confirmed user, no comments yet | Empty thread renders below the article; root comment editor with the standard toolbar is visible; no error box | ✅ "Aucun commentaire pour le moment." + Quill toolbar booted, "20 caractères minimum" hint, no error box; thread sits below the article body |
+| Published article, confirmed user | Thread loads on scroll (lazy), not on page load — watch the network tab for the `/comments/fragments` call | ✅ initial HTML carries `page: 0` and no comment body; items arrive from `GET /comments/fragments` |
+| Root comment form | Submit blocked under 20 characters (counter/validation visible), accepted at 20; posted comment appears immediately | ✅ counter 19 → *Publier* disabled, 20 → enabled; after posting the redirect deep-links to the new comment and it renders |
+| Root comment, second one | The same user can post a second root comment — no "already commented" block, unlike a chapter | ✅ form still present after the first, second root posted |
+| Article creator (admin) on their own article | Can post a root comment on their own article — form is present, not hidden | ✅ |
+| Reply flow | Reply box opens on a root comment, accepts a 1-character reply, and no "reply" control exists on a reply | ✅ 1-char reply accepted and nested under its root. Nuance: a reply *does* carry a *Répondre* button (on the last child only), but its `data-comment-id` is the **root**'s, so it re-opens the root's form — depth stays 1. Same as chapters |
+| Notification | The root author's bell shows the reply notification; its link lands on `/news/{slug}?comment=<id>` and scrolls to the right comment | ✅ unread badge, one notification, `href` = `/news/actualite-e2e?comment=<replyId>`; the target is server-preloaded, in the viewport and ring-highlighted |
+| Notification, self-reply | Replying to your own thread with no other participant produces no notification for yourself | ✅ |
+| Settings → Notifications | A distinct "Commentaires d'actualités" group appears with one toggle, visually separate from Story's "Commentaires" group; unchecking it persists after reload | ✅ own group between "Actualités" and "Promotions & modération", far from Story's "Commentaires"; unchecking survives a reload |
+| Edit own comment | Edit control present on own root comment and own reply, with no time limit; the 20-char rule still applies on a root edit | ✅ edit control on own root and own reply; *Sauvegarder* disabled at 10 chars on a root edit, enabled at 20; reply edit has no minimum. "No time limit" is not observable in a browser — `canEditOwn()` returns `true` unconditionally, covered by `NewsCommentPolicyTest` |
+| Report a comment | Report dialog opens with the shared comment reasons; the report appears in the Moderation admin panel with a working deep link back to the article | ✅ modal opens with the shared `comment` reasons; the report's *open content* link is `/news/actualite-e2e?comment=<rootId>` and resolves 200 on the comment |
+| Moderator view | A moderator sees the moderation actions on comments of a published article | ✅ *Modération* popover with *Supprimer* / *Vider le contenu* on someone else's comment |
+| Draft preview (admin) | No comment section at all on an unpublished article — not an empty one, not a disabled one | ✅ no `#comments`, no `#comment-list`, no members-only box; draft banner and body render |
+| Guest, published article | Members-only prompt + login button, same as chapter comments (decision #10) | ✅ prompt + *Se connecter*, which lands on `/login`; no form, no items |
+| Deactivated commenter | A comment from a deactivated account is hidden from the thread; reactivating restores it | ✅ via the admin user list, both directions |
+| Deleted commenter | A comment whose author was deleted still renders, with the author reference gone and no broken profile link | ✅ body kept, author becomes "Esperluette disparue" with the default avatar and no profile link |
+| Article deleted | After deleting the article from the admin panel, no orphan thread is reachable and no error appears anywhere it was counted | ✅ article 404s, `/news` and the home page render without it, the surviving article's thread is untouched |
+| Mobile (375px) | The thread, editor toolbar and reply controls are usable at mobile width on the article page | ✅ toolbar wraps to two rows, no horizontal overflow, reply form and its editor usable |
+
+### Observations, none of them defects of this feature
+
+All three are shared `Comment`-domain behaviour that chapter comments exhibit
+identically; recorded so they are not rediscovered as surprises.
+
+1. Posting from a deep-linked URL yields a doubled query parameter —
+   `?comment=12&comment=57#comments` — because `CommentController@store`
+   appends `comment=<new id>` to a referer that already carries one. PHP reads
+   the last value, so the page behaves correctly.
+2. Deactivate/reactivate and account deletion bump a comment's `updated_at`,
+   so an untouched comment can show "Modifié le …" afterwards.
+3. The thread starts directly under the article body with no heading or
+   separator (chapters do the same). Purely cosmetic; a call for the user, not
+   a bug.
 
 ## Open items
 
