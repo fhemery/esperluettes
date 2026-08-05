@@ -1,5 +1,5 @@
 <x-app-layout :page="$page">
-    <article class=" max-w-[800px] mx-auto">
+    <article class="w-full md:max-w-[800px] mx-auto">
         <header class="mb-6 md:mb-10">
         <div class="flex gap-2 items-baseline">
         <x-shared::title>{{ $news->title }}</x-shared::title>
