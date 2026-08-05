@@ -1,19 +1,14 @@
 /**
- * What actually is a block in a chapter's prose.
+ * What actually is a block in a chapter's prose, for the purpose of
+ * constraining a quote selection.
  *
- * Deliberately narrower than `canonical-text.js`'s BLOCK_TAGS: that set contains
- * DIV, which would make any decorative wrapper look like a block boundary. Here
- * only a `div.ce-block` (the block-editor wrapper) counts as one.
- */
-const BLOCK_TAGS = new Set(['P', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'PRE']);
-
-/**
- * @param {Node|null} node
- * @returns {boolean}
+ * A `div.ce-block` (the multi-block editor's wrapper) is the only boundary
+ * that matters: it is one Quill instance, one authored unit. Paragraphs,
+ * list items, headings, etc. inside it are just prose — a quote may freely
+ * span several of them, only not cross into another editor block.
  */
 export function isBlockElement(node) {
     if (!node || node.nodeType !== 1 /* ELEMENT_NODE */) return false;
-    if (BLOCK_TAGS.has(node.tagName)) return true;
 
     return node.tagName === 'DIV' && node.classList.contains('ce-block');
 }

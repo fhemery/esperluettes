@@ -28,9 +28,9 @@ export function quoteMiniForm() {
 
             if (!region) return;
 
-            // A quote must stay inside a single block: the canonical text inserts a
-            // synthetic space at every block boundary, which maps to no text node and
-            // would leave an untinted hole in the highlight.
+            // A quote must stay inside a single editor block (one Quill instance):
+            // it may freely span several paragraphs within that block, just not
+            // cross into another block.
             const spansSeveralBlocks = closestBlock(range.startContainer) !== closestBlock(range.endContainer);
 
             const { text: canonicalText, nodeMap } = buildCanonicalText(region);

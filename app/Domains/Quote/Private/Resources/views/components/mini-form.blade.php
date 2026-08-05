@@ -21,7 +21,7 @@
 >
     <h2 id="quote-mini-form-title" class="text-lg font-semibold mb-3">{{ __('quote::ui.mini_form.title') }}</h2>
 
-    <blockquote class="border-l-4 border-tertiary/40 pl-3 mb-4 text-sm text-gray-700 italic line-clamp-3"
+    <blockquote class="border-l-4 border-tertiary/40 pl-3 mb-4 text-sm text-gray-700 italic line-clamp-3 whitespace-pre-line"
                 x-text="selectedText">
     </blockquote>
 
