@@ -24,6 +24,37 @@ The carousel result set is cached under the key `news.carousel` for 5 minutes. A
 
 Slugs are auto-generated from the article title using `spatie/laravel-sluggable` with a 60-character limit. The slug is generated **only on creation** (`doNotGenerateSlugsOnUpdate`). Renaming an article does not change its URL, preserving any existing links.
 
+### Comments on articles
+
+Published articles carry a one-level comment thread, rendered by the Comment
+domain's `<x-comment::comment-list-component>` in lazy mode (`page="0"`,
+`perPage="5"`). News owns only the integration: `NewsCommentPolicy` registered
+for entity type `news`, the `NotifyOnNewsComment` listener, and the
+`CommentMaintenancePublicApi::deleteFor('news', $id)` call in
+`NewsService::delete()`. No table, no route, no controller and no JavaScript.
+
+Rules that differ from chapter comments: root comments require **20 characters**
+(replies have no minimum), there is **no per-user cap**, and the article's own
+creator **may** comment on their own article. Root comments notify nobody; a
+reply notifies the root author plus every prior replier, minus the replier.
+
+Comments exist only on `published` articles, roots **and replies alike**. The
+Blade block and `NewsCommentPolicy::canCreateRoot()` both check
+`status === 'published'`, so a draft previewed by an admin shows no comment
+section at all. `canCreateRoot()` returns `false` — never throws — for an
+article id that does not exist.
+
+Replies are gated in `NewsCommentPolicy::validateCreate()`, not in `canReply()`:
+`CommentPublicApi::create()` enforces `canCreateRoot()` on the root path but
+never calls `canReply()`, and `validateCreate()` is the only hook that runs on
+both. Without it, someone holding a root comment id could reply to a thread
+whose article had gone back to draft. `canReply()` stays a constant `true` on
+purpose — Comment calls it once per rendered comment, so looking the article up
+there would cost one query per comment in the thread.
+
+The entity type string `'news'` is persisted in `comments.commentable_type` —
+never rename it.
+
 ### User deletion safety
 
 `created_by` is intentionally nullable and carries no database foreign key constraint to `users`. When a user is deleted, the `RemoveCreatorOnUserDeleted` listener nullifies `created_by` for all articles they authored. This follows the architecture rule prohibiting cross-domain FK constraints to the `users` table.
@@ -51,4 +82,5 @@ Slugs are auto-generated from the article title using `spatie/laravel-sluggable`
 | Domain event bus | [Events](../Events/README.md) via `EventBus::emit()` | Cross-domain audit log and event routing |
 | Admin sidebar registration | [Administration](../Administration/README.md) via `AdminNavigationRegistry` | Shared admin layout owns navigation state |
 | Image storage, variants and display | [Media](../Media/README.md) via `MediaPublicApi` | Media owns image handling for every domain; News stores paths only |
+| Comment threads on articles | [Comment](../Comment/README.md) via `CommentPolicyRegistry`, `CommentMaintenancePublicApi` and `CommentPublicApi` | Comment owns storage, UI, moderation and lifecycle for every commentable entity; News supplies the policy for entity type `news` |
 | Block sanitization, rendering and text length | [Editor](../Editor/README.md) via `EditorPublicApi` (`sanitizeText`, `render`, `plainTextLength`) | Editor owns the block schema and the authoring components; News owns the `content_blocks` column and the derived `content` cache |

@@ -1,5 +1,5 @@
 <x-app-layout :page="$page">
-    <article class=" max-w-[800px] mx-auto">
+    <article class="w-full md:max-w-[800px] mx-auto">
         <header class="mb-6 md:mb-10">
         <div class="flex gap-2 items-baseline">
         <x-shared::title>{{ $news->title }}</x-shared::title>
@@ -92,5 +92,11 @@
         <div class="news-content">
             {!! $news->content !!}
         </div>
+
+        @if($news->status === 'published')
+        <section id="comments" class="mt-10">
+            <x-comment::comment-list-component entity-type="news" entity-id="{{ $news->id }}" page="0" perPage="5" />
+        </section>
+        @endif
     </article>
 </x-app-layout>

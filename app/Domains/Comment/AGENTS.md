@@ -37,6 +37,8 @@
 
 **Deep-link pre-loading is unbounded.** When `?comment={id}` is present in the request, `CommentListComponent` loads pages in a loop until the target comment is found. If the comment does not exist on the entity, the loop terminates when items run out; it does not throw.
 
+**`canCreateRoot()` is enforced, `canReply()` is not.** `CommentPublicApi::create()` calls `canCreateRoot()` on the root path, but the reply path only validates the parent (same target, and it is a root) plus the reply length limits. `canReply()` is used solely to set the `canReply` flag on `CommentDto`, i.e. to show or hide the UI control. A policy that must actually forbid replying cannot express it through `canReply()` today — it has to throw from `validateCreate()`, which is the only hook called on both paths (`NewsCommentPolicy` does exactly this to keep replies off an unpublished article).
+
 **Policy registration must happen in `boot()`, not `register()`.** `CommentPolicyRegistry` is a singleton bound in `CommentServiceProvider::register()`. Other domains must register their policies in their own provider's `boot()` to ensure the singleton already exists.
 
 **Editor assets must load on the list shell, not on fragments.** Reply/edit `<x-editor::rich-text>` instances often render only inside `GET /comments/fragments` HTML or when `canCreateRoot` is false — both paths discard `@push`. `comment-list.blade.php` includes `@include('editor::components._assets')` when `!$isGuest && !$error`; Alpine calls `initQuillEditor` when Répondre/Éditer opens. See README § Editor assets and inline composers.

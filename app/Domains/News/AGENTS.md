@@ -22,6 +22,7 @@ All four events are registered on the `EventBus` in `NewsServiceProvider`.
 | Event | Action |
 |-------|--------|
 | `Auth::UserDeleted` | Nullifies `created_by` on all articles authored by that user (`RemoveCreatorOnUserDeleted`) |
+| `Comment::CommentPosted` | On a **reply** in a news thread, notifies the root comment's author plus every prior replier, minus the replier (`NotifyOnNewsComment`). A root comment on an article notifies nobody. |
 
 ## Non-obvious invariants
 
@@ -39,5 +40,5 @@ All four events are registered on the `EventBus` in `NewsServiceProvider`.
 
 ## Registry integrations
 
-- **NotificationFactory** (`Notification` domain) — registers `NewsPublishedNotification` under type `news.published`. This is required for the notification system to reconstruct the notification content from stored data.
+- **NotificationFactory** (`Notification` domain) — registers `NewsPublishedNotification` under type `news.published` (group `news`) and `NewsReplyCommentNotification` under type `news.reply_comment` (group `news-comments`, registered locally with `registerGroup()` in `NewsServiceProvider` because it holds only News types). This is required for the notification system to reconstruct the notification content from stored data. Both type strings are persisted in `notifications.content_key` — never rename them. A group must be registered before any type that references it, or `register()` throws.
 - **AdminNavigationRegistry** (`Administration` domain) — registers two admin nav entries: news management (`news.admin.index`) and carousel ordering (`news.admin.pinned.index`), both restricted to `ADMIN` and `TECH_ADMIN` roles.

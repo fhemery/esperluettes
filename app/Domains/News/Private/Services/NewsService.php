@@ -2,6 +2,7 @@
 
 namespace App\Domains\News\Private\Services;
 
+use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\News\Private\Models\News;
 use App\Domains\News\Public\Events\NewsPublished;
@@ -27,6 +28,7 @@ class NewsService
         private readonly NotificationPublicApi $notificationApi,
         private readonly EditorPublicApi $editor,
         private readonly MediaPublicApi $media,
+        private readonly CommentMaintenancePublicApi $comments,
     ) {}
 
     public function sanitizeContent(string $html): string
@@ -176,6 +178,10 @@ class NewsService
         if ($news->is_pinned) {
             $this->bustCarouselCache();
         }
+
+        // Purge the article's comment thread (hard delete via maintenance API)
+        // before the parent row goes away, so no orphan comment can remain.
+        $this->comments->deleteFor('news', (int) $news->id);
 
         $news->delete();
     }

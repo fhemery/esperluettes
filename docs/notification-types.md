@@ -2,7 +2,7 @@
 
 > **Auto-generated** by `php artisan notifications:export-types-doc`. Do not edit by hand.
 
-Generated at: 2026-08-03T07:18:37+00:00 (`locale`: `fr`)
+Generated at: 2026-08-05T06:42:39+00:00 (`locale`: `fr`)
 
 ## Group: Commentaires (`comments`)
 
@@ -46,6 +46,12 @@ Generated at: 2026-08-03T07:18:37+00:00 (`locale`: `fr`)
 | Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
 | --- | --- | --- | --- | --- | --- |
 | `news.published` | `App\Domains\News\Public\Notifications\NewsPublishedNotification` | Une actualité d'être publiée sur le site | `news_title`, `news_slug` | no | no |
+
+## Group: Commentaires d'actualités (`news-comments`)
+
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
+| --- | --- | --- | --- | --- | --- |
+| `news.reply_comment` | `App\Domains\News\Public\Notifications\NewsReplyCommentNotification` | Un de mes commentaires d'actualité a reçu une réponse | `comment_id`, `author_name`, `author_slug`, `news_title`, `news_slug` | no | no |
 
 ## Group: Promotions & modération (`moderation`)
 

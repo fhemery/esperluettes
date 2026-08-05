@@ -100,7 +100,16 @@ export const COMMENTS = {
   rootCommentId: 1,
 } as const;
 
-export const NEWS = { slug: 'actualite-e2e', title: 'Actualité E2E' } as const;
+/**
+ * News articles, written by `app/Domains/News/Database/Seeders/E2eNewsSeeder.php`.
+ * `disposable` is meant to be deleted by a spec; nothing else may rely on it.
+ */
+export const NEWS = {
+  slug: 'actualite-e2e',
+  title: 'Actualité E2E',
+  draft: { slug: 'actualite-e2e-brouillon', title: 'Actualité E2E brouillon' },
+  disposable: { slug: 'actualite-e2e-a-supprimer', title: 'Actualité E2E à supprimer' },
+} as const;
 
 /**
  * The five *Concours de citations* activities, written by

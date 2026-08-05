@@ -518,6 +518,8 @@ deptrac:
       - AuthPublic
       - Shared
       - NewsPrivate
+      # NewsServiceProvider registers the news comment policy
+      - CommentPublic
       - EventsPublic
       - AdministrationPublic
       - MediaPublic
@@ -706,6 +708,8 @@ deptrac:
     NewsPrivate:
       - Shared
       - AuthPublic
+      # NewsCommentPolicy implements Comment's CommentPolicy contract
+      - CommentPublic
       - EditorPublic
       - EventsPublic
       - MediaPublic

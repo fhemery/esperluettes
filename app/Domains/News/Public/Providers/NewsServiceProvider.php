@@ -6,15 +6,20 @@ use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
+use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\News\Private\Listeners\NotifyOnNewsComment;
 use App\Domains\News\Private\Listeners\RemoveCreatorOnUserDeleted;
 use App\Domains\News\Private\Models\News;
+use App\Domains\News\Private\Services\NewsCommentPolicy;
 use App\Domains\News\Private\Observers\NewsObserver;
 use App\Domains\News\Public\Events\NewsDeleted;
 use App\Domains\News\Public\Events\NewsPublished;
 use App\Domains\News\Public\Events\NewsUnpublished;
 use App\Domains\News\Public\Events\NewsUpdated;
 use App\Domains\News\Public\Notifications\NewsPublishedNotification;
+use App\Domains\News\Public\Notifications\NewsReplyCommentNotification;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
@@ -56,8 +61,25 @@ class NewsServiceProvider extends ServiceProvider
         // Subscribe to user deletion to nullify creator id on news
         $eventBus->subscribe(UserDeleted::name(), [RemoveCreatorOnUserDeleted::class, 'handle']);
 
+        // Comments on news articles: published-only, 20-char minimum on root comments
+        app(CommentPolicyRegistry::class)->register('news', app(NewsCommentPolicy::class));
+
+        // Notify thread participants when someone replies on a news comment thread
+        $eventBus->subscribe(CommentPosted::class, [app(NotifyOnNewsComment::class), 'handle']);
+
         // Register notification types
-        app(NotificationFactory::class)->register(
+        $notificationFactory = app(NotificationFactory::class);
+
+        // News-specific group: must be registered before any of its types
+        $notificationFactory->registerGroup('news-comments', 45, 'news::notification.settings.group_comments');
+        $notificationFactory->register(
+            type: NewsReplyCommentNotification::type(),
+            class: NewsReplyCommentNotification::class,
+            groupId: 'news-comments',
+            nameKey: 'news::notification.settings.type_reply_comment',
+        );
+
+        $notificationFactory->register(
             type: NewsPublishedNotification::type(),
             class: NewsPublishedNotification::class,
             groupId: 'news',
