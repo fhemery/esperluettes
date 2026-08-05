@@ -3,6 +3,7 @@
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\News\Private\Models\News;
 use App\Domains\News\Private\Services\NewsCommentPolicy;
+use App\Domains\News\Private\Services\NewsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -129,6 +130,56 @@ describe('News comment policy — who may post a root comment', function () {
         $policy = new NewsCommentPolicy();
 
         expect($policy->canCreateRoot(999999, $user->id))->toBeFalse();
+    });
+});
+
+describe('News comment policy — replies follow the article status', function () {
+    it('refuses a reply on an article that was unpublished after the thread existed', function () {
+        $author = admin($this);
+        $news = publishedNews($author->id);
+
+        $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+        $rootId = createComment('news', $news->id, generateDummyText(20), null);
+
+        app(NewsService::class)->unpublish($news);
+
+        $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]));
+
+        expect(function () use ($news, $rootId) {
+            createComment('news', $news->id, 'abc', $rootId);
+        })->toThrow(ValidationException::withMessages(['body' => ['Comment not allowed']]));
+    });
+
+    it('refuses a reply on a draft article for an admin too', function () {
+        $author = admin($this);
+        $news = publishedNews($author->id);
+
+        $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+        $rootId = createComment('news', $news->id, generateDummyText(20), null);
+
+        app(NewsService::class)->unpublish($news);
+
+        $this->actingAs($author);
+
+        expect(function () use ($news, $rootId) {
+            createComment('news', $news->id, 'abc', $rootId);
+        })->toThrow(ValidationException::withMessages(['body' => ['Comment not allowed']]));
+    });
+
+    it('still accepts a reply once the article is published again', function () {
+        $author = admin($this);
+        $news = publishedNews($author->id);
+
+        $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+        $rootId = createComment('news', $news->id, generateDummyText(20), null);
+
+        $service = app(NewsService::class);
+        $service->unpublish($news);
+        $service->publish($news);
+
+        $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]));
+
+        expect(createComment('news', $news->id, 'abc', $rootId))->toBeGreaterThan(0);
     });
 });
 

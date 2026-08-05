@@ -6,12 +6,23 @@ use App\Domains\Comment\Public\Api\Contracts\CommentDto;
 use App\Domains\Comment\Public\Api\Contracts\CommentPolicy;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\News\Private\Models\News;
+use Illuminate\Validation\ValidationException;
 
 class NewsCommentPolicy implements CommentPolicy
 {
+    /**
+     * The published-only rule, for roots *and* replies.
+     *
+     * `CommentPublicApi::create()` enforces `canCreateRoot()` on the root path
+     * but never calls `canReply()` on the reply path, so this hook — the only
+     * one that runs on both — is where a reply to a thread whose article has
+     * gone back to draft is refused. Same message the root path produces.
+     */
     public function validateCreate(CommentToCreateDto $dto): void
     {
-        return;
+        if (!$this->isPublished($dto->entityId)) {
+            throw ValidationException::withMessages(['body' => ['Comment not allowed']]);
+        }
     }
 
     /**
@@ -20,14 +31,26 @@ class NewsCommentPolicy implements CommentPolicy
      */
     public function canCreateRoot(int $entityId, int $userId): bool
     {
-        $news = News::query()->find($entityId);
-
-        return $news !== null && $news->status === 'published';
+        return $this->isPublished($entityId);
     }
 
+    /**
+     * UI only: Comment calls this once per rendered comment to show or hide the
+     * reply control, never on the create path. Kept as a constant `true` so a
+     * thread does not cost one article lookup per comment — the thread is only
+     * reachable on a published article anyway, and `validateCreate()` above is
+     * what actually refuses the post.
+     */
     public function canReply(CommentDto $parentComment, int $userId): bool
     {
         return true;
+    }
+
+    private function isPublished(int $entityId): bool
+    {
+        $news = News::query()->find($entityId);
+
+        return $news !== null && $news->status === 'published';
     }
 
     public function canEditOwn(CommentDto $comment, int $userId): bool
