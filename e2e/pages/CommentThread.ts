@@ -12,27 +12,13 @@ import { RichTextEditor } from './RichTextEditor';
  *   arrive from `GET /comments/fragments` once the sentinel scrolls into view.
  *   Anything that reads an item must wait for that.
  * - A comment is an `<li id="comment-{id}">`, and replies are `<li>`s nested
- *   inside their root's `<li>`. So a locator matching "the li holding this
- *   body" matches the ancestor too — `.last()` is what picks the innermost one.
+ *   inside their root's `<li>`.
  */
 export class CommentThread {
   readonly root: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('#comment-list');
-  }
-
-  /** The "members only" box Comment renders when `checkAccess()` refuses. */
-  get membersOnlyBox(): Locator {
-    return this.root.getByText('Seuls les membres peuvent accéder aux commentaires.');
-  }
-
-  get loginButton(): Locator {
-    return this.root.getByRole('link', { name: 'Se connecter' });
-  }
-
-  get emptyMessage(): Locator {
-    return this.root.getByText('Aucun commentaire pour le moment.');
   }
 
   get rootForm(): Locator {
@@ -55,24 +41,6 @@ export class CommentThread {
 
   item(commentId: number): Locator {
     return this.root.locator(`#comment-${commentId}`);
-  }
-
-  /**
-   * The innermost `<li>` whose body is `text` — i.e. the comment itself rather
-   * than the root it may be nested in.
-   */
-  itemWithBody(text: string): Locator {
-    return this.root
-      .locator('li[id^="comment-"]')
-      .filter({ has: this.page.locator('.comment-body', { hasText: text }) })
-      .last();
-  }
-
-  async idOfBody(text: string): Promise<number> {
-    const raw = await this.itemWithBody(text).getAttribute('id');
-    const id = Number((raw ?? '').replace('comment-', ''));
-    expect(id, `no comment id parsed from "${raw}"`).toBeGreaterThan(0);
-    return id;
   }
 
   /** Scroll to the bottom so the `x-intersect` sentinel fires the fragment fetch. */
@@ -110,63 +78,5 @@ export class CommentThread {
     const id = Number(params[params.length - 1]);
     expect(id, `no comment id in ${this.page.url()}`).toBeGreaterThan(0);
     return id;
-  }
-
-  replyButtonOn(commentId: number): Locator {
-    return this.item(commentId).locator('[data-action="reply"]').first();
-  }
-
-  replyForm(parentId: number): Locator {
-    return this.root.locator(`form[data-comment-draft="reply"][data-parent-comment-id="${parentId}"]`);
-  }
-
-  replyEditor(parentId: number): RichTextEditor {
-    return new RichTextEditor(this.page, `reply-editor-${parentId}`);
-  }
-
-  async postReply(rootId: number, body: string): Promise<number> {
-    await this.replyButtonOn(rootId).click();
-    const form = this.replyForm(rootId);
-    await expect(form).toBeVisible();
-    await this.replyEditor(rootId).fill(body);
-    const submit = form.locator('button[type="submit"]');
-    await expect(submit).toBeEnabled();
-    const before = this.page.url();
-    await submit.click();
-    return this.awaitPostedId(before);
-  }
-
-  editButtonOn(commentId: number): Locator {
-    return this.item(commentId).locator(`[data-action="edit"][data-comment-id="${commentId}"]`).first();
-  }
-
-  editForm(commentId: number): Locator {
-    return this.item(commentId).locator(`form[action$="/comments/${commentId}"]`);
-  }
-
-  editEditor(commentId: number): RichTextEditor {
-    return new RichTextEditor(this.page, `edit-editor-${commentId}`);
-  }
-
-  /** The compact flag button `<x-moderation::report-button>` renders. */
-  reportButtonOn(commentId: number): Locator {
-    return this.item(commentId).locator('[x-data^="reportButton"] button').first();
-  }
-
-  /**
-   * The moderator popover trigger, present only for a moderator on someone
-   * else's comment.
-   */
-  moderationTriggerOn(commentId: number): Locator {
-    return this.item(commentId).locator('[aria-haspopup="dialog"]').first();
-  }
-
-  /**
-   * The moderator action menu. `<x-shared::popover>` teleports its panel to
-   * `<body>`, so this cannot be scoped to the comment — every comment's panel
-   * sits at body level and only the open one is visible.
-   */
-  get openModerationMenu(): Locator {
-    return this.page.locator('#comment-moderator-btn').locator('visible=true');
   }
 }
