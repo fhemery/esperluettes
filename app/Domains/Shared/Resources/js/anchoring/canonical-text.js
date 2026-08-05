@@ -5,7 +5,12 @@ const BLOCK_TAGS = new Set(['P', 'BLOCKQUOTE', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H
  *
  * - HTML tags are stripped.
  * - Custom emoji blots (<span class="ql-custom-emoji-{name}">) become :name:.
- * - Block-level element boundaries contribute a single space.
+ * - Block-level element boundaries contribute a single newline, so a quote
+ *   spanning several paragraphs keeps its line breaks.
+ * - A whitespace-only text node right after a boundary is dropped: stored
+ *   chapter HTML has a literal "\n" between sibling `<p>` tags (formatting,
+ *   not authored content), which would otherwise double up with the
+ *   boundary's own newline.
  *
  * @param {Element} rootEl
  * @returns {{ text: string, nodeMap: Array<{start: number, end: number, domNode: Text}> }}
@@ -17,6 +22,9 @@ export function buildCanonicalText(rootEl) {
     function walk(node) {
         if (node.nodeType === 3 /* TEXT_NODE */) {
             const content = node.textContent;
+            if (content.trim() === '' && (text.length === 0 || /\s$/.test(text))) {
+                return;
+            }
             if (content.length > 0) {
                 const start = text.length;
                 text += content;
@@ -37,8 +45,8 @@ export function buildCanonicalText(rootEl) {
             walk(child);
         }
 
-        if (BLOCK_TAGS.has(node.tagName) && text.length > 0 && text[text.length - 1] !== ' ') {
-            text += ' ';
+        if (BLOCK_TAGS.has(node.tagName) && text.length > 0 && text[text.length - 1] !== '\n') {
+            text += '\n';
         }
     }
 

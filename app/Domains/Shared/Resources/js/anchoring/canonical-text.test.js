@@ -28,14 +28,27 @@ describe('buildCanonicalText', () => {
         expect(text).toBe('Hello bold text');
     });
 
-    it('adds one space at block boundaries between paragraphs', () => {
+    it('adds one newline at block boundaries between paragraphs', () => {
         const { text } = buildCanonicalText(makeEl('<p>First</p><p>Second</p>'));
-        expect(text).toBe('First Second');
+        expect(text).toBe('First\nSecond');
     });
 
-    it('does not add double spaces when adjacent block elements are processed', () => {
+    it('does not add double newlines when adjacent block elements are processed', () => {
         const { text } = buildCanonicalText(makeEl('<p>A</p><p>B</p><p>C</p>'));
-        expect(text).toBe('A B C');
+        expect(text).toBe('A\nB\nC');
+    });
+
+    it('does not double the newline when the stored HTML already has one between sibling paragraphs', () => {
+        // Real chapter content stores a literal "\n" between sibling <p> tags
+        // (formatting, not authored content) — it must not stack with the
+        // boundary's own newline into a blank line.
+        const { text } = buildCanonicalText(makeEl('<p>First</p>\n<p>Second</p>'));
+        expect(text).toBe('First\nSecond');
+    });
+
+    it('keeps a genuine inline space between two inline elements', () => {
+        const { text } = buildCanonicalText(makeEl('<p><em>Hello</em> <strong>world</strong></p>'));
+        expect(text).toBe('Hello world');
     });
 
     it('replaces custom emoji blot with :name: token', () => {
@@ -50,7 +63,7 @@ describe('buildCanonicalText', () => {
 
     it('handles blockquote as block element', () => {
         const { text } = buildCanonicalText(makeEl('<blockquote>Quote</blockquote><p>After</p>'));
-        expect(text).toBe('Quote After');
+        expect(text).toBe('Quote\nAfter');
     });
 
     it('returns empty string for empty element', () => {

@@ -30,7 +30,7 @@
         <template x-if="quote">
             <div>
                 <blockquote
-                    class="border-l-4 border-tertiary/40 pl-3 mb-4 text-sm text-gray-700 italic line-clamp-4"
+                    class="border-l-4 border-tertiary/40 pl-3 mb-4 text-sm text-gray-700 italic line-clamp-4 whitespace-pre-line"
                     x-text="quote.highlighted_text"
                 ></blockquote>
 

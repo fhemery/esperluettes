@@ -8,19 +8,19 @@ function makeEl(html) {
 }
 
 describe('isBlockElement', () => {
-    it('accepts real block tags', () => {
-        for (const html of ['<p>a</p>', '<blockquote>a</blockquote>', '<h1>a</h1>', '<h6>a</h6>', '<pre>a</pre>']) {
-            expect(isBlockElement(makeEl(html).firstElementChild)).toBe(true);
-        }
-        expect(isBlockElement(makeEl('<ul><li>a</li></ul>').querySelector('li'))).toBe(true);
-    });
-
     it('accepts an editor block wrapper div', () => {
         expect(isBlockElement(makeEl('<div class="ce-block ce-block--text"><p>a</p></div>').firstElementChild)).toBe(true);
     });
 
     it('rejects a decorative div', () => {
         expect(isBlockElement(makeEl('<div class="wrapper">a</div>').firstElementChild)).toBe(false);
+    });
+
+    it('rejects paragraphs and other prose tags', () => {
+        for (const html of ['<p>a</p>', '<blockquote>a</blockquote>', '<h1>a</h1>', '<h6>a</h6>', '<pre>a</pre>']) {
+            expect(isBlockElement(makeEl(html).firstElementChild)).toBe(false);
+        }
+        expect(isBlockElement(makeEl('<ul><li>a</li></ul>').querySelector('li'))).toBe(false);
     });
 
     it('rejects inline elements', () => {
@@ -35,11 +35,11 @@ describe('isBlockElement', () => {
 });
 
 describe('closestBlock', () => {
-    it('finds the paragraph of a text node nested in inline markup', () => {
-        const root = makeEl('<p id="one">le <em>chat</em> dort</p>');
+    it('skips paragraphs and inline markup and returns the editor block', () => {
+        const root = makeEl('<div class="ce-block"><p id="one">le <em>chat</em> dort</p></div>');
         const em = root.querySelector('em');
 
-        expect(closestBlock(em.firstChild)).toBe(root.querySelector('#one'));
+        expect(closestBlock(em.firstChild)).toBe(root.querySelector('.ce-block'));
     });
 
     it('skips a decorative div and returns the editor block', () => {
@@ -49,9 +49,9 @@ describe('closestBlock', () => {
         expect(closestBlock(inner.firstChild)).toBe(root.querySelector('.ce-block'));
     });
 
-    it('returns null when there is no block ancestor', () => {
-        const root = makeEl('<span>texte</span>');
+    it('returns null when there is no editor block ancestor', () => {
+        const root = makeEl('<p>texte</p>');
 
-        expect(closestBlock(root.querySelector('span').firstChild)).toBeNull();
+        expect(closestBlock(root.querySelector('p').firstChild)).toBeNull();
     });
 });

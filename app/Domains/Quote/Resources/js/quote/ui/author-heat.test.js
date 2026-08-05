@@ -59,7 +59,7 @@ describe('author heat — tint', () => {
 
         // Such a passage can no longer be captured, but if one exists it must
         // yield one mark per text node it covers, never a throw.
-        heat._render([row(1, 'bloc second')]);
+        heat._render([row(1, 'bloc\nsecond')]);
 
         expect(marks().map(m => m.textContent)).toEqual(['bloc', 'second']);
     });

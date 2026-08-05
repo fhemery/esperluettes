@@ -70,7 +70,7 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
         expect(component.error).toBeNull();
     });
 
-    it('rejects a selection spanning two paragraphs', () => {
+    it('accepts a selection spanning two paragraphs outside any editor block', () => {
         document.body.innerHTML = `
             <div class="annotable-region">
                 <p id="a">le chat dort</p>
@@ -82,8 +82,26 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
         component.openForm({ chapterId: 1, storyId: 2 });
 
         expect(component.open).toBe(true);
-        expect(component.multiBlock).toBe(true);
-        expect(component.error).toBe(MULTI_BLOCK);
+        expect(component.multiBlock).toBe(false);
+        expect(component.error).toBeNull();
+    });
+
+    it('accepts a selection spanning two paragraphs inside the same editor block', () => {
+        document.body.innerHTML = `
+            <div class="annotable-region">
+                <div class="ce-block ce-block--text">
+                    <p id="a">le chat dort</p>
+                    <p id="b">le chien court</p>
+                </div>
+            </div>`;
+        select(textOf('#a'), 0, textOf('#b'), 8);
+
+        const component = makeComponent();
+        component.openForm({ chapterId: 1, storyId: 2 });
+
+        expect(component.open).toBe(true);
+        expect(component.multiBlock).toBe(false);
+        expect(component.error).toBeNull();
     });
 
     it('rejects a selection spanning two editor block wrappers', () => {
@@ -104,8 +122,8 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
     it('does not save while the selection spans several blocks', async () => {
         document.body.innerHTML = `
             <div class="annotable-region">
-                <p id="a">le chat dort</p>
-                <p id="b">le chien court</p>
+                <div class="ce-block ce-block--text"><p id="a">le chat dort</p></div>
+                <div class="ce-block ce-block--text"><p id="b">le chien court</p></div>
             </div>`;
         select(textOf('#a'), 0, textOf('#b'), 8);
 

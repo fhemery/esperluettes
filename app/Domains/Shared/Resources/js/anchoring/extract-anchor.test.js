@@ -80,7 +80,7 @@ describe('extractAnchor', () => {
         expect(anchor.suffix).toBe('one two three four five');
     });
 
-    it('handles selection spanning a paragraph boundary', () => {
+    it('handles selection spanning a paragraph boundary and keeps the line break', () => {
         const el = makeEl('<p>First paragraph</p><p>second paragraph</p>');
         const canonical = buildCanonicalText(el);
         const textNodes = getTextNodes(el);
@@ -91,8 +91,7 @@ describe('extractAnchor', () => {
         const anchor = extractAnchor(makeRange(firstNode, start, secondNode, 6), el, canonical);
 
         expect(anchor).not.toBeNull();
-        expect(anchor.highlighted).toContain('paragraph');
-        expect(anchor.highlighted).toContain('second');
+        expect(anchor.highlighted).toBe('paragraph\nsecond');
     });
 
     it('returns null when selection exceeds 500 plain-text characters', () => {

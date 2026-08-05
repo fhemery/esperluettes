@@ -42,7 +42,7 @@
 
     <template x-for="item in items" :key="item.id">
         <article class="flex flex-col gap-2 border-b border-accent pb-4 last:border-0 last:pb-0">
-            <blockquote class="border-l-4 border-tertiary/60 pl-3 italic text-fg/80 text-sm" x-text="item.highlighted_text"></blockquote>
+            <blockquote class="border-l-4 border-tertiary/60 pl-3 italic text-fg/80 text-sm whitespace-pre-line" x-text="item.highlighted_text"></blockquote>
 
             <template x-if="item.anchor_missing">
                 <span class="self-start text-xs rounded bg-warning/15 text-warning px-2 py-0.5">

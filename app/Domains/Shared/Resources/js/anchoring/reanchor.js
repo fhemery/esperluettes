@@ -85,15 +85,15 @@ function findBySurroundingContext(text, prefix, suffix) {
         let contentStart = prefixPos + prefix.length;
 
         if (!suffix) {
-            while (contentStart < text.length && text[contentStart] === ' ') contentStart++;
+            while (contentStart < text.length && /\s/.test(text[contentStart])) contentStart++;
             matches.push({ start: contentStart, end: text.length });
         } else {
             const suffixPos = text.indexOf(suffix, contentStart);
             if (suffixPos !== -1 && suffixPos > contentStart) {
                 let start = contentStart;
                 let end = suffixPos;
-                while (start < end && text[start] === ' ') start++;
-                while (end > start && text[end - 1] === ' ') end--;
+                while (start < end && /\s/.test(text[start])) start++;
+                while (end > start && /\s/.test(text[end - 1])) end--;
                 matches.push({ start, end });
             }
         }
