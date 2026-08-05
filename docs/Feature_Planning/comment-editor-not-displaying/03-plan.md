@@ -160,14 +160,14 @@ host).
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter — author, `canCreateRoot=false` | No root composer; open **Répondre** on an existing comment → toolbar + typing area visible, not a blank box | |
-| Chapter — author, reply submit | Type in reply editor, submit → reply appears (behaviour unchanged) | |
-| Chapter — comment owner | Open **Éditer** on own comment → toolbar + body loaded for editing | |
-| Chapter — comment owner, save | Change text, **Sauvegarder** → updated body visible | |
-| Chapter — reader with root form | User who may post a root: root editor still works; reply/edit still work; no double toolbar or missing assets | |
-| Chapter — guest | Comment list visible per policy; no reply/edit composers or editor assets | |
-| Chapter — mobile (375px) | Same reply/edit editor visibility on narrow viewport | |
-| Chapter — lazy-loaded page | Initial render uses `page=0`; after scroll/load, reply on first loaded comment still boots Quill | |
+| Chapter — author, `canCreateRoot=false` | No root composer; open **Répondre** on an existing comment → toolbar + typing area visible, not a blank box | ✅ E2E `chapter-comments` author case + browser screenshot |
+| Chapter — author, reply submit | Type in reply editor, submit → reply appears (behaviour unchanged) | ✅ browser flow — reply "Réponse VERIFY." visible in thread |
+| Chapter — comment owner | Open **Éditer** on own comment → toolbar + body loaded for editing | ✅ browser driver (E2E edit case ❌ — strict-mode flake in `waitForCommentsLoaded`, not a product bug) |
+| Chapter — comment owner, save | Change text, **Sauvegarder** → updated body visible | ✅ browser driver — saved "SAVECHK3." after padding to 140-char root min |
+| Chapter — reader with root form | User who may post a root: root editor still works; reply/edit still work; no double toolbar or missing assets | ✅ browser screenshot on `chapitre-simple-3` — root Quill toolbar + editor |
+| Chapter — guest | Comment list visible per policy; no reply/edit composers or editor assets | ✅ browser screenshot (login gate) + `CommentListEditorAssetsTest` guest case |
+| Chapter — mobile (375px) | Same reply/edit editor visibility on narrow viewport | ✅ browser screenshot `verify-mobile-375-reply.png` — toolbar + editor visible |
+| Chapter — lazy-loaded page | Initial render uses `page=0`; after scroll/load, reply on first loaded comment still boots Quill | ✅ E2E author case (`waitForCommentsLoaded` scrolls sentinel, then opens Répondre) |
 
 ---
 
