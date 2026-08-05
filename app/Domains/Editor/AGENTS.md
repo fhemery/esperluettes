@@ -35,7 +35,7 @@ None.
 
 **Quill's own `snow` stylesheet rides on the JS entry.** `editor-bundle.js` imports it, so the JS entry emits an `editor-bundle-<hash>.css` link of its own alongside `editor-<hash>.css`. Any assertion that counts editor stylesheets must distinguish the two basenames.
 
-**A `@push` inside an AJAX-rendered fragment is discarded** — there is no layout to flush the stack into. Comment's fragments carry editors and work only because `comment-list.blade.php` renders a page-level editor first. A domain that renders an editor *only* inside a fragment must push the assets from the page itself.
+**A `@push` inside an AJAX-rendered fragment is discarded** — there is no layout to flush the stack into. Comment's list shell includes `@include('editor::components._assets')` on the full-page render so lazy-loaded reply/edit composers have Quill available; fragments themselves cannot push assets. Any host that renders an editor *only* inside a fragment must push the assets from the page shell itself.
 
 **`initQuillEditor` is idempotent.** It checks `container.dataset.quillInited` and skips if already initialised. Always call it by the container's `id`.
 

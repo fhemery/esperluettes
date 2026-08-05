@@ -6,6 +6,7 @@
  *
  *   app/Domains/Auth/Database/Seeders/E2eAccountsSeeder.php
  *   app/Domains/Story/Database/Seeders/E2eStorySeeder.php
+ *   app/Domains/Comment/Database/Seeders/E2eCommentsSeeder.php
  *   app/Domains/News/Database/Seeders/E2eNewsSeeder.php
  *
  * Specs must read fixtures from here rather than hard-coding slugs, so that a
@@ -87,6 +88,16 @@ export const QUOTES = {
   formattedPassage: "de l'italique et du gras",
   /** Below the illustrated chapter's lazily-loaded image. */
   belowImagePassage: "qui suit l'image",
+} as const;
+
+/**
+ * One root comment on the published chapter, written by
+ * `app/Domains/Comment/Database/Seeders/E2eCommentsSeeder.php`.
+ */
+export const COMMENTS = {
+  chapterSlug: STORY.publishedChapter.slug,
+  bodyMarker: 'Commentaire E2E pour éditeur',
+  rootCommentId: 1,
 } as const;
 
 export const NEWS = { slug: 'actualite-e2e', title: 'Actualité E2E' } as const;

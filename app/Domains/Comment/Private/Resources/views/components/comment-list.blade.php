@@ -7,6 +7,9 @@
   perPage: {{ (int) ($list->perPage ?? 20) }},
   hasMore: {{ ($list->total > count($list->items)) ? 'true' : 'false' }},
 })">
+  @if(!$isGuest && !$error)
+    @include('editor::components._assets')
+  @endif
   @push('styles')
     <style>
       /* Comment body blockquotes (applies to fragments appended later) */
@@ -168,6 +171,15 @@
             this.activeReplyId = (this.activeReplyId === id) ? null : id;
             // Close edit when opening a reply
             if (this.activeReplyId !== null) this.activeEditId = null;
+            // Try initializing the reply editor after it becomes visible
+            const editorId = `reply-editor-${id}`;
+            try {
+              if (this.activeReplyId && window.initQuillEditor) {
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => { window.initQuillEditor(editorId); });
+                });
+              }
+            } catch (e) { /* no-op */ }
           }
           if (cancelBtn) {
             this.activeReplyId = null;
