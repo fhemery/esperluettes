@@ -368,6 +368,22 @@ deptrac:
         - type: directory
           value: app/Domains/StoryRef/Tests/
 
+    # Statistics Domain
+    - name: StatisticsPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Statistics/Public/'
+
+    - name: StatisticsPrivate
+      collectors:
+        - type: directory
+          value: 'app/Domains/Statistics/Private/'
+
+    - name: StatisticsTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Statistics/Tests/'
+
     # Quote Domain
     - name: QuotePublic
       collectors:
@@ -594,6 +610,15 @@ deptrac:
       - StoryRefPrivate
       - AdministrationPublic
 
+    StatisticsPublic:
+      - Shared
+      - StatisticsPrivate
+      - AuthPublic
+      - AdministrationPublic
+      - CommentPublic
+      - EventsPublic
+      - StoryPublic
+
     # ###################################################
     # Private domains - can access Shared + other domain Public APIs + events
     # ###################################################
@@ -769,6 +794,15 @@ deptrac:
       - StoryRefPublic
       - AdministrationPublic
 
+    StatisticsPrivate:
+      - Shared
+      - StatisticsPublic
+      - AuthPublic
+      - AdministrationPublic
+      - CommentPublic
+      - EventsPublic
+      - StoryPublic
+
     # ###################################################
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
     # ###################################################
@@ -912,6 +946,16 @@ deptrac:
       - TestHelpers
       - StoryRefPrivate
       - StoryRefPublic
+
+    StatisticsTests:
+      - Shared
+      - TestHelpers
+      - StatisticsPrivate
+      - StatisticsPublic
+      - AuthPublic
+      - AdministrationPublic
+      - EventsPublic
+      - StoryPublic
 
     # Media Domain
     MediaPublic:
