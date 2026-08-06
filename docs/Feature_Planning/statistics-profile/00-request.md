@@ -2,7 +2,7 @@
 
 Migrated from `Statistics.md` Phase 5, the only phase of that plan never
 delivered. The rest is live — see
-[`../statistics/README.md`](../statistics/README.md).
+[`../_done/statistics.md`](../_done/statistics.md).
 
 ## What I want
 

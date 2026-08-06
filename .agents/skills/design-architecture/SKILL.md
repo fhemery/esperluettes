@@ -22,7 +22,8 @@ research agents:
 
 - the **nearest analogous feature** and how it is wired (Quote is the most
   recent complete example: policy, public API, profile tab, notification,
-  cascade listeners);
+  cascade listeners) — its compact record, if wrapped, is
+  `docs/Feature_Planning/_done/<slug>.md`, with the tradeoffs it locked and why;
 - the **extension points** the feature will plug into, and their real
   signatures — `ProfileTabRegistry`, `SettingsPublicApi`, `NotificationPublicApi`,
   `ModerationRegistry`, `MediaPublicApi`, `EventPublicApi`, `StatisticDefinition`;

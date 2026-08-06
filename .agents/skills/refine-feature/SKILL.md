@@ -25,7 +25,10 @@ register its profile tab?", "what does `ProfileTabRegistry` require?".
 
 Look at the nearest existing feature. This app has strong precedent: Quote,
 Comment, ReadList and Annotations all solve the same shape of problem. Reusing
-a settled pattern is worth more than inventing a better one.
+a settled pattern is worth more than inventing a better one. If a similar
+feature has already shipped, its compact record is in
+`docs/Feature_Planning/_done/<slug>.md` — the "Decisions worth remembering" and
+"Not done" sections there often answer a question before you have to ask it.
 
 **Never ask the user something the code answers.** Every wasted question spends
 the attention you need for the questions only they can answer.

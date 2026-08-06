@@ -19,16 +19,16 @@ should be.
   whatever its position or status. This is the normal form when two sessions
   run in parallel — see "Parallel sessions" in
   [`.agents/loop/README.md`](../../loop/README.md).
-- Otherwise take the **first row with status `TODO`**, top to bottom. Before
+- Otherwise take the **first entry with status `TODO`**, top to bottom. Before
   doing so, check `git worktree list`: if the repository has more than one
-  worktree, another session may be running, and picking a row unilaterally is
-  how two sessions end up on the same one. Say which row you would take and ask
-  the user to confirm, rather than guessing.
-- If a row is `WIP:*`, do not silently skip it — tell the user there is a task
-  in progress and ask whether to finish it (`/continue-task`) or start the new
-  one anyway.
-- If there is no `TODO` row, say so and stop. Do not invent a task.
-- `BLOCKED:*` rows are skipped, but mention them once.
+  worktree, another session may be running, and picking an entry unilaterally
+  is how two sessions end up on the same one. Say which entry you would take
+  and ask the user to confirm, rather than guessing.
+- If an entry is `WIP:*`, do not silently skip it — tell the user there is a
+  task in progress and ask whether to finish it (`/continue-task`) or start the
+  new one anyway.
+- If there is no `TODO` entry, say so and stop. Do not invent a task.
+- `BLOCKED:*` entries are skipped, but mention them once.
 - Once you have selected the task, if you can, change the conversation title to `Task: <Task name>`
 
 ## 2. Set up
@@ -55,7 +55,7 @@ Judge the size from `00-request.md` and propose:
 
 State your judgement in one sentence and the mode you are taking. In
 `interactive` mode wait for the user; in `auto` mode carry on. Write the mode
-into the backlog row.
+into the backlog entry.
 
 ## 4. Run the loop
 
@@ -86,7 +86,7 @@ flow work?" costs the orchestrator one paragraph instead of six file reads it
 will then carry for the rest of the session.
 
 Dispatch each step in order. After each one, update the backlog status — your
-own row only, never another session's — then:
+own entry only, never another session's — then:
 
 - `interactive` — stop, summarise the step's output in a few lines, and tell the
   user to `/clear` and run `/continue-task`. **One step per chat.** The next step
@@ -127,9 +127,9 @@ Stop and ask the user when:
   `design-architecture` auto section) — then stop for that decision only, then
   resume chaining.
 
-In `auto` mode, when WRAP finishes with no open questions, mark the backlog
-row `DONE` and report the outcome. Do **not** start the next backlog `TODO`
-unless the user asks (`/next-task`).
+In `auto` mode, when WRAP finishes with no open questions, archive the backlog
+entry to `## Done` (see `wrap-task` §6) and report the outcome. Do **not**
+start the next backlog `TODO` unless the user asks (`/next-task`).
 
-Never mark a task `DONE` yourself in `interactive` mode — WRAP proposes it, the
-user confirms.
+Never archive a task's backlog entry yourself in `interactive` mode — WRAP
+proposes it, the user confirms.

@@ -47,8 +47,8 @@ In the "Not done" section, three separate things:
 - open questions still open.
 
 Then **push the ones worth doing back to `docs/Feature_Planning/BACKLOG.md`** as new
-`TODO` rows with their own folder, and link them from the README. This is what
-makes the loop a loop rather than a pipeline.
+`TODO` entries with their own folder, and link them from the README. This is
+what makes the loop a loop rather than a pipeline.
 
 ## 4. Retire the feature's e2e specs
 
@@ -92,12 +92,33 @@ domain that owns the core of it, not in a shared dumping ground.
 - New notification type → `docs/notification-types.md`.
 - New deptrac edge → make sure `02-architecture.md` §5 explains it.
 
-## 6. Close the backlog row
+## 6. Archive the folder and close the backlog entry
 
-- Move the row to the `## Done` table with the date, or set it to
-  `BLOCKED:<reason>` if it is genuinely not finished.
-- In `interactive` mode, **propose** this and let the user confirm; do not mark
-  a task `DONE` on your own authority.
+A finished task's folder does not stay where it was worked on — everything in
+it except the README you just wrote in step 2 is now redundant with what step 5
+folded into the domain docs, or with `BACKLOG.md` for leftovers. Keeping
+`00-request.md`/`01`–`03`/`DECISIONS.md` around forever, one live folder per
+task, is what made `docs/Feature_Planning/` unreadable.
+
+- Move `README.md` to `docs/Feature_Planning/_done/<slug>.md` (flat file, no
+  subfolder) and delete the rest of the folder.
+- Fix the README's own links: drop the `Spec:` line (it pointed at files that
+  no longer exist) and any other link into a file you just deleted. A link to
+  another task's README that also lives in `_done/` becomes `./other-slug.md`;
+  a link to a folder that is still active in `BACKLOG.md` is untouched.
+- Grep the rest of the repo for markdown links into the old folder path
+  (`grep -rn "](.*<slug>/" --include=*.md docs app`) — an active task's
+  `00-request.md` may point at it (e.g. a "the core is live, see …" pointer). Fix
+  those to `_done/<slug>.md` too. Plain backtick mentions (`` `<slug>/` ``, not a
+  real `[...](...)` link) are not links and do not need fixing.
+- Add one line to `BACKLOG.md`'s `## Done` list:
+  `` - [`<slug>`](_done/<slug>.md) · <one-sentence summary of what it shipped> ``.
+  Succinct on purpose — the README is where the detail lives.
+- Remove the entry from the active list above `## Done`.
+- Set it to `BLOCKED:<reason>` instead of any of the above if the task is
+  genuinely not finished.
+- In `interactive` mode, **propose** this and let the user confirm; do not
+  archive a task on your own authority.
 
 ## 7. Commit the paperwork
 

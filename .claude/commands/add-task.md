@@ -10,12 +10,12 @@ Add a task to `docs/Feature_Planning/BACKLOG.md`. Do **not** start working on it
    with the user's own words — do not embellish, do not invent requirements. Ask
    at most two clarifying questions if the request is unusable as written.
 4. Copy `.agents/loop/templates/DECISIONS.md` into the folder.
-5. Add a row to the backlog table: title, folder, proposed mode
+5. Add an entry to the backlog list: title, folder, proposed mode
    (`auto` for a bugfix or chore, `interactive` otherwise), status `TODO`.
-   Append it at the bottom unless the task blocks or is blocked by another row —
-   then insert it where the dependency requires. Rows carry no numbers, so
-   inserting one changes nothing else.
-6. Report the row and where it landed in the order.
+   Append it at the bottom unless the task blocks or is blocked by another
+   entry — then insert it where the dependency requires. Entries carry no
+   numbers, so inserting one changes nothing else.
+6. Report the entry and where it landed in the order.
 
 Request:
 

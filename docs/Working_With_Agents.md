@@ -101,21 +101,22 @@ session A:  /next-task annotations
 session B:  /next-task statistics-profile
 ```
 
-Agents do not pick rows for themselves when more than one session is open — a
-bare `/next-task` in that situation makes them stop and ask. Selection is yours
-because only you can see both sessions.
+Agents do not pick entries for themselves when more than one session is open —
+a bare `/next-task` in that situation makes them stop and ask. Selection is
+yours because only you can see both sessions.
 
-Pick tasks from **different domains**. The backlog's status column flags the
+Pick tasks from **different domains**. The backlog's status field flags the
 overlaps deliberately: `chapters-multi-edit/` and `annotations/` both rework
 per-block anchoring, and `editor-domain-visual-qa/` is meant to land before
 `chapters-multi-edit/` moves the DOM again. Two sessions on tasks like those
 produce a merge nobody wants to review, however clean the mechanics are.
 
 Task folders are per-slug, so the planning artifacts never collide. The only
-shared file is `BACKLOG.md`, where each task is one line and each session edits
-only its own row. If the two rows happen to sit within a few lines of each
-other, git may raise a one-line conflict when the second branch merges — keep
-both rows.
+shared file is `BACKLOG.md`, where each task is one line (deliberately not a
+markdown table — column padding would get rewritten on every edit) and each
+session edits only its own entry. If the two entries happen to sit within a
+few lines of each other, git may raise a one-line conflict when the second
+branch merges — keep both entries.
 
 ### Delete one
 

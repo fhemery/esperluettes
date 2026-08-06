@@ -1,7 +1,7 @@
 # Calendar — activity subscription and participant limits — request
 
 Migrated from `Calendar.md` §Deferred Features. The Calendar core is live — see
-[`../calendar/README.md`](../calendar/README.md).
+[`../_done/calendar.md`](../_done/calendar.md).
 
 ## What I want
 

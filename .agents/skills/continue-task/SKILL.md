@@ -15,11 +15,11 @@ Read [`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG
 Never `git pull` or `git rebase` — the user keeps the working copy where it
 should be.
 
-- One `WIP:*` row → that is the task.
+- One `WIP:*` entry → that is the task.
 - Several → normal when two sessions run in parallel worktrees, not an anomaly.
-  Prefer the row whose task folder *this* worktree's branch has been touching
+  Prefer the entry whose task folder *this* worktree's branch has been touching
   (`git log --oneline main.. -- docs/Feature_Planning/`); if that is ambiguous,
-  list them and ask. Never resume another session's row.
+  list them and ask. Never resume another session's entry.
 - None → say so and offer `/next-task`.
 - If the user named a task, use it whatever its status.
 
@@ -53,8 +53,9 @@ Also check reality, not just files:
   npm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
   ```
 
-If the files and the status column disagree, **fix the column** and say so in
-one line. Do not re-run a step whose artifact already exists — read it instead.
+If the files and the status field disagree, **fix the status field** and say so
+in one line. Do not re-run a step whose artifact already exists — read it
+instead.
 
 ## 3. Re-orient
 
@@ -72,7 +73,7 @@ next action is, and anything that looks inconsistent.
 
 Continue exactly as `next-task` §4 — including its orchestrator rule: you
 dispatch PLAN / BUILD / VERIFY / WRAP to subagents and do not edit code
-yourself. Start at the reconciled step and honour the row's mode:
+yourself. Start at the reconciled step and honour the entry's mode:
 
 - `interactive` — one step, then stop and ask the user to `/clear` and run
   `/continue-task` in a new chat. **BUILD is the exception**: chain its remaining

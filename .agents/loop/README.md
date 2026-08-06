@@ -14,9 +14,9 @@ backlog and the task folders.
 
 | Command | Selector |
 |---------|----------|
-| `/next-task` | first row with status `TODO` in [`BACKLOG.md`](../../docs/Feature_Planning/BACKLOG.md) → start it at REFINE |
-| `/continue-task` | first row with status `WIP:*` → resume at that step (ask if several are WIP) |
-| `/add-task` | append a new row, write `00-request.md`, stop |
+| `/next-task` | first entry with status `TODO` in [`BACKLOG.md`](../../docs/Feature_Planning/BACKLOG.md) → start it at REFINE |
+| `/continue-task` | first entry with status `WIP:*` → resume at that step (ask if several are WIP) |
+| `/add-task` | append a new entry, write `00-request.md`, stop |
 
 ## The six steps
 
@@ -36,17 +36,19 @@ the codebase already answers.
 
 ## Status vocabulary
 
-`docs/Feature_Planning/BACKLOG.md` status column:
+`docs/Feature_Planning/BACKLOG.md` status field, in each entry:
 
 - `TODO` — not started
 - `WIP:<STEP>` — in progress, `<STEP>` ∈ `REFINE DESIGN PLAN BUILD VERIFY WRAP`;
   BUILD may carry a phase counter, e.g. `WIP:BUILD (3/7)`
 - `BLOCKED:<reason>` — waiting on something outside the loop
-- `DONE` — wrapped
+
+There is no `DONE` status sitting on an active entry: WRAP's last act is to
+archive it — see `## Done` in `BACKLOG.md` and "Task folder" below.
 
 **The artifacts are the real checkpoints.** If `02-architecture.md` exists,
-DESIGN happened, whatever the status column says. `/continue-task` reconciles
-the two and trusts the files. Update the status column at every step boundary so
+DESIGN happened, whatever the status field says. `/continue-task` reconciles
+the two and trusts the files. Update the status field at every step boundary so
 an interrupted session resumes cheaply.
 
 ## Modes
@@ -67,7 +69,7 @@ does. An `auto` task that runs twelve phases inline in the orchestrator's thread
 is the single most expensive thing this loop can do — see "Context discipline".
 
 The orchestrator proposes a mode when the task is created; the user overrides
-it by editing the column.
+it by editing the entry.
 
 ## Context discipline
 
@@ -105,7 +107,7 @@ artifact rather than keeping the thread alive.
 
 ## Task folder
 
-`docs/Feature_Planning/<slug>/`
+While a task is active, everything lives in `docs/Feature_Planning/<slug>/`:
 
 ```
 00-request.md        the raw ask, written by the user (free form, may be 3 lines)
@@ -113,16 +115,30 @@ artifact rather than keeping the thread alive.
 02-architecture.md   DESIGN output — how it is built, tradeoffs locked
 03-plan.md           PLAN output — phases with deliverables/tests/acceptance
 DECISIONS.md         append-only log; every answer the user gave, with its date
-README.md            WRAP output — the compact record; **the only file agents
-                     should load by default** once the task is DONE
+README.md            WRAP output — the compact record
 shots/               screenshots produced by VERIFY
 ```
 
 `README.md` exists so a finished feature costs ~100 lines of context instead of
-~1000. The phase documents stay in the folder as history; agents read them only
-when the README points them there.
+~1000. The phase documents stay in the folder as history while the task is
+active; agents read them only when the README points them there.
 
 Templates for each file live in [`templates/`](./templates/).
+
+## The `_done/` archive
+
+WRAP's last act (§6 of `wrap-task`) is to reduce the folder to that one
+`README.md`, move it to `docs/Feature_Planning/_done/<slug>.md` — a flat file,
+no subfolder — and delete the rest. `docs/Feature_Planning/<slug>/` then stops
+existing; `00-request.md`/`01`–`03`/`DECISIONS.md` are not kept, since step 5
+already folded anything a future reader needs into the domain's own docs, and
+git keeps the rest.
+
+`_done/` is not loaded by default — it is browsed the way you'd browse closed
+PRs, when working in a related area or chasing why something is the way it is.
+REFINE and DESIGN check it for a similar past feature before asking the user a
+question a prior decision already answered (see "the nearest analogous
+feature" in `refine-feature` and `design-architecture`).
 
 ## Parallel sessions
 
@@ -136,8 +152,10 @@ directory basename, so each worktree has its own containers and MySQL volume,
 and PHP tests run on in-memory SQLite (`phpunit.xml`). Two gates never contend.
 
 What is *not* isolated is [`BACKLOG.md`](../../docs/Feature_Planning/BACKLOG.md).
-Task folders are per-slug and never collide; the backlog is one table where each
-task is a single line. Two rules keep that manageable:
+Task folders are per-slug and never collide; the backlog is a list where each
+task is a single line, deliberately not a markdown table — a table's column
+padding gets rewritten on every edit, which turns unrelated edits from two
+branches into unreadable merge conflicts. Two rules keep the list manageable:
 
 **The user names the task, the session does not choose it.** When more than one
 session is running, `/next-task <folder>` is given the folder explicitly:
@@ -147,7 +165,7 @@ session is running, `/next-task <folder>` is given the folder explicitly:
 ```
 
 Selection is the user's, made once, out loud, before either session starts —
-there is no protocol for two agents to agree on a row, because they never race
+there is no protocol for two agents to agree on an entry, because they never race
 for one. A bare `/next-task` still takes the first `TODO`, and is fine for a
 single session; with two open it is a bug, and the orchestrator says so rather
 than guessing.
@@ -158,11 +176,11 @@ per-block anchoring, and `editor-domain-visual-qa/` is meant to land before
 `chapters-multi-edit/` moves the DOM again. Two sessions on tasks like those
 merge badly whatever the backlog mechanics. Pick rows from different domains.
 
-Status updates then need no ceremony: edit the row and let the change ride along
-with the step's normal commit — no pull, no rebase, ever. Each
-session only ever touches its own row. They still land on two branches, so if
-the rows sit within a few lines of each other git may raise a one-line conflict
-when the second branch merges — take both rows and move on.
+Status updates then need no ceremony: edit the entry and let the change ride
+along with the step's normal commit — no pull, no rebase, ever. Each
+session only ever touches its own entry. They still land on two branches, so if
+the entries sit within a few lines of each other git may raise a one-line
+conflict when the second branch merges — take both entries and move on.
 
 ## Skills the loop leans on
 
