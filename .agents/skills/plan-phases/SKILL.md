@@ -82,5 +82,6 @@ rather than leaving it to BUILD.
 
 ## Output
 
-Return the phase index table and the total phase count. Flag any phase you were
+Run `npm run gate` and commit `03-plan.md` (follow the `commit` skill), then
+return the phase index table and the total phase count. Flag any phase you were
 unsure how to cut.

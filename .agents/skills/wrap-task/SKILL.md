@@ -122,8 +122,11 @@ task, is what made `docs/Feature_Planning/` unreadable.
 
 ## 7. Commit the paperwork
 
-The README, the backlog change and any regenerated domain docs go in one
-`docs(<domain>)` commit. Follow the `commit` skill.
+Run `npm run gate` — step 6 just deleted and moved files, so this is the check
+that a link elsewhere in the repo did not silently break. Fix anything it
+reports before committing, not after. The README, the backlog change and any
+regenerated domain docs go in one `docs(<domain>)` commit. Follow the `commit`
+skill.
 
 ## 8. Report
 

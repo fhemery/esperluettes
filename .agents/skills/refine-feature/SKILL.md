@@ -100,6 +100,11 @@ Fill the template. Rules:
   accident.
 - User-facing wording in French.
 
+Run `npm run gate` and commit `01-functional.md` and `DECISIONS.md` (follow the
+`commit` skill) — this step wrote or deleted planning docs (e.g. absorbing a
+sibling task), and an uncaught broken link here is exactly what sits invisible
+until an unrelated change stumbles on it later.
+
 Then hand back to the orchestrator with a five-line summary: what the feature
 is, the two or three decisions that shaped it, and anything still open.
 

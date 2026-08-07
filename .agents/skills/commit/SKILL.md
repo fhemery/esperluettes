@@ -7,8 +7,10 @@ description: Write and make a git commit that matches this project's conventions
 
 ## Before you commit
 
-- **Only commit when asked**, or when the loop's BUILD step reaches the end of a
-  phase. Never commit speculatively mid-work.
+- **Only commit when asked**, or at the end of a loop step — BUILD commits at
+  the end of each phase; REFINE, DESIGN, PLAN and WRAP each commit their own
+  artifact before handing back (see `.agents/loop/README.md`'s "Gate" section).
+  Never commit speculatively mid-work.
 - Never commit on `main`. Branch first: `git checkout -b <type>/<short-slug>`.
 - `git status` and `git diff` first — know exactly what is going in. Do not
   `git add -A` without looking; unrelated stray files are how a clean phase

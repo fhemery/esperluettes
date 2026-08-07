@@ -103,6 +103,9 @@ The test: if a line would be copied verbatim into a phase's Deliverables, it
 belongs in `03-plan.md` only. Duplicating it does not help BUILD — BUILD reads
 the plan — and guarantees the two drift.
 
+Run `npm run gate` and commit `02-architecture.md` and `DECISIONS.md` (follow
+the `commit` skill) before handing back.
+
 Hand back a five-line summary: placement, data model in one line, the tradeoffs
 locked, and any new deptrac edge.
 
