@@ -59,4 +59,4 @@ tracking down why something is the way it is.
 - [`discord-notifications`](_done/discord-notifications.md) · Discord DM delivery channel for notifications
 - [`calendar`](_done/calendar.md) · plugin-based time-bound activities (Jardino, SecretGift, Quote contest)
 - [`discord-link-hint`](_done/discord-link-hint.md) · preferences warning when Discord notifications are on but unlinked
-- **Quotes v1** · `Quotes.md`, `Quotes_Architecture.md`, `Quotes_Implementation_Plan.md` — reader quote book v1. Pre-loop; docs never compacted into `_done/`, kept as loose files.
+- **Quotes v1** · reader quote book v1. Pre-loop; planning docs (`Quotes.md`, `Quotes_Architecture.md`, `Quotes_Implementation_Plan.md`) removed — see [`app/Domains/Quote/README.md`](../../app/Domains/Quote/README.md) for the surviving record.

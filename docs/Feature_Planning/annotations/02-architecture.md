@@ -4,7 +4,7 @@ Companion to [`Chapter_Annotations.md`](./01-functional.md). The functional spec
 
 **v1 scope is deliberately narrower than the functional spec.** The MVP loop is "highlight → write comment → save → review via pop-up modal", with no in-chapter visual indicators, no post-publish editing, no replies, no gutter, no filter UI. See §8 for the v1-vs-vNext split. The data model and PHP architecture below are sized for the full spec — only the JS / UI surface and a few API methods are trimmed for v1.
 
-**Quotes ship first.** The Quote feature ([`Quotes_Architecture.md`](../Quotes_Architecture.md)) establishes shared infrastructure that Annotations inherits:
+**Quotes ship first.** The [Quote domain](../../../app/Domains/Quote/README.md) establishes shared infrastructure that Annotations inherits:
 - **JS test tooling** (Vitest + happy-dom) — set up by Quote, available to Annotations.
 - **Shared anchoring JS** (`buildCanonicalText`, `extractAnchor`, `findAnchor`) — live in `app/Domains/Shared/Resources/js/anchoring/` after Quote Phase 2. Annotations imports from there instead of owning local copies.
 - **`<x-comment::annotable>` with toolbar slot** — created by Quote Phase 9. Annotations adds its "Annoter" button to the existing `@slot('toolbar-actions')` in `chapters/show.blade.php` alongside the Quote button.
