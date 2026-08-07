@@ -62,7 +62,10 @@ provider registers the type into `CalendarRegistry`.
   `max_participants` are stored on `activities` and editable in the admin form,
   but **enforce nothing** — there is no enrolment logic, no cap, no participant
   list. Existing types use implicit participation.
-  → [`../calendar-subscription/`](../calendar-subscription/)
+  → absorbed into [`../secret-gift-enrolment/`](../secret-gift-enrolment/):
+  Secret Gift is the only real consumer, so enrolment is built there as a
+  Secret-Gift-owned concern instead of a generic base-Calendar mechanism; the
+  two dead fields are dropped rather than enforced.
 - **State-change notifications.** Nothing announces that an activity opened or
   is about to close. Deferred originally because the Notification domain did not
   exist; it does now.

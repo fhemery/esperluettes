@@ -33,13 +33,35 @@ the gap itself is not forgotten.
   README claimed) or explicit (a button, a confirmation)?
 - What are `preferences` for, and when does the participant fill them in?
 - Which activity states allow enrolling and un-enrolling?
-- Does this wait for `calendar-subscription/`, which introduces generic
-  enrolment for **any** activity with `requires_subscription`? Secret Gift may
-  be its first real consumer rather than needing its own mechanism —
-  **settle this before designing anything**.
 
 ## Constraints
 
 - Role restrictions on the activity must gate enrolment.
 - The shuffle is a manual Artisan command run by an admin after registration
   closes; enrolment must be closed by then, or the assignment set is unstable.
+
+## Merged from `calendar-subscription/` (2026-08-07)
+
+That task proposed a generic base-Calendar enrolment mechanism (driven by the
+unused `requires_subscription` / `max_participants` columns on
+`calendar_activities`). REFINE on it established that Jardino and Quote
+Contest are both open participation and never consult those columns, and
+collaborative-stories (future) won't need subscription in v1 either — so
+Secret Gift is the *only* real consumer. Building a generic mechanism for one
+consumer is speculative; decided to fold that task's scope in here instead and
+build enrolment as a Secret-Gift-owned concern on its existing
+`calendar_secret_gift_participants` table. `calendar-subscription/` is closed
+as absorbed. Its remaining open questions, now in scope here:
+
+- Cap enforcement: hard refusal at `max_participants`, or a waiting list?
+- Who can see the participant list: everyone, enrolled users only, or admins
+  only?
+- What happens to a participant row when the user is deactivated or deleted?
+  (Calendar has no cleanup listeners for either event today — Jardino goals
+  aren't cleaned up either, so there's no existing convention to follow inside
+  Calendar; Quote and ReadList soft-delete/hard-delete on those events
+  respectively, if a precedent is wanted.)
+
+The `requires_subscription` / `max_participants` base columns are dead code
+once this ships (SecretGift's own logic won't read them) — DESIGN should
+decide whether to drop them.
