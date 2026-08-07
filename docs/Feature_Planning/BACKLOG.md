@@ -22,10 +22,8 @@ into unreadable merge conflicts. A one-line-per-task list keeps a conflict
 scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
-- **Calendar — activity subscription and participant limits** · `calendar-subscription/` · interactive · TODO
+- **Secret Gift — participants cannot enrol** · `secret-gift-enrolment/` · interactive · WIP:BUILD (0/7): 7-phase plan ready in `03-plan.md`
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO
-- **Quotes — moderation of quotes and notes** · `quotes-moderation/` · interactive · TODO
-- **Secret Gift — participants cannot enrol** · `secret-gift-enrolment/` · interactive · TODO: may be absorbed by `calendar-subscription/` rather than needing its own mechanism
 - **Jardino — `deselected_at` is never written** · `jardino-snapshot-deselection/` · auto · TODO
 - **Chapter annotations** · `annotations/` · interactive · TODO: enters at **BUILD** — `01`/`02`/`03` are the pre-loop documents, 10 of 14 phases remain. Overlaps `chapters-multi-edit/` and `quotes-author-view/` on per-block anchoring — read both records in `_done/` first and sequence them deliberately. Two facts now settled by `quotes-author-view/`: `Shared/Resources/js/anchoring/block-elements.js` is the shared "what is a block" predicate (narrower than `canonical-text.js`'s `BLOCK_TAGS`), and quotes are now refused at capture when they span two blocks (decisions #22/#23) — decide deliberately whether annotations adopt the same restriction or handle the boundary seam.
 - **Gift sound on Media, retire `<x-shared::sound-upload>`** · `media-sound-upload/` · interactive · TODO: leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out
