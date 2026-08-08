@@ -88,6 +88,35 @@ describe('News Details Test', function () {
         $response->assertSee('Tech Admin Draft');
     });
 
+    it('shows draft preview with banner to moderators', function () {
+        $moderator = moderator($this);
+        $news = News::factory()->create([
+            'title' => 'Moderator Draft',
+            'slug' => 'moderator-draft',
+            'status' => 'draft',
+            'published_at' => null,
+            'created_by' => $moderator->id,
+        ]);
+
+        $response = $this->actingAs($moderator)->get(route('news.show', ['slug' => $news->slug]));
+        $response->assertOk();
+        $response->assertSee('news::public.draft_preview');
+        $response->assertSee('Moderator Draft');
+    });
+
+    it('shows edit link to moderators on published news', function () {
+        $moderator = moderator($this);
+        $news = News::factory()->published()->create([
+            'title' => 'Published For Moderator',
+            'slug' => 'published-for-moderator',
+            'created_by' => $moderator->id,
+        ]);
+
+        $response = $this->actingAs($moderator)->get(route('news.show', ['slug' => $news->slug]));
+        $response->assertOk();
+        $response->assertSee(route('news.admin.edit', $news));
+    });
+
     it('allows direct access to published news', function () {
         $admin = admin($this);
         $a = News::factory()->published()->create([

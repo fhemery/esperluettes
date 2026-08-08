@@ -12,7 +12,7 @@ Route::middleware('web')->group(function () {
 });
 
 // Admin routes for News
-Route::middleware(['web', 'auth', 'compliant', 'role:' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])
+Route::middleware(['web', 'auth', 'compliant', 'role:' . Roles::MODERATOR . ',' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])
     ->prefix('admin/news')
     ->name('news.admin.')
     ->group(function () {

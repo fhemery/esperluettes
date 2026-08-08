@@ -1,6 +1,6 @@
 # News Domain
 
-The News domain owns news article creation, the publish/unpublish lifecycle, and a pinned carousel displayed on the home page. All article management is restricted to administrators; published articles are publicly readable.
+The News domain owns news article creation, the publish/unpublish lifecycle, and a pinned carousel displayed on the home page. Article management is restricted to moderators, admins, and tech-admins; published articles are publicly readable.
 
 Explicitly out of scope: generic user notifications (delegated to [Notification](../Notification/README.md)), home page layout (delegated to [Home](../Home/README.md)), and audit logging (delegated to [Events](../Events/README.md)).
 
@@ -10,7 +10,7 @@ Explicitly out of scope: generic user notifications (delegated to [Notification]
 
 ### Article status
 
-Each article carries a `status` field with two values: `draft` and `published`. Only published articles are visible to regular users. Admins can preview draft articles via the public `show` route.
+Each article carries a `status` field with two values: `draft` and `published`. Only published articles are visible to regular users. Moderators, admins, and tech-admins can preview draft articles via the public `show` route.
 
 `published_at` is set the first time an article transitions to `published`; it is never overwritten by subsequent publish/unpublish cycles. This means `published_at` records when the article was first released, not the most recent re-publish.
 
