@@ -25,6 +25,36 @@ class SecretGiftService
             ->first();
     }
 
+    /**
+     * Enrol a user, or overwrite the preferences of an already-enrolled one.
+     *
+     * `updateOrCreate` rather than `create`: the unique key on
+     * `(activity_id, user_id)` would turn a double submit into a 500, and a
+     * second join is semantically the same as saving preferences again.
+     */
+    public function join(Activity $activity, int $userId, ?string $preferences): SecretGiftParticipant
+    {
+        return SecretGiftParticipant::query()->updateOrCreate(
+            ['activity_id' => $activity->id, 'user_id' => $userId],
+            ['preferences' => $preferences],
+        );
+    }
+
+    public function updatePreferences(SecretGiftParticipant $participant, ?string $preferences): void
+    {
+        $participant->preferences = $preferences;
+        $participant->save();
+    }
+
+    /** Un-enrol a user. A no-op when there is nothing to remove. */
+    public function leave(Activity $activity, int $userId): void
+    {
+        SecretGiftParticipant::query()
+            ->where('activity_id', $activity->id)
+            ->where('user_id', $userId)
+            ->delete();
+    }
+
     public function getAssignmentAsGiver(int $activityId, int $userId): ?SecretGiftAssignment
     {
         return SecretGiftAssignment::where('activity_id', $activityId)

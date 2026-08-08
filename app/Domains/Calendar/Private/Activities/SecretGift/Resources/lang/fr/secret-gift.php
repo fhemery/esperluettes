@@ -55,8 +55,16 @@ return [
         'registration_hint' => 'Les inscriptions ouvrent à l\'ouverture de l\'activité et ferment à cette date, au plus tard au début de l\'activité.',
     ],
 
+    // Flash messages
+    'flash' => [
+        'joined' => 'Vous êtes bien inscrit(e) à cette activité !',
+        'preferences_saved' => 'Vos préférences ont bien été enregistrées.',
+        'left' => 'Vous n\'êtes plus inscrit(e) à cette activité.',
+    ],
+
     // Validation messages
     'validation' => [
+        'preferences_max' => 'Vos préférences sont trop longues (maximum 65 535 caractères).',
         'registration_ends_before_preview_start' => 'La fin des inscriptions ne peut pas précéder l\'ouverture de l\'activité.',
         'registration_ends_after_activity_start' => 'La fin des inscriptions ne peut pas dépasser le début de l\'activité.',
         'gift_text_max' => 'Le texte du cadeau est trop long (maximum 65 535 caractères).',
