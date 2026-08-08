@@ -71,6 +71,20 @@ return [
         'section_title' => 'Cadeau surprise',
         'registration_ends_at' => 'Fin des inscriptions',
         'registration_hint' => 'Les inscriptions ouvrent à l\'ouverture de l\'activité et ferment à cette date, au plus tard au début de l\'activité.',
+
+        // Shuffle panel
+        'shuffle_title' => 'Attribution des cadeaux',
+        'participants_count' => ':count inscrit(e)s',
+        'participants_empty' => 'Personne n\'est inscrit(e) pour le moment.',
+        'shuffle_button' => 'Lancer le tirage',
+        'already_shuffled' => 'Le tirage a déjà été effectué : chaque inscrit(e) a son destinataire.',
+        'not_shuffled_yet' => 'Le tirage n\'a pas encore été effectué.',
+        'shuffle_disabled_not_enough' => 'Il faut au moins 2 inscrit(e)s pour lancer le tirage.',
+        'shuffle_disabled_active' => 'L\'activité a commencé : le tirage ne peut plus être relancé.',
+        'shuffle_confirm_title' => 'Lancer le tirage ?',
+        'shuffle_confirm_body' => 'Attention : le tirage supprime toutes les attributions existantes et les cadeaux déjà déposés (textes, images et sons) sont définitivement perdus. Les inscriptions seront closes.',
+        'shuffle_confirm_cancel' => 'Annuler',
+        'shuffle_confirm_confirm' => 'Lancer le tirage',
     ],
 
     // Flash messages
@@ -78,6 +92,8 @@ return [
         'joined' => 'Vous êtes bien inscrit(e) à cette activité !',
         'preferences_saved' => 'Vos préférences ont bien été enregistrées.',
         'left' => 'Vous n\'êtes plus inscrit(e) à cette activité.',
+        'shuffled' => 'Le tirage a été effectué pour :count participant(e)s.',
+        'shuffle_not_enough_participants' => 'Il faut au moins 2 inscrit(e)s pour lancer le tirage.',
     ],
 
     // Validation messages

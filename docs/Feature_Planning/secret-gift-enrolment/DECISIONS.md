@@ -27,4 +27,4 @@ the user may want to reverse — surface these in the WRAP summary.
 
 | # | Assumption | Made at | Reversible? |
 |---|------------|---------|-------------|
-| | | | |
+| A1 | Phase 7's acceptance says the shuffle route "403s" for `user-confirmed`/`user`. The project's `role:` middleware — the mechanism architecture §3.3 tells us to use — denies by redirecting to the dashboard with an error, never by a 403 (QuoteContest's admin category routes behave the same). Kept the middleware and asserted denial as that redirect; the security property (request never reaches `ShuffleService`, no assignment row written) is tested. | BUILD phase 7 | Yes — would need a custom abort in the middleware or a controller-level role check, diverging from every other admin route. |

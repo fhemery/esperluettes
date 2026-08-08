@@ -22,7 +22,7 @@ into unreadable merge conflicts. A one-line-per-task list keeps a conflict
 scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
-- **Secret Gift — participants cannot enrol** · `secret-gift-enrolment/` · interactive · WIP:BUILD (6/7): 7-phase plan in `03-plan.md`; phases 1–6 done
+- **Secret Gift — participants cannot enrol** · `secret-gift-enrolment/` · interactive · WIP:VERIFY: all 7 BUILD phases done
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO
 - **Jardino — `deselected_at` is never written** · `jardino-snapshot-deselection/` · auto · TODO
 - **Chapter annotations** · `annotations/` · interactive · TODO: enters at **BUILD** — `01`/`02`/`03` are the pre-loop documents, 10 of 14 phases remain. Overlaps `chapters-multi-edit/` and `quotes-author-view/` on per-block anchoring — read both records in `_done/` first and sequence them deliberately. Two facts now settled by `quotes-author-view/`: `Shared/Resources/js/anchoring/block-elements.js` is the shared "what is a block" predicate (narrower than `canonical-text.js`'s `BLOCK_TAGS`), and quotes are now refused at capture when they span two blocks (decisions #22/#23) — decide deliberately whether annotations adopt the same restriction or handle the boundary seam.

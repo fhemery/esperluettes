@@ -69,6 +69,41 @@ class SecretGiftConfigService
     }
 
     /**
+     * How many enrolments the activity holds.
+     *
+     * This is the number `performShuffle()` works from — deliberately the raw
+     * row count, not `participantsWithProfiles()->count()`, which drops rows
+     * whose profile can no longer be resolved.
+     */
+    public function participantCount(int $activityId): int
+    {
+        return SecretGiftParticipant::query()->where('activity_id', $activityId)->count();
+    }
+
+    /** Whether the activity already has an assignment set. */
+    public function hasBeenShuffled(Activity $activity): bool
+    {
+        return $this->shuffle->hasBeenShuffled($activity);
+    }
+
+    /**
+     * Re-shuffling is free while the activity has not started, and blocked for
+     * good once it has — shuffled or not (decision #6). A running exchange must
+     * never see its pairings move under the participants' feet.
+     *
+     * The one definition both the controller and the admin panel read: a
+     * disabled button and a refused POST always agree.
+     */
+    public function isShuffleAllowedInState(Activity $activity): bool
+    {
+        return ! in_array($activity->state, [
+            ActivityState::ACTIVE,
+            ActivityState::ENDED,
+            ActivityState::ARCHIVED,
+        ], true);
+    }
+
+    /**
      * The activity's participants as public profiles, ordered by display name.
      *
      * Never carries `preferences`: that column is only ever read for the one

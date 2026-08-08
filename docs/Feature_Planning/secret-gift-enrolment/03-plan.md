@@ -19,7 +19,7 @@
 | 4 | Enrolment service, write endpoints, authorization | M | 3 | DONE |
 | 5 | Participant cleanup on deactivation / deletion | S | 4 | DONE |
 | 6 | Participant-facing UI (join / edit / leave / list) | M | 4 | DONE |
-| 7 | Moderator & admin shuffle screen | M | 3, 4 | TODO |
+| 7 | Moderator & admin shuffle screen | M | 3, 4 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
