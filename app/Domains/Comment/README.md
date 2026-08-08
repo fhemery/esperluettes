@@ -140,6 +140,18 @@ Alpine on the list calls `window.initQuillEditor` when **Répondre** or
 append). `CommentListEditorAssetsTest` guards asset emission; browser coverage is
 in `e2e/tests/core/chapter-comments.spec.ts`.
 
+### Draft autosave and post-submit clear
+
+Compose forms opt into `app/Domains/Comment/Resources/js/comment-draft/index.js`
+via `data-comment-draft`. Drafts live in `localStorage` and restore on the next
+visit. On successful create, the controller flashes `comment.draft_consumed`; the
+list shell sets `window.__commentDraftConsumed` **before** the deferred Vite
+module boots. Bootstrap clears the matching slot and skips restore — otherwise
+hosts that keep the root form visible (news: unlimited roots) re-show the
+just-posted body. Chapters hide the root form after one root, so the same race
+was invisible there. Vitest: `comment-draft/index.test.js`. Browser:
+`e2e/tests/core/comment-draft-consume.spec.ts`.
+
 ## Routes
 
 | Method | Path | Auth | Description |

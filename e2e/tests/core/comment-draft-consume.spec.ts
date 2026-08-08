@@ -3,10 +3,16 @@ import { ChapterCommentsPage } from '../../pages/ChapterCommentsPage';
 import { expect, test } from '../../support/test';
 
 /**
- * Feature VERIFY — news comment compose form must be empty after a successful
- * submit (draft consume-before-restore). Temporary: delete or promote at WRAP.
+ * CORE — comment draft consume-before-restore after a successful submit.
  *
- * Client-only: PHP cannot see localStorage restore into Quill after redirect.
+ * On success, `CommentController` flashes `comment.draft_consumed` and the list
+ * shell sets `window.__commentDraftConsumed` before the Vite draft module
+ * restores localStorage into Quill. If that ordering regresses, hosts that keep
+ * the root form visible (news: unlimited roots) show the just-posted body again.
+ * Chapters hide the root form after one root, so the same race is invisible there.
+ *
+ * Promoted from news-comment-form-retains-text VERIFY: Comment draft JS is shared
+ * by every comment host and breakable without touching News or Story PHP.
  */
 
 const ROOT_BODY = 'Commentaire e2e apres soumission le formulaire doit etre vide';
