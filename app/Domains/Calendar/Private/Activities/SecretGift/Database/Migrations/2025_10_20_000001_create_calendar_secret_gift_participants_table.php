@@ -10,6 +10,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Previously shipped as 2024_12_13_140000_* — already applied in production.
+        if (Schema::hasTable('calendar_secret_gift_participants')) {
+            return;
+        }
+
         Schema::create('calendar_secret_gift_participants', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')->constrained('calendar_activities')->cascadeOnDelete();
