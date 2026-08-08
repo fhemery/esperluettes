@@ -96,7 +96,10 @@ final class AdminNavigationRegistry
         return collect($this->pages)
             ->filter(fn($page) => $page['group'] === $groupKey)
             ->filter(fn($page) => $this->userCanAccessPage($page))
-            ->map(fn($page) => array_merge($page, ['label' => __($page['label'])]))
+            ->map(fn($page, $key) => array_merge($page, [
+                'key' => $key,
+                'label' => __($page['label']),
+            ]))
             ->sortBy('sort_order');
     }
 

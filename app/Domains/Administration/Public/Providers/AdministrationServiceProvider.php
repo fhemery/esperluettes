@@ -45,7 +45,7 @@ class AdministrationServiceProvider extends ServiceProvider
         // hardcoded in the sidebar
 
         $registry->registerPage(
-            __('administration::maintenance.key'),
+            'maintenance',
             'administration',
             'administration::maintenance.title',
             AdminRegistryTarget::route('administration.maintenance'),
