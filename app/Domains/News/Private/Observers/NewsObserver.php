@@ -19,7 +19,7 @@ class NewsObserver
     {
         // Auto-assign display_order if pinned and order not provided
         if ($news->is_pinned && empty($news->display_order)) {
-            $news->display_order = $this->nextDisplayOrder();
+            $news->display_order = $this->assignFirstDisplayOrder($news);
         }
     }
 
@@ -33,7 +33,7 @@ class NewsObserver
             if ($newPinned && !$oldPinned) {
                 // Became pinned: ensure it has an order
                 if (empty($news->display_order)) {
-                    $news->display_order = $this->nextDisplayOrder();
+                    $news->display_order = $this->assignFirstDisplayOrder($news);
                 }
             } elseif (!$newPinned && $oldPinned) {
                 // Became unpinned: clear order
@@ -41,7 +41,7 @@ class NewsObserver
             }
         } elseif ($news->is_pinned && empty($news->display_order)) {
             // Still pinned but no order set yet: assign one
-            $news->display_order = $this->nextDisplayOrder();
+            $news->display_order = $this->assignFirstDisplayOrder($news);
         }
     }
 
@@ -88,10 +88,23 @@ class NewsObserver
         Cache::forget('news.carousel');
     }
 
-    protected function nextDisplayOrder(): int
+    /**
+     * Insert as first: bump other pinned orders by 1 (query builder — no model
+     * events), then return 1 for the newly pinned article.
+     */
+    protected function assignFirstDisplayOrder(News $news): int
     {
-        $max = News::query()->where('is_pinned', true)->max('display_order');
-        return is_null($max) ? 1 : ((int) $max + 1);
+        $query = News::query()
+            ->where('is_pinned', true)
+            ->whereNotNull('display_order');
+
+        if ($news->exists) {
+            $query->where('id', '!=', $news->id);
+        }
+
+        $query->increment('display_order');
+
+        return 1;
     }
 
     protected function bustIfRelevant(News $news, bool $onCreate = false): void

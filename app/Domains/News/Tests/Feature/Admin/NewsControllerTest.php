@@ -26,6 +26,15 @@ describe('News Admin Controller', function () {
             $response->assertSee('Draft News');
         });
 
+        it('allows access for moderator users', function () {
+            $user = moderator($this);
+
+            $response = $this->actingAs($user)
+                ->get(route('news.admin.index'));
+
+            $response->assertOk();
+        });
+
         it('denies access to non-admin users', function () {
             $user = alice($this, [], true, [Roles::USER_CONFIRMED]);
 
@@ -72,6 +81,29 @@ describe('News Admin Controller', function () {
             $this->assertDatabaseHas('news', [
                 'title' => 'Test News',
                 'slug' => 'test-news',
+                'status' => 'draft',
+                'created_by' => $user->id,
+            ]);
+        });
+
+        it('creates a draft news item for moderators', function () {
+            $user = moderator($this);
+
+            $response = $this->actingAs($user)
+                ->post(route('news.admin.store'), [
+                    'title' => 'Moderator News',
+                    'slug' => 'moderator-news',
+                    'summary' => 'A short summary',
+                    'content' => '<p>News content</p>',
+                    'status' => 'draft',
+                    'is_pinned' => false,
+                ]);
+
+            $response->assertRedirect(route('news.admin.index'));
+
+            $this->assertDatabaseHas('news', [
+                'title' => 'Moderator News',
+                'slug' => 'moderator-news',
                 'status' => 'draft',
                 'created_by' => $user->id,
             ]);
@@ -233,6 +265,33 @@ describe('News Admin Controller', function () {
 
             $response->assertRedirect(route('news.admin.index'));
             $response->assertSessionHasNoErrors();
+        });
+
+        it('persists is_pinned when the form posts the toggle', function () {
+            $user = admin($this);
+            $news = News::factory()->create([
+                'title' => 'Pin Me',
+                'slug' => 'pin-me',
+                'status' => 'draft',
+                'is_pinned' => false,
+            ]);
+
+            $response = $this->actingAs($user)
+                ->put(route('news.admin.update', $news), [
+                    'title' => 'Pin Me',
+                    'slug' => 'pin-me',
+                    'summary' => 'Updated summary',
+                    'content' => '<p>Updated content</p>',
+                    'status' => 'draft',
+                    'is_pinned' => true,
+                ]);
+
+            $response->assertRedirect(route('news.admin.index'));
+
+            $this->assertDatabaseHas('news', [
+                'id' => $news->id,
+                'is_pinned' => true,
+            ]);
         });
     });
 

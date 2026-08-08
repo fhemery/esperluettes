@@ -36,9 +36,9 @@ All four events are registered on the `EventBus` in `NewsServiceProvider`.
 
 **`created_by` is nullable; no FK to `users` exists.** This is intentional per architecture rules. User deletion nullifies the field via event listener, not a cascade. Do not add a FK constraint.
 
-**Admin access check in the public `show` route.** Draft articles are accessible to `ADMIN` and `TECH_ADMIN` roles via the regular `/news/{slug}` route for preview. This check uses `AuthPublicApi::hasAnyRole()` — do not duplicate this logic in middleware.
+**Admin access check in the public `show` route.** Draft articles are accessible to `MODERATOR`, `ADMIN`, and `TECH_ADMIN` roles via the regular `/news/{slug}` route for preview. This check uses `AuthPublicApi::hasAnyRole()` — do not duplicate this logic in middleware.
 
 ## Registry integrations
 
 - **NotificationFactory** (`Notification` domain) — registers `NewsPublishedNotification` under type `news.published` (group `news`) and `NewsReplyCommentNotification` under type `news.reply_comment` (group `news-comments`, registered locally with `registerGroup()` in `NewsServiceProvider` because it holds only News types). This is required for the notification system to reconstruct the notification content from stored data. Both type strings are persisted in `notifications.content_key` — never rename them. A group must be registered before any type that references it, or `register()` throws.
-- **AdminNavigationRegistry** (`Administration` domain) — registers two admin nav entries: news management (`news.admin.index`) and carousel ordering (`news.admin.pinned.index`), both restricted to `ADMIN` and `TECH_ADMIN` roles.
+- **AdminNavigationRegistry** (`Administration` domain) — registers two admin nav entries: news management (`news.admin.index`) and carousel ordering (`news.admin.pinned.index`), restricted to `MODERATOR`, `ADMIN`, and `TECH_ADMIN` roles.

@@ -102,7 +102,7 @@ class NewsServiceProvider extends ServiceProvider
             'news::admin.nav.news',
             AdminRegistryTarget::route('news.admin.index'),
             'newspaper',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
+            [Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN],
             10,
         );
 
@@ -113,7 +113,7 @@ class NewsServiceProvider extends ServiceProvider
             'news::admin.nav.pinned',
             AdminRegistryTarget::route('news.admin.pinned.index'),
             'push_pin',
-            [Roles::ADMIN, Roles::TECH_ADMIN],
+            [Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN],
             11,
         );
     }

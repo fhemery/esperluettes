@@ -10,7 +10,7 @@ class NewsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasRole([Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
+        return $this->user()?->hasRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]) ?? false;
     }
 
     public function rules(): array

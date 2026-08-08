@@ -224,7 +224,7 @@ Located in `Resources/views/components/`. Referenced as `<x-shared::component-na
 - `text-input`, `input-label`, `input-error` — standard text field, label, error display
 - `select`, `select-with-tooltips` — select boxes
 - `searchable-multi-select` — Alpine-powered multi-select with search
-- `toggle` — boolean toggle switch
+- `toggle` — boolean toggle switch. The checkbox overlays the visible track (`relative` + absolute inset, opacity 0) so focus does not scroll a clipped `sr-only` node inside Administration’s `overflow-y-auto` main pane. Keep `peer` / `peer-checked` / `peer-focus` on the track; do not reintroduce `sr-only` on the input.
 - `button`, `secondary-button`, `danger-button` — button variants
 
 **Fields (Settings/Config plug-in system)**

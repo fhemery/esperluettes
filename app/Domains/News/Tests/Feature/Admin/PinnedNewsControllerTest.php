@@ -38,6 +38,15 @@ describe('Pinned News Admin Controller', function () {
             $response->assertDontSee('Not Pinned');
         });
 
+        it('allows access for moderator users', function () {
+            $user = moderator($this);
+
+            $response = $this->actingAs($user)
+                ->get(route('news.admin.pinned.index'));
+
+            $response->assertOk();
+        });
+
         it('denies access to non-admin users', function () {
             $user = alice($this, [], true, [Roles::USER_CONFIRMED]);
 
@@ -80,6 +89,31 @@ describe('Pinned News Admin Controller', function () {
             expect($news3->fresh()->display_order)->toBe(1);
             expect($news1->fresh()->display_order)->toBe(2);
             expect($news2->fresh()->display_order)->toBe(3);
+        });
+
+        it('reorders pinned news for moderators', function () {
+            $user = moderator($this);
+            $news1 = News::factory()->create([
+                'title' => 'First',
+                'is_pinned' => true,
+                'display_order' => 1,
+            ]);
+            $news2 = News::factory()->create([
+                'title' => 'Second',
+                'is_pinned' => true,
+                'display_order' => 2,
+            ]);
+
+            $response = $this->actingAs($user)
+                ->putJson(route('news.admin.pinned.reorder'), [
+                    'ordered_ids' => [$news2->id, $news1->id],
+                ]);
+
+            $response->assertOk();
+            $response->assertJson(['success' => true]);
+
+            expect($news2->fresh()->display_order)->toBe(1);
+            expect($news1->fresh()->display_order)->toBe(2);
         });
 
         it('validates ordered_ids array', function () {

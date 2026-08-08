@@ -3,7 +3,7 @@
         <header class="mb-6 md:mb-10">
         <div class="flex gap-2 items-baseline">
         <x-shared::title>{{ $news->title }}</x-shared::title>
-         @if(Auth::user() && Auth::user()->hasRole(['admin', 'tech-admin']))
+         @if(Auth::user() && Auth::user()->hasRole(['moderator', 'admin', 'tech-admin']))
         <a href="{{ route('news.admin.edit', $news) }}">
             <x-shared::button icon="edit" size="xs" color="accent" :outline="true">
             </x-shared::button>

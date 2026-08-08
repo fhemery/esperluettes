@@ -21,26 +21,33 @@
     'cursor-pointer'              => !$disabled,
     'cursor-not-allowed opacity-50' => $disabled,
 ])>
-    <input
-        @if($id) id="{{ $id }}" @endif
-        type="checkbox"
-        name="{{ $name }}"
-        value="{{ $value }}"
-        class="sr-only peer"
-        {{ $checked ? 'checked' : '' }}
-        {{ $disabled ? 'disabled' : '' }}
-    >
-    <span @class([
-        'relative inline-block w-11 h-6 rounded-full bg-gray-300 transition-colors align-middle',
-        'peer-focus:outline-hidden peer-focus:ring-2',
-        'after:content-[\'\'] after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full',
-        'after:bg-white after:shadow after:transition-transform',
-        'peer-checked:after:translate-x-5',
-        'peer-checked:bg-accent peer-focus:ring-accent/80' => $btnColor === 'accent',
-        'peer-checked:bg-primary peer-focus:ring-primary/80' => $btnColor === 'primary',
-        'peer-checked:bg-secondary peer-focus:ring-secondary/80' => $btnColor === 'secondary',
-        'peer-checked:bg-tertiary peer-focus:ring-tertiary/80' => $btnColor === 'tertiary',
-    ])></span>
+    {{-- Relative track box: checkbox overlays the visible switch so focus does not scroll a clipped sr-only node. --}}
+    <span class="relative inline-block h-6 w-11 shrink-0 align-middle">
+        <input
+            @if($id) id="{{ $id }}" @endif
+            type="checkbox"
+            name="{{ $name }}"
+            value="{{ $value }}"
+            @class([
+                'peer absolute inset-0 z-10 h-full w-full opacity-0',
+                'cursor-pointer' => !$disabled,
+                'cursor-not-allowed' => $disabled,
+            ])
+            {{ $checked ? 'checked' : '' }}
+            {{ $disabled ? 'disabled' : '' }}
+        >
+        <span @class([
+            'pointer-events-none relative block h-full w-full rounded-full bg-gray-300 transition-colors',
+            'peer-focus:outline-hidden peer-focus:ring-2',
+            'after:content-[\'\'] after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full',
+            'after:bg-white after:shadow after:transition-transform',
+            'peer-checked:after:translate-x-5',
+            'peer-checked:bg-accent peer-focus:ring-accent/80' => $btnColor === 'accent',
+            'peer-checked:bg-primary peer-focus:ring-primary/80' => $btnColor === 'primary',
+            'peer-checked:bg-secondary peer-focus:ring-secondary/80' => $btnColor === 'secondary',
+            'peer-checked:bg-tertiary peer-focus:ring-tertiary/80' => $btnColor === 'tertiary',
+        ])></span>
+    </span>
     @if($label)
         <span @class([
             'ml-3 text-sm',
