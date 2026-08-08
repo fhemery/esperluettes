@@ -266,6 +266,33 @@ describe('News Admin Controller', function () {
             $response->assertRedirect(route('news.admin.index'));
             $response->assertSessionHasNoErrors();
         });
+
+        it('persists is_pinned when the form posts the toggle', function () {
+            $user = admin($this);
+            $news = News::factory()->create([
+                'title' => 'Pin Me',
+                'slug' => 'pin-me',
+                'status' => 'draft',
+                'is_pinned' => false,
+            ]);
+
+            $response = $this->actingAs($user)
+                ->put(route('news.admin.update', $news), [
+                    'title' => 'Pin Me',
+                    'slug' => 'pin-me',
+                    'summary' => 'Updated summary',
+                    'content' => '<p>Updated content</p>',
+                    'status' => 'draft',
+                    'is_pinned' => true,
+                ]);
+
+            $response->assertRedirect(route('news.admin.index'));
+
+            $this->assertDatabaseHas('news', [
+                'id' => $news->id,
+                'is_pinned' => true,
+            ]);
+        });
     });
 
     describe('publish', function () {

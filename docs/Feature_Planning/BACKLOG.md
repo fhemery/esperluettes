@@ -31,8 +31,7 @@ scoped to the task that actually changed.
 - **Gift sound on Media, retire `<x-shared::sound-upload>`** · `media-sound-upload/` · interactive · TODO: leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out
 - **Validation messages — file rules print raw keys** · `validation-messages/` · auto · TODO: from `chapters-multi-edit/` decision #11 (defect D4). No `lang/*/validation.php` is published, so `image` prints `validation.image` and `max` prints nothing. Hits `ChapterRequest` and `NewsRequest` alike; fix it once, app-wide.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
-- **News — pin to carousel white screen** · `news-pin-carousel-white-screen/` · auto · TODO
-- **News — pin to carousel as first** · `news-pin-carousel-first/` · auto · TODO
+- **News — pin to carousel white screen** · `news-pin-carousel-white-screen/` · auto · WIP:BUILD (1/1)
 - **Admin — menus E2E for moderator / admin / tech_admin** · `admin-menus-e2e/` · auto · TODO
 
 ## Done
@@ -42,6 +41,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`news-pin-carousel-first`](_done/news-pin-carousel-first.md) · newly pinned news inserts at carousel position 1 (others shift +1)
 - [`news-moderator-access`](_done/news-moderator-access.md) · moderators get full News admin (CRUD, publish, pin, carousel, draft preview)
 - [`comment-editor-not-displaying`](_done/comment-editor-not-displaying.md) · reply/edit composers rendered blank after the Editor domain split; fixed asset loading
 - [`shared-a11y`](_done/shared-a11y.md) · tabs/confirm-modal a11y gaps (`role="tabpanel"`, focus-on-open)
