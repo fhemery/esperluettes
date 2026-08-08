@@ -57,6 +57,7 @@ breaks, the whole suite fails first.
 | [`support/global-setup.ts`](support/global-setup.ts) | `migrate:fresh --seed --env=e2e` before the run. |
 | `app/Domains/*/Database/Seeders/E2e*Seeder.php` | Write the fixture world — one account per role, one story, one chapter, one news. Each domain owns its own; `DatabaseSeeder` calls them when `APP_ENV=e2e`. |
 | [`support/fixtures.ts`](support/fixtures.ts) | The same fixtures in TypeScript. **Keep in step with the seeder.** |
+| [`support/admin-nav-map.ts`](support/admin-nav-map.ts) | Expected admin sidebar `data-nav-key` sets per staff role. Update when a domain changes `AdminNavigationRegistry` registrations. |
 | [`support/auth.setup.ts`](support/auth.setup.ts) | Logs each role in once, parks cookies in `.auth/`. |
 | [`support/test.ts`](support/test.ts) | The suite's `test`, with a per-role page fixture. |
 | [`pages/`](pages/) | Page and component objects. Selectors live here and nowhere else. |
