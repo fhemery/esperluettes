@@ -16,7 +16,7 @@ Each article carries a `status` field with two values: `draft` and `published`. 
 
 ### Pinned carousel
 
-Published articles can be individually pinned (`is_pinned = true`) and assigned a `display_order`. The carousel shown on the home page is composed exclusively of pinned, published articles, ordered by `display_order` ascending then `published_at` descending as a tiebreaker.
+Published articles can be individually pinned (`is_pinned = true`) and assigned a `display_order`. Newly pinned articles (create or first-time pin on edit, with no order yet) are inserted at position 1; existing pinned rows shift by +1. The carousel shown on the home page is composed exclusively of pinned, published articles, ordered by `display_order` ascending then `published_at` descending as a tiebreaker.
 
 The carousel result set is cached under the key `news.carousel` for 5 minutes. Any state change that affects carousel membership (pin status, display order, publish status) busts this cache. The `NewsObserver` handles automatic cache invalidation on model events; `NewsService::bustCarouselCache()` is called explicitly after bulk reordering.
 
