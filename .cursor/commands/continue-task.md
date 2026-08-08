@@ -12,3 +12,11 @@ Honour the row's **mode**:
 - `auto` — keep going through the remaining steps in this chat until the task
   is `DONE` or a stop condition needs me. Do not pause between steps when there
   is no question. All state stays on disk either way.
+
+## Cursor: spawn fallback
+
+Same rule as `/next-task`: PLAN / BUILD / VERIFY / WRAP stay in subagents.
+Premium credit exhaustion is **not** "cannot spawn" — retry with a Cursor
+model (`composer-2.5-fast`, or another listed Cursor/`composer`/`cursor-*`
+model) and keep going. Only run those steps in this thread if the Task /
+agent-spawn capability is actually missing, and say so explicitly first.
