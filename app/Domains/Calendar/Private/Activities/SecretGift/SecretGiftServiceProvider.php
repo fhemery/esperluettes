@@ -21,12 +21,17 @@ class SecretGiftServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(app_path('Domains/Calendar/Private/Activities/SecretGift/Resources/views'), 'secret-gift');
-        $this->loadTranslationsFrom(app_path('Domains/Calendar/Private/Activities/SecretGift/Resources/lang'), 'secret-gift');
-        $this->loadMigrationsFrom(app_path('Domains/Calendar/Private/Activities/SecretGift/Database/Migrations'));
-        $this->loadRoutesFrom(app_path('Domains/Calendar/Private/Activities/SecretGift/Http/routes.php'));
+        $base = app_path('Domains/Calendar/Private/Activities/SecretGift');
 
+        $this->loadViewsFrom($base . '/Resources/views', 'secret-gift');
+        $this->loadTranslationsFrom($base . '/Resources/lang', 'secret-gift');
+        $this->loadMigrationsFrom($base . '/Database/Migrations');
+        $this->loadRoutesFrom($base . '/Http/routes.php');
+
+        // The reader page is a class component; the admin config panel is an
+        // anonymous one. Both answer to the same `secret-gift::` prefix.
         Blade::componentNamespace('App\\Domains\\Calendar\\Private\\Activities\\SecretGift\\View\\Components', 'secret-gift');
+        Blade::anonymousComponentPath($base . '/Resources/views/components', 'secret-gift');
 
         // Let Media GC know which private image files gifts still use.
         app(MediaUsageRegistry::class)->register(new SecretGiftMediaUsageProvider());

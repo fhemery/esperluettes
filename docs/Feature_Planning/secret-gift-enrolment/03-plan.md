@@ -15,7 +15,7 @@
 |---|-------|------|------------|--------|
 | 1 | Promote `DateOrderRule` to Calendar core | S | — | DONE |
 | 2 | Drop `requires_subscription` / `max_participants` | S | — | DONE |
-| 3 | Settings table + `registration_ends_at` config panel | M | 1 | TODO |
+| 3 | Settings table + `registration_ends_at` config panel | M | 1 | DONE |
 | 4 | Enrolment service, write endpoints, authorization | M | 3 | TODO |
 | 5 | Participant cleanup on deactivation / deletion | S | 4 | TODO |
 | 6 | Participant-facing UI (join / edit / leave / list) | M | 4 | TODO |

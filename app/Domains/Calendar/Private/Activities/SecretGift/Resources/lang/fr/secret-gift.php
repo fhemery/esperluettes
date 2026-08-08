@@ -48,8 +48,17 @@ return [
     // Preferences template (default content for subscription)
     'preferences_template' => '<p><strong>Ce que j\'aime :</strong></p><p></p><p><strong>Ce que je n\'aime pas :</strong></p><p></p><p><strong>Fanart autorisé :</strong> Oui / Non</p><p><strong>Genres préférés :</strong></p><p></p><p><strong>Autres informations :</strong></p><p></p>',
 
+    // Admin configuration panel
+    'config' => [
+        'section_title' => 'Cadeau surprise',
+        'registration_ends_at' => 'Fin des inscriptions',
+        'registration_hint' => 'Les inscriptions ouvrent à l\'ouverture de l\'activité et ferment à cette date, au plus tard au début de l\'activité.',
+    ],
+
     // Validation messages
     'validation' => [
+        'registration_ends_before_preview_start' => 'La fin des inscriptions ne peut pas précéder l\'ouverture de l\'activité.',
+        'registration_ends_after_activity_start' => 'La fin des inscriptions ne peut pas dépasser le début de l\'activité.',
         'gift_text_max' => 'Le texte du cadeau est trop long (maximum 65 535 caractères).',
         'gift_image_mimes' => 'L\'image doit être au format JPG ou PNG.',
         'gift_image_max' => 'L\'image ne doit pas dépasser 5 Mo.',
