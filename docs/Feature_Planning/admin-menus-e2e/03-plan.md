@@ -17,7 +17,7 @@
 |---|-------|------|------------|--------|
 | 1 | Sidebar `data-nav-key` markup | S | — | DONE |
 | 2 | tech-admin E2E account + Playwright role | S | — | DONE |
-| 3 | Core admin-menus inventory spec | S | 1, 2 | TODO |
+| 3 | Core admin-menus inventory spec | S | 1, 2 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
