@@ -16,7 +16,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Sidebar `data-nav-key` markup | S | — | DONE |
-| 2 | tech-admin E2E account + Playwright role | S | — | TODO |
+| 2 | tech-admin E2E account + Playwright role | S | — | DONE |
 | 3 | Core admin-menus inventory spec | S | 1, 2 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.

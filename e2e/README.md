@@ -75,7 +75,7 @@ test('an author can edit their chapter', async ({ author }) => {  // already log
 ```
 
 Roles available as fixtures: `guest`, `user`, `confirmed`, `author`,
-`moderator`, `admin`. Each gets its own browser context, so one role's session
+`moderator`, `admin`, `tech_admin`. Each gets its own browser context, so one role's session
 can never leak into another's assertions.
 
 New specs go in `tests/features/`. Rules that keep this cheap to own:

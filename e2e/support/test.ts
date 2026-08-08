@@ -34,6 +34,7 @@ function roleFixture(role: RoleName | null) {
 export const test = base.extend<RolePages>({
   guest: roleFixture(null),
   admin: roleFixture('admin'),
+  tech_admin: roleFixture('tech_admin'),
   moderator: roleFixture('moderator'),
   author: roleFixture('author'),
   confirmed: roleFixture('confirmed'),

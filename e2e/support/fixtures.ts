@@ -13,7 +13,7 @@
  * change to a seeder breaks compilation instead of a selector three files away.
  */
 
-export type RoleName = 'admin' | 'moderator' | 'author' | 'confirmed' | 'user';
+export type RoleName = 'admin' | 'tech_admin' | 'moderator' | 'author' | 'confirmed' | 'user';
 
 export interface Account {
   readonly email: string;
@@ -26,6 +26,12 @@ const password = 'password';
 
 export const ACCOUNTS: Record<RoleName, Account> = {
   admin: { email: 'admin@e2e.test', password, displayName: 'E2E Admin', profileSlug: 'e2e-admin' },
+  tech_admin: {
+    email: 'tech-admin@e2e.test',
+    password,
+    displayName: 'E2E Tech-admin',
+    profileSlug: 'e2e-tech-admin',
+  },
   moderator: { email: 'moderator@e2e.test', password, displayName: 'E2E Moderator', profileSlug: 'e2e-moderator' },
   author: { email: 'author@e2e.test', password, displayName: 'E2E Author', profileSlug: 'e2e-author' },
   confirmed: { email: 'confirmed@e2e.test', password, displayName: 'E2E Confirmed', profileSlug: 'e2e-confirmed' },
