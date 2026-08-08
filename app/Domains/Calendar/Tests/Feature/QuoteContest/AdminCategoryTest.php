@@ -110,27 +110,54 @@ describe('Quote contest category administration', function () {
         expect(QuoteContestCategory::query()->count())->toBe(1);
     });
 
-    it('denies every category route to a confirmed user and to a moderator', function () {
+    it('denies every category route to a confirmed user', function () {
         $contest = createQuoteContest($this);
         $category = makeCategory($contest->id, 'La plus drôle');
 
-        foreach ([alice($this), moderator($this)] as $intruder) {
-            $this->actingAs($intruder);
+        $this->actingAs(alice($this));
 
-            $this->post(route('calendar.admin.quote-contest.categories.store', $contest->id), [
-                'title' => 'Ajout interdit',
-            ])->assertRedirect(route('dashboard'));
+        $this->post(route('calendar.admin.quote-contest.categories.store', $contest->id), [
+            'title' => 'Ajout interdit',
+        ])->assertRedirect(route('dashboard'));
 
-            $this->put(route('calendar.admin.quote-contest.categories.update', [$contest->id, $category->id]), [
-                'title' => 'Édition interdite',
-            ])->assertRedirect(route('dashboard'));
+        $this->put(route('calendar.admin.quote-contest.categories.update', [$contest->id, $category->id]), [
+            'title' => 'Édition interdite',
+        ])->assertRedirect(route('dashboard'));
 
-            $this->delete(route('calendar.admin.quote-contest.categories.destroy', [$contest->id, $category->id]))
-                ->assertRedirect(route('dashboard'));
-        }
+        $this->delete(route('calendar.admin.quote-contest.categories.destroy', [$contest->id, $category->id]))
+            ->assertRedirect(route('dashboard'));
 
         expect(QuoteContestCategory::query()->count())->toBe(1)
             ->and($category->fresh()->title)->toBe('La plus drôle');
+    });
+
+    it('lets a moderator add, edit and delete an empty category', function () {
+        $contest = createQuoteContest($this);
+        $this->actingAs(moderator($this));
+
+        $this->post(route('calendar.admin.quote-contest.categories.store', $contest->id), [
+            'title' => 'La plus drôle',
+            'description' => 'Les citations qui font rire.',
+        ])->assertSessionHasNoErrors();
+
+        $category = QuoteContestCategory::query()->where('activity_id', $contest->id)->sole();
+
+        expect($category->title)->toBe('La plus drôle')
+            ->and($category->description)->toBe('Les citations qui font rire.');
+
+        $this->put(route('calendar.admin.quote-contest.categories.update', [$contest->id, $category->id]), [
+            'title' => 'La plus cocasse',
+            'description' => 'Les citations qui font vraiment rire.',
+            'position' => 1,
+        ])->assertSessionHasNoErrors();
+
+        expect($category->fresh()->title)->toBe('La plus cocasse')
+            ->and($category->fresh()->description)->toBe('Les citations qui font vraiment rire.');
+
+        $this->delete(route('calendar.admin.quote-contest.categories.destroy', [$contest->id, $category->id]))
+            ->assertSessionHas('success');
+
+        expect(QuoteContestCategory::query()->count())->toBe(0);
     });
 
     it('lists the categories with their entry count on the activity edit form', function () {
