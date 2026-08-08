@@ -45,6 +45,24 @@ return [
     'download_sound' => 'Télécharger le son',
     'browser_no_support' => 'Votre navigateur ne supporte pas l\'élément audio.',
 
+    // Enrolment (join / edit preferences / leave / participant list)
+    'enrolment' => [
+        'join_title' => 'Inscrivez-vous à cet échange de cadeaux',
+        'join_button' => 'Je m\'inscris',
+        'preferences_label' => 'Vos préférences',
+        'preferences_hint' => 'Seule la personne qui vous offrira un cadeau verra ces informations.',
+        'save_preferences' => 'Enregistrer mes préférences',
+        'leave_button' => 'Me désinscrire',
+        'leave_confirm_title' => 'Vous désinscrire de cette activité ?',
+        'leave_confirm_body' => 'Votre inscription et vos préférences seront supprimées. Vous pourrez vous réinscrire tant que les inscriptions sont ouvertes.',
+        'leave_confirm_cancel' => 'Annuler',
+        'leave_confirm_confirm' => 'Confirmer la désinscription',
+        'registration_closed' => 'Les inscriptions sont fermées.',
+        'registration_closed_participant' => 'Les inscriptions sont fermées : vos préférences ne sont plus modifiables.',
+        'participants_title' => 'Les inscrit(e)s',
+        'participants_alone' => 'Vous êtes pour le moment la seule personne inscrite.',
+    ],
+
     // Preferences template (default content for subscription)
     'preferences_template' => '<p><strong>Ce que j\'aime :</strong></p><p></p><p><strong>Ce que je n\'aime pas :</strong></p><p></p><p><strong>Fanart autorisé :</strong> Oui / Non</p><p><strong>Genres préférés :</strong></p><p></p><p><strong>Autres informations :</strong></p><p></p>',
 

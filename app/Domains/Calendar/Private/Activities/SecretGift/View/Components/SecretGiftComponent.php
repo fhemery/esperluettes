@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Calendar\Private\Activities\SecretGift\View\Components;
 
 use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftAssignment;
+use App\Domains\Calendar\Private\Activities\SecretGift\Services\SecretGiftConfigService;
 use App\Domains\Calendar\Private\Activities\SecretGift\Services\SecretGiftService;
 use App\Domains\Calendar\Private\Activities\SecretGift\Services\ShuffleService;
 use App\Domains\Calendar\Private\Models\Activity;
@@ -21,6 +22,7 @@ class SecretGiftComponent extends Component
         private readonly SecretGiftService $service,
         private readonly ShuffleService $shuffleService,
         private readonly ProfilePublicApi $profileApi,
+        private readonly SecretGiftConfigService $configService,
     ) {}
 
     public function render(): View
@@ -62,6 +64,12 @@ class SecretGiftComponent extends Component
         return view('secret-gift::components.secret-gift', [
             'activity' => $this->activity,
             'isParticipant' => $isParticipant,
+            'participant' => $participant,
+            'registrationOpen' => $this->configService->isRegistrationOpen($this->activity),
+            // The list is enrolled-only, so an outsider must not even pay for the query.
+            'participants' => $isParticipant
+                ? $this->configService->participantsWithProfiles($this->activity->id)
+                : collect(),
             'isActive' => $isActive,
             'isEnded' => $isEnded,
             'isPreview' => $isPreview,
