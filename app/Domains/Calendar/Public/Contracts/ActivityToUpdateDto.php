@@ -15,8 +15,6 @@ class ActivityToUpdateDto
         public ?string $image_path = null,
         /** @var array<int,string>|null */
         public ?array $role_restrictions = null,
-        public ?bool $requires_subscription = false,
-        public ?int $max_participants = null,
         public ?CarbonInterface $preview_starts_at = null,
         public ?CarbonInterface $active_starts_at = null,
         public ?CarbonInterface $active_ends_at = null,

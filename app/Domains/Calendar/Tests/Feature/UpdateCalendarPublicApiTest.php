@@ -79,8 +79,6 @@ describe('CalendarPublicApi - update', function () {
             description: 'New description',
             image_path: 'img.png',
             role_restrictions: [Roles::USER],
-            requires_subscription: true,
-            max_participants: 50,
             preview_starts_at: now(),
             active_starts_at: now()->addDay(),
             active_ends_at: now()->addDays(2),
@@ -94,8 +92,6 @@ describe('CalendarPublicApi - update', function () {
         expect($dto->description)->toContain('New description');
         expect($dto->image_path)->toBe('img.png');
         expect($dto->role_restrictions)->toEqual([Roles::USER]);
-        expect($dto->requires_subscription)->toBeTrue();
-        expect($dto->max_participants)->toBe(50);
     });
 
     it('rejects update when required fields are only whitespace (trimmed) or type unknown', function () {

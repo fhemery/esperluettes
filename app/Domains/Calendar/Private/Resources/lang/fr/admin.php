@@ -20,8 +20,6 @@ return [
         'description' => 'Description',
         'image' => 'Image',
         'role_restrictions' => 'Restrictions de rôle',
-        'requires_subscription' => 'Inscription requise',
-        'max_participants' => 'Nombre max de participants',
         'preview_starts_at' => 'Début de visibilité',
         'active_starts_at' => 'Date de début',
         'active_ends_at' => 'Date de fin',

@@ -27,8 +27,6 @@ class ActivityUpdateRequest
             'description' => $dto->description,
             'image_path' => $dto->image_path,
             'role_restrictions' => $dto->role_restrictions,
-            'requires_subscription' => (bool) ($dto->requires_subscription ?? false),
-            'max_participants' => $dto->max_participants,
             'preview_starts_at' => $dto->preview_starts_at,
             'active_starts_at' => $dto->active_starts_at,
             'active_ends_at' => $dto->active_ends_at,

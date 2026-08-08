@@ -17,8 +17,6 @@ class ActivityDto
         public ?string $image_path,
         /** @var array<int,string> */
         public array $role_restrictions,
-        public bool $requires_subscription,
-        public ?int $max_participants,
         public ?CarbonInterface $preview_starts_at,
         public ?CarbonInterface $active_starts_at,
         public ?CarbonInterface $active_ends_at,
@@ -36,8 +34,6 @@ class ActivityDto
             description: $a->description,
             image_path: $a->image_path,
             role_restrictions: $a->role_restrictions ?? [],
-            requires_subscription: (bool) $a->requires_subscription,
-            max_participants: $a->max_participants,
             preview_starts_at: $a->preview_starts_at,
             active_starts_at: $a->active_starts_at,
             active_ends_at: $a->active_ends_at,

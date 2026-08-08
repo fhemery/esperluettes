@@ -18,7 +18,6 @@ function createActiveSecretGift(TestCase $t, array $overrides = [], ?int $actorU
     $baseOverrides = [
         'name' => 'Secret Santa',
         'activity_type' => SecretGiftRegistration::ACTIVITY_TYPE,
-        'requires_subscription' => true,
         'preview_starts_at' => now()->subDay(),
         'active_starts_at' => now()->subHour(),
         'active_ends_at' => now()->addDay(),

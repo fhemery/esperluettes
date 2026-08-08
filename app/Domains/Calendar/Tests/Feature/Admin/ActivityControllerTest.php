@@ -72,6 +72,14 @@ describe('Activity Admin Controller', function () {
                 ->get(route('calendar.admin.activities.create'))
                 ->assertRedirect();
         });
+
+        it('no longer exposes the removed participant-limit fields on the admin form', function () {
+            $this->actingAs(admin($this))
+                ->get(route('calendar.admin.activities.create'))
+                ->assertOk()
+                ->assertDontSee('name="max_participants"', false)
+                ->assertDontSee('name="requires_subscription"', false);
+        });
     });
 
     describe('store', function () {
@@ -108,16 +116,14 @@ describe('Activity Admin Controller', function () {
                 ->post(route('calendar.admin.activities.store'), [
                     'name' => 'Activité complète',
                     'activity_type' => 'fake',
-                    'requires_subscription' => '1',
-                    'max_participants' => '50',
+                    'description' => 'Une description',
+                    'role_restrictions' => [Roles::USER_CONFIRMED],
                 ])
                 ->assertRedirect(route('calendar.admin.activities.index'));
 
-            $this->assertDatabaseHas('calendar_activities', [
-                'name' => 'Activité complète',
-                'requires_subscription' => true,
-                'max_participants' => 50,
-            ]);
+            $activity = Activity::where('name', 'Activité complète')->firstOrFail();
+            expect($activity->description)->toContain('Une description');
+            expect($activity->role_restrictions)->toEqual([Roles::USER_CONFIRMED]);
         });
     });
 
