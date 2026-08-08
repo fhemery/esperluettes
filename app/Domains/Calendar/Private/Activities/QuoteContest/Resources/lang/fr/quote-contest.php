@@ -140,7 +140,6 @@ return [
     ],
 
     'validation' => [
-        'invalid_date' => 'Cette date n\'est pas valide.',
         'submissions_end_before_activity_start' => 'La fin des soumissions ne peut pas précéder le début de l\'activité.',
         'votes_start_before_submissions_end' => 'Le début des votes ne peut pas précéder la fin des soumissions.',
         'votes_start_after_activity_end' => 'Le début des votes ne peut pas dépasser la fin de l\'activité.',
