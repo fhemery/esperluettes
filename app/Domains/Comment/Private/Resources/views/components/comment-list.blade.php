@@ -96,8 +96,13 @@
 @if(!$isGuest && session()->has('comment.draft_consumed'))
   @push('scripts')
     <script>
+      {{-- Dependency-free marker: must run before the deferred Vite draft module
+           restores localStorage into the compose form. comment-draft/index.js
+           honours this on bootstrap; clearRoot/clearReply remain a best-effort
+           secondary path when the module is already on window. --}}
       (function () {
         const payload = @json(session('comment.draft_consumed'));
+        window.__commentDraftConsumed = payload;
         const apply = () => {
           if (!window.commentDrafts || !payload) return;
           const { scope, userId, entityType, entityId } = payload;
