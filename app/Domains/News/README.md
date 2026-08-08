@@ -40,7 +40,7 @@ reply notifies the root author plus every prior replier, minus the replier.
 
 Comments exist only on `published` articles, roots **and replies alike**. The
 Blade block and `NewsCommentPolicy::canCreateRoot()` both check
-`status === 'published'`, so a draft previewed by an admin shows no comment
+`status === 'published'`, so a draft previewed by a manager role shows no comment
 section at all. `canCreateRoot()` returns `false` — never throws — for an
 article id that does not exist.
 
