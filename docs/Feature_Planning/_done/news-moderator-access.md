@@ -87,5 +87,5 @@ UI — only the role lists on five enforcement points were widened.
   deleted with it; `E2eNewsSeeder` / `fixtures.ts` e2e-only additions (draft
   row, second pinned article) are reverted.
 - No rows pushed back to `docs/Feature_Planning/BACKLOG.md` — FAQ/StaticPage
-  moderator parity is parked (functional §9); `admin-menus-e2e/` already covers
+  moderator parity is parked (functional §9); `_done/admin-menus-e2e.md` covers
   broader admin nav smoke per role.

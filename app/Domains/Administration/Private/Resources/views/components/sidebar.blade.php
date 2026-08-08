@@ -12,6 +12,7 @@
         icon="dashboard"
         active="{{ $currentUrl === route('administration.dashboard') }}"
         class="text-md"
+        nav-key="dashboard"
     />
     <x-administration::navigation-item
         href="{{route('dashboard')}}"
@@ -19,6 +20,7 @@
         icon="undo"
         active="{{ $currentUrl === route('dashboard') }}"
         class="text-md"
+        nav-key="back-to-site"
     />
     @foreach ($navigation as $groupKey => $group)
         <div>
@@ -38,6 +40,7 @@
                             :label="$page['label']"
                             :icon="$page['icon']"
                             :active="$isActive"
+                            :nav-key="$page['key']"
                         />
                     @endforeach
                 </div>

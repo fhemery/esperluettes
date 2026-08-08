@@ -17,6 +17,8 @@
 
 **`AdminNavigationRegistry` must be cleared between tests** that manipulate it directly. The singleton persists across test cases in the same process. Call `$registry->clear()` in a `beforeEach` block when testing navigation registration.
 
+**Sidebar links carry `data-nav-key`** (registry page key, or `dashboard` / `back-to-site` for the hardcoded links). Keep `e2e/support/admin-nav-map.ts` in sync when registrations change — that is the permanent role→menu contract.
+
 **`LayoutComponent` throws exceptions on auth failure** — it does not redirect, it throws `\Exception`. Route middleware (`auth`, `role:...`) on the routes is what handles the redirect; the component's check is a secondary safety net for direct Blade rendering in tests.
 
 **Log file access is restricted to `storage/logs/*.log`.** The `LogsController` sanitises the `file` query parameter with `basename()` and then verifies the resolved path still starts with `storage_path('logs')`. Do not bypass this by constructing paths manually.

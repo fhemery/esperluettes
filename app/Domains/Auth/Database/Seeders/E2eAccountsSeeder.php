@@ -28,6 +28,7 @@ class E2eAccountsSeeder extends Seeder
     /** email => roles */
     public const ACCOUNTS = [
         'admin@e2e.test' => [Roles::ADMIN, Roles::USER_CONFIRMED],
+        'tech-admin@e2e.test' => [Roles::TECH_ADMIN, Roles::USER_CONFIRMED],
         'moderator@e2e.test' => [Roles::MODERATOR, Roles::USER_CONFIRMED],
         'author@e2e.test' => [Roles::USER_CONFIRMED],
         'confirmed@e2e.test' => [Roles::USER_CONFIRMED],
@@ -43,6 +44,7 @@ class E2eAccountsSeeder extends Seeder
 
     public const AUTHOR_EMAIL = 'author@e2e.test';
     public const ADMIN_EMAIL = 'admin@e2e.test';
+    public const TECH_ADMIN_EMAIL = 'tech-admin@e2e.test';
     public const CONFIRMED_EMAIL = 'confirmed@e2e.test';
     public const MODERATOR_EMAIL = 'moderator@e2e.test';
 

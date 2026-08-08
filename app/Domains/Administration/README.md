@@ -52,7 +52,9 @@ The logs viewer reads files from `storage/logs/*.log`. It displays the last 1 00
 
 **`AdminNavigationRegistry` is a singleton** — registered once at boot, populated by all domain service providers, then read by the sidebar component on each request. This avoids re-resolving and re-registering on every render, and allows any domain to contribute to the sidebar without depending on Administration's internals.
 
-**The dashboard link is hardcoded in the sidebar template** — it is not registered through the registry because it is always present and always first, regardless of role. Adding it to the registry would require special handling to pin it at position zero.
+**The dashboard link is hardcoded in the sidebar template** — it is not registered through the registry because it is always present and always first, regardless of role. Adding it to the registry would require special handling to pin it at position zero. The "back to site" link is likewise hardcoded. Both carry stable `data-nav-key` values (`dashboard`, `back-to-site`).
+
+**Every sidebar link exposes `data-nav-key`.** Registry pages use their `registerPage` key (merged into the nav payload by `getPagesForGroup`). Page keys must be stable string literals — never `__('…')` — so testing locales and E2E stay aligned. The core Playwright suite freezes the expected key set per staff role in `e2e/support/admin-nav-map.ts`; update that map in the same change when you add, remove, or re-permission an admin page.
 
 **`AdminRegistryTarget` supports both route names and raw URLs** — legacy Filament pages use raw `/admin/...` URLs while new custom pages use named routes. The value object encapsulates this distinction so the sidebar template does not need to know which kind it is handling.
 
