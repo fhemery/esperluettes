@@ -17,7 +17,7 @@
 | 2 | Drop `requires_subscription` / `max_participants` | S | — | DONE |
 | 3 | Settings table + `registration_ends_at` config panel | M | 1 | DONE |
 | 4 | Enrolment service, write endpoints, authorization | M | 3 | DONE |
-| 5 | Participant cleanup on deactivation / deletion | S | 4 | TODO |
+| 5 | Participant cleanup on deactivation / deletion | S | 4 | DONE |
 | 6 | Participant-facing UI (join / edit / leave / list) | M | 4 | TODO |
 | 7 | Moderator & admin shuffle screen | M | 3, 4 | TODO |
 

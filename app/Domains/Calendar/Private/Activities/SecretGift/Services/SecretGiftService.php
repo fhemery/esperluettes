@@ -14,8 +14,10 @@ use App\Domains\Calendar\Public\Contracts\ActivityState;
 
 class SecretGiftService
 {
-    public function __construct(private readonly MediaPublicApi $media)
-    {
+    public function __construct(
+        private readonly MediaPublicApi $media,
+        private readonly ShuffleService $shuffle,
+    ) {
     }
 
     public function getParticipant(int $activityId, int $userId): ?SecretGiftParticipant
@@ -53,6 +55,36 @@ class SecretGiftService
             ->where('activity_id', $activity->id)
             ->where('user_id', $userId)
             ->delete();
+    }
+
+    /**
+     * Un-enrol a removed (deactivated or deleted) user from every Secret Gift
+     * they had joined but that has not been shuffled yet.
+     *
+     * Once the shuffle has run the row and its assignments are left strictly
+     * alone (decision #10): the pairing stands, and whoever was drawn to
+     * receive from this user simply gets no gift. That mirrors the existing,
+     * deliberately unaddressed Jardino behaviour on the same events.
+     *
+     * Unscoped by activity on purpose — a handful of concurrent Secret Gifts
+     * makes the scan cheap; revisit if that stops holding.
+     */
+    public function removeParticipantsForUser(int $userId): void
+    {
+        $participants = SecretGiftParticipant::query()
+            ->with('activity')
+            ->where('user_id', $userId)
+            ->get();
+
+        foreach ($participants as $participant) {
+            $activity = $participant->activity;
+
+            if ($activity !== null && $this->shuffle->hasBeenShuffled($activity)) {
+                continue;
+            }
+
+            $participant->delete();
+        }
     }
 
     public function getAssignmentAsGiver(int $activityId, int $userId): ?SecretGiftAssignment
