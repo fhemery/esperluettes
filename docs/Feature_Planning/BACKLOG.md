@@ -31,6 +31,11 @@ scoped to the task that actually changed.
 - **Gift sound on Media, retire `<x-shared::sound-upload>`** · `media-sound-upload/` · interactive · TODO: leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out
 - **Validation messages — file rules print raw keys** · `validation-messages/` · auto · TODO: from `chapters-multi-edit/` decision #11 (defect D4). No `lang/*/validation.php` is published, so `image` prints `validation.image` and `max` prints nothing. Hits `ChapterRequest` and `NewsRequest` alike; fix it once, app-wide.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
+- **Story preferences** · `story-preferences/` · interactive · TODO
+- **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · TODO
+- **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
+- **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
+- **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
 
 ## Done
 
@@ -39,6 +44,8 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`favicon-season-cache`](_done/favicon-season-cache.md) · favicon links append `?theme=<season>` so season changes bust browser cache
+- [`news-comment-form-retains-text`](_done/news-comment-form-retains-text.md) · Comment draft consume-before-restore — form empty after successful submit
 - [`admin-menus-e2e`](_done/admin-menus-e2e.md) · core E2E locks admin sidebar `data-nav-key` inventory for moderator / admin / tech-admin
 - [`news-pin-carousel-white-screen`](_done/news-pin-carousel-white-screen.md) · Shared toggle focus overlay — stops admin pane scrolling away on pin click
 - [`news-pin-carousel-first`](_done/news-pin-carousel-first.md) · newly pinned news inserts at carousel position 1 (others shift +1)

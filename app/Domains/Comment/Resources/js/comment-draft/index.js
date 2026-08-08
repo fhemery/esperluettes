@@ -91,6 +91,43 @@ export function clearReply(userId, entityType, entityId) {
   persist(userId, entityType, entityId, state);
 }
 
+/**
+ * Flash-driven "this draft was just posted" marker, set by an inline script
+ * before the Vite module runs. Applied before any restore so a deferred module
+ * cannot repopulate the form from localStorage after a successful submit.
+ */
+function readConsumedMarker() {
+  if (typeof window === 'undefined') return null;
+  const payload = window.__commentDraftConsumed;
+  if (!payload || typeof payload !== 'object') return null;
+  const userId = Number(payload.userId);
+  const entityType = payload.entityType;
+  const entityId = payload.entityId != null ? String(payload.entityId) : null;
+  const scope = payload.scope;
+  if (!userId || !entityType || !entityId) return null;
+  if (scope !== 'root' && scope !== 'reply') return null;
+  return { scope, userId, entityType, entityId };
+}
+
+function applyConsumedMarker() {
+  const payload = readConsumedMarker();
+  if (!payload) return null;
+  if (payload.scope === 'root') {
+    clearRoot(payload.userId, payload.entityType, payload.entityId);
+  } else {
+    clearReply(payload.userId, payload.entityType, payload.entityId);
+  }
+  return payload;
+}
+
+function markerMatchesForm(payload, scope, userId, entityType, entityId) {
+  if (!payload) return false;
+  return payload.scope === scope
+    && payload.userId === userId
+    && payload.entityType === entityType
+    && String(payload.entityId) === String(entityId);
+}
+
 // ---------- Auto-wire forms ----------
 
 const DEBOUNCE_MS = 500;
@@ -144,10 +181,13 @@ function initDraftForm(form) {
   form.dataset.commentDraftWired = '1';
 
   // ---- Restore ----
-  // Honour `old()` repopulation: if the textarea already has content (server
-  // came back with a validation error), don't clobber it with the draft — the
-  // user's most recent typing is on the page.
-  if (isEditorEmpty(textarea.value)) {
+  // Honour a successful-submit consume marker before reading localStorage, so
+  // the just-posted body cannot come back into a form that stays visible
+  // (e.g. news roots). Honour `old()` next: if the textarea already has content
+  // (validation error), don't clobber it with a draft.
+  const consumed = applyConsumedMarker();
+  const skipRestore = markerMatchesForm(consumed, scope, userId, entityType, entityId);
+  if (!skipRestore && isEditorEmpty(textarea.value)) {
     const state = load(userId, entityType, entityId);
     if (scope === 'root' && state.root?.body) {
       restoreIntoEditor(editorContainer, textarea, state.root.body);
@@ -195,6 +235,9 @@ function initDraftForm(form) {
 }
 
 export function bootstrap(root = document) {
+  // Clear storage even when no form is present yet (Alpine may load() the
+  // reply slot to decide whether to auto-open a composer).
+  applyConsumedMarker();
   root.querySelectorAll('form[data-comment-draft]').forEach(initDraftForm);
 }
 
@@ -211,6 +254,7 @@ if (typeof document !== 'undefined') {
 // `commentList` reading the reply slot to auto-open the form, (c) re-bootstrap
 // after the infinite-scroll loader appends new comment fragments.
 if (typeof window !== 'undefined') {
+  applyConsumedMarker();
   window.commentDrafts = {
     load,
     saveRoot,

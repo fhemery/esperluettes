@@ -78,8 +78,11 @@ most expensive rule to break.
 Never run REFINE or DESIGN in a subagent: a subagent cannot talk to the user, so
 the interview would be lost. Conversely, never run PLAN / BUILD / VERIFY / WRAP
 in this thread — they need no user input, so there is nothing to gain and a
-whole context to lose. Only if the host genuinely cannot spawn agents do you run
-them here via their skills, and then you say so explicitly.
+whole context to lose. Only if the host genuinely cannot spawn agents (the
+spawn/Task capability is missing) do you run them here via their skills, and
+then you say so explicitly. A model refusal, rate limit, or premium-credit
+exhaustion is not that case — pick another available model and keep spawning.
+
 
 Delegate research to read-only `Explore` agents too. "How does the FAQ image
 flow work?" costs the orchestrator one paragraph instead of six file reads it
