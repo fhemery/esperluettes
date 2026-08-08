@@ -24,8 +24,8 @@ class QuoteContestModerationController
     /**
      * Moderation of user content, which in this codebase always means these
      * three roles together (Moderation, Story, FAQ and Auth all read the same
-     * list). Calendar's `[admin, tech-admin]` gates *configuration*, which is a
-     * different question.
+     * list). Category configuration uses the same staff roles via route
+     * middleware; this constant gates content moderation only.
      */
     public const ROLES = [Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN];
 

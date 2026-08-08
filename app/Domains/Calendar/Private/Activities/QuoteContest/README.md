@@ -176,11 +176,15 @@ are mirrored beside them, greyed and read-only. Validation enforces
 `début activité ≤ fin soumissions ≤ début votes ≤ fin activité` from the payload
 alone — the activity dates travel in the same request.
 
-Categories are managed by their own three routes, so each row needs its own
-`<form>` and the block is **pushed to the `activity-config-extras` stack** that
-the activity pages render *after* `</form>`: nesting forms is illegal HTML and
-browsers silently drop the inner one. Categories can be added and edited at any
-time; deletion is refused while the category holds any entry, withdrawn or not.
+Categories are managed by their own three routes — middleware allows
+`admin`, `tech-admin`, and `moderator` (same staff set as Calendar activity
+admin). Each row needs its own `<form>` and the block is **pushed to the
+`activity-config-extras` stack** that the activity pages render *after*
+`</form>`: nesting forms is illegal HTML and browsers silently drop the inner
+one. Categories can be added and edited at any time; deletion is refused while
+the category holds any entry, withdrawn or not. Content moderation (*Résultats*,
+entry delete) uses `QuoteContestModerationController::ROLES` separately; the role
+set is the same three roles.
 
 ## Not done
 

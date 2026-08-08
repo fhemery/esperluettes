@@ -44,6 +44,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`quote-contest-moderator-ops`](_done/quote-contest-moderator-ops.md) · moderators can CRUD quote-contest categories on activity edit (middleware parity)
 - [`favicon-season-cache`](_done/favicon-season-cache.md) · favicon links append `?theme=<season>` so season changes bust browser cache
 - [`news-comment-form-retains-text`](_done/news-comment-form-retains-text.md) · Comment draft consume-before-restore — form empty after successful submit
 - [`admin-menus-e2e`](_done/admin-menus-e2e.md) · core E2E locks admin sidebar `data-nav-key` inventory for moderator / admin / tech-admin
