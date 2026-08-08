@@ -9,9 +9,10 @@ use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteC
 use App\Domains\Calendar\Private\Activities\QuoteContest\Http\Controllers\QuoteContestVoteController;
 use Illuminate\Support\Facades\Route;
 
-// Category CRUD only: the contest's dates ride along with the activity form.
+// Category CRUD: admin, tech-admin and moderator (same staff set as Calendar
+// activity admin). Contest dates ride along with the activity form.
 // No PATCH anywhere — the production WAF resets that verb.
-Route::middleware(['web', 'auth', 'role:' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])
+Route::middleware(['web', 'auth', 'role:' . Roles::ADMIN . ',' . Roles::TECH_ADMIN . ',' . Roles::MODERATOR])
     ->prefix('admin/calendar/quote-contest/{activity}')
     ->name('calendar.admin.quote-contest.')
     ->group(function () {
