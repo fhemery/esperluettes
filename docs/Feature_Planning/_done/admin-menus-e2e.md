@@ -33,7 +33,7 @@ Specs are under `e2e/tests/core/` (`npm run e2e:core`).
 | Nav key in registry payload | `Administration/.../AdminNavigationRegistry.php` |
 | Sidebar / link markup | `Administration/.../sidebar.blade.php`, `navigation-item.blade.php` |
 | Maintenance key registration | `Administration/.../AdministrationServiceProvider.php` |
-| PHP nav-key tests | `Administration/Tests/Feature/AdminNavigationNavKeyTest.php` |
+| PHP nav-key tests | `Administration/Tests/Feature/AdminNavigationNavKeyTest.php` (fake registrations only — no live cross-domain keys) |
 | E2E account | `Auth/Database/Seeders/E2eAccountsSeeder.php` |
 | Mapping | `e2e/support/admin-nav-map.ts` |
 | Page object | `e2e/pages/AdminSidebar.ts` |
