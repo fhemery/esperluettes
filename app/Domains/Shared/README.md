@@ -287,6 +287,8 @@ Reads `version.json` from the project root and caches the version string for 1 h
 
 `Theme::seasonal()` determines the active visual theme (winter/spring/summer/autumn) by astronomical season. The current theme is injected into `<html data-season="...">` by the layout, and Tailwind classes prefixed `bg-seasonal`, `bg-theme-ribbon`, `text-fg`, `bg-bg` etc. are resolved by a CSS theming layer that reads the data attribute.
 
+Favicon `<link>`s in `layouts/partials/head.blade.php` use `$theme->asset('favicons/…')` then append `?theme={{ $theme->value }}` (outside `asset()`) so browsers refetch when the season changes. Do not put the query inside the path passed to `Theme::asset()`. Root `public/favicon.ico` copies are unchanged and may still be hit by browsers that ignore HTML links.
+
 ### Session and CSRF management
 
 The authenticated layout includes inline JS that:
