@@ -63,6 +63,34 @@ export class CommentThread {
     return this.awaitPostedId(before);
   }
 
+  replyForm(parentCommentId: number): Locator {
+    return this.root.locator(
+      `form[data-comment-draft="reply"][data-parent-comment-id="${parentCommentId}"]`,
+    );
+  }
+
+  replyEditor(parentCommentId: number): RichTextEditor {
+    return new RichTextEditor(this.page, `reply-editor-${parentCommentId}`);
+  }
+
+  async openReply(parentCommentId: number): Promise<void> {
+    await this.item(parentCommentId)
+      .getByRole('button', { name: 'Répondre', exact: true })
+      .click();
+  }
+
+  async postReply(parentCommentId: number, body: string): Promise<number> {
+    await this.openReply(parentCommentId);
+    const editor = this.replyEditor(parentCommentId);
+    await editor.waitUntilReady();
+    await editor.fill(body);
+    const submit = this.replyForm(parentCommentId).locator('button[type="submit"]');
+    await expect(submit).toBeEnabled();
+    const before = this.page.url();
+    await submit.click();
+    return this.awaitPostedId(before);
+  }
+
   /**
    * The URL we came from matters: the page may already carry a `?comment=`
    * (a deep link), and waiting for the pattern alone would read the *old* id

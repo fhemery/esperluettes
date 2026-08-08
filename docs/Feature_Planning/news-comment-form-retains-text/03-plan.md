@@ -77,11 +77,11 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| News article, confirmed user | Post a root comment (≥20 chars) → after redirect, root compose form is empty | |
-| News article, confirmed user | Start typing a root, leave without submit, return → draft still restores | |
-| News article, confirmed user | Post a reply → reply composer does not reopen with the submitted body | |
-| Chapter (smoke) | After author's first root, root form still hidden (unchanged) | |
-| Mobile news article | Post root → form empty (same as desktop) | |
+| News article, confirmed user | Post a root comment (≥20 chars) → after redirect, root compose form is empty | ✅ |
+| News article, confirmed user | Start typing a root, leave without submit, return → draft still restores | ✅ |
+| News article, confirmed user | Post a reply → reply composer does not reopen with the submitted body | ✅ |
+| Chapter (smoke) | After author's first root, root form still hidden (unchanged) | ✅ |
+| Mobile news article | Post root → form empty (same as desktop) | n/a — same client code path; covered by vitest + desktop e2e |
 
 ## Open items
 
