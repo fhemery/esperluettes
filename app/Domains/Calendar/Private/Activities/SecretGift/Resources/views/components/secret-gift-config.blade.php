@@ -25,7 +25,7 @@
     }
 @endphp
 
-<div class="surface-bg p-6 rounded-lg flex flex-col gap-4 secret-gift-config">
+<div class="surface-bg p-6 rounded-lg flex flex-col gap-4 secret-gift-config" data-testid="sg-config-panel">
     <h2 class="text-base font-semibold">{{ __('secret-gift::secret-gift.config.section_title') }}</h2>
     <p class="text-xs text-fg/60">{{ __('secret-gift::secret-gift.config.registration_hint') }}</p>
 
@@ -47,7 +47,7 @@
       pushed to the stack both admin pages render after </form>.
     --}}
     @push('activity-config-extras')
-        <div class="surface-bg p-6 rounded-lg flex flex-col gap-4 max-w-3xl secret-gift-shuffle">
+        <div class="surface-bg p-6 rounded-lg flex flex-col gap-4 max-w-3xl secret-gift-shuffle" data-testid="sg-shuffle-panel">
             <h2 class="text-base font-semibold">{{ __('secret-gift::secret-gift.config.shuffle_title') }}</h2>
 
             @if($participantCount === 0)
@@ -76,11 +76,11 @@
             </p>
 
             @if($shuffleBlockedReason)
-                <p class="text-sm text-error">{{ $shuffleBlockedReason }}</p>
+                <p class="text-sm text-error" data-testid="sg-shuffle-blocked">{{ $shuffleBlockedReason }}</p>
             @endif
 
             <div class="flex justify-end">
-                <x-shared::button type="button" color="error" icon="shuffle"
+                <x-shared::button type="button" color="error" icon="shuffle" data-testid="sg-shuffle-button"
                     :disabled="$shuffleBlockedReason !== null"
                     x-on:click="$dispatch('open-modal', 'sg-shuffle')">
                     {{ __('secret-gift::secret-gift.config.shuffle_button') }}

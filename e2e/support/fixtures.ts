@@ -8,6 +8,8 @@
  *   app/Domains/Story/Database/Seeders/E2eStorySeeder.php
  *   app/Domains/Comment/Database/Seeders/E2eCommentsSeeder.php
  *   app/Domains/News/Database/Seeders/E2eNewsSeeder.php
+ *   app/Domains/Calendar/Database/Seeders/E2eCalendarSeeder.php
+ *   app/Domains/Calendar/Database/Seeders/E2eSecretGiftSeeder.php
  *
  * Specs must read fixtures from here rather than hard-coding slugs, so that a
  * change to a seeder breaks compilation instead of a selector three files away.
@@ -156,6 +158,42 @@ export const CONTEST = {
   /** `confirmed` owns 200 filler quotes; this one is singled out by the filter. */
   longBookNeedle: 'Passage numéro 137 du carnet',
   longBookSize: 200,
+} as const;
+
+/**
+ * The nine *Cadeau surprise* activities, written by
+ * `app/Domains/Calendar/Database/Seeders/E2eSecretGiftSeeder.php`.
+ *
+ * Both the activity state and the registration window come from the clock, and
+ * the shuffle is one-way, so each combination needs its own activity. They are
+ * named for where `confirmed` — the reader the specs drive — stands in them.
+ */
+export const GIFTS = {
+  /** Open, `confirmed` not enrolled: the join form. Never mutated. */
+  open: { slug: 'cadeau-surprise-ouvert', name: 'Cadeau surprise — inscriptions ouvertes' },
+  /** Open, `confirmed` not enrolled: the one the join → edit → leave journey uses. */
+  joinable: { slug: 'cadeau-surprise-rejoindre', name: 'Cadeau surprise — à rejoindre' },
+  /** Open, `confirmed` enrolled among four: edit form, leave action, participant list. */
+  enrolled: { slug: 'cadeau-surprise-inscrit', name: 'Cadeau surprise — déjà inscrit' },
+  /** Open, `confirmed` the only participant: the *alone* line, and a shuffle short of 2. */
+  alone: { slug: 'cadeau-surprise-seul', name: 'Cadeau surprise — seul(e) inscrit(e)' },
+  /** Still preview, deadline passed: read-only. `confirmed` in, `author` out. */
+  closed: { slug: 'cadeau-surprise-closes', name: 'Cadeau surprise — inscriptions closes' },
+  /** Still preview and before the deadline, but shuffled: closed early. */
+  shuffled: { slug: 'cadeau-surprise-tire', name: 'Cadeau surprise — tirage déjà fait' },
+  /** Active and shuffled: `confirmed` gives to `author`. */
+  active: { slug: 'cadeau-surprise-actif', name: 'Cadeau surprise — en cours' },
+  /** Open, three participants, never shuffled: the one a spec may shuffle. */
+  toShuffle: { slug: 'cadeau-surprise-a-tirer', name: 'Cadeau surprise — tirage à lancer' },
+  /** Admins only. */
+  restricted: { slug: 'cadeau-surprise-reserve', name: 'Cadeau surprise — réservé' },
+} as const;
+
+export const GIFT = {
+  /** `author`'s preferences on `open` — private, so no list and no admin panel may show it. */
+  secretPreferences: 'Je collectionne les hérissons en chocolat',
+  /** `author`'s preferences on `active`, where `confirmed` is their giver — the one place it shows. */
+  recipientPreferences: 'Je collectionne les timbres de dragons',
 } as const;
 
 /** Where auth.setup.ts parks each role's cookies. */

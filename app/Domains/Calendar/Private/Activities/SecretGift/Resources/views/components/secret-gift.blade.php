@@ -22,7 +22,7 @@
         {{-- Enrolment surface. The window is re-derived server-side by every write
              endpoint: hiding a control here is presentation, not authorization. --}}
         @if($isParticipant && $registrationOpen)
-            <div class="surface-read p-6 rounded-lg flex flex-col gap-4">
+            <div class="surface-read p-6 rounded-lg flex flex-col gap-4" data-testid="sg-preferences-panel">
                 <h3 class="text-lg font-bold">{{ __('secret-gift::secret-gift.enrolment.preferences_label') }}</h3>
                 <p class="text-sm text-fg/70">{{ __('secret-gift::secret-gift.enrolment.preferences_hint') }}</p>
 
@@ -46,7 +46,7 @@
                 </form>
 
                 <div class="border-t border-border pt-4 flex justify-end">
-                    <button type="button" class="text-sm text-error underline"
+                    <button type="button" class="text-sm text-error underline" data-testid="sg-leave-button"
                             x-data x-on:click="$dispatch('open-modal', 'sg-leave')">
                         {{ __('secret-gift::secret-gift.enrolment.leave_button') }}
                     </button>
@@ -63,7 +63,7 @@
                 />
             </div>
         @elseif($isParticipant)
-            <div class="surface-read p-6 rounded-lg flex flex-col gap-4">
+            <div class="surface-read p-6 rounded-lg flex flex-col gap-4" data-testid="sg-closed-participant">
                 <p class="text-lg">{{ __('secret-gift::secret-gift.waiting_for_start') }}</p>
                 <p class="text-sm text-fg/70">{{ __('secret-gift::secret-gift.enrolment.registration_closed_participant') }}</p>
 
@@ -79,7 +79,7 @@
                 </div>
             </div>
         @elseif($registrationOpen)
-            <div class="surface-read p-6 rounded-lg flex flex-col gap-4">
+            <div class="surface-read p-6 rounded-lg flex flex-col gap-4" data-testid="sg-join-panel">
                 <h3 class="text-lg font-bold">{{ __('secret-gift::secret-gift.enrolment.join_title') }}</h3>
                 <p class="text-sm text-fg/70">{{ __('secret-gift::secret-gift.enrolment.preferences_hint') }}</p>
 
@@ -102,7 +102,7 @@
                 </form>
             </div>
         @else
-            <div class="surface-read p-6 rounded-lg text-center">
+            <div class="surface-read p-6 rounded-lg text-center" data-testid="sg-closed-outsider">
                 <p class="text-lg">{{ __('secret-gift::secret-gift.not_participant') }}</p>
                 <p class="text-sm text-fg/70">{{ __('secret-gift::secret-gift.enrolment.registration_closed') }}</p>
             </div>
@@ -157,7 +157,7 @@
     {{-- Participant list: enrolled-only, display names only. Never carries
          preferences, nor any pairing information. --}}
     @if($isParticipant)
-        <div class="surface-read p-6 rounded-lg flex flex-col gap-4 secret-gift-participants">
+        <div class="surface-read p-6 rounded-lg flex flex-col gap-4 secret-gift-participants" data-testid="sg-participants">
             <h3 class="text-lg font-bold">{{ __('secret-gift::secret-gift.enrolment.participants_title') }}</h3>
 
             @if($participants->count() <= 1)

@@ -733,28 +733,32 @@ Seed hint: a PREVIEW Secret Gift with an open window, at least three
 participants, and one with a distinctive `preferences` string, plus a second
 activity whose deadline has already passed.
 
+Ran 2026-08-08 against `e2e/tests/features/secret-gift-enrolment.spec.ts`
+(18 tests, all green) on the fixtures in
+`app/Domains/Calendar/Database/Seeders/E2eSecretGiftSeeder.php`.
+
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Admin → activity create, type `secret-gift` | The type panel appears on selecting the type; it shows the *fin d'inscription* field and **no** shuffle panel. The Restrictions section shows no "Inscription requise" toggle and no "Nombre max de participants" input. | |
-| Admin → activity create, bad deadline | Submitting a deadline before `preview_starts_at` shows a French error under the field; the form keeps every entered value. | |
-| Admin → activity edit, Secret Gift | Deadline prefilled. Below the form: participant count, participant list by display name, and the shuffle button. No participant's preferences text anywhere on the page. | |
-| Admin → activity edit, < 2 participants | Shuffle button disabled with a readable explanation, not silently inert. | |
-| Admin → shuffle confirm modal | Opens on click; body plainly warns that re-running destroys existing assignments and the gifts on them; cancel closes it and changes nothing. | |
-| Admin → after shuffling | Success flash with the count; page reloads showing "already shuffled". | |
-| Admin → activity edit, ACTIVE activity | Shuffle button disabled with the "activity is active" reason. | |
-| Admin → activity edit, as **moderator** | Same panel and same shuffle button as an admin sees; reachable from the admin nav. | |
-| Activity page, PREVIEW + open, non-participant (`user-confirmed`) | Join form with the rich-text editor pre-filled with the likes/dislikes/fanart/genres template; toolbar renders; no participant list. | |
-| Activity page, right after joining | Success flash; editor now holds the saved preferences; leave button present; participant list appears. | |
-| Activity page, participant list | Display names only. No preferences, no pairing hints, no "who has whom". Sensible when the caller is the only participant (the *alone* line, not an empty box). | |
-| Activity page, leave flow | Confirm modal opens, cancel is harmless, confirm removes the enrolment and returns the page to the join form. | |
-| Activity page, PREVIEW + deadline passed, participant | Preferences shown read-only, no edit form, no leave button, "registration closed" line, participant list still visible. | |
-| Activity page, PREVIEW + deadline passed, non-participant | "Registration closed" message, no join form, no participant list. | |
-| Activity page, PREVIEW + already shuffled, before the deadline | Same closed state as above — the shuffle closes registration early. | |
-| Activity page, ACTIVE + shuffled, participant | The existing two-tab gift UI is unchanged: recipient name, their preferences, gift editor. No enrolment controls leaked into it. | |
-| Activity page as a role excluded by `role_restrictions` | 404, not a rendered page with the button missing. | |
-| Activity page, **mobile** (≈390px) | Join form, rich-text toolbar, participant list and leave button all usable and unclipped. | |
-| Admin activity edit, **mobile** | Shuffle panel and participant list readable; confirm modal fits. | |
-| After deactivating a participant (pre-shuffle) | Their name is gone from the participant list on the next load, for both the activity page and the admin panel. | |
+| Admin → activity create, type `secret-gift` | The type panel appears on selecting the type; it shows the *fin d'inscription* field and **no** shuffle panel. The Restrictions section shows no "Inscription requise" toggle and no "Nombre max de participants" input. | ✅ |
+| Admin → activity create, bad deadline | Submitting a deadline before `preview_starts_at` shows a French error under the field; the form keeps every entered value. | ✅ |
+| Admin → activity edit, Secret Gift | Deadline prefilled. Below the form: participant count, participant list by display name, and the shuffle button. No participant's preferences text anywhere on the page. | ✅ |
+| Admin → activity edit, < 2 participants | Shuffle button disabled with a readable explanation, not silently inert. | ✅ |
+| Admin → shuffle confirm modal | Opens on click; body plainly warns that re-running destroys existing assignments and the gifts on them; cancel closes it and changes nothing. | ✅ |
+| Admin → after shuffling | Success flash with the count; page reloads showing "already shuffled". | ✅ |
+| Admin → activity edit, ACTIVE activity | Shuffle button disabled with the "activity is active" reason. | ✅ |
+| Admin → activity edit, as **moderator** | Same panel and same shuffle button as an admin sees; reachable from the admin nav. | ✅ |
+| Activity page, PREVIEW + open, non-participant (`user-confirmed`) | Join form with the rich-text editor pre-filled with the likes/dislikes/fanart/genres template; toolbar renders; no participant list. | ✅ |
+| Activity page, right after joining | Success flash; editor now holds the saved preferences; leave button present; participant list appears. | ✅ |
+| Activity page, participant list | Display names only. No preferences, no pairing hints, no "who has whom". Sensible when the caller is the only participant (the *alone* line, not an empty box). | ✅ (avatars alongside the names — richer than open item 5 assumed, and it reads well) |
+| Activity page, leave flow | Confirm modal opens, cancel is harmless, confirm removes the enrolment and returns the page to the join form. | ✅ |
+| Activity page, PREVIEW + deadline passed, participant | Preferences shown read-only, no edit form, no leave button, "registration closed" line, participant list still visible. | ✅ |
+| Activity page, PREVIEW + deadline passed, non-participant | "Registration closed" message, no join form, no participant list. | ✅ |
+| Activity page, PREVIEW + already shuffled, before the deadline | Same closed state as above — the shuffle closes registration early. | ✅ |
+| Activity page, ACTIVE + shuffled, participant | The existing two-tab gift UI is unchanged: recipient name, their preferences, gift editor. No enrolment controls leaked into it. | ✅ (the participant list also renders below the tabs — no control, and architecture §4 asks for it) |
+| Activity page as a role excluded by `role_restrictions` | 404, not a rendered page with the button missing. | n/a — pure authorization, settled by `ActivityShowPageTest` (page) and `EnrolmentTest` (write routes); nothing a browser adds |
+| Activity page, **mobile** (≈390px) | Join form, rich-text toolbar, participant list and leave button all usable and unclipped. | ✅ for the enrolment block. The page **header** above it clips its state badge by ~1 px on a long activity name — `activity/show.blade.php`, base Calendar, not this feature's markup |
+| Admin activity edit, **mobile** | Shuffle panel and participant list readable; confirm modal fits. | ✅ |
+| After deactivating a participant (pre-shuffle) | Their name is gone from the participant list on the next load, for both the activity page and the admin panel. | n/a — the row removal is asserted six ways in `ParticipantCleanupTest`; the list is a plain read of it |
 
 ## Open items
 
