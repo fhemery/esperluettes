@@ -22,7 +22,6 @@ into unreadable merge conflicts. A one-line-per-task list keeps a conflict
 scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
-- **Secret Gift — participants cannot enrol** · `secret-gift-enrolment/` · interactive · WIP:WRAP: VERIFY done, 18/18 checklist rows pass (2 n/a, covered by PHP tests)
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO
 - **Jardino — `deselected_at` is never written** · `jardino-snapshot-deselection/` · auto · TODO
 - **Chapter annotations** · `annotations/` · interactive · TODO: enters at **BUILD** — `01`/`02`/`03` are the pre-loop documents, 10 of 14 phases remain. Overlaps `chapters-multi-edit/` and `quotes-author-view/` on per-block anchoring — read both records in `_done/` first and sequence them deliberately. Two facts now settled by `quotes-author-view/`: `Shared/Resources/js/anchoring/block-elements.js` is the shared "what is a block" predicate (narrower than `canonical-text.js`'s `BLOCK_TAGS`), and quotes are now refused at capture when they span two blocks (decisions #22/#23) — decide deliberately whether annotations adopt the same restriction or handle the boundary seam.
@@ -53,6 +52,7 @@ tracking down why something is the way it is.
 - [`news-pin-carousel-white-screen`](_done/news-pin-carousel-white-screen.md) · Shared toggle focus overlay — stops admin pane scrolling away on pin click
 - [`news-pin-carousel-first`](_done/news-pin-carousel-first.md) · newly pinned news inserts at carousel position 1 (others shift +1)
 - [`news-moderator-access`](_done/news-moderator-access.md) · moderators get full News admin (CRUD, publish, pin, carousel, draft preview)
+- [`secret-gift-enrolment`](_done/secret-gift-enrolment.md) · readers can join, edit their preferences and leave a Secret Gift before the shuffle, behind a mandatory registration deadline, with a moderator/admin shuffle panel
 - [`comment-editor-not-displaying`](_done/comment-editor-not-displaying.md) · reply/edit composers rendered blank after the Editor domain split; fixed asset loading
 - [`shared-a11y`](_done/shared-a11y.md) · tabs/confirm-modal a11y gaps (`role="tabpanel"`, focus-on-open)
 - [`quote-contest`](_done/quote-contest.md) · third Calendar activity type — quote-book entries, categories, anonymous voting
