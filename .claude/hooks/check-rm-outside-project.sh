@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# PreToolUse hook (Bash matcher): auto-allows `rm` calls whose targets stay
-# inside the project directory, auto-denies ones that reach outside it.
-# Any other command is left alone (no decision emitted -> normal rules apply).
+# PreToolUse hook (Bash matcher): auto-allows `rm` calls (including ones
+# wrapped in `timeout`) whose targets stay inside the project directory,
+# auto-denies ones that reach outside it. Any other command is left alone
+# (no decision emitted -> normal rules apply).
 set -euo pipefail
 
 cmd=$(jq -r '.tool_input.command // empty')
@@ -17,9 +18,23 @@ outside=""
 for sub in "${subcmds[@]}"; do
   read -ra tok <<< "$sub"
   [ "${#tok[@]}" -eq 0 ] && continue
-  [ "${tok[0]}" != "rm" ] && continue
+
+  start=0
+  if [ "${tok[0]}" = "timeout" ]; then
+    start=1
+    # skip timeout's own flags (-k/--kill-after, -s/--signal take a value)
+    while [ "$start" -lt "${#tok[@]}" ] && [[ "${tok[$start]}" == -* ]]; do
+      case "${tok[$start]}" in
+        -k|--kill-after|-s|--signal) start=$((start + 2)) ;;
+        *) start=$((start + 1)) ;;
+      esac
+    done
+    start=$((start + 1)) # mandatory DURATION argument
+  fi
+  [ "$start" -ge "${#tok[@]}" ] && continue
+  [ "${tok[$start]}" != "rm" ] && continue
   found_rm=1
-  for t in "${tok[@]:1}"; do
+  for t in "${tok[@]:$((start + 1))}"; do
     case "$t" in
       -*) continue ;;
     esac
