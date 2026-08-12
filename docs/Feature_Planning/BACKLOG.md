@@ -38,6 +38,7 @@ scoped to the task that actually changed.
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
 - **Domain docs gate check** · `domain-docs-gate-check/` · auto · TODO: gate should fail if a domain under `app/Domains` is missing `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root `AGENTS.md` Domain Registry table
 - **Gate parallel execution** · `gate-parallel-execution/` · auto · TODO: `npm run gate` runs PHP tests sequentially per domain once more than a few domains are touched, slower than parallel on multi-core machines — investigate why and optimize the PHP part; also check running all check categories (PHP, JS, docs, ...) in parallel
+- **Fix audit vulnerabilities** · `fix-audit-vulnerabilities/` · auto · TODO: NPM and composer dependency audit findings
 
 ## Done
 
