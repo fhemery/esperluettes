@@ -36,7 +36,8 @@ scoped to the task that actually changed.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
-- **Domain CLAUDE.md shims** · `domain-claude-md-shims/` · auto · TODO: `document-domain` writes a per-domain `CLAUDE.md` containing only `@AGENTS.md`; root gets the same treatment rather than a symlink
+- **Domain docs gate check** · `domain-docs-gate-check/` · auto · TODO: gate should fail if a domain under `app/Domains` is missing `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root `AGENTS.md` Domain Registry table
+- **Gate parallel execution** · `gate-parallel-execution/` · auto · TODO: `npm run gate` runs PHP tests sequentially per domain once more than a few domains are touched, slower than parallel on multi-core machines — investigate why and optimize the PHP part; also check running all check categories (PHP, JS, docs, ...) in parallel
 
 ## Done
 
@@ -45,6 +46,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`domain-claude-md-shims`](_done/domain-claude-md-shims.md) · every domain gets a one-line `CLAUDE.md` (`@AGENTS.md`) shim; `document-domain` now writes README + AGENTS + shim
 - [`quote-contest-moderator-ops`](_done/quote-contest-moderator-ops.md) · moderators can CRUD quote-contest categories on activity edit (middleware parity)
 - [`favicon-season-cache`](_done/favicon-season-cache.md) · favicon links append `?theme=<season>` so season changes bust browser cache
 - [`news-comment-form-retains-text`](_done/news-comment-form-retains-text.md) · Comment draft consume-before-restore — form empty after successful submit

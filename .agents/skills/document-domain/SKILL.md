@@ -1,14 +1,15 @@
 ---
 name: document-domain
-description: This skill should be used when the user asks to "document domain X", "update domain docs for X", "write the CLAUDE.md for X", "write the README for X domain", or "document the X module". Produces or updates both README.md and CLAUDE.md for a given domain under app/Domains/.
+description: This skill should be used when the user asks to "document domain X", "update domain docs for X", "write the CLAUDE.md for X", "write the README for X domain", or "document the X module". Produces or updates three files for a given domain under app/Domains/ — README.md, AGENTS.md, and the one-line CLAUDE.md shim.
 version: 0.1.0
 ---
 
 # Document Domain
 
-Produce or update two documentation files for a domain:
+Produce or update three documentation files for a domain:
 - **README.md** — human-readable domain overview for developers
-- **CLAUDE.md** — agent instructions: only what cannot be derived from reading the code
+- **AGENTS.md** — agent instructions: only what cannot be derived from reading the code
+- **CLAUDE.md** — a one-line shim (`@AGENTS.md`) so Claude Code auto-loads `AGENTS.md`
 
 Consult `references/content-guide.md` for the detailed breakdown of what belongs in each file and what to leave out.
 
@@ -16,14 +17,14 @@ Consult `references/content-guide.md` for the detailed breakdown of what belongs
 
 Resolve the domain name and path. All domains live under `app/Domains/<DomainName>/`.
 
-If the user provides a partial or lowercase name (e.g. "story", "read list"), match it against the Domain Registry in the root `CLAUDE.md`.
+If the user provides a partial or lowercase name (e.g. "story", "read list"), match it against the Domain Registry in the root `AGENTS.md`.
 
 ## Step 2 — Explore the domain
 
 Read the following, in order. Stop reading a file once you have what you need — don't load everything blindly.
 
 1. Existing `README.md` (if present) — note what's already covered and what's missing
-2. Existing `CLAUDE.md` (if present) — note what's already there to avoid duplication
+2. Existing `AGENTS.md` (if present) — note what's already there to avoid duplication
 3. `Public/` folder — read the Public API class(es) and list of events; these are the domain's external contract
 4. `Private/Services/` — skim service method signatures to understand business operations
 5. `Private/Models/` — skim models for relationships and non-obvious casts/scopes
@@ -48,9 +49,9 @@ Write for a **human developer** joining the project. See `references/content-gui
 
 If a README already exists, preserve accurate content and extend or correct it rather than rewriting from scratch.
 
-## Step 4 — Write or update CLAUDE.md
+## Step 4 — Write or update AGENTS.md
 
-Target: `app/Domains/<Domain>/CLAUDE.md`
+Target: `app/Domains/<Domain>/AGENTS.md`
 
 Write for an **AI agent** doing implementation work in this domain. See `references/content-guide.md` for the full content contract. In brief:
 
@@ -59,15 +60,36 @@ Write for an **AI agent** doing implementation work in this domain. See `referen
 - Events catalogue — what to emit and when (spread across many files otherwise)
 - Non-obvious invariants that span multiple files and would cause bugs if missed
 
-If a CLAUDE.md already exists, merge and update rather than overwrite.
+If an AGENTS.md already exists, merge and update rather than overwrite.
 
-## Step 5 — Verify
+## Step 5 — Write the CLAUDE.md shim
 
-After writing both files:
+Target: `app/Domains/<Domain>/CLAUDE.md`
 
-1. Check that CLAUDE.md contains **no information derivable from a single file** (model fields, route lists, service signatures). If found, remove it.
+Write exactly one line:
+
+```
+@AGENTS.md
+```
+
+Nothing else — no heading, no domain name, no comment, and never any prose of
+its own. This mirrors the root `CLAUDE.md` pattern, minus root's
+Claude-Code-specific addendum: that addendum is a rule about Claude Code
+tooling, not about any domain, so it stays root-only.
+
+The step is idempotent: if the file already contains exactly that line, leave it
+alone. The shim exists because Claude Code auto-loads `CLAUDE.md` only — the
+`@AGENTS.md` include hands it the domain's `AGENTS.md` without duplicating a
+single word of it.
+
+## Step 6 — Verify
+
+After writing the files:
+
+1. Check that AGENTS.md contains **no information derivable from a single file** (model fields, route lists, service signatures). If found, remove it.
 2. Check that README.md contains **no agent instructions** — only human-readable explanation.
-3. Confirm the domain's entry in the root `CLAUDE.md` Domain Registry is accurate (path, responsibilities summary, tables). Update it if not.
+3. Confirm the domain's entry in the root `AGENTS.md` Domain Registry is accurate (path, responsibilities summary, tables). Update it if not.
+4. Check that the domain's `CLAUDE.md` is exactly the single line `@AGENTS.md`.
 
 ## Additional Resources
 

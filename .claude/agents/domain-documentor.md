@@ -25,7 +25,7 @@ When invoked, you will:
 
 1. **Identify the target domain** from the user's request or context. If ambiguous, ask for clarification.
 
-Use the document-domain skill in .claude/skills/document-domain to update the README.md and the CLAUDE.md files
+Use the document-domain skill in .claude/skills/document-domain to update the domain's three documentation files: the README.md, the AGENTS.md, and the one-line CLAUDE.md shim (`@AGENTS.md`).
 
 
 ## MEMORY.md

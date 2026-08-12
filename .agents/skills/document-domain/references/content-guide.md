@@ -1,11 +1,19 @@
-# Content Guide — README.md vs CLAUDE.md
+# Content Guide — README.md vs AGENTS.md
 
 ## Core principle
 
 **README.md** = human understanding. Written for a developer who just joined the project.  
-**CLAUDE.md** = agent instructions. Written for an AI that will implement features in this domain.  
+**AGENTS.md** = agent instructions. Written for an AI that will implement features in this domain.  
 
-The test for CLAUDE.md: *would an agent cause a bug or architectural violation by not knowing this, and can it NOT be derived by reading a single file?* If both answers are yes, it belongs in CLAUDE.md. Otherwise, leave it out.
+The test for AGENTS.md: *would an agent cause a bug or architectural violation by not knowing this, and can it NOT be derived by reading a single file?* If both answers are yes, it belongs in AGENTS.md. Otherwise, leave it out.
+
+### A note on the domain's CLAUDE.md
+
+A domain's `CLAUDE.md` is a **generated one-line shim** containing `@AGENTS.md`
+and nothing else. It is not a third content file to calibrate, and it is never a
+place to put prose: there are only two content files, `README.md` and
+`AGENTS.md`, and nothing below is about `CLAUDE.md`. Do not split agent content
+between the two — everything an agent needs goes in `AGENTS.md`.
 
 ---
 
@@ -51,7 +59,7 @@ Instead, **fold the content in**. If a planning document records something a fut
 
 ---
 
-## CLAUDE.md
+## AGENTS.md
 
 ### Always include
 
@@ -98,12 +106,12 @@ Examples of good invariants:
 
 **No FK constraint note** — If the domain intentionally avoids a FK to `users` (per architecture rules), state it explicitly with the reason.
 
-### Never include in CLAUDE.md
+### Never include in AGENTS.md
 
 | What | Why |
 |------|-----|
 | Model field lists | Agent reads the model |
-| Table names | Already in root CLAUDE.md Domain Registry |
+| Table names | Already in root AGENTS.md Domain Registry |
 | Route lists | Agent reads routes.php |
 | Service method signatures | Agent reads the service |
 | Anything in a single readable file | Creates drift when the file changes |
@@ -119,7 +127,7 @@ Examples of good invariants:
 - Architecture: Admin Filament resources live in `app/Domains/Admin/`, not inside the News domain itself
 - Cross-domain: Home domain uses `NewsPublicApi::getPinnedForCarousel()` to render the carousel
 
-### CLAUDE.md would contain
+### AGENTS.md would contain
 - README pointer
 - Public API: `NewsPublicApi` — `getPinnedForCarousel()` for Home domain
 - Events: `NewsPublished`, `NewsUnpublished`, `NewsUpdated`, `NewsDeleted`
@@ -131,7 +139,7 @@ Examples of good invariants:
 - List of `news` table columns
 - The `NewsRequest` validation rules
 
-### CLAUDE.md would NOT contain
+### AGENTS.md would NOT contain
 - Explanation of what "published" means to a user
 - The fact that `is_pinned` is a boolean
 
@@ -147,7 +155,7 @@ Before finalising either file, run through these:
 - [ ] Are architecture decisions justified (not just described)?
 - [ ] Is the cross-domain map complete?
 
-**CLAUDE.md**
+**AGENTS.md**
 - [ ] Does every entry require reading *multiple files* to discover independently?
 - [ ] Is the Public API clearly identified?
 - [ ] Are all emitted events listed?
