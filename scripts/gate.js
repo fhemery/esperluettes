@@ -25,7 +25,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawnSync } from 'child_process';
-import { makeLog, runCmd, determineRunner, isSailRunning } from './utils.js';
+import { makeLog, runCmdAsync, determineRunner, isSailRunning } from './utils.js';
 import { resolvePhpTestPlan, getModifiedFiles } from './launch_staged_tests.js';
 
 const log = makeLog('gate');
@@ -78,7 +78,7 @@ function artisan(runner, extra) {
     : { cmd: 'php', args: ['artisan', ...extra] };
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2));
   const runner = determineRunner();
 
@@ -118,18 +118,42 @@ function main() {
   const failed = [];
   const skipped = [];
   const ran = [];
+
+  // Start every non-skipped step's command right away (all launched before
+  // any is awaited), then let each one print its own labelled block as soon
+  // as it settles — order = completion order, not declaration order.
+  // Exception: `build` (vite build, which empties public/build and rewrites
+  // manifest.json only near the end of its run) waits for `php` to settle
+  // when both are selected and php is not skipped — a concurrently-running
+  // `php` step renders Blade views via @vite and can transiently hit a
+  // missing manifest otherwise. No race is possible without a concurrently
+  // running php, so build starts immediately when php is absent or skipped.
+  const runStep = (step) => runCmdAsync(step.cmd, step.args, { cwd: root }).then(({ ok, output }) => {
+    log(`--- ${step.label}`);
+    if (output) process.stdout.write(output + '\n');
+    log(`${ok ? 'PASS' : 'FAIL'}: ${step.label}`);
+    ran.push(step.id);
+    if (!ok) failed.push(step.id);
+  });
+
+  const pending = [];
+  let phpPromise = null;
   for (const step of selected) {
     if (step.skipReason) {
       log(`SKIP: ${step.label} (${step.skipReason})`);
       skipped.push(step.id);
       continue;
     }
-    log(`--- ${step.label}`);
-    const ok = runCmd(step.cmd, step.args, { cwd: root });
-    log(`${ok ? 'PASS' : 'FAIL'}: ${step.label}`);
-    ran.push(step.id);
-    if (!ok) failed.push(step.id);
+    if (step.id === 'build' && phpPromise) {
+      pending.push(phpPromise.then(() => runStep(step)));
+      continue;
+    }
+    const promise = runStep(step);
+    if (step.id === 'php') phpPromise = promise;
+    pending.push(promise);
   }
+
+  await Promise.allSettled(pending);
 
   console.log('');
   if (failed.length > 0) {
@@ -139,4 +163,7 @@ function main() {
   console.log(`[gate] PASSED: ${ran.join(', ') || 'nothing to run'}${skipped.length ? ` (skipped: ${skipped.join(', ')})` : ''}`);
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

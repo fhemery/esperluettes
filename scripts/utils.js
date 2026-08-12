@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { spawnSync } from 'child_process';
+import { spawnSync, spawn } from 'child_process';
 import { parse as dotenvParse } from 'dotenv';
 
 // Logging
@@ -103,6 +103,26 @@ export function runCmdWithOutput(cmd, args, opts = {}) {
   });
   const output = ((res.stdout || '') + (res.stderr || '')).trim();
   return { ok: res.status === 0, output };
+}
+
+// Async, non-blocking runner that returns { ok, output } without throwing —
+// captures stdout+stderr, same shape as runCmdWithOutput. Built on spawn (not
+// spawnSync) so several commands can run concurrently; used by gate.js's
+// concurrent step scheduling.
+export function runCmdAsync(cmd, args, opts = {}) {
+  return new Promise((resolve) => {
+    const child = spawn(cmd, args || [], { shell: process.platform === 'win32', ...opts });
+    let output = '';
+    if (child.stdout) child.stdout.on('data', (d) => { output += d; });
+    if (child.stderr) child.stderr.on('data', (d) => { output += d; });
+    child.on('error', (err) => {
+      output += `${output ? '\n' : ''}${err.message}`;
+      resolve({ ok: false, output: output.trim() });
+    });
+    child.on('close', (code) => {
+      resolve({ ok: code === 0, output: output.trim() });
+    });
+  });
 }
 
 // Check whether sail containers are currently running
