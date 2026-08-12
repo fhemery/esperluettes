@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Composer audit — `league/commonmark` bump | S | — | DONE |
-| 2 | NPM audit — fixable advisories (Quill exception) | S | — | TODO |
+| 2 | NPM audit — fixable advisories (Quill exception) | S | — | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
