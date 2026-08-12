@@ -213,15 +213,15 @@ the docs, do not Playwright the app.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Docker Sail setup (`docs/Setup_01a_Docker_Sail.md`) | Fresh reader can follow Corepack → `pnpm install` → `pnpm run build` without hitting npm | |
-| Laragon setup (`docs/Setup_01b_Windows_Laragon.md`) | Same pnpm path; Windows notes still coherent | |
-| CONTRIBUTING | Husky install tied to `pnpm install`, not npm | |
-| AGENTS.md + loop skills | Gate/e2e/browser commands use pnpm | |
-| Existing clone (hand check) | Remove `node_modules`, `pnpm install`, `pnpm run gate -- --quick` succeeds | |
-| `composer run dev` | Vite leg starts (pnpm-backed) alongside PHP processes | |
-| Husky pre-commit | Commit with a trivial change runs deptrac + vitest via pnpm exec | |
-| Deploying | `pnpm run package` documented; dev-server shutdown note still valid | |
-| PR CI (GitHub) | Workflow green with frozen pnpm install on the branch | |
+| Docker Sail setup (`docs/Setup_01a_Docker_Sail.md`) | Fresh reader can follow Corepack → `pnpm install` → `pnpm run build` without hitting npm | ✅ §8 documents Corepack path, existing-clone `rm`, Sail fallback; no npm install/run in doc |
+| Laragon setup (`docs/Setup_01b_Windows_Laragon.md`) | Same pnpm path; Windows notes still coherent | ✅ §8 matches; Windows SSL/Laragon steps unchanged |
+| CONTRIBUTING | Husky install tied to `pnpm install`, not npm | ✅ §Local hooks cites `pnpm install` + Corepack |
+| AGENTS.md + loop skills | Gate/e2e/browser commands use pnpm | ✅ `rg` on listed active docs — no project `npm install/run` or `npx`; loop skills say `pnpm run gate` |
+| Existing clone (hand check) | Remove `node_modules`, `pnpm install`, `pnpm run gate -- --quick` succeeds | ✅ `rm -rf node_modules && pnpm install --frozen-lockfile` + gate green (docs, deptrac, php, js) |
+| `composer run dev` | Vite leg starts (pnpm-backed) alongside PHP processes | ✅ `composer.json` `scripts.dev` shells to `pnpm run dev`; `pnpm run dev` → Vite 7 ready |
+| Husky pre-commit | Commit with a trivial change runs deptrac + vitest via pnpm exec | ✅ `husky-precommit.js` uses `pnpm exec vitest run`; deptrac + vitest both pass when invoked |
+| Deploying | `pnpm run package` documented; dev-server shutdown note still valid | ✅ §Generating a package uses `pnpm run package`; shutdown note references `pnpm run dev` |
+| PR CI (GitHub) | Workflow green with frozen pnpm install on the branch | n/a — `gh`/GitHub API unreachable from verify env; `.github/workflows/pr-tests.yml` uses Corepack + `pnpm install --frozen-lockfile` + build/test (matches local smoke) |
 
 ---
 
