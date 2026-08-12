@@ -33,6 +33,93 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const SEARCH_ROOTS = ['docs', 'app/Domains'];
 const PLANNING_DIR = 'Feature_Planning';
+const CLAUDE_SHIM = '@AGENTS.md\n';
+
+export function listDomainNames(rootDir) {
+  const domainsDir = path.join(rootDir, 'app', 'Domains');
+  let entries;
+  try {
+    entries = fs.readdirSync(domainsDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  return entries.filter((e) => e.isDirectory()).map((e) => e.name).sort();
+}
+
+export function checkDomainTrio(rootDir, domainName) {
+  const domainDir = path.join(rootDir, 'app', 'Domains', domainName);
+  const failures = [];
+  const required = ['README.md', 'AGENTS.md', 'CLAUDE.md'];
+
+  for (const file of required) {
+    if (!fs.existsSync(path.join(domainDir, file))) {
+      failures.push(`app/Domains/${domainName}: missing ${file}`);
+    }
+  }
+
+  const claudePath = path.join(domainDir, 'CLAUDE.md');
+  if (fs.existsSync(claudePath)) {
+    const content = fs.readFileSync(claudePath);
+    if (!content.equals(Buffer.from(CLAUDE_SHIM))) {
+      failures.push(`app/Domains/${domainName}: CLAUDE.md is not the @AGENTS.md shim`);
+    }
+  }
+
+  return failures;
+}
+
+export function parseRegistryDomainPaths(agentsMdContent) {
+  const lines = agentsMdContent.split(/\r?\n/);
+  const startIdx = lines.findIndex((line) => line.trim() === '## Domain Registry');
+  if (startIdx === -1) {
+    return [];
+  }
+
+  const paths = [];
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith('## ')) {
+      break;
+    }
+    if (!line.startsWith('|')) {
+      continue;
+    }
+    const cells = line.split('|').map((c) => c.trim()).filter((c) => c !== '');
+    if (cells.length < 2 || /^:?-+:?$/.test(cells[0])) {
+      continue;
+    }
+    const match = cells[1].match(/`(app\/Domains\/[^`]+)`/);
+    if (match) {
+      paths.push(match[1]);
+    }
+  }
+  return paths;
+}
+
+export function checkRegistrySync(domainNames, registryPaths) {
+  const failures = [];
+  const registrySet = new Set(registryPaths);
+  const domainSet = new Set(domainNames);
+
+  for (const name of domainNames) {
+    const expected = `app/Domains/${name}`;
+    if (!registrySet.has(expected)) {
+      failures.push(`app/Domains/${name}: not listed in Domain Registry`);
+    }
+  }
+
+  for (const regPath of registryPaths) {
+    const match = regPath.match(/^app\/Domains\/(.+)$/);
+    if (!match) {
+      continue;
+    }
+    if (!domainSet.has(match[1])) {
+      failures.push(`${regPath}: listed in Domain Registry but no directory on disk`);
+    }
+  }
+
+  return failures;
+}
 
 function walk(dir, out = []) {
   let entries;
@@ -147,4 +234,7 @@ function main() {
   log(`checked ${files.length} markdown files`);
 }
 
-main();
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isDirectRun) {
+  main();
+}
