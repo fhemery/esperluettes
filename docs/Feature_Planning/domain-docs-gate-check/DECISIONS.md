@@ -25,3 +25,5 @@ the user may want to reverse — surface these in the WRAP summary.
 | A4 | Document and register `Follow` in this task so the new checks pass; no permanent exception | REFINE | Yes — could exclude Follow temporarily, but that defeats the filed purpose |
 | A5 | Enforce in `scripts/check-docs.js` only; no PHPUnit "file exists" test | REFINE | Yes — prior WRAP called PHPUnit for this test theatre |
 | A6 | Error messages stay English, matching existing `check-docs.js` style | REFINE | Yes |
+| A7 | Extend `scripts/check-docs.js` rather than adding a new gate step | DESIGN | Yes |
+| A8 | Prove helpers with a small Node/Vitest suite + gate acceptance; VERIFY skipped (no UI) | DESIGN | Yes |
