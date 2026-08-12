@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-12
-- **Context:** [migrate-npm-to-pnpm functional spec](../Feature_Planning/migrate-npm-to-pnpm/01-functional.md)
+- **Context:** [migrate-npm-to-pnpm WRAP record](../Feature_Planning/_done/migrate-npm-to-pnpm.md)
 
 ## Context
 
@@ -137,9 +137,8 @@ lockfile discipline, and delayed uptake of fresh registry releases.
   leftover `package-lock.json`, then `pnpm install` once (documented in setup).
 - CI cache strategy switches from npm to pnpm (Corepack + `cache: 'pnpm'` or
   documented alternative if setup-node cache misbehaves).
-- Agents and active docs must be updated to `pnpm run gate` / `pnpm install`
-  (phase 3); until then, phase 1–2 still run the gate via **`npm run gate`**
-  because npm remains on disk until the core switch lands.
+- Agents and active docs use `pnpm run gate` / `pnpm install` (migration
+  completed 2026-08-12).
 - Yarn and bun remain in the Sail Dockerfile; that is out of scope for this ADR.
 
 ### Rollback
@@ -150,5 +149,4 @@ npm + pnpm support is not a supported mode** — it would rot immediately.
 
 ## References
 
-- Architecture: [`02-architecture.md`](../Feature_Planning/migrate-npm-to-pnpm/02-architecture.md) §4 (tooling contracts), §7 (tradeoffs), §8 (file layout)
-- Decisions log: [`DECISIONS.md`](../Feature_Planning/migrate-npm-to-pnpm/DECISIONS.md)
+- WRAP record: [`migrate-npm-to-pnpm.md`](../Feature_Planning/_done/migrate-npm-to-pnpm.md)
