@@ -9,19 +9,20 @@
 The gate docs step (`pnpm run gate` → `docs` → `scripts/check-docs.js`) now
 fails when any immediate subdirectory of `app/Domains/` is missing the
 documentation trio (`README.md`, `AGENTS.md`, `CLAUDE.md`), when `CLAUDE.md`
-is not exactly the `@AGENTS.md` shim, or when disk and the root `AGENTS.md`
-Domain Registry drift apart (missing row or orphan row). This closes the hole
-left by [`domain-claude-md-shims`](./domain-claude-md-shims.md): new domains
-could ship without docs or a registry entry and stay green. Follow was the only
-gap on disk — it was documented and registered in phase 1 so the new rules pass
-on a clean tree.
+lacks a line `@AGENTS.md`, or when disk and the root `AGENTS.md` Domain
+Registry drift apart (missing row or orphan row). This closes the hole left by
+[`domain-claude-md-shims`](./domain-claude-md-shims.md): new domains could ship
+without docs or a registry entry and stay green. Follow was the only gap on
+disk — it was documented and registered in phase 1 so the new rules pass on a
+clean tree.
 
 ## Key behaviour
 
 - **Domains = immediate subdirs of `app/Domains/`.** Files at that root are
   ignored; discovery is filesystem-first, not registry-first.
-- **CLAUDE shim is byte-exact:** `@AGENTS.md\n` (Unix newline only). CRLF or
-  missing trailing newline fails with a distinct message from "missing file".
+- **`CLAUDE.md` must include a line `@AGENTS.md`.** Extra Claude-Code-only
+  instructions are allowed (same pattern as root `CLAUDE.md`). The gate does
+  not require a byte-exact one-line shim.
 - **Registry check is bidirectional.** Every disk domain needs Path
   `` `app/Domains/<Name>` `` in the Domain Registry table; every such Path must
   point at an existing directory. Responsibilities / Tables columns are not
@@ -29,17 +30,14 @@ on a clean tree.
 - **All five checks run every time; non-fail-fast.** Violations aggregate per
   check label, then the script exits 1. Existing rules (Feature_Planning ban in
   domain docs and ADRs, relative-link resolution) are unchanged.
-- **No PHPUnit.** Pure helpers are exported from `check-docs.js` and covered by
-  colocated Vitest tests; gate acceptance is the green tree.
+- **No PHPUnit / no Vitest for the docs checker.** The gate docs step *is* the
+  test: it runs against the real tree every `pnpm run gate`.
 
 ## Where the code lives
 
 | Concern | Path |
 |---------|------|
 | Docs step (rules 1–5) | `scripts/check-docs.js` |
-| Exported helpers | `listDomainNames`, `checkDomainTrio`, `parseRegistryDomainPaths`, `checkRegistrySync` |
-| Vitest suite | `scripts/check-docs.test.js` |
-| Vitest include widened | `vitest.config.js` (`scripts/**/*.test.js`) |
 | Follow documentation trio | `app/Domains/Follow/README.md`, `AGENTS.md`, `CLAUDE.md` |
 | Domain Registry row | root `AGENTS.md` § Domain Registry (**Follow**) |
 
@@ -60,11 +58,15 @@ not add new registry hooks.
    breaks parsing.
 4. **VERIFY skipped** — no browser surface (same rationale as
    `domain-claude-md-shims`).
+5. **`CLAUDE.md` is not byte-locked** — must contain `@AGENTS.md` as a line;
+   Claude-Code-only addenda are allowed (supersedes the stricter WRAP wording
+   from `domain-claude-md-shims`).
 
 ## Plan vs code
 
 All three BUILD phases shipped as planned (`2951ab05`, `f726e560`, `2f0306d6`).
-No phases left open. Code matches architecture §3.1 and functional §4.
+Post-WRAP: the colocated Vitest suite was removed (duplicated the gate), and
+the CLAUDE check was relaxed from byte-exact shim to "includes `@AGENTS.md`".
 
 ## Not done
 

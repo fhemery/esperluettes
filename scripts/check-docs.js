@@ -33,9 +33,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const SEARCH_ROOTS = ['docs', 'app/Domains'];
 const PLANNING_DIR = 'Feature_Planning';
-const CLAUDE_SHIM = '@AGENTS.md\n';
-
-export function listDomainNames(rootDir) {
+function listDomainNames(rootDir) {
   const domainsDir = path.join(rootDir, 'app', 'Domains');
   let entries;
   try {
@@ -46,7 +44,11 @@ export function listDomainNames(rootDir) {
   return entries.filter((e) => e.isDirectory()).map((e) => e.name).sort();
 }
 
-export function checkDomainTrio(rootDir, domainName) {
+function claudeMdIncludesAgents(content) {
+  return content.split(/\r?\n/).some((line) => line.trim() === '@AGENTS.md');
+}
+
+function checkDomainTrio(rootDir, domainName) {
   const domainDir = path.join(rootDir, 'app', 'Domains', domainName);
   const failures = [];
   const required = ['README.md', 'AGENTS.md', 'CLAUDE.md'];
@@ -59,16 +61,16 @@ export function checkDomainTrio(rootDir, domainName) {
 
   const claudePath = path.join(domainDir, 'CLAUDE.md');
   if (fs.existsSync(claudePath)) {
-    const content = fs.readFileSync(claudePath);
-    if (!content.equals(Buffer.from(CLAUDE_SHIM))) {
-      failures.push(`app/Domains/${domainName}: CLAUDE.md is not the @AGENTS.md shim`);
+    const content = fs.readFileSync(claudePath, 'utf8');
+    if (!claudeMdIncludesAgents(content)) {
+      failures.push(`app/Domains/${domainName}: CLAUDE.md must include a line @AGENTS.md`);
     }
   }
 
   return failures;
 }
 
-export function parseRegistryDomainPaths(agentsMdContent) {
+function parseRegistryDomainPaths(agentsMdContent) {
   const lines = agentsMdContent.split(/\r?\n/);
   const startIdx = lines.findIndex((line) => line.trim() === '## Domain Registry');
   if (startIdx === -1) {
@@ -96,7 +98,7 @@ export function parseRegistryDomainPaths(agentsMdContent) {
   return paths;
 }
 
-export function checkRegistrySync(domainNames, registryPaths) {
+function checkRegistrySync(domainNames, registryPaths) {
   const failures = [];
   const registrySet = new Set(registryPaths);
   const domainSet = new Set(domainNames);
@@ -231,7 +233,7 @@ function main() {
     { label: 'ADRs do not reference Feature_Planning', failures: checkAdrPlanningReferences(files) },
     { label: 'relative markdown links resolve', failures: checkRelativeLinks(files) },
     {
-      label: 'every domain has README.md, AGENTS.md, and CLAUDE.md shim',
+      label: 'every domain has README.md, AGENTS.md, and CLAUDE.md with @AGENTS.md',
       failures: checkAllDomainTrios(root),
     },
     {
@@ -258,7 +260,4 @@ function main() {
   log(`checked ${files.length} markdown files`);
 }
 
-const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-if (isDirectRun) {
-  main();
-}
+main();

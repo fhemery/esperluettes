@@ -17,9 +17,9 @@ three files, then the 26 shims were backfilled.
 
 ## Key behaviour
 
-- **Shim content is fixed: exactly `@AGENTS.md`, one line, trailing newline,
-  nothing else.** No heading, no domain name, no prose — identical in all 26
-  files. A domain `CLAUDE.md` is generated output, not a third content file.
+- **At WRAP time, shim content was fixed to exactly `@AGENTS.md`.** That was
+  later relaxed: `CLAUDE.md` must include a line `@AGENTS.md`, and may carry
+  Claude-Code-only addenda — see [`domain-docs-gate-check`](./domain-docs-gate-check.md).
 - **`AGENTS.md` is the agent-instructions file.** The skill's old wording called
   it "CLAUDE.md" while in fact writing `AGENTS.md` (26/26 domains proved it);
   that was corrected as terminology, not behaviour.
@@ -52,10 +52,9 @@ throughout both skill files.
 
 ## Decisions worth remembering
 
-1. **No per-domain Claude addendum.** Root's "do not use Python/sed to edit
-   files" rule is Claude-Code tooling guidance, not domain guidance, so it stays
-   root-only. Reversible: add an addendum by hand in one domain's `CLAUDE.md`
-   the day it is needed.
+1. **Root Claude-Code addendum stays root-only by default.** Domains may still
+   grow Claude-Code-only lines in their own `CLAUDE.md` when needed; the gate
+   only requires the `@AGENTS.md` include (see `domain-docs-gate-check`).
 2. **Do not re-split agent content between `AGENTS.md` and `CLAUDE.md`.**
    `content-guide.md` now says this explicitly near the top; it exists to stop a
    future agent "helpfully" moving prose into the shim.

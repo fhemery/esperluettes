@@ -9,11 +9,13 @@ The test for AGENTS.md: *would an agent cause a bug or architectural violation b
 
 ### A note on the domain's CLAUDE.md
 
-A domain's `CLAUDE.md` is a **generated one-line shim** containing `@AGENTS.md`
-and nothing else. It is not a third content file to calibrate, and it is never a
-place to put prose: there are only two content files, `README.md` and
-`AGENTS.md`, and nothing below is about `CLAUDE.md`. Do not split agent content
-between the two — everything an agent needs goes in `AGENTS.md`.
+A domain's `CLAUDE.md` is Claude Code's entrypoint: it must include a line
+`@AGENTS.md` so `AGENTS.md` is loaded. It may also hold **Claude-Code-only**
+addenda (tooling quirks), like root `CLAUDE.md` does. It is not a place for
+general agent instructions — those stay in `AGENTS.md`. There are still only
+two shared content files (`README.md` and `AGENTS.md`); nothing below is about
+calibrating `CLAUDE.md`. Do not split cross-tool agent content between
+`AGENTS.md` and `CLAUDE.md`.
 
 ---
 
