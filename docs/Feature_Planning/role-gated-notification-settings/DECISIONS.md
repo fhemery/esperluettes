@@ -1,4 +1,4 @@
-# Secret Gift — enrolment — decisions log
+# <Task title> — decisions log
 
 Append-only. Every question the user arbitrated, with the answer as given.
 BUILD reads this before asking anything already settled.

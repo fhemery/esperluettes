@@ -2,7 +2,7 @@
 
 This domain manages time-bound activities (writing challenges, contests, collaborative events) with a plugin-based activity-type registry.
 
-**Not done.** `requires_subscription` and `max_participants` are stored on `calendar_activities` and editable in the admin form but **enforce nothing** — there is no enrolment logic, no cap and no participant list. The core announces nothing either: state is derived from dates, with no cron and no transition event to notify on. The quote contest broadcasts its own lifecycle from its own scheduled command and its own date columns — a first example a generic Calendar notification mechanism could be built from, not a mechanism itself.
+**Not done.** The core has no enrolment logic, no cap and no participant list — the `requires_subscription` and `max_participants` columns that once sat unused on `calendar_activities` were removed as dead code; an activity type that needs enrolment owns it on its own tables. The core announces nothing either: state is derived from dates, with no cron and no transition event to notify on. The quote contest broadcasts its own lifecycle from its own scheduled command and its own date columns — a first example a generic Calendar notification mechanism could be built from, not a mechanism itself.
 
 **Images.** Activity images go through `MediaPublicApi` on the `activities` scope: new uploads land flat under `activities/`, the admin form uses `<x-media::image-field>` (reuse picker included) and both public views render `<x-media::image>`. Removing an image only clears `image_path` — the file is reclaimed by `media:gc`, which `ActivityMediaUsageProvider` keeps honest. Images uploaded before the migration still live under `activities/YYYY/MM/`; they render normally, are never swept, and do not show up in the picker.
 
@@ -41,15 +41,22 @@ Slugs are generated as `{slugified-name}-{id}` on creation. On name update, the 
 
 `CalendarRegistry` (a singleton) maps string type keys to `ActivityRegistrationInterface` implementations. Each registration provides:
 - `displayComponentKey()` — the Blade component key used by the detail page to render the activity's main UI.
-- `configComponentKey()` — an optional key for an admin configuration component, rendered inside the activity create/edit form. Backed by `configRules()` (validation rules merged into the activity request for that type only) and `persistConfig()`, run in the same transaction as the activity write. Only Quote Contest uses this half; the other two return `null` and no-op.
+- `configComponentKey()` — an optional key for an admin configuration component, rendered inside the activity create/edit form. Backed by `configRules()` (validation rules merged into the activity request for that type only) and `persistConfig()`, run in the same transaction as the activity write. Secret Gift and Quote Contest both use this half; Jardino returns `null` and no-ops.
 
 The registry is populated at boot time in `CalendarServiceProvider`.
 
 | Type key | Registration class | Display component | Config component |
 |----------|--------------------|-------------------|------------------|
 | `jardino` | `JardinoRegistration` | `jardino::jardino-component` | — |
-| `secret-gift` | `SecretGiftRegistration` | `secret-gift::secret-gift-component` | — |
+| `secret-gift` | `SecretGiftRegistration` | `secret-gift::secret-gift-component` | `secret-gift::secret-gift-config` |
 | `quote-contest` | `QuoteContestRegistration` | `quote-contest::quote-contest-component` | `quote-contest::quote-contest-config` |
+
+`Private/Support/DateOrderRule.php` is a shared validation rule available to
+any type's `configRules()`: it compares a date field against another field of
+the *same* request payload (no database read needed, since the activity's own
+dates travel in the same form). Both Secret Gift (registration deadline
+against the activity's preview/active start) and Quote Contest (its two
+contest dates) use it.
 
 ## Built-in Activity Types
 
@@ -67,7 +74,7 @@ Each type documents itself; the core knows nothing about what they do.
 - **A type's configuration is written in the activity's own transaction.** `ActivityController::store()`/`update()` run the activity write and the registration's `persistConfig()` inside one `DB::transaction()`, so a type can never exist without its config row and throwing from `persistConfig()` rolls the activity back. On create the type is chosen in the same form, so every declared config panel is rendered and toggled client-side — only the submitted type's `configRules()` are applied server-side.
 - **Quote Contest privacy is enforced by query shape, not by templates.** Submitter identities and vote counts exist in one family of view models, built by one method, for three roles. The tab that shows them is absent from the tabs array for everyone else rather than hidden in Blade. See the [Quote Contest README](Private/Activities/QuoteContest/README.md).
 - **Each activity type is its own sub-module, not its own domain.** Views, translations, migrations, routes, models, and services for a type live entirely under `Private/Activities/<TypeName>/`. Promoting them to domains was rejected: an activity is not independently useful, it always hangs off an `Activity` row, and it would need a Public API nobody would call. Living under Calendar's `Private/` also means Deptrac lets a type reach Calendar's own models and services directly. Revisit only if a type ever needs to be consumed from outside Calendar.
-- **Secret Gift shuffle is an Artisan command, not an automated trigger.** An admin runs it manually after the registration phase closes, allowing them to review participant count before committing.
+- **Secret Gift shuffle is a manual action, never automated.** A moderator/admin/tech-admin triggers it from a button on the activity edit page (or the `secret-gift:shuffle` Artisan command, kept alongside it) after judging registration closed. There is no cron and no auto-shuffle on any state transition, so an activity can go `active` unshuffled if nobody triggers it — a deliberate non-goal, not an oversight. See the [Secret Gift README](Private/Activities/SecretGift/README.md).
 
 ## Cross-Domain Delegation
 
@@ -83,9 +90,11 @@ Each type documents itself; the core knows nothing about what they do.
 
 ## Admin Panel
 
-Activity CRUD lives in this domain: `Private/Controllers/Admin/ActivityController.php`, routed under the `admin/calendar` prefix (`calendar.admin.*`) with views in `Private/Resources/views/pages/admin/activities/`. It uses the custom `Administration` panel — there is no Filament here. `CalendarPublicApi` exposes the same operations programmatically. A type may add its own fields to that form through `configComponentKey()`; Quote Contest does, for its two dates, and pushes its category editor to the `activity-config-extras` stack the pages render after `</form>` (each category row needs its own form, and nested forms are illegal HTML).
+Activity CRUD lives in this domain: `Private/Controllers/Admin/ActivityController.php`, routed under the `admin/calendar` prefix (`calendar.admin.*`) with views in `Private/Resources/views/pages/admin/activities/`. It uses the custom `Administration` panel — there is no Filament here. `CalendarPublicApi` exposes the same operations programmatically (but does not run a type's `configRules()` / `persistConfig()` — only the admin form does, so an activity created through the Public API has no type-specific settings row unless the caller writes one itself). A type may add its own fields to that form through `configComponentKey()`.
 
-Two Artisan commands live here: `secret-gift:shuffle` (manual) and `calendar:quote-contest-notify`, scheduled every five minutes from `bootstrap/app.php`.
+**`activity-config-extras` is a Blade stack, and a real extension point.** The config component renders *inside* the activity's own `<form>`, so anything needing its own submit — a table of rows each with a delete button, a standalone action button — cannot live there directly: nested forms are illegal HTML and the browser silently drops the inner one. A type pushes that markup to the `activity-config-extras` stack instead, which both the create and edit admin pages render *after* `</form>`. Two consumers today: Quote Contest pushes its category editor (each row is its own form), and Secret Gift pushes its shuffle button and confirm modal (a POST that must not be the activity form's submit). A third type needing the same shape follows the same pattern — `@push('activity-config-extras')` from the config component, no core change required.
+
+Two Artisan commands live here: `secret-gift:shuffle` (manual, also reachable from a button on the activity edit page — see the [Secret Gift README](Private/Activities/SecretGift/README.md)) and `calendar:quote-contest-notify`, scheduled every five minutes from `bootstrap/app.php`.
 
 ## Adding a New Activity Type (Checklist)
 

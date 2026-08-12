@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Calendar\Private\Activities\QuoteContest;
 
 use App\Domains\Calendar\Private\Activities\QuoteContest\Services\QuoteContestConfigService;
-use App\Domains\Calendar\Private\Activities\QuoteContest\Support\DateOrderRule;
+use App\Domains\Calendar\Private\Support\DateOrderRule;
 use App\Domains\Calendar\Public\Api\ActivityRegistrationInterface;
 
 class QuoteContestRegistration implements ActivityRegistrationInterface

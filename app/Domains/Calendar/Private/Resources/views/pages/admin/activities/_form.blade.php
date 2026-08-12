@@ -87,22 +87,6 @@
         </div>
         <x-shared::input-error :messages="$errors->get('role_restrictions')" class="mt-1" />
     </div>
-
-    <div>
-        <x-shared::toggle
-            name="requires_subscription"
-            :checked="(bool) old('requires_subscription', $activity?->requires_subscription ?? false)"
-            :label="__('calendar::admin.fields.requires_subscription')"
-        />
-    </div>
-
-    <div>
-        <x-shared::input-label for="max_participants">{{ __('calendar::admin.fields.max_participants') }}</x-shared::input-label>
-        <x-shared::text-input id="max_participants" name="max_participants" type="number"
-            class="mt-1 block w-48" min="1" max="100000"
-            :value="old('max_participants', $activity?->max_participants ?? '')" />
-        <x-shared::input-error :messages="$errors->get('max_participants')" class="mt-1" />
-    </div>
 </div>
 
 {{-- Section: Dates --}}

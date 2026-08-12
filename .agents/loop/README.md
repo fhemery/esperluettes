@@ -205,6 +205,16 @@ Honours `LOCAL_RUNNER` (`php` or `sail`) like the husky hooks. A phase is not
 finished until the gate is green — this is rule #4 of `AGENTS.md` made
 mechanical.
 
+**Every step ends on a green gate and a commit, not just BUILD.** REFINE,
+DESIGN, PLAN and WRAP all write or delete files under `docs/Feature_Planning/`
+— a renamed task folder, an absorbed sibling task, a deleted pre-loop doc — and
+each of those can break a relative link or leave a stale reference sitting
+uncommitted, invisible until some unrelated later change stumbles on it. Run
+`npm run gate` (it skips the PHP/JS suites when nothing code-related changed,
+so this is cheap) and commit the step's own artifact before handing back —
+see the `commit` skill. Skip the commit only for a genuine mid-interview
+scratch state, and say so.
+
 ## Non-negotiables inherited from AGENTS.md
 
 1. Don't assume. Don't hide confusion. Surface tradeoffs.

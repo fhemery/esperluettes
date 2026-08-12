@@ -4,21 +4,26 @@ declare(strict_types=1);
 
 use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftAssignment;
 use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftParticipant;
+use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftSettings;
 use App\Domains\Calendar\Private\Activities\SecretGift\SecretGiftRegistration;
 use App\Domains\Calendar\Private\Activities\SecretGift\Services\ShuffleService;
 use App\Domains\Calendar\Private\Models\Activity;
 use Tests\TestCase;
 
 /**
- * Create an ACTIVE Secret Gift activity and return helper data.
- * Returns an object: { id: int, url: string, activity: Activity }
+ * Create an ACTIVE Secret Gift activity with its settings row.
+ * Returns an object: { id: int, url: string, activity: Activity, settings: SecretGiftSettings }
+ *
+ * `createActivity()` goes through `CalendarPublicApi`, which bypasses
+ * `configRules()`/`persistConfig()` — so the settings row the admin form would
+ * have written has to be created here. Without it the activity would read as
+ * "registration closed" (a missing row is deliberately fail-safe).
  */
-function createActiveSecretGift(TestCase $t, array $overrides = [], ?int $actorUserId = null): object
+function createActiveSecretGift(TestCase $t, array $overrides = [], array $settings = [], ?int $actorUserId = null): object
 {
     $baseOverrides = [
         'name' => 'Secret Santa',
         'activity_type' => SecretGiftRegistration::ACTIVITY_TYPE,
-        'requires_subscription' => true,
         'preview_starts_at' => now()->subDay(),
         'active_starts_at' => now()->subHour(),
         'active_ends_at' => now()->addDay(),
@@ -28,23 +33,44 @@ function createActiveSecretGift(TestCase $t, array $overrides = [], ?int $actorU
     $activity = Activity::findOrFail($id);
     $url = route('calendar.activities.show', $activity->slug);
 
+    // Registration is already over for an activity that has started.
+    $settingsRow = SecretGiftSettings::create(array_merge([
+        'activity_id' => $id,
+        'registration_ends_at' => now()->subHour(),
+    ], $settings));
+
     return (object) [
         'id' => $id,
         'url' => $url,
         'activity' => $activity,
+        'settings' => $settingsRow,
     ];
+}
+
+/**
+ * Create a Secret Gift activity in PREVIEW with an open registration window.
+ */
+function createPreviewSecretGift(TestCase $t, array $overrides = [], array $settings = []): object
+{
+    return createActiveSecretGift($t, array_merge([
+        'preview_starts_at' => now()->subDay(),
+        'active_starts_at' => now()->addDays(7),
+        'active_ends_at' => now()->addDays(14),
+    ], $overrides), array_merge([
+        'registration_ends_at' => now()->addDays(3),
+    ], $settings));
 }
 
 /**
  * Create an ENDED Secret Gift activity.
  */
-function createEndedSecretGift(TestCase $t, array $overrides = [], ?int $actorUserId = null): object
+function createEndedSecretGift(TestCase $t, array $overrides = [], array $settings = [], ?int $actorUserId = null): object
 {
     return createActiveSecretGift($t, array_merge([
         'preview_starts_at' => now()->subDays(3),
         'active_starts_at' => now()->subDays(2),
         'active_ends_at' => now()->subHour(),
-    ], $overrides), $actorUserId);
+    ], $overrides), $settings, $actorUserId);
 }
 
 /**

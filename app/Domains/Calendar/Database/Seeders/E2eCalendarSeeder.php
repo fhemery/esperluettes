@@ -253,7 +253,6 @@ class E2eCalendarSeeder extends Seeder
             // Decision #1: the whole activity is gated here, so a non-confirmed
             // `user` never reaches the page nor sees it listed.
             'role_restrictions' => [Roles::USER_CONFIRMED, Roles::MODERATOR, Roles::ADMIN],
-            'requires_subscription' => false,
             'created_by_user_id' => $this->users[E2eAccountsSeeder::ADMIN_EMAIL] ?? null,
         ], $dates));
 

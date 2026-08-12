@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Calendar\Private\Activities\QuoteContest\Support;
+namespace App\Domains\Calendar\Private\Support;
 
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
@@ -13,14 +13,13 @@ use Illuminate\Support\Carbon;
 /**
  * Compares a date field to another field of the *same* request payload.
  *
- * The contest's timeline rule (`début activité ≤ fin soumissions ≤ début votes
- * ≤ fin activité`, assumption A4) spans the activity's own dates and the
- * plugin's, which the admin form submits together. A data-aware rule is
- * therefore enough — nothing is read from the database.
+ * Available to any activity type whose `configRules()` orders dates the admin
+ * form submits together — the activity's own dates and the plugin's. A
+ * data-aware rule is therefore enough — nothing is read from the database.
  *
- * It carries its own French message so a violation renders as a field error on
- * the activity form: `configRules()` has no hook to contribute custom messages
- * to `ActivityRequest`.
+ * The caller passes the message key of the ordering violation, so a violation
+ * renders as a field error on the activity form: `configRules()` has no hook to
+ * contribute custom messages to `ActivityRequest`.
  *
  * Parsing failures are reported here too, which is why the field's rule list
  * bails: `required` speaks first, then this rule, and never Laravel's untranslated
@@ -61,7 +60,7 @@ final class DateOrderRule implements DataAwareRule, ValidationRule
     {
         $date = $this->toDate($value);
         if ($date === null) {
-            $fail(__('quote-contest::quote-contest.validation.invalid_date'));
+            $fail(__('calendar::calendar.validation.dates.invalid_date'));
 
             return;
         }

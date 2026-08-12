@@ -14,8 +14,10 @@ use App\Domains\Calendar\Public\Contracts\ActivityState;
 
 class SecretGiftService
 {
-    public function __construct(private readonly MediaPublicApi $media)
-    {
+    public function __construct(
+        private readonly MediaPublicApi $media,
+        private readonly ShuffleService $shuffle,
+    ) {
     }
 
     public function getParticipant(int $activityId, int $userId): ?SecretGiftParticipant
@@ -23,6 +25,66 @@ class SecretGiftService
         return SecretGiftParticipant::where('activity_id', $activityId)
             ->where('user_id', $userId)
             ->first();
+    }
+
+    /**
+     * Enrol a user, or overwrite the preferences of an already-enrolled one.
+     *
+     * `updateOrCreate` rather than `create`: the unique key on
+     * `(activity_id, user_id)` would turn a double submit into a 500, and a
+     * second join is semantically the same as saving preferences again.
+     */
+    public function join(Activity $activity, int $userId, ?string $preferences): SecretGiftParticipant
+    {
+        return SecretGiftParticipant::query()->updateOrCreate(
+            ['activity_id' => $activity->id, 'user_id' => $userId],
+            ['preferences' => $preferences],
+        );
+    }
+
+    public function updatePreferences(SecretGiftParticipant $participant, ?string $preferences): void
+    {
+        $participant->preferences = $preferences;
+        $participant->save();
+    }
+
+    /** Un-enrol a user. A no-op when there is nothing to remove. */
+    public function leave(Activity $activity, int $userId): void
+    {
+        SecretGiftParticipant::query()
+            ->where('activity_id', $activity->id)
+            ->where('user_id', $userId)
+            ->delete();
+    }
+
+    /**
+     * Un-enrol a removed (deactivated or deleted) user from every Secret Gift
+     * they had joined but that has not been shuffled yet.
+     *
+     * Once the shuffle has run the row and its assignments are left strictly
+     * alone (decision #10): the pairing stands, and whoever was drawn to
+     * receive from this user simply gets no gift. That mirrors the existing,
+     * deliberately unaddressed Jardino behaviour on the same events.
+     *
+     * Unscoped by activity on purpose — a handful of concurrent Secret Gifts
+     * makes the scan cheap; revisit if that stops holding.
+     */
+    public function removeParticipantsForUser(int $userId): void
+    {
+        $participants = SecretGiftParticipant::query()
+            ->with('activity')
+            ->where('user_id', $userId)
+            ->get();
+
+        foreach ($participants as $participant) {
+            $activity = $participant->activity;
+
+            if ($activity !== null && $this->shuffle->hasBeenShuffled($activity)) {
+                continue;
+            }
+
+            $participant->delete();
+        }
     }
 
     public function getAssignmentAsGiver(int $activityId, int $userId): ?SecretGiftAssignment

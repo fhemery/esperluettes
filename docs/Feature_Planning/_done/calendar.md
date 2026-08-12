@@ -58,11 +58,12 @@ provider registers the type into `CalendarRegistry`.
 
 ## Not done
 
-- **Subscription and participant limits.** `requires_subscription` and
-  `max_participants` are stored on `activities` and editable in the admin form,
-  but **enforce nothing** — there is no enrolment logic, no cap, no participant
-  list. Existing types use implicit participation.
-  → [`../calendar-subscription/`](../calendar-subscription/)
+- **Subscription and participant limits.** Settled by
+  [`secret-gift-enrolment`](./secret-gift-enrolment.md): Secret Gift was the only
+  real consumer, so enrolment was built there as a Secret-Gift-owned concern
+  instead of a generic base-Calendar mechanism, and the two dead columns
+  (`requires_subscription`, `max_participants`) were dropped rather than
+  enforced. Other types still use implicit participation.
 - **State-change notifications.** Nothing announces that an activity opened or
   is about to close. Deferred originally because the Notification domain did not
   exist; it does now.

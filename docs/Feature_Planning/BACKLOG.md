@@ -22,10 +22,7 @@ into unreadable merge conflicts. A one-line-per-task list keeps a conflict
 scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
-- **Calendar — activity subscription and participant limits** · `calendar-subscription/` · interactive · TODO
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO
-- **Quotes — moderation of quotes and notes** · `quotes-moderation/` · interactive · TODO
-- **Secret Gift — participants cannot enrol** · `secret-gift-enrolment/` · interactive · TODO: may be absorbed by `calendar-subscription/` rather than needing its own mechanism
 - **Jardino — `deselected_at` is never written** · `jardino-snapshot-deselection/` · auto · TODO
 - **Chapter annotations** · `annotations/` · interactive · TODO: enters at **BUILD** — `01`/`02`/`03` are the pre-loop documents, 10 of 14 phases remain. Overlaps `chapters-multi-edit/` and `quotes-author-view/` on per-block anchoring — read both records in `_done/` first and sequence them deliberately. Two facts now settled by `quotes-author-view/`: `Shared/Resources/js/anchoring/block-elements.js` is the shared "what is a block" predicate (narrower than `canonical-text.js`'s `BLOCK_TAGS`), and quotes are now refused at capture when they span two blocks (decisions #22/#23) — decide deliberately whether annotations adopt the same restriction or handle the boundary seam.
 - **Gift sound on Media, retire `<x-shared::sound-upload>`** · `media-sound-upload/` · interactive · TODO: leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out
@@ -38,6 +35,8 @@ scoped to the task that actually changed.
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
 - **Domain docs gate check** · `domain-docs-gate-check/` · auto · TODO: gate should fail if a domain under `app/Domains` is missing `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root `AGENTS.md` Domain Registry table
 - **Gate parallel execution** · `gate-parallel-execution/` · auto · TODO: `npm run gate` runs PHP tests sequentially per domain once more than a few domains are touched, slower than parallel on multi-core machines — investigate why and optimize the PHP part; also check running all check categories (PHP, JS, docs, ...) in parallel
+- **Migrate npm to pnpm** · `migrate-npm-to-pnpm/` · auto · TODO
+- **Role-gated notification preferences (moderator/admin)** · `role-gated-notification-settings/` · interactive · TODO
 
 ## Done
 
@@ -55,6 +54,7 @@ tracking down why something is the way it is.
 - [`news-pin-carousel-white-screen`](_done/news-pin-carousel-white-screen.md) · Shared toggle focus overlay — stops admin pane scrolling away on pin click
 - [`news-pin-carousel-first`](_done/news-pin-carousel-first.md) · newly pinned news inserts at carousel position 1 (others shift +1)
 - [`news-moderator-access`](_done/news-moderator-access.md) · moderators get full News admin (CRUD, publish, pin, carousel, draft preview)
+- [`secret-gift-enrolment`](_done/secret-gift-enrolment.md) · readers can join, edit their preferences and leave a Secret Gift before the shuffle, behind a mandatory registration deadline, with a moderator/admin shuffle panel
 - [`comment-editor-not-displaying`](_done/comment-editor-not-displaying.md) · reply/edit composers rendered blank after the Editor domain split; fixed asset loading
 - [`shared-a11y`](_done/shared-a11y.md) · tabs/confirm-modal a11y gaps (`role="tabpanel"`, focus-on-open)
 - [`quote-contest`](_done/quote-contest.md) · third Calendar activity type — quote-book entries, categories, anonymous voting
@@ -75,4 +75,4 @@ tracking down why something is the way it is.
 - [`discord-notifications`](_done/discord-notifications.md) · Discord DM delivery channel for notifications
 - [`calendar`](_done/calendar.md) · plugin-based time-bound activities (Jardino, SecretGift, Quote contest)
 - [`discord-link-hint`](_done/discord-link-hint.md) · preferences warning when Discord notifications are on but unlinked
-- **Quotes v1** · `Quotes.md`, `Quotes_Architecture.md`, `Quotes_Implementation_Plan.md` — reader quote book v1. Pre-loop; docs never compacted into `_done/`, kept as loose files.
+- **Quotes v1** · reader quote book v1. Pre-loop; planning docs (`Quotes.md`, `Quotes_Architecture.md`, `Quotes_Implementation_Plan.md`) removed — see [`app/Domains/Quote/README.md`](../../app/Domains/Quote/README.md) for the surviving record.

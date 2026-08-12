@@ -197,7 +197,7 @@ describe('Quote contest admin configuration', function () {
             ->toBe('Le début des votes ne peut pas précéder la fin des soumissions.')
             ->and($fr('validation.votes_start_after_activity_end'))
             ->toBe('Le début des votes ne peut pas dépasser la fin de l\'activité.')
-            ->and($fr('validation.invalid_date'))
+            ->and(trans('calendar::calendar.validation.dates.invalid_date', [], 'fr'))
             ->toBe('Cette date n\'est pas valide.')
             ->and($fr('config.section_title'))->toBe('Concours de citations')
             ->and($fr('config.categories_empty'))

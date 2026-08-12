@@ -24,8 +24,6 @@ class ActivityService
         $activity->image_path = $data['image_path'] ?? null;
         $activity->activity_type = (string) $data['activity_type'];
         $activity->role_restrictions = $data['role_restrictions'] ?? [];
-        $activity->requires_subscription = (bool) ($data['requires_subscription'] ?? false);
-        $activity->max_participants = $data['max_participants'] ?? null;
         $activity->preview_starts_at = $data['preview_starts_at'] ?? null;
         $activity->active_starts_at = $data['active_starts_at'] ?? null;
         $activity->active_ends_at = $data['active_ends_at'] ?? null;
@@ -51,8 +49,6 @@ class ActivityService
         $activity->description = $data['description'] ?? null;
         $activity->image_path = $data['image_path'] ?? null;
         $activity->role_restrictions = $data['role_restrictions'] ?? [];
-        $activity->requires_subscription = (bool) ($data['requires_subscription'] ?? false);
-        $activity->max_participants = $data['max_participants'] ?? null;
         $activity->preview_starts_at = $data['preview_starts_at'] ?? null;
         $activity->active_starts_at = $data['active_starts_at'] ?? null;
         $activity->active_ends_at = $data['active_ends_at'] ?? null;

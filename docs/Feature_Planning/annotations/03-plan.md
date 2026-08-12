@@ -19,9 +19,9 @@ Concrete, phase-by-phase plan for the v1 delivery.
 
 | Original phase | Status | Delivered by |
 |----------------|--------|--------------|
-| Phase 3 — JS test infrastructure | **Done by Quote Phase 1** | [`Quotes_Implementation_Plan.md` Phase 1](../Quotes_Implementation_Plan.md) |
-| Phase 9 — JS pure core (anchoring functions) | **Done by Quote Phase 2** (`canonical-text`, `extract-anchor`, `reanchor` live in `Shared/Resources/js/anchoring/`) | [`Quotes_Implementation_Plan.md` Phase 2](../Quotes_Implementation_Plan.md) |
-| Phase 10 — `<x-comment::annotable>` component + toolbar slot | **Done by Quote Phase 9** (component exists; toolbar slot wired; generic toolbar JS in Comment domain) | [`Quotes_Implementation_Plan.md` Phase 9](../Quotes_Implementation_Plan.md) |
+| Phase 3 — JS test infrastructure | **Done, shipped with Quote** (Vitest + happy-dom) | [Quote domain README](../../../app/Domains/Quote/README.md) |
+| Phase 9 — JS pure core (anchoring functions) | **Done, shipped with Quote** (`buildCanonicalText`, `extractAnchor`, `findAnchor` live in `Shared/Resources/js/anchoring/`) | [Quote domain README, "Shared anchoring, established here"](../../../app/Domains/Quote/README.md#architecture-decisions) |
+| Phase 10 — `<x-comment::annotable>` component + toolbar slot | **Done, shipped with Quote** (component exists; toolbar slot wired; generic toolbar JS in Comment domain) | [Quote domain README, "Front-end architecture"](../../../app/Domains/Quote/README.md#front-end-architecture) |
 
 Annotations phases 3, 9, and 10 below are updated accordingly.
 
@@ -99,7 +99,7 @@ artifacts. Re-read them before starting rather than re-running REFINE.
 
 ## Phase 3 — JS test infrastructure *(delivered by Quote)*
 
-> **This phase is complete.** The Vitest + happy-dom + testing-library setup is established by [Quote Phase 1](../Quotes_Implementation_Plan.md). Verify the infrastructure is in place before starting Annotations Phase 9.
+> **This phase is complete.** The Vitest + happy-dom + testing-library setup was established shipping the [Quote domain](../../../app/Domains/Quote/README.md). Verify the infrastructure is in place before starting Annotations Phase 9.
 
 No work required here. The acceptance criteria below serve as a checklist to confirm the Quote phase landed correctly before Annotations JS work begins.
 
@@ -248,7 +248,7 @@ No work required here. The acceptance criteria below serve as a checklist to con
 
 ## Phase 9 — JS pure core *(anchoring functions delivered by Quote)*
 
-> **The three anchoring functions are already delivered.** `buildCanonicalText`, `extractAnchor`, and `findAnchor` live in `app/Domains/Shared/Resources/js/anchoring/` (created by [Quote Phase 2](../Quotes_Implementation_Plan.md)) with full unit-test coverage. This phase only delivers the Annotations-specific `drafts-store`.
+> **The three anchoring functions are already delivered.** `buildCanonicalText`, `extractAnchor`, and `findAnchor` live in `app/Domains/Shared/Resources/js/anchoring/` (created shipping the [Quote domain](../../../app/Domains/Quote/README.md#architecture-decisions)) with full unit-test coverage. This phase only delivers the Annotations-specific `drafts-store`.
 
 **Remaining deliverable.**
 - `app/Domains/Comment/Resources/js/annotations/stores/drafts-store.js`
@@ -268,7 +268,7 @@ The annotation JS modules that need anchoring functions (`toolbar.js`, `inline-f
 
 ## Phase 10 — `<x-comment::annotable>` bootstrap
 
-> **The component and toolbar slot already exist** from [Quote Phase 9](../Quotes_Implementation_Plan.md). `<x-comment::annotable>` is registered, the `@slot('toolbar-actions')` is wired, the generic selection → toolbar JS is in place, and `chapters/show.blade.php` already wraps the chapter content. This phase only adds the Annotations-specific JS bootstrap.
+> **The component and toolbar slot already exist**, shipped with the [Quote domain](../../../app/Domains/Quote/README.md#front-end-architecture). `<x-comment::annotable>` is registered, the `@slot('toolbar-actions')` is wired, the generic selection → toolbar JS is in place, and `chapters/show.blade.php` already wraps the chapter content. This phase only adds the Annotations-specific JS bootstrap.
 
 **Remaining deliverables.**
 - JS bootstrap `app/Domains/Comment/Resources/js/annotations/index.js`:

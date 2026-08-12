@@ -12,13 +12,12 @@ use Carbon\CarbonImmutable;
 use App\Domains\Calendar\Public\Contracts\ActivityState;
 
 #[Table('calendar_activities')]
-#[Fillable(['name', 'slug', 'description', 'image_path', 'activity_type', 'role_restrictions', 'requires_subscription', 'max_participants', 'preview_starts_at', 'active_starts_at', 'active_ends_at', 'archived_at', 'created_by_user_id'])]
+#[Fillable(['name', 'slug', 'description', 'image_path', 'activity_type', 'role_restrictions', 'preview_starts_at', 'active_starts_at', 'active_ends_at', 'archived_at', 'created_by_user_id'])]
 class Activity extends Model
 {
 
     protected $casts = [
         'role_restrictions' => 'array',
-        'requires_subscription' => 'boolean',
         'preview_starts_at' => 'datetime',
         'active_starts_at' => 'datetime',
         'active_ends_at' => 'datetime',
