@@ -42,15 +42,24 @@ Or directly click on the lock icon on the home screen :
 8. In project directory, run :
 
 ```bash
+npm install -g pnpm@11.21.0
 composer install
-npm install
-npm run build
+pnpm install
+pnpm run build
 php artisan generate:key
 php artisan migrate:install
 php artisan migrate
 php artisan db:seed
 php artisan storage:link
 ```
+
+`pnpm@11.21.0` must match `package.json` → `packageManager`. Optional:
+`corepack enable` instead of `npm install -g`, if Corepack works on your Node.
+
+`pnpm install` installs Husky hooks via the root `prepare` script. If hooks are
+missing, run `pnpm run prepare`. Allowed dependency builds live in
+`pnpm-workspace.yaml` → `allowBuilds` (no interactive approve step for normal
+setup).
 
 You are up and running on the domain you configured in step 2 (for example, http://esperluettes.test). 
 System might redirect you to https://esperluettes.test and tell you the site is not secure. Simply tell your browser everything is ok.
@@ -69,10 +78,10 @@ Just go to Laragon and start/stop the Apache server and the mysql server.
 ### Regenerate javascript and tailwind classes (whenever you touch javascript)
 
 Either once:
-> npm run build
+> pnpm run build
 
 Or on every change (very useful for development):
-> npm run dev
+> pnpm run dev
 
 ## Other Essential Laravel Commands
 - Artisan commands: `php artisan [command]`

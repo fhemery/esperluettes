@@ -3,6 +3,8 @@
 This project uses Docker and Laravel `Sail` command to work without installing too many things on your machine.
 To setup, you need:
 - [Nodejs](https://nodejs.org) - Take the LTS version
+- **pnpm** — once Node is installed: `npm install -g pnpm@11.21.0` (version must
+  match `packageManager` in `package.json`; details in the setup guides below)
 
 Therefore, choose your option, and come back to this page to continue:
 - [Setup via Docker](./Setup_01a_Docker_Sail.md)

@@ -18,8 +18,8 @@ All paths below are relative to the repo root.
 ## One-time setup
 
 ```bash
-npm install          # playwright is a devDependency
-npm run browser:setup
+pnpm install          # playwright is a devDependency
+pnpm run browser:setup
 ```
 
 `browser:setup` is idempotent and fast once satisfied — run it whenever you are
@@ -55,7 +55,7 @@ A flow is a `.mjs` file that default-exports `async ({ page, ctx, browser, helpe
 Run one:
 
 ```bash
-APP_USER=… APP_PASSWORD=… npm run browser:drive -- .agents/skills/run-app/flows/profile-tabs.mjs
+APP_USER=… APP_PASSWORD=… pnpm run browser:drive -- .agents/skills/run-app/flows/profile-tabs.mjs
 ```
 
 `flows/profile-tabs.mjs` is a complete worked example — copy it. It logs in,
@@ -86,7 +86,7 @@ blank page is a flow that asserted nothing.
 For a quick look, skip the flow file:
 
 ```bash
-APP_USER=… APP_PASSWORD=… npm run browser:drive -- \
+APP_USER=… APP_PASSWORD=… pnpm run browser:drive -- \
   --goto /profile/logistix/quotes \
   --shot adhoc.png \
   --eval "document.querySelectorAll('[role=\"tab\"]').length"
@@ -137,8 +137,8 @@ not run Alpine, so anything client-side is only proven in the browser.
 
 | Symptom | Fix |
 |---|---|
-| `playwright is missing from node_modules` | `npm install` |
-| `chromium will not launch` naming a missing `.so` | `npx playwright install-deps chromium` |
+| `playwright is missing from node_modules` | `pnpm install` |
+| `chromium will not launch` naming a missing `.so` | `pnpm exec playwright install-deps chromium` |
 | `no response from http://localhost` | `./vendor/bin/sail up -d` |
 | `Login failed for …` | Wrong `APP_USER`/`APP_PASSWORD`; the message includes the app's own error |
 | `No settings row titled "…"` | The label is French and must match exactly, e.g. `Masquer mon carnet de citations` |

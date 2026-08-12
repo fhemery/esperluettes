@@ -1,0 +1,7 @@
+# Allow dependency install scripts (pnpm 11+).
+# Packages not listed here cannot run postinstall/preinstall builds.
+# Do not use interactive `pnpm approve-builds` for day-to-day setup —
+# edit this file (or run `pnpm approve-builds <name>` and commit) when a
+# new dependency genuinely needs a build.
+allowBuilds:
+  esbuild: true

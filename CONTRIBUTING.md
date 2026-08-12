@@ -46,10 +46,23 @@ Scope is optional but recommended (e.g., `auth`, `profile`, `shared`, `admin`).
 
 ## Local hooks (installed automatically)
 
-We use Husky to install Git hooks on `npm install`.
+We use Husky. Git hooks install on `pnpm install` via the root `prepare`
+script (`"prepare": "husky"` in `package.json`). Install pnpm first — see
+[Setup via Docker and Sail](./docs/Setup_01a_Docker_Sail.md)
+(`npm install -g pnpm@…` matching `packageManager`).
 
 - commit-msg: validates your message with commitlint (Conventional Commits)
 - pre-commit: runs architectural checks with Deptrac, and launch unit / integration tests (with Pest)
+
+If hooks did not install (e.g. you used `--ignore-scripts`), run:
+
+```
+pnpm run prepare
+```
+
+Dependency install scripts (esbuild, …) are allowlisted in
+`pnpm-workspace.yaml` under `allowBuilds` — that committed file is the source
+of truth; you do not need `pnpm approve-builds` for a normal clone.
 
 If needed, you can bypass the Deptrac check temporarily:
 

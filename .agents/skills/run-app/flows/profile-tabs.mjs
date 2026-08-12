@@ -2,7 +2,7 @@
  * Profile tab registry: the tabs a viewer sees, where they land, and the
  * owner-facing visibility indicator.
  *
- *   APP_USER=… APP_PASSWORD=… npm run browser:drive -- \
+ *   APP_USER=… APP_PASSWORD=… pnpm run browser:drive -- \
  *     .agents/skills/run-app/flows/profile-tabs.mjs
  *
  * Doubles as the worked example for writing new flows.

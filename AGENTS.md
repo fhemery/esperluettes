@@ -26,15 +26,17 @@ Finished features are summarised in `docs/Feature_Planning/<slug>/README.md`.
 Read that first; the full `01`–`03` documents only when it points you there.
 
 **A domain's `README.md` / `AGENTS.md` must never reference
-`docs/Feature_Planning`.** Planning docs are working memory for a task in
-flight — renamed, split and deleted when it wraps. Fold what matters into the
-domain's own docs instead. Planning may link to code docs, never the reverse.
+`docs/Feature_Planning`.** Same for **`docs/adr/**`** — ADRs are durable and
+must not link into planning folders (active or `_done/`). Planning docs are
+working memory for a task in flight — renamed, split and deleted when it wraps.
+Fold what matters into the domain docs or the ADR instead. Planning may link to
+code docs / ADRs, never the reverse. Use the `write-adr` skill for new ADRs.
 
 ## Definition of done
-- `npm run gate` — docs + deptrac + PHP tests + vitest + asset build. Green, or
+- `pnpm run gate` — docs + deptrac + PHP tests + vitest + asset build. Green, or
   the work is not finished. `-- --quick` skips the asset build. Steps are scoped
   to what the branch changed; `-- --all` forces the full run.
-- `npm run e2e` — Playwright, for features with browser-only behaviour. Kept
+- `pnpm run e2e` — Playwright, for features with browser-only behaviour. Kept
   out of the gate because it needs the app running; see `e2e/README.md`.
 
 # Functional knowledge

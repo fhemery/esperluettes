@@ -14,10 +14,10 @@
   Use --all to force every step over the whole codebase.
 
   Usage:
-    npm run gate                 # docs + deptrac + php tests + js tests + asset build
-    npm run gate -- --quick      # skip the asset build
-    npm run gate -- --all        # ignore change detection, run everything
-    npm run gate -- --only=php   # run a single step (docs|deptrac|php|js|build)
+    pnpm run gate                 # docs + deptrac + php tests + js tests + asset build
+    pnpm run gate -- --quick      # skip the asset build
+    pnpm run gate -- --all        # ignore change detection, run everything
+    pnpm run gate -- --only=php   # run a single step (docs|deptrac|php|js|build)
 
   Honours LOCAL_RUNNER (php|sail) exactly like the husky hooks.
 */
@@ -33,7 +33,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // A front-end change is anything vitest or vite could possibly care about.
 const ASSET_FILE = /\.(m?js|cjs|ts|tsx|jsx|vue|css|scss)$/i;
-const ASSET_CONFIG = /^(package(-lock)?\.json|vite\.config\.[cm]?[jt]s|vitest\.config\.[cm]?[jt]s|tailwind\.config\.[cm]?js|postcss\.config\.[cm]?js)$/i;
+const ASSET_CONFIG = /^(package(-lock)?\.json|pnpm-lock\.yaml|vite\.config\.[cm]?[jt]s|vitest\.config\.[cm]?[jt]s|tailwind\.config\.[cm]?js|postcss\.config\.[cm]?js)$/i;
 
 function parseArgs(argv) {
   const args = { quick: false, only: null, all: false };
@@ -104,8 +104,8 @@ function main() {
     { id: 'docs', label: 'Documentation consistency', cmd: 'node', args: [path.join('scripts', 'check-docs.js')] },
     { id: 'deptrac', label: 'Deptrac (architecture boundaries)', cmd: 'node', args: [path.join('scripts', 'launch_deptrac.js')] },
     { id: 'php', label: phpStep.label, cmd: phpStep.cmd, args: phpStep.args, skipReason: phpPlan.mode === 'none' ? phpPlan.reason : null },
-    { id: 'js', label: 'JS test suite (vitest)', cmd: 'npx', args: ['vitest', 'run'], skipReason: assetsTouched ? null : noAssetChange },
-    { id: 'build', label: 'Asset build (vite)', cmd: 'npx', args: ['vite', 'build'], skip: args.quick, skipReason: assetsTouched ? null : noAssetChange },
+    { id: 'js', label: 'JS test suite (vitest)', cmd: 'pnpm', args: ['exec', 'vitest', 'run'], skipReason: assetsTouched ? null : noAssetChange },
+    { id: 'build', label: 'Asset build (vite)', cmd: 'pnpm', args: ['exec', 'vite', 'build'], skip: args.quick, skipReason: assetsTouched ? null : noAssetChange },
   ];
 
   const selected = steps.filter(s => (args.only ? s.id === args.only : !s.skip));

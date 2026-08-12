@@ -79,7 +79,7 @@ function main() {
     }
 
     // JS tests (Vitest)
-    if (!runCmd('npx', ['vitest', 'run'])) process.exit(1);
+    if (!runCmd('pnpm', ['exec', 'vitest', 'run'])) process.exit(1);
 
     // Delegate test execution to the staged tests launcher (imported)
     try {

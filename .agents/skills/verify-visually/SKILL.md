@@ -10,7 +10,7 @@ loading, any "the tab appeared for the wrong user" bug is only provable in a
 browser. That is what this step is for.
 
 **The output of this step is specs that stay.** Not a throwaway script — a spec
-in [`e2e/`](../../../e2e/README.md) that runs on every later `npm run e2e` and
+in [`e2e/`](../../../e2e/README.md) that runs on every later `pnpm run e2e` and
 catches the regression next time. Read `e2e/README.md` before writing anything.
 
 ## 1. Cut the checklist down — most rows do not belong here
@@ -40,7 +40,7 @@ to the user as a question, not as a screenshot.
 ## 2. Write the spec in `features/`, not `core/`
 
 ```bash
-npm run e2e:setup      # first time only
+pnpm run e2e:setup      # first time only
 ./vendor/bin/sail up -d
 ```
 
@@ -63,8 +63,8 @@ every future run.
 ## 3. Run
 
 ```bash
-npm run e2e -- <your-spec>
-npm run e2e                    # then the whole suite, to catch regressions
+pnpm run e2e -- <your-spec>
+pnpm run e2e                    # then the whole suite, to catch regressions
 ```
 
 The database is rebuilt before every run, so specs may write freely and must
@@ -80,9 +80,9 @@ happened here before.
 - Fill the checklist's `OK?` column: ✅, ❌ with the failure, or `n/a` with the
   reason.
 - On failure, the trace and screenshot are already captured —
-  `npm run e2e:report`. Do not add success screenshots; they cost tokens and
+  `pnpm run e2e:report`. Do not add success screenshots; they cost tokens and
   prove nothing an assertion does not.
-- Run `npm run gate` one last time.
+- Run `pnpm run gate` one last time.
 - Report: rows covered by new specs, rows pushed back to BUILD as feature
   tests, rows that failed, rows you could not automate and why.
 

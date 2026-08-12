@@ -22,7 +22,7 @@ rather than quietly changing it.
 1. **Bottom-up.** Schema and model, then policy and lifecycle listeners, then
    service and public API, then endpoints, then UI, then i18n/a11y polish. This
    is the order that keeps every phase testable on its own.
-2. **A phase ends green.** `npm run gate` passes at the end of every phase. If a
+2. **A phase ends green.** `pnpm run gate` passes at the end of every phase. If a
    phase cannot end green, it is badly cut.
 3. **A phase is S or M.** S ≈ half a day, M ≈ 1–2 days. Anything larger gets
    split. Prefer more, smaller phases — each one is a fresh subagent context.
@@ -59,7 +59,7 @@ through it for something you could have written in a line.
   tests only for genuinely isolated logic (sanitisers, anchoring, formatters).
   Vitest for DOM behaviour.
 - **Acceptance** — checkable statements. "✅ A non-confirmed user gets 403 on
-  POST /quotes", not "✅ permissions work". Always include "✅ `npm run gate`
+  POST /quotes", not "✅ permissions work". Always include "✅ `pnpm run gate`
   green".
 
 Write the **test that proves the security rule** into the phase that introduces
@@ -82,6 +82,6 @@ rather than leaving it to BUILD.
 
 ## Output
 
-Run `npm run gate` and commit `03-plan.md` (follow the `commit` skill), then
+Run `pnpm run gate` and commit `03-plan.md` (follow the `commit` skill), then
 return the phase index table and the total phase count. Flag any phase you were
 unsure how to cut.

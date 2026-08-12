@@ -10,7 +10,7 @@ Add a task to `docs/Feature_Planning/BACKLOG.md`. Do **not** start working on it
    TODO list — only look at `BACKLOG.md` if the request explicitly says this
    task blocks or is blocked by another one, in which case grep for that
    entry's slug and pass `after:<slug>` or `before:<slug>`.
-3. Run `npm run add-task -- --slug=<slug> --title="<title>" --mode=<mode> [--position=after:<slug>|before:<slug>]`
+3. Run `pnpm run add-task -- --slug=<slug> --title="<title>" --mode=<mode> [--position=after:<slug>|before:<slug>]`
    (position defaults to `bottom`). It creates the task folder, copies
    `DECISIONS.md`, and inserts the backlog line.
 4. Write `docs/Feature_Planning/<slug>/00-request.md`, filled with the user's

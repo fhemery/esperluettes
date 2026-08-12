@@ -50,9 +50,9 @@ reports once. Use `auto` for bugfixes and chores.
 ## Definition of done
 
 ```bash
-npm run gate            # docs + deptrac + php tests + vitest + vite build
-npm run gate -- --quick # skip the asset build
-npm run gate -- --all   # ignore change detection, run everything
+pnpm run gate            # docs + deptrac + php tests + vitest + vite build
+pnpm run gate -- --quick # skip the asset build
+pnpm run gate -- --all   # ignore change detection, run everything
 ```
 
 The gate scopes itself to what the branch changed (commits since `main` plus
@@ -68,13 +68,13 @@ Two agents can work the loop at the same time, each in its own git worktree.
 ### Create one
 
 ```bash
-npm run worktree -- b        # ../esperluettes-b, on a new branch `b`
+pnpm run worktree -- b        # ../esperluettes-b, on a new branch `b`
 cd ../esperluettes-b
-composer install && npm install
+composer install && pnpm install
 ./vendor/bin/sail up -d
 ```
 
-`npm run worktree` does the part that is easy to get wrong: it copies your
+`pnpm run worktree` does the part that is easy to get wrong: it copies your
 `.env` and shifts the host ports, because `docker-compose.yml` binds `:80`,
 `:5173`, `:8080` and `:3306` on the host and two stacks cannot both have them.
 With `--offset=1` (the default, incremented per existing worktree) the second

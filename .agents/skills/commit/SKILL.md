@@ -15,7 +15,7 @@ description: Write and make a git commit that matches this project's conventions
 - `git status` and `git diff` first — know exactly what is going in. Do not
   `git add -A` without looking; unrelated stray files are how a clean phase
   commit turns into a mess.
-- `npm run gate` should already be green. The pre-commit hook runs deptrac and
+- `pnpm run gate` should already be green. The pre-commit hook runs deptrac and
   vitest anyway, and the full PHP suite when you are on `main`.
 
 ## Format

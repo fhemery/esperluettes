@@ -50,11 +50,27 @@ Note: For **Windows**: to avoid permission issues, you should launch command fro
 
 > sail artisan storage:link
 
-8. Run npm build to create the assets
+8. Build frontend assets (pnpm)
 
-> npm install
+Install the pnpm version pinned in `package.json` → `packageManager` (today
+`pnpm@11.21.0`). **Primary** — Node always ships npm:
 
-> npm run build
+> npm install -g pnpm@11.21.0
+
+Optional alternatives if you prefer them: `corepack enable` (when Corepack is
+available on your Node build), or the global `pnpm` already present inside the
+Sail image. Match the `packageManager` version either way.
+
+`pnpm install` runs the root `prepare` script, which installs Husky git hooks
+(commit-msg + pre-commit). If hooks are missing after install, run
+`pnpm run prepare`.
+
+Dependency packages that need install scripts (e.g. esbuild) are allowlisted in
+`pnpm-workspace.yaml` → `allowBuilds`. You should not need an interactive
+`pnpm approve-builds` for a normal setup; if install refuses a new package’s
+build, a maintainer adds it to that file and commits.
+
+See also [`docs/adr/0001-use-pnpm.md`](./adr/0001-use-pnpm.md) for *why* pnpm.
 
 You are up and running on : http://localhost. The first user you can log with is admin@example.com / password.
 
@@ -72,10 +88,10 @@ Stopping:
 ### Regenerate javascript and tailwind classes (whenever you touch javascript)
 
 Either once:
-> npm run build
+> pnpm run build
 
 Or on every change (very useful for development):
-> npm run dev
+> pnpm run dev
 
 ## Other Essential Laravel Commands
 - Artisan commands: `sail artisan [command]`

@@ -36,7 +36,7 @@ between the two — everything an agent needs goes in `AGENTS.md`.
 
 **Cross-domain delegation map** — What this domain intentionally outsources to others, and why. This prevents developers from accidentally re-implementing something that already exists.
 
-**Never reference `docs/Feature_Planning/`.** Planning documents are working memory for an in-flight task: they are renamed, split and deleted when the task wraps, so a link from a domain README rots. The dependency runs one way only — planning may link to code docs, never the reverse. `npm run gate` fails on a violation.
+**Never reference `docs/Feature_Planning/`.** Planning documents are working memory for an in-flight task: they are renamed, split and deleted when the task wraps, so a link from a domain README rots. The dependency runs one way only — planning may link to code docs, never the reverse. `pnpm run gate` fails on a violation.
 
 Instead, **fold the content in**. If a planning document records something a future reader of this domain needs — what is not done, a known drift between spec and code, a decision that would otherwise be re-litigated — state it here, in full, in its own short section. A domain's documentation must stand on its own.
 

@@ -2,8 +2,8 @@
 /**
  * Browser harness for driving the running app.
  *
- *   npm run browser:drive -- <flow.mjs> [args…]     run a flow file
- *   npm run browser:drive -- --goto /profile --as fred@hemit.fr --shot p.png
+ *   pnpm run browser:drive -- <flow.mjs> [args…]     run a flow file
+ *   pnpm run browser:drive -- --goto /profile --as fred@hemit.fr --shot p.png
  *
  * A flow file default-exports `async ({ page, ctx, browser, helpers }) => {}`.
  * See flows/profile-tabs.mjs for a worked example.
