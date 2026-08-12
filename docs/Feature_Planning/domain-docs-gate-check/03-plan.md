@@ -14,7 +14,7 @@
 |---|-------|------|------------|--------|
 | 1 | Document Follow + Domain Registry row | S | — | DONE |
 | 2 | Docs-check helpers + Vitest suite | S | — | DONE |
-| 3 | Wire rules 4–5 into `check-docs.js` | S | 1, 2 | TODO |
+| 3 | Wire rules 4–5 into `check-docs.js` | S | 1, 2 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

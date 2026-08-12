@@ -207,6 +207,22 @@ function checkRelativeLinks(files) {
   return failures;
 }
 
+function checkAllDomainTrios(rootDir) {
+  const failures = [];
+  for (const name of listDomainNames(rootDir)) {
+    failures.push(...checkDomainTrio(rootDir, name));
+  }
+  return failures;
+}
+
+function checkDomainRegistrySync(rootDir) {
+  const agentsPath = path.join(rootDir, 'AGENTS.md');
+  const content = fs.readFileSync(agentsPath, 'utf8');
+  const registryPaths = parseRegistryDomainPaths(content);
+  const domainNames = listDomainNames(rootDir);
+  return checkRegistrySync(domainNames, registryPaths);
+}
+
 function main() {
   const files = SEARCH_ROOTS.flatMap((r) => walk(path.join(root, r)));
 
@@ -214,6 +230,14 @@ function main() {
     { label: 'domain docs do not reference Feature_Planning', failures: checkDomainPlanningReferences(files) },
     { label: 'ADRs do not reference Feature_Planning', failures: checkAdrPlanningReferences(files) },
     { label: 'relative markdown links resolve', failures: checkRelativeLinks(files) },
+    {
+      label: 'every domain has README.md, AGENTS.md, and CLAUDE.md shim',
+      failures: checkAllDomainTrios(root),
+    },
+    {
+      label: 'Domain Registry matches app/Domains on disk',
+      failures: checkDomainRegistrySync(root),
+    },
   ];
 
   let failed = false;
