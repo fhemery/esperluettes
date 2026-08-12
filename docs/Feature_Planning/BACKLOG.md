@@ -36,6 +36,7 @@ scoped to the task that actually changed.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
+- **Domain CLAUDE.md shims** · `domain-claude-md-shims/` · auto · TODO: `document-domain` writes a per-domain `CLAUDE.md` containing only `@AGENTS.md`; root gets the same treatment rather than a symlink
 
 ## Done
 
