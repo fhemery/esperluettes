@@ -63,6 +63,7 @@ code docs / ADRs, never the reverse. Use the `write-adr` skill for new ADRs.
 | **Editor** | `app/Domains/Editor` | Rich-text and block-based content authoring: the `<x-editor::rich-text>` / `<x-editor::multi>` components with their self-loaded Quill assets and toolbar presets, and block-document rendering to sanitized HTML via `EditorPublicApi`; owns no table | *(none)* |
 | **Events** | `app/Domains/Events` | Domain event bus and audit log infrastructure; cross-domain communication backbone |
 | **FAQ** | `app/Domains/FAQ` | FAQ categories and questions with admin panel |
+| **Follow** | `app/Domains/Follow` | User follow relationships, follow button on profiles, Following profile tab, new-follower and new-story notifications for followers | `follow_follows` |
 | **Home** | `app/Domains/Home` | Home page, aggregates data from multiple domains |
 | **Media** | `app/Domains/Media` | Path-addressed image handling: upload, responsive variants, reuse picker, usage-provider registry + swept GC (`media:gc`), and the `<x-media::image>` / `<x-media::image-field>` components. Also a private half — images stored off the public disk, with no URL and no variants, streamed back by the consumer after its own authorization check. Sole entry point `MediaPublicApi`; owns no tables. | *(none)* |
 | **Message** | `app/Domains/Message` | Private messages between users (incomplete) |

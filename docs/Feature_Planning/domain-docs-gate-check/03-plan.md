@@ -12,7 +12,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Document Follow + Domain Registry row | S | — | TODO |
+| 1 | Document Follow + Domain Registry row | S | — | DONE |
 | 2 | Docs-check helpers + Vitest suite | S | — | TODO |
 | 3 | Wire rules 4–5 into `check-docs.js` | S | 1, 2 | TODO |
 

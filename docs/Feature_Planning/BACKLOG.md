@@ -33,8 +33,7 @@ scoped to the task that actually changed.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
-- **Domain docs gate check** · `domain-docs-gate-check/` · auto · WIP:BUILD (0/3): gate should fail if a domain under `app/Domains` is missing `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root `AGENTS.md` Domain Registry table
-- **Domain docs gate check** · `domain-docs-gate-check/` · auto · WIP:DESIGN: gate should fail if a domain under `app/Domains` is missing `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root `AGENTS.md` Domain Registry table
+- **Domain docs gate check** · `domain-docs-gate-check/` · auto · WIP:BUILD (1/3): gate should fail if a domain under `app/Domains` is missing `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root `AGENTS.md` Domain Registry table
 - **Role-gated notification preferences (moderator/admin)** · `role-gated-notification-settings/` · interactive · TODO
 
 ## Done
