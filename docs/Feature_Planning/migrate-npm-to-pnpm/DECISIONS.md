@@ -10,6 +10,11 @@ a new row that supersedes it and note the number.
 |---|------|------|----------|----------|------------|
 | 1 | 2026-08-12 | REFINE | Mode | auto — tooling chore; functional question answered by the request | — |
 | 2 | 2026-08-12 | REFINE | Package manager | Stay on pnpm as requested (not yarn/bun). Request invited a challenge; supply-chain delay + explicit ask win over “Sail already has yarn/bun”. | — |
+| 3 | 2026-08-12 | DESIGN | How developers get pnpm | Corepack + `packageManager` (Sail global = fallback) | — |
+| 4 | 2026-08-12 | DESIGN | pnpm major / 24h age | Prefer pnpm 11.x (default age); else ≥10.16 + explicit 1440 | — |
+| 5 | 2026-08-12 | DESIGN | ADR location | `docs/adr/0001-use-pnpm.md` | — |
+| 6 | 2026-08-12 | DESIGN | Lockfile migration | Prefer `pnpm import` then verify | — |
+| 7 | 2026-08-12 | DESIGN | CI pnpm bootstrap | Corepack after setup-node | — |
 
 ## Assumptions made without asking
 
@@ -26,3 +31,8 @@ the user may want to reverse — surface these in the WRAP summary.
 | A6 | Replace hard-coded `npm`/`npx` in repo scripts, husky, composer `dev`, and CI with pnpm/`pnpm exec` equivalents; script *names* unchanged. | REFINE | Mostly no once CI lands |
 | A7 | Leave yarn/bun installs in the Sail Dockerfile alone. | REFINE | Yes |
 | A8 | No dual npm+pnpm support; one lockfile (`pnpm-lock.yaml`) only. | REFINE | Painful after merge |
+| A9 | Corepack + `packageManager` is the contract; Sail global pnpm is fallback only. | DESIGN | Yes — docs/CI |
+| A10 | Pin pnpm 11.x for default 24h `minimumReleaseAge`; fall back to ≥10.16 + explicit 1440 if v11 defaults block install. | DESIGN | Medium (lockfile) |
+| A11 | ADR at `docs/adr/0001-use-pnpm.md` with a tiny `docs/adr/README.md` index. | DESIGN | Yes — path |
+| A12 | Prefer `pnpm import` from `package-lock.json` before a fresh resolve. | DESIGN | Yes before delete |
+| A13 | CI enables Corepack after `setup-node` (not `pnpm/action-setup`) unless Corepack fails. | DESIGN | Yes |
