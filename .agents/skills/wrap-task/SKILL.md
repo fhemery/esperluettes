@@ -88,7 +88,8 @@ domain that owns the core of it, not in a shared dumping ground.
   now be wrong. Regenerate with the `document-domain` skill, or flag them if you
   cannot.
 - New domain, or a domain's responsibilities changed → the domain registry
-  table in `AGENTS.md` (`CLAUDE.md` is a symlink to it — edit `AGENTS.md`).
+  table in `AGENTS.md` (root `CLAUDE.md` just includes it via `@AGENTS.md` —
+  edit `AGENTS.md`).
 - New notification type → `docs/notification-types.md`.
 - New deptrac edge → make sure `02-architecture.md` §5 explains it.
 
