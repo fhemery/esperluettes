@@ -12,7 +12,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | ADR — record the package-manager decision | S | — | TODO |
+| 1 | ADR — record the package-manager decision | S | — | DONE |
 | 2 | Core switch — lockfile, runtime scripts, CI | M | 1 | TODO |
 | 3 | Active documentation sweep | M | 2 | TODO |
 
