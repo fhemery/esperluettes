@@ -26,14 +26,9 @@ three files, then the 26 shims were backfilled.
 - **Root `CLAUDE.md` was not touched** — it was already a real file containing
   `@AGENTS.md` plus the Claude-Code editing rule. It is **not** a symlink, and
   never was.
-- **Nothing enforces the shims mechanically.** `scripts/check-docs.js` only
-  inspects files basenamed `README.md`/`AGENTS.md` and only matches
-  `[text](path)` link syntax, so the shims are inert to the gate: green here
-  means "we broke nothing", not "the shims are correct". A new domain gaining an
-  `AGENTS.md` without a `CLAUDE.md` will drift silently. See "Not done".
-- **`app/Domains/Follow/` deliberately has no shim** — it has no `AGENTS.md`, no
-  `README.md` and no Domain Registry row, so `@AGENTS.md` would include a file
-  that does not exist.
+- **Shim enforcement landed in a follow-up task.** At WRAP time nothing gated
+  `CLAUDE.md`; see [`domain-docs-gate-check`](./domain-docs-gate-check.md),
+  which added rules 4–5 to `scripts/check-docs.js` and documented Follow.
 
 ## Where the code lives
 
@@ -44,7 +39,7 @@ three files, then the 26 shims were backfilled.
 | Claude Code agent shim | `.claude/agents/domain-documentor.md` |
 | The 26 shims | `app/Domains/<Domain>/CLAUDE.md` |
 | Domain Registry (26 rows, canonical list) | root `AGENTS.md` §"Domain Registry" |
-| Gate docs check (does not know about `CLAUDE.md`) | `scripts/check-docs.js` |
+| Gate docs check (rules 4–5 added in `domain-docs-gate-check`) | `scripts/check-docs.js` |
 
 ## Skill changes, concretely
 
@@ -88,18 +83,8 @@ and `7a94b506`. Two notes:
 Deliberate non-goals: no domain's `AGENTS.md`/`README.md` prose was rewritten;
 no root content change; no other repo symlink touched.
 
-Two pieces of drift this task found but did not fix, both filed rather than lost:
-
-- **`app/Domains/Follow/` is an undocumented 27th domain** — it has `Database/`,
-  `Private/`, `Public/`, `Tests/` on disk but no `README.md`, no `AGENTS.md` and
-  no root Domain Registry row (the registry lists 26). Excluded from the
-  backfill as a boundary, not fixed. Running `document-domain` on it would
-  produce all three files including the shim.
-- **Nothing gates the three-file rule** — filed as
-  [`domain-docs-gate-check/`](../domain-docs-gate-check/) (`TODO`, `auto`): make
-  `npm run gate`'s docs step fail when a domain is missing
-  `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root Domain
-  Registry. That entry also covers the `Follow` case, since a registry check
-  catches it.
+Two pieces of drift this task found were filed and later shipped in
+[`domain-docs-gate-check`](./domain-docs-gate-check.md): Follow documentation +
+registry row, and gate enforcement of the trio + bidirectional registry sync.
 
 No e2e specs were created by this task, so there was nothing to retire.

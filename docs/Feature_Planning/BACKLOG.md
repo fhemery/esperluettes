@@ -33,7 +33,6 @@ scoped to the task that actually changed.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
-- **Domain docs gate check** · `domain-docs-gate-check/` · auto · WIP:BUILD (3/3): gate should fail if a domain under `app/Domains` is missing `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root `AGENTS.md` Domain Registry table
 - **Role-gated notification preferences (moderator/admin)** · `role-gated-notification-settings/` · interactive · TODO
 
 ## Done
@@ -43,6 +42,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`domain-docs-gate-check`](_done/domain-docs-gate-check.md) · gate docs step enforces domain doc trio + Domain Registry sync; Follow documented and registered
 - [`gate-parallel-execution`](_done/gate-parallel-execution.md) · `pnpm run gate` runs its steps (docs/deptrac/php/js/build) concurrently instead of sequentially, `build` sequenced after `php` to avoid a manifest race; multi-domain `ParallelTestCommand` concurrency was built then reverted
 - [`migrate-npm-to-pnpm`](_done/migrate-npm-to-pnpm.md) · pnpm 11 is the sole Node manager; lockfile, CI, hooks, gate, and active docs switched from npm
 - [`fix-audit-vulnerabilities`](_done/fix-audit-vulnerabilities.md) · cleared fixable Composer/NPM audit findings; Quill 2.0.3 XSS (GHSA-v3m3-f69x-jf25) accepted exception
