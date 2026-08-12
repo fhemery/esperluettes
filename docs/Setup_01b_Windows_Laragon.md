@@ -42,7 +42,7 @@ Or directly click on the lock icon on the home screen :
 8. In project directory, run :
 
 ```bash
-corepack enable
+npm install -g pnpm@11.21.0
 composer install
 pnpm install
 pnpm run build
@@ -52,6 +52,14 @@ php artisan migrate
 php artisan db:seed
 php artisan storage:link
 ```
+
+`pnpm@11.21.0` must match `package.json` → `packageManager`. Optional:
+`corepack enable` instead of `npm install -g`, if Corepack works on your Node.
+
+`pnpm install` installs Husky hooks via the root `prepare` script. If hooks are
+missing, run `pnpm run prepare`. Allowed dependency builds live in
+`pnpm-workspace.yaml` → `allowBuilds` (no interactive approve step for normal
+setup).
 
 **Existing clones** after pulling the pnpm migration: remove `node_modules` and
 any stray `package-lock.json` once before `pnpm install`.

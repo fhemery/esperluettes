@@ -2,13 +2,13 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-12
-- **Context:** [migrate-npm-to-pnpm WRAP record](../Feature_Planning/_done/migrate-npm-to-pnpm.md)
+- **Context:** Node frontend toolchain (Vite, Husky, Vitest, CI asset build) previously used npm exclusively
 
 ## Context
 
 This repository ships a Laravel application with a Vite frontend, Husky hooks,
 and CI that installs Node dependencies before building assets and running
-Vitest. Today that toolchain uses npm (`package-lock.json`, `npm install`,
+Vitest. That toolchain used to rely on npm (`package-lock.json`, `npm install`,
 `npm run …`, `npx …` in scripts).
 
 We want two things npm does not give us out of the box:
@@ -19,41 +19,25 @@ We want two things npm does not give us out of the box:
    explicit lockfile contract for local work and CI.
 
 Node still ships npm, so choosing pnpm is an intentional extra step for every
-developer and for CI bootstrap.
+developer and for CI.
 
 ## Decision
 
 **Use pnpm as the only Node package manager for this repository.** npm is not
-supported in parallel; there is one lockfile and one install path.
+supported in parallel; there is one lockfile and one install path for project
+dependencies.
 
-### How developers and CI get pnpm
-
-**Primary path: Corepack + `package.json` `packageManager`.**
-
-After phase 2 of the migration lands, `package.json` will declare an exact pin
-such as `"packageManager": "pnpm@11.x"`. Developers run `corepack enable` once;
-Corepack (built into Node) downloads and invokes that exact pnpm version on the
-host. CI enables Corepack after `actions/setup-node` and uses the same pin — no
-separate `pnpm/action-setup` action.
-
-**Fallback only: Sail’s global pnpm.** The Laravel Sail Docker image already
-installs pnpm globally. If Corepack is disabled or unavailable in a corporate
-image, a developer inside Sail can still run pnpm, but setup docs and CI treat
-Corepack + `packageManager` as the contract. The Sail image version is not the
-source of truth.
-
-We explicitly rejected:
-
-- documenting global `npm install -g pnpm` as the happy path;
-- relying on Sail’s global pnpm alone;
-- supporting npm and pnpm side-by-side (“dual manager” docs or lockfiles).
+How to put pnpm on a machine (global install vs Corepack vs Sail) is an
+**operational detail** — see the setup guides, not this ADR.
+`package.json` still declares `"packageManager": "pnpm@…"` so tools and CI can
+read the intended version.
 
 ### Lockfile and installs
 
 | Artifact | Role |
 |----------|------|
-| `pnpm-lock.yaml` | Sole committed Node resolution file (replaces `package-lock.json`) |
-| `package-lock.json` | Removed when the migration completes; not kept alongside pnpm |
+| `pnpm-lock.yaml` | Sole committed Node resolution file |
+| `package-lock.json` | Not used; do not reintroduce alongside pnpm |
 
 **CI and reproducible installs** use a frozen lockfile:
 
@@ -64,89 +48,67 @@ pnpm install --frozen-lockfile
 Any install that would mutate `pnpm-lock.yaml` fails in CI instead of silently
 drifting.
 
-Lockfile migration (phase 2) prefers `pnpm import` from the existing
-`package-lock.json` to preserve current resolutions (including pinned Quill
-2.0.3 and axios 1.18.1). A fresh resolve is acceptable only if import fails
-verification.
-
 ### Supply-chain: minimum release age
 
 **Target: 24 hours** before a newly published package version may be installed.
 
-**Preferred:** pin **pnpm 11.x** in `packageManager`. pnpm 11 defaults
-`minimumReleaseAge` to **1440 minutes (24 h)** with no project opt-in, and
-requires Node 22+ (CI already uses Node 24).
+We pin **pnpm 11.x** (see `packageManager`). pnpm 11 defaults
+`minimumReleaseAge` to **1440 minutes (24 h)** and requires Node 22+ (CI uses
+Node 24).
 
-**Fallback:** if pnpm 11 defaults or strictness (`blockExoticSubdeps`,
-`verifyDepsBeforeRun`, etc.) block install or scripts, pin pnpm ≥ 10.16 and set
-`minimumReleaseAge: 1440` explicitly in `.npmrc` or `pnpm-workspace.yaml`. Note
-the fallback in this ADR when it happens.
+If a future pnpm major drops that default or its stricter install defaults
+block us, either restore an explicit `minimumReleaseAge: 1440` in
+`pnpm-workspace.yaml` or document a version floor here.
 
-Audit commands for this repo should use `pnpm audit`, not `npm audit`, once docs
-are updated (phase 3).
+**Dependency build scripts** are gated by pnpm 11 `strictDepBuilds`. Allowed
+packages are listed explicitly in `pnpm-workspace.yaml` → `allowBuilds`
+(today: `esbuild`). That file is the allowlist — not an interactive
+per-machine prompt.
 
-**Phase 2 note (2026-08-12):** pnpm 11.21.0 `strictDepBuilds` blocked esbuild
-postinstall until `pnpm-workspace.yaml` declared `allowBuilds: esbuild: true`.
-We stayed on 11.x; no downgrade to 10.16 was needed.
-
-### Script names and documentation
+### Script names
 
 `package.json` script **names stay unchanged** (`gate`, `dev`, `build`, `test`,
-`package`, …). Internal scripts and Husky hooks will invoke tools via
-`pnpm` / `pnpm exec …` instead of `npm` / `npx`.
+`package`, …). Tooling invokes them via `pnpm` / `pnpm exec …`.
 
 The script named **`package`** is kept for deploy/packaging. In documentation,
 prefer **`pnpm run package`** over a bare `pnpm package` in case a future pnpm
 built-in collides with that name.
 
-Day-to-day invocations after migration:
-
-```bash
-pnpm install
-pnpm run build
-pnpm run gate
-pnpm run package   # deploy asset build — prefer this form in docs
-pnpm exec vitest run
-```
+Audit commands for this repo use `pnpm audit`, not `npm audit`.
 
 ### What we give up vs “Node ships npm”
 
 | npm (default) | pnpm (chosen) |
 |---------------|---------------|
-| Zero extra bootstrap — npm is bundled with Node | One-time `corepack enable` (or Sail fallback) before first install |
+| Zero extra bootstrap — npm is bundled with Node | Install pnpm once on the machine (see setup docs) |
 | Familiar to every Node tutorial | Team and docs must say “pnpm” for this repo |
-| `package-lock.json` ecosystem default | Contributors must delete old `node_modules` / stray `package-lock.json` once when switching |
-| Simpler mental model for occasional contributors | Slightly stricter install semantics (frozen CI, content-addressable store) |
+| `package-lock.json` ecosystem default | Contributors must not mix npm lockfiles with this repo |
+| Simpler mental model for occasional contributors | Stricter install semantics (frozen CI, content-addressable store, build allowlist) |
 
 We accept that cost for reproducible versions, faster installs, stricter
 lockfile discipline, and delayed uptake of fresh registry releases.
+
+We explicitly rejected supporting npm and pnpm side-by-side for project
+deps (“dual manager” docs or lockfiles).
 
 ## Consequences
 
 ### Positive
 
-- Same pnpm version on developer machines and CI via Corepack + `packageManager`.
-- Faster, deduplicated installs and a single lockfile artifact.
-- Default (or configured) 24 h minimum release age on new package versions.
-- Husky, gate, Composer `dev`, and CI stop hardcoding npm while script names
-  stay stable.
+- One lockfile (`pnpm-lock.yaml`) and one install vocabulary for the repo.
+- Default 24 h minimum release age on new package versions (pnpm 11).
+- Explicit `allowBuilds` allowlist for dependency install scripts.
+- Husky, gate, Composer `dev`, and CI use pnpm while script names stay stable.
 
 ### Negative / operational
 
-- New clones and existing clones after pull: remove old `node_modules` and any
-  leftover `package-lock.json`, then `pnpm install` once (documented in setup).
-- CI cache strategy switches from npm to pnpm (Corepack + `cache: 'pnpm'` or
-  documented alternative if setup-node cache misbehaves).
-- Agents and active docs use `pnpm run gate` / `pnpm install` (migration
-  completed 2026-08-12).
-- Yarn and bun remain in the Sail Dockerfile; that is out of scope for this ADR.
+- Every developer needs pnpm on PATH before `pnpm install` (setup docs).
+- Existing clones after the migration: remove old `node_modules` / stray
+  `package-lock.json`, then reinstall once.
+- New dependency build scripts require a committed `allowBuilds` update.
 
 ### Rollback
 
 Rollback is a **git revert** of the migration commits (lockfile, scripts, CI,
 docs) and restoring `package-lock.json` from history if needed. **Dual
 npm + pnpm support is not a supported mode** — it would rot immediately.
-
-## References
-
-- WRAP record: [`migrate-npm-to-pnpm.md`](../Feature_Planning/_done/migrate-npm-to-pnpm.md)

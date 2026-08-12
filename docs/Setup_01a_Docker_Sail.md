@@ -50,11 +50,16 @@ Note: For **Windows**: to avoid permission issues, you should launch command fro
 
 > sail artisan storage:link
 
-8. Build frontend assets (Corepack + pnpm)
+8. Build frontend assets (pnpm)
 
-Once per machine (host or WSL):
+Install the pnpm version pinned in `package.json` → `packageManager` (today
+`pnpm@11.21.0`). **Primary** — Node always ships npm:
 
-> corepack enable
+> npm install -g pnpm@11.21.0
+
+Optional alternatives if you prefer them: `corepack enable` (when Corepack is
+available on your Node build), or the global `pnpm` already present inside the
+Sail image. Match the `packageManager` version either way.
 
 From the repo root — **existing clones** after pulling the pnpm migration should
 remove leftover npm artifacts once, then install:
@@ -65,9 +70,16 @@ remove leftover npm artifacts once, then install:
 
 Fresh clones skip the `rm` step.
 
-If Corepack is unavailable, the Sail image includes a global pnpm as a fallback
-only — see [`docs/adr/0001-use-pnpm.md`](./adr/0001-use-pnpm.md). Prefer
-Corepack + `packageManager` in `package.json` as the contract.
+`pnpm install` runs the root `prepare` script, which installs Husky git hooks
+(commit-msg + pre-commit). If hooks are missing after install, run
+`pnpm run prepare`.
+
+Dependency packages that need install scripts (e.g. esbuild) are allowlisted in
+`pnpm-workspace.yaml` → `allowBuilds`. You should not need an interactive
+`pnpm approve-builds` for a normal setup; if install refuses a new package’s
+build, a maintainer adds it to that file and commits.
+
+See also [`docs/adr/0001-use-pnpm.md`](./adr/0001-use-pnpm.md) for *why* pnpm.
 
 You are up and running on : http://localhost. The first user you can log with is admin@example.com / password.
 

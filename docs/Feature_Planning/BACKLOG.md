@@ -44,7 +44,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
-- [`migrate-npm-to-pnpm`](_done/migrate-npm-to-pnpm.md) · pnpm 11 via Corepack is the sole Node manager; lockfile, CI, hooks, gate, and active docs switched from npm
+- [`migrate-npm-to-pnpm`](_done/migrate-npm-to-pnpm.md) · pnpm 11 is the sole Node manager; lockfile, CI, hooks, gate, and active docs switched from npm
 - [`fix-audit-vulnerabilities`](_done/fix-audit-vulnerabilities.md) · cleared fixable Composer/NPM audit findings; Quill 2.0.3 XSS (GHSA-v3m3-f69x-jf25) accepted exception
 - [`domain-claude-md-shims`](_done/domain-claude-md-shims.md) · every domain gets a one-line `CLAUDE.md` (`@AGENTS.md`) shim; `document-domain` now writes README + AGENTS + shim
 - [`quote-contest-moderator-ops`](_done/quote-contest-moderator-ops.md) · moderators can CRUD quote-contest categories on activity edit (middleware parity)

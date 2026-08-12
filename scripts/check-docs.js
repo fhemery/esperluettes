@@ -13,7 +13,13 @@
     linked. The dependency runs one way only — planning may link to code docs,
     never the reverse.
 
-  Rule 2 — no broken relative links in any tracked markdown under docs/ and
+  Rule 2 — ADRs must not depend on planning docs.
+    Any markdown under docs/adr/ may not reference Feature_Planning (active
+    task folders or _done/). ADRs are durable decisions; planning paths
+    disappear on WRAP. Fold what matters into the ADR itself — see the
+    write-adr skill.
+
+  Rule 3 — no broken relative links in any tracked markdown under docs/ and
     app/Domains/.
 */
 
@@ -51,20 +57,36 @@ function relative(p) {
   return path.relative(root, p).split(path.sep).join('/');
 }
 
-function checkPlanningReferences(files) {
+function linesReferencingPlanning(file) {
+  const failures = [];
+  const rel = relative(file);
+  const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
+  lines.forEach((line, i) => {
+    if (line.includes(PLANNING_DIR)) {
+      failures.push(`${rel}:${i + 1} references ${PLANNING_DIR} — fold the content in instead`);
+    }
+  });
+  return failures;
+}
+
+function checkDomainPlanningReferences(files) {
   const failures = [];
   for (const file of files) {
     const rel = relative(file);
     if (!rel.startsWith('app/Domains/')) continue;
     const base = path.basename(file);
     if (base !== 'README.md' && base !== 'AGENTS.md') continue;
+    failures.push(...linesReferencingPlanning(file));
+  }
+  return failures;
+}
 
-    const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
-    lines.forEach((line, i) => {
-      if (line.includes(PLANNING_DIR)) {
-        failures.push(`${rel}:${i + 1} references ${PLANNING_DIR} — fold the content in instead`);
-      }
-    });
+function checkAdrPlanningReferences(files) {
+  const failures = [];
+  for (const file of files) {
+    const rel = relative(file);
+    if (!rel.startsWith('docs/adr/')) continue;
+    failures.push(...linesReferencingPlanning(file));
   }
   return failures;
 }
@@ -102,7 +124,8 @@ function main() {
   const files = SEARCH_ROOTS.flatMap((r) => walk(path.join(root, r)));
 
   const checks = [
-    { label: 'domain docs do not reference Feature_Planning', failures: checkPlanningReferences(files) },
+    { label: 'domain docs do not reference Feature_Planning', failures: checkDomainPlanningReferences(files) },
+    { label: 'ADRs do not reference Feature_Planning', failures: checkAdrPlanningReferences(files) },
     { label: 'relative markdown links resolve', failures: checkRelativeLinks(files) },
   ];
 

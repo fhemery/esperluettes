@@ -63,13 +63,14 @@ small on purpose. A feature spec left behind is a bug in the process.
 
 ## 5. Update the surrounding docs
 
-**A domain's docs must never reference `docs/Feature_Planning`.** Planning
-documents are working memory for an in-flight task — they get renamed, split and
-deleted when the task wraps, and a link from `app/Domains/**` into them rots. The
-dependency runs one way only: planning may link to code docs, never the reverse.
+**A domain's docs must never reference `docs/Feature_Planning`.** Same for
+**`docs/adr/**`**. Planning documents are working memory for an in-flight task —
+they get renamed, split and deleted when the task wraps, and a link from
+`app/Domains/**` or an ADR into them rots. The dependency runs one way only:
+planning may link to code docs / ADRs, never the reverse.
 
 So do not leave a pointer — **fold the content in**. `pnpm run gate` fails on a
-violation. Three destinations, in order of preference:
+violation. Destinations, in order of preference:
 
 1. **`app/Domains/<D>/README.md`** — anything a future reader of the domain
    needs: what is not done, a known drift, a decision that would otherwise be
@@ -78,7 +79,10 @@ violation. Three destinations, in order of preference:
    README, and only what cannot be learnt by reading the code. Link it from the
    README. Strip hard: a design document written before the code is planning
    material, redundant once the code exists.
-3. **Delete it.** Most planning content earns neither of the first two. The
+3. **`docs/adr/`** — cross-cutting durable decisions (package manager, auth
+   model, …). Self-contained; never link back to the task folder. Use the
+   `write-adr` skill.
+4. **Delete it.** Most planning content earns none of the first three. The
    folder under `docs/Feature_Planning/` is disposable by design; git keeps it.
 
 A feature spanning several domains has no single home — put its record in the
