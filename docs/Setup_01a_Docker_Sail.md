@@ -61,15 +61,6 @@ Optional alternatives if you prefer them: `corepack enable` (when Corepack is
 available on your Node build), or the global `pnpm` already present inside the
 Sail image. Match the `packageManager` version either way.
 
-From the repo root — **existing clones** after pulling the pnpm migration should
-remove leftover npm artifacts once, then install:
-
-> rm -rf node_modules package-lock.json
-> pnpm install
-> pnpm run build
-
-Fresh clones skip the `rm` step.
-
 `pnpm install` runs the root `prepare` script, which installs Husky git hooks
 (commit-msg + pre-commit). If hooks are missing after install, run
 `pnpm run prepare`.

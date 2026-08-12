@@ -61,9 +61,6 @@ missing, run `pnpm run prepare`. Allowed dependency builds live in
 `pnpm-workspace.yaml` → `allowBuilds` (no interactive approve step for normal
 setup).
 
-**Existing clones** after pulling the pnpm migration: remove `node_modules` and
-any stray `package-lock.json` once before `pnpm install`.
-
 You are up and running on the domain you configured in step 2 (for example, http://esperluettes.test). 
 System might redirect you to https://esperluettes.test and tell you the site is not secure. Simply tell your browser everything is ok.
 
