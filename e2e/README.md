@@ -5,16 +5,16 @@ backed by a throwaway SQLite database. The local MySQL dev database is never
 touched, so specs are free to create, edit and delete whatever they need.
 
 ```bash
-npm run e2e                    # everything, headless
-npm run e2e:core               # only the permanent net
-npm run e2e -- --headed        # watch it happen
-npm run e2e -- editor          # only specs matching "editor"
-npm run e2e:ui                 # Playwright's interactive runner
-npm run e2e:report             # open the last HTML report
-E2E_SKIP_RESET=1 npm run e2e   # keep the current database between runs
+pnpm run e2e                    # everything, headless
+pnpm run e2e:core               # only the permanent net
+pnpm run e2e -- --headed        # watch it happen
+pnpm run e2e -- editor          # only specs matching "editor"
+pnpm run e2e:ui                 # Playwright's interactive runner
+pnpm run e2e:report             # open the last HTML report
+E2E_SKIP_RESET=1 pnpm run e2e   # keep the current database between runs
 ```
 
-One-time: `npm run e2e:setup` (downloads the Chromium binary).
+One-time: `pnpm run e2e:setup` (downloads the Chromium binary).
 
 ## What belongs in a browser at all
 
@@ -36,7 +36,7 @@ What is left, and what this suite is for:
 | | `tests/core/` | `tests/features/` |
 |---|---|---|
 | Lifetime | permanent | deleted at WRAP |
-| Runs | every `npm run e2e` | while the feature is in flight |
+| Runs | every `pnpm run e2e` | while the feature is in flight |
 | Bar to entry | guards something used across the app and breakable from anywhere | verifies one feature once |
 
 `core/` is the net that must stay green after every feature, so it is kept
@@ -89,7 +89,7 @@ New specs go in `tests/features/`. Rules that keep this cheap to own:
 - **Never clean up after yourself.** The database is rebuilt before every run;
   cleanup code is just another thing to get wrong.
 - **Screenshots on failure only.** Playwright captures them, plus a trace you
-  can open with `npm run e2e:report`. Do not add success screenshots.
+  can open with `pnpm run e2e:report`. Do not add success screenshots.
 
 ## Gotchas
 

@@ -52,4 +52,4 @@ per §2. Suppress self-notification: an actor is not told about their own action
 
 ## 6. Document it
 
-Add the new type to `docs/notification-types.md`, then `npm run gate`.
+Add the new type to `docs/notification-types.md`, then `pnpm run gate`.

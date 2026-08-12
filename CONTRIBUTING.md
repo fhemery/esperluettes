@@ -46,7 +46,8 @@ Scope is optional but recommended (e.g., `auth`, `profile`, `shared`, `admin`).
 
 ## Local hooks (installed automatically)
 
-We use Husky to install Git hooks on `npm install`.
+We use Husky to install Git hooks on `pnpm install` (run `corepack enable` once
+per machine first — see [Setup via Docker and Sail](./docs/Setup_01a_Docker_Sail.md)).
 
 - commit-msg: validates your message with commitlint (Conventional Commits)
 - pre-commit: runs architectural checks with Deptrac, and launch unit / integration tests (with Pest)

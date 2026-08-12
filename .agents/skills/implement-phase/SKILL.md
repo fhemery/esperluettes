@@ -1,6 +1,6 @@
 ---
 name: implement-phase
-description: Implement one phase of a feature's implementation plan, test-first, until the gate is green. Use at the BUILD step of the loop — one invocation per phase of docs/Feature_Planning/<slug>/03-plan.md. Writes failing integration tests first, implements the minimum that passes, runs npm run gate, and updates the phase status.
+description: Implement one phase of a feature's implementation plan, test-first, until the gate is green. Use at the BUILD step of the loop — one invocation per phase of docs/Feature_Planning/<slug>/03-plan.md. Writes failing integration tests first, implements the minimum that passes, runs pnpm run gate, and updates the phase status.
 ---
 
 # Implement one phase
@@ -58,8 +58,8 @@ response body for a non-owner, not merely hidden by Blade.
 one word; a red one is worth its failures. Redirect, then read only what broke:
 
 ```bash
-npm run gate > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
-npm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+pnpm run gate > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+pnpm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
 ./vendor/bin/sail artisan test --filter=X > /tmp/test.log 2>&1 && echo PASS || tail -30 /tmp/test.log
 ```
 

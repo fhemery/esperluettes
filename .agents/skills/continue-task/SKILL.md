@@ -50,7 +50,7 @@ Also check reality, not just files:
   output out of your thread:
 
   ```bash
-  npm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+  pnpm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
   ```
 
 If the files and the status field disagree, **fix the status field** and say so

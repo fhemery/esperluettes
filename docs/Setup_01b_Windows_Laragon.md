@@ -42,15 +42,19 @@ Or directly click on the lock icon on the home screen :
 8. In project directory, run :
 
 ```bash
+corepack enable
 composer install
-npm install
-npm run build
+pnpm install
+pnpm run build
 php artisan generate:key
 php artisan migrate:install
 php artisan migrate
 php artisan db:seed
 php artisan storage:link
 ```
+
+**Existing clones** after pulling the pnpm migration: remove `node_modules` and
+any stray `package-lock.json` once before `pnpm install`.
 
 You are up and running on the domain you configured in step 2 (for example, http://esperluettes.test). 
 System might redirect you to https://esperluettes.test and tell you the site is not secure. Simply tell your browser everything is ok.
@@ -69,10 +73,10 @@ Just go to Laragon and start/stop the Apache server and the mysql server.
 ### Regenerate javascript and tailwind classes (whenever you touch javascript)
 
 Either once:
-> npm run build
+> pnpm run build
 
 Or on every change (very useful for development):
-> npm run dev
+> pnpm run dev
 
 ## Other Essential Laravel Commands
 - Artisan commands: `php artisan [command]`

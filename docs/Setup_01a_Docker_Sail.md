@@ -50,11 +50,24 @@ Note: For **Windows**: to avoid permission issues, you should launch command fro
 
 > sail artisan storage:link
 
-8. Run npm build to create the assets
+8. Build frontend assets (Corepack + pnpm)
 
-> npm install
+Once per machine (host or WSL):
 
-> npm run build
+> corepack enable
+
+From the repo root — **existing clones** after pulling the pnpm migration should
+remove leftover npm artifacts once, then install:
+
+> rm -rf node_modules package-lock.json
+> pnpm install
+> pnpm run build
+
+Fresh clones skip the `rm` step.
+
+If Corepack is unavailable, the Sail image includes a global pnpm as a fallback
+only — see [`docs/adr/0001-use-pnpm.md`](./adr/0001-use-pnpm.md). Prefer
+Corepack + `packageManager` in `package.json` as the contract.
 
 You are up and running on : http://localhost. The first user you can log with is admin@example.com / password.
 
@@ -72,10 +85,10 @@ Stopping:
 ### Regenerate javascript and tailwind classes (whenever you touch javascript)
 
 Either once:
-> npm run build
+> pnpm run build
 
 Or on every change (very useful for development):
-> npm run dev
+> pnpm run dev
 
 ## Other Essential Laravel Commands
 - Artisan commands: `sail artisan [command]`

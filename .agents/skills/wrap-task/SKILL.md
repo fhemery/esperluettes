@@ -68,7 +68,7 @@ documents are working memory for an in-flight task — they get renamed, split a
 deleted when the task wraps, and a link from `app/Domains/**` into them rots. The
 dependency runs one way only: planning may link to code docs, never the reverse.
 
-So do not leave a pointer — **fold the content in**. `npm run gate` fails on a
+So do not leave a pointer — **fold the content in**. `pnpm run gate` fails on a
 violation. Three destinations, in order of preference:
 
 1. **`app/Domains/<D>/README.md`** — anything a future reader of the domain
@@ -123,7 +123,7 @@ task, is what made `docs/Feature_Planning/` unreadable.
 
 ## 7. Commit the paperwork
 
-Run `npm run gate` — step 6 just deleted and moved files, so this is the check
+Run `pnpm run gate` — step 6 just deleted and moved files, so this is the check
 that a link elsewhere in the repo did not silently break. Fix anything it
 reports before committing, not after. The README, the backlog change and any
 regenerated domain docs go in one `docs(<domain>)` commit. Follow the `commit`

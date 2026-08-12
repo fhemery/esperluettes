@@ -121,7 +121,7 @@ plan. Never paste a subagent's full output into your thread.
 Stop and ask the user when:
 
 - a step produces a **blocking** open question;
-- the gate (`npm run gate`) fails twice on the same phase for the same reason;
+- the gate (`pnpm run gate`) fails twice on the same phase for the same reason;
 - reality contradicts the plan (a needed API does not exist, a decision turns
   out to be unimplementable);
 - you are about to touch a domain that neither `01-functional.md` nor

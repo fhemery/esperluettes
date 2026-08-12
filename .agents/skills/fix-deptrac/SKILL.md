@@ -7,7 +7,7 @@ description: Analyze deptrac violations after a failed deptrac check and decide 
 
 There are two situations in which the deptrac fix is needed:
 1. if the output is already in your context, from the hook that triggered this skill, yoy already have the output.
-2. else, you can run deptrac with `npm run launch-deptrac` command
+2. else, you can run deptrac with `pnpm run launch-deptrac` command
 
 ## Architecture rules for this project
 
@@ -110,7 +110,7 @@ Keep the list sorted alphabetically within each entry for readability.
 Run deptrac to confirm the violation is resolved:
 
 ```
-npm run launch-deptrac
+pnpm run launch-deptrac
 ```
 
 If more violations appear, repeat from Step 1.

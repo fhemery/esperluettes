@@ -98,7 +98,7 @@ costs**. Three rules follow:
    session. Redirect and read only what failed:
 
    ```bash
-   npm run gate > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+   pnpm run gate > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
    ```
 
 The artifacts exist to make these boundaries cheap. A step that cannot resume
@@ -194,8 +194,8 @@ recurring pieces of work. `verify-visually` defers to `run-app` for the browser.
 Every BUILD phase and the VERIFY step end on a green gate:
 
 ```bash
-npm run gate            # docs + deptrac + php tests + vitest + vite build
-npm run gate -- --quick # skip the asset build (faster inner loop)
+pnpm run gate            # docs + deptrac + php tests + vitest + vite build
+pnpm run gate -- --quick # skip the asset build (faster inner loop)
 ```
 
 The `docs` step enforces that no `app/Domains/**/{README,AGENTS}.md` references
@@ -210,7 +210,7 @@ DESIGN, PLAN and WRAP all write or delete files under `docs/Feature_Planning/`
 — a renamed task folder, an absorbed sibling task, a deleted pre-loop doc — and
 each of those can break a relative link or leave a stale reference sitting
 uncommitted, invisible until some unrelated later change stumbles on it. Run
-`npm run gate` (it skips the PHP/JS suites when nothing code-related changed,
+`pnpm run gate` (it skips the PHP/JS suites when nothing code-related changed,
 so this is cheap) and commit the step's own artifact before handing back —
 see the `commit` skill. Skip the commit only for a genuine mid-interview
 scratch state, and say so.

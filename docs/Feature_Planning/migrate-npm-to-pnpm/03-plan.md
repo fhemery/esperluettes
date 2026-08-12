@@ -14,7 +14,7 @@
 |---|-------|------|------------|--------|
 | 1 | ADR — record the package-manager decision | S | — | DONE |
 | 2 | Core switch — lockfile, runtime scripts, CI | M | 1 | DONE |
-| 3 | Active documentation sweep | M | 2 | TODO |
+| 3 | Active documentation sweep | M | 2 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

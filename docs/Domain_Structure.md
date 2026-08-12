@@ -70,7 +70,7 @@ Rules:
 - **Domain docs must never reference `docs/Feature_Planning`.** Planning
   documents are renamed, split and deleted as tasks wrap, so a link from
   `app/Domains` into them rots by design. The dependency runs one way only:
-  planning may link to code docs, never the reverse. `npm run gate` enforces it.
+  planning may link to code docs, never the reverse. `pnpm run gate` enforces it.
 - **`Docs/` is not an archive.** Write down only what cannot be learnt by
   reading the code, and is not already in the README. A design document written
   *before* the code is planning material — once the code exists it is at best

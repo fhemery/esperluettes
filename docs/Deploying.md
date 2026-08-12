@@ -18,9 +18,9 @@ This project requires PHP >= 8.3 to be deployed. It works perfectly with a share
 - Web server (Apache or Nginx)
 
 ## Generating a package
-**IMPORTANT**: You must shut down vite dev server (`npm run dev`) before running the deployment script. Else the assets are going to point to your local server
+**IMPORTANT**: You must shut down vite dev server (`pnpm run dev`) before running the deployment script. Else the assets are going to point to your local server
 
-> npm run package
+> pnpm run package
 
 This command requires Nodejs >= 20, and two files :
 - `.env.test` for test environment

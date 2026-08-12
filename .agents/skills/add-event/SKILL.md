@@ -55,5 +55,5 @@ cover every case, including the ones where it should do nothing.
 
 ## Gate
 
-`npm run gate` must be green: deptrac in particular, since a consumer importing
+`pnpm run gate` must be green: deptrac in particular, since a consumer importing
 the emitting domain's `Public/Events/` may need an edge that does not exist yet.
