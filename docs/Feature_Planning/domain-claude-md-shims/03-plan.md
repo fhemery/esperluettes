@@ -14,7 +14,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Fix `document-domain` terminology and add the shim step | S | — | DONE |
-| 2 | Backfill the 26 domain `CLAUDE.md` shims | S | 1 | TODO |
+| 2 | Backfill the 26 domain `CLAUDE.md` shims | S | 1 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
