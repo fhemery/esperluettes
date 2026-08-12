@@ -35,7 +35,7 @@ scoped to the task that actually changed.
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
 - **Domain docs gate check** · `domain-docs-gate-check/` · auto · TODO: gate should fail if a domain under `app/Domains` is missing `README.md`/`AGENTS.md`/`CLAUDE.md`, or is missing from the root `AGENTS.md` Domain Registry table
 - **Gate parallel execution** · `gate-parallel-execution/` · auto · TODO: `npm run gate` runs PHP tests sequentially per domain once more than a few domains are touched, slower than parallel on multi-core machines — investigate why and optimize the PHP part; also check running all check categories (PHP, JS, docs, ...) in parallel
-- **Migrate npm to pnpm** · `migrate-npm-to-pnpm/` · auto · WIP:BUILD (1/3)
+- **Migrate npm to pnpm** · `migrate-npm-to-pnpm/` · auto · WIP:BUILD (2/3)
 - **Role-gated notification preferences (moderator/admin)** · `role-gated-notification-settings/` · interactive · TODO
 
 ## Done

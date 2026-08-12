@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | ADR — record the package-manager decision | S | — | DONE |
-| 2 | Core switch — lockfile, runtime scripts, CI | M | 1 | TODO |
+| 2 | Core switch — lockfile, runtime scripts, CI | M | 1 | DONE |
 | 3 | Active documentation sweep | M | 2 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.

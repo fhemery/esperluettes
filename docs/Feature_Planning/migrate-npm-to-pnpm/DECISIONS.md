@@ -15,6 +15,8 @@ a new row that supersedes it and note the number.
 | 5 | 2026-08-12 | DESIGN | ADR location | `docs/adr/0001-use-pnpm.md` | — |
 | 6 | 2026-08-12 | DESIGN | Lockfile migration | Prefer `pnpm import` then verify | — |
 | 7 | 2026-08-12 | DESIGN | CI pnpm bootstrap | Corepack after setup-node | — |
+| 8 | 2026-08-12 | BUILD | Exact pnpm patch pin | `pnpm@11.21.0` in `packageManager` (latest stable 11.x at BUILD) | — |
+| 9 | 2026-08-12 | BUILD | pnpm 11 strictDepBuilds | Stay on 11.x; `pnpm-workspace.yaml` `allowBuilds: esbuild: true` after `pnpm approve-builds` — not a downgrade to 10.16 | 4 |
 
 ## Assumptions made without asking
 

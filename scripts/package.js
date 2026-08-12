@@ -158,7 +158,7 @@ function runner() {
       composer: (args) => runHere('composer', args, { shell: process.platform === 'win32' }),
       artisan: (args) => runHere('php', ['artisan', ...args], { shell: process.platform === 'win32' }),
       composerIn: (relativeDir, args) => runHere('composer', [...args, `--working-dir=${path.join(projectRoot, relativeDir)}`], { shell: process.platform === 'win32' }),
-      npm: (args) => runHere('npm', args, { shell: process.platform === 'win32' }),
+      pnpm: (args) => runHere('pnpm', args, { shell: process.platform === 'win32' }),
     };
   }
   const sailPath = path.join(projectRoot, 'vendor', 'bin', 'sail');
@@ -175,7 +175,7 @@ function runner() {
     composer: (args) => sailRunner(['composer', ...args]),
     artisan: (args) => sailRunner(['artisan', ...args]),
     composerIn: (relativeDir, args) => sailRunner(['composer', ...args, `--working-dir=${toContainerPath(relativeDir)}`]),
-    npm: (args) => runHere('npm', [...args]),
+    pnpm: (args) => runHere('pnpm', [...args]),
   };
 }
 
@@ -468,7 +468,7 @@ async function main() {
   const distSourcePath = await copyToDist();
 
   log(null, '🏗️ Step 4: Rebuilding front and sending it to dist as well');
-  r.npm(['run', 'build']);
+  r.pnpm(['run', 'build']);
   await verifyViteBuildSync();
 
   log(null, '📦 Step 5: installing vendor folder and optimizing')

@@ -85,6 +85,10 @@ the fallback in this ADR when it happens.
 Audit commands for this repo should use `pnpm audit`, not `npm audit`, once docs
 are updated (phase 3).
 
+**Phase 2 note (2026-08-12):** pnpm 11.21.0 `strictDepBuilds` blocked esbuild
+postinstall until `pnpm-workspace.yaml` declared `allowBuilds: esbuild: true`.
+We stayed on 11.x; no downgrade to 10.16 was needed.
+
 ### Script names and documentation
 
 `package.json` script **names stay unchanged** (`gate`, `dev`, `build`, `test`,

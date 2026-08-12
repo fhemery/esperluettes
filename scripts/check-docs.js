@@ -2,7 +2,7 @@
 /*
   Documentation consistency checks.
 
-  Run standalone or as the `docs` step of `npm run gate`.
+  Run standalone or as the `docs` step of `pnpm run gate`.
 
   Rule 1 — code docs must not depend on planning docs.
     A README.md or AGENTS.md under app/Domains may not reference

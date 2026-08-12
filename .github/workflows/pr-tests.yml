@@ -30,13 +30,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'
+          cache: 'pnpm'
 
-      - name: Install npm dependencies
-        run: npm ci
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build assets
-        run: npm run build
+        run: pnpm run build
 
       - name: Prepare environment
         run: |
@@ -53,7 +56,7 @@ jobs:
         run: composer deptrac
 
       - name: Run JS tests
-        run: npm run test
+        run: pnpm run test
 
       - name: Run tests
         run: php artisan test:parallel
