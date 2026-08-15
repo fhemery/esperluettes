@@ -43,3 +43,4 @@ Other domains that register settings tabs:
 | Shared   | `general`  | `SharedServiceProvider::TAB_GENERAL`                |
 | ReadList | `readlist` | `ReadListServiceProvider::TAB_READLIST`             |
 | Profile  | `profile`  | `ProfileServiceProvider::TAB_PROFILE`               |
+| Story    | `stories`  | `StoryServiceProvider::TAB_STORIES`                 |
