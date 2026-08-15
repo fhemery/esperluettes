@@ -15,7 +15,7 @@
 |---|-------|------|------------|--------|
 | 1 | Settings tab « Histoires » + `StoryPreferenceService` | S | — | DONE |
 | 2 | Hide-from-lists — library `/stories` | S | 1 | DONE |
-| 3 | Hide-from-lists — dashboard discover + story search | S | 1 | TODO |
+| 3 | Hide-from-lists — dashboard discover + story search | S | 1 | DONE |
 | 4 | Hide-TW-display — shared component + story show | S | 1 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.

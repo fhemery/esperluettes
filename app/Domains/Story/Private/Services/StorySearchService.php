@@ -18,7 +18,7 @@ class StorySearchService
      *  - rows: Illuminate\Support\Collection<Story> (max $limit)
      *  - total: int (uncapped total)
      */
-    public function search(string $query, int $limit = 25): array
+    public function search(string $query, int $limit = 25, bool $noTwOnly = false): array
     {
        
         $q = trim($query);
@@ -58,6 +58,12 @@ class StorySearchService
                 $w->orWhere('description', 'like', $qLike);
             }
         });
+
+        // Applied before the count so the reported total matches the rows the
+        // caller can actually show.
+        if ($noTwOnly) {
+            $base->where('tw_disclosure', Story::TW_NO_TW);
+        }
 
         $total = (int) $base->count('id');
 

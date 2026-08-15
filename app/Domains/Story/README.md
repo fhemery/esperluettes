@@ -103,7 +103,7 @@ Other domains interact with Story through `StoryPublicApi` (`Public/Api/StoryPub
 | `getAuthorIds(storyId)` | Return all author user IDs for a story |
 | `getStoryIdByChapterId(chapterId)` | Resolve the story a chapter belongs to, so a caller can authorize from a chapter ID alone without knowing the chapter→story relation itself |
 | `countAuthoredStories(userId)` | Count stories where user is an author |
-| `searchStories(query, viewerUserId, limit)` | Full-text search returning `StorySearchResultDto[]` |
+| `searchStories(query, viewerUserId, limit)` | Full-text search returning `StorySearchResultDto[]`. When `viewerUserId` is given, that reader's « masquer les histoires avec avertissement » preference is applied (items **and** `total`); a `null` viewer is never filtered |
 | `filterUsersWithAccessToStory(userIds, storyId)` | Filter provided user IDs to those with access (respects visibility rules) |
 | `diffAccessForUsers(userIds, storyId, previousVisibility)` | Compute users who gained/lost access after a visibility change |
 | `getStoriesByIds(storyIds)` / `getChaptersByIds(chapterIds)` / `getAuthorIdsByStoryIds(storyIds)` | Batch lookups by ID, keyed by ID in the returned array |

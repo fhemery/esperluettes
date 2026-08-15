@@ -6,6 +6,7 @@ use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\StorySearchResultDto;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\CoverService;
+use App\Domains\Story\Private\Services\StoryPreferenceService;
 use App\Domains\Story\Private\Services\StorySearchService;
 use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Services\StoryAccessService;
@@ -49,6 +50,7 @@ class StoryPublicApi
         private readonly StoryAccessService $accessService,
         private readonly StoryRefPublicApi $storyRefs,
         private readonly CoverService $coverService,
+        private readonly StoryPreferenceService $preferences,
     ) {
     }
 
@@ -193,8 +195,13 @@ class StoryPublicApi
 
         $cap = max(1, min(25, (int) $limit));
 
+        // A known viewer gets their « masquer les histoires avec avertissement »
+        // preference applied; a null viewer id (guest) never does.
+        $noTwOnly = $viewerUserId !== null
+            && $this->preferences->hidesStoriesWithTriggerWarnings($viewerUserId);
+
         // Delegate to service (enforces visibility and matching)
-        $result = $this->search->search($q, $cap);
+        $result = $this->search->search($q, $cap, $noTwOnly);
         $rows = $result['rows'];
         $total = (int) $result['total'];
 

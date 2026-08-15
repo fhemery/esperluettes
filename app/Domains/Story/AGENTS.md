@@ -15,7 +15,7 @@
 | `getAuthorIds(storyId)` | `int[]` of author user IDs |
 | `getStoryIdByChapterId(chapterId)` | Story ID for a chapter, or `null`; lets a caller authorize from a chapter ID without inferring the chapter→story relation itself |
 | `countAuthoredStories(userId)` | Count of stories where user is an author |
-| `searchStories(query, viewerUserId, limit)` | Full-text title search returning `StorySearchResultDto[]` (max 25) |
+| `searchStories(query, viewerUserId, limit)` | Full-text title search returning `StorySearchResultDto[]` (max 25); applies the viewer's `hide-stories-with-tw` preference when `viewerUserId` is non-null |
 | `filterUsersWithAccessToStory(userIds, storyId)` | Filter to users who can access the story under current visibility |
 | `diffAccessForUsers(userIds, storyId, previousVisibility)` | Returns `['gained' => int[], 'lost' => int[]]` after a visibility change |
 

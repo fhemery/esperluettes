@@ -315,7 +315,7 @@ final class StoryRepository
      * 
      * @return array<Story>
      */
-    public function getRandomStories(int $viewerId, int $nbStories = 7, array $visibilities = [Story::VIS_PUBLIC]): array
+    public function getRandomStories(int $viewerId, int $nbStories = 7, array $visibilities = [Story::VIS_PUBLIC], bool $noTwOnly = false): array
     {
         $query = $this->selectFields(GetStoryOptions::ForCardDisplay());
 
@@ -331,6 +331,12 @@ final class StoryRepository
 
         // Visibility: allow public and community only
         $query->whereIn('visibility', $visibilities);
+
+        // Same rule as the library's « Histoires sans avertissement » filter:
+        // only fully disclosed TW-free stories survive.
+        if ($noTwOnly) {
+            $query->where('tw_disclosure', Story::TW_NO_TW);
+        }
 
         return $query->inRandomOrder()->limit($nbStories)->get()->all();
     }
