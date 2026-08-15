@@ -177,6 +177,9 @@
                 sm:col-start-2 sm:col-span-1 sm:row-start-4 sm:row-span-1
                 flex flex-col justify-between gap-2 h-full">
                 <!-- Trigger warnings -->
+                {{-- Reader preference « masquer les avertissements »: the heading goes with the badges,
+                     otherwise the preference leaves an empty labelled region. --}}
+                @if(!app(\App\Domains\Story\Private\Services\StoryPreferenceService::class)->hidesTriggerWarnings())
                 <div class="flex flex-col gap-2">
                     <div class="font-semibold text-md leading-5">
                         @if ($viewModel->twDisclosure == 'no_tw')
@@ -225,6 +228,7 @@
                             @endif
                     @endswitch
                 </div>
+                @endif
 
                 <!-- Copyright badge -->
                 <div class="text-sm text-gray-700">

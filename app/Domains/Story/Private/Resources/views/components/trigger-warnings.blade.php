@@ -3,6 +3,10 @@
     'disclosure' => null,
 ])
 
+{{-- Reader preference « masquer les avertissements »: gate every surface that mounts this component, with no prop-drill. --}}
+@php($hideTw = app(\App\Domains\Story\Private\Services\StoryPreferenceService::class)->hidesTriggerWarnings())
+
+@if(!$hideTw)
 @if(!empty($items))
     <x-shared::popover placement="top">
         <x-slot name="trigger">
@@ -37,4 +41,5 @@
         </x-slot>
         <div>{{ __('story::shared.trigger_warnings.tooltips.unspoiled') }}</div>
     </x-shared::popover>
+@endif
 @endif
