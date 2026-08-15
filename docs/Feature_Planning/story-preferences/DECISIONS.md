@@ -35,3 +35,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | 3 | Working French labels: tab « Histoires », « Masquer les avertissements », « Masquer les histoires avec avertissement » — copy may be tightened in BUILD | REFINE | Yes |
 | 4 | Prefs owned by Story domain (settings registration + list/display behaviour) | REFINE | Yes — DESIGN confirmed |
 | 5 | Author create/edit TW form and StoryRef admin catalog are not gated by hide-display (reader surfaces only) | DESIGN | Yes |
+| 6 | The library filter panel (`exclude_tw` multi-select and « Histoires sans avertissement » checkbox) is not gated by hide-display: it is a filtering control and reveals no individual story's warnings — same reasoning as #5. Architecture §4 names only `<x-story::trigger-warnings>` and the story-show block | PLAN | Yes |
