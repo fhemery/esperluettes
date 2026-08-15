@@ -33,6 +33,95 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const SEARCH_ROOTS = ['docs', 'app/Domains'];
 const PLANNING_DIR = 'Feature_Planning';
+function listDomainNames(rootDir) {
+  const domainsDir = path.join(rootDir, 'app', 'Domains');
+  let entries;
+  try {
+    entries = fs.readdirSync(domainsDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  return entries.filter((e) => e.isDirectory()).map((e) => e.name).sort();
+}
+
+function claudeMdIncludesAgents(content) {
+  return content.split(/\r?\n/).some((line) => line.trim() === '@AGENTS.md');
+}
+
+function checkDomainTrio(rootDir, domainName) {
+  const domainDir = path.join(rootDir, 'app', 'Domains', domainName);
+  const failures = [];
+  const required = ['README.md', 'AGENTS.md', 'CLAUDE.md'];
+
+  for (const file of required) {
+    if (!fs.existsSync(path.join(domainDir, file))) {
+      failures.push(`app/Domains/${domainName}: missing ${file}`);
+    }
+  }
+
+  const claudePath = path.join(domainDir, 'CLAUDE.md');
+  if (fs.existsSync(claudePath)) {
+    const content = fs.readFileSync(claudePath, 'utf8');
+    if (!claudeMdIncludesAgents(content)) {
+      failures.push(`app/Domains/${domainName}: CLAUDE.md must include a line @AGENTS.md`);
+    }
+  }
+
+  return failures;
+}
+
+function parseRegistryDomainPaths(agentsMdContent) {
+  const lines = agentsMdContent.split(/\r?\n/);
+  const startIdx = lines.findIndex((line) => line.trim() === '## Domain Registry');
+  if (startIdx === -1) {
+    return [];
+  }
+
+  const paths = [];
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith('## ')) {
+      break;
+    }
+    if (!line.startsWith('|')) {
+      continue;
+    }
+    const cells = line.split('|').map((c) => c.trim()).filter((c) => c !== '');
+    if (cells.length < 2 || /^:?-+:?$/.test(cells[0])) {
+      continue;
+    }
+    const match = cells[1].match(/`(app\/Domains\/[^`]+)`/);
+    if (match) {
+      paths.push(match[1]);
+    }
+  }
+  return paths;
+}
+
+function checkRegistrySync(domainNames, registryPaths) {
+  const failures = [];
+  const registrySet = new Set(registryPaths);
+  const domainSet = new Set(domainNames);
+
+  for (const name of domainNames) {
+    const expected = `app/Domains/${name}`;
+    if (!registrySet.has(expected)) {
+      failures.push(`app/Domains/${name}: not listed in Domain Registry`);
+    }
+  }
+
+  for (const regPath of registryPaths) {
+    const match = regPath.match(/^app\/Domains\/(.+)$/);
+    if (!match) {
+      continue;
+    }
+    if (!domainSet.has(match[1])) {
+      failures.push(`${regPath}: listed in Domain Registry but no directory on disk`);
+    }
+  }
+
+  return failures;
+}
 
 function walk(dir, out = []) {
   let entries;
@@ -120,6 +209,22 @@ function checkRelativeLinks(files) {
   return failures;
 }
 
+function checkAllDomainTrios(rootDir) {
+  const failures = [];
+  for (const name of listDomainNames(rootDir)) {
+    failures.push(...checkDomainTrio(rootDir, name));
+  }
+  return failures;
+}
+
+function checkDomainRegistrySync(rootDir) {
+  const agentsPath = path.join(rootDir, 'AGENTS.md');
+  const content = fs.readFileSync(agentsPath, 'utf8');
+  const registryPaths = parseRegistryDomainPaths(content);
+  const domainNames = listDomainNames(rootDir);
+  return checkRegistrySync(domainNames, registryPaths);
+}
+
 function main() {
   const files = SEARCH_ROOTS.flatMap((r) => walk(path.join(root, r)));
 
@@ -127,6 +232,14 @@ function main() {
     { label: 'domain docs do not reference Feature_Planning', failures: checkDomainPlanningReferences(files) },
     { label: 'ADRs do not reference Feature_Planning', failures: checkAdrPlanningReferences(files) },
     { label: 'relative markdown links resolve', failures: checkRelativeLinks(files) },
+    {
+      label: 'every domain has README.md, AGENTS.md, and CLAUDE.md with @AGENTS.md',
+      failures: checkAllDomainTrios(root),
+    },
+    {
+      label: 'Domain Registry matches app/Domains on disk',
+      failures: checkDomainRegistrySync(root),
+    },
   ];
 
   let failed = false;

@@ -1,6 +1,6 @@
 ---
 name: document-domain
-description: This skill should be used when the user asks to "document domain X", "update domain docs for X", "write the CLAUDE.md for X", "write the README for X domain", or "document the X module". Produces or updates three files for a given domain under app/Domains/ — README.md, AGENTS.md, and the one-line CLAUDE.md shim.
+description: This skill should be used when the user asks to "document domain X", "update domain docs for X", "write the CLAUDE.md for X", "write the README for X domain", or "document the X module". Produces or updates three files for a given domain under app/Domains/ — README.md, AGENTS.md, and CLAUDE.md (must include `@AGENTS.md`; may carry Claude-Code-only addenda).
 version: 0.1.0
 ---
 
@@ -9,7 +9,9 @@ version: 0.1.0
 Produce or update three documentation files for a domain:
 - **README.md** — human-readable domain overview for developers
 - **AGENTS.md** — agent instructions: only what cannot be derived from reading the code
-- **CLAUDE.md** — a one-line shim (`@AGENTS.md`) so Claude Code auto-loads `AGENTS.md`
+- **CLAUDE.md** — Claude Code entrypoint: must include a line `@AGENTS.md` so
+  `AGENTS.md` is loaded; may also hold Claude-Code-only instructions (mirrors
+  root `CLAUDE.md`)
 
 Consult `references/content-guide.md` for the detailed breakdown of what belongs in each file and what to leave out.
 
@@ -62,25 +64,23 @@ Write for an **AI agent** doing implementation work in this domain. See `referen
 
 If an AGENTS.md already exists, merge and update rather than overwrite.
 
-## Step 5 — Write the CLAUDE.md shim
+## Step 5 — Write or update CLAUDE.md
 
 Target: `app/Domains/<Domain>/CLAUDE.md`
 
-Write exactly one line:
+Claude Code auto-loads `CLAUDE.md` only. The file **must** contain a line that
+is exactly `@AGENTS.md` (leading/trailing whitespace on that line is fine) so
+the domain's `AGENTS.md` is included. Beyond that line, Claude-Code-only
+instructions are allowed — same idea as root `CLAUDE.md`.
 
-```
-@AGENTS.md
-```
+Default when creating the file for the first time: a single line `@AGENTS.md`
+plus a trailing newline. Do **not** wipe an existing file that already includes
+`@AGENTS.md` and has addenda — leave those addenda alone. If `@AGENTS.md` is
+missing, add that include line (prefer near the top) without deleting other
+content.
 
-Nothing else — no heading, no domain name, no comment, and never any prose of
-its own. This mirrors the root `CLAUDE.md` pattern, minus root's
-Claude-Code-specific addendum: that addendum is a rule about Claude Code
-tooling, not about any domain, so it stays root-only.
-
-The step is idempotent: if the file already contains exactly that line, leave it
-alone. The shim exists because Claude Code auto-loads `CLAUDE.md` only — the
-`@AGENTS.md` include hands it the domain's `AGENTS.md` without duplicating a
-single word of it.
+Do **not** put general agent instructions here — those belong in `AGENTS.md`.
+`CLAUDE.md` addenda are for Claude-Code tooling quirks only.
 
 ## Step 6 — Verify
 
@@ -89,7 +89,7 @@ After writing the files:
 1. Check that AGENTS.md contains **no information derivable from a single file** (model fields, route lists, service signatures). If found, remove it.
 2. Check that README.md contains **no agent instructions** — only human-readable explanation.
 3. Confirm the domain's entry in the root `AGENTS.md` Domain Registry is accurate (path, responsibilities summary, tables). Update it if not.
-4. Check that the domain's `CLAUDE.md` is exactly the single line `@AGENTS.md`.
+4. Check that the domain's `CLAUDE.md` contains a line `@AGENTS.md` (extra Claude-Code-only content is fine).
 
 ## Additional Resources
 
