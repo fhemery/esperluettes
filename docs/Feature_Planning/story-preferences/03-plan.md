@@ -423,24 +423,35 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Settings › Histoires (desktop) | The tab exists, sits after « Général », shows two toggles with readable French names and descriptions | |
-| Settings › Histoires (mobile) | Tab reachable and toggles usable at 375 px | |
-| Settings › Histoires | Toggling either preference saves without a page reload and survives a refresh | |
-| Library `/stories` — hide-lists ON | Only « sans avertissement » stories listed; the « Histoires sans avertissement » checkbox is **unchecked**; filter panel intact | |
-| Library `/stories` — hide-lists ON, no `no_tw` story matches | Empty state renders normally (no broken grid) | |
-| Library `/stories` — hide-display ON | No warning icon anywhere in the card meta row; the chapters/words row keeps its alignment | |
-| Library `/stories` — both OFF | Pixel-identical to production today | |
-| Dashboard « à découvrir » — hide-lists ON | Carousel shows only `no_tw` stories, still 7 slots or fewer without layout break | |
-| Story page (`listed`) — hide-display ON | No « Avertissements » heading, no badges; the right column (statut, retours, copyright) stays aligned | |
-| Story page (`no_tw`) and (`unspoiled`) — hide-display ON | Same: no marker, no heading | |
-| Story page — hide-lists ON, direct URL to a `listed` story | Page opens normally (functional §4.5) | |
-| Read list (own pile) — both preferences ON | Trigger-warned stories still listed; no TW icons on the cards | |
-| Read list — another user's pile | Same as above | |
-| Profile › Histoires tab and « Continuer ma lecture » — hide-lists ON | Trigger-warned stories still listed (not discovery surfaces) | |
-| Search dropdown (`/search/partial`) — hide-lists ON | Trigger-warned stories absent from story results; counts consistent | |
-| Author story edit form — hide-display ON | The trigger-warning picker is still fully visible and usable | |
-| Guest browsing library + a story page | Warnings visible, lists unfiltered — defaults, whatever any account has set | |
-| Mobile (375 px) library + story page — hide-display ON | No leftover gap or stray separator where the TW icon used to be | |
+| Settings › Histoires (desktop) | The tab exists, sits after « Général », shows two toggles with readable French names and descriptions | ✅ |
+| Settings › Histoires (mobile) | Tab reachable and toggles usable at 375 px | ✅ |
+| Settings › Histoires | Toggling either preference saves without a page reload and survives a refresh | ✅ |
+| Library `/stories` — hide-lists ON | Only « sans avertissement » stories listed; the « Histoires sans avertissement » checkbox is **unchecked**; filter panel intact | ✅ |
+| Library `/stories` — hide-lists ON, no `no_tw` story matches | Empty state renders normally (no broken grid) | ✅ |
+| Library `/stories` — hide-display ON | No warning icon anywhere in the card meta row; the chapters/words row keeps its alignment | ✅ |
+| Library `/stories` — both OFF | Pixel-identical to production today | ✅ |
+| Dashboard « à découvrir » — hide-lists ON | Carousel shows only `no_tw` stories, still 7 slots or fewer without layout break | ✅ |
+| Story page (`listed`) — hide-display ON | No « Avertissements » heading, no badges; the right column (statut, retours, copyright) stays aligned | ✅ |
+| Story page (`no_tw`) and (`unspoiled`) — hide-display ON | Same: no marker, no heading | ✅ |
+| Story page — hide-lists ON, direct URL to a `listed` story | Page opens normally (functional §4.5) | ✅ |
+| Read list (own pile) — both preferences ON | Trigger-warned stories still listed; no TW icons on the cards | ✅ |
+| Read list — another user's pile | Same as above | n/a — no such surface exists (`/readlist` is own-pile only) |
+| Profile › Histoires tab and « Continuer ma lecture » — hide-lists ON | Trigger-warned stories still listed (not discovery surfaces) | ✅ |
+| Search dropdown (`/search/partial`) — hide-lists ON | Trigger-warned stories absent from story results; counts consistent | ✅ |
+| Author story edit form — hide-display ON | The trigger-warning picker is still fully visible and usable | ✅ |
+| Guest browsing library + a story page | Warnings visible, lists unfiltered — defaults, whatever any account has set | ✅ |
+| Mobile (375 px) library + story page — hide-display ON | No leftover gap or stray separator where the TW icon used to be | ✅ |
+
+**VERIFY findings beyond the checklist** (not defects, flagged for WRAP/the user):
+- Assumption #6/#7's leak is more visible than the note implies: with hide-display ON, opening
+  the library's « Exclure selon le contenu » filter panel renders the full TW catalog as
+  readable on-screen labels (e.g. « Physical Violence »), not just in page source as DECISIONS
+  #7 says. Still the accepted design (assumption #6), but worth the user knowing before closing.
+- An empty-state library grid (hide-lists ON, nothing matches) reuses the generic
+  « Aucune histoire publique pour le moment. » copy — no on-screen hint that a *preference*
+  caused it. UX question, not a bug.
+- Confirmed as intended: an author no longer sees their own story's TW block on its public show
+  page when hide-display is on (only the edit form still shows the picker) — matches assumption #5.
 
 ## Open items
 
