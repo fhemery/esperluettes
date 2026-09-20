@@ -22,7 +22,7 @@ return [
         ],
         'filters' => [
             'name_filter'     => 'Nom',
-            'user_id'         => 'ID utilisateur',
+            'user'            => 'Utilisateur',
             'occurred_after'  => 'Après le',
             'occurred_before' => 'Avant le',
             'apply'           => 'Filtrer',

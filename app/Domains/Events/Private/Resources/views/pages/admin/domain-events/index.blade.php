@@ -21,7 +21,7 @@
 
             <div class="min-w-48">
                 <label class="block text-sm font-medium text-fg/70 mb-1">
-                    {{ __('events::admin.domain_events.filters.user_id') }}
+                    {{ __('events::admin.domain_events.filters.user') }}
                 </label>
                 <x-profile::user-search-input
                     name="user_id"
