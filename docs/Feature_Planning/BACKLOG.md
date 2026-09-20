@@ -34,6 +34,8 @@ scoped to the task that actually changed.
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
 - **Role-gated notification preferences (moderator/admin)** · `role-gated-notification-settings/` · interactive · TODO
+- **Default Discord notifications setting** · `default-discord-notifications/` · interactive · TODO
+- **Fix chapter table of contents alignment** · `chapter-toc-alignment-fix/` · auto · WIP:REFINE
 
 ## Done
 
