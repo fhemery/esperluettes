@@ -68,6 +68,19 @@ class E2eStorySeeder extends Seeder
     public const ILLUSTRATED_CHAPTER_SLUG = 'chapitre-illustre-7';
 
     /**
+     * A title far too long for the table-of-contents column, so a spec can see
+     * whether it is still truncated to one line instead of wrapping.
+     */
+    public const LONG_TITLE_CHAPTER_ID = 11;
+    public const LONG_TITLE_CHAPTER_SLUG = 'chapitre-au-titre-interminable-11';
+    public const LONG_TITLE_CHAPTER_TITLE = 'Chapitre au titre interminable qui déborde très largement de sa colonne, même sur un écran large, et qui doit donc rester sur une seule ligne coupée par des points de suspension sans jamais faire grandir sa rangée';
+
+    /** A public story with no chapter at all: the table-of-contents empty state. */
+    public const EMPTY_STORY_ID = 6;
+    public const EMPTY_STORY_SLUG = 'histoire-sans-chapitre-6';
+    public const EMPTY_STORY_TITLE = 'Histoire sans chapitre E2E';
+
+    /**
      * Three stories that exist only to feed the quote-contest picker, which
      * lists *every* quote the reader owns and greys the ineligible ones with
      * their reason. The reasons are properties of the story, so they can only
@@ -193,10 +206,52 @@ class E2eStorySeeder extends Seeder
             'first_published_at' => now(),
         ], $story->id);
 
+        $this->createChapter(self::LONG_TITLE_CHAPTER_ID, self::LONG_TITLE_CHAPTER_TITLE, self::LONG_TITLE_CHAPTER_SLUG, [
+            'content' => '<p>Un chapitre dont seul le titre compte.</p>',
+            'sort_order' => 6,
+            'status' => Chapter::STATUS_PUBLISHED,
+            'first_published_at' => now(),
+        ], $story->id);
+
         $story->update(['last_chapter_published_at' => now()]);
 
         $this->createCoauthoredStory($authorId);
         $this->createContestStories($authorId);
+        $this->createEmptyStory($authorId);
+    }
+
+    /** A public story with no chapter, for the table-of-contents empty state. */
+    private function createEmptyStory(int $authorId): void
+    {
+        $story = new Story([
+            'created_by_user_id' => $authorId,
+            'title' => self::EMPTY_STORY_TITLE,
+            'slug' => self::EMPTY_STORY_SLUG,
+            'description' => '<p>Une histoire qui n\'a encore aucun chapitre.</p>',
+            'visibility' => Story::VIS_PUBLIC,
+            'tw_disclosure' => Story::TW_NO_TW,
+            'story_ref_type_id' => StoryRefType::value('id'),
+            'story_ref_audience_id' => StoryRefAudience::value('id'),
+            'story_ref_copyright_id' => StoryRefCopyright::value('id'),
+        ]);
+        $story->id = self::EMPTY_STORY_ID;
+        $story->save();
+
+        DB::table('story_genres')->insert([
+            'story_id' => $story->id,
+            'story_ref_genre_id' => StoryRefGenre::value('id'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('story_collaborators')->insert([
+            'story_id' => $story->id,
+            'user_id' => $authorId,
+            'role' => 'author',
+            'invited_by_user_id' => $authorId,
+            'invited_at' => now(),
+            'accepted_at' => now(),
+        ]);
     }
 
     /**

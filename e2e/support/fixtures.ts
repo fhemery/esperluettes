@@ -59,6 +59,19 @@ export const STORY = {
   countedChapter: { slug: 'chapitre-compte-5', title: 'Chapitre compté' },
   /** Advanced: inline formatting, then a raw lazily-loaded image, then prose. */
   illustratedChapter: { slug: 'chapitre-illustre-7', title: 'Chapitre illustré' },
+  /** Title far wider than its table-of-contents column: the truncation case. */
+  longTitleChapter: {
+    slug: 'chapitre-au-titre-interminable-11',
+    title:
+      'Chapitre au titre interminable qui déborde très largement de sa colonne, même sur un écran large, ' +
+      'et qui doit donc rester sur une seule ligne coupée par des points de suspension sans jamais faire grandir sa rangée',
+  },
+} as const;
+
+/** Story 6: public, no chapter at all — the table-of-contents empty state. */
+export const EMPTY_STORY = {
+  slug: 'histoire-sans-chapitre-6',
+  title: 'Histoire sans chapitre E2E',
 } as const;
 
 /**
