@@ -10,6 +10,8 @@ a new row that supersedes it and note the number.
 |---|------|------|----------|----------|------------|
 | 1 | 2026-09-20 | REFINE | Scope of the fix | Fix both author-list.blade.php and reader-list.blade.php | — |
 | 2 | 2026-09-20 | REFINE | Alignment method | Add `h-full` and `items-center` classes to chapter info containers | — |
+| 3 | 2026-09-20 | DESIGN | Implementation approach | Add Tailwind classes to existing templates, no refactoring | — |
+| 4 | 2026-09-20 | DESIGN | Deptrac edges | No new edges, changes internal to Story domain | — |
 
 ## Assumptions made without asking
 
