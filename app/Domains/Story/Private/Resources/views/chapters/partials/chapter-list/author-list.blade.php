@@ -1,7 +1,7 @@
 @php($chapters = $chapters ?? ($viewModel->chapters ?? []))
 <div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto_auto_auto] gap-1">
     @foreach($chapters as $ch)
-    <div class="flex flex-col gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface">
+    <div class="flex flex-col justify-center gap-2 flex-1 min-w-0 surface-read p-2 text-on-surface">
         <div class="flex items-center gap-2">
             <a href="{{ route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}" 
                 class="flex-1 truncate text-fg hover:text-fg/80 font-semibold">{{ $ch->title }}</a>
