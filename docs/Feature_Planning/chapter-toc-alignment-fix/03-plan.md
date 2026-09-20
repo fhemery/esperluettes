@@ -21,7 +21,7 @@ centering classes to chapter info containers to match button alignment",
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Author chapter list — vertically centre the chapter info cell | S | — | TODO |
+| 1 | Author chapter list — vertically centre the chapter info cell | S | — | DONE |
 | 2 | Reader chapter list — vertically centre the chapter info cell | S | — | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
