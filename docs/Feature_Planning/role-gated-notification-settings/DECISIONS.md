@@ -41,3 +41,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | A11 | Non-staff write of a role-gated type returns 404, matching `hideInSettings`. | DESIGN | Yes |
 | A12 | Send is wrapped so a notification exception cannot roll back the report or promotion request. | DESIGN | Yes |
 | A13 | `sourceUserId` is not auto-excluded; callers pass `$excludeUserId` separately. | DESIGN | Yes |
+| A14 | Inbox copy: « :user_name a déposé un nouveau signalement. Voir les signalements » (link). Display name is HTML-escaped in `display()` since the translation renders as HTML. | BUILD | Yes |

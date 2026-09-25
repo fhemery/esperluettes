@@ -21,6 +21,12 @@ All three are `AuditableEvent` and are persisted to the `domain_events` table vi
 
 ---
 
+## Notifications sent
+
+- `moderation.report.submitted` (`ReportSubmittedNotification`) — sent by `ModerationService::createReport` to every active moderator / admin / tech-admin except the reporter, via `createNotificationForTypeAudience`. Payload is the reporter display name only; never add the reason, topic or description. The send is wrapped in `try/catch` + `report()` so a notification failure cannot undo the report.
+
+---
+
 ## Non-obvious invariants
 
 - **Topic keys are permanent.** `topic_key` is stored as a plain string in both `moderation_reasons` and `moderation_reports`. Renaming a key after data exists will orphan all existing records — never rename a registered topic key.

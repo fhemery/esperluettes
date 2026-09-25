@@ -12,7 +12,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Role-gated notification infrastructure | M | — | DONE |
-| 2 | Moderation — report submitted staff notification | S | 1 | TODO |
+| 2 | Moderation — report submitted staff notification | S | 1 | DONE |
 | 3 | Auth — promotion requested staff notification | S | 1 | TODO |
 | 4 | Staff demotion and re-promotion lifecycle | S | 1, 3 | TODO |
 

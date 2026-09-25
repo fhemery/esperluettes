@@ -9,6 +9,9 @@ use App\Domains\Moderation\Public\Events\ReportSubmitted;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Moderation\Public\Events\ReportApproved;
 use App\Domains\Moderation\Public\Events\ReportRejected;
+use App\Domains\Moderation\Public\Notifications\ReportSubmittedNotification;
+use App\Domains\Notification\Public\Api\NotificationPublicApi;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +19,9 @@ class ModerationService
 {
     private const PENDING_COUNT_CACHE_KEY = 'moderation.pending_reports_count';
     public function __construct(
-        private ModerationRegistry $registry
+        private ModerationRegistry $registry,
+        private ProfilePublicApi $profileApi,
+        private NotificationPublicApi $notificationApi,
     ) {
     }
 
@@ -136,7 +141,28 @@ class ModerationService
             reasonLabel: $reason->label ?? null,
         ));
 
+        $this->notifyStaffOfNewReport((int) Auth::id());
+
         return $created;
+    }
+
+    /**
+     * Notify active staff (except the reporter) of a new report.
+     * A notification failure must never undo the report.
+     */
+    private function notifyStaffOfNewReport(int $reporterId): void
+    {
+        try {
+            $reporterName = $this->profileApi->getPublicProfile($reporterId)?->display_name ?? '';
+
+            $this->notificationApi->createNotificationForTypeAudience(
+                new ReportSubmittedNotification(userName: $reporterName),
+                sourceUserId: $reporterId,
+                excludeUserId: $reporterId,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**

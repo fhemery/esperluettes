@@ -32,7 +32,7 @@ scoped to the task that actually changed.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
-- **Role-gated notification preferences (moderator/admin)** · `role-gated-notification-settings/` · interactive · WIP:BUILD (2/4)
+- **Role-gated notification preferences (moderator/admin)** · `role-gated-notification-settings/` · interactive · WIP:BUILD (3/4)
 
 ## Done
 
