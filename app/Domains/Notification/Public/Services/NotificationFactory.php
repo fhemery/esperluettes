@@ -35,12 +35,21 @@ class NotificationFactory
         string $nameKey,
         bool $forcedOnWebsite = false,
         bool $hideInSettings = false,
+        ?array $visibleToRoles = null,
     ): void {
         if (!isset($this->groups[$groupId])) {
             throw new \InvalidArgumentException("Group '{$groupId}' is not registered. Call registerGroup() first.");
         }
         $this->map[$type] = $class;
-        $this->types[$type] = new NotificationTypeDefinition($type, $class, $groupId, $nameKey, $forcedOnWebsite, $hideInSettings);
+        $this->types[$type] = new NotificationTypeDefinition(
+            $type,
+            $class,
+            $groupId,
+            $nameKey,
+            $forcedOnWebsite,
+            $hideInSettings,
+            $visibleToRoles,
+        );
     }
 
     /**

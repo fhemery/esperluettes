@@ -66,18 +66,19 @@ class ExportNotificationTypesDocumentationCommand extends Command
         foreach ($factory->getGroups() as $group) {
             $lines[] = '## Group: '.$this->markdownPlain(__($group->translationKey)).' (`'.$group->id.'`)';
             $lines[] = '';
-            $lines[] = '| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |';
-            $lines[] = '| --- | --- | --- | --- | --- | --- |';
+            $lines[] = '| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |';
+            $lines[] = '| --- | --- | --- | --- | --- | --- | --- |';
 
             foreach ($factory->getTypesForGroup($group->id, true) as $def) {
                 $lines[] = sprintf(
-                    '| `%s` | `%s` | %s | %s | %s | %s |',
+                    '| `%s` | `%s` | %s | %s | %s | %s | %s |',
                     $def->type,
                     $def->class,
                     $this->markdownTableCell(__($def->nameKey)),
                     $this->payloadFields($def->class),
                     $def->forcedOnWebsite ? 'yes' : 'no',
                     $def->hideInSettings ? 'yes' : 'no',
+                    $this->visibleToRolesCell($def),
                 );
             }
             $lines[] = '';
@@ -144,5 +145,14 @@ class ExportNotificationTypesDocumentationCommand extends Command
         $escaped = str_replace(['|', "\n", "\r"], ['\\|', ' ', ' '], $value);
 
         return str_replace('`', "'", $escaped);
+    }
+
+    private function visibleToRolesCell(\App\Domains\Notification\Public\Contracts\NotificationTypeDefinition $def): string
+    {
+        if ($def->visibleToRoles === null || $def->visibleToRoles === []) {
+            return 'all authenticated users';
+        }
+
+        return implode(', ', $def->visibleToRoles);
     }
 }

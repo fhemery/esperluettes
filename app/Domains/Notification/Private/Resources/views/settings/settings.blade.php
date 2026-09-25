@@ -1,11 +1,16 @@
 @inject('factory',         \App\Domains\Notification\Public\Services\NotificationFactory::class)
 @inject('channelRegistry', \App\Domains\Notification\Public\Services\NotificationChannelRegistry::class)
 @inject('prefsService',    \App\Domains\Notification\Private\Services\NotificationPreferencesService::class)
+@inject('authApi',         \App\Domains\Auth\Public\Api\AuthPublicApi::class)
 
 @php
     $groups      = $factory->getGroups();
     $channels    = $channelRegistry->getActiveChannels();
     $preferences = $prefsService->getPreferencesForUser(auth()->id());
+    $roleSlugs   = array_map(
+        fn ($role) => $role->slug,
+        $authApi->getRolesByUserIds([auth()->id()])[auth()->id()] ?? [],
+    );
 @endphp
 
 <form method="POST" action="{{ route('notification.preferences.save') }}" class="p-6">
@@ -36,7 +41,12 @@
             </thead>
             <tbody>
                 @foreach($groups as $group)
-                    @php $typesInGroup = $factory->getTypesForGroup($group->id); @endphp
+                    @php
+                        $typesInGroup = array_values(array_filter(
+                            $factory->getTypesForGroup($group->id),
+                            fn ($typeDef) => $typeDef->isVisibleTo($roleSlugs),
+                        ));
+                    @endphp
                     @if(count($typesInGroup) > 0)
 
                     <tr class="border-b border-fg/10 bg-fg/3">
