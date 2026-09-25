@@ -74,7 +74,10 @@ use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\ConfigParameterVisibility;
 use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
+use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
+use App\Domains\Settings\Public\Contracts\SettingsTabDefinition;
 use App\Domains\Shared\Contracts\ParameterType;
+use App\Domains\Story\Private\Services\StoryPreferenceService;
 use App\Domains\Story\Private\Support\FeatureToggles;
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
@@ -86,6 +89,19 @@ class StoryServiceProvider extends ServiceProvider
     public const TAB_PROFILE = 'profile';
     public const SECTION_PRIVACY = 'privacy';
     public const KEY_HIDE_COMMENTS_SECTION = 'hide-comments-section';
+
+    /** Story's own settings tab, holding the reader's story preferences. */
+    public const TAB_STORIES = 'stories';
+    public const SECTION_READING = 'reading';
+    public const KEY_HIDE_TRIGGER_WARNINGS = 'hide-trigger-warnings';
+    public const KEY_HIDE_STORIES_WITH_TW = 'hide-stories-with-tw';
+
+    public function register(): void
+    {
+        // Singleton: the service memoizes per request, which only works if
+        // every `app(...)` call — including the ones in Blade — shares it.
+        $this->app->singleton(StoryPreferenceService::class);
+    }
 
     public function boot(): void
     {
@@ -123,6 +139,7 @@ class StoryServiceProvider extends ServiceProvider
         // After all providers boot, so Profile's settings tab/section exist.
         $this->app->booted(function () {
             $this->registerSettings();
+            $this->registerStoryPreferenceSettings();
         });
 
         // Register policies
@@ -337,6 +354,59 @@ class StoryServiceProvider extends ServiceProvider
             order: 10,
             nameKey: 'story::profile.settings.hide-comments-section.name',
             descriptionKey: 'story::profile.settings.hide-comments-section.description',
+        ));
+    }
+
+    /**
+     * Story's own settings tab: the two reader preferences about trigger
+     * warnings. Kept apart from registerSettings() because that method returns
+     * early once its own parameter exists — anything appended to it would be
+     * skipped on a second boot.
+     */
+    private function registerStoryPreferenceSettings(): void
+    {
+        $settingsApi = app(SettingsPublicApi::class);
+
+        // Skip if already registered (idempotent for testing)
+        if ($settingsApi->getTab(self::TAB_STORIES) !== null) {
+            return;
+        }
+
+        $settingsApi->registerTab(new SettingsTabDefinition(
+            id: self::TAB_STORIES,
+            order: 15,
+            nameKey: 'story::settings.tabs.stories',
+            icon: 'menu_book',
+        ));
+
+        $settingsApi->registerSection(new SettingsSectionDefinition(
+            tabId: self::TAB_STORIES,
+            id: self::SECTION_READING,
+            order: 10,
+            nameKey: 'story::settings.sections.reading.name',
+            descriptionKey: 'story::settings.sections.reading.description',
+        ));
+
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_STORIES,
+            sectionId: self::SECTION_READING,
+            key: self::KEY_HIDE_TRIGGER_WARNINGS,
+            type: ParameterType::BOOL,
+            default: false,
+            order: 10,
+            nameKey: 'story::settings.params.hide-trigger-warnings.name',
+            descriptionKey: 'story::settings.params.hide-trigger-warnings.description',
+        ));
+
+        $settingsApi->registerParameter(new SettingsParameterDefinition(
+            tabId: self::TAB_STORIES,
+            sectionId: self::SECTION_READING,
+            key: self::KEY_HIDE_STORIES_WITH_TW,
+            type: ParameterType::BOOL,
+            default: false,
+            order: 20,
+            nameKey: 'story::settings.params.hide-stories-with-tw.name',
+            descriptionKey: 'story::settings.params.hide-stories-with-tw.description',
         ));
     }
 }

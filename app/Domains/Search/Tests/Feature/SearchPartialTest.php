@@ -2,6 +2,9 @@
 
 namespace App\Domains\Search\Tests\Feature;
 
+use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\StoryPreferenceService;
+use App\Domains\Story\Public\Providers\StoryServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -104,6 +107,29 @@ describe('Search results partial', function () {
 
             $resp->assertOk();
             $resp->assertSee('<mark>Special</mark>', false);
+        });
+
+        it('hides trigger-warned stories from the search dropdown when the reader preference is on', function () {
+            $author = alice($this);
+            $reader = bob($this);
+
+            publicStory('Warned Story', $author->id, ['tw_disclosure' => Story::TW_LISTED]);
+            publicStory('Calm Story', $author->id, ['tw_disclosure' => Story::TW_NO_TW]);
+
+            setSettingsValue(
+                $reader->id,
+                StoryServiceProvider::TAB_STORIES,
+                StoryServiceProvider::KEY_HIDE_STORIES_WITH_TW,
+                true,
+            );
+            app()->forgetInstance(StoryPreferenceService::class);
+
+            $this->actingAs($reader);
+            $response = $this->get('/search/partial?q=Story');
+
+            $response->assertOk()
+                ->assertSeeText('Calm Story')
+                ->assertDontSeeText('Warned Story');
         });
     });
 

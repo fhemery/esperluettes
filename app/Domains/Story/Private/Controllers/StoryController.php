@@ -11,6 +11,7 @@ use App\Domains\Shared\Support\Seo;
 use App\Domains\Shared\ViewModels\PageViewModel;
 use App\Domains\Story\Private\Http\Requests\StoryRequest;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\StoryPreferenceService;
 use App\Domains\Story\Private\Services\StoryService;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use App\Domains\Story\Private\Support\GetStoryOptions;
@@ -40,6 +41,7 @@ class StoryController
         private readonly CommentPublicApi          $comments,
         private readonly StoryViewModelBuilder     $vmBuilder,
         private readonly CoverService               $coverService,
+        private readonly StoryPreferenceService     $preferences,
     )
     {
     }
@@ -86,8 +88,11 @@ class StoryController
         if ($this->authApi->hasAnyRole([Roles::USER_CONFIRMED])) {
             $vis[] = Story::VIS_COMMUNITY;
         }
-        // Parse "No TW only" checkbox
+        // Parse "No TW only" checkbox. It stays a one-shot request filter: the
+        // reader preference below ORs into the query without ticking it back
+        // into the form or into the pagination query string.
         $noTwOnly = request()->boolean('no_tw_only', false);
+        $effectiveNoTwOnly = $noTwOnly || $this->preferences->hidesStoriesWithTriggerWarnings();
         // Parse "Complete only" checkbox
         $completeOnly = request()->boolean('complete_only', false);
 
@@ -98,7 +103,7 @@ class StoryController
             audienceIds: $audienceIds, 
             genreIds: $genreIds, 
             excludeTriggerWarningIds: $excludeTwIds, 
-            noTwOnly: $noTwOnly,
+            noTwOnly: $effectiveNoTwOnly,
             completeOnly: $completeOnly
         );
         $fieldsToReturn = GetStoryOptions::ForCardDisplay();

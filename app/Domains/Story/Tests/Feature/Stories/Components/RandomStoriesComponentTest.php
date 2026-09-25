@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\StoryPreferenceService;
+use App\Domains\Story\Public\Providers\StoryServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
@@ -67,6 +70,51 @@ describe('RandomStoriesComponent', function () {
         expect($html)
             ->toContain(__('story::discover.title'))
             ->toContain(__('story::discover.placeholder_cta'));
+    });
+
+    it('excludes trigger-warned stories from the discover carousel when the preference is on', function () {
+        $author = alice($this);
+        $noTw = publicStory('Discover No TW', $author->id, ['tw_disclosure' => Story::TW_NO_TW]);
+        createPublishedChapter($this, $noTw, $author, ['title' => 'C1']);
+        $listed = publicStory('Discover Listed TW', $author->id, ['tw_disclosure' => Story::TW_LISTED]);
+        createPublishedChapter($this, $listed, $author, ['title' => 'C1']);
+        $unspoiled = publicStory('Discover Unspoiled TW', $author->id, ['tw_disclosure' => Story::TW_UNSPOILED]);
+        createPublishedChapter($this, $unspoiled, $author, ['title' => 'C1']);
+
+        $viewer = bob($this, roles: [Roles::USER]);
+        setSettingsValue(
+            $viewer->id,
+            StoryServiceProvider::TAB_STORIES,
+            StoryServiceProvider::KEY_HIDE_STORIES_WITH_TW,
+            true,
+        );
+        app()->forgetInstance(StoryPreferenceService::class);
+        $this->actingAs($viewer);
+
+        $html = Blade::render('<x-story::random-stories-component />');
+        expect($html)
+            ->toContain('Discover No TW')
+            ->not->toContain('Discover Listed TW')
+            ->not->toContain('Discover Unspoiled TW');
+    });
+
+    it('keeps them when the preference is off', function () {
+        $author = alice($this);
+        $noTw = publicStory('Discover No TW', $author->id, ['tw_disclosure' => Story::TW_NO_TW]);
+        createPublishedChapter($this, $noTw, $author, ['title' => 'C1']);
+        $listed = publicStory('Discover Listed TW', $author->id, ['tw_disclosure' => Story::TW_LISTED]);
+        createPublishedChapter($this, $listed, $author, ['title' => 'C1']);
+        $unspoiled = publicStory('Discover Unspoiled TW', $author->id, ['tw_disclosure' => Story::TW_UNSPOILED]);
+        createPublishedChapter($this, $unspoiled, $author, ['title' => 'C1']);
+
+        $viewer = bob($this, roles: [Roles::USER]);
+        $this->actingAs($viewer);
+
+        $html = Blade::render('<x-story::random-stories-component />');
+        expect($html)
+            ->toContain('Discover No TW')
+            ->toContain('Discover Listed TW')
+            ->toContain('Discover Unspoiled TW');
     });
 
     it('only includes stories with at least one published chapter', function () {
