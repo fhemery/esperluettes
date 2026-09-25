@@ -14,7 +14,7 @@
 | 1 | Role-gated notification infrastructure | M | — | DONE |
 | 2 | Moderation — report submitted staff notification | S | 1 | DONE |
 | 3 | Auth — promotion requested staff notification | S | 1 | DONE |
-| 4 | Staff demotion and re-promotion lifecycle | S | 1, 3 | TODO |
+| 4 | Staff demotion and re-promotion lifecycle | S | 1, 3 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days.
 

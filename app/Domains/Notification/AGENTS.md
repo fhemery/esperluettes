@@ -37,7 +37,7 @@
 
 **`hideInSettings` does not affect delivery.** Types with `hideInSettings: true` are still dispatched normally; the flag only excludes them from the preferences UI (and from `getTypesForGroup()` when called without `includeHidden: true`). Used for legacy type keys that have been superseded.
 
-**`visibleToRoles` is a server-side gate, not only a UI filter.** `NotificationPreferencesService` resolves the user's roles through `AuthPublicApi` and skips/refuses invisible types in listing, `set`, `setAll` and `setGroup`; the controller maps a refused `set` to 404. Removing any of these checks makes the gate cosmetic.
+**`visibleToRoles` is a server-side gate, not only a UI filter.** `NotificationPreferencesService` resolves the user's roles through `AuthPublicApi` and skips/refuses invisible types in listing, `set`, `setAll` and `setGroup`; the controller maps a refused `set` to 404. Removing any of these checks makes the gate cosmetic. Losing the role never deletes stored preferences: rows vanish from the tab and `createNotificationForTypeAudience` stops targeting the user (audience comes from current roles), and re-granting the role restores the earlier choices.
 
 **Preferences are sparse.** The `notification_preferences` table only stores rows that differ from the channel's `defaultEnabled`. When a user sets a preference equal to the default, the row is deleted. Filtering at dispatch time accounts for this (see `NotificationPreferencesRepository::filterForChannel`).
 
