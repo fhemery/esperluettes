@@ -28,7 +28,6 @@ scoped to the task that actually changed.
 - **Gift sound on Media, retire `<x-shared::sound-upload>`** · `media-sound-upload/` · interactive · TODO: leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out
 - **Validation messages — file rules print raw keys** · `validation-messages/` · auto · TODO: from `chapters-multi-edit/` decision #11 (defect D4). No `lang/*/validation.php` is published, so `image` prints `validation.image` and `max` prints nothing. Hits `ChapterRequest` and `NewsRequest` alike; fix it once, app-wide.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
-- **Story preferences** · `story-preferences/` · interactive · WIP:WRAP
 - **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · TODO
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
@@ -42,6 +41,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`story-preferences`](_done/story-preferences.md) · Settings tab « Histoires » with two reader booleans: hide trigger-warning display on story/read-list cards and the story page, and hide trigger-warned stories from library, discover and search
 - [`domain-docs-gate-check`](_done/domain-docs-gate-check.md) · gate docs step enforces domain doc trio + Domain Registry sync; Follow documented and registered
 - [`gate-parallel-execution`](_done/gate-parallel-execution.md) · `pnpm run gate` runs its steps (docs/deptrac/php/js/build) concurrently instead of sequentially, `build` sequenced after `php` to avoid a manifest race; multi-domain `ParallelTestCommand` concurrency was built then reverted
 - [`migrate-npm-to-pnpm`](_done/migrate-npm-to-pnpm.md) · pnpm 11 is the sole Node manager; lockfile, CI, hooks, gate, and active docs switched from npm
