@@ -2,86 +2,86 @@
 
 > **Auto-generated** by `php artisan notifications:export-types-doc`. Do not edit by hand.
 
-Generated at: 2026-08-05T06:42:39+00:00 (`locale`: `fr`)
+Generated at: 2026-09-25T18:59:10+00:00 (`locale`: `fr`)
 
 ## Group: Commentaires (`comments`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `story.chapter.comment` | `App\Domains\Story\Public\Notifications\ChapterCommentNotification` | J'ai reçu un commentaire sur l'une de mes histoires ou un de mes commentaires a reçu une réponse | `comment_id`, `author_name`, `author_slug`, `chapter_title`, `story_slug`, `chapter_slug`, `is_reply`, `story_name` | no | yes |
-| `story.chapter.root_comment` | `App\Domains\Story\Public\Notifications\ChapterRootCommentNotification` | J'ai reçu un commentaire sur l'une de mes histoires | `comment_id`, `author_name`, `author_slug`, `chapter_title`, `story_slug`, `chapter_slug`, `story_name` | no | no |
-| `story.chapter.reply_comment` | `App\Domains\Story\Public\Notifications\ChapterReplyCommentNotification` | Un de mes commentaires a reçu une réponse | `comment_id`, `author_name`, `author_slug`, `chapter_title`, `story_slug`, `chapter_slug`, `story_name` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `story.chapter.comment` | `App\Domains\Story\Public\Notifications\ChapterCommentNotification` | J'ai reçu un commentaire sur l'une de mes histoires ou un de mes commentaires a reçu une réponse | `comment_id`, `author_name`, `author_slug`, `chapter_title`, `story_slug`, `chapter_slug`, `is_reply`, `story_name` | no | yes | all authenticated users |
+| `story.chapter.root_comment` | `App\Domains\Story\Public\Notifications\ChapterRootCommentNotification` | J'ai reçu un commentaire sur l'une de mes histoires | `comment_id`, `author_name`, `author_slug`, `chapter_title`, `story_slug`, `chapter_slug`, `story_name` | no | no | all authenticated users |
+| `story.chapter.reply_comment` | `App\Domains\Story\Public\Notifications\ChapterReplyCommentNotification` | Un de mes commentaires a reçu une réponse | `comment_id`, `author_name`, `author_slug`, `chapter_title`, `story_slug`, `chapter_slug`, `story_name` | no | no | all authenticated users |
 
 ## Group: Collaboration (`collaboration`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `story.coauthor.chapter.created` | `App\Domains\Story\Public\Notifications\CoAuthorChapterCreatedNotification` | Un·e de mes co-auteurices a créé un chapitre sur une de nos histoires | `user_name`, `user_slug`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no |
-| `story.coauthor.chapter.updated` | `App\Domains\Story\Public\Notifications\CoAuthorChapterUpdatedNotification` | Un·e de mes co-auteurices a modifié un chapitre sur une de nos histoires | `user_name`, `user_slug`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no |
-| `story.coauthor.chapter.deleted` | `App\Domains\Story\Public\Notifications\CoAuthorChapterDeletedNotification` | Un·e de mes co-auteurices a supprimé un chapitre sur une de nos histoires | `user_name`, `user_slug`, `story_title`, `story_slug`, `chapter_title` | no | no |
-| `story.collaborator.role_given` | `App\Domains\Story\Public\Notifications\CollaboratorRoleGivenNotification` | Un rôle de collaborateurice (auteurice, bêta-lecteurice...) m'a été accordé | `user_name`, `user_slug`, `story_title`, `story_slug`, `role` | no | no |
-| `story.collaborator.removed` | `App\Domains\Story\Public\Notifications\CollaboratorRemovedNotification` | Un rôle de collaborateurice (bêta-lecteurice...) m'a été retiré | `user_name`, `user_slug`, `story_title`, `story_slug` | no | no |
-| `story.collaborator.left` | `App\Domains\Story\Public\Notifications\CollaboratorLeftNotification` | Un·e collaborateurice a quitté une histoire | `user_name`, `user_slug`, `story_title`, `story_slug` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `story.coauthor.chapter.created` | `App\Domains\Story\Public\Notifications\CoAuthorChapterCreatedNotification` | Un·e de mes co-auteurices a créé un chapitre sur une de nos histoires | `user_name`, `user_slug`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no | all authenticated users |
+| `story.coauthor.chapter.updated` | `App\Domains\Story\Public\Notifications\CoAuthorChapterUpdatedNotification` | Un·e de mes co-auteurices a modifié un chapitre sur une de nos histoires | `user_name`, `user_slug`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no | all authenticated users |
+| `story.coauthor.chapter.deleted` | `App\Domains\Story\Public\Notifications\CoAuthorChapterDeletedNotification` | Un·e de mes co-auteurices a supprimé un chapitre sur une de nos histoires | `user_name`, `user_slug`, `story_title`, `story_slug`, `chapter_title` | no | no | all authenticated users |
+| `story.collaborator.role_given` | `App\Domains\Story\Public\Notifications\CollaboratorRoleGivenNotification` | Un rôle de collaborateurice (auteurice, bêta-lecteurice...) m'a été accordé | `user_name`, `user_slug`, `story_title`, `story_slug`, `role` | no | no | all authenticated users |
+| `story.collaborator.removed` | `App\Domains\Story\Public\Notifications\CollaboratorRemovedNotification` | Un rôle de collaborateurice (bêta-lecteurice...) m'a été retiré | `user_name`, `user_slug`, `story_title`, `story_slug` | no | no | all authenticated users |
+| `story.collaborator.left` | `App\Domains\Story\Public\Notifications\CollaboratorLeftNotification` | Un·e collaborateurice a quitté une histoire | `user_name`, `user_slug`, `story_title`, `story_slug` | no | no | all authenticated users |
 
 ## Group: Publication (`publication`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `story.chapter.scheduled_published` | `App\Domains\Story\Public\Notifications\ChapterScheduledPublishedNotification` | Un de mes chapitres a été publié automatiquement à la date planifiée | `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `story.chapter.scheduled_published` | `App\Domains\Story\Public\Notifications\ChapterScheduledPublishedNotification` | Un de mes chapitres a été publié automatiquement à la date planifiée | `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no | all authenticated users |
 
 ## Group: Pile à Lire (PAL) (`readlist`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `readlist.story.added` | `App\Domains\ReadList\Public\Notifications\ReadListAddedNotification` | Une de mes histoires a été ajoutée à une PAL | `reader_name`, `reader_slug`, `story_title`, `story_slug` | no | no |
-| `readlist.chapter.published` | `App\Domains\ReadList\Public\Notifications\ReadListChapterPublishedNotification` | Un nouveau chapitre d'une histoire de ma PAL a été publié | `author_name`, `author_slug`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no |
-| `readlist.chapter.unpublished` | `App\Domains\ReadList\Public\Notifications\ReadListChapterUnpublishedNotification` | Un chapitre d'une histoire de ma PAL a été dépublié | `author_name`, `author_slug`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no |
-| `readlist.story.deleted` | `App\Domains\ReadList\Public\Notifications\ReadListStoryDeletedNotification` | Une histoire de ma PAL a été supprimée | `author_name`, `author_slug`, `story_title` | no | no |
-| `readlist.story.unpublished` | `App\Domains\ReadList\Public\Notifications\ReadListStoryUnpublishedNotification` | Une histoire de ma PAL a été dépubliée | `author_name`, `author_slug`, `story_title` | no | no |
-| `readlist.story.republished` | `App\Domains\ReadList\Public\Notifications\ReadListStoryRepublishedNotification` | Une histoire de ma PAL a été republiée | `author_name`, `author_slug`, `story_title`, `story_slug` | no | no |
-| `readlist.story.completed` | `App\Domains\ReadList\Public\Notifications\ReadListStoryCompletedNotification` | Une histoire de ma PAL a été marquée comme terminée | `author_name`, `author_slug`, `story_title`, `story_slug` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `readlist.story.added` | `App\Domains\ReadList\Public\Notifications\ReadListAddedNotification` | Une de mes histoires a été ajoutée à une PAL | `reader_name`, `reader_slug`, `story_title`, `story_slug` | no | no | all authenticated users |
+| `readlist.chapter.published` | `App\Domains\ReadList\Public\Notifications\ReadListChapterPublishedNotification` | Un nouveau chapitre d'une histoire de ma PAL a été publié | `author_name`, `author_slug`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no | all authenticated users |
+| `readlist.chapter.unpublished` | `App\Domains\ReadList\Public\Notifications\ReadListChapterUnpublishedNotification` | Un chapitre d'une histoire de ma PAL a été dépublié | `author_name`, `author_slug`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug` | no | no | all authenticated users |
+| `readlist.story.deleted` | `App\Domains\ReadList\Public\Notifications\ReadListStoryDeletedNotification` | Une histoire de ma PAL a été supprimée | `author_name`, `author_slug`, `story_title` | no | no | all authenticated users |
+| `readlist.story.unpublished` | `App\Domains\ReadList\Public\Notifications\ReadListStoryUnpublishedNotification` | Une histoire de ma PAL a été dépubliée | `author_name`, `author_slug`, `story_title` | no | no | all authenticated users |
+| `readlist.story.republished` | `App\Domains\ReadList\Public\Notifications\ReadListStoryRepublishedNotification` | Une histoire de ma PAL a été republiée | `author_name`, `author_slug`, `story_title`, `story_slug` | no | no | all authenticated users |
+| `readlist.story.completed` | `App\Domains\ReadList\Public\Notifications\ReadListStoryCompletedNotification` | Une histoire de ma PAL a été marquée comme terminée | `author_name`, `author_slug`, `story_title`, `story_slug` | no | no | all authenticated users |
 
 ## Group: Actualités (`news`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `news.published` | `App\Domains\News\Public\Notifications\NewsPublishedNotification` | Une actualité d'être publiée sur le site | `news_title`, `news_slug` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `news.published` | `App\Domains\News\Public\Notifications\NewsPublishedNotification` | Une actualité d'être publiée sur le site | `news_title`, `news_slug` | no | no | all authenticated users |
 
 ## Group: Commentaires d'actualités (`news-comments`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `news.reply_comment` | `App\Domains\News\Public\Notifications\NewsReplyCommentNotification` | Un de mes commentaires d'actualité a reçu une réponse | `comment_id`, `author_name`, `author_slug`, `news_title`, `news_slug` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `news.reply_comment` | `App\Domains\News\Public\Notifications\NewsReplyCommentNotification` | Un de mes commentaires d'actualité a reçu une réponse | `comment_id`, `author_name`, `author_slug`, `news_title`, `news_slug` | no | no | all authenticated users |
 
 ## Group: Promotions & modération (`moderation`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `auth.promotion.accepted` | `App\Domains\Auth\Public\Notifications\PromotionAcceptedNotification` | Ma demande de promotion a été acceptée | `user_name` | yes | no |
-| `auth.promotion.rejected` | `App\Domains\Auth\Public\Notifications\PromotionRejectedNotification` | Ma demande de promotion a été refusée | `user_name` | yes | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `auth.promotion.accepted` | `App\Domains\Auth\Public\Notifications\PromotionAcceptedNotification` | Ma demande de promotion a été acceptée | `user_name` | yes | no | all authenticated users |
+| `auth.promotion.rejected` | `App\Domains\Auth\Public\Notifications\PromotionRejectedNotification` | Ma demande de promotion a été refusée | `user_name` | yes | no | all authenticated users |
 
 ## Group: Suivi (`follow`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `follow.new_follower` | `App\Domains\Follow\Private\Notifications\NewFollowerNotification` | Une Esperluette vous suit | `follower_id`, `follower_name`, `follower_slug` | no | no |
-| `follow.new_story` | `App\Domains\Follow\Private\Notifications\NewStoryNotification` | Une Esperluette que vous suivez a publié une nouvelle histoire | `author_id`, `author_name`, `author_slug`, `story_id`, `story_title`, `story_slug` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `follow.new_follower` | `App\Domains\Follow\Private\Notifications\NewFollowerNotification` | Une Esperluette vous suit | `follower_id`, `follower_name`, `follower_slug` | no | no | all authenticated users |
+| `follow.new_story` | `App\Domains\Follow\Private\Notifications\NewStoryNotification` | Une Esperluette que vous suivez a publié une nouvelle histoire | `author_id`, `author_name`, `author_slug`, `story_id`, `story_title`, `story_slug` | no | no | all authenticated users |
 
 ## Group: Citations (`quote`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `quote.chapter_quoted` | `App\Domains\Quote\Public\Notifications\ChapterQuotedNotification` | Quelqu'un a cité un passage de votre chapitre | `quoter_id`, `quoter_name`, `quoter_slug`, `chapter_id`, `chapter_title`, `chapter_slug`, `story_id`, `story_title`, `story_slug` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `quote.chapter_quoted` | `App\Domains\Quote\Public\Notifications\ChapterQuotedNotification` | Quelqu'un a cité un passage de votre chapitre | `quoter_id`, `quoter_name`, `quoter_slug`, `chapter_id`, `chapter_title`, `chapter_slug`, `story_id`, `story_title`, `story_slug` | no | no | all authenticated users |
 
 ## Group: Calendrier (`calendar`)
 
-| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI |
-| --- | --- | --- | --- | --- | --- |
-| `calendar.quote_contest.entry_removed` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\EntryRemovedNotification` | Une de mes citations a été retirée d'un concours par la modération | `category_title`, `activity_slug`, `activity_name` | no | no |
-| `calendar.quote_contest.submissions_open` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\SubmissionsOpenNotification` | Les soumissions d'un concours de citations sont ouvertes | `activity_name`, `activity_slug` | no | no |
-| `calendar.quote_contest.submissions_closing` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\SubmissionsClosingNotification` | Les soumissions d'un concours de citations ferment bientôt | `activity_name`, `activity_slug` | no | no |
-| `calendar.quote_contest.votes_open` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\VotesOpenNotification` | Les votes d'un concours de citations sont ouverts | `activity_name`, `activity_slug` | no | no |
-| `calendar.quote_contest.votes_closing` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\VotesClosingNotification` | Les votes d'un concours de citations ferment bientôt | `activity_name`, `activity_slug` | no | no |
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `calendar.quote_contest.entry_removed` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\EntryRemovedNotification` | Une de mes citations a été retirée d'un concours par la modération | `category_title`, `activity_slug`, `activity_name` | no | no | all authenticated users |
+| `calendar.quote_contest.submissions_open` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\SubmissionsOpenNotification` | Les soumissions d'un concours de citations sont ouvertes | `activity_name`, `activity_slug` | no | no | all authenticated users |
+| `calendar.quote_contest.submissions_closing` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\SubmissionsClosingNotification` | Les soumissions d'un concours de citations ferment bientôt | `activity_name`, `activity_slug` | no | no | all authenticated users |
+| `calendar.quote_contest.votes_open` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\VotesOpenNotification` | Les votes d'un concours de citations sont ouverts | `activity_name`, `activity_slug` | no | no | all authenticated users |
+| `calendar.quote_contest.votes_closing` | `App\Domains\Calendar\Private\Activities\QuoteContest\Notifications\VotesClosingNotification` | Les votes d'un concours de citations ferment bientôt | `activity_name`, `activity_slug` | no | no | all authenticated users |
 
 ## Delivery channels
 

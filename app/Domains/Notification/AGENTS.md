@@ -4,7 +4,7 @@
 
 ## Public API
 
-- [NotificationPublicApi](Public/Api/NotificationPublicApi.php) — `createNotification`, `createBroadcastNotification`, `getUnreadCount`, `deleteNotificationsByType`, `countNotificationsByType`
+- [NotificationPublicApi](Public/Api/NotificationPublicApi.php) — `createNotification`, `createBroadcastNotification`, `createNotificationForTypeAudience`, `getUnreadCount`, `deleteNotificationsByType`, `countNotificationsByType`
 - [NotificationFactory](Public/Services/NotificationFactory.php) — singleton registry; `registerGroup`, `register`, `resolve`, `make`, `getRegisteredTypes`, `getGroups`, `getTypesForGroup`, `getTypeDefinition`
 - [NotificationChannelRegistry](Public/Services/NotificationChannelRegistry.php) — singleton registry for external delivery channels; `register`, `get`, `getActiveChannels`, `getAllChannels`
 - [NotificationContent](Public/Contracts/NotificationContent.php) — interface that every notification payload must implement
@@ -36,6 +36,8 @@
 **`forcedOnWebsite` applies to the website channel only.** The flag means "this type cannot be opted out on the website." It has no bearing on other channels — those remain fully user-controlled even for forced types. Enforced in `NotificationPublicApi` at dispatch time and in `NotificationPreferencesController` at preference update time.
 
 **`hideInSettings` does not affect delivery.** Types with `hideInSettings: true` are still dispatched normally; the flag only excludes them from the preferences UI (and from `getTypesForGroup()` when called without `includeHidden: true`). Used for legacy type keys that have been superseded.
+
+**`visibleToRoles` is a server-side gate, not only a UI filter.** `NotificationPreferencesService` resolves the user's roles through `AuthPublicApi` and skips/refuses invisible types in listing, `set`, `setAll` and `setGroup`; the controller maps a refused `set` to 404. Removing any of these checks makes the gate cosmetic.
 
 **Preferences are sparse.** The `notification_preferences` table only stores rows that differ from the channel's `defaultEnabled`. When a user sets a preference equal to the default, the row is deleted. Filtering at dispatch time accounts for this (see `NotificationPreferencesRepository::filterForChannel`).
 
@@ -71,6 +73,7 @@ app(\App\Domains\Notification\Public\Services\NotificationFactory::class)->regis
     nameKey: 'mydomain::notifications.your_type_label',
     forcedOnWebsite: false,         // optional; true = user cannot opt out on website
     hideInSettings: false,          // optional; true = excluded from preferences UI
+    visibleToRoles: null,           // optional; role slugs gating prefs + createNotificationForTypeAudience recipients
 );
 ```
 

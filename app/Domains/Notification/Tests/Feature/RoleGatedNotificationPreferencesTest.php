@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Notification\Public\Contracts\NotificationChannelDefinition;
 use App\Domains\Notification\Public\Services\NotificationChannelRegistry;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Notification\Tests\Fixtures\StaffOnlyTestNotificationContent;
@@ -30,6 +31,17 @@ afterEach(function () {
     clearSettingsRegistry();
 });
 
+function registerStaffTestOptInChannel(): void
+{
+    app(NotificationChannelRegistry::class)->register(new NotificationChannelDefinition(
+        id: 'staff_optin',
+        nameTranslationKey: 'test::channel',
+        defaultEnabled: false,
+        sortOrder: 99,
+        deliveryCallback: fn ($dto, $ids) => null,
+    ));
+}
+
 function staffPrefRow(int $userId, string $channel = 'website'): ?object
 {
     return DB::table('notification_preferences')
@@ -46,7 +58,9 @@ describe('Role-gated notification preferences', function () {
         $this->actingAs($user)
             ->get(route('settings.tab', ['tab' => 'notification']))
             ->assertOk()
-            ->assertDontSee(STAFF_ONLY_TYPE);
+            ->assertDontSee(STAFF_ONLY_TYPE)
+            // the staff-only group has no visible type left, so its header is skipped too
+            ->assertDontSee('test::staff.group');
     });
 
     it('shows a visibleToRoles type on the settings tab for moderator, admin, and tech-admin', function () {
@@ -98,41 +112,52 @@ describe('Role-gated notification preferences', function () {
         expect((bool) $row->enabled)->toBeFalse();
     });
 
+    // Enable-all on an opt-in (default-off) channel is what writes rows under sparse storage.
     it('skips staff-only types on bulk enable-all for a non-staff user', function () {
+        registerStaffTestOptInChannel();
         $user = alice($this, roles: [Roles::USER_CONFIRMED]);
 
-        $this->actingAs($user)
-            ->putJson(route('notification.preferences.bulk'), [
-                'channel' => 'website',
-                'enabled' => true,
-                'scope' => 'all',
-            ])
-            ->assertOk()
-            ->assertJson(['success' => true]);
+        foreach (['all', 'test-staff'] as $scope) {
+            $this->actingAs($user)
+                ->putJson(route('notification.preferences.bulk'), [
+                    'channel' => 'staff_optin',
+                    'enabled' => true,
+                    'scope' => $scope,
+                ])
+                ->assertOk()
+                ->assertJson(['success' => true]);
+        }
 
-        expect(staffPrefRow($user->id))->toBeNull();
+        expect(staffPrefRow($user->id, 'staff_optin'))->toBeNull();
     });
 
     it('includes staff-only types on bulk enable-all for a staff user', function () {
+        registerStaffTestOptInChannel();
         $moderator = alice($this, roles: [Roles::MODERATOR, Roles::USER_CONFIRMED]);
-
-        // Opt out first so bulk enable-all creates a meaningful change
-        DB::table('notification_preferences')->insert([
-            'user_id' => $moderator->id,
-            'type'    => STAFF_ONLY_TYPE,
-            'channel' => 'website',
-            'enabled' => false,
-        ]);
 
         $this->actingAs($moderator)
             ->putJson(route('notification.preferences.bulk'), [
-                'channel' => 'website',
+                'channel' => 'staff_optin',
                 'enabled' => true,
                 'scope' => 'all',
             ])
             ->assertOk()
             ->assertJson(['success' => true]);
 
-        expect(staffPrefRow($moderator->id))->toBeNull();
+        $row = staffPrefRow($moderator->id, 'staff_optin');
+        expect($row)->not->toBeNull();
+        expect((bool) $row->enabled)->toBeTrue();
+    });
+
+    it('ignores staff-only keys in a full-form save by a non-staff user', function () {
+        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+
+        $this->actingAs($user)
+            ->post(route('notification.preferences.save'), [
+                'prefs' => [STAFF_ONLY_TYPE => ['website' => '0']],
+            ])
+            ->assertRedirect();
+
+        expect(staffPrefRow($user->id))->toBeNull();
     });
 });

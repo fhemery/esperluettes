@@ -2,6 +2,7 @@
 
 namespace App\Domains\Notification\Private\Console;
 
+use App\Domains\Notification\Public\Contracts\NotificationTypeDefinition;
 use App\Domains\Notification\Public\Services\NotificationChannelRegistry;
 use App\Domains\Notification\Public\Services\NotificationFactory;
 use Illuminate\Console\Command;
@@ -147,7 +148,7 @@ class ExportNotificationTypesDocumentationCommand extends Command
         return str_replace('`', "'", $escaped);
     }
 
-    private function visibleToRolesCell(\App\Domains\Notification\Public\Contracts\NotificationTypeDefinition $def): string
+    private function visibleToRolesCell(NotificationTypeDefinition $def): string
     {
         if ($def->visibleToRoles === null || $def->visibleToRoles === []) {
             return 'all authenticated users';
