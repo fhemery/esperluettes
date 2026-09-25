@@ -21,6 +21,7 @@ use App\Domains\Auth\Public\Events\UserRoleGranted;
 use App\Domains\Auth\Public\Events\UserRoleRevoked;
 use App\Domains\Auth\Public\Notifications\PromotionAcceptedNotification;
 use App\Domains\Auth\Public\Notifications\PromotionRejectedNotification;
+use App\Domains\Auth\Public\Notifications\PromotionRequestedNotification;
 use App\Domains\Auth\Public\Support\AuthConfigKeys;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
@@ -111,6 +112,14 @@ class AuthServiceProvider extends ServiceProvider
             groupId: 'moderation',
             nameKey: 'auth::notification.settings.type_promotion_rejected',
             forcedOnWebsite: true,
+        );
+        $notificationFactory->register(
+            type: PromotionRequestedNotification::type(),
+            class: PromotionRequestedNotification::class,
+            groupId: 'moderation',
+            nameKey: 'auth::notification.settings.type_promotion_requested',
+            forcedOnWebsite: false,
+            visibleToRoles: [Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN],
         );
 
         $this->registerAdminNavigation();

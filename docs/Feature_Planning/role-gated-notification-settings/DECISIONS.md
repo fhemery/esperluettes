@@ -42,3 +42,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | A12 | Send is wrapped so a notification exception cannot roll back the report or promotion request. | DESIGN | Yes |
 | A13 | `sourceUserId` is not auto-excluded; callers pass `$excludeUserId` separately. | DESIGN | Yes |
 | A14 | Inbox copy: « :user_name a déposé un nouveau signalement. Voir les signalements » (link). Display name is HTML-escaped in `display()` since the translation renders as HTML. | BUILD | Yes |
+| A15 | Promotion inbox copy: « :user_name a déposé une nouvelle demande de promotion. Voir les demandes de promotion » (link), same escaping as A14. | BUILD | Yes |

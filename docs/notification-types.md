@@ -2,7 +2,7 @@
 
 > **Auto-generated** by `php artisan notifications:export-types-doc`. Do not edit by hand.
 
-Generated at: 2026-09-25T19:07:07+00:00 (`locale`: `fr`)
+Generated at: 2026-09-25T19:15:02+00:00 (`locale`: `fr`)
 
 ## Group: Commentaires (`comments`)
 
@@ -60,6 +60,7 @@ Generated at: 2026-09-25T19:07:07+00:00 (`locale`: `fr`)
 | `moderation.report.submitted` | `App\Domains\Moderation\Public\Notifications\ReportSubmittedNotification` | Un nouveau signalement a été déposé | `user_name` | no | no | moderator, admin, tech-admin |
 | `auth.promotion.accepted` | `App\Domains\Auth\Public\Notifications\PromotionAcceptedNotification` | Ma demande de promotion a été acceptée | `user_name` | yes | no | all authenticated users |
 | `auth.promotion.rejected` | `App\Domains\Auth\Public\Notifications\PromotionRejectedNotification` | Ma demande de promotion a été refusée | `user_name` | yes | no | all authenticated users |
+| `auth.promotion.requested` | `App\Domains\Auth\Public\Notifications\PromotionRequestedNotification` | Une nouvelle demande de promotion a été déposée | `user_name` | no | no | moderator, admin, tech-admin |
 
 ## Group: Suivi (`follow`)
 
