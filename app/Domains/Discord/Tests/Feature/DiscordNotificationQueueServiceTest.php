@@ -1,9 +1,6 @@
 <?php
 
-use App\Domains\Config\Public\Contracts\FeatureToggle;
-use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Discord\Private\Services\DiscordNotificationQueueService;
-use App\Domains\Discord\Private\Support\DiscordFeatureToggles;
 use App\Domains\Notification\Public\Services\NotificationChannelRegistry;
 use App\Domains\Discord\Tests\Fixtures\HtmlTestNotificationContent;
 use App\Domains\Notification\Public\Contracts\NotificationDto;
@@ -25,38 +22,11 @@ beforeEach(function () {
 // ---------------------------------------------------------------------------
 
 describe('Discord notification channel registration', function () {
-    it('appears in getActiveChannels() when the feature toggle is ON', function () {
-        createFeatureToggle($this, new FeatureToggle(
-            name:   DiscordFeatureToggles::NOTIFICATIONS,
-            domain: DiscordFeatureToggles::DOMAIN,
-            access: FeatureToggleAccess::ON,
-        ));
-
+    it('appears in getActiveChannels()', function () {
         $registry = app(NotificationChannelRegistry::class);
         $ids      = array_map(fn ($c) => $c->id, $registry->getActiveChannels());
 
         expect($ids)->toContain('discord');
-    });
-
-    it('is absent from getActiveChannels() when the toggle does not exist', function () {
-        // No toggle in DB → isToggleEnabled returns false → channel inactive
-        $registry = app(NotificationChannelRegistry::class);
-        $ids      = array_map(fn ($c) => $c->id, $registry->getActiveChannels());
-
-        expect($ids)->not->toContain('discord');
-    });
-
-    it('is absent from getActiveChannels() when the feature toggle is OFF', function () {
-        createFeatureToggle($this, new FeatureToggle(
-            name:   DiscordFeatureToggles::NOTIFICATIONS,
-            domain: DiscordFeatureToggles::DOMAIN,
-            access: FeatureToggleAccess::OFF,
-        ));
-
-        $registry = app(NotificationChannelRegistry::class);
-        $ids      = array_map(fn ($c) => $c->id, $registry->getActiveChannels());
-
-        expect($ids)->not->toContain('discord');
     });
 
     it('is registered as default-off (users must opt in)', function () {

@@ -2,9 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Domains\Config\Public\Contracts\FeatureToggle;
-use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
-use App\Domains\Discord\Private\Support\DiscordFeatureToggles;
 use App\Domains\Notification\Public\Services\NotificationChannelRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,12 +14,6 @@ beforeEach(function () {
     putenv('DISCORD_BOT_API_KEY=' . $key);
     $_ENV['DISCORD_BOT_API_KEY'] = $key;
     $_SERVER['DISCORD_BOT_API_KEY'] = $key;
-
-    createFeatureToggle($this, new FeatureToggle(
-        name:   DiscordFeatureToggles::NOTIFICATIONS,
-        domain: DiscordFeatureToggles::DOMAIN,
-        access: FeatureToggleAccess::ON,
-    ));
 });
 
 afterEach(function () {
