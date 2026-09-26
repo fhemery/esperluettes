@@ -71,8 +71,12 @@ export const STORY = {
   advancedChapter: { slug: 'chapitre-avance-4', title: 'Chapitre avancé' },
   /** Used only for the no-op-conversion word-count check. */
   countedChapter: { slug: 'chapitre-compte-5', title: 'Chapitre compté' },
-  /** Advanced: inline formatting, then a raw lazily-loaded image, then prose. */
-  illustratedChapter: { slug: 'chapitre-illustre-7', title: 'Chapitre illustré' },
+  /** Advanced: inline formatting, then a raw lazily-loaded image with a caption, then prose. */
+  illustratedChapter: {
+    slug: 'chapitre-illustre-7',
+    title: 'Chapitre illustré',
+    caption: "Légende de l'illustration E2E",
+  },
 } as const;
 
 /**

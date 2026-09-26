@@ -368,18 +368,18 @@ caption, added in phase 3** / text; quotes `de l'italique et du gras` and
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter 7, confirmed reader, desktop | Select a few words inside the first text block → toolbar with « Citer »; the mini-form opens and saves | |
-| Chapter 7, confirmed reader, desktop | Select text wholly inside the image caption → no toolbar at all (no empty bubble) | |
-| Chapter 7, confirmed reader, desktop | Drag from the end of the first text block into the caption → no « Citer » | |
-| Chapter 7, confirmed reader, desktop | Drag from the first text block across the image into the second → « Citer » shows; mini-form shows the « plusieurs blocs » error | |
-| Chapter 7, confirmed reader, desktop | Triple-click the last paragraph before the image → note whether « Citer » shows and, if it does, that the form opens (not a dead button) | |
-| Chapter 7, confirmed reader | Seeded quotes `de l'italique et du gras` and `qui suit l'image` still highlight in place | |
-| Chapter 7, author | Heat tint and summary list both seeded quotes; nothing tinted on the image/caption | |
-| Chapter 3 (Simple), confirmed reader | Seeded highlights still render at the same places; quoting a new passage works | |
-| Chapter 3 (Simple), author | Heat map, gutter markers, badge count and summary (incl. the stale row) unchanged from before the feature | |
-| Chapter 3 (Simple), any viewer | Layout unchanged: text indent, paragraph spacing, last-paragraph padding (compare with `main`) | |
-| Chapter 3 / 7, guest and non-confirmed user | No « Citer », no toolbar — unchanged | |
-| Chapter 7, mobile (touch) | Long-press selection in a text block → toolbar below the selection with « Citer »; long-press on the caption → no toolbar | |
+| Chapter 7, confirmed reader, desktop | Select a few words inside the first text block → toolbar with « Citer »; the mini-form opens and saves | ✅ `01a`, `01b` |
+| Chapter 7, confirmed reader, desktop | Select text wholly inside the image caption → no toolbar at all (no empty bubble) | ✅ `02` |
+| Chapter 7, confirmed reader, desktop | Drag from the end of the first text block into the caption → no « Citer » | ✅ `03` (no toolbar at all) |
+| Chapter 7, confirmed reader, desktop | Drag from the first text block across the image into the second → « Citer » shows; mini-form shows the « plusieurs blocs » error | ✅ per spec §4.2.2, not as worded: the drag crosses the caption, so « Citer » is **hidden** (`04a`). The cross-block error itself verified on ch.4, two text blocks without image (`04b`) |
+| Chapter 7, confirmed reader, desktop | Triple-click the last paragraph before the image → note whether « Citer » shows and, if it does, that the form opens (not a dead button) | ❌ « Citer » **shows** but is a **dead button**: the triple-click range ends at `(figure.ce-block--image, 0)`, no caption text is intersected so the toolbar allows it, then `mini-form.js` `openForm()` gets no anchor and returns silently (`05`, failure shot in `test-results/`) |
+| Chapter 7, confirmed reader | Seeded quotes `de l'italique et du gras` and `qui suit l'image` still highlight in place | ✅ `06a` (confirmed's own); `qui suit l'image` belongs to admin, checked as admin (`06b`) |
+| Chapter 7, author | Heat tint and summary list both seeded quotes; nothing tinted on the image/caption | ✅ `07` (badge 2, 2 markers, 2 summary rows, no mark in the figure) |
+| Chapter 3 (Simple), confirmed reader | Seeded highlights still render at the same places; quoting a new passage works | ✅ `08a`, `08b` |
+| Chapter 3 (Simple), author | Heat map, gutter markers, badge count and summary (incl. the stale row) unchanged from before the feature | ✅ `09` (badge 5, depth-3 tint, 3 markers, 4 summary rows incl. stale) |
+| Chapter 3 (Simple), any viewer | Layout unchanged: text indent, paragraph spacing, last-paragraph padding (compare with `main`) | ✅ `10` — indent 32px, padding 12px, last 0px; paragraph offsets identical to the Advanced twin ch.4 (compared in-branch, not against a `main` build) |
+| Chapter 3 / 7, guest and non-confirmed user | No « Citer », no toolbar — unchanged | ✅ `11-guest`, `11-user` |
+| Chapter 7, mobile (touch) | Long-press selection in a text block → toolbar below the selection with « Citer »; long-press on the caption → no toolbar | ✅ `12a`, `12b` — Pixel 7 emulation; selection set programmatically + `touchend` (Playwright cannot drive a native long-press) |
 
 ## Open items
 
