@@ -1,8 +1,6 @@
 # Role-gated notification preferences (moderator/admin)
 
-**Status:** DONE — 2026-09-26 · **Domain(s):** `Notification` (core), `Moderation`, `Auth` · **Spec:**
-[functional](./01-functional.md) · [architecture](./02-architecture.md) ·
-[plan](./03-plan.md) · [decisions](./DECISIONS.md)
+**Status:** DONE — 2026-09-26 · **Domain(s):** `Notification` (core), `Moderation`, `Auth` · Planning docs deleted at WRAP; decision numbers below refer to them (in git history)
 
 ## What it does
 
@@ -52,12 +50,12 @@ No schema change, no new route, no JS.
 
 ## Decisions worth remembering
 
-- Audience lives **on the type** (#10, §7.1 of architecture): one list for seeing the row and for being selected, so visibility and send cannot drift.
+- Audience lives **on the type** (#10): one list for seeing the row and for being selected, so visibility and send cannot drift.
 - Each domain owns its type (#11): Moderation owns the report type, Auth the request type; Notification knows nothing about reports.
 - Send is in the owning service after the write, not a listener on `ReportSubmitted` / `PromotionRequested` (#12) — Auth stays a pure emitter, no queue wait.
 - Per-activity eligibility (Calendar / Quote Contest `role_restrictions`) is **not** this rule (#9) — that audience is "users authorized to this activity", handled by `calendar-notifications/`.
 
-**Assumptions made without asking (DECISIONS.md A1–A15) — all reversible except A7, A8:**
+**Assumptions made without asking (A1–A15) — all reversible except A7, A8:**
 A1 same « Promotions & modération » group, no staff-only group · A2 one notification per event, no digest ·
 A3 deactivated accounts excluded · A4 sent rows stay after resolve/delete · A5 preference labels « Un nouveau
 signalement a été déposé » / « Une nouvelle demande de promotion a été déposée » · A6 links to admin index, not
@@ -70,7 +68,7 @@ inbox copy « :user_name a déposé un nouveau signalement / une nouvelle demand
 
 ## Code vs plan
 
-The code matches `03-plan.md` phase for phase. Things the plan did not spell out:
+The code matches the 4-phase plan phase for phase. Things the plan did not spell out:
 
 - The controller checks visibility itself in `update` *before* calling `set`, and `set` checks again. The duplication is intentional.
 - The settings Blade resolves roles itself (`@inject` `AuthPublicApi`) in addition to `getPreferencesForUser` filtering. Two filters, one rule.
