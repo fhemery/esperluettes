@@ -14,6 +14,10 @@ a new row that supersedes it and note the number.
 | 4 | 2026-09-26 | REFINE | Existing quotes whose text/prefix/suffix spans a caption? | Accept possible staleness; no audit command. | — |
 | 5 | 2026-09-26 | REFINE | Selection touching a non-quotable area? | Hide « Citer » in the selection toolbar; other toolbar actions unaffected. | — |
 | 6 | 2026-09-26 | REFINE | Align cross-block rule with #5? | No — cross-block keeps its existing error in the mini-form. | — |
+| 7 | 2026-09-26 | DESIGN | Where is quotability decided at display time? | Client-side from the stored block class, hardcoded: only `.ce-block--text` is quotable. No `data-quotable` attribute, no server rewrite, no re-render. | — |
+| 8 | 2026-09-26 | DESIGN | Where does the quotable selector live? | In Quote, passed as a filter to the generic Shared canonical-text function — annotations may later include images. | — |
+| 9 | 2026-09-26 | DESIGN | How does Simple mode fit the rule? | Wrap Simple content in `div.ce-block.ce-block--text` at display time (user's suggestion). | — |
+| 10 | 2026-09-26 | DESIGN | How is « Citer » hidden? | Declarative `data-requires-selection-within` on toolbar actions, evaluated by Comment's toolbar; toolbar hidden when no action applies. | — |
 
 ## Assumptions made without asking
 
