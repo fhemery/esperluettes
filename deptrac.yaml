@@ -209,22 +209,6 @@ deptrac:
         - type: directory
           value: app/Domains/Home/Private/
 
-    # Message Domain
-    - name: MessagePublic
-      collectors:
-        - type: directory
-          value: app/Domains/Message/Public/
-
-    - name: MessagePrivate
-      collectors:
-        - type: directory
-          value: app/Domains/Message/Private/
-
-    - name: MessageTests
-      collectors:
-        - type: directory
-          value: app/Domains/Message/Tests/
-
     #Moderation Domain
     - name: ModerationPublic
       collectors:
@@ -502,11 +486,6 @@ deptrac:
       - Shared
       - HomePrivate
 
-    MessagePublic:
-      - Shared
-      - MessagePrivate
-      - EventsPublic
-
     ModerationPublic:
       - Shared
       - ModerationPrivate
@@ -694,13 +673,6 @@ deptrac:
       - AuthPublic
       - NewsPublic
 
-    MessagePrivate:
-      - Shared
-      - AuthPublic
-      - MessagePublic
-      - EventsPublic
-      - ConfigPublic
-
     ModerationPrivate:
       - Shared
       - ModerationPublic
@@ -879,11 +851,6 @@ deptrac:
       - TestHelpers
       - SettingsPrivate
       - SettingsPublic
-
-    MessageTests:
-      - TestHelpers
-      - MessagePrivate
-      - MessagePublic
 
     ModerationTests:
       - TestHelpers

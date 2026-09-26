@@ -15,7 +15,6 @@ More details can be found inside the different modules README.
 - [FAQ](../app/Domains/FAQ/README.md)
 - [Home](../app/Domains/Home/README.md)
 - [Media](../app/Domains/Media/README.md)
-- [Message](../app/Domains/Message/README.md)
 - [Moderation](../app/Domains/Moderation/README.md)
 - [News](../app/Domains/News/README.md)
 - [Notification](../app/Domains/Notification/README.md)
