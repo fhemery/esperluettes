@@ -36,6 +36,8 @@ A report transitions through three statuses:
 
 Transitioning to `confirmed` or `dismissed` emits a domain event that other domains can react to.
 
+Creating a report also sends the staff-only `moderation.report.submitted` notification (reporter display name + link to the reports queue, never the reason or topic) to every active moderator / admin / tech-admin except the reporter. A notification failure is reported and never undoes the report. The type is role-gated (`visibleToRoles`), so only staff see its preference row.
+
 ### Snapshot formatter (optional but recommended)
 
 Because reported content can be edited or deleted after a report is filed, a domain can supply a **snapshot formatter** that:
@@ -74,6 +76,8 @@ The Blade component `<x-moderation::report-button :topic="'story'" :entity-id="$
 | Authentication and role checks | Auth domain (`AuthPublicApi`, `Roles`) | Centralised role model |
 | Event persistence and dispatch | Events domain (`EventBus`) | All domain events flow through the shared bus |
 | Admin navigation registration | Administration domain (`AdminNavigationRegistry`) | Shared admin sidebar contract |
+| Staff notification on new report | Notification domain (`NotificationPublicApi::createNotificationForTypeAudience`) | Central delivery pipeline and role-gated preferences |
+| Reporter display name | Profile (`ProfilePublicApi`) | Profile owns user identity |
 | Content actions on approval/rejection | Each consuming domain | Moderation does not own the content |
 
 ---

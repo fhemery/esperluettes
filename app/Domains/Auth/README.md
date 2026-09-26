@@ -52,7 +52,7 @@ Unsponsored users (role `user`) can request elevation to `user-confirmed` once t
 
 The promotion workflow:
 1. Dashboard collects the comment count via `CommentPublicApi` and calls `AuthPublicApi::canRequestPromotion()`.
-2. If eligible, user submits via `AuthPublicApi::requestPromotion()` which creates a `PromotionRequest` row.
+2. If eligible, user submits via `AuthPublicApi::requestPromotion()` which creates a `PromotionRequest` row and sends the staff-only `auth.promotion.requested` notification to every active moderator / admin / tech-admin except the requester (failure is reported, never undoes the request).
 3. Admins/moderators review in `/admin/auth/promotion-requests`.
 4. On accept: `RoleService::promoteToConfirmed()` swaps `user` → `user-confirmed`; `PromotionAccepted` event and in-app notification sent.
 5. On reject: rejection reason stored; `PromotionRejected` event and in-app notification sent; user must wait before re-applying.
@@ -92,7 +92,7 @@ The compliance check result is cached in the session under `user_compliance_chec
 |---------|-------------|-----|
 | Display names | Profile (via `ProfilePublicApi`) | Profile owns user identity; Auth only stores credentials |
 | Promotion eligibility comment count | Caller (Dashboard) via `AuthPublicApi` | Auth cannot depend on Comment |
-| In-app notifications (promotion result) | Notification (via `NotificationPublicApi`) | Central delivery pipeline |
+| In-app notifications (promotion result; new request to staff) | Notification (via `NotificationPublicApi`) | Central delivery pipeline |
 | Config parameters | Config (via `ConfigPublicApi`) | Centralised feature/parameter store |
 | Admin navigation entry | Administration (via `AdminNavigationRegistry`) | Admin layout is owned by Administration |
 | Event persistence & audit log | Events (via `EventBus`) | Cross-domain event infrastructure |
