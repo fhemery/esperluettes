@@ -82,12 +82,10 @@ describe('Feature toggles - updateFeatureToggle', function () {
 
     it('forbids an admin from updating a tech_admins_only toggle', function () {
         declareFeatureToggle('update-tech-only', 'config', FeatureToggleAdminVisibility::TECH_ADMINS_ONLY);
-        // Row claims all_admins: the declaration must win.
         DB::table('config_feature_toggles')->insert([
             'domain' => 'config',
             'name' => 'update-tech-only',
             'access' => 'on',
-            'admin_visibility' => 'all_admins',
             'roles' => '[]',
             'created_at' => now(),
             'updated_at' => now(),

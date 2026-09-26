@@ -44,3 +44,7 @@ the user may want to reverse — surface these in the WRAP summary.
 | A20 | `updateFeatureToggle` resolves an existing row case-insensitively via the cache, then updates it or creates a lowercased one, instead of a raw `updateOrCreate` — same result, and a legacy mixed-case row is updated rather than duplicated on a case-sensitive DB | BUILD 2 | Yes — cheap |
 | A21 | Order in `updateFeatureToggle`: undeclared check first, then permission. In `deleteFeatureToggle`: permission, then declared refusal, then missing-row no-op | BUILD 2 | Yes — cheap |
 | A22 | `listFeatureToggles` reports the domain/name as written in the declaration; orphans keep the row's casing | BUILD 2 | Yes — cheap |
+| A23 | `destroy` is `DELETE /feature-toggles/{domain}/{name}`, not model binding as the plan said: the orphan DTO has no id and the index no longer queries the model. Side effect: `GET /feature-toggles/create` matches no route (404, not 405) | BUILD 3 | Yes — cheap |
+| A24 | Edit loads the toggle through `listFeatureToggles()` (404 when undeclared) rather than a new API method; update with no `roles` field clears roles (`[]`), as the old edit did | BUILD 3 | Yes — cheap |
+| A25 | View tests assert translation keys, not French text: the test locale is `zz` | BUILD 3 | Yes — cheap |
+| A26 | `UpdateFeatureToggleTest`'s "declaration wins over the row" case loses its `admin_visibility: all_admins` row value (the column is gone); it still proves an admin cannot change a tech-only toggle | BUILD 3 | Yes — cheap |

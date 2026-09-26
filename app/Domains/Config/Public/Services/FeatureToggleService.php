@@ -13,7 +13,6 @@ use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
 use App\Domains\Config\Public\Contracts\FeatureToggleDefinition;
 use App\Domains\Config\Public\Exceptions\UndeclaredFeatureToggleException;
 use App\Domains\Config\Public\Events\DTO\FeatureToggleSnapshot;
-use App\Domains\Config\Public\Events\FeatureToggleAdded;
 use App\Domains\Config\Public\Events\FeatureToggleDeleted;
 use App\Domains\Config\Public\Events\FeatureToggleUpdated;
 use App\Domains\Events\Public\Api\EventBus;
@@ -21,8 +20,6 @@ use DomainException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class FeatureToggleService
 {
@@ -39,31 +36,6 @@ class FeatureToggleService
         private FeatureToggleRepository $repo,
         private EventBus $events,
     ) {}
-
-    public function addFeatureToggle(FeatureToggleContract $featureToggle): void
-    {
-        if (!$this->auth->hasAnyRole([Roles::TECH_ADMIN])) {
-            throw new AuthorizationException('Only tech admins can create feature toggles');
-        }
-
-        // Validate inputs and uniqueness
-        $this->assertNewToggleIsValid($featureToggle);
-
-        $this->repo->create([
-            'domain' => $featureToggle->domain,
-            'name' => $featureToggle->name,
-            'access' => $featureToggle->access->value,
-            'admin_visibility' => $featureToggle->admin_visibility->value,
-            'roles' => $featureToggle->roles,
-            'updated_by' => Auth::id(),
-        ]);
-
-        Cache::forget($this->allCacheKey());
-
-        // Emit domain event
-        $snapshot = FeatureToggleSnapshot::fromFeatureToggle($featureToggle);
-        $this->events->emit(new FeatureToggleAdded($snapshot));
-    }
 
     /**
      * Declare a feature toggle. Called from domain ServiceProviders during boot().
@@ -138,7 +110,6 @@ class FeatureToggleService
 
         $data = [
             'access' => $access->value,
-            'admin_visibility' => $definition->adminVisibility->value,
             'updated_by' => Auth::id(),
         ];
         if ($roles !== null) {
@@ -163,43 +134,6 @@ class FeatureToggleService
             admin_visibility: $definition->adminVisibility,
             access: $access,
             roles: $model->roles ?? [],
-        );
-        $snapshot = FeatureToggleSnapshot::fromFeatureToggle($toggle);
-        $this->events->emit(new FeatureToggleUpdated($snapshot));
-    }
-
-    public function editFeatureToggle(string $name, string $domain, FeatureToggleAdminVisibility $adminVisibility, FeatureToggleAccess $access, array $roles): void
-    {
-        if (!$this->auth->hasAnyRole([Roles::TECH_ADMIN])) {
-            throw new AuthorizationException('Only tech admins can edit feature toggles');
-        }
-
-        $all = $this->getAllCached();
-        $row = $all['byDomain'][strtolower($domain)][strtolower($name)] ?? null;
-        if (!$row) {
-            return;
-        }
-
-        $model = $this->repo->findByDomainAndName($row['domain'], $row['name']);
-        if (!$model instanceof FeatureToggleModel) {
-            return;
-        }
-
-        $this->repo->update($model, [
-            'admin_visibility' => $adminVisibility->value,
-            'access' => $access->value,
-            'roles' => $roles,
-            'updated_by' => Auth::id(),
-        ]);
-
-        Cache::forget($this->allCacheKey());
-
-        $toggle = new \App\Domains\Config\Public\Contracts\FeatureToggle(
-            name: $model->name,
-            domain: $model->domain,
-            admin_visibility: $adminVisibility,
-            access: $access,
-            roles: $roles,
         );
         $snapshot = FeatureToggleSnapshot::fromFeatureToggle($toggle);
         $this->events->emit(new FeatureToggleUpdated($snapshot));
@@ -256,7 +190,7 @@ class FeatureToggleService
 
     /**
      * Return all toggles cached as both list and by-domain map.
-     * @return array{list: array<int,array{domain:string,name:string,access:string,admin_visibility:string,roles:array}>, byDomain: array<string,array<string,array{domain:string,name:string,access:string,admin_visibility:string,roles:array}>>}
+     * @return array{list: array<int,array{domain:string,name:string,access:string,roles:array}>, byDomain: array<string,array<string,array{domain:string,name:string,access:string,roles:array}>>}
      */
     private function getAllCached(): array
     {
@@ -273,7 +207,6 @@ class FeatureToggleService
                     'domain' => $m->domain,
                     'name' => $m->name,
                     'access' => $m->access,
-                    'admin_visibility' => $m->admin_visibility,
                     'roles' => $m->roles ?? [],
                 ];
                 $list[] = $row;
@@ -286,39 +219,6 @@ class FeatureToggleService
     private function allCacheKey(): string
     {
         return 'feature_toggles:all';
-    }
-
-    /**
-     * Validate required fields and uniqueness for a new feature toggle.
-     * Throws ValidationException on error.
-     */
-    private function assertNewToggleIsValid(FeatureToggleContract $featureToggle): void
-    {
-        // Basic required validation (trim to guard whitespace-only)
-        $data = [
-            'name' => trim((string) $featureToggle->name),
-            'domain' => trim((string) $featureToggle->domain),
-        ];
-        $rules = [
-            'name' => ['required', 'string', 'min:1'],
-            'domain' => ['required', 'string', 'min:1'],
-        ];
-        $validator = Validator::make($data, $rules);
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        // Uniqueness (case-insensitive on domain+name)
-        $existing = $this->repo->all();
-        $dn = strtolower($data['domain']);
-        $nn = strtolower($data['name']);
-        foreach ($existing as $m) {
-            if (strtolower($m->domain) === $dn && strtolower($m->name) === $nn) {
-                throw ValidationException::withMessages([
-                    'name' => [__('This feature toggle already exists in this domain.')],
-                ]);
-            }
-        }
     }
 
     /**
