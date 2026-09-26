@@ -10,7 +10,6 @@
  *   app/Domains/News/Database/Seeders/E2eNewsSeeder.php
  *   app/Domains/Calendar/Database/Seeders/E2eCalendarSeeder.php
  *   app/Domains/Calendar/Database/Seeders/E2eSecretGiftSeeder.php
- *   app/Domains/Config/Database/Seeders/E2eFeatureTogglesSeeder.php
  *
  * Specs must read fixtures from here rather than hard-coding slugs, so that a
  * change to a seeder breaks compilation instead of a selector three files away.
@@ -125,17 +124,6 @@ export const COMMENTS = {
   chapterSlug: STORY.publishedChapter.slug,
   bodyMarker: 'Commentaire E2E pour éditeur',
   rootCommentId: 1,
-} as const;
-
-/**
- * Feature toggles. `declared` has no row in the seeded database, so it shows as
- * OFF; `orphan` is a row written by
- * `app/Domains/Config/Database/Seeders/E2eFeatureTogglesSeeder.php` that no
- * service provider declares.
- */
-export const FEATURE_TOGGLES = {
-  declared: { domain: 'shared', name: 'dark_theme' },
-  orphan: { domain: 'moderation', name: 'reporting' },
 } as const;
 
 /**

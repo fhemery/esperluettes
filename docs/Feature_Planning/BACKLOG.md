@@ -32,8 +32,9 @@ scoped to the task that actually changed.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO: DESIGN done, resume at **PLAN**. Prerequisite [`quotable-blocks-opt-in`](_done/quotable-blocks-opt-in.md) is done — see the note in its `02-architecture.md` §4.3
-- **Feature toggles declared in service providers** · `feature-toggle-registration/` · auto · WIP:WRAP
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
+- **Admin pages — flash message shown twice** · `admin-double-flash/` · auto · TODO: leftover from `feature-toggle-registration`. The admin layout and ~23 admin page views both render `<x-shared::flash-block />`; pre-existing.
+- **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
 
 ## Done
 
@@ -42,6 +43,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`feature-toggle-registration`](_done/feature-toggle-registration.md) · toggles exist only once declared in a service provider (undeclared check throws), admin page built on declarations + orphan rows, read-only `config:toggles [--json]`, cleanup skill driven by both
 - [`quotable-blocks-opt-in`](_done/quotable-blocks-opt-in.md) · only `.ce-block--text` areas are quotable (captions and other block types excluded from canonical text and « Citer »); Simple chapters wrapped in one text block at display; reusable `within` filter and toolbar `data-requires-selection-within`
 - [`role-gated-notification-settings`](_done/role-gated-notification-settings.md) · notification types can declare `visibleToRoles` (gates preference rows, writes and `createNotificationForTypeAudience` recipients); staff get opt-out/Discord-opt-in notifications for new reports and new promotion requests
 - [`story-preferences`](_done/story-preferences.md) · Settings tab « Histoires » with two reader booleans: hide trigger-warning display on story/read-list cards and the story page, and hide trigger-warned stories from library, discover and search
