@@ -10,6 +10,8 @@ use App\Domains\Config\Private\Support\ConfigStorageReadiness;
 use App\Domains\Config\Public\Contracts\FeatureToggle as FeatureToggleContract;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
+use App\Domains\Config\Public\Contracts\FeatureToggleDefinition;
+use App\Domains\Config\Public\Exceptions\UndeclaredFeatureToggleException;
 use App\Domains\Config\Public\Events\DTO\FeatureToggleSnapshot;
 use App\Domains\Config\Public\Events\FeatureToggleAdded;
 use App\Domains\Config\Public\Events\FeatureToggleDeleted;
@@ -23,6 +25,14 @@ use Illuminate\Validation\ValidationException;
 
 class FeatureToggleService
 {
+    /**
+     * In-memory registry of toggle declarations, keyed by lowercased domain then name.
+     * Populated during ServiceProvider boot().
+     *
+     * @var array<string, array<string, FeatureToggleDefinition>>
+     */
+    private static array $definitions = [];
+
     public function __construct(
         private AuthPublicApi $auth,
         private FeatureToggleRepository $repo,
@@ -54,10 +64,36 @@ class FeatureToggleService
         $this->events->emit(new FeatureToggleAdded($snapshot));
     }
 
+    /**
+     * Declare a feature toggle. Called from domain ServiceProviders during boot().
+     * Declaring the same toggle twice keeps the last declaration.
+     */
+    public function registerFeatureToggle(FeatureToggleDefinition $definition): void
+    {
+        self::$definitions[strtolower($definition->domain)][strtolower($definition->name)] = $definition;
+    }
+
+    public function getDefinition(string $name, ?string $domain = 'config'): ?FeatureToggleDefinition
+    {
+        return self::$definitions[strtolower($domain ?? 'config')][strtolower($name)] ?? null;
+    }
+
+    /**
+     * Clear all declarations (for testing).
+     */
+    public static function clearDefinitions(): void
+    {
+        self::$definitions = [];
+    }
+
     public function isToggleEnabled(string $name, ?string $domain = 'config'): bool
     {
         $domain = strtolower($domain ?? 'config');
         $name = strtolower($name);
+        if ($this->getDefinition($name, $domain) === null) {
+            throw new UndeclaredFeatureToggleException($domain, $name);
+        }
+
         $all = $this->getAllCached();
         $data = $all['byDomain'][$domain][$name] ?? null;
         if (!$data) {

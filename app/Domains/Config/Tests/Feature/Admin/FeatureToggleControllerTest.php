@@ -11,6 +11,8 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+beforeEach(fn () => clearFeatureToggleDefinitions());
+
 function makeToggle(string $name = 'test-toggle', string $domain = 'config', FeatureToggleAccess $access = FeatureToggleAccess::OFF, FeatureToggleAdminVisibility $visibility = FeatureToggleAdminVisibility::ALL_ADMINS): FeatureToggle
 {
     return FeatureToggle::create([

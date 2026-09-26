@@ -1,8 +1,6 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Config\Public\Contracts\FeatureToggle;
-use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -253,14 +251,6 @@ describe('Story details page', function () {
     });
 
     describe('Moderation', function () {
-        beforeEach(function () {
-            createFeatureToggle($this, new FeatureToggle(
-                'reporting',
-                'moderation',
-                access: FeatureToggleAccess::ON
-            ));
-        });
-
         it('does not show the moderator popover to guests', function () {
             $author = alice($this);
             $story = publicStory('Public Story', $author->id, ['description' => '<p>desc</p>']);

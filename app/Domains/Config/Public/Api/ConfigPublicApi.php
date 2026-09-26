@@ -6,6 +6,7 @@ use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\FeatureToggle;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
+use App\Domains\Config\Public\Contracts\FeatureToggleDefinition;
 use App\Domains\Config\Public\Services\ConfigParameterService;
 use App\Domains\Config\Public\Services\FeatureToggleService;
 
@@ -19,6 +20,15 @@ class ConfigPublicApi
     // =========================================================================
     // Feature Toggles
     // =========================================================================
+
+    /**
+     * Declare a feature toggle. Call from your ServiceProvider boot().
+     * Checking an undeclared toggle throws UndeclaredFeatureToggleException.
+     */
+    public function registerFeatureToggle(FeatureToggleDefinition $definition): void
+    {
+        $this->featureToggleService->registerFeatureToggle($definition);
+    }
 
     public function addFeatureToggle(FeatureToggle $featureToggle): void
     {

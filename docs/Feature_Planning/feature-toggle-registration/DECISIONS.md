@@ -37,3 +37,5 @@ the user may want to reverse — surface these in the WRAP summary.
 | A14 | `FeatureToggleAdded` no longer emitted but stays registered so stored events deserialize | DESIGN | Yes — cheap |
 | A15 | The command's report method stays internal to Config, not on `ConfigPublicApi` | DESIGN | Yes — cheap |
 | A9 | Command is `config:toggles` with `--json`; table output otherwise; lists declared toggles and orphan rows with declared flag, access, roles, last change date | REFINE | Yes |
+| A16 | `UndeclaredFeatureToggleException` names the toggle lowercased (`domain/name`), as the lookup key is | BUILD 1 | Yes — cheap |
+| A17 | `AddFeatureToggleTest` "proceeds normally" left as is: `createFeatureToggle()` now declares the toggle, so the extra declaration the plan asked for was redundant | BUILD 1 | Yes — cheap |

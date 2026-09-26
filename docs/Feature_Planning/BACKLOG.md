@@ -32,7 +32,7 @@ scoped to the task that actually changed.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
 - **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO: DESIGN done, resume at **PLAN**. Prerequisite [`quotable-blocks-opt-in`](_done/quotable-blocks-opt-in.md) is done — see the note in its `02-architecture.md` §4.3
-- **Feature toggles declared in service providers** · `feature-toggle-registration/` · auto · WIP:BUILD (0/4)
+- **Feature toggles declared in service providers** · `feature-toggle-registration/` · auto · WIP:BUILD (1/4)
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 
 ## Done

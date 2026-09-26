@@ -11,6 +11,8 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+beforeEach(fn () => clearFeatureToggleDefinitions());
+
 describe('Feature toggles - listFeatureToggles', function () {
     it('returns an empty array if no toggles are found', function () {
         $api = app(ConfigPublicApi::class);

@@ -13,6 +13,8 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+beforeEach(fn () => clearFeatureToggleDefinitions());
+
 describe('Feature toggles - addFeatureToggle', function () {
     it('throws Unauthorized when creating a feature toggle as non tech admin', function () {
         $user = alice($this);
