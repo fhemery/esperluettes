@@ -39,3 +39,8 @@ the user may want to reverse — surface these in the WRAP summary.
 | A9 | Command is `config:toggles` with `--json`; table output otherwise; lists declared toggles and orphan rows with declared flag, access, roles, last change date | REFINE | Yes |
 | A16 | `UndeclaredFeatureToggleException` names the toggle lowercased (`domain/name`), as the lookup key is | BUILD 1 | Yes — cheap |
 | A17 | `AddFeatureToggleTest` "proceeds normally" left as is: `createFeatureToggle()` now declares the toggle, so the extra declaration the plan asked for was redundant | BUILD 1 | Yes — cheap |
+| A18 | `Admin/FeatureToggleControllerTest`'s `makeToggle()` also declares its toggle: otherwise the `setAccess` cases hit an undeclared toggle and throw. The plan only named the `destroy` change | BUILD 2 | Yes — cheap |
+| A19 | `AddFeatureToggleTest` calls `addFeatureToggle` through a file-local helper (and declares in "proceeds normally"), since `createFeatureToggle()` no longer goes through it. The file is deleted in phase 3 | BUILD 2 | Yes — cheap |
+| A20 | `updateFeatureToggle` resolves an existing row case-insensitively via the cache, then updates it or creates a lowercased one, instead of a raw `updateOrCreate` — same result, and a legacy mixed-case row is updated rather than duplicated on a case-sensitive DB | BUILD 2 | Yes — cheap |
+| A21 | Order in `updateFeatureToggle`: undeclared check first, then permission. In `deleteFeatureToggle`: permission, then declared refusal, then missing-row no-op | BUILD 2 | Yes — cheap |
+| A22 | `listFeatureToggles` reports the domain/name as written in the declaration; orphans keep the row's casing | BUILD 2 | Yes — cheap |

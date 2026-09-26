@@ -20,7 +20,12 @@ function createFeatureToggle(TestCase $t, FeatureToggle $featureToggle): Feature
         $featureToggle->admin_visibility,
     ));
     $t->actingAs(techAdmin($t));
-    $api->addFeatureToggle($featureToggle);
+    $api->updateFeatureToggle(
+        $featureToggle->name,
+        $featureToggle->access,
+        $featureToggle->domain,
+        $featureToggle->roles,
+    );
     return $featureToggle;
 }
 

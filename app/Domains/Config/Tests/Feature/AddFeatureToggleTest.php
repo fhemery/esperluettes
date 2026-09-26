@@ -15,6 +15,13 @@ uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(fn () => clearFeatureToggleDefinitions());
 
+// createFeatureToggle() no longer goes through addFeatureToggle, which this file covers until it is removed.
+function addFeatureToggleAsTechAdmin(TestCase $t, FeatureToggle $featureToggle): void
+{
+    $t->actingAs(techAdmin($t));
+    app(ConfigPublicApi::class)->addFeatureToggle($featureToggle);
+}
+
 describe('Feature toggles - addFeatureToggle', function () {
     it('throws Unauthorized when creating a feature toggle as non tech admin', function () {
         $user = alice($this);
@@ -39,7 +46,8 @@ describe('Feature toggles - addFeatureToggle', function () {
         $user = techAdmin($this);
         $this->actingAs($user);
 
-        createFeatureToggle($this, new FeatureToggle(
+        declareFeatureToggle('test-feature', 'config');
+        addFeatureToggleAsTechAdmin($this, new FeatureToggle(
             name: 'test-feature',
             domain: 'config',
             access: FeatureToggleAccess::ON,
@@ -54,7 +62,7 @@ describe('Feature toggles - addFeatureToggle', function () {
 
         $this->expectException(ValidationException::class);
 
-        createFeatureToggle($this, new FeatureToggle(
+        addFeatureToggleAsTechAdmin($this, new FeatureToggle(
             name: '  ',
             domain: 'config',
             access: FeatureToggleAccess::ON,
@@ -67,7 +75,7 @@ describe('Feature toggles - addFeatureToggle', function () {
 
         $this->expectException(ValidationException::class);
 
-        createFeatureToggle($this, new FeatureToggle(
+        addFeatureToggleAsTechAdmin($this, new FeatureToggle(
             name: 'test-feature',
             domain: '  ',
             access: FeatureToggleAccess::ON,
@@ -75,7 +83,7 @@ describe('Feature toggles - addFeatureToggle', function () {
     });
 
     it('should throw a ValidationException if toggle already exists', function () {
-        createFeatureToggle($this, new FeatureToggle(
+        addFeatureToggleAsTechAdmin($this, new FeatureToggle(
             name: 'test-feature',
             domain: 'config',
             access: FeatureToggleAccess::ON,
@@ -83,7 +91,7 @@ describe('Feature toggles - addFeatureToggle', function () {
 
         $this->expectException(ValidationException::class);
 
-        createFeatureToggle($this, new FeatureToggle(
+        addFeatureToggleAsTechAdmin($this, new FeatureToggle(
             name: 'test-feature',
             domain: 'config',
             access: FeatureToggleAccess::OFF,
@@ -98,7 +106,7 @@ describe('Feature toggles - addFeatureToggle', function () {
                 access: FeatureToggleAccess::ON,
             );
 
-            createFeatureToggle($this, $feature);
+            addFeatureToggleAsTechAdmin($this, $feature);
 
             $event = latestEventOf(FeatureToggleAdded::name(), FeatureToggleAdded::class);
             expect($event)->not->toBeNull();

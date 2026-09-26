@@ -15,6 +15,8 @@ beforeEach(fn () => clearFeatureToggleDefinitions());
 
 function makeToggle(string $name = 'test-toggle', string $domain = 'config', FeatureToggleAccess $access = FeatureToggleAccess::OFF, FeatureToggleAdminVisibility $visibility = FeatureToggleAdminVisibility::ALL_ADMINS): FeatureToggle
 {
+    declareFeatureToggle($name, $domain, $visibility);
+
     return FeatureToggle::create([
         'name'             => $name,
         'domain'           => $domain,
@@ -196,6 +198,8 @@ describe('FeatureToggle Admin Controller', function () {
 
         it('deletes a toggle as tech-admin', function () {
             $toggle = makeToggle();
+            // Declared toggles cannot be deleted: make it an orphan.
+            clearFeatureToggleDefinitions();
 
             $this->actingAs(techAdmin($this))
                 ->delete(route('config.admin.feature-toggles.destroy', $toggle))

@@ -17,6 +17,7 @@ use App\Domains\Config\Public\Events\FeatureToggleAdded;
 use App\Domains\Config\Public\Events\FeatureToggleDeleted;
 use App\Domains\Config\Public\Events\FeatureToggleUpdated;
 use App\Domains\Events\Public\Api\EventBus;
+use DomainException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -108,25 +109,20 @@ class FeatureToggleService
         };
     }
 
-    public function updateFeatureToggle(string $name, FeatureToggleAccess $access, ?string $domain = 'config'): void
+    /**
+     * Set the state of a declared toggle, creating its row on the first change.
+     * $roles === null keeps the current roles ([] for a new row).
+     */
+    public function updateFeatureToggle(string $name, FeatureToggleAccess $access, ?string $domain = 'config', ?array $roles = null): void
     {
-        // Resolve via cache (case-insensitive), then load exact model
         $domainKey = strtolower($domain ?? 'config');
         $nameKey = strtolower($name);
-        $all = $this->getAllCached();
-        $row = $all['byDomain'][$domainKey][$nameKey] ?? null;
-        if (!$row) {
-            // No-op if not found (aligns with current tests)
-            return;
+        $definition = $this->getDefinition($nameKey, $domainKey);
+        if ($definition === null) {
+            throw new UndeclaredFeatureToggleException($domainKey, $nameKey);
         }
 
-        $model = $this->repo->findByDomainAndName($row['domain'], $row['name']);
-        if (!$model instanceof FeatureToggleModel) {
-            return;
-        }
-
-        $adminVisibility = FeatureToggleAdminVisibility::from($model->admin_visibility);
-        if ($adminVisibility === FeatureToggleAdminVisibility::ALL_ADMINS) {
+        if ($definition->adminVisibility === FeatureToggleAdminVisibility::ALL_ADMINS) {
             if (!$this->auth->hasAnyRole([Roles::ADMIN, Roles::TECH_ADMIN])) {
                 throw new AuthorizationException('Only admins can update this feature toggle');
             }
@@ -136,19 +132,35 @@ class FeatureToggleService
             }
         }
 
-        $this->repo->update($model, [
+        // Resolve an existing row via cache (case-insensitive), then load the exact model
+        $row = $this->getAllCached()['byDomain'][$domainKey][$nameKey] ?? null;
+        $model = $row ? $this->repo->findByDomainAndName($row['domain'], $row['name']) : null;
+
+        $data = [
             'access' => $access->value,
+            'admin_visibility' => $definition->adminVisibility->value,
             'updated_by' => Auth::id(),
-        ]);
+        ];
+        if ($roles !== null) {
+            $data['roles'] = $roles;
+        }
+
+        if ($model instanceof FeatureToggleModel) {
+            $this->repo->update($model, $data);
+        } else {
+            $model = $this->repo->create($data + [
+                'domain' => $domainKey,
+                'name' => $nameKey,
+                'roles' => [],
+            ]);
+        }
 
         Cache::forget($this->allCacheKey());
 
-        // Emit domain event with updated snapshot
-        $vis = FeatureToggleAdminVisibility::from($model->admin_visibility);
-        $toggle = new \App\Domains\Config\Public\Contracts\FeatureToggle(
+        $toggle = new FeatureToggleContract(
             name: $model->name,
             domain: $model->domain,
-            admin_visibility: $vis,
+            admin_visibility: $definition->adminVisibility,
             access: $access,
             roles: $model->roles ?? [],
         );
@@ -193,21 +205,25 @@ class FeatureToggleService
         $this->events->emit(new FeatureToggleUpdated($snapshot));
     }
 
+    /**
+     * Delete an orphan row (a row no declaration matches). Declared toggles cannot be deleted.
+     */
     public function deleteFeatureToggle(string $name, ?string $domain = 'config'): void
     {
-        $domainKey = strtolower($domain ?? 'config');
-        $nameKey = strtolower($name);
-
-        // Resolve original row via cache for case-insensitive behavior
-        $all = $this->getAllCached();
-        $row = $all['byDomain'][$domainKey][$nameKey] ?? null;
-        if (!$row) {
-            // No-op (aligns with current tests)
-            return;
-        }
-
         if (!$this->auth->hasAnyRole([Roles::TECH_ADMIN])) {
             throw new AuthorizationException('Only tech admins can delete feature toggles');
+        }
+
+        $domainKey = strtolower($domain ?? 'config');
+        $nameKey = strtolower($name);
+        if ($this->getDefinition($nameKey, $domainKey) !== null) {
+            throw new DomainException("Feature toggle {$domainKey}/{$nameKey} is declared and cannot be deleted.");
+        }
+
+        // Resolve original row via cache for case-insensitive behavior
+        $row = $this->getAllCached()['byDomain'][$domainKey][$nameKey] ?? null;
+        if (!$row) {
+            return;
         }
 
         // Find and delete the exact model
@@ -219,18 +235,23 @@ class FeatureToggleService
         // Invalidate cache first so subsequent reads miss
         Cache::forget($this->allCacheKey());
 
-        // Emit domain event with snapshot from the resolved row
-        $vis = FeatureToggleAdminVisibility::from($row['admin_visibility']);
-        $access = FeatureToggleAccess::from($row['access']);
-        $toggle = new \App\Domains\Config\Public\Contracts\FeatureToggle(
+        // Emit domain event with snapshot from the resolved row (orphans are tech-admin-only)
+        $snapshot = FeatureToggleSnapshot::fromFeatureToggle($this->orphanFromRow($row));
+        $this->events->emit(new FeatureToggleDeleted($snapshot));
+    }
+
+    /**
+     * @param array{domain:string,name:string,access:string,roles:array} $row
+     */
+    private function orphanFromRow(array $row): FeatureToggleContract
+    {
+        return new FeatureToggleContract(
             name: $row['name'],
             domain: $row['domain'],
-            admin_visibility: $vis,
-            access: $access,
+            admin_visibility: FeatureToggleAdminVisibility::TECH_ADMINS_ONLY,
+            access: FeatureToggleAccess::from($row['access']),
             roles: $row['roles'] ?? [],
         );
-        $snapshot = FeatureToggleSnapshot::fromFeatureToggle($toggle);
-        $this->events->emit(new FeatureToggleDeleted($snapshot));
     }
 
     /**
@@ -312,18 +333,45 @@ class FeatureToggleService
             return [];
         }
 
-        $all = $this->getAllCached();
+        // One entry per declaration, merged with its row; visibility always from the declaration
+        $byDomain = $this->getAllCached()['byDomain'];
+        $definitions = self::$definitions;
+        ksort($definitions);
         $result = [];
-        foreach ($all['list'] as $row) {
-            $vis = FeatureToggleAdminVisibility::from($row['admin_visibility']);
-            if ($isTech || $vis === FeatureToggleAdminVisibility::ALL_ADMINS) {
-                $result[] = new \App\Domains\Config\Public\Contracts\FeatureToggle(
-                    name: $row['name'],
-                    domain: $row['domain'],
-                    admin_visibility: $vis,
-                    access: FeatureToggleAccess::from($row['access']),
+        foreach ($definitions as $domainKey => $names) {
+            ksort($names);
+            foreach ($names as $nameKey => $definition) {
+                if (!$isTech && $definition->adminVisibility !== FeatureToggleAdminVisibility::ALL_ADMINS) {
+                    continue;
+                }
+                $row = $byDomain[$domainKey][$nameKey] ?? null;
+                $result[] = new FeatureToggleContract(
+                    name: $definition->name,
+                    domain: $definition->domain,
+                    admin_visibility: $definition->adminVisibility,
+                    access: $row ? FeatureToggleAccess::from($row['access']) : FeatureToggleAccess::OFF,
                     roles: $row['roles'] ?? [],
                 );
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Rows that no declaration matches. Tech admins only.
+     *
+     * @return array<int,FeatureToggleContract>
+     */
+    public function listOrphanFeatureToggles(): array
+    {
+        if (!$this->auth->hasAnyRole([Roles::TECH_ADMIN])) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($this->getAllCached()['list'] as $row) {
+            if ($this->getDefinition($row['name'], $row['domain']) === null) {
+                $result[] = $this->orphanFromRow($row);
             }
         }
         return $result;

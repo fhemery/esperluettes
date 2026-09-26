@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Declaration registry, undeclared check throws, `shared/dark_theme` declared | S | — | DONE |
-| 2 | Toggle state from declarations (service + public API) | M | 1 | TODO |
+| 2 | Toggle state from declarations (service + public API) | M | 1 | DONE |
 | 3 | Admin page on declarations + orphans; drop `admin_visibility`; remove create/add/edit | M | 2 | TODO |
 | 4 | `config:toggles` command, cleanup skill, Config docs | S | 2 | TODO |
 
