@@ -23,5 +23,15 @@ the deploy. I need something that tells me to do so.
   "À retester" section, from the commits between two tags. The rollout plan
   probably extends it rather than starting from scratch.
 
+## Pending production steps (must appear in the next rollout plan)
+
+From the `chore/feature-flag-cleanup` branch, to do after its deploy:
+
+- Delete the feature toggles `calendar / enabled`,
+  `discord / discord_notifications`, `message / active` and
+  `moderation / reporting` in the admin UI.
+- Drop the `messages` and `message_deliveries` tables by hand: the Message
+  domain was deleted, and no migration drops them.
+
 ## Explicitly out of scope
 
