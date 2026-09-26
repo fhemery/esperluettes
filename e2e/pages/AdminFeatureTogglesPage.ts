@@ -65,6 +65,18 @@ export class AdminFeatureTogglesPage {
     return row.locator('td').nth(3);
   }
 
+  /** How far a table container can scroll sideways (scrollWidth - clientWidth). */
+  async horizontalScrollRange(container: Locator): Promise<number> {
+    return container.evaluate((el) => el.scrollWidth - el.clientWidth);
+  }
+
+  /** Scroll a table container all the way to its right edge. */
+  async scrollToEnd(container: Locator): Promise<void> {
+    await container.evaluate((el) => {
+      el.scrollLeft = el.scrollWidth;
+    });
+  }
+
   rowButtons(row: Locator): Locator {
     return row.getByRole('button');
   }

@@ -51,17 +51,28 @@ test.describe('feature toggle admin page', () => {
     await expect(page.declaredRow(orphan)).toHaveCount(0);
   });
 
-  test('at 375px the action buttons of both tables stay reachable', async ({ tech_admin }) => {
+  // The pre-existing admin-table pattern (A31): the page never scrolls
+  // sideways; the table container does, and scrolling it reveals the actions.
+  test('at 375px the page does not scroll and the actions are reached by scrolling each table', async ({
+    tech_admin,
+  }) => {
     await tech_admin.setViewportSize({ width: 375, height: 800 });
     const page = new AdminFeatureTogglesPage(tech_admin);
     await page.goto();
 
     const pageOverflow = await tech_admin.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      () => document.documentElement.scrollWidth - window.innerWidth,
     );
     expect(pageOverflow, 'page scrolls horizontally').toBeLessThanOrEqual(0);
 
-    for (const row of [page.declaredRow(declared), page.orphanRow(orphan)]) {
+    for (const [container, row] of [
+      [page.declaredTable, page.declaredRow(declared)],
+      [page.orphanTable, page.orphanRow(orphan)],
+    ] as const) {
+      expect(await page.horizontalScrollRange(container), 'table container scrolls sideways').toBeGreaterThan(0);
+
+      await page.scrollToEnd(container);
+
       const buttons = page.rowButtons(row);
       const count = await buttons.count();
       expect(count).toBeGreaterThan(0);

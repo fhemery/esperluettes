@@ -52,3 +52,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | A28 | `report()` reads `updated_at` / `roles` with `?? null` / `?? []` so a `feature_toggles:all` cache entry written before the deploy (no `updated_at` key) does not raise a warning | BUILD 4 | Yes — cheap |
 | A29 | Table output shows an empty cell for a null `updated_at`; ISO-8601 is Carbon's `toIso8601String()` (`2026-01-02T03:04:05+00:00`) | BUILD 4 | Yes — cheap |
 | A30 | The cleanup skill's removal step deletes the declaration *after* replacing the checks, so a leftover check throws and the gate catches it; the "declared, unused" bucket replaces "in prod, unused", and the old "not in prod, used / missing row" bucket folds into "off" (a row-less declared toggle is reported as `off`) | BUILD 4 | Yes — cheap |
+| A31 | 375px: horizontal scroll inside the table container is the pre-existing admin-table pattern, accepted; no layout change | VERIFY | Yes — cheap |

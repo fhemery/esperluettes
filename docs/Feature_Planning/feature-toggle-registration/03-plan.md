@@ -354,7 +354,7 @@ during PLAN while the flows are fresh.
 | Same, as regular admin | `shared/dark_theme` not shown (tech admins only); orphan section absent; empty state readable, not a broken table | ✅ (spec; also PHP-tested) |
 | Set access on row-less `shared/dark_theme` (tech admin) | Switch to `ON` sticks after reload; Settings → Général shows the Apparence option on a new request | ✅ (spec: the « Mode » setting is absent before, present after) |
 | Edit page (tech admin) | Only access + roles fields; `role_based` + a role saves and shows the role on the index | ✅ (spec) |
-| Mobile width (375px), tech admin | Index and orphan section stay usable (no horizontal overflow of action buttons) | ❌ page itself does not scroll, but both tables clip their Actions column inside `overflow-x-auto`: the declared row's ON / Par rôle / Modifier and the orphan's Supprimer sit outside the 375px viewport (only reachable by scrolling the table sideways) |
+| Mobile width (375px), tech admin | Index and orphan section stay usable (no horizontal overflow of action buttons) | ✅ (spec) page does not scroll; action buttons reached by scrolling the table container — pre-existing admin-table pattern, accepted (A31) |
 | `sail artisan config:toggles` and `--json` | Table readable; JSON matches the index (declared + orphan) | ✅ (run by hand on the e2e env) |
 
 ## Open items
