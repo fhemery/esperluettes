@@ -31,7 +31,7 @@ scoped to the task that actually changed.
 - **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · TODO
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
-- **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
+- **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · WIP:DESIGN
 
 ## Done
 
