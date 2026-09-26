@@ -190,7 +190,7 @@ class FeatureToggleService
 
     /**
      * Return all toggles cached as both list and by-domain map.
-     * @return array{list: array<int,array{domain:string,name:string,access:string,roles:array}>, byDomain: array<string,array<string,array{domain:string,name:string,access:string,roles:array}>>}
+     * @return array{list: array<int,array{domain:string,name:string,access:string,roles:array,updated_at:?string}>, byDomain: array<string,array<string,array{domain:string,name:string,access:string,roles:array,updated_at:?string}>>}
      */
     private function getAllCached(): array
     {
@@ -208,6 +208,7 @@ class FeatureToggleService
                     'name' => $m->name,
                     'access' => $m->access,
                     'roles' => $m->roles ?? [],
+                    'updated_at' => $m->updated_at?->toIso8601String(),
                 ];
                 $list[] = $row;
                 $byDomain[strtolower($m->domain)][strtolower($m->name)] = $row;
@@ -255,6 +256,48 @@ class FeatureToggleService
             }
         }
         return $result;
+    }
+
+    /**
+     * Read-only report of every declaration then every orphan row, sorted by domain then name.
+     * No authorization and no visibility filter: for the console only, not exposed on ConfigPublicApi.
+     *
+     * @return list<array{domain:string,name:string,declared:bool,access:string,roles:list<string>,updated_at:?string}>
+     */
+    public function report(): array
+    {
+        $byDomain = $this->getAllCached()['byDomain'];
+        $entries = [];
+        foreach (self::$definitions as $domainKey => $names) {
+            foreach ($names as $nameKey => $definition) {
+                $row = $byDomain[$domainKey][$nameKey] ?? null;
+                $entries[] = [
+                    'domain' => $definition->domain,
+                    'name' => $definition->name,
+                    'declared' => true,
+                    'access' => $row['access'] ?? FeatureToggleAccess::OFF->value,
+                    'roles' => array_values($row['roles'] ?? []),
+                    'updated_at' => $row['updated_at'] ?? null,
+                ];
+            }
+        }
+        foreach ($this->getAllCached()['list'] as $row) {
+            if ($this->getDefinition($row['name'], $row['domain']) === null) {
+                $entries[] = [
+                    'domain' => $row['domain'],
+                    'name' => $row['name'],
+                    'declared' => false,
+                    'access' => $row['access'],
+                    'roles' => array_values($row['roles'] ?? []),
+                    'updated_at' => $row['updated_at'] ?? null,
+                ];
+            }
+        }
+
+        usort($entries, fn (array $a, array $b) => [strtolower($a['domain']), strtolower($a['name'])]
+            <=> [strtolower($b['domain']), strtolower($b['name'])]);
+
+        return $entries;
     }
 
     /**
