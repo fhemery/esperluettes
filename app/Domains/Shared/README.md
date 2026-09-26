@@ -184,7 +184,7 @@ Checks that a display name produces a unique profile slug. Accepts an optional `
 | `badge-overflow.js` | `window.BadgeOverflow` | Detects overflowing badge lists and shows a `+N` overflow indicator. |
 | `date-utils.js` | `window.DateUtils` | Date formatting utilities. |
 | `bootstrap.js` | — | Axios setup, CSRF header. |
-| `anchoring/canonical-text.js` | `buildCanonicalText(rootEl)` | Normalised text extraction from rendered content. |
+| `anchoring/canonical-text.js` | `buildCanonicalText(rootEl, { within? })` | Normalised text extraction from rendered content. `within` (a CSS selector) restricts the text to matching areas; consumers own the selector. |
 | `anchoring/extract-anchor.js` | `extractAnchor(range, rootEl, canonicalText)` | Builds a quote anchor (prefix / highlighted / suffix) from a selection. |
 | `anchoring/reanchor.js` | `findAnchor(canonicalText, anchor)` | Re-locates a stored anchor in edited text. |
 | `anchoring/block-elements.js` | `isBlockElement(node)`, `closestBlock(node)` | Tells whether a selection crosses two blocks, so the caller can refuse it. Deliberately a *narrower* block definition than `canonical-text.js` — see note below. |

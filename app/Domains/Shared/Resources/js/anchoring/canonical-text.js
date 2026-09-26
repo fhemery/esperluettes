@@ -12,14 +12,31 @@ const BLOCK_TAGS = new Set(['P', 'BLOCKQUOTE', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H
  *   not authored content), which would otherwise double up with the
  *   boundary's own newline.
  *
+ * - With `within` (a CSS selector), only content inside an element matching it
+ *   (below `rootEl`) contributes — text, nodeMap entries, emoji tokens and
+ *   block newlines alike. Other subtrees are still walked, since a match may be
+ *   nested, but add nothing. The caller owns the selector.
+ *
  * @param {Element} rootEl
+ * @param {{ within?: string }} [options]
  * @returns {{ text: string, nodeMap: Array<{start: number, end: number, domNode: Text}> }}
  */
-export function buildCanonicalText(rootEl) {
+export function buildCanonicalText(rootEl, { within } = {}) {
     let text = '';
     const nodeMap = [];
 
-    function walk(node) {
+    function walk(node, inside) {
+        if (node.nodeType === 1 /* ELEMENT_NODE */ && !inside && node !== rootEl) {
+            inside = node.matches(within);
+        }
+
+        if (!inside) {
+            for (const child of node.childNodes) {
+                walk(child, false);
+            }
+            return;
+        }
+
         if (node.nodeType === 3 /* TEXT_NODE */) {
             const content = node.textContent;
             if (content.trim() === '' && (text.length === 0 || /\s$/.test(text))) {
@@ -42,7 +59,7 @@ export function buildCanonicalText(rootEl) {
         }
 
         for (const child of node.childNodes) {
-            walk(child);
+            walk(child, true);
         }
 
         if (BLOCK_TAGS.has(node.tagName) && text.length > 0 && text[text.length - 1] !== '\n') {
@@ -50,7 +67,8 @@ export function buildCanonicalText(rootEl) {
         }
     }
 
-    walk(rootEl);
+    // No filter: everything is inside, which is exactly the unfiltered walk.
+    walk(rootEl, !within);
     text = text.trimEnd();
 
     return { text, nodeMap };

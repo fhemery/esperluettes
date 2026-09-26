@@ -31,3 +31,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | 3 | Same behaviour on mobile touch selection. | REFINE (replay confirmed) | yes |
 | 4 | Injection mechanism (block class vs `content_blocks`) left to DESIGN. | REFINE (replay confirmed) | yes |
 | 5 | No notifications, events, settings, stats, search or migrations. | REFINE (replay confirmed) | yes |
+| 6 | Phase 1 test "unchanged when within is omitted" pins the real current output `'avant\nlégendeaprès'`: `FIGURE`/`FIGCAPTION` are not in `BLOCK_TAGS`, so a caption runs into the next block with no newline. Left as is — changing `BLOCK_TAGS` would stale existing quotes and is out of scope. | BUILD phase 1 | yes |
