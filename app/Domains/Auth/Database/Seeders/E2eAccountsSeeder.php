@@ -45,8 +45,8 @@ class E2eAccountsSeeder extends Seeder
     /**
      * A non-confirmed account registered long enough ago to request promotion.
      * `E2eCommentsSeeder` gives it the root comments the request also needs.
-     * Kept out of `ACCOUNTS` so the per-role logins never touch it: the only
-     * spec that uses it submits its one promotion request.
+     * Kept out of `ACCOUNTS` so the per-role logins never touch it: a spec
+     * using it can submit only one promotion request per run.
      */
     public const PROMOTABLE_EMAIL = 'promotable@e2e.test';
 

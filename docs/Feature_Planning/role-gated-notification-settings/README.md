@@ -42,7 +42,7 @@ No schema change, no new route, no JS.
 | Promotion type + send | `app/Domains/Auth/Public/Notifications/PromotionRequestedNotification.php`, `Private/Services/PromotionRequestService.php` (`notifyStaffOfNewRequest`), registered in `AuthServiceProvider` |
 | French copy | `Moderation/Private/Resources/lang/fr/notifications.php`, `Auth/Private/Resources/lang/fr/notification.php`, `Notification/.../lang/fr/validation.php` |
 | Tests | `Notification/Tests/Feature/{RoleGatedNotificationPreferences,CreateNotificationForTypeAudience,StaffNotificationRoleLifecycle}Test.php`, `Notification/Tests/Fixtures/StaffOnlyTestNotificationContent.php`, `Moderation/Tests/Feature/ReportSubmittedStaffNotificationTest.php`, `Auth/Tests/Feature/PromotionRequestedStaffNotificationTest.php` |
-| E2E world | `E2eFeatureTogglesSeeder` (Config; turns on `discord/discord_notifications`), `promotable@e2e.test` in `E2eAccountsSeeder` + its 5 root comments in `E2eCommentsSeeder`; page objects `e2e/pages/{NotificationPreferencesPage,NotificationInboxPage,ReportButton,DashboardPromotionCard}.ts` |
+| E2E world | `promotable@e2e.test` in `E2eAccountsSeeder` (+ `PROMOTABLE` in `e2e/support/fixtures.ts`) and its 5 root comments in `E2eCommentsSeeder`, kept for future specs |
 | Deptrac | `ModerationPublic` → `NotificationPublic` (type registration), `ModerationPrivate` → `NotificationPublic` (send). Auth needed no new edge. |
 
 ## Extension points used
@@ -83,5 +83,4 @@ The code matches `03-plan.md` phase for phase. Things the plan did not spell out
 - **Cut mid-build:** nothing.
 - **Known risk kept:** the staff trio `moderator/admin/tech-admin` is now hard-coded in badges, admin nav and both registrations. A fourth staff role must update all of them. No `Roles::staff()` helper was added on purpose.
 - **Backlog:** no new row. The existing `calendar-notifications/` row already carries the per-activity-audience leftover (decision #9).
-- **E2E:** `e2e/tests/features/role-gated-notification-settings.spec.ts` **deleted** at WRAP. It was VERIFY-only, and PHP tests cover the gates, sends and lifecycle. The page objects and e2e seed data it introduced stay; see the open question below.
-- **Open question:** keep the now-unused e2e page objects and the `promotable` seed account for future specs, or remove them?
+- **E2E:** `e2e/tests/features/role-gated-notification-settings.spec.ts` **deleted** at WRAP. It was VERIFY-only, and PHP tests cover the gates, sends and lifecycle. Its four page objects and the `E2eFeatureTogglesSeeder` (Discord column on) were removed with it (user decision); the `promotable` account was kept.
