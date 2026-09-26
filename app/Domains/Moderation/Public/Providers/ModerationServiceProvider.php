@@ -10,6 +10,8 @@ use App\Domains\Moderation\Public\Events\ReportSubmitted;
 use App\Domains\Moderation\Public\Events\ReportApproved;
 use App\Domains\Moderation\Public\Events\ReportRejected;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Moderation\Public\Notifications\ReportSubmittedNotification;
+use App\Domains\Notification\Public\Services\NotificationFactory;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -48,6 +50,14 @@ class ModerationServiceProvider extends ServiceProvider
         $eventBus->registerEvent(ReportRejected::name(), ReportRejected::class);
 
         $this->registerAdminNavigation();
+
+        app(NotificationFactory::class)->register(
+            type: ReportSubmittedNotification::type(),
+            class: ReportSubmittedNotification::class,
+            groupId: 'moderation',
+            nameKey: 'moderation::notifications.settings.type_report_submitted',
+            visibleToRoles: [Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN],
+        );
     }
 
     protected function registerAdminNavigation(): void

@@ -41,7 +41,7 @@ A singleton registry that maps type strings to their implementation classes. Typ
 
 | Method | Description |
 |--------|-------------|
-| `register(string $type, string $class, string $groupId, string $nameKey, bool $forcedOnWebsite = false, bool $hideInSettings = false)` | Register a `NotificationContent` class. Throws if `groupId` is not registered. |
+| `register(string $type, string $class, string $groupId, string $nameKey, bool $forcedOnWebsite = false, bool $hideInSettings = false, ?array $visibleToRoles = null)` | Register a `NotificationContent` class. Throws if `groupId` is not registered. |
 | `getTypeDefinition(string $type): ?NotificationTypeDefinition` | Return the full type definition, or null if unknown. |
 | `resolve(string $type): ?string` | Return the class name for a type, or null if unregistered. |
 | `make(string $type, array $data): ?NotificationContent` | Instantiate content via `fromData()`, or null if unregistered. |
@@ -67,6 +67,7 @@ The primary entry point for other domains:
 |--------|-------------|
 | `createNotification(int[] $userIds, NotificationContent $content, ?int $sourceUserId = null, ?\DateTime $createdAt = null)` | Validate and persist a notification for specific users with channel-aware delivery. |
 | `createBroadcastNotification(NotificationContent $content, ?int $sourceUserId = null)` | Send to all users with roles `user` and `user-confirmed` with channel-aware delivery. |
+| `createNotificationForTypeAudience(NotificationContent $content, ?int $sourceUserId = null, ?int $excludeUserId = null)` | Send to the active holders of the type's `visibleToRoles`, minus `$excludeUserId`, with channel-aware delivery. Silent no-op when nobody is left; throws `ValidationException` when the type is unknown or has no `visibleToRoles`. `$sourceUserId` is not auto-excluded. |
 | `getUnreadCount(int $userId): int` | Count unread notifications for a user. |
 | `deleteNotificationsByType(string $contentKey): int` | Delete all notifications of a given type (returns count deleted). |
 | `countNotificationsByType(string $contentKey): int` | Count notifications of a given type. |
@@ -110,6 +111,8 @@ The preferences model uses sparse storage: only non-default values are persisted
 **`forcedOnWebsite`** types cannot be opted out on the website channel. The website toggle is rendered as disabled in the preferences UI. Other channels remain fully user-controlled even for forced types. This flag is enforced in `NotificationPublicApi` at dispatch time and in `NotificationPreferencesController` at preference update time.
 
 **`hideInSettings`** types are excluded from the preferences UI and from `getTypesForGroup()` by default. Used for deprecated or legacy type keys (e.g., `story.chapter.comment` which was superseded by `story.chapter.root_comment` and `story.chapter.reply_comment`). These types are still delivered normally — `hideInSettings` only affects the preferences page.
+
+**`visibleToRoles`** (list of role slugs) restricts a type to users currently holding at least one of those roles; null/empty means every authenticated user. It gates the preferences UI (rows and empty group headers are skipped), every preference write (`set` throws `NotificationTypeNotVisibleException`, mapped to 404; `setAll` / `setGroup` / the full-form save skip the type), and is the recipient list of `createNotificationForTypeAudience`. Roles are read from `AuthPublicApi`, never from the request. Stored preferences of a user who loses the role are kept, so re-gaining it restores them.
 
 ## Database schema
 

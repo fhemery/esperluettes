@@ -26,7 +26,13 @@ has since been built, so it is now cheap.
 - Notifications go through the Notification domain, with Discord delivery
   available for users who opted in.
 - Role restrictions decide who is eligible — an ineligible user must not be
-  notified.
+  notified. This is **per activity** (`role_restrictions` on that activity),
+  not a type-level role list. Noted 2026-08-15 during
+  `role-gated-notification-settings/` REFINE: Quote Contest’s
+  `calendar:quote-contest-notify` currently broadcasts to all active
+  `user-confirmed` and ignores each contest’s `role_restrictions`. That
+  command must be brought onto the per-activity audience when this task
+  runs — do not treat it as already correct.
 
 ## Open questions for REFINE
 

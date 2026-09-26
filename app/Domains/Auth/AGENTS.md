@@ -39,6 +39,11 @@
 
 This domain registers no event listeners. It is a pure emitter; cross-domain reactions to its events are handled inside the consuming domains.
 
+## Notifications sent
+
+- `auth.promotion.accepted` / `auth.promotion.rejected` — sent to the requester by `PromotionRequestService` when a request is decided.
+- `auth.promotion.requested` (`PromotionRequestedNotification`) — sent by `PromotionRequestService::requestPromotion` to every active moderator / admin / tech-admin except the requester, via `createNotificationForTypeAudience`. The type is role-gated (`visibleToRoles`), so its preference row is hidden from non-staff. Payload is the requester display name only. The send is wrapped in `try/catch` + `report()` so a notification failure cannot undo the request.
+
 ## Non-obvious invariants
 
 **Always use `RoleService` to mutate roles, never call `User::assignRole` / `User::removeRole` directly.** `RoleService` invalidates the role cache (`auth:user_roles:{userId}`, TTL 10 min) and emits `UserRoleGranted` / `UserRoleRevoked`. Bypassing it silently leaves stale cache and no audit trail.
@@ -64,7 +69,7 @@ This domain registers no event listeners. It is a pure emitter; cross-domain rea
 ## Registry integrations
 
 - **ConfigPublicApi** (`Config` domain) — registers three parameters: `require_activation_code` (bool), `non_confirmed_comment_threshold` (int, default 5), `non_confirmed_timespan` (time in seconds, default 604800).
-- **NotificationFactory** (`Notification` domain) — registers `PromotionAcceptedNotification` and `PromotionRejectedNotification` content types.
+- **NotificationFactory** (`Notification` domain) — registers `PromotionAcceptedNotification`, `PromotionRejectedNotification` and the staff-only `PromotionRequestedNotification` content types.
 - **AdminNavigationRegistry** (`Administration` domain) — registers the promotion-requests admin page under the `auth` group with a badge icon (visible to admin, tech-admin, moderator).
 - **EventBus** (`Events` domain) — all 14 public events are registered during `AuthServiceProvider::boot`.
 - **Router alias** — `role` middleware alias is registered globally pointing to `CheckRole`.

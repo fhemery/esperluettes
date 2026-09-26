@@ -513,6 +513,8 @@ deptrac:
       - EventsPublic
       - AuthPublic
       - AdministrationPublic
+      # ModerationServiceProvider registers the report-submitted notification type
+      - NotificationPublic
 
     NewsPublic:
       - AuthPublic
@@ -704,6 +706,8 @@ deptrac:
       - ModerationPublic
       - AuthPublic
       - EventsPublic
+      # ModerationService notifies staff of new reports
+      - NotificationPublic
 
     NewsPrivate:
       - Shared

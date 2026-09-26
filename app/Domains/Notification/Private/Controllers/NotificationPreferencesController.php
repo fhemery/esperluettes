@@ -2,6 +2,9 @@
 
 namespace App\Domains\Notification\Private\Controllers;
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
+use App\Domains\Auth\Public\Api\Dto\RoleDto;
+use App\Domains\Notification\Private\Exceptions\NotificationTypeNotVisibleException;
 use App\Domains\Notification\Private\Services\NotificationPreferencesService;
 use App\Domains\Notification\Public\Services\NotificationChannelRegistry;
 use App\Domains\Notification\Public\Services\NotificationFactory;
@@ -17,16 +20,22 @@ class NotificationPreferencesController extends Controller
         private NotificationPreferencesService $prefsService,
         private NotificationFactory $factory,
         private NotificationChannelRegistry $channelRegistry,
+        private AuthPublicApi $authApi,
     ) {}
 
     public function save(Request $request): RedirectResponse
     {
-        $userId   = Auth::id();
+        $userId    = Auth::id();
         $submitted = $request->input('prefs', []);
         $channels  = $this->channelRegistry->getActiveChannels();
+        $roleSlugs = $this->roleSlugsForUser($userId);
 
         foreach ($this->factory->getGroups() as $group) {
             foreach ($this->factory->getTypesForGroup($group->id) as $typeDef) {
+                if (!$typeDef->isVisibleTo($roleSlugs)) {
+                    continue;
+                }
+
                 if (!$typeDef->forcedOnWebsite) {
                     $enabled = (bool) ($submitted[$typeDef->type]['website'] ?? false);
                     $this->prefsService->set($userId, $typeDef->type, 'website', $enabled);
@@ -62,11 +71,20 @@ class NotificationPreferencesController extends Controller
             return response()->json(['message' => 'Type not found'], 404);
         }
 
+        $roleSlugs = $this->roleSlugsForUser((int) Auth::id());
+        if (!$typeDef->isVisibleTo($roleSlugs)) {
+            return response()->json(['message' => 'Type not found'], 404);
+        }
+
         if ($channel === 'website' && $typeDef->forcedOnWebsite) {
             return response()->json(['message' => 'This notification type cannot be disabled on website'], 403);
         }
 
-        $this->prefsService->set(Auth::id(), $type, $channel, $enabled);
+        try {
+            $this->prefsService->set(Auth::id(), $type, $channel, $enabled);
+        } catch (NotificationTypeNotVisibleException) {
+            return response()->json(['message' => 'Type not found'], 404);
+        }
 
         return response()->json(['success' => true]);
     }
@@ -121,5 +139,18 @@ class NotificationPreferencesController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function roleSlugsForUser(int $userId): array
+    {
+        $rolesByUser = $this->authApi->getRolesByUserIds([$userId]);
+
+        return array_map(
+            fn (RoleDto $role): string => $role->slug,
+            $rolesByUser[$userId] ?? [],
+        );
     }
 }

@@ -42,6 +42,14 @@ class E2eAccountsSeeder extends Seeder
      */
     public const DEACTIVATED_EMAIL = 'deactivated@e2e.test';
 
+    /**
+     * A non-confirmed account registered long enough ago to request promotion.
+     * `E2eCommentsSeeder` gives it the root comments the request also needs.
+     * Kept out of `ACCOUNTS` so the per-role logins never touch it: a spec
+     * using it can submit only one promotion request per run.
+     */
+    public const PROMOTABLE_EMAIL = 'promotable@e2e.test';
+
     public const AUTHOR_EMAIL = 'author@e2e.test';
     public const ADMIN_EMAIL = 'admin@e2e.test';
     public const TECH_ADMIN_EMAIL = 'tech-admin@e2e.test';
@@ -73,5 +81,18 @@ class E2eAccountsSeeder extends Seeder
             Role::whereIn('slug', [Roles::USER_CONFIRMED])->pluck('id')->all()
         );
         $deactivated->deactivate();
+
+        $promotable = User::firstOrCreate(
+            ['email' => self::PROMOTABLE_EMAIL],
+            [
+                'password' => Hash::make(self::PASSWORD),
+                'email_verified_at' => now(),
+            ]
+        );
+        $promotable->roles()->syncWithoutDetaching(
+            Role::whereIn('slug', [Roles::USER])->pluck('id')->all()
+        );
+        // Older than the default 7-day probation, so the request is allowed.
+        $promotable->forceFill(['created_at' => now()->subDays(30)])->save();
     }
 }

@@ -141,6 +141,43 @@ class NotificationPublicApi
         }
     }
 
+    /**
+     * Dispatch to the type's visibleToRoles (active users only), then apply
+     * per-user channel preferences as createNotification already does.
+     *
+     * @throws ValidationException if the type is unknown or has no visibleToRoles
+     */
+    public function createNotificationForTypeAudience(
+        NotificationContent $content,
+        ?int $sourceUserId = null,
+        ?int $excludeUserId = null,
+    ): void {
+        $type       = $content::type();
+        $definition = $this->factory->getTypeDefinition($type);
+
+        if ($definition === null || $definition->visibleToRoles === null || $definition->visibleToRoles === []) {
+            throw ValidationException::withMessages([
+                'type' => [trans('notifications::validation.missing_visible_to_roles')],
+            ]);
+        }
+
+        $userIds = $this->authApi->getUserIdsByRoles($definition->visibleToRoles, activeOnly: true);
+        $userIds = array_values(array_unique(array_map('intval', $userIds)));
+
+        if ($excludeUserId !== null) {
+            $userIds = array_values(array_filter(
+                $userIds,
+                fn (int $id): bool => $id !== (int) $excludeUserId,
+            ));
+        }
+
+        if ($userIds === []) {
+            return;
+        }
+
+        $this->createNotification($userIds, $content, $sourceUserId);
+    }
+
     public function getUnreadCount(int $userId): int
     {
         return $this->service->getUnreadCount($userId);

@@ -26,6 +26,14 @@ class E2eCommentsSeeder extends Seeder
 
     public const BODY_MARKER = 'Commentaire E2E pour éditeur';
 
+    /**
+     * One root comment each for the promotable account
+     * (`E2eAccountsSeeder::PROMOTABLE_EMAIL`). Promotion counts *distinct*
+     * chapters, and five is the default threshold. Chapters 3–7 of
+     * `E2eStorySeeder` — chapter 1 is left alone, the comment specs read it.
+     */
+    private const PROMOTABLE_CHAPTER_IDS = [3, 4, 5, 6, 7];
+
     public function run(): void
     {
         if (DB::table('comments')->exists()) {
@@ -52,5 +60,26 @@ class E2eCommentsSeeder extends Seeder
             'created_at' => now()->subDay(),
             'updated_at' => now()->subDay(),
         ]);
+
+        $promotableId = DB::table('users')
+            ->where('email', 'promotable@e2e.test')
+            ->value('id');
+
+        if ($promotableId === null) {
+            return;
+        }
+
+        foreach (self::PROMOTABLE_CHAPTER_IDS as $chapterId) {
+            DB::table('comments')->insert([
+                'commentable_type' => 'chapter',
+                'commentable_id' => $chapterId,
+                'author_id' => (int) $promotableId,
+                'parent_comment_id' => null,
+                'is_active' => true,
+                'body' => '<p>Commentaire de promotion E2E</p>',
+                'created_at' => now()->subDays(2),
+                'updated_at' => now()->subDays(2),
+            ]);
+        }
     }
 }

@@ -13,6 +13,7 @@ use App\Domains\Auth\Public\Events\PromotionRejected;
 use App\Domains\Auth\Public\Events\PromotionRequested;
 use App\Domains\Auth\Public\Notifications\PromotionAcceptedNotification;
 use App\Domains\Auth\Public\Notifications\PromotionRejectedNotification;
+use App\Domains\Auth\Public\Notifications\PromotionRequestedNotification;
 use App\Domains\Auth\Public\Support\AuthConfigKeys;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Events\Public\Api\EventBus;
@@ -128,6 +129,8 @@ class PromotionRequestService
         // Emit event
         $this->eventBus()->emit(new PromotionRequested($userId));
 
+        $this->notifyStaffOfNewRequest($userId);
+
         return PromotionRequestResultDto::success();
     }
 
@@ -203,6 +206,24 @@ class PromotionRequestService
         $this->sendRejectedNotification($request->user_id);
 
         return true;
+    }
+
+    /**
+     * Notify active staff (except the requester) of a new promotion request.
+     * A notification failure must never undo the request.
+     */
+    private function notifyStaffOfNewRequest(int $userId): void
+    {
+        try {
+            $profile = $this->profileApi()->getPublicProfile($userId);
+            $this->notificationApi()->createNotificationForTypeAudience(
+                new PromotionRequestedNotification($profile?->display_name ?? ''),
+                sourceUserId: $userId,
+                excludeUserId: $userId,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**

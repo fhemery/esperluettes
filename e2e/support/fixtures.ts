@@ -43,6 +43,20 @@ export const ACCOUNTS: Record<RoleName, Account> = {
 export const ROLES = Object.keys(ACCOUNTS) as RoleName[];
 
 /**
+ * A non-confirmed account old enough, and with root comments on enough
+ * distinct chapters (seeded by `E2eCommentsSeeder` on chapters 3–7), to
+ * request promotion. Not a
+ * role fixture: auth.setup never logs it in, a spec that needs it does. Each
+ * run can submit only one promotion request with it.
+ */
+export const PROMOTABLE: Account = {
+  email: 'promotable@e2e.test',
+  password,
+  displayName: 'E2E Promotable',
+  profileSlug: 'e2e-promotable',
+};
+
+/**
  * Stories and chapters are addressed by slug-with-id ('mon-histoire-1'); the
  * app 301s any other spelling to that exact string.
  */
