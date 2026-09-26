@@ -31,7 +31,8 @@ scoped to the task that actually changed.
 - **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · TODO
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
-- **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · TODO
+- **Quotable blocks opt in** · `quotable-blocks-opt-in/` · interactive · TODO: prerequisite of `multiedit-chapter-switch-block/` (its decision #12) — anchoring must read only blocks that opt into quoting
+- **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · BLOCKED:waits for `quotable-blocks-opt-in/` — DESIGN done, resume at PLAN
 
 ## Done
 

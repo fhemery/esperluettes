@@ -16,6 +16,7 @@ Plain links are awkward for choose-your-own-adventure / interactive stories. Nic
 ## Constraints or ideas I already have
 
 The feature is a bit tricky from an architectural point of view, because this block is clearly a "story only" block. It makes no sense in static pages, or news, or anywhere else the multi-edit is used. We must therefore find a way to plug new blocks dynamically into the architecture.
+The dropdown in which to choose the link should only link to existing chapters of the existing book. You might self reference the chapter (yeah, imagine a temporal loop scenario).
 
 ## Explicitly out of scope
 
