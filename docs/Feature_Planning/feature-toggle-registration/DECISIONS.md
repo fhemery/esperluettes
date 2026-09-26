@@ -30,4 +30,10 @@ the user may want to reverse — surface these in the WRAP summary.
 | A6 | The toggle description lookup (`<domain>::config.feature_toggles.<name>`) and its column are removed | REFINE | Yes — cheap |
 | A7 | Declaring the same toggle twice keeps the last declaration, like config parameters | REFINE | Yes — cheap |
 | A8 | `shared/dark_theme` is declared "tech admins only" | REFINE | Yes — one line |
+| A10 | Declarations live in a static registry in `FeatureToggleService`, like config parameters | DESIGN | Yes |
+| A11 | `admin_visibility` column dropped (migration with `down()`) | DESIGN | Yes — `down()` re-adds it |
+| A12 | Rows created lazily on the first state change, never at boot | DESIGN | Yes — cheap |
+| A13 | `addFeatureToggle` / `editFeatureToggle` removed; roles set through `updateFeatureToggle(..., ?array $roles)` | DESIGN | Yes |
+| A14 | `FeatureToggleAdded` no longer emitted but stays registered so stored events deserialize | DESIGN | Yes — cheap |
+| A15 | The command's report method stays internal to Config, not on `ConfigPublicApi` | DESIGN | Yes — cheap |
 | A9 | Command is `config:toggles` with `--json`; table output otherwise; lists declared toggles and orphan rows with declared flag, access, roles, last change date | REFINE | Yes |
