@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         // Each domain owns its own, in dependency order.
         if (app()->environment('e2e')) {
             $this->call([
+                \App\Domains\Config\Database\Seeders\E2eFeatureTogglesSeeder::class,
                 \App\Domains\Auth\Database\Seeders\E2eAccountsSeeder::class,
                 \App\Domains\Profile\Database\Seeders\E2eProfilesSeeder::class,
                 \App\Domains\Story\Database\Seeders\E2eStorySeeder::class,

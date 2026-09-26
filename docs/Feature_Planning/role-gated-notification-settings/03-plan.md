@@ -244,15 +244,15 @@ Filled during PLAN; VERIFY executes against a running app (`verify-visually` ski
 
 | Surface | Role / state | Check | OK? |
 |---------|--------------|-------|-----|
-| Settings → Notifications tab | Confirmed non-staff (`user-confirmed`) | « Promotions & modération » shows only the two requester-facing promotion rows; **no** « nouveau signalement » or « nouvelle demande de promotion » rows | |
-| Settings → Notifications tab | Moderator (or admin / tech-admin) | Same group shows **four** rows: two requester-facing + two new staff rows | |
-| Settings → Notifications tab | Staff | Staff row website toggles default **on**; Discord toggles default **off** | |
-| Settings → Notifications tab | Staff, Discord unlinked | Discord column still shows the existing link warning; website column unchanged | |
-| Settings → Notifications tab | Mobile viewport (~375px) | Table scrolls/aligns like today; staff rows readable | |
-| Inbox | Staff recipient after another user files a report | French line, reporter display name, link opens moderation-reports admin queue | |
-| Inbox | Staff recipient after a user submits a promotion request | French line, requester display name, link opens promotion-requests admin queue | |
-| Settings → Notifications tab | Staff demoted to `user-confirmed` only | Two staff rows disappear; requester-facing rows remain | |
-| Settings → Notifications tab | Same user re-promoted to moderator | Staff rows reappear with prior toggle choices restored | |
+| Settings → Notifications tab | Confirmed non-staff (`user-confirmed`) | « Promotions & modération » shows only the two requester-facing promotion rows; **no** « nouveau signalement » or « nouvelle demande de promotion » rows | ✅ e2e (`user` and `confirmed`) — shots/settings-confirmed.png, settings-user.png |
+| Settings → Notifications tab | Moderator (or admin / tech-admin) | Same group shows **four** rows: two requester-facing + two new staff rows | ✅ e2e for moderator, admin and tech_admin — shots/settings-{moderator,admin,tech_admin}.png |
+| Settings → Notifications tab | Staff | Staff row website toggles default **on**; Discord toggles default **off** | ✅ e2e for all 3 staff roles (Discord column switched on in the e2e world by `E2eFeatureTogglesSeeder`); save + reload keeps the choices (tech_admin) |
+| Settings → Notifications tab | Staff, Discord unlinked | Discord column still shows the existing link warning; website column unchanged | ✅ e2e — « Compte Discord non lié » under Discord only |
+| Settings → Notifications tab | Mobile viewport (~375px) | Table scrolls/aligns like today; staff rows readable | ✅ e2e — the page does not scroll sideways, labels wrap and stay >120px wide, toggles are reachable — shots/settings-moderator-375.png |
+| Inbox | Staff recipient after another user files a report | French line, reporter display name, link opens moderation-reports admin queue | ✅ e2e — `confirmed` reports via the Alpine modal; moderator and admin get « E2E Confirmed a déposé un nouveau signalement. Voir les signalements », the link lands on « Signalements »; the reporter gets nothing — shots/inbox-admin-report.png |
+| Inbox | Staff recipient after a user submits a promotion request | French line, requester display name, link opens promotion-requests admin queue | ✅ e2e — `promotable` requests from the dashboard; admin gets « E2E Promotable a déposé une nouvelle demande de promotion. Voir les demandes de promotion », the link lands on « Demandes de promotion » — shots/inbox-admin-promotion.png |
+| Settings → Notifications tab | Staff demoted to `user-confirmed` only | Two staff rows disappear; requester-facing rows remain | ✅ moved to PHP: role check on the server, no client behaviour — `StaffNotificationRoleLifecycleTest` (hides rows after demotion) |
+| Settings → Notifications tab | Same user re-promoted to moderator | Staff rows reappear with prior toggle choices restored | ✅ moved to PHP — `StaffNotificationRoleLifecycleTest` (keeps prefs across demotion; restores rows with stored choices) |
 
 ## Open items
 

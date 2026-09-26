@@ -4,6 +4,7 @@
  * Every value here is written by a domain's `E2e*Seeder` and rebuilt from
  * scratch before each run — keep the two sides in step:
  *
+ *   app/Domains/Config/Database/Seeders/E2eFeatureTogglesSeeder.php (Discord notifications on)
  *   app/Domains/Auth/Database/Seeders/E2eAccountsSeeder.php
  *   app/Domains/Story/Database/Seeders/E2eStorySeeder.php
  *   app/Domains/Comment/Database/Seeders/E2eCommentsSeeder.php
@@ -41,6 +42,19 @@ export const ACCOUNTS: Record<RoleName, Account> = {
 };
 
 export const ROLES = Object.keys(ACCOUNTS) as RoleName[];
+
+/**
+ * A non-confirmed account old enough, and with root comments on enough
+ * distinct chapters (seeded by `E2eCommentsSeeder` on chapters 3–7), to
+ * request promotion. Not a
+ * role fixture: auth.setup never logs it in, the one spec that needs it does.
+ */
+export const PROMOTABLE: Account = {
+  email: 'promotable@e2e.test',
+  password,
+  displayName: 'E2E Promotable',
+  profileSlug: 'e2e-promotable',
+};
 
 /**
  * Stories and chapters are addressed by slug-with-id ('mon-histoire-1'); the
