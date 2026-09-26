@@ -1,7 +1,5 @@
 <?php
 
-use App\Domains\Config\Public\Contracts\FeatureToggle;
-use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
