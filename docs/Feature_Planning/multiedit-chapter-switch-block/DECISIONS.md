@@ -15,6 +15,11 @@ a new row that supersedes it and note the number.
 | 5 | 2026-09-26 | REFINE | Touch linear prev/next navigation? | No, unchanged — out of scope | — |
 | 6 | 2026-09-26 | REFINE | Can readers quote button labels? | No, excluded | — |
 | 7 | 2026-09-26 | REFINE | Replay + assumptions A1–A9 | Accepted | — |
+| 8 | 2026-09-26 | DESIGN | How does a Story-only block plug into the Editor? | Block-type registry in Editor, per-consumer `blockTypes` opt-in | — |
+| 9 | 2026-09-26 | DESIGN | Target status/title are read-time info, HTML is stored | Static save-time render; no published/deleted check; reader gets a 404 on a dead choice, as with plain links today | #1, #4 (reader side) |
+| 10 | 2026-09-26 | DESIGN | How does an author prepare an unpublished branch? | Per-choice "enabled" toggle; disabled choices are hidden from everyone on the reader page | — |
+| 11 | 2026-09-26 | DESIGN | Empty-label fallback after target rename | Title frozen at last save of the holding chapter | #2 (partly) |
+| 12 | 2026-09-26 | DESIGN | Keeping labels out of quotes | No opt-out stopgap. Quotability becomes opt-in per block in a prerequisite task (`quotable-blocks-opt-in/`); this task is BLOCKED until it is done | — |
 
 ## Assumptions made without asking
 
