@@ -349,13 +349,13 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Admin → Feature toggles, as tech admin, fresh DB | `shared/dark_theme` listed under its domain as `OFF`; no create button; no description / visibility column | |
-| Same, as tech admin, after inserting an orphan row (e.g. `moderation/reporting`) | Section « Non déclarés dans le code » shows it with a delete button only; deleting it removes it and flashes success | |
-| Same, as regular admin | `shared/dark_theme` not shown (tech admins only); orphan section absent; empty state readable, not a broken table | |
-| Set access on row-less `shared/dark_theme` (tech admin) | Switch to `ON` sticks after reload; Settings → Général shows the Apparence option on a new request | |
-| Edit page (tech admin) | Only access + roles fields; `role_based` + a role saves and shows the role on the index | |
-| Mobile width (375px), tech admin | Index and orphan section stay usable (no horizontal overflow of action buttons) | |
-| `sail artisan config:toggles` and `--json` | Table readable; JSON matches the index (declared + orphan) | |
+| Admin → Feature toggles, as tech admin, fresh DB | `shared/dark_theme` listed under its domain as `OFF`; no create button; no description / visibility column | ✅ (spec; also PHP-tested) |
+| Same, as tech admin, after inserting an orphan row (e.g. `moderation/reporting`) | Section « Non déclarés dans le code » shows it with a delete button only; deleting it removes it and flashes success | ✅ (spec; orphan from `E2eFeatureTogglesSeeder`, native `confirm()` accepted) |
+| Same, as regular admin | `shared/dark_theme` not shown (tech admins only); orphan section absent; empty state readable, not a broken table | ✅ (spec; also PHP-tested) |
+| Set access on row-less `shared/dark_theme` (tech admin) | Switch to `ON` sticks after reload; Settings → Général shows the Apparence option on a new request | ✅ (spec: the « Mode » setting is absent before, present after) |
+| Edit page (tech admin) | Only access + roles fields; `role_based` + a role saves and shows the role on the index | ✅ (spec) |
+| Mobile width (375px), tech admin | Index and orphan section stay usable (no horizontal overflow of action buttons) | ❌ page itself does not scroll, but both tables clip their Actions column inside `overflow-x-auto`: the declared row's ON / Par rôle / Modifier and the orphan's Supprimer sit outside the 375px viewport (only reachable by scrolling the table sideways) |
+| `sail artisan config:toggles` and `--json` | Table readable; JSON matches the index (declared + orphan) | ✅ (run by hand on the e2e env) |
 
 ## Open items
 

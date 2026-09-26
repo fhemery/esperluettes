@@ -12,7 +12,7 @@
 
         <x-shared::flash-block />
 
-        <div class="surface-read p-4 overflow-x-auto">
+        <div class="surface-read p-4 overflow-x-auto" data-testid="feature-toggles-declared">
             <table class="w-full admin">
                 <thead>
                     <tr class="border-b border-border text-left">
@@ -74,7 +74,7 @@
         @if(!empty($orphans))
             <x-shared::title tag="h2">{{ __('config::admin.feature_toggles.orphans.title') }}</x-shared::title>
 
-            <div class="surface-read p-4 overflow-x-auto">
+            <div class="surface-read p-4 overflow-x-auto" data-testid="feature-toggles-orphans">
                 <table class="w-full admin">
                     <thead>
                         <tr class="border-b border-border text-left">
