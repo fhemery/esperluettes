@@ -11,9 +11,8 @@ created by hand in the admin UI; the code just reads them with
 `isToggleEnabled(name, domain)`, and a name that has no row silently returns
 `false`. Registration makes the code the declared list of toggles.
 
-The toggles still in the code must be moved to the new rule (at the time of
-writing: Shared, Discord, Message, and the `calendar`/`enabled` string used in
-the Dashboard — whatever survives the first cleanup).
+The toggles still in the code must be moved to the new rule. After the first
+cleanup, only `shared` / `dark_theme` is left.
 
 Also a read-only artisan command (e.g. `config:toggles --json`) that lists the
 toggles with their production state (access, roles, and when it last changed —
@@ -32,14 +31,15 @@ been ON in production long enough; a ROLE_BASED toggle is not live yet.
 
 ## Constraints or ideas I already have
 
-- Order: the `cleanup-feature-flags` skill is written first (against today's
-  code), and a first manual cleanup of the unused toggles is run with it
-  **before** this feature, so no dead toggle gets migrated.
+- Order: the `cleanup-feature-flags` skill was written first (against the
+  code of the time), and a first cleanup was run with it **before** this
+  feature, so no dead toggle gets migrated (`calendar/enabled`,
+  `discord/discord_notifications` and the whole Message domain are gone).
 - Only feature toggles. Config parameters (`registerParameter`, e.g. Story's
   cover flags, currently in a class named `FeatureToggles`) are here to stay
   and are not part of this.
-- A toggle carries no French strings of its own (Message has one today, a
-  `feature_toggles.active` description).
+- A toggle carries no French strings of its own. The admin page still looks
+  up an optional `<domain>::config.feature_toggles.<name>` description.
 
 ## Explicitly out of scope
 
