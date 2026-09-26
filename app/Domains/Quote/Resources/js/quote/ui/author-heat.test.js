@@ -32,7 +32,7 @@ describe('author heat — tint', () => {
     });
 
     it('wraps a quoted passage in a single mark', () => {
-        const heat = heatOver('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+        const heat = heatOver('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>');
 
         heat._render([row(1, 'chat dort')]);
 
@@ -41,7 +41,7 @@ describe('author heat — tint', () => {
     });
 
     it('deepens the tint where two quotes overlap', () => {
-        const heat = heatOver('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+        const heat = heatOver('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>');
 
         heat._render([row(1, 'le chat dort'), row(2, 'chat dort sur')]);
 
@@ -54,7 +54,7 @@ describe('author heat — tint', () => {
 
     it('splits one canonical segment into one mark per block it covers', () => {
         const heat = heatOver(
-            '<div class="ce-block"><p>premier bloc</p></div><div class="ce-block"><p>second bloc</p></div>'
+            '<div class="ce-block ce-block--text"><p>premier bloc</p></div><div class="ce-block ce-block--text"><p>second bloc</p></div>'
         );
 
         // Such a passage can no longer be captured, but if one exists it must
@@ -65,7 +65,7 @@ describe('author heat — tint', () => {
     });
 
     it('leaves the text untouched for a passage that no longer exists', () => {
-        const heat = heatOver('<div class="ce-block"><p>le chat dort</p></div>');
+        const heat = heatOver('<div class="ce-block ce-block--text"><p>le chat dort</p></div>');
 
         heat._render([row(1, 'le chien aboie')]);
 
@@ -73,7 +73,7 @@ describe('author heat — tint', () => {
     });
 
     it('removes every mark when the heat is turned off', () => {
-        const heat = heatOver('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+        const heat = heatOver('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>');
 
         heat._render([row(1, 'le chat dort'), row(2, 'chat dort sur')]);
         heat._render([]);
@@ -111,7 +111,7 @@ describe('author heat — gutter markers', () => {
     }
 
     it('keeps two passages starting on the same line from stacking', () => {
-        const heat = gutteredHeat('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+        const heat = gutteredHeat('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>');
 
         heat._render([row(1, 'le chat'), row(2, 'chat dort')]);
         layOut({ 'le ': 100, 'chat': 100, ' dort': 100 });
@@ -123,7 +123,7 @@ describe('author heat — gutter markers', () => {
     });
 
     it('leaves passages on distinct lines where they are', () => {
-        const heat = gutteredHeat('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+        const heat = gutteredHeat('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>');
 
         heat._render([row(1, 'le chat'), row(2, 'sur le toit')]);
         layOut({ 'le chat': 100, 'sur le toit': 300 });
@@ -149,7 +149,7 @@ describe('author heat — passage popover', () => {
 
     it('lists every quote covering the clicked point', () => {
         const handler = listen();
-        const heat = heatOver('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+        const heat = heatOver('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>');
 
         heat._render([
             row(1, 'le chat dort'),
@@ -171,7 +171,7 @@ describe('author heat — passage popover', () => {
 
     it('opens the panel on Enter from a focused tint', () => {
         const handler = listen();
-        const heat = heatOver('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+        const heat = heatOver('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>');
 
         heat._render([row(1, 'chat dort')]);
 
@@ -189,7 +189,7 @@ describe('author heat — passage popover', () => {
 
     it('scrolls to a passage focused from the summary and opens its popover', () => {
         const handler = listen();
-        const heat = heatOver('<div class="ce-block"><p>le chat dort sur le toit</p></div>');
+        const heat = heatOver('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>');
 
         heat._render([row(1, 'chat dort'), row(2, 'chat dort')]);
 
@@ -207,7 +207,7 @@ describe('author heat — passage popover', () => {
 
     it('does nothing when the focused passage is stale', () => {
         const handler = listen();
-        const heat = heatOver('<div class="ce-block"><p>le chat dort</p></div>');
+        const heat = heatOver('<div class="ce-block ce-block--text"><p>le chat dort</p></div>');
 
         heat._render([row(1, 'le chien aboie')]);
         heat.focusGroup('le chien aboie');

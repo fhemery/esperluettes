@@ -15,7 +15,7 @@
 | 1 | Shared — `buildCanonicalText` gains a `within` area filter | S | — | DONE |
 | 2 | Comment — per-action `data-requires-selection-within` on the selection toolbar | S | — | DONE |
 | 3 | Story — wrap Simple-mode content in one `ce-block--text` on the read page | S | — | DONE |
-| 4 | Quote — read and capture only `.ce-block--text` areas; « Citer » declares its area | M | 1, 2, 3 | TODO |
+| 4 | Quote — read and capture only `.ce-block--text` areas; « Citer » declares its area | M | 1, 2, 3 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

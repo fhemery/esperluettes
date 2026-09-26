@@ -1,7 +1,10 @@
 @props(['chapterId', 'storyId', 'canQuote' => false])
 @if ($canQuote)
+{{-- Quotable area rule, also written as QUOTABLE_AREA_SELECTOR in
+     Resources/js/quote/ui/author-anchoring.js — keep both in sync. --}}
 <button
     type="button"
+    data-requires-selection-within=".ce-block--text"
     class="quote-toolbar-btn inline-flex items-center gap-1 px-3 py-1 text-sm
            rounded bg-tertiary/10 hover:bg-tertiary/20 text-tertiary-800
            border border-tertiary/30 transition-colors"

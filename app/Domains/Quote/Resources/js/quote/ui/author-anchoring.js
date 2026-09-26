@@ -2,6 +2,18 @@ import { buildCanonicalText } from '../../../../../Shared/Resources/js/anchoring
 import { findAnchor } from '../../../../../Shared/Resources/js/anchoring/reanchor.js';
 
 /**
+ * The only quotable areas inside the quote zone (`[data-quote-article]`): text
+ * blocks. Image blocks and their captions are not quotable. Every Quote call to
+ * `buildCanonicalText()` passes this as `within`, so capture and re-anchoring
+ * agree.
+ *
+ * The rule is also written in
+ * `app/Domains/Quote/Private/Resources/views/components/toolbar-button.blade.php`
+ * (`data-requires-selection-within`) — keep both in sync.
+ */
+export const QUOTABLE_AREA_SELECTOR = '.ce-block--text';
+
+/**
  * Re-anchor aggregate rows against a chapter's canonical text.
  *
  * `groupPassages()` is pure and cannot know a row is stale on its own: the
@@ -39,5 +51,5 @@ export function annotateRanges(canonical, rows) {
 export function resolveRows(rows, articleEl) {
     if (!articleEl) return rows.map(row => ({ ...row, range: null }));
 
-    return annotateRanges(buildCanonicalText(articleEl), rows);
+    return annotateRanges(buildCanonicalText(articleEl, { within: QUOTABLE_AREA_SELECTOR }), rows);
 }

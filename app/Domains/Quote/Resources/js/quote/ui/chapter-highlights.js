@@ -1,5 +1,6 @@
 import { buildCanonicalText } from '../../../../../Shared/Resources/js/anchoring/canonical-text.js';
 import { findAnchor } from '../../../../../Shared/Resources/js/anchoring/reanchor.js';
+import { QUOTABLE_AREA_SELECTOR } from './author-anchoring.js';
 
 export function quoteHighlighter({ chapterId, storyId, markLabel = '' }) {
     return {
@@ -33,7 +34,7 @@ export function quoteHighlighter({ chapterId, storyId, markLabel = '' }) {
 
             if (!quotes.length) return;
 
-            const canonical = buildCanonicalText(articleEl);
+            const canonical = buildCanonicalText(articleEl, { within: QUOTABLE_AREA_SELECTOR });
 
             for (const quote of quotes) {
                 if (quote.anchor_missing || !quote.chapter_available) continue;
