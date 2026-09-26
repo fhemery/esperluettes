@@ -1,4 +1,4 @@
-# <Task title> — decisions log
+# Feature toggles declared in service providers — decisions log
 
 Append-only. Every question the user arbitrated, with the answer as given.
 BUILD reads this before asking anything already settled.
@@ -8,7 +8,12 @@ a new row that supersedes it and note the number.
 
 | # | Date | Step | Question | Decision | Supersedes |
 |---|------|------|----------|----------|------------|
-| 1 | YYYY-MM-DD | REFINE | | | — |
+| 1 | 2026-09-26 | REFINE | Production state source for the cleanup skill | Read-only artisan command, output pasted by the user | — |
+| 2 | 2026-09-26 | REFINE | Deleting rows of toggles removed from code | By hand in the admin UI after deploy; no migration | — |
+| 3 | 2026-09-26 | REFINE | Config parameters in scope? | No, toggles only | — |
+| 4 | 2026-09-26 | REFINE | Order of work | Skill, first cleanup, then this feature (which readjusts the skill) | — |
+| 5 | 2026-09-26 | REFINE | French strings on a toggle | None | — |
+| 6 | 2026-09-26 | REFINE | Mode and branch | `auto`, on `chore/feature-flag-cleanup` | — |
 
 ## Assumptions made without asking
 
@@ -17,4 +22,12 @@ the user may want to reverse — surface these in the WRAP summary.
 
 | # | Assumption | Made at | Reversible? |
 |---|------------|---------|-------------|
-| | | | |
+| A1 | Checking an undeclared toggle throws, in every environment (not "log and return false") | REFINE | Yes — cheap |
+| A2 | A declared toggle without a row reads as `off`; there is no per-declaration default access | REFINE | Yes — cheap |
+| A3 | Admin visibility is part of the declaration and no longer editable in the UI | REFINE | Yes |
+| A4 | The admin "create toggle" form is removed; the first access change creates the row | REFINE | Yes |
+| A5 | Orphan rows are shown to tech admins only, labelled « Non déclaré dans le code », delete being their only action | REFINE | Yes |
+| A6 | The toggle description lookup (`<domain>::config.feature_toggles.<name>`) and its column are removed | REFINE | Yes — cheap |
+| A7 | Declaring the same toggle twice keeps the last declaration, like config parameters | REFINE | Yes — cheap |
+| A8 | `shared/dark_theme` is declared "tech admins only" | REFINE | Yes — one line |
+| A9 | Command is `config:toggles` with `--json`; table output otherwise; lists declared toggles and orphan rows with declared flag, access, roles, last change date | REFINE | Yes |
