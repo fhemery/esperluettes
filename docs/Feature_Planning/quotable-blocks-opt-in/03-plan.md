@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Shared — `buildCanonicalText` gains a `within` area filter | S | — | DONE |
-| 2 | Comment — per-action `data-requires-selection-within` on the selection toolbar | S | — | TODO |
+| 2 | Comment — per-action `data-requires-selection-within` on the selection toolbar | S | — | DONE |
 | 3 | Story — wrap Simple-mode content in one `ce-block--text` on the read page | S | — | TODO |
 | 4 | Quote — read and capture only `.ce-block--text` areas; « Citer » declares its area | M | 1, 2, 3 | TODO |
 

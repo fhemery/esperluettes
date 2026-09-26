@@ -32,3 +32,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | 4 | Injection mechanism (block class vs `content_blocks`) left to DESIGN. | REFINE (replay confirmed) | yes |
 | 5 | No notifications, events, settings, stats, search or migrations. | REFINE (replay confirmed) | yes |
 | 6 | Phase 1 test "unchanged when within is omitted" pins the real current output `'avant\nlégendeaprès'`: `FIGURE`/`FIGCAPTION` are not in `BLOCK_TAGS`, so a caption runs into the next block with no newline. Left as is — changing `BLOCK_TAGS` would stale existing quotes and is out of scope. | BUILD phase 1 | yes |
+| 7 | Phase 2 test "spanning two matching areas" uses its own fixture (two `.ok` areas separated only by whitespace): the plan's shared fixture has a caption between `a` and `b`, so a range spanning them is correctly `false`. | BUILD phase 2 | yes |

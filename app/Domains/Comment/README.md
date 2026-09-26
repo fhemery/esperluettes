@@ -122,6 +122,20 @@ The `CommentListComponent` supports two loading modes:
 
 It also supports **deep linking**: when the request contains a `?comment={id}` query parameter, the component pre-loads pages until the target comment is found, then passes a `targetCommentId` to the Blade template for client-side scroll-and-highlight.
 
+### Selection toolbar (`<x-comment::annotable>`)
+
+`<x-comment::annotable>` wraps content in an annotable region and renders a
+selection toolbar template, shown near any text selection inside the region
+when `canAnnotate` is true. Other domains contribute buttons through the
+`toolbar-actions` slot; each button owns its own Alpine bindings.
+
+An action may carry `data-requires-selection-within="<css selector>"` (on the
+slot's top-level element or a descendant of it). It is then shown only when
+every non-whitespace text node touched by the selection lies inside an element
+matching the selector; actions without the attribute are always shown. When no
+action applies, the toolbar is not shown at all. The selector is chosen by the
+contributing domain — Comment never knows which domain declared it.
+
 ### Editor assets and inline composers
 
 Reply and edit composers use `<x-editor::rich-text>`, but they often appear only
