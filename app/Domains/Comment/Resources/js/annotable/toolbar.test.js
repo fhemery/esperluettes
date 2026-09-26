@@ -73,6 +73,17 @@ describe('selectionIsWithin', () => {
         setup();
         expect(selectionIsWithin(range(textOf('a'), 0, textOf('c'), 1), '.ok')).toBe(false);
     });
+
+    it('is true when the range ends at the start of the caption block without covering it (triple-click)', () => {
+        setup();
+        const figure = document.querySelector('figure');
+        expect(selectionIsWithin(range(textOf('a'), 0, figure, 0), '.ok')).toBe(true);
+    });
+
+    it('is true when the range starts at the very end of the caption text', () => {
+        setup();
+        expect(selectionIsWithin(range(textOf('c'), 1, textOf('b'), 1), '.ok')).toBe(true);
+    });
 });
 
 describe('showToolbar', () => {

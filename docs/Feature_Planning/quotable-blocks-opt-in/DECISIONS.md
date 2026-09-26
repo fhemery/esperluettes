@@ -18,6 +18,7 @@ a new row that supersedes it and note the number.
 | 8 | 2026-09-26 | DESIGN | Where does the quotable selector live? | In Quote, passed as a filter to the generic Shared canonical-text function — annotations may later include images. | — |
 | 9 | 2026-09-26 | DESIGN | How does Simple mode fit the rule? | Wrap Simple content in `div.ce-block.ce-block--text` at display time (user's suggestion). | — |
 | 10 | 2026-09-26 | DESIGN | How is « Citer » hidden? | Declarative `data-requires-selection-within` on toolbar actions, evaluated by Comment's toolbar; toolbar hidden when no action applies. | — |
+| 11 | 2026-09-26 | VERIFY | Triple-click before an image leaves the range end at `(figure, 0)` → « Citer » shown but dead. Hide it, or make it work? | Make it work: a selection boundary that sits on a block edge without covering any of that block's text is ignored — both by the toolbar's within-check and by anchor extraction — so a triple-clicked paragraph is quotable. | — |
 
 ## Assumptions made without asking
 

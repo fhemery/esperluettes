@@ -196,6 +196,19 @@ describe('quoteMiniForm.openForm — quotable areas', () => {
         expect(component._anchor.suffix).not.toContain('légende');
     });
 
+    it('opens on a triple-clicked paragraph whose range ends at the start of the image block', () => {
+        document.body.innerHTML = ILLUSTRATED;
+        select(textOf('#a'), 0, document.querySelector('figure'), 0);
+
+        const component = makeComponent();
+        component.openForm({ chapterId: 1, storyId: 2 });
+
+        expect(component.open).toBe(true);
+        expect(component.multiBlock).toBe(false);
+        expect(component.error).toBeNull();
+        expect(component._anchor.highlighted).toBe('le chat dort sur le tapis');
+    });
+
     it('still flags a selection spanning two text blocks as multi-block', () => {
         document.body.innerHTML = ILLUSTRATED;
         select(textOf('#a'), 3, textOf('#b'), 8);

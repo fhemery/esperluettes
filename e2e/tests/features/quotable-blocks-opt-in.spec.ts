@@ -16,8 +16,8 @@ import { expect, test } from '../../support/test';
  * Order matters: the author checks on the Simple chapter pin the seeded counts,
  * so they run before any reader saves a new quote there.
  *
- * The triple-click row is expected to fail until BUILD fixes the dead « Citer »
- * button. Set E2E_SHOTS_DIR to write the VERIFY evidence screenshots.
+ * The triple-click row pins decision #11: a boundary merely touching the image
+ * block is ignored, so the paragraph is quotable. Set E2E_SHOTS_DIR to write the VERIFY evidence screenshots.
  */
 
 const ILLUSTRATED = STORY.illustratedChapter;
@@ -138,17 +138,20 @@ test.describe('confirmed reader, desktop', () => {
     await chapter.goto();
     await chapter.tripleClick('Delta un.');
     expect(await chapter.selectionText()).toContain('au milieu de la phrase.');
-    await chapter.evidence('05-triple-click-before-image');
     console.log('[triple-click range]', await chapter.rangeEnds());
-    // Observation row: whichever way it goes, never a dead button.
-    if (await chapter.citeButton.isVisible()) {
-      await chapter.citeButton.click();
-      await expect(chapter.miniForm).toBeVisible();
-      test.info().annotations.push({ type: 'triple-click', description: 'Citer shown, form opens' });
-    } else {
-      await expect(chapter.toolbar).toBeHidden();
-      test.info().annotations.push({ type: 'triple-click', description: 'Citer hidden, no toolbar' });
-    }
+    // Decision #11: the boundary touching the image block is ignored, so the
+    // paragraph is quotable — « Citer » shows, the form opens and saves.
+    await expect(chapter.citeButton).toBeVisible();
+    await chapter.citeButton.click();
+    await expect(chapter.miniForm).toBeVisible();
+    await expect(chapter.miniFormQuote).toContainText('Delta un.');
+    await expect(chapter.miniFormQuote).toContainText('au milieu de la phrase.');
+    await expect(chapter.miniFormQuote).not.toContainText('Epsilon');
+    await expect(chapter.miniFormError).toBeHidden();
+    await chapter.evidence('05-triple-click-before-image');
+    await chapter.miniFormSave.click();
+    await expect(chapter.miniForm).toBeHidden();
+    await expect.poll(async () => (await chapter.tintTexts()).some(t => t.startsWith('Delta un.'))).toBe(true);
   });
 
   test('ch.7 a few words in the first block: « Citer », mini-form opens and saves', async ({ confirmed }) => {

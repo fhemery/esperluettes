@@ -30,7 +30,7 @@
 | `Http/BackToCommentsRedirector.php` | Reconstruct `#comments` redirect after comment post |
 | `Helpers/VersionHelper.php` | Read and cache `version.json` for display in footer |
 | `Resources/js/tooltip.js` | Alpine `popover` component with viewport-aware positioning and keyboard activation |
-| `Resources/js/anchoring/` | Read-side quote anchoring: `buildCanonicalText`, `extractAnchor`, `findAnchor`, `isBlockElement`/`closestBlock` |
+| `Resources/js/anchoring/` | Read-side quote anchoring: `buildCanonicalText`, `extractAnchor`, `findAnchor`, `isBlockElement`/`closestBlock`, `coveredTextSlices`/`trimRangeToText` |
 | `Resources/css/app.css` | Site-wide styles, including the read-side rules for stored rich content |
 
 ## Non-obvious rules

@@ -1,6 +1,7 @@
 import { buildCanonicalText } from '../../../../../Shared/Resources/js/anchoring/canonical-text.js';
 import { extractAnchor } from '../../../../../Shared/Resources/js/anchoring/extract-anchor.js';
 import { closestBlock } from '../../../../../Shared/Resources/js/anchoring/block-elements.js';
+import { trimRangeToText } from '../../../../../Shared/Resources/js/anchoring/text-range.js';
 import { createQuote } from '../api/client.js';
 import { QUOTABLE_AREA_SELECTOR } from './author-anchoring.js';
 
@@ -31,8 +32,11 @@ export function quoteMiniForm() {
 
             // A quote must stay inside a single editor block (one Quill instance):
             // it may freely span several paragraphs within that block, just not
-            // cross into another block.
-            const spansSeveralBlocks = closestBlock(range.startContainer) !== closestBlock(range.endContainer);
+            // cross into another block. A boundary merely touching a block
+            // (triple-click ending at the next block's start) does not count.
+            const covered = trimRangeToText(range);
+            if (!covered) return;
+            const spansSeveralBlocks = closestBlock(covered.startContainer) !== closestBlock(covered.endContainer);
 
             const { text: canonicalText, nodeMap } = buildCanonicalText(articleEl, { within: QUOTABLE_AREA_SELECTOR });
             const anchor = extractAnchor(range, articleEl, { text: canonicalText, nodeMap });

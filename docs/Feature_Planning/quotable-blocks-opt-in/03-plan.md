@@ -16,6 +16,7 @@
 | 2 | Comment — per-action `data-requires-selection-within` on the selection toolbar | S | — | DONE |
 | 3 | Story — wrap Simple-mode content in one `ce-block--text` on the read page | S | — | DONE |
 | 4 | Quote — read and capture only `.ce-block--text` areas; « Citer » declares its area | M | 1, 2, 3 | DONE |
+| 5 | Fix — triple-click before an image quotes the paragraph (decision #11) | S | 4 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
@@ -358,6 +359,25 @@ What earlier phases left behind:
 
 ---
 
+## Phase 5 — Fix: triple-click before an image quotes the paragraph
+
+Found at VERIFY (checklist row 5), settled by decision #11. A triple-click on
+the paragraph before an image yields a range ending at `(figure, 0)`: the
+toolbar's within-check accepted it, but `extractAnchor` only understood text
+containers and returned null, so « Citer » was a dead button.
+
+- **Shared** — new `anchoring/text-range.js`: `coveredTextSlices(range)` (the
+  non-blank text a range really covers) and `trimRangeToText(range)` (the range
+  narrowed to that text, or null). `extractAnchor` trims its range first.
+- **Comment** — `selectionIsWithin` is `coveredTextSlices(...).every(...)`, so
+  a start at the very end of a caption no longer hides « Citer » either.
+- **Quote** — `openForm()` runs the multi-block guard on the trimmed range
+  (the raw `(figure, 0)` end would otherwise count as another block).
+
+Tests: `text-range.test.js`; boundary cases in `extract-anchor.test.js`,
+`toolbar.test.js`, `mini-form.test.js`; e2e row 5 asserts the form opens and
+saves. A selection that covers caption text stays hidden (existing tests).
+
 ## Visual QA checklist
 
 Filled by VERIFY. One row per surface worth looking at with real eyes, written
@@ -372,7 +392,7 @@ caption, added in phase 3** / text; quotes `de l'italique et du gras` and
 | Chapter 7, confirmed reader, desktop | Select text wholly inside the image caption → no toolbar at all (no empty bubble) | ✅ `02` |
 | Chapter 7, confirmed reader, desktop | Drag from the end of the first text block into the caption → no « Citer » | ✅ `03` (no toolbar at all) |
 | Chapter 7, confirmed reader, desktop | Drag from the first text block across the image into the second → « Citer » shows; mini-form shows the « plusieurs blocs » error | ✅ per spec §4.2.2, not as worded: the drag crosses the caption, so « Citer » is **hidden** (`04a`). The cross-block error itself verified on ch.4, two text blocks without image (`04b`) |
-| Chapter 7, confirmed reader, desktop | Triple-click the last paragraph before the image → note whether « Citer » shows and, if it does, that the form opens (not a dead button) | ❌ « Citer » **shows** but is a **dead button**: the triple-click range ends at `(figure.ce-block--image, 0)`, no caption text is intersected so the toolbar allows it, then `mini-form.js` `openForm()` gets no anchor and returns silently (`05`, failure shot in `test-results/`) |
+| Chapter 7, confirmed reader, desktop | Triple-click the last paragraph before the image → note whether « Citer » shows and, if it does, that the form opens (not a dead button) | ✅ `05` — after phase 5 (decision #11): the range still ends at `(figure.ce-block--image, 0)`, but that boundary covers no text and is ignored; « Citer » shows, the form opens on the whole paragraph with no error, and the quote saves. (Was ❌: dead button, `openForm()` got no anchor.) |
 | Chapter 7, confirmed reader | Seeded quotes `de l'italique et du gras` and `qui suit l'image` still highlight in place | ✅ `06a` (confirmed's own); `qui suit l'image` belongs to admin, checked as admin (`06b`) |
 | Chapter 7, author | Heat tint and summary list both seeded quotes; nothing tinted on the image/caption | ✅ `07` (badge 2, 2 markers, 2 summary rows, no mark in the figure) |
 | Chapter 3 (Simple), confirmed reader | Seeded highlights still render at the same places; quoting a new passage works | ✅ `08a`, `08b` |
@@ -389,7 +409,8 @@ caption, added in phase 3** / text; quotes `de l'italique et du gras` and
   even though no caption character is selected. It is the conservative choice
   (consistent with the filtered canonical text, where such a range may not
   extract an anchor), so the plan keeps it; VERIFY's triple-click row checks
-  whether it is noticeable. Not blocking.
+  whether it is noticeable. Not blocking. *Resolved by phase 5 (decision
+  #11): such a zero-coverage boundary is now ignored.*
 - **Phase 2** — whether a slot action may be wrapped (attribute on a
   descendant of the `[data-toolbar-actions]` child rather than the child
   itself). Today `<x-quote::toolbar-button>` renders the `<button>` directly;

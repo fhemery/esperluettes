@@ -8,11 +8,15 @@
  *
  * An action (an element child of [data-toolbar-actions], or a descendant of
  * one) may carry data-requires-selection-within="<css selector>": it is then
- * shown only when every non-whitespace text node touched by the selection lies
- * inside an element matching that selector. Actions without the attribute are
+ * shown only when every non-blank text the selection covers lies inside an
+ * element matching that selector (a boundary merely touching a block, e.g. a
+ * triple-click ending at `(nextBlock, 0)`, covers nothing there — see Shared's
+ * `coveredTextSlices`, which anchor extraction also uses). Actions without the attribute are
  * always shown. When no action applies, the toolbar is not shown at all. The
  * selector belongs to the contributing domain; this module never knows it.
  */
+
+import { coveredTextSlices } from '../../../../Shared/Resources/js/anchoring/text-range.js';
 
 const TOOLBAR_ID = 'comment-toolbar-active';
 
@@ -69,20 +73,8 @@ function setTooLongState(toolbar, tooLong) {
 }
 
 export function selectionIsWithin(range, selector) {
-    const root = range.commonAncestorContainer;
-    const nodes = [];
-    if (root.nodeType === Node.TEXT_NODE) {
-        nodes.push(root);
-    } else {
-        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-        while (walker.nextNode()) nodes.push(walker.currentNode);
-    }
-
-    for (const node of nodes) {
-        if (!range.intersectsNode(node) || !node.textContent.trim()) continue;
-        if (!node.parentElement?.closest(selector)) return false;
-    }
-    return true;
+    return coveredTextSlices(range)
+        .every(({ node }) => node.parentElement?.closest(selector));
 }
 
 const REQUIRES_ATTR = 'data-requires-selection-within';

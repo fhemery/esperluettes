@@ -1,3 +1,5 @@
+import { trimRangeToText } from './text-range.js';
+
 const MAX_HIGHLIGHT_LENGTH = 500;
 const CONTEXT_WORDS = 5;
 
@@ -12,6 +14,10 @@ const CONTEXT_WORDS = 5;
  */
 export function extractAnchor(range, rootEl, canonicalText) {
     const { text, nodeMap } = canonicalText;
+
+    // A boundary touching a block without covering its text is not selected.
+    range = trimRangeToText(range);
+    if (!range) return null;
 
     const startCanonical = domOffsetToCanonical(range.startContainer, range.startOffset, nodeMap);
     const endCanonical = domOffsetToCanonical(range.endContainer, range.endOffset, nodeMap);
