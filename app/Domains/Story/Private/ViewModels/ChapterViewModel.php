@@ -21,6 +21,7 @@ class CurrentChapterViewModel {
         public readonly int $wordCount,
         public readonly int $characterCount,
         public readonly int $readsLogged,
+        public readonly bool $isAdvanced,
     ) {
     }
 
@@ -36,6 +37,7 @@ class CurrentChapterViewModel {
             wordCount: (int) ($chapter->word_count ?? 0),
             characterCount: (int) ($chapter->character_count ?? 0),
             readsLogged: (int) $chapter->reads_logged_count,
+            isAdvanced: ! empty($chapter->content_blocks),
         );
     }
 }

@@ -72,6 +72,8 @@ The custom tab is **not** a Media component: `cover-tab-custom.blade.php` is a b
 
 `<x-quote::author-heat>` and the reader-side quoting toolbar both re-anchor saved passages by walking the rendered DOM, and they both assume the chapter body renders as a **single `<article data-quote-article>` root** with nothing else competing for text offsets inside it. Anyone editing chapter rendering (e.g. wrapping the content in additional markup, splitting it across multiple containers, or introducing another rich-text region on the page) must keep the entire quotable body inside that one root, or both reader quotes and the author heat map lose their anchoring.
 
+The children of that root are always `.ce-block` wrappers: Advanced content already is one wrapper per block, and Simple content (no `content_blocks`) is wrapped in a single `<div class="ce-block ce-block--text">` at display time — the stored `content` is never modified. Only `.ce-block--text` areas are read by the quote system, so an image block and its caption are never quotable.
+
 ---
 
 ## Architecture Decisions
