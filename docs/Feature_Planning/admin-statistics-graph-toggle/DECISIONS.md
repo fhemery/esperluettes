@@ -15,6 +15,8 @@ a new row that supersedes it and note the number.
 | 5 | 2026-09-27 | REFINE | Chart form in weekly mode | Bars | — |
 | 6 | 2026-09-27 | REFINE | Roots/replies chart in weekly mode | Stacked bars | — |
 | 7 | 2026-09-27 | REFINE | Negative weekly values | Net value, negatives allowed | — |
+| 8 | 2026-09-27 | DESIGN | Where are weekly values computed / how does the switch redraw? | Server aggregates daily deltas into weeks; both datasets embedded in the page; in-place switch, no reload | — |
+| 9 | 2026-09-27 | DESIGN | Where does the switch component live? | Generic `x-shared::segmented-control` in Shared (reused by the future range selector) | — |
 
 ## Assumptions made without asking
 
