@@ -1,5 +1,6 @@
 @props([
     'data',
+    'weekly' => [],
     'label' => '',
     'cumulative' => false,
     'height' => '300px',
@@ -14,6 +15,11 @@
         'cumulativeValue' => $point->cumulativeValue,
     ])->values()->all();
 
+    $weeklyPoints = collect($weekly)->map(fn ($point) => [
+        'x' => $point->periodStart->format('Y-m-d'),
+        'value' => (float) $point->value,
+    ])->values()->all();
+
     $rangeMin = count($chartPoints) > 0 ? $chartPoints[0]['x'] : null;
     $rangeMax = count($chartPoints) > 0 ? $chartPoints[array_key_last($chartPoints)]['x'] : null;
 
@@ -25,6 +31,8 @@
         'rangeMin' => $rangeMin,
         'rangeMax' => $rangeMax,
         'locale' => app()->getLocale(),
+        'weekTooltip' => __('statistics::admin.week_tooltip'),
+        'currentWeekLabel' => __('statistics::admin.current_week'),
     ];
 @endphp
 
@@ -32,6 +40,7 @@
     <div
         data-statistics-line-chart
         data-points='@json($chartPoints)'
+        data-weekly-points='@json($weeklyPoints)'
         data-label="{{ $label }}"
         data-options='@json($options)'
         {{ $attributes->class(['stat-line-chart w-full']) }}

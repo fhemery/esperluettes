@@ -45,16 +45,40 @@
         );
     })->all();
 
+    // Weekly nets, aligned on the week (not the index): roots may start later
+    // than the total. Replies are not clamped — a net may be negative.
+    $weeklyTotal = $queryService->getWeeklyTimeSeries($totalKey, $scopeType, $scopeId);
+    $weeklyRootByWeek = collect($queryService->getWeeklyTimeSeries($rootKey, $scopeType, $scopeId))
+        ->keyBy(fn ($point) => $point->periodStart->format('Y-m-d'));
+
+    $weeklyRoot = [];
+    $weeklyReply = [];
+    foreach ($weeklyTotal as $totalPoint) {
+        $rootValue = $weeklyRootByWeek->get($totalPoint->periodStart->format('Y-m-d'))?->value ?? 0;
+        $weeklyRoot[] = new \App\Domains\Statistics\Public\DTOs\TimeSeriesPoint(
+            periodStart: $totalPoint->periodStart,
+            granularity: $totalPoint->granularity,
+            value: $rootValue,
+        );
+        $weeklyReply[] = new \App\Domains\Statistics\Public\DTOs\TimeSeriesPoint(
+            periodStart: $totalPoint->periodStart,
+            granularity: $totalPoint->granularity,
+            value: $totalPoint->value - $rootValue,
+        );
+    }
+
     $series = [
         [
             'label' => $rootLabel,
             'data' => $rootSeries,
+            'weeklyData' => $weeklyRoot,
             'color' => 'rgb(99, 102, 241)',
             'backgroundColor' => 'rgba(99, 102, 241, 0.1)',
         ],
         [
             'label' => $replyLabel,
             'data' => $replySeries,
+            'weeklyData' => $weeklyReply,
             'color' => 'rgb(16, 185, 129)',
             'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
         ],

@@ -15,7 +15,7 @@
 |---|-------|------|------------|--------|
 | 1 | Weekly aggregation service (`WeeklyAggregator` + `getWeeklyTimeSeries()`) | S | — | DONE |
 | 2 | Shared `x-shared::segmented-control` component (shared infrastructure) | S | — | DONE |
-| 3 | Chart components ship the weekly payload + weekly i18n strings | S | 1 | TODO |
+| 3 | Chart components ship the weekly payload + weekly i18n strings | S | 1 | DONE |
 | 4 | `charts.js` weekly mode, chart registry and the switch on the page | M | 2, 3 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.

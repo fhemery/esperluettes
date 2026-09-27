@@ -20,6 +20,7 @@
         $maxPoints,
         cumulative: true,
     );
+    $weeklySeries = $queryService->getWeeklyTimeSeries($statisticKey, $scopeType, $scopeId);
 @endphp
 
 <div {{ $attributes->class(['stat-widget surface-bg text-on-surface rounded-lg p-6']) }}>
@@ -29,6 +30,7 @@
 
     <x-statistics::line-chart
         :data="$timeSeries"
+        :weekly="$weeklySeries"
         :label="$label"
         :height="$chartHeight"
         cumulative
