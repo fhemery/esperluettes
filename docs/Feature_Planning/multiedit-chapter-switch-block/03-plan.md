@@ -17,7 +17,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Editor — block-type registry and render delegation (shared infrastructure) | S | — | DONE |
-| 2 | Editor — `<x-editor::multi>` driven by the registry (`blockTypes`, `blockContext`, block chrome component) | M | 1 | TODO |
+| 2 | Editor — `<x-editor::multi>` driven by the registry (`blockTypes`, `blockContext`, block chrome component) | M | 1 | DONE |
 | 2v | Checkpoint — visual regression check of the refactored editor on existing consumers (`visual-verifier`, no code) | S | 2 | TODO |
 | 3 | Story — `chapter-choice` server side: request, resolver, target check, rendering | M | 1 | TODO |
 | 4 | Story — `chapter-choice` editor partial and chapter form wiring | M | 2, 3 | TODO |

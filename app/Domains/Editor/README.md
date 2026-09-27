@@ -115,7 +115,8 @@ before storing it, not something a profile does.
 
 ## Blade components
 
-Two anonymous components, registered by `EditorServiceProvider` under the
+Two anonymous components (plus the `<x-editor::multi.block>` chrome for plugin
+block partials, below), registered by `EditorServiceProvider` under the
 `editor` namespace. **Only the prefixed form exists** — there is deliberately no
 unprefixed `<x-editor>` alias.
 
@@ -173,12 +174,36 @@ and the `MediaUsageProvider` that keeps the file alive.
 | `contentValue` | `''` | Current simple-mode HTML |
 | `blocks` | `[]` | Stored blocks; a non-empty array opens in advanced mode |
 | `mode` | `'simple'` | Initial mode when `blocks` is empty |
-| `blockTypes` | `['text', 'image']` | Types the insert affordance offers |
+| `blockTypes` | `['text', 'image']` | Per-consumer opt-in list of registered types. Drives the palette, the "+" insert menu, the hidden templates and which stored blocks render (registry order; an unregistered key is ignored; a stored block of a non-enabled type is skipped) |
+| `blockContext` | `[]` | Passed untouched to plugin block partials as `$context`; Editor never reads it |
 | `toolbar` | `'default'` | Preset name or token array, resolved once and shared by both panes and every text block |
 | `min` / `max` | `null` | Bounds on the **summed** text length |
 | `placeholder` | `''` | Placeholder text |
 | `nbLines` | `5` | Height in lines of every writing surface — the simple pane and each text block |
 | `indentParagraphs` | `false` | Adds `ql-indent` to every writing surface |
+
+Switching back to *simple* is refused while any non-text block exists.
+
+#### Plugin block types
+
+A registered type's `editorView()` is `@include`d for each stored block of that
+type and once inside its hidden `<template data-block-template="{key}">` (the
+JS clones it by key). The partial receives:
+
+| Var | Value |
+|-----|-------|
+| `$name` | Base field name (`blocks`) |
+| `$uid` | Block uid; `__UID__` inside the template (replaced on clone) |
+| `$block` | The stored block array, `null` for a new one |
+| `$context` | The `blockContext` prop |
+
+It must wrap its fields in `<x-editor::multi.block :type :name :uid>`, which
+renders the chrome every block needs — root `[data-block][data-type][data-uid]`,
+move/delete controls, the hidden `{name}[{uid}][type]` input, then the "+"
+insert menu (it reads the enclosing editor's `blockTypes` itself). Its fields
+submit as `{name}[{uid}][…]`. The built-in text and image partials do not use
+it: they take component-level props (toolbar, bounds, scope) this contract does
+not carry.
 
 Translations live in `Private/Resources/lang/fr/` under the `editor::` namespace:
 `editor::rich-text.*` and `editor::multi.*`.

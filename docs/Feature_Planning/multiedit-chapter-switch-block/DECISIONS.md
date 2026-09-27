@@ -39,3 +39,5 @@ Confirmed by the user at replay (decision #7).
 | A7 | No cap on number of choices per block | REFINE | Yes |
 | A8 | Buttons wrap/stack on mobile | REFINE | Yes |
 | A9 | Label plain text, ~120 chars max | REFINE | Yes |
+| A10 | `<x-editor::multi.block>` gets the enabled types via `@aware(['blockTypes'])` from the enclosing `<x-editor::multi>`, so plugin partials pass nothing | BUILD (2) | Yes |
+| A11 | A stored `text`/`image` block is also skipped when its type is not in `blockTypes` (same rule as plugins); no consumer does this today | BUILD (2) | Yes |

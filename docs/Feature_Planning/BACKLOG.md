@@ -30,7 +30,7 @@ scoped to the task that actually changed.
 - **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · TODO
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · TODO
-- **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · WIP:BUILD (1/5). Prerequisite [`quotable-blocks-opt-in`](_done/quotable-blocks-opt-in.md) is done — see the note in its `02-architecture.md` §4.3
+- **Multi-edit — chapter switch block** · `multiedit-chapter-switch-block/` · interactive · WIP:BUILD (2/5). Prerequisite [`quotable-blocks-opt-in`](_done/quotable-blocks-opt-in.md) is done — see the note in its `02-architecture.md` §4.3
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **Admin pages — flash message shown twice** · `admin-double-flash/` · auto · TODO: leftover from `feature-toggle-registration`. The admin layout and ~23 admin page views both render `<x-shared::flash-block />`; pre-existing.
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.

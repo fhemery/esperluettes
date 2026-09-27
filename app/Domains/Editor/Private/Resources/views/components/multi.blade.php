@@ -12,8 +12,14 @@
       contentValue current simple HTML
       blocks       initial advanced blocks (array) — non-empty ⇒ start advanced
       mode         'simple' | 'advanced' (initial)
-      blockTypes   allowed types, default ['text','image']
-      scope        Media scope for image uploads/picker (required)
+      blockTypes   per-consumer opt-in list of registered block types, default
+                   ['text','image']. Drives the palette, the "+" insert menu,
+                   the hidden templates and which stored blocks are rendered
+                   (in EditorBlockRegistry order; unregistered keys ignored,
+                   stored blocks of a non-enabled type skipped).
+      blockContext array passed untouched to plugin block partials as $context;
+                   Editor never reads it. Default [].
+      scope       Media scope for image uploads/picker (required)
       toolbar      preset name or explicit token array (passed to each text block)
       min / max    summed-text constraints
       placeholder  editor placeholder
@@ -28,6 +34,7 @@
     'blocks' => [],
     'mode' => 'simple',
     'blockTypes' => ['text', 'image'],
+    'blockContext' => [],
     'scope',
     'toolbar' => 'default',
     'min' => null,
@@ -39,10 +46,18 @@
 ])
 
 @use(App\Domains\Editor\Private\Support\ToolbarPresets)
+@use(App\Domains\Editor\Public\Blocks\EditorBlockRegistry)
 
 @include('editor::components._assets')
 
 @php
+    // Registered types this consumer opted into, in registry order. Inherited by
+    // the text/image partials' insert affordance through include scope.
+    $enabledTypes = array_values(array_filter(
+        app(EditorBlockRegistry::class)->all(),
+        fn ($t) => in_array($t->key(), $blockTypes, true),
+    ));
+    $enabledByKey = collect($enabledTypes)->keyBy(fn ($t) => $t->key());
     // Resolved once here, so both panes and every text block share one list.
     $toolbar = ToolbarPresets::resolve($toolbar);
     $simpleId = 'me-simple-' . Str::random(6);
@@ -104,18 +119,25 @@
     <div x-show="mode === 'advanced'" x-cloak>
         <div x-ref="container" class="multi-editor__blocks">
             @foreach ($blocks as $i => $block)
-                @if (($block['type'] ?? 'text') === 'image')
+                @php $blockKey = $block['type'] ?? 'text'; @endphp
+                @if (!$enabledByKey->has($blockKey))
+                    {{-- Type not enabled/registered for this consumer: skipped. --}}
+                @elseif ($blockKey === 'image')
                     @include('editor::components.multi._image-block', [
                         'name' => $name, 'uid' => 'b' . $i, 'scope' => $scope,
                         'path' => $block['path'] ?? null, 'alt' => $block['alt'] ?? '', 'caption' => $block['caption'] ?? '',
                         'keepOriginal' => $block['keep_original'] ?? false,
                         'needsPropertyConfirm' => $needsPropertyConfirm,
                     ])
-                @else
+                @elseif ($blockKey === 'text')
                     @include('editor::components.multi._text-block', [
                         'name' => $name, 'uid' => 'b' . $i, 'toolbar' => $toolbar,
                         'min' => $min, 'max' => $max, 'html' => $block['html'] ?? '', 'placeholder' => $placeholder,
                         'nbLines' => $nbLines, 'indentParagraphs' => $indentParagraphs,
+                    ])
+                @else
+                    @include($enabledByKey[$blockKey]->editorView(), [
+                        'name' => $name, 'uid' => 'b' . $i, 'block' => $block, 'context' => $blockContext,
                     ])
                 @endif
             @endforeach
@@ -123,36 +145,37 @@
 
         {{-- Palette --}}
         <div class="flex gap-2 mt-2 justify-center">
-            @if (in_array('text', $blockTypes, true))
-                <button type="button" x-on:click="appendBlock('text')"
+            @foreach ($enabledTypes as $t)
+                <button type="button" x-on:click="appendBlock('{{ $t->key() }}')"
                     class="px-3 py-1.5 text-sm rounded-md border border-border text-primary hover:bg-primary/5 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[18px]">notes</span>{{ __('editor::multi.add_text') }}
+                    <span class="material-symbols-outlined text-[18px]">{{ $t->icon() }}</span>{{ __($t->labelKey()) }}
                 </button>
-            @endif
-            @if (in_array('image', $blockTypes, true))
-                <button type="button" x-on:click="appendBlock('image')"
-                    class="px-3 py-1.5 text-sm rounded-md border border-border text-primary hover:bg-primary/5 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[18px]">image</span>{{ __('editor::multi.add_image') }}
-                </button>
-            @endif
+            @endforeach
         </div>
     </div>
 
-    {{-- Hidden templates for dynamically added blocks --}}
-    <template x-ref="tplText">
-        @include('editor::components.multi._text-block', [
-            'name' => $name, 'uid' => '__UID__', 'toolbar' => $toolbar,
-            'min' => $min, 'max' => $max, 'html' => '', 'placeholder' => $placeholder,
-            'nbLines' => $nbLines, 'indentParagraphs' => $indentParagraphs,
-        ])
-    </template>
-    <template x-ref="tplImage">
-        @include('editor::components.multi._image-block', [
-            'name' => $name, 'uid' => '__UID__', 'scope' => $scope, 'path' => null, 'alt' => '', 'caption' => '',
-            'keepOriginal' => false,
-            'needsPropertyConfirm' => $needsPropertyConfirm,
-        ])
-    </template>
+    {{-- Hidden templates for dynamically added blocks, one per enabled type --}}
+    @foreach ($enabledTypes as $t)
+        <template data-block-template="{{ $t->key() }}">
+            @if ($t->key() === 'text')
+                @include('editor::components.multi._text-block', [
+                    'name' => $name, 'uid' => '__UID__', 'toolbar' => $toolbar,
+                    'min' => $min, 'max' => $max, 'html' => '', 'placeholder' => $placeholder,
+                    'nbLines' => $nbLines, 'indentParagraphs' => $indentParagraphs,
+                ])
+            @elseif ($t->key() === 'image')
+                @include('editor::components.multi._image-block', [
+                    'name' => $name, 'uid' => '__UID__', 'scope' => $scope, 'path' => null, 'alt' => '', 'caption' => '',
+                    'keepOriginal' => false,
+                    'needsPropertyConfirm' => $needsPropertyConfirm,
+                ])
+            @else
+                @include($t->editorView(), [
+                    'name' => $name, 'uid' => '__UID__', 'block' => null, 'context' => $blockContext,
+                ])
+            @endif
+        </template>
+    @endforeach
 
     @once
     @push('scripts')
@@ -165,6 +188,9 @@
                 // as a block is detached (removeBlock), $refs.container would be
                 // undefined and the state would stop syncing.
                 let containerEl = null;
+                // Same reason: templates are looked up from the component root,
+                // captured at init ($root would be the insert menu's own x-data).
+                let rootEl = null;
 
             return {
                 mode: cfg.mode,
@@ -172,12 +198,13 @@
                 labels: cfg.labels,
                 seq: 0,
                 blockCount: 0,
-                imageCount: 0,
+                nonTextCount: 0,
                 canGoSimple: false,
                 orderCsv: '',
 
                 init() {
                     containerEl = this.$refs.container;
+                    rootEl = this.$el;
                     // Initialize Quill on the server-rendered text blocks. Done here
                     // (not via inline scripts) so it can't run before the editor
                     // bundle has loaded — the cause of blank editors on the edit page.
@@ -200,7 +227,8 @@
                 _blocks() { return Array.from(this._container().querySelectorAll('[data-block]')); },
                 _newUid() { return 'n' + (this.seq++); },
                 _make(type, uid) {
-                    const tpl = type === 'image' ? this.$refs.tplImage : this.$refs.tplText;
+                    const tpl = rootEl.querySelector(':scope > template[data-block-template="' + type + '"]');
+                    if (!tpl) return null; // type not enabled for this editor
                     const holder = document.createElement('div');
                     holder.appendChild(tpl.content.cloneNode(true));
                     holder.innerHTML = holder.innerHTML.split('__UID__').join(uid);
@@ -215,12 +243,14 @@
                 },
                 appendBlock(type) {
                     const node = this._make(type, this._newUid());
+                    if (!node) return;
                     this._container().appendChild(node);
                     this._afterInsert(node, type);
                 },
                 insertAfter(el, type) {
                     const block = el.closest('[data-block]');
                     const node = this._make(type, this._newUid());
+                    if (!node) return;
                     block.after(node);
                     this._afterInsert(node, type);
                 },
@@ -243,9 +273,9 @@
                 syncState() {
                     const blocks = this._blocks();
                     this.blockCount = blocks.length;
-                    this.imageCount = blocks.filter(b => b.dataset.type === 'image').length;
+                    this.nonTextCount = blocks.filter(b => b.dataset.type !== 'text').length;
                     this.orderCsv = blocks.map(b => b.dataset.uid).join(',');
-                    this.canGoSimple = this.blockCount === 1 && this.imageCount === 0;
+                    this.canGoSimple = this.blockCount === 1 && this.nonTextCount === 0;
                 },
                 goAdvanced() {
                     if (this.mode === 'advanced') return;
