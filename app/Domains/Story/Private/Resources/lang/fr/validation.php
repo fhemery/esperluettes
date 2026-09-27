@@ -83,6 +83,10 @@ return [
         'blocks' => [
             'required' => 'Le contenu est requis : ajoutez au moins un bloc.',
         ],
+        'choice' => [
+            'foreign_target' => 'Un choix pointe vers un chapitre qui n’appartient pas à cette histoire.',
+            'label_max' => 'Le libellé d’un choix ne peut pas dépasser 120 caractères.',
+        ],
         'publish_at' => [
             'after' => 'La date de publication planifiée doit être dans le futur.',
         ],

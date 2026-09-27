@@ -585,6 +585,8 @@ deptrac:
       - SettingsPublic
       # Registers the chapter media usage provider with the Media GC
       - MediaPublic
+      # Registers the chapter-choice block type
+      - EditorPublic
 
     StoryRefPublic:
       - Shared

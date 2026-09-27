@@ -236,3 +236,19 @@ describe('NewsMediaUsageProvider', function () {
         expect($paths)->toContain('news/2025/01/header.jpg');
     });
 });
+
+describe('News advanced mode — HTTP request', function () {
+    it('rejects a chapter-choice block', function () {
+        $before = News::count();
+
+        $this->actingAs(admin($this))
+            ->post(route('news.admin.store'), newsData([
+                'mode' => 'advanced',
+                'blocks_order' => 'b0',
+                'blocks' => ['b0' => ['type' => 'chapter-choice', 'choices' => [['chapter_id' => 1]]]],
+            ]))
+            ->assertSessionHasErrors('blocks.b0.type');
+
+        expect(News::count())->toBe($before);
+    });
+});

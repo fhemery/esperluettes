@@ -88,6 +88,7 @@
 
 - **CommentPolicyRegistry** (`Comment` domain) — registers `'chapter'` policy with `ChapterCommentPolicy`.
 - **MediaUsageRegistry** (`Media` domain) — registers `ChapterMediaUsageProvider`, which reports the image paths of every chapter (including soft-deleted ones) so the Media GC does not sweep them.
+- **EditorBlockRegistry** (`Editor` domain) — registers the `chapter-choice` block type (`ChapterChoiceBlockType`); see the README's "Chapter choice block".
 - **ModerationRegistry** (`Moderation` domain) — registers `'story'` and `'chapter'` topics with `StorySnapshotFormatter` and `ChapterSnapshotFormatter`.
 - **NotificationFactory** (`Notification` domain) — registers 7 notification types: `ChapterCommentNotification`, `CoAuthorChapterCreated/Updated/DeletedNotification`, `CollaboratorRoleGiven/Removed/LeftNotification`.
 - **ConfigPublicApi** (`Config` domain) — registers feature toggles `story.theme_covers_enabled` and `story.custom_covers_enabled` (both default `false`).

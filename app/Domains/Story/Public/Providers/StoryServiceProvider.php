@@ -4,6 +4,8 @@ namespace App\Domains\Story\Public\Providers;
 
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
+use App\Domains\Editor\Public\Blocks\EditorBlockRegistry;
+use App\Domains\Story\Private\Editor\ChapterChoiceBlockType;
 use App\Domains\Story\Private\Support\ChapterMediaUsageProvider;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
@@ -151,6 +153,9 @@ class StoryServiceProvider extends ServiceProvider
 
         // Let Media GC know which image files chapters still use (block images).
         app(MediaUsageRegistry::class)->register(new ChapterMediaUsageProvider());
+
+        // Offer the chapter-choice block to editors that enable it (chapter form only).
+        app(EditorBlockRegistry::class)->register(new ChapterChoiceBlockType());
 
         // Register policies
         $registry = app(CommentPolicyRegistry::class);

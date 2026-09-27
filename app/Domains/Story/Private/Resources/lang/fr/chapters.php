@@ -7,6 +7,10 @@ return [
     'deleted_success' => 'Chapitre supprimé avec succès.',
 
     'back_to_story' => 'Retour à l\'histoire',
+
+    'choice' => [
+        'block_label' => 'Choix de chapitres',
+    ],
     
     'create' => [
         'title' => 'Nouveau chapitre',

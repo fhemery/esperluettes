@@ -41,3 +41,5 @@ Confirmed by the user at replay (decision #7).
 | A9 | Label plain text, ~120 chars max | REFINE | Yes |
 | A10 | `<x-editor::multi.block>` gets the enabled types via `@aware(['blockTypes'])` from the enclosing `<x-editor::multi>`, so plugin partials pass nothing | BUILD (2) | Yes |
 | A11 | A stored `text`/`image` block is also skipped when its type is not in `blockTypes` (same rule as plugins); no consumer does this today | BUILD (2) | Yes |
+| A12 | A choice targeting its own holding chapter is rendered with the slug/title from *before* that save (targets are read before the update); a rename in the same save leaves a stale slug, absorbed by the canonical 301 | BUILD (3) | Yes |
+| A13 | Choice buttons reuse `<x-shared::button>` primary colours (`surface-primary`, `text-sm`, `rounded-md`) and are centred in the wrapper; VERIFY confirms the look | BUILD (3) | Yes |

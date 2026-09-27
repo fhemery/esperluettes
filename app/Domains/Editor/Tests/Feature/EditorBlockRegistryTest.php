@@ -42,7 +42,8 @@ describe('EditorBlockRegistry', function () {
     it('lists text then image as built-in types', function () {
         $types = app(EditorBlockRegistry::class)->all();
 
-        expect(array_map(fn (EditorBlockType $t) => $t->key(), $types))->toBe(['text', 'image']);
+        // Built-ins come first; other domains may register more after them.
+        expect(array_map(fn (EditorBlockType $t) => $t->key(), array_slice($types, 0, 2)))->toBe(['text', 'image']);
         expect($types[0]->icon())->toBe('notes');
         expect($types[1]->icon())->toBe('image');
     });

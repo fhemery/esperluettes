@@ -123,3 +123,18 @@ describe('Static page advanced mode — HTTP request', function () {
         expect(Storage::disk('public')->allFiles('static-pages'))->toBeEmpty();
     });
 });
+
+describe('Static page advanced mode — block types', function () {
+    it('rejects a chapter-choice block', function () {
+        $before = StaticPage::count();
+
+        $this->actingAs(admin($this))
+            ->post(route('static.admin.store'), advancedStaticPagePayload([
+                'blocks_order' => 'b0',
+                'blocks' => ['b0' => ['type' => 'chapter-choice', 'choices' => [['chapter_id' => 1]]]],
+            ]))
+            ->assertSessionHasErrors('blocks.b0.type');
+
+        expect(StaticPage::count())->toBe($before);
+    });
+});
