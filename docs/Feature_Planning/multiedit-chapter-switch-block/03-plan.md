@@ -18,7 +18,7 @@
 |---|-------|------|------------|--------|
 | 1 | Editor — block-type registry and render delegation (shared infrastructure) | S | — | DONE |
 | 2 | Editor — `<x-editor::multi>` driven by the registry (`blockTypes`, `blockContext`, block chrome component) | M | 1 | DONE |
-| 2v | Checkpoint — visual regression check of the refactored editor on existing consumers (`visual-verifier`, no code) | S | 2 | TODO |
+| 2v | Checkpoint — visual regression check of the refactored editor on existing consumers (`visual-verifier`, no code) | S | 2 | DONE |
 | 3 | Story — `chapter-choice` server side: request, resolver, target check, rendering | M | 1 | TODO |
 | 4 | Story — `chapter-choice` editor partial and chapter form wiring | M | 2, 3 | TODO |
 
@@ -242,6 +242,27 @@ traced to the refactor and not to the new block. Dispatched to the
 
 **Output.** Screenshots in `shots/checkpoint-2v/`, a short pass/fail list
 appended under this section, status `DONE` in the phase index.
+
+**Result (2026-09-27, HEAD 7f3a05ff) — PASS, no regression.** Method: every
+page below was captured on HEAD and again with `app/Domains/Editor` checked
+out at c0da6420 (pre-refactor), then compared; code restored afterwards.
+- ✅ `pnpm run e2e:core` — 26/26 green (incl. `multi-editor`).
+- ✅ News + StaticPage admin, Avancé: palette and "+" menu are
+  `notes` « Ajouter du texte » + `image` « Ajouter une image », identical
+  before/after (chapter create form too).
+- ✅ Insert (+ menu, palette), move down/up (`blocks_order` follows), delete,
+  image upload with alt/caption — both forms; desktop and 375px look right
+  (`after-{news,static}-editor-375.png`).
+- ✅ « Simple » disabled with an image block (tooltip is the new phase-2
+  wording), still disabled with two text blocks, enabled with one.
+- ✅ Save + reopen: reopens Avancé as text,image,text; public page shows
+  text / image / caption / text (`after-*-qa-public.png`).
+- ✅ Before/after diff: editor blocks DOM identical (modulo Alpine transition
+  styles and random media-field ids), public rendered HTML identical for the
+  new QA items and the existing `news/test` and `qui-sommes-nous`; all
+  before/after screenshots byte-identical, so only the `after-*` set is kept.
+- n/a FAQ admin — uses `<x-editor::rich-text>`, not the multi-editor.
+- ✅ Chapter create form (author): unchanged, byte-identical screenshots.
 
 ---
 
