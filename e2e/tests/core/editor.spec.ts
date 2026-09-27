@@ -15,7 +15,7 @@ import { expect, test } from '../../support/test';
  * app/Domains/Story/Tests/Feature/Chapters/EditChapterTest.php.
  */
 
-const EDITOR_ASSET = /editor(-bundle)?-[A-Za-z0-9_]+\.(js|css)$/;
+const EDITOR_ASSET = /editor(-bundle)?-[A-Za-z0-9_-]+\.(js|css)$/;
 
 test('a read-only page loads no editor asset', async ({ guest }) => {
   const requested: string[] = [];
