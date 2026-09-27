@@ -89,6 +89,7 @@ Advanced chapters may hold a `chapter-choice` block — a group of buttons linki
 - **Same-story rule (security).** A `chapter_id` must be a chapter of the story (any status, `ChapterChoiceTargets`), or an id the edited chapter already stored — which is how a choice to a since-deleted chapter survives a save. Anything else is a validation error on `blocks`. Choices without a target, then blocks without a choice, are dropped.
 - **Relative URLs** (`chapters.show`, `absolute: false`), so stored HTML survives a domain change; stale slugs are absorbed by the canonical redirect of the reader page.
 - **Not quotable** and not counted: the wrapper is `ce-block--chapter-choice`, never `ce-block--text`, and word/character counts read text blocks only.
+- **Editor side.** Only the chapter form opts in (`blockTypes` `text`, `image`, `chapter-choice`), passing `blockContext['chapters']` from `ChapterChoiceTargets`. The partial `editor/chapter-choice-block` (+ `chapter-choice-row`) server-renders one row per choice; a local Alpine scope adds, moves and removes rows in the DOM and re-indexes their names, so the submitted order is the order on screen. A stored target missing from the list shows as « Chapitre supprimé » with a warning and is kept on save.
 
 ---
 

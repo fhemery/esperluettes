@@ -48,6 +48,8 @@
                         'alt' => $oldBlock['alt'] ?? '',
                         'caption' => $oldBlock['caption'] ?? '',
                         'keep_original' => !empty($oldBlock['keep_original']),
+                        // As submitted; the chapter-choice partial casts the values.
+                        'choices' => $oldBlock['choices'] ?? [],
                     ];
                 }
             }
@@ -57,6 +59,8 @@
             name="blocks" contentName="content"
             :contentValue="old('content', $chapter->content ?? '')"
             :blocks="$chapterBlocks"
+            :blockTypes="['text', 'image', 'chapter-choice']"
+            :blockContext="['chapters' => $choiceTargets]"
             toolbar="links"
             class="mt-1 block w-full"
             :nbLines="15" :indentParagraphs="true"

@@ -18,6 +18,7 @@ use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\ReadingProgressService;
 use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Private\Services\StoryService;
+use App\Domains\Story\Private\Support\ChapterChoiceTargets;
 use App\Domains\Story\Private\Support\GetStoryOptions;
 use App\Domains\Story\Private\ViewModels\ChapterViewModel;
 use App\Domains\StoryRef\Public\Api\StoryRefPublicApi;
@@ -38,6 +39,7 @@ class ChapterController
         private ChapterCreditService $chapterCreditService,
         private StoryRefPublicApi $storyRefs,
         private CoverService $coverService,
+        private ChapterChoiceTargets $choiceTargets,
     ) {
     }
 
@@ -82,6 +84,7 @@ class ChapterController
 
         return view('story::chapters.create', [
             'story' => $story,
+            'choiceTargets' => $this->choiceTargets->forStory($story),
         ]);
     }
 
@@ -221,6 +224,7 @@ class ChapterController
             'story' => $story,
             'chapter' => $chapter,
             'page' => $page,
+            'choiceTargets' => $this->choiceTargets->forStory($story),
         ]);
     }
 

@@ -10,6 +10,17 @@ return [
 
     'choice' => [
         'block_label' => 'Choix de chapitres',
+        'add' => 'Ajouter un choix',
+        'target' => 'Chapitre cible',
+        'label' => 'Libellé (facultatif)',
+        'label_placeholder' => 'Vide : le titre du chapitre cible est utilisé',
+        'enabled' => 'Actif',
+        'unpublished' => 'non publié',
+        'deleted' => 'Chapitre supprimé',
+        'deleted_warning' => 'Ce chapitre a été supprimé : choisissez une autre cible ou retirez ce choix. Il n\'est pas affiché aux lecteurs.',
+        'move_up' => 'Monter ce choix',
+        'move_down' => 'Descendre ce choix',
+        'remove' => 'Retirer ce choix',
     ],
     
     'create' => [

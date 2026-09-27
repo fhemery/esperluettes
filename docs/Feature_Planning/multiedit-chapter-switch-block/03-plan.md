@@ -20,7 +20,7 @@
 | 2 | Editor — `<x-editor::multi>` driven by the registry (`blockTypes`, `blockContext`, block chrome component) | M | 1 | DONE |
 | 2v | Checkpoint — visual regression check of the refactored editor on existing consumers (`visual-verifier`, no code) | S | 2 | DONE |
 | 3 | Story — `chapter-choice` server side: request, resolver, target check, rendering | M | 1 | DONE |
-| 4 | Story — `chapter-choice` editor partial and chapter form wiring | M | 2, 3 | TODO |
+| 4 | Story — `chapter-choice` editor partial and chapter form wiring | M | 2, 3 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
