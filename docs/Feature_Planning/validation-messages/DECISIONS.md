@@ -22,4 +22,7 @@ the user may want to reverse — surface these in the WRAP summary.
 | A3 | Block errors show in the form's existing `blocks` error area, not inline next to the faulty block | REFINE | yes |
 | A4 | The existing `validation.max.file` default « :max Mo » is wrong (`:max` is in Ko) and is corrected to Ko | REFINE | yes |
 | A5 | Messages never expose technical field paths (`blocks.x.file`); fields get a French label or the message is phrased without one | REFINE | yes |
+| A7 | T1 — defaults live in a Shared-owned PHP `validation.php`, registered unnamespaced via `FileLoader::addPath()`; rejected root `lang/`, JSON, `laravel-lang` package | DESIGN | yes (cheap: one file moves) |
+| A8 | T2 — messages phrased without `:attribute` (supersedes A5's "French label" branch) | DESIGN | yes |
+| A9 | T4 — the three `validation.*` keys in `Shared/fr.json` are removed (JSON shadows PHP) | DESIGN | yes |
 | A6 | Tests keep `APP_LOCALE=zz`; the French text is verified by tests that switch to `fr` | REFINE | yes |
