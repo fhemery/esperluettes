@@ -50,15 +50,20 @@ drifting.
 
 ### Supply-chain: minimum release age
 
-**Target: 24 hours** before a newly published package version may be installed.
+**Target: 48 hours** before a newly published package version may be installed.
 
-We pin **pnpm 11.x** (see `packageManager`). pnpm 11 defaults
-`minimumReleaseAge` to **1440 minutes (24 h)** and requires Node 22+ (CI uses
-Node 24).
+It is set explicitly in `pnpm-workspace.yaml` as `minimumReleaseAge: 2880`
+(minutes), not left to pnpm's default. We pin **pnpm 11.x** (see
+`packageManager`), which requires Node 22+ (CI uses Node 24) and would
+otherwise default to 24 h.
 
-If a future pnpm major drops that default or its stricter install defaults
-block us, either restore an explicit `minimumReleaseAge: 1440` in
-`pnpm-workspace.yaml` or document a version floor here.
+*Amended 2026-09-27:* raised from pnpm's 24 h default to an explicit 48 h, so
+a compromised release has a wider window to be caught and pulled, and so the
+policy no longer depends on a pnpm default that a future major could change.
+
+The age is checked when a version is **resolved**, not when a lockfile is
+installed: after tightening it, regenerate `pnpm-lock.yaml` so every locked
+version is resolved under the new rule.
 
 **Dependency build scripts** are gated by pnpm 11 `strictDepBuilds`. Allowed
 packages are listed explicitly in `pnpm-workspace.yaml` → `allowBuilds`
@@ -96,7 +101,7 @@ deps (“dual manager” docs or lockfiles).
 ### Positive
 
 - One lockfile (`pnpm-lock.yaml`) and one install vocabulary for the repo.
-- Default 24 h minimum release age on new package versions (pnpm 11).
+- Explicit 48 h minimum release age on new package versions.
 - Explicit `allowBuilds` allowlist for dependency install scripts.
 - Husky, gate, Composer `dev`, and CI use pnpm while script names stay stable.
 

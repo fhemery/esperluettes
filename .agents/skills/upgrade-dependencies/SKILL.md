@@ -27,7 +27,7 @@ Argument: none → both stages; `php` or `js` → that stage only.
 - Default scope: **security fixes + patch/minor updates within the existing
   constraints**. **Major versions** go in a separate *optional* section, one
   line each. The user picks them individually, and none is taken by default.
-- Never bypass the safeguards: pnpm's 24 h `minimumReleaseAge`
+- Never bypass the safeguards: pnpm's 48 h `minimumReleaseAge`
   ([ADR 0001](../../../docs/adr/0001-use-pnpm.md)), the `allowBuilds` allowlist,
   Composer's `audit.block-insecure`. When one of them blocks a fix, report it
   and let the user decide.
@@ -61,6 +61,13 @@ For each advisory, note the package, installed version, fixed versions,
 severity, CVE/GHSA and whether the package is direct or transitive. For a
 transitive one, find its parent with `composer why <pkg>`. Also note any
 **abandoned** packages that `audit` reports.
+
+`--with-all-dependencies` also moves **transitive** packages across majors
+when a parent widens its range (e.g. Laravel 13.33 allowing guzzle 8). Before
+the plan, dry-run the update (`sail composer update --dry-run -W …`) and list
+every transitive major it would bring in section C, marked *(transitive)*,
+with whether `app/` uses it directly. The user can hold one back with
+`--with <pkg>:<constraint>`.
 
 For each major candidate, read its changelog or UPGRADE guide (WebFetch the
 GitHub release notes / `UPGRADE.md`). For `laravel/framework`, read the
@@ -146,8 +153,16 @@ Things to know about this repo:
 - **Exact pins** in `dependencies` (alpinejs, @alpinejs/intersect, axios,
   quill, quill-delta, uuid) are deliberate. A bump keeps the exact pin
   (`--save-exact`). `alpinejs` and `@alpinejs/intersect` always move together.
-- `minimumReleaseAge` (24 h): a version published less than 24 h ago won't
-  install. List it under "Cannot fix now — retry after <date>".
+- `minimumReleaseAge` (48 h, set in `pnpm-workspace.yaml`): a version
+  published less than 48 h ago won't install. List it under "Cannot fix now —
+  retry after <date>". The age is checked at resolution only: if it is ever
+  tightened, regenerate the lockfile (`rm pnpm-lock.yaml && pnpm install`).
+- `ERR_PNPM_UNEXPECTED_STORE`: `node_modules` was linked from another store
+  (typically the VS Code snap terminal's). Nothing is written. Ask the user;
+  the usual fix is `rm -rf node_modules` and install again.
+- Known advisories with no fixed release and a documented mitigation sit in
+  `auditConfig.ignoreGhsas` in `pnpm-workspace.yaml`. Re-check each on every
+  run: drop the entry once a fix ships.
 - For a major of **Vite, Tailwind, Vitest, Playwright, Quill, Alpine**, check
   the migration guide against this repo's config: `vite.config.*`, the CSS
   entry points, `vitest.config.*`, `playwright.config.*`, Quill usage in the
@@ -184,10 +199,15 @@ Never add a `package-lock.json`. Only `pnpm-lock.yaml` changes.
 pnpm audit                    # expected: only the "D" items remain
 pnpm install --frozen-lockfile   # what CI does: the lockfile must be consistent
 pnpm run gate -- --all        # full, including the asset build
+pnpm run e2e:setup            # only if playwright moved — downloads its Chromium
 pnpm run e2e
 ```
 
-Same failure handling as 1.4.
+Same failure handling as 1.4. Take majors in **small batches** (low-risk
+tooling together, a bundler on its own), each verified and committed, so a
+failure points at one cause. An e2e failure is not always the upgrade's fault:
+a new build changes asset hashes, which can expose a brittle spec — find the
+cause before blaming the bump.
 
 ### 2.5 Commit
 
