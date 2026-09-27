@@ -88,7 +88,7 @@ BUILD narrowed them to the field-level list (A12). The Shared README
   > 2 Mo client-side (« Le fichier dépasse la taille maximale de 2 Mo. ») and
   clears the input, so the server « 2048 Ko » text only shows when the guard is
   bypassed. Same limit, different wording — left as is, no row.
-- **Pushed to backlog** — [`validation-messages-followups/`](../validation-messages-followups/00-request.md):
+- **Pushed to backlog** — [`validation-messages-followups`](./validation-messages-followups.md) (done):
   1. the top « Oups » box repeats a shared block error once per faulty block
      (renders `$errors->all()` without de-dup, A12);
   2. Shared's own custom rules (`maxstripped`, `minstripped`, `required_trimmed`)
