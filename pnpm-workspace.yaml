@@ -5,3 +5,14 @@
 # new dependency genuinely needs a build.
 allowBuilds:
   esbuild: true
+
+# Supply-chain delay: a version must be published for 48 h before it can be
+# installed (pnpm 11 defaults to 24 h). See docs/adr/0001-use-pnpm.md.
+minimumReleaseAge: 2880
+
+auditConfig:
+  ignoreGhsas:
+    # Quill XSS via HTML export (low). No fixed release exists; the exported
+    # HTML is sanitized server-side with HTML Purifier before storage/render.
+    # Remove once a patched quill is out.
+    - GHSA-v3m3-f69x-jf25

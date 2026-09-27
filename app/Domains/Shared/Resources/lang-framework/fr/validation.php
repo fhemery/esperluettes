@@ -26,6 +26,7 @@ return [
     'alpha_num' => 'Ce champ ne doit contenir que des lettres et des chiffres.',
     'any_of' => 'Cette valeur est invalide.',
     'array' => 'Ce champ doit être une liste.',
+    'array_keys' => 'Ce champ ne doit contenir que les clés suivantes : :values.',
     'ascii' => 'Ce champ ne doit contenir que des caractères alphanumériques et des symboles sur un octet.',
     'base64' => 'Cette valeur doit être une chaîne Base64 valide.',
     'before' => 'La date doit être antérieure au :date.',
