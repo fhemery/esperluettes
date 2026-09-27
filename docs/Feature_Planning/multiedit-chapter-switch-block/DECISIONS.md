@@ -20,6 +20,7 @@ a new row that supersedes it and note the number.
 | 10 | 2026-09-26 | DESIGN | How does an author prepare an unpublished branch? | Per-choice "enabled" toggle; disabled choices are hidden from everyone on the reader page | — |
 | 11 | 2026-09-26 | DESIGN | Empty-label fallback after target rename | Title frozen at last save of the holding chapter | #2 (partly) |
 | 12 | 2026-09-26 | DESIGN | Keeping labels out of quotes | No opt-out stopgap. Quotability becomes opt-in per block in a prerequisite task (`quotable-blocks-opt-in/`); this task is BLOCKED until it is done | — |
+| 13 | 2026-09-27 | VERIFY | Choice button colour (primary had light-theme contrast 3.1–3.6)? | `accent` — it means an action; `tertiary` only if accent really does not fit. Applied without re-verifying | A13 (colour) |
 
 ## Assumptions made without asking
 
