@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import { makeLog, fileExists, runCmdWithOutput, determineRunner, isSailRunning } from './utils.js';
 
 const log = makeLog('deptrac');

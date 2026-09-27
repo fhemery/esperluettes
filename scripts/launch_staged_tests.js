@@ -21,7 +21,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawnSync } from 'child_process';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import { makeLog, fileExists, runCmd, determineRunner } from './utils.js';
 
 const excludeFoldersOrFiles = [
