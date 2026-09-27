@@ -4,16 +4,44 @@ use App\Domains\Config\Private\Repositories\ConfigParameterRepository;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\FeatureToggle;
+use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
+use App\Domains\Config\Public\Contracts\FeatureToggleDefinition;
 use App\Domains\Config\Public\Services\ConfigParameterService;
+use App\Domains\Config\Public\Services\FeatureToggleService;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 function createFeatureToggle(TestCase $t, FeatureToggle $featureToggle): FeatureToggle
 {
     $api = app(ConfigPublicApi::class);
+    $api->registerFeatureToggle(new FeatureToggleDefinition(
+        $featureToggle->domain,
+        $featureToggle->name,
+        $featureToggle->admin_visibility,
+    ));
     $t->actingAs(techAdmin($t));
-    $api->addFeatureToggle($featureToggle);
+    $api->updateFeatureToggle(
+        $featureToggle->name,
+        $featureToggle->access,
+        $featureToggle->domain,
+        $featureToggle->roles,
+    );
     return $featureToggle;
+}
+
+function declareFeatureToggle(
+    string $name,
+    string $domain = 'config',
+    FeatureToggleAdminVisibility $adminVisibility = FeatureToggleAdminVisibility::TECH_ADMINS_ONLY,
+): void {
+    app(ConfigPublicApi::class)->registerFeatureToggle(
+        new FeatureToggleDefinition($domain, $name, $adminVisibility)
+    );
+}
+
+function clearFeatureToggleDefinitions(): void
+{
+    FeatureToggleService::clearDefinitions();
 }
 
 function checkToggleState(string $featureToggleName): bool

@@ -1,8 +1,6 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
-use App\Domains\Config\Public\Contracts\FeatureToggle;
-use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use App\Domains\Story\Private\Models\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Domains\Story\Private\Services\ChapterCreditService;
@@ -157,10 +155,6 @@ describe('Chapter display', function () {
     });
 
     describe('Moderation', function () {
-        beforeEach(function () {
-            createFeatureToggle($this, new FeatureToggle('reporting', 'moderation', access: FeatureToggleAccess::ON));
-        });
-
         it('does not show the report button on own chapter', function () {
             $author = alice($this);
             $story = publicStory('Moderation Story', $author->id);

@@ -12,15 +12,21 @@ This domain does not own any user-facing pages. It provides infrastructure consu
 
 ### Feature toggles
 
-A feature toggle has three access modes:
+A feature toggle is **declared in code**: the owning domain calls `ConfigPublicApi::registerFeatureToggle(new FeatureToggleDefinition(domain, name, adminVisibility))` from its `ServiceProvider::boot()`. The declaration is held in memory (`FeatureToggleService::$definitions`), like parameter definitions. Checking an undeclared toggle with `isToggleEnabled()` throws `UndeclaredFeatureToggleException` — a typo or a forgotten declaration fails loudly instead of reading as `false`.
+
+The row in `config_feature_toggles` only stores state. A declared toggle with no row reads as `OFF`; its row is created the first time an admin changes its access. A toggle has three access modes:
 
 - `OFF` — the feature is disabled for everyone.
 - `ON` — the feature is enabled for all authenticated and unauthenticated users.
 - `ROLE_BASED` — the feature is enabled only for users who hold one of the listed roles.
 
-Toggling access requires at minimum `ADMIN` role, but creating or deleting a toggle is restricted to `TECH_ADMIN` only. Visibility of a toggle in the admin panel is separately controlled: `TECH_ADMINS_ONLY` hides the toggle from regular admins; `ALL_ADMINS` makes it visible to both.
+Who sees and changes a toggle in the admin panel comes from its declaration, never from the row: `TECH_ADMINS_ONLY` (the default) restricts it to tech admins; `ALL_ADMINS` lets regular admins change it too. Toggles cannot be created from the admin panel — declaring one is a code change.
 
-Toggle state is cached for 60 minutes under the key `feature_toggles:all`. Any mutation (add, update, delete) immediately invalidates this cache.
+An **orphan** is a row no declaration matches, typically left behind after a toggle was removed from code. Orphans have no effect. Tech admins see them in a separate « Non déclarés dans le code » section of the admin page and delete them by hand there; declared toggles cannot be deleted. Nothing deletes rows automatically.
+
+`php artisan config:toggles` prints, read-only and with no user, every declared toggle and every orphan row (`--json` for machine-readable output, with a `declared` flag per entry). It is how a production state is inspected without the admin panel.
+
+Toggle state is cached for 60 minutes under the key `feature_toggles:all`. Any mutation (update, delete) immediately invalidates this cache.
 
 ### Configuration parameters
 
@@ -39,11 +45,11 @@ Parameter overrides are cached for 60 minutes under `config_parameters:values`. 
 
 ### Admin panel integration
 
-The domain registers a navigation entry in the Administration domain's `AdminNavigationRegistry` for the parameters page (`config.admin.parameters.index`), visible to `ADMIN` and `TECH_ADMIN`. Feature toggles have no dedicated page within this domain — they are listed via `ConfigPublicApi::listFeatureToggles()` for whichever admin surface needs them.
+The domain registers two navigation entries in the Administration domain's `AdminNavigationRegistry`, both visible to `ADMIN` and `TECH_ADMIN`: the parameters page (`config.admin.parameters.index`) and the feature toggles page (`config.admin.feature-toggles.index`). The toggles page lists the declared toggles the current admin may see (`ConfigPublicApi::listFeatureToggles()`), lets them change access and roles, and shows orphan rows to tech admins (`listOrphanFeatureToggles()`).
 
 ## Architecture decisions
 
-**Definitions are in-memory, overrides in the database.** Parameter definitions are registered at boot and live only in `ConfigParameterService::$definitions` (a static array). This means the set of available parameters is always determined by the deployed codebase, not by what is in the database. An override row without a matching registered definition is silently ignored. This prevents stale config rows from affecting the application after a feature is removed.
+**Definitions are in-memory, overrides in the database.** Parameter definitions are registered at boot and live only in `ConfigParameterService::$definitions` (a static array). This means the set of available parameters is always determined by the deployed codebase, not by what is in the database. An override row without a matching registered definition is silently ignored. This prevents stale config rows from affecting the application after a feature is removed. Feature toggles follow the same rule: the declaration decides what exists and who may change it, the row only its state.
 
 **Toggle names and domain keys are case-insensitive.** Both services normalize names to `strtolower()` before cache lookups and storage comparisons. This avoids subtle mismatches between registering domains and querying domains.
 

@@ -26,22 +26,10 @@
             <x-story::keep-reading-component />
         </div>
 
-        <!-- Calendar widget or placeholder -->
-        @if($calendarEnabled)
-            <div class="col-span-1 sm:col-span-2 min-w-0">
-                <x-calendar::activity-list-component />
-            </div>
-        @else
-            <div class="col-span-1 sm:col-span-2 flex flex-col gap-2 items-center justify-center p-4 surface-read text-on-surface">
-                <x-shared::title tag="h3" icon="group" class="text-tertiary">
-                    {{ __('dashboard::index.placeholder_title') }}
-                </x-shared::title>
-                <div class="flex-1">
-                    <img src="{{ $theme->asset('not-ready.png') }}" alt="{{ __('dashboard::index.placeholder_text') }}" class="max-w-full h-auto">
-                </div>
-                <p class="text-sm text-muted">{{ __('dashboard::index.placeholder_text') }}</p>
-            </div>
-        @endif
+        <!-- Calendar widget -->
+        <div class="col-span-1 sm:col-span-2 min-w-0">
+            <x-calendar::activity-list-component />
+        </div>
 
         <!-- Discover random stories -->
         <div class="col-span-1 sm:col-span-2 lg:col-span-4 min-w-0">

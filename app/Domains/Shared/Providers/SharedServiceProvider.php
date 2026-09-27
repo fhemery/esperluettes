@@ -3,6 +3,7 @@
 namespace App\Domains\Shared\Providers;
 
 use App\Domains\Config\Public\Api\ConfigPublicApi;
+use App\Domains\Config\Public\Contracts\FeatureToggleDefinition;
 use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Shared\Support\FeatureToggles;
 use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
@@ -159,6 +160,11 @@ class SharedServiceProvider extends ServiceProvider
                     'summer' => 'shared::settings.params.theme.options.summer',
                 ],
             ],
+        ));
+
+        app(ConfigPublicApi::class)->registerFeatureToggle(new FeatureToggleDefinition(
+            FeatureToggles::DOMAIN,
+            FeatureToggles::DARK_THEME,
         ));
 
         if (app(ConfigPublicApi::class)->isToggleEnabled(

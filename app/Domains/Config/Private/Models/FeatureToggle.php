@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 #[Table('config_feature_toggles')]
-#[Fillable(['domain', 'name', 'access', 'admin_visibility', 'roles', 'updated_by'])]
+#[Fillable(['domain', 'name', 'access', 'roles', 'updated_by'])]
 class FeatureToggle extends Model
 {
 

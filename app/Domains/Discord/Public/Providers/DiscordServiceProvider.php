@@ -2,11 +2,9 @@
 
 namespace App\Domains\Discord\Public\Providers;
 
-use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Discord\Private\Listeners\CleanDiscordNotificationsOnDisconnect;
 use App\Domains\Discord\Private\Listeners\RemoveDiscordAssociationsOnUserDeleted;
 use App\Domains\Discord\Private\Services\DiscordNotificationQueueService;
-use App\Domains\Discord\Private\Support\DiscordFeatureToggles;
 use App\Domains\Discord\Public\Api\DiscordPublicApi;
 use App\Domains\Discord\Public\Events\DiscordConnected;
 use App\Domains\Discord\Public\Events\DiscordDisconnected;
@@ -50,12 +48,6 @@ class DiscordServiceProvider extends ServiceProvider
             sortOrder:           20,
             deliveryCallback:    function (NotificationDto $dto, array $userIds) {
                 app(DiscordNotificationQueueService::class)->queue($dto, $userIds);
-            },
-            featureCheck:        function () {
-                return app(ConfigPublicApi::class)->isToggleEnabled(
-                    DiscordFeatureToggles::NOTIFICATIONS,
-                    DiscordFeatureToggles::DOMAIN
-                );
             },
             warningForUser:      function (int $userId) {
                 if (app(DiscordPublicApi::class)->isLinked($userId)) {

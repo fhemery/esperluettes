@@ -1,6 +1,5 @@
 <?php
 
-use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\FeatureToggle;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
@@ -8,107 +7,68 @@ use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
 use App\Domains\Config\Public\Events\FeatureToggleDeleted;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-describe('Feature toggles - deleteFeatureToggle', function () {
-    it('should do nothing if toggle is not found', function() {
-        $api = app(ConfigPublicApi::class);
-        $this->actingAs(techAdmin($this));
-        $api->deleteFeatureToggle('test-feature');
+beforeEach(fn () => clearFeatureToggleDefinitions());
 
-        // Did not throw. That's enough
+function makeOrphanToggle(TestCase $t, string $name, string $domain = 'config'): void
+{
+    createFeatureToggle($t, new FeatureToggle(
+        name: $name,
+        domain: $domain,
+        admin_visibility: FeatureToggleAdminVisibility::ALL_ADMINS,
+        access: FeatureToggleAccess::ON,
+    ));
+    clearFeatureToggleDefinitions();
+}
+
+describe('Feature toggles - deleteFeatureToggle', function () {
+    it('deletes an orphan row as tech admin and emits FeatureToggleDeleted', function () {
+        makeOrphanToggle($this, 'delete-orphan');
+        $this->actingAs(techAdmin($this));
+
+        app(ConfigPublicApi::class)->deleteFeatureToggle('DELETE-ORPHAN', 'Config');
+
+        expect(DB::table('config_feature_toggles')->where('name', 'delete-orphan')->exists())->toBeFalse();
+
+        $event = latestEventOf(FeatureToggleDeleted::name(), FeatureToggleDeleted::class);
+        expect($event)->not->toBeNull();
+        expect($event->featureToggle->name)->toBe('delete-orphan');
+        expect($event->featureToggle->domain)->toBe('config');
+        expect($event->featureToggle->admin_visibility)->toBe(FeatureToggleAdminVisibility::TECH_ADMINS_ONLY->value);
     });
 
-    it('should do nothing if domain does not match', function() {
+    it('does nothing when there is no row', function () {
+        $this->actingAs(techAdmin($this));
+
+        app(ConfigPublicApi::class)->deleteFeatureToggle('delete-missing');
+
+        expect(latestEventOf(FeatureToggleDeleted::name(), FeatureToggleDeleted::class))->toBeNull();
+    });
+
+    it('refuses to delete a declared toggle', function () {
         createFeatureToggle($this, new FeatureToggle(
-            name: 'test-feature',
+            name: 'delete-declared',
             domain: 'config',
             access: FeatureToggleAccess::ON,
         ));
-        $api = app(ConfigPublicApi::class);
         $this->actingAs(techAdmin($this));
-        $api->deleteFeatureToggle('test-feature', 'events');
 
-        expect(checkToggleState('test-feature', 'config'))->toBeTrue();
+        expect(fn () => app(ConfigPublicApi::class)->deleteFeatureToggle('delete-declared'))
+            ->toThrow(DomainException::class);
+        expect(DB::table('config_feature_toggles')->where('name', 'delete-declared')->exists())->toBeTrue();
+        expect(checkToggleState('delete-declared'))->toBeTrue();
     });
 
-    it('throws Unauthorized when not done by a tech admin, event if feature toggle is admin allowed', function () {
-        $feature = new FeatureToggle(
-            name: 'test-feature',
-            domain: 'config',
-            admin_visibility: FeatureToggleAdminVisibility::ALL_ADMINS,
-            access: FeatureToggleAccess::ON,
-        );
-        createFeatureToggle($this, $feature);
+    it('forbids an admin from deleting an orphan', function () {
+        makeOrphanToggle($this, 'delete-forbidden');
+        $this->actingAs(admin($this));
 
-        $user = admin($this);
-        $this->actingAs($user);
-        
-        $api = app(ConfigPublicApi::class);
-
-        $this->expectException(AuthorizationException::class);
-        $api->deleteFeatureToggle('test-feature');
-    });
-
-    it('does delete the toggle if user is tech admin', function () {
-        $feature = new FeatureToggle(
-            name: 'test-feature',
-            domain: 'config',
-            admin_visibility: FeatureToggleAdminVisibility::TECH_ADMINS_ONLY,
-            access: FeatureToggleAccess::ON,
-        );
-        createFeatureToggle($this, $feature);
-
-        $user = techAdmin($this);
-        $this->actingAs($user);
-        
-        $api = app(ConfigPublicApi::class);
-        $api->deleteFeatureToggle('test-feature');
-
-        expect(checkToggleState('test-feature'))->toBeFalse();
-    });
-
-    it('does work case insensitively', function () {
-        $feature = new FeatureToggle(
-            name: 'test-feature',
-            domain: 'config',
-            admin_visibility: FeatureToggleAdminVisibility::TECH_ADMINS_ONLY,
-            access: FeatureToggleAccess::ON,
-        );
-        createFeatureToggle($this, $feature);
-
-        $user = techAdmin($this);
-        $this->actingAs($user);
-        
-        $api = app(ConfigPublicApi::class);
-        $api->deleteFeatureToggle('TEST-FEATURE');
-
-        expect(checkToggleState('test-feature'))->toBeFalse();
-    });
-
-    describe('Events', function () {
-        it('should emit an event when a feature toggle is deleted', function () {
-            $feature = new FeatureToggle(
-                name: 'test-feature',
-                domain: 'config',
-                access: FeatureToggleAccess::ON,
-            );
-            createFeatureToggle($this, $feature);
-
-            $user = techAdmin($this);
-            $this->actingAs($user);
-            $api = app(ConfigPublicApi::class);
-            $api->deleteFeatureToggle('test-feature');
-
-            $event = latestEventOf(FeatureToggleDeleted::name(), FeatureToggleDeleted::class);
-            expect($event)->not->toBeNull();
-
-            $snapshot = $event->featureToggle;
-            expect($snapshot->name)->toBe($feature->name);
-            expect($snapshot->domain)->toBe($feature->domain);
-          
-        });
+        expect(fn () => app(ConfigPublicApi::class)->deleteFeatureToggle('delete-forbidden'))
+            ->toThrow(AuthorizationException::class);
+        expect(DB::table('config_feature_toggles')->where('name', 'delete-forbidden')->exists())->toBeTrue();
     });
 });

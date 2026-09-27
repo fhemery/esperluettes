@@ -5,7 +5,7 @@ namespace App\Domains\Config\Public\Api;
 use App\Domains\Config\Public\Contracts\ConfigParameterDefinition;
 use App\Domains\Config\Public\Contracts\FeatureToggle;
 use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
-use App\Domains\Config\Public\Contracts\FeatureToggleAdminVisibility;
+use App\Domains\Config\Public\Contracts\FeatureToggleDefinition;
 use App\Domains\Config\Public\Services\ConfigParameterService;
 use App\Domains\Config\Public\Services\FeatureToggleService;
 
@@ -20,9 +20,13 @@ class ConfigPublicApi
     // Feature Toggles
     // =========================================================================
 
-    public function addFeatureToggle(FeatureToggle $featureToggle): void
+    /**
+     * Declare a feature toggle. Call from your ServiceProvider boot().
+     * Checking an undeclared toggle throws UndeclaredFeatureToggleException.
+     */
+    public function registerFeatureToggle(FeatureToggleDefinition $definition): void
     {
-        $this->featureToggleService->addFeatureToggle($featureToggle);
+        $this->featureToggleService->registerFeatureToggle($definition);
     }
 
     public function isToggleEnabled(string $featureToggleName, ?string $domain = 'config'): bool
@@ -30,16 +34,18 @@ class ConfigPublicApi
         return $this->featureToggleService->isToggleEnabled($featureToggleName, $domain);
     }
 
-    public function updateFeatureToggle(string $featureToggleName, FeatureToggleAccess $access, ?string $domain = 'config'): void
+    /**
+     * Set the state of a declared toggle; the first change creates its row.
+     * $roles === null keeps the current roles.
+     */
+    public function updateFeatureToggle(string $featureToggleName, FeatureToggleAccess $access, ?string $domain = 'config', ?array $roles = null): void
     {
-        $this->featureToggleService->updateFeatureToggle($featureToggleName, $access, $domain);
+        $this->featureToggleService->updateFeatureToggle($featureToggleName, $access, $domain, $roles);
     }
 
-    public function editFeatureToggle(string $name, string $domain, FeatureToggleAdminVisibility $adminVisibility, FeatureToggleAccess $access, array $roles): void
-    {
-        $this->featureToggleService->editFeatureToggle($name, $domain, $adminVisibility, $access, $roles);
-    }
-
+    /**
+     * Delete an orphan row (tech admin only). Throws DomainException for a declared toggle.
+     */
     public function deleteFeatureToggle(string $featureToggleName, ?string $domain = 'config'): void
     {
         $this->featureToggleService->deleteFeatureToggle($featureToggleName, $domain);
@@ -53,6 +59,16 @@ class ConfigPublicApi
     public function listFeatureToggles(): array
     {
         return $this->featureToggleService->listFeatureToggles();
+    }
+
+    /**
+     * List stored rows that no declaration matches. Tech admins only (empty otherwise).
+     *
+     * @return array<FeatureToggle>
+     */
+    public function listOrphanFeatureToggles(): array
+    {
+        return $this->featureToggleService->listOrphanFeatureToggles();
     }
 
     // =========================================================================

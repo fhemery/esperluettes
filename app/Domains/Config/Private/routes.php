@@ -17,17 +17,12 @@ Route::prefix('admin/config')
 
         Route::get('/feature-toggles', [FeatureToggleController::class, 'index'])
             ->name('config.admin.feature-toggles.index');
-        Route::post('/feature-toggles/{featureToggle}/set-access', [FeatureToggleController::class, 'setAccess'])
+        Route::post('/feature-toggles/{domain}/{name}/set-access', [FeatureToggleController::class, 'setAccess'])
             ->name('config.admin.feature-toggles.setAccess');
-
-        Route::get('/feature-toggles/create', [FeatureToggleController::class, 'create'])
-            ->name('config.admin.feature-toggles.create');
-        Route::post('/feature-toggles', [FeatureToggleController::class, 'store'])
-            ->name('config.admin.feature-toggles.store');
-        Route::get('/feature-toggles/{featureToggle}/edit', [FeatureToggleController::class, 'edit'])
+        Route::get('/feature-toggles/{domain}/{name}/edit', [FeatureToggleController::class, 'edit'])
             ->name('config.admin.feature-toggles.edit');
-        Route::put('/feature-toggles/{featureToggle}', [FeatureToggleController::class, 'update'])
+        Route::put('/feature-toggles/{domain}/{name}', [FeatureToggleController::class, 'update'])
             ->name('config.admin.feature-toggles.update');
-        Route::delete('/feature-toggles/{featureToggle}', [FeatureToggleController::class, 'destroy'])
+        Route::delete('/feature-toggles/{domain}/{name}', [FeatureToggleController::class, 'destroy'])
             ->name('config.admin.feature-toggles.destroy');
     });

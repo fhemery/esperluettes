@@ -5,6 +5,7 @@ namespace App\Domains\Config\Public\Providers;
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Config\Private\Console\ListFeatureTogglesCommand;
 use App\Domains\Config\Public\Events\ConfigParameterUpdated;
 use App\Domains\Config\Public\Events\FeatureToggleAdded;
 use App\Domains\Config\Public\Events\FeatureToggleDeleted;
@@ -15,6 +16,11 @@ use Illuminate\Support\ServiceProvider;
 
 class ConfigServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->commands([ListFeatureTogglesCommand::class]);
+    }
+
     public function boot(): void
     {
         // Load migrations for the Config domain

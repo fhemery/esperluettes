@@ -5,8 +5,6 @@ use App\Domains\Comment\Public\Api\Contracts\CommentDto;
 use App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy;
 use App\Domains\Comment\Private\Models\Comment;
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
-use App\Domains\Config\Public\Contracts\FeatureToggle;
-use App\Domains\Config\Public\Contracts\FeatureToggleAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -305,14 +303,6 @@ describe('Comment list partial display', function () {
     });
 
     describe('Moderation UI in fragments', function () {
-        beforeEach(function () {
-            createFeatureToggle($this, new FeatureToggle(
-                'reporting',
-                'moderation',
-                access: FeatureToggleAccess::ON
-            ));
-        });
-
         it('shows the report button to authenticated non-authors in fragment HTML', function () {
             $entityType = 'default';
             $entityId = 789;

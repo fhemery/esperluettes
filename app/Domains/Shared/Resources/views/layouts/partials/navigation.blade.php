@@ -45,8 +45,6 @@
                 </div>
             </div>
 
-            <!-- Messages Icon -->
-            <x-message::message-icon-component />
             <!-- Notifications Icon -->
             <x-notification::notification-icon-component />
             <!-- Promotion Requests Icon -->
