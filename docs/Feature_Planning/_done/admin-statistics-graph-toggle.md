@@ -1,9 +1,7 @@
 # Admin statistics — cumulative / non-cumulative graph toggle
 
 **Status:** DONE — 2026-09-27 · **Domain(s):** `Statistics` (owner), `Shared`
-(generic control) · **Spec:** [functional](./01-functional.md) ·
-[architecture](./02-architecture.md) · [plan](./03-plan.md) ·
-[decisions](./DECISIONS.md)
+(generic control)
 
 ## What it does
 
@@ -70,7 +68,7 @@ change.
 
 - **Deliberate non-goals** (spec §8): other granularities (day, month, admin-chosen), per-graph toggles, remembering the mode server-side or across devices, changing the tiles, statistics outside the admin page (the separate `statistics-profile/` task).
 - **Time-range selector** (*12 derniers mois* / *Depuis le début*): planned follow-up. It also addresses the unbounded weekly bars. Pushed to the backlog as [`admin-statistics-time-range/`](../admin-statistics-time-range/00-request.md).
-- Nothing was cut mid-build. All 4 phases are DONE, and the VERIFY checklist is fully green (screenshots in [`shots/`](./shots/)).
+- Nothing was cut mid-build. All 4 phases are DONE, and the VERIFY checklist is fully green.
 - Code/plan drift: architecture §4.4 (initial mode from the init event) was replaced by the `data-value` read, as explained above. Architecture §8's file layout omits `WeeklyChartPayloadTest.php`, the E2E seeder and the page object, which all exist.
 - **E2E**: `e2e/tests/features/admin-statistics-graph-toggle.spec.ts` was **deleted** at WRAP, because it guards one admin page and nothing app-wide. Payload and access are covered by PHP tests; chart drawing and switching by `charts.test.js`. The seeder, the `STATISTICS` fixture and `AdminStatisticsPage.ts` were kept for the time-range follow-up.
 - Open questions: none.

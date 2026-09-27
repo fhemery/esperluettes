@@ -29,8 +29,7 @@ scoped to the task that actually changed.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
 - **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · TODO
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
-- **Admin statistics — cumulative / non-cumulative graph toggle** · `admin-statistics-graph-toggle/` · interactive · WIP:WRAP: README written; archive to `_done/` awaits user confirmation
-- **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from `admin-statistics-graph-toggle/` (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
+- **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **Admin pages — flash message shown twice** · `admin-double-flash/` · auto · TODO: leftover from `feature-toggle-registration`. The admin layout and ~23 admin page views both render `<x-shared::flash-block />`; pre-existing.
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
@@ -46,6 +45,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) · page-level *Cumulé / Par semaine* switch on `/admin/statistics`: weekly net bars (Monday weeks, current week lighter, stacked comment breakdown), remembered per browser; new generic `x-shared::segmented-control`
 - [`multiedit-chapter-switch-block`](_done/multiedit-chapter-switch-block.md) · « Choix de chapitres » block in chapter Avancé mode — buttons to chapters of the same story, rendered at save time, per-choice enabled toggle; Editor gained a block-type registry with per-consumer `blockTypes` opt-in
 - [`validation-messages-followups`](_done/validation-messages-followups.md) · « Oups » flash box lists each validation message once; French defaults for Shared's `maxstripped`, `minstripped`, `required_trimmed`
 - [`validation-messages`](_done/validation-messages.md) · French defaults for every Laravel built-in rule (Shared `lang-framework/fr/validation.php`, unnamespaced, attribute-less, sizes in Ko); per-block editor errors shown under the editor in chapter/news/static page forms
