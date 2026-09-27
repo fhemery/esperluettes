@@ -1,6 +1,10 @@
 <?php
 
+use App\Domains\Editor\Private\Blocks\ImageBlockType;
+use App\Domains\Editor\Private\Blocks\TextBlockType;
 use App\Domains\Editor\Private\Support\ContentBlocksRenderer;
+use App\Domains\Editor\Public\Blocks\EditorBlockRegistry;
+use App\Domains\Editor\Public\Blocks\EditorBlockType;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -112,6 +116,87 @@ describe('ContentBlocksRenderer profiles', function () {
         $html = renderer()->sanitizeText('<p><a href="/stories/1">Chapitre</a></p>', 'multiedit-narrative');
 
         expect($html)->toContain('<a href="/stories/1">Chapitre</a>');
+    });
+});
+
+/**
+ * Bind a fresh registry holding the built-ins plus a fake `fake` type that
+ * echoes its block and context, so the fake never leaks into other tests.
+ */
+function bindRendererFakeRegistry(): void
+{
+    $registry = new EditorBlockRegistry();
+    $registry->register(new TextBlockType());
+    $registry->register(new ImageBlockType());
+    $registry->register(new class implements EditorBlockType {
+        public function key(): string
+        {
+            return 'fake';
+        }
+
+        public function labelKey(): string
+        {
+            return 'fake.label';
+        }
+
+        public function icon(): string
+        {
+            return 'star';
+        }
+
+        public function editorView(): string
+        {
+            return 'fake::view';
+        }
+
+        public function render(array $block, array $context): string
+        {
+            return '<fake data-value="' . e($block['value'] ?? '') . '" data-context="'
+                . e(json_encode($context)) . '"></fake>';
+        }
+    });
+    app()->instance(EditorBlockRegistry::class, $registry);
+}
+
+describe('ContentBlocksRenderer block-type delegation', function () {
+    it('delegates a registered plugin type to its render() with the consumer context', function () {
+        bindRendererFakeRegistry();
+
+        $html = renderer()->render([
+            ['type' => 'text', 'html' => '<p>One</p>'],
+            ['type' => 'fake', 'value' => 'x'],
+            ['type' => 'text', 'html' => '<p>Two</p>'],
+        ], 'multiedit-text', ['storyId' => 7]);
+
+        $expectedContext = e(json_encode(['profile' => 'multiedit-text', 'storyId' => 7]));
+        expect($html)->toContain('<fake data-value="x" data-context="' . $expectedContext . '"></fake>');
+        expect(strpos($html, 'One'))->toBeLessThan(strpos($html, '<fake'));
+        expect(strpos($html, '<fake'))->toBeLessThan(strpos($html, 'Two'));
+    });
+
+    it('passes the profile to plugin types under the reserved profile key', function () {
+        bindRendererFakeRegistry();
+
+        $html = renderer()->render(
+            [['type' => 'fake', 'value' => 'x']],
+            'multiedit-narrative',
+            ['profile' => 'consumer-attempt'],
+        );
+
+        expect($html)->toContain(e(json_encode(['profile' => 'multiedit-narrative'])));
+        expect($html)->not->toContain('consumer-attempt');
+    });
+
+    it('still drops a block whose type is not registered', function () {
+        bindRendererFakeRegistry();
+
+        $html = renderer()->render([
+            ['type' => 'unknown', 'html' => '<p>Ghost</p>'],
+            ['html' => '<p>No type</p>'],
+            ['type' => 'text', 'html' => '<p>Kept</p>'],
+        ]);
+
+        expect($html)->toBe('<div class="ce-block ce-block--text"><p>Kept</p></div>');
     });
 });
 

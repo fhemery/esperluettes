@@ -5,6 +5,7 @@
 ## Public API
 
 - [EditorPublicApi](Public/Api/EditorPublicApi.php) — the **only** PHP entry point other domains use: `render`, `sanitizeText`, `plainTextLength`, `plainText`. Autowired concrete class; nothing to bind.
+- [EditorBlockRegistry](Public/Blocks/EditorBlockRegistry.php) / [EditorBlockType](Public/Blocks/EditorBlockType.php) — register a block type from another domain.
 - `<x-editor::rich-text>` and `<x-editor::multi>` — the authoring components (see README). Registered by [EditorServiceProvider](Public/Providers/EditorServiceProvider.php).
 
 ## Events emitted
@@ -17,11 +18,11 @@ None.
 
 ## Non-obvious invariants
 
-**Blocks stay plain arrays.** The block schema (README) is Editor's data contract; it is deliberately not typed. DTOs would not remove the per-type dispatch, and the seam that actually pays off is a block-type registry — a redesign to make the day a third block type appears, not before.
+**Blocks stay plain arrays.** The block schema (README) is Editor's data contract; it is deliberately not typed. DTOs would not remove the per-type dispatch; the seam is the block-type registry (`Public/Blocks/EditorBlockRegistry`, contract `EditorBlockType`, README "Block-type registry"). `text` and `image` are built-in registrations; `ContentBlocksRenderer` renders every block through the registry and drops unregistered types. A plugin type's HTML is not re-sanitized by Editor, and `profile` is a reserved render-context key.
 
 **`ContentBlocksRenderer` is Editor-private and `EditorPublicApi` is its only caller outside.** Other domains inject the public API, never the renderer. Deptrac enforces it.
 
-**The renderer emits `<x-media::image>` through `Blade::render()` at runtime.** That is why `EditorPrivate` depends on `MediaPublic`, and why a change to the `<x-media::image>` component's props can break rendering with no PHP-level signal. The renderer's image cases in `Tests/Feature/ContentBlocksRendererTest.php` are the only guard.
+**The built-in image type (`Private/Blocks/ImageBlockType`) emits `<x-media::image>` through `Blade::render()` at runtime.** That is why `EditorPrivate` depends on `MediaPublic`, and why a change to the `<x-media::image>` component's props can break rendering with no PHP-level signal. The renderer's image cases in `Tests/Feature/ContentBlocksRendererTest.php` are the only guard.
 
 **There is no unprefixed `<x-editor>`.** Editor registers the `editor` anonymous-component path only. `Message`'s compose page used the unprefixed spelling before the extraction; it now uses `<x-editor::rich-text>` like everyone else.
 

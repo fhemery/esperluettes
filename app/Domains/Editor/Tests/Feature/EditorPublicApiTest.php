@@ -1,6 +1,8 @@
 <?php
 
 use App\Domains\Editor\Public\Api\EditorPublicApi;
+use App\Domains\Editor\Public\Blocks\EditorBlockRegistry;
+use App\Domains\Editor\Public\Blocks\EditorBlockType;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -92,5 +94,40 @@ describe('EditorPublicApi', function () {
         ]);
 
         expect($len)->toBe(11);
+    });
+
+    it('forwards the render context to plugin types', function () {
+        $registry = new EditorBlockRegistry();
+        $registry->register(new class implements EditorBlockType {
+            public function key(): string
+            {
+                return 'fake';
+            }
+
+            public function labelKey(): string
+            {
+                return 'fake.label';
+            }
+
+            public function icon(): string
+            {
+                return 'star';
+            }
+
+            public function editorView(): string
+            {
+                return 'fake::view';
+            }
+
+            public function render(array $block, array $context): string
+            {
+                return '<fake>' . e(json_encode($context)) . '</fake>';
+            }
+        });
+        app()->instance(EditorBlockRegistry::class, $registry);
+
+        $html = editorApi()->render([['type' => 'fake']], 'multiedit-narrative', ['storyId' => 3]);
+
+        expect($html)->toBe('<fake>' . e(json_encode(['profile' => 'multiedit-narrative', 'storyId' => 3])) . '</fake>');
     });
 });

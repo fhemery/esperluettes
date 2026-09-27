@@ -4,52 +4,39 @@ declare(strict_types=1);
 
 namespace App\Domains\Editor\Private\Support;
 
-use Illuminate\Support\Facades\Blade;
+use App\Domains\Editor\Public\Blocks\EditorBlockRegistry;
 use Mews\Purifier\Facades\Purifier;
 
 /**
  * Renders MultiEdit advanced content (an ordered array of typed blocks) to
- * sanitized HTML, and computes the plain-text length of its text blocks.
+ * HTML, and computes the plain-text length of its text blocks.
  *
- * Block shapes:
- *   ['type' => 'text',  'html' => '<p>…</p>']
- *   ['type' => 'image', 'path' => 'news/x.jpg', 'alt' => '…', 'caption' => '…'?]
- *
- * Text is sanitized with a no-<img> Purifier profile — `multiedit-text` by
- * default, or any profile the consumer passes; images render via the shared
- * <x-media::image> component (responsive picture).
+ * Each block is rendered by its registered EditorBlockType (built-ins: `text`,
+ * `image`); blocks of an unregistered or missing type are dropped. Text is
+ * sanitized with a no-<img> Purifier profile — `multiedit-text` by default, or
+ * any profile the consumer passes.
  */
 class ContentBlocksRenderer
 {
+    public function __construct(
+        private readonly EditorBlockRegistry $registry,
+    ) {}
+
     /**
      * @param array<int, array<string, mixed>> $blocks
+     * @param array<string, mixed> $context consumer render context; the
+     *        `profile` key is reserved and always set to $profile
      */
-    public function render(array $blocks, string $profile = 'multiedit-text'): string
+    public function render(array $blocks, string $profile = 'multiedit-text', array $context = []): string
     {
+        $context = ['profile' => $profile] + $context;
         $out = '';
         foreach ($blocks as $block) {
-            $type = $block['type'] ?? null;
-
-            if ($type === 'text') {
-                $clean = $this->sanitizeText((string) ($block['html'] ?? ''), $profile);
-                if ($clean !== '') {
-                    $out .= '<div class="ce-block ce-block--text">' . $clean . '</div>';
-                }
-            } elseif ($type === 'image') {
-                $path = $block['path'] ?? null;
-                if (!$path) {
-                    continue;
-                }
-                $out .= Blade::render(
-                    '<x-media::image :path="$path" :alt="$alt" :caption="$caption" :raw="$raw" class="ce-block ce-block--image" />',
-                    [
-                        'path' => (string) $path,
-                        'alt' => (string) ($block['alt'] ?? ''),
-                        'caption' => ($block['caption'] ?? null) ?: null,
-                        'raw' => !empty($block['keep_original']),
-                    ]
-                );
+            $type = $this->registry->get((string) ($block['type'] ?? ''));
+            if ($type === null) {
+                continue;
             }
+            $out .= $type->render($block, $context);
         }
         return $out;
     }
