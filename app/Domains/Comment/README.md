@@ -131,8 +131,10 @@ when `canAnnotate` is true. Other domains contribute buttons through the
 
 An action may carry `data-requires-selection-within="<css selector>"` (on the
 slot's top-level element or a descendant of it). It is then shown only when
-every non-whitespace text node touched by the selection lies inside an element
-matching the selector; actions without the attribute are always shown. When no
+every non-blank text the selection covers lies inside an element matching the
+selector (a boundary that merely touches a block without covering its text, e.g.
+a triple-click ending at `(nextBlock, 0)`, is ignored — Shared's
+`anchoring/text-range.js`); actions without the attribute are always shown. When no
 action applies, the toolbar is not shown at all. The selector is chosen by the
 contributing domain — Comment never knows which domain declared it.
 
