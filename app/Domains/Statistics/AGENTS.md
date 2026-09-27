@@ -58,6 +58,8 @@ The listener resolves affected statistics through `StatisticRegistry::getListene
 
 **Time-series is daily only.** `StatisticComputeService::incrementTimeSeries()` always writes `granularity = 'daily'`. Monthly compression described in the feature plan is not implemented; do not assume monthly rows exist.
 
+**Weekly aggregation ignores the chart's date range.** `StatisticQueryService::getWeeklyTimeSeries()` fetches *all* daily rows for the key/scope (no `from`/`to`), then `WeeklyAggregator::aggregate()` builds one point per calendar week from the first-ever data point through the current week. Do not add a range parameter without checking `charts.js`'s expectation that weekly bars can show more history than the cumulative view for the same chart.
+
 **Cumulative values are recomputed after every delta.** After incrementing daily buckets, `recomputeCumulativeValues()` walks all rows in `period_start` order and rewrites `cumulative_value`. Chart display for cumulative mode relies on these stored values.
 
 **Null means "no data yet", not zero.** `StatisticQueryService::getValue()` returns `null` when no snapshot row exists. Blade components must handle null (the `digit` component shows `—`). Do not coerce null to `0` at the query layer.
