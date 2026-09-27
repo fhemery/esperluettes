@@ -512,25 +512,25 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter edit (author), Avancé | Palette and "+" menu show text, image, « Choix de chapitres » with icons; inserting one gives a block with one empty choice | |
-| Chapter edit — choice block | Add / move up / move down / remove choices; controls aligned, keyboard-reachable, labelled | |
-| Chapter edit — dropdown | All story chapters in reading order, drafts « (non publié) », current chapter present | |
-| Chapter edit — deleted target | Choice to a deleted chapter shows « Chapitre supprimé » + warning; save succeeds | |
-| Chapter edit — disabled choice | « Actif » unchecked survives save and reopen | |
-| Chapter edit — mode switch | « Simple » disabled with tooltip while a choice block exists; enabled again after deleting it (single text block left) | |
-| Chapter edit — validation error | Label > 120 (forced via devtools) or other error: form re-renders with choice blocks intact | |
-| Chapter create (author) | Block available; current (unsaved) chapter absent from dropdown | |
-| Chapter edit — mobile (≈375px) | Choice rows stack, select/label usable, no horizontal scroll | |
-| Reader page — guest | Buttons render, wrap, no underline, no text indent, not styled as body text; click opens target | |
-| Reader page — confirmed user | Same as guest; selecting a label shows no « Citer » toolbar; selecting text then dragging onto buttons hides « Citer » | |
-| Reader page — author | Identical to reader view (no « non publié » marker — arch §0) | |
-| Reader page — disabled / all-disabled | Disabled choice absent; all-disabled block leaves no empty box or gap | |
-| Reader page — dead link | Choice to an unpublished chapter 404s for a guest (accepted, #9); deleted target renders nothing | |
-| Reader page — renamed target | Old fallback title kept; link still resolves via canonical redirect | |
-| Reader page — mobile (≈375px) | Buttons stack/wrap, tappable, no overflow | |
-| Reader page — dark/theme | Button colours readable on the reading surface | |
-| Author heat / quote highlights | Existing quotes in the chapter still highlight; no heat on choice labels | |
-| News & static-page editors (admin) | No « Choix de chapitres » in palette or "+" menu; "+" menu honours `blockTypes` | |
+| Chapter edit (author), Avancé | Palette and "+" menu show text, image, « Choix de chapitres » with icons; inserting one gives a block with one empty choice | ✅ spec (icons `alt_route`, one empty enabled choice, fresh uids) — `shots/verify/edit-palette.png`, `edit-insert-menu-open.png` |
+| Chapter edit — choice block | Add / move up / move down / remove choices; controls aligned, keyboard-reachable, labelled | ✅ spec: every control has an `aria-label`; Tab order label → Actif → ↑ → ↓; Enter/Space move and remove, focus kept — `edit-choice-blocks-desktop.png` |
+| Chapter edit — dropdown | All story chapters in reading order, drafts « (non publié) », current chapter present | ✅ spec + PHP `ChapterChoiceEditorTest` |
+| Chapter edit — deleted target | Choice to a deleted chapter shows « Chapitre supprimé » + warning; save succeeds | ✅ PHP (`ChapterChoiceEditorTest`, `ChapterChoiceBlockTest`); look checked by hand (create → target → delete → reopen → save) — `edit-deleted-target.png` |
+| Chapter edit — disabled choice | « Actif » unchecked survives save and reopen | ✅ spec |
+| Chapter edit — mode switch | « Simple » disabled with tooltip while a choice block exists; enabled again after deleting it (single text block left) | ✅ spec; tooltip « Ne gardez qu’un seul bloc de texte… » present (driver) |
+| Chapter edit — validation error | Label > 120 (forced via devtools) or other error: form re-renders with choice blocks intact | ✅ spec (maxlength stripped, 121 chars): back on the form, blocks and label kept, Alpine alive; toast « Le libellé d'un choix ne peut pas dépasser 120 caractères. » — `edit-validation-error-top.png`, `edit-validation-error-block.png` |
+| Chapter create (author) | Block available; current (unsaved) chapter absent from dropdown | ✅ spec: options are exactly the 6 existing chapters — `create-choice-block.png` |
+| Chapter edit — mobile (≈375px) | Choice rows stack, select/label usable, no horizontal scroll | ✅ spec (label below select, both inside 375px, no overflow) — `edit-choice-blocks-375.png`. Eyeball: the 3 palette buttons wrap their labels onto 2–3 lines (`edit-palette-375.png`) |
+| Reader page — guest | Buttons render, wrap, no underline, no text indent, not styled as body text; click opens target | ✅ spec (computed styles; click lands on target) — `reader-guest-desktop.png`. Needed `pnpm run build`: the stale `public/build` lacked `no-underline!` (see report) |
+| Reader page — confirmed user | Same as guest; selecting a label shows no « Citer » toolbar; selecting text then dragging onto buttons hides « Citer » | ✅ spec (both; control selection inside text does show « Citer ») — `reader-confirmed-label-selected.png` |
+| Reader page — author | Identical to reader view (no « non publié » marker — arch §0) | ✅ spec: block `outerHTML` identical for author and guest |
+| Reader page — disabled / all-disabled | Disabled choice absent; all-disabled block leaves no empty box or gap | ✅ spec (2 blocks rendered of 3, no empty `.ce-block`) + PHP |
+| Reader page — dead link | Choice to an unpublished chapter 404s for a guest (accepted, #9); deleted target renders nothing | ✅ spec (guest GET → 404) + PHP (deleted renders nothing) |
+| Reader page — renamed target | Old fallback title kept; link still resolves via canonical redirect | ✅ PHP only (`ChapterChoiceBlockTest` rename case; canonical 301 in `ViewChapterTest`) — nothing client-side |
+| Reader page — mobile (≈375px) | Buttons stack/wrap, tappable, no overflow | ❌ wrap, fit, 38px tall, no overflow — but labels inherit the article's `text-align: justify`: a wrapped label shows stretched word gaps and is not centred. Spec `at 375px the buttons wrap…` fails on it — `reader-guest-375.png` |
+| Reader page — dark/theme | Button colours readable on the reading surface | ✅ readable in 4 seasons × light/dark — `reader-dark-*.png`, `reader-light-spring.png`. Contrast 3.1–3.6 light, 4.4–5.5 dark: same as every `<x-shared::button>` primary (A13), below AA 4.5 in light → question for the user |
+| Author heat / quote highlights | Existing quotes in the chapter still highlight; no heat on choice labels | ✅ spec: labels copying two quoted passages, placed above them; heat and reader highlight land in the text only — `reader-author-heat.png`, `reader-confirmed-own-highlight.png` |
+| News & static-page editors (admin) | No « Choix de chapitres » in palette or "+" menu; "+" menu honours `blockTypes` | ✅ PHP (`*FormRendersMultiEditorTest`); checked in the driver — `admin-news-editor.png`, `admin-static-editor.png` |
 
 ## Open items
 

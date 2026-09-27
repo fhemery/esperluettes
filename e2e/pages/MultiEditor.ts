@@ -95,6 +95,20 @@ export class MultiEditor {
     return new ChapterChoiceBlock(this.choiceBlocks.nth(index));
   }
 
+  /** One entry of the palette at the bottom of the advanced pane. */
+  paletteButton(type: BlockType): Locator {
+    return this.root.locator(`button[x-on\\:click="appendBlock('${type}')"]`);
+  }
+
+  /** One entry of the nth block's "+" menu (open it with `openInsertMenu`). */
+  insertMenuButton(index: number, type: BlockType): Locator {
+    return this.block(index).locator(`button[x-on\\:click="insertAfter($el, '${type}'); open = false"]`);
+  }
+
+  async openInsertMenu(index: number): Promise<void> {
+    await this.block(index).locator('button[x-on\\:click="open = !open"]').click();
+  }
+
   /** The palette at the bottom of the advanced pane. */
   async addBlock(type: BlockType): Promise<void> {
     const before = await this.blocks.count();

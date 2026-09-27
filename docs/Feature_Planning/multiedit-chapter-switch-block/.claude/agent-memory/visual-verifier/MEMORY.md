@@ -1,0 +1,1 @@
+- [VERIFY environment gotchas](verify-environment-gotchas.md) — rebuild assets first; single-spec run command; driver against :8080 for shots

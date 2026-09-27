@@ -34,6 +34,22 @@ export class ChapterChoiceBlock {
     return this.row(index).locator('input[type="checkbox"]');
   }
 
+  get addButton(): Locator {
+    return this.root.locator('button[x-on\\:click="add($el)"]');
+  }
+
+  upButton(index: number): Locator {
+    return this.row(index).locator('button[x-on\\:click="up($el)"]');
+  }
+
+  downButton(index: number): Locator {
+    return this.row(index).locator('button[x-on\\:click="down($el)"]');
+  }
+
+  removeButton(index: number): Locator {
+    return this.row(index).locator('button[x-on\\:click="remove($el)"]');
+  }
+
   /** Every submitted field name of the nth row. */
   async names(index: number): Promise<string[]> {
     return this.row(index).locator('[name]').evaluateAll(els => els.map(e => e.getAttribute('name') ?? ''));
