@@ -57,6 +57,10 @@ class SharedServiceProvider extends ServiceProvider
         // Register PHP translations (namespaced)
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'shared');
 
+        // Register framework default translations (unnamespaced: the validator
+        // looks up `validation.<rule>`, not `shared::validation.<rule>`)
+        $this->app['translator']->getLoader()->addPath(__DIR__ . '/../Resources/lang-framework');
+
 
         // Register the view namespaces
         $this->loadViewsFrom(

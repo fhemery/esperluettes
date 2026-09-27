@@ -12,7 +12,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Shared — French default validation messages | S | — | TODO |
+| 1 | Shared — French default validation messages | S | — | DONE |
 | 2 | Story / News / StaticPage — show block errors in the blocks error area | S | 1 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.

@@ -262,7 +262,16 @@ Located in `Resources/lang/fr/`. Referenced with the `shared::` namespace.
 | `errors.php` | Error page messages |
 | `fields.php` | Generic field labels for Settings/Config fields |
 | `footer.php` | Footer text |
-| `validation.php` | Custom validator messages (`maxstripped`, `minstripped`, `unique_profile_display_name`, etc.) |
+| `validation.php` | Custom validation rule messages (`unique_profile_display_name`) |
+
+### Framework defaults
+
+`Resources/lang-framework/fr/validation.php` holds the French messages for every Laravel built-in validation rule. It is registered **unnamespaced** (`FileLoader::addPath()` in `SharedServiceProvider`), because the validator looks up `validation.<rule>`; it is kept out of `Resources/lang/` so it does not merge with `shared::validation`. It only fills the rules a form request's own `messages()` does not override.
+
+- Messages never use `:attribute` — errors render under their own field, and no technical field path (`blocks.<uid>.file`) can leak. Rules that need another field use `:other` / `:values`.
+- File sizes are stated in **Ko** (`:max`, `:min`, `:size` are kilobytes for files).
+- A unit test checks the file covers every key of the framework's English `validation.php`, so a framework upgrade adding a rule fails the suite.
+- Do not put `validation.*` keys in `fr.json`: JSON lines win over PHP groups and would shadow this file.
 
 ---
 

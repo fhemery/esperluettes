@@ -26,4 +26,5 @@ the user may want to reverse — surface these in the WRAP summary.
 | A8 | T2 — messages phrased without `:attribute` (supersedes A5's "French label" branch) | DESIGN | yes |
 | A9 | T4 — the three `validation.*` keys in `Shared/fr.json` are removed (JSON shadows PHP) | DESIGN | yes |
 | A10 | Plan cut into 2 phases (Shared defaults; block-error display in the 3 forms). Block errors: exact `blocks` errors merged with `Arr::flatten($errors->get('blocks.*'))`, de-duplicated (the wildcard returns a nested array); block-error tests added to each domain's existing `*AdvancedModeTest.php` rather than new files | PLAN | yes |
+| A11 | Folder name kept as planned: `Shared/Resources/lang-framework/`. French wording per rule chosen at BUILD (subject « Ce champ » / « Cette valeur » / « Le fichier » / « Le texte » depending on the rule; `unique` → « Cette valeur est déjà utilisée. »); `custom` shipped as an empty array (English file's placeholder example dropped). An extra unit case asserts `custom`/`attributes` keys exist | BUILD (1/2) | yes |
 | A6 | Tests keep `APP_LOCALE=zz`; the French text is verified by tests that switch to `fr` | REFINE | yes |
