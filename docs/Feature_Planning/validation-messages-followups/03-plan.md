@@ -128,11 +128,11 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter edit (author), two image blocks with a non-image file each, submit | « Oups » box lists the image message **once**; field-level list under the editor unchanged | |
-| Same, plus a second distinct error (e.g. empty title) | Both messages in the box, each once | |
-| Chapter edit, mobile width (≈375px) | Box still readable, no layout change | |
-| Admin form (e.g. Calendar activity create, empty name) | Administration layout's box still shows its errors normally | |
-| Any form submitted valid | No « Oups » box | |
+| Chapter edit (author), two image blocks with a non-image file each, submit | « Oups » box lists the image message **once**; field-level list under the editor unchanged | ✅ box: « Le fichier doit être une image. » once; field line under the editor untouched (`shots/row1-box-top.png`, `shots/row1-full.png`) |
+| Same, plus a second distinct error (e.g. empty title) | Both messages in the box, each once | ✅ « Le titre est requis. » then the image message, each once (`shots/row2-box-two-errors.png`) |
+| Chapter edit, mobile width (≈375px) | Box still readable, no layout change | ✅ same 2 items, no horizontal overflow; box is the existing fixed overlay (`shots/row3-mobile.png`) |
+| Admin form (e.g. Calendar activity create, empty name) | Administration layout's box still shows its errors normally | ✅ name + type both fail with « Ce champ est obligatoire. », box lists it once, field errors show twice (`shots/row4-admin-activity.png`) |
+| Any form submitted valid | No « Oups » box | ✅ chapter saved, only the success flash (`shots/row5-valid-submit.png`) |
 
 The custom-rule defaults (phase 1) have no reachable UI today — every current
 use overrides the message — so they are covered by tests only.
