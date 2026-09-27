@@ -177,7 +177,8 @@ per-block anchoring, and `editor-domain-visual-qa/` is meant to land before
 merge badly whatever the backlog mechanics. Pick rows from different domains.
 
 Status updates then need no ceremony: edit the entry and let the change ride
-along with the step's normal commit — no pull, no rebase, ever. Each
+along with the step's normal commit — no pull, no rebase, once the task
+branch exists (`/next-task` pulls `main` only to create it). Each
 session only ever touches its own entry. They still land on two branches, so if
 the entries sit within a few lines of each other git may raise a one-line
 conflict when the second branch merges — take both entries and move on.

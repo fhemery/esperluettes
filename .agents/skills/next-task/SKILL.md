@@ -12,8 +12,7 @@ not already in context — it defines the steps, statuses and folder layout.
 ## 1. Select
 
 Read [`docs/Feature_Planning/BACKLOG.md`](../../../docs/Feature_Planning/BACKLOG.md).
-Never `git pull` or `git rebase` — the user keeps the working copy where it
-should be.
+Never `git rebase`. The only pull is the one on `main` in §2.
 
 - **If the user named a task** (`/next-task annotations`), that is the task,
   whatever its position or status. This is the normal form when two sessions
@@ -33,10 +32,14 @@ should be.
 
 ## 2. Set up
 
-- Check the current branch (`git rev-parse --abbrev-ref HEAD`). If it is `main`,
-  create a task branch (`git checkout -b <type>/<folder>`) and say so. On any
-  other branch, stay on it — assume it is the right one and do not pull, rebase
-  or switch.
+- **If the user named the branch to work on**, switch to it (or stay on it) and
+  do not pull, rebase or switch further.
+- **Otherwise start from a fresh `main`**, whatever branch you are on:
+  1. `git status --short` must be clean — if not, stop and ask.
+  2. `git checkout main && git pull --ff-only`. If `main` is checked out in
+     another worktree, use `git fetch origin main` and branch from
+     `origin/main` instead.
+  3. `git checkout -b <type>/<folder>` and say so.
 - Ensure `docs/Feature_Planning/<folder>/` exists.
 - If `00-request.md` is missing, ask the user for the request before doing
   anything else — the loop has no input otherwise. Offer
