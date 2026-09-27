@@ -4,6 +4,7 @@ import './bootstrap';
 //import './april-fools';
 import Alpine from 'alpinejs';
 import registerTooltip from './tooltip.js';
+import registerSegmentedControl from './segmented-control.js';
 import { registerSlugForm } from './slug-utils.js';
 import * as DateUtils from './date-utils.js';
 import {BadgeOverflow} from './badge-overflow.js';
@@ -23,6 +24,7 @@ Alpine.plugin(intersect)
 Alpine.store('popover', { openId: null });
 registerTooltip(Alpine);
 registerSlugForm(Alpine);
+registerSegmentedControl(Alpine);
 
 Alpine.start();
 
