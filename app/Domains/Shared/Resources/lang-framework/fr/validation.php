@@ -107,6 +107,7 @@ return [
         'string' => 'Le texte ne doit pas dépasser :max caractères.',
     ],
     'max_digits' => 'Ce nombre ne doit pas contenir plus de :max chiffres.',
+    'maxstripped' => 'Ce champ ne doit pas dépasser :max caractères.',
     'mimes' => 'Le fichier doit être de type : :values.',
     'mimetypes' => 'Le fichier doit être de type : :values.',
     'min' => [
@@ -116,6 +117,7 @@ return [
         'string' => 'Le texte doit contenir au moins :min caractères.',
     ],
     'min_digits' => 'Ce nombre doit contenir au moins :min chiffres.',
+    'minstripped' => 'Ce champ doit contenir au moins :min caractères.',
     'missing' => 'Ce champ doit être absent.',
     'missing_if' => 'Ce champ doit être absent quand :other vaut :value.',
     'missing_unless' => 'Ce champ doit être absent sauf si :other vaut :value.',
@@ -149,6 +151,7 @@ return [
     'required_if' => 'Ce champ est obligatoire quand :other vaut :value.',
     'required_if_accepted' => 'Ce champ est obligatoire quand :other est accepté.',
     'required_if_declined' => 'Ce champ est obligatoire quand :other est refusé.',
+    'required_trimmed' => 'Ce champ est obligatoire.',
     'required_unless' => 'Ce champ est obligatoire sauf si :other fait partie de : :values.',
     'required_with' => 'Ce champ est obligatoire quand :values est présent.',
     'required_with_all' => 'Ce champ est obligatoire quand :values sont présents.',

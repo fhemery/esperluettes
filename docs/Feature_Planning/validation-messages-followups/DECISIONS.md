@@ -22,5 +22,6 @@ the user may want to reverse — surface these in the WRAP summary.
 | A3 | De-dup lives in the `flash-block` view, not a helper; custom defaults go in the framework-defaults file (unnamespaced lookup) | DESIGN | yes |
 | A4 | Two S phases (custom-rule defaults, then flash de-dup), independent of each other | PLAN | yes |
 | A5 | `required_trimmed` stays a non-implicit rule (it only fires on `null` in a direct `Validator::make`; `''`/blank reach it as `null` over HTTP). Making it implicit is out of scope; its test uses `null` | PLAN | yes |
+| A7 | Shared `AGENTS.md` still describes `Resources/lang/fr/validation.php` as "for custom rule messages"; left untouched in phase 1 (not a listed deliverable) — WRAP should note that `maxstripped`/`minstripped`/`required_trimmed` defaults now live in the framework-defaults file | BUILD (1/2) | yes |
 | A6 | Custom-rule tests extend `Shared/Tests/Feature/DefaultValidationMessagesTest.php`; flash de-dup gets a new `Shared/Tests/Feature/View/Components/FlashBlockTest.php` | PLAN | yes |
 
