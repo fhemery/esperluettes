@@ -33,6 +33,29 @@ far:
    (underlined, indented buttons) because a class was missing until
    `pnpm run build`. Fix: treat Blade changes as triggering the asset build
    (Tailwind scans them), and/or have `verify-visually` / `e2e` rebuild first.
+5. **Browser-verification know-how belongs in the skills, not in agent
+   memory.** During `multiedit-chapter-switch-block` VERIFY, the
+   `visual-verifier` saved a memory note — inside the task folder
+   (`docs/Feature_Planning/<slug>/.claude/agent-memory/…`) instead of
+   `.claude/agent-memory/visual-verifier/`, so it was deleted at WRAP. What it
+   held, beyond suggestion 4:
+   - when a style assertion fails, grep `public/build/assets/app-*.css` for
+     the class before reporting a defect (stale build, see 4);
+   - `pnpm run e2e -- <filter>` ran the whole suite; run one file with
+     `pnpm exec playwright test e2e/tests/features/<slug>.spec.ts`;
+   - after `pnpm run e2e`, the e2e server on :8080 keeps the post-run data:
+     point the run-app driver at it with `APP_BASE_URL=http://localhost:8080`
+     and the seeded `<role>@e2e.test` accounts (CGU already accepted by
+     `auth.setup`) to take checklist screenshots.
+
+   Fold these into `verify-visually` / `run-app` / `e2e/README.md`, and find
+   out why the agent's memory path resolved into the task folder.
+6. **Add a RETRO step to the loop.** After VERIFY (or as the first part of
+   WRAP), look back on the task: what slowed it down, what the user had to
+   correct, what an agent had to discover the hard way (like 4 and 5). Each
+   finding becomes a numbered suggestion appended to this request — or a new
+   loop-improvement task once this one is done — so improvements come out of
+   every task by default instead of being noted by hand.
 
 ## Why
 
