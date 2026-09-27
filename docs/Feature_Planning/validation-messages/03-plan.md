@@ -173,14 +173,19 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter edit, advanced mode, desktop | Upload a non-image (e.g. PDF) in an image block, save → blocks error area shows « Le fichier doit être une image. » in French, red, under the editor | |
-| Chapter edit, advanced mode, desktop | Upload an image > 2 Mo → message states « 2048 Ko », no raw key | |
-| Chapter edit, mobile 375px | Same error renders under the editor without overflow | |
-| News admin form, advanced mode | Non-image in an image block → French message in the blocks area | |
-| News admin form, header image | Oversize header image → domain's own message still shown (unchanged) | |
-| Static page admin form, advanced mode | Non-image in an image block → French message in the blocks area | |
-| Any form relying on defaults (e.g. a required field left empty) | French sentence, no field path, no `validation.` key | |
-| Chapter form, two faulty blocks with the same error | Message shown once | |
+| Chapter edit, advanced mode, desktop | Upload a non-image (e.g. PDF) in an image block, save → blocks error area shows « Le fichier doit être une image. » in French, red, under the editor | ✅ `shots/chapter-pdf-desktop.png` |
+| Chapter edit, advanced mode, desktop | Upload an image > 2 Mo → message states « 2048 Ko », no raw key | ✅ « Le fichier ne doit pas dépasser 2048 Ko. » — `shots/chapter-oversize-desktop.png`. Only reachable by bypassing the Media image-field's client guard, which clears the input and shows « Le fichier dépasse la taille maximale de 2 Mo. » first (`shots/chapter-oversize-client-guard.png`) |
+| Chapter edit, mobile 375px | Same error renders under the editor without overflow | ✅ no horizontal overflow — `shots/chapter-pdf-mobile.png` |
+| News admin form, advanced mode | Non-image in an image block → French message in the blocks area | ✅ `shots/news-pdf-block.png` (blocks area below the fold; asserted on text) |
+| News admin form, header image | Oversize header image → domain's own message still shown (unchanged) | ✅ « L'image ne doit pas dépasser 2 Mo. » under the field — `shots/news-header-oversize.png` |
+| Static page admin form, advanced mode | Non-image in an image block → French message in the blocks area | ✅ `shots/static-page-pdf-block.png` (blocks area below the fold; asserted on text) |
+| Any form relying on defaults (e.g. a required field left empty) | French sentence, no field path, no `validation.` key | ✅ static page, empty `status` → « Ce champ est obligatoire. » — `shots/static-page-defaults.png` |
+| Chapter form, two faulty blocks with the same error | Message shown once | ✅ under the editor. The top « Oups » flash box still lists it twice (layout renders `$errors->all()`, A12) — `shots/chapter-two-pdfs.png` |
+
+VERIFY (2026-09-27): driven with the run-app driver against the e2e world. No
+e2e spec added: every row is server-side validation or Blade rendering, already
+asserted by the feature tests added in BUILD; the browser pass only confirmed
+the rendering in French.
 
 ## Open items
 
