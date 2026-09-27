@@ -55,7 +55,7 @@
                     </button>
                 </div>
                 <ul class="list-disc list-inside">
-                    @foreach ($errors->all() as $error)
+                    @foreach (array_unique($errors->all()) as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>

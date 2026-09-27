@@ -168,6 +168,8 @@ Registers three custom Laravel validation rules (called once from a service prov
 | `minstripped:<min>[,<profile>]` | min character count | Fails if stripped plain text is below min. Newlines excluded from count. |
 | `required_trimmed` | — | Fails if value is null or whitespace-only after trim. |
 
+Each has a French default in `Resources/lang-framework/fr/validation.php` (« Ce champ ne doit pas dépasser :max caractères. », « … au moins :min caractères. », « Ce champ est obligatoire. »), used when a form's `messages()` gives none. `required_trimmed` is **not** an implicit rule: in a direct `Validator::make` it only runs on `null` (over HTTP, `''`/blank arrive as `null` through the `ConvertEmptyStringsToNull` middleware).
+
 ### `UniqueProfileDisplayName` (ValidationRule)
 
 Checks that a display name produces a unique profile slug. Accepts an optional `$ignoreUserId` for update scenarios. Resolves `ProfilePublicApi` from the container.
@@ -215,7 +217,7 @@ wrapper should. Keep the two sets aligned in intent, not in content.
 Located in `Resources/views/components/`. Referenced as `<x-shared::component-name>`.
 
 **Layout / chrome**
-- `flash-block` — session flash messages
+- `flash-block` — session flash messages, plus the « Oups » box listing `$errors->all()` de-duplicated by message text (first-occurrence order)
 - `footer` — site footer
 - `nav-link`, `responsive-nav-link`, `dropdown`, `dropdown-link` — navigation primitives
 - `breadcrumbs`, `breadcrumbs-empty` — breadcrumb trail (uses `BreadcrumbsComponent` class for wiring)
@@ -262,7 +264,16 @@ Located in `Resources/lang/fr/`. Referenced with the `shared::` namespace.
 | `errors.php` | Error page messages |
 | `fields.php` | Generic field labels for Settings/Config fields |
 | `footer.php` | Footer text |
-| `validation.php` | Custom validator messages (`maxstripped`, `minstripped`, `unique_profile_display_name`, etc.) |
+| `validation.php` | Custom validation rule messages (`unique_profile_display_name`) |
+
+### Framework defaults
+
+`Resources/lang-framework/fr/validation.php` holds the French messages for every Laravel built-in validation rule. It is registered **unnamespaced** (`FileLoader::addPath()` in `SharedServiceProvider`), because the validator looks up `validation.<rule>`; it is kept out of `Resources/lang/` so it does not merge with `shared::validation`. It only fills the rules a form request's own `messages()` does not override.
+
+- Messages never use `:attribute` — errors render under their own field, and no technical field path (`blocks.<uid>.file`) can leak. Rules that need another field use `:other` / `:values`.
+- File sizes are stated in **Ko** (`:max`, `:min`, `:size` are kilobytes for files).
+- A unit test checks the file covers every key of the framework's English `validation.php`, so a framework upgrade adding a rule fails the suite. It checks `english ⊆ french`, so the custom-rule extras (`maxstripped`, `minstripped`, `required_trimmed`) are allowed.
+- Do not put `validation.*` keys in `fr.json`: JSON lines win over PHP groups and would shadow this file.
 
 ---
 

@@ -151,6 +151,24 @@ describe('Chapter advanced mode', function () {
         expect(Chapter::query()->count())->toBe(0);
     });
 
+    it('shows an image block error in the blocks error area', function () {
+        app()->setLocale('fr');
+        $createUrl = route('chapters.create', ['storySlug' => $this->story->slug]);
+
+        $html = $this->from($createUrl)
+            ->followingRedirects()
+            ->post(route('chapters.store', ['storySlug' => $this->story->slug]), advancedChapterPayload([
+                'blocks' => ['b0' => ['type' => 'image', 'file' => UploadedFile::fake()->create('doc.pdf', 10)]],
+            ]))
+            ->assertOk()
+            ->getContent();
+
+        // The field-level error list, not the layout's flash block (which lists every error).
+        expect($html)->toMatch('#<ul class="text-sm text-red-600[^"]*">\s*<li>Le fichier doit être une image\.</li>#u');
+        expect($html)->not->toContain('validation.');
+        expect(Chapter::query()->count())->toBe(0);
+    });
+
     it('still requires content in simple mode', function () {
         $this->post(route('chapters.store', ['storySlug' => $this->story->slug]), [
             'title' => 'No Content',
