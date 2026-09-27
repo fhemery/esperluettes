@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | French defaults for Shared's custom rules | S | — | DONE |
-| 2 | De-duplicate the « Oups » box | S | — | TODO |
+| 2 | De-duplicate the « Oups » box | S | — | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
