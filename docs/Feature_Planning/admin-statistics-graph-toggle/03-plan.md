@@ -437,22 +437,22 @@ tech-admin) on `/admin/statistics`, with seeded or recomputed statistics.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Page, first visit (cleared `localStorage`) | Switch above the tabs shows *Cumulé* selected; charts look exactly as before; tiles unchanged | |
-| Switch → *Par semaine*, Utilisateurs tab | Chart becomes bars, one per week, x labels are Mondays, no gaps (zero weeks visible as empty slots) | |
-| Contenus tab after switching on Utilisateurs | Histoires / Chapitres / Mots already in bars on first open (hidden-tab redraw), correctly sized | |
-| Commentaires tab, weekly | *Commentaires* bars + *racines et réponses* stacked bars; stacked height matches the *Commentaires* bar of the same week; legend shows both series | |
-| Current week bar | Last bar visibly lighter on every chart; tooltip *Semaine du … : n (semaine en cours)* | |
-| Tooltip, a normal week | *Semaine du 15 sept. 2026 : 37* format, French month abbreviation; one line per series on the stacked chart | |
-| Negative week (e.g. *Mots* after an edit removing words, or a deleted story) | Bar drops below the zero line, axis extends below zero | |
-| Reload in *Par semaine* | Page opens in *Par semaine*; no long cumulative flash before the bars | |
-| Switch back → *Cumulé* | All curves restored on all tabs, identical to first visit | |
-| Keyboard | Tab lands on the switch once; arrow keys change the selection and redraw; visible focus ring | |
-| Screen-reader semantics (devtools accessibility tree) | `radiogroup` with a label, two `radio`s, `aria-checked` follows the selection | |
-| Empty metric (fresh DB, no data) | Dashed "no data" box in both modes, no JS error in the console | |
-| `localStorage` blocked (private window with storage disabled, or a corrupt value set manually) | Page opens on *Cumulé*, switch still works, no console error | |
-| Mobile width (~375 px) | Switch fits and is tappable above the tabs; bar charts readable within the existing admin layout | |
-| Tech-admin role | Same page, same switch and behaviour as admin | |
-| Non-admin (`user-confirmed`) | Still redirected away from `/admin/statistics` | |
+| Page, first visit (cleared `localStorage`) | Switch above the tabs shows *Cumulé* selected; charts look exactly as before; tiles unchanged | ✅ spec `first visit…`; shot 01 |
+| Switch → *Par semaine*, Utilisateurs tab | Chart becomes bars, one per week, x labels are Mondays, no gaps (zero weeks visible as empty slots) | ✅ spec `Par semaine turns…` (6 slots, Monday labels, zero week h=0, tiles unchanged); shot 02 |
+| Contenus tab after switching on Utilisateurs | Histoires / Chapitres / Mots already in bars on first open (hidden-tab redraw), correctly sized | ✅ spec `hidden tabs…` (280 px high, full width); shot 04 |
+| Commentaires tab, weekly | *Commentaires* bars + *racines et réponses* stacked bars; stacked height matches the *Commentaires* bar of the same week; legend shows both series | ✅ spec `comments: breakdown…`; shot 05 |
+| Current week bar | Last bar visibly lighter on every chart; tooltip *Semaine du … : n (semaine en cours)* | ✅ spec `the current week…` (alpha 0.35 vs 0.8 on all 6 charts); shot 03 |
+| Tooltip, a normal week | *Semaine du 15 sept. 2026 : 37* format, French month abbreviation; one line per series on the stacked chart | ✅ spec `a normal week tooltip…` + stacked tooltip in `comments: breakdown…`; shots 02, 05 |
+| Negative week (e.g. *Mots* after an edit removing words, or a deleted story) | Bar drops below the zero line, axis extends below zero | ✅ seeded negative week on *Histoires* and *Mots*, spec `hidden tabs…`; shot 04 |
+| Reload in *Par semaine* | Page opens in *Par semaine*; no long cumulative flash before the bars | ✅ spec `a reload…` (no line frame ever drawn, all tabs); shot 06 at 150 ms |
+| Switch back → *Cumulé* | All curves restored on all tabs, identical to first visit | ✅ spec `switching back…` (axis ticks identical); shot 07 |
+| Keyboard | Tab lands on the switch once; arrow keys change the selection and redraw; visible focus ring | ✅ spec `keyboard…` (ArrowRight/Left/End move focus + selection + redraw — DECISIONS #7 fix holds); ring is thin on the selected orange segment, eyeball shot 08 |
+| Screen-reader semantics (devtools accessibility tree) | `radiogroup` with a label, two `radio`s, `aria-checked` follows the selection | ✅ spec `the switch is a labelled radiogroup…` (Playwright role queries on the a11y tree) |
+| Empty metric (fresh DB, no data) | Dashed "no data" box in both modes, no JS error in the console | ✅ exercised once by hand against truncated statistics (the seeded world has data, so not kept as a spec); shots 12–14 |
+| `localStorage` blocked (private window with storage disabled, or a corrupt value set manually) | Page opens on *Cumulé*, switch still works, no console error | ✅ specs `a corrupt stored mode…` and `blocked storage…` |
+| Mobile width (~375 px) | Switch fits and is tappable above the tabs; bar charts readable within the existing admin layout | ✅ spec `mobile width…`; shot 09 (labels rotate, readable) |
+| Tech-admin role | Same page, same switch and behaviour as admin | ✅ spec `tech-admin…`; shot 10 |
+| Non-admin (`user-confirmed`) | Still redirected away from `/admin/statistics` | n/a in browser — covered by `StatisticsControllerTest` "denies access to non-admins"; shot 11 for the record |
 
 ## Open items
 

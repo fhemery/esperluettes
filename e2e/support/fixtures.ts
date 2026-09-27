@@ -10,6 +10,7 @@
  *   app/Domains/News/Database/Seeders/E2eNewsSeeder.php
  *   app/Domains/Calendar/Database/Seeders/E2eCalendarSeeder.php
  *   app/Domains/Calendar/Database/Seeders/E2eSecretGiftSeeder.php
+ *   app/Domains/Statistics/Database/Seeders/E2eStatisticsSeeder.php
  *
  * Specs must read fixtures from here rather than hard-coding slugs, so that a
  * change to a seeder breaks compilation instead of a selector three files away.
@@ -212,6 +213,24 @@ export const GIFT = {
   secretPreferences: 'Je collectionne les hérissons en chocolat',
   /** `author`'s preferences on `active`, where `confirmed` is their giver — the one place it shows. */
   recipientPreferences: 'Je collectionne les timbres de dragons',
+} as const;
+
+/**
+ * Global statistics, written by
+ * `app/Domains/Statistics/Database/Seeders/E2eStatisticsSeeder.php` as net daily
+ * deltas relative to the current week. Weekly nets, oldest first; the last one
+ * is the current week. Index 2 is a week with no row (a zero bar), and
+ * `words` / `stories` each drop below zero once.
+ */
+export const STATISTICS = {
+  weeks: 6,
+  zeroWeekIndex: 2,
+  users: [3, 1, 0, 5, 2, 1],
+  stories: [2, 1, 0, -1, 1, 1],
+  chapters: [3, 2, 0, 1, 4, 1],
+  words: [1200, 800, 0, -300, 500, 150],
+  comments: [4, 3, 0, 5, 2, 1],
+  rootComments: [2, 1, 0, 3, 1, 1],
 } as const;
 
 /** Where auth.setup.ts parks each role's cookies. */
