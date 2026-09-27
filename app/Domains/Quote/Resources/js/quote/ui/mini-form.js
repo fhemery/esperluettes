@@ -1,7 +1,9 @@
 import { buildCanonicalText } from '../../../../../Shared/Resources/js/anchoring/canonical-text.js';
 import { extractAnchor } from '../../../../../Shared/Resources/js/anchoring/extract-anchor.js';
 import { closestBlock } from '../../../../../Shared/Resources/js/anchoring/block-elements.js';
+import { trimRangeToText } from '../../../../../Shared/Resources/js/anchoring/text-range.js';
 import { createQuote } from '../api/client.js';
+import { QUOTABLE_AREA_SELECTOR } from './author-anchoring.js';
 
 export function quoteMiniForm() {
     return {
@@ -22,19 +24,22 @@ export function quoteMiniForm() {
             if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
 
             const range = selection.getRangeAt(0);
-            const region = range.commonAncestorContainer.nodeType === 3
-                ? range.commonAncestorContainer.parentElement?.closest('.annotable-region')
-                : range.commonAncestorContainer?.closest?.('.annotable-region');
+            const articleEl = range.commonAncestorContainer.nodeType === 3
+                ? range.commonAncestorContainer.parentElement?.closest('[data-quote-article]')
+                : range.commonAncestorContainer?.closest?.('[data-quote-article]');
 
-            if (!region) return;
+            if (!articleEl) return;
 
             // A quote must stay inside a single editor block (one Quill instance):
             // it may freely span several paragraphs within that block, just not
-            // cross into another block.
-            const spansSeveralBlocks = closestBlock(range.startContainer) !== closestBlock(range.endContainer);
+            // cross into another block. A boundary merely touching a block
+            // (triple-click ending at the next block's start) does not count.
+            const covered = trimRangeToText(range);
+            if (!covered) return;
+            const spansSeveralBlocks = closestBlock(covered.startContainer) !== closestBlock(covered.endContainer);
 
-            const { text: canonicalText, nodeMap } = buildCanonicalText(region);
-            const anchor = extractAnchor(range, region, { text: canonicalText, nodeMap });
+            const { text: canonicalText, nodeMap } = buildCanonicalText(articleEl, { within: QUOTABLE_AREA_SELECTOR });
+            const anchor = extractAnchor(range, articleEl, { text: canonicalText, nodeMap });
 
             if (!anchor) return;
 

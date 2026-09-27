@@ -33,6 +33,14 @@ function textOf(selector) {
     return document.querySelector(selector).firstChild;
 }
 
+/** Text block / image block with caption / text block, as an Advanced chapter renders it. */
+const ILLUSTRATED = `
+    <article data-quote-article>
+        <div class="ce-block ce-block--text"><p id="a">le chat dort sur le tapis</p></div>
+        <figure class="ce-block ce-block--image media-image"><img alt=""><figcaption id="cap">une légende sous image</figcaption></figure>
+        <div class="ce-block ce-block--text"><p id="b">le chien court dans le jardin</p></div>
+    </article>`;
+
 beforeEach(() => {
     document.body.innerHTML = '';
     vi.mocked(createQuote).mockReset();
@@ -41,10 +49,12 @@ beforeEach(() => {
 describe('quoteMiniForm.openForm — multi-block guard', () => {
     it('accepts a selection inside a single paragraph', () => {
         document.body.innerHTML = `
-            <div class="annotable-region">
-                <p id="a">le chat dort sur le tapis</p>
-                <p id="b">le chien court dans le jardin</p>
-            </div>`;
+            <article data-quote-article>
+                <div class="ce-block ce-block--text">
+                    <p id="a">le chat dort sur le tapis</p>
+                    <p id="b">le chien court dans le jardin</p>
+                </div>
+            </article>`;
         select(textOf('#a'), 0, textOf('#a'), 12);
 
         const component = makeComponent();
@@ -57,9 +67,11 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
 
     it('accepts a selection spanning inline markup inside one paragraph', () => {
         document.body.innerHTML = `
-            <div class="annotable-region">
-                <p id="a">le <em id="e">chat</em> dort</p>
-            </div>`;
+            <article data-quote-article>
+                <div class="ce-block ce-block--text">
+                    <p id="a">le <em id="e">chat</em> dort</p>
+                </div>
+            </article>`;
         select(textOf('#a'), 0, textOf('#e'), 4);
 
         const component = makeComponent();
@@ -70,12 +82,14 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
         expect(component.error).toBeNull();
     });
 
-    it('accepts a selection spanning two paragraphs outside any editor block', () => {
+    it('accepts a selection spanning two paragraphs inside the Simple-mode wrapper', () => {
         document.body.innerHTML = `
-            <div class="annotable-region">
-                <p id="a">le chat dort</p>
-                <p id="b">le chien court</p>
-            </div>`;
+            <article data-quote-article>
+                <div class="ce-block ce-block--text">
+                    <p id="a">le chat dort</p>
+                    <p id="b">le chien court</p>
+                </div>
+            </article>`;
         select(textOf('#a'), 0, textOf('#b'), 8);
 
         const component = makeComponent();
@@ -88,12 +102,12 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
 
     it('accepts a selection spanning two paragraphs inside the same editor block', () => {
         document.body.innerHTML = `
-            <div class="annotable-region">
+            <article data-quote-article>
                 <div class="ce-block ce-block--text">
                     <p id="a">le chat dort</p>
                     <p id="b">le chien court</p>
                 </div>
-            </div>`;
+            </article>`;
         select(textOf('#a'), 0, textOf('#b'), 8);
 
         const component = makeComponent();
@@ -106,10 +120,10 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
 
     it('rejects a selection spanning two editor block wrappers', () => {
         document.body.innerHTML = `
-            <div class="annotable-region">
+            <article data-quote-article>
                 <div class="ce-block ce-block--text"><p id="a">le chat dort</p></div>
                 <div class="ce-block ce-block--text"><p id="b">le chien court</p></div>
-            </div>`;
+            </article>`;
         select(textOf('#a'), 0, textOf('#b'), 8);
 
         const component = makeComponent();
@@ -121,10 +135,10 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
 
     it('does not save while the selection spans several blocks', async () => {
         document.body.innerHTML = `
-            <div class="annotable-region">
+            <article data-quote-article>
                 <div class="ce-block ce-block--text"><p id="a">le chat dort</p></div>
                 <div class="ce-block ce-block--text"><p id="b">le chien court</p></div>
-            </div>`;
+            </article>`;
         select(textOf('#a'), 0, textOf('#b'), 8);
 
         const component = makeComponent();
@@ -134,5 +148,76 @@ describe('quoteMiniForm.openForm — multi-block guard', () => {
         expect(createQuote).not.toHaveBeenCalled();
         expect(component.open).toBe(true);
         expect(component.saving).toBe(false);
+    });
+});
+
+describe('quoteMiniForm.openForm — quotable areas', () => {
+    it('resolves the root from [data-quote-article], not .annotable-region', () => {
+        document.body.innerHTML = `
+            <div class="annotable-region">
+                <div class="ce-block ce-block--text"><p>dehors avant</p></div>
+                <article data-quote-article>
+                    <div class="ce-block ce-block--text"><p id="a">le chat dort sur le tapis</p></div>
+                </article>
+                <div class="ce-block ce-block--text"><p>dehors après</p></div>
+            </div>`;
+        select(textOf('#a'), 3, textOf('#a'), 12);
+
+        const component = makeComponent();
+        component.openForm({ chapterId: 1, storyId: 2 });
+
+        expect(component.open).toBe(true);
+        expect(component._anchor.highlighted).toBe('chat dort');
+        expect(component._anchor.prefix).toBe('le');
+        expect(component._anchor.suffix).toBe('sur le tapis');
+    });
+
+    it('does not open for a selection wholly inside an image caption', () => {
+        document.body.innerHTML = ILLUSTRATED;
+        select(textOf('#cap'), 0, textOf('#cap'), 11);
+
+        const component = makeComponent();
+        component.openForm({ chapterId: 1, storyId: 2 });
+
+        expect(component.open).toBe(false);
+        expect(component._anchor).toBeNull();
+    });
+
+    it('builds prefix and suffix that skip the caption', () => {
+        document.body.innerHTML = ILLUSTRATED;
+        select(textOf('#a'), 13, textOf('#a'), 25);
+
+        const component = makeComponent();
+        component.openForm({ chapterId: 1, storyId: 2 });
+
+        expect(component.open).toBe(true);
+        expect(component._anchor.highlighted).toBe('sur le tapis');
+        expect(component._anchor.suffix.startsWith('le chien court')).toBe(true);
+        expect(component._anchor.suffix).not.toContain('légende');
+    });
+
+    it('opens on a triple-clicked paragraph whose range ends at the start of the image block', () => {
+        document.body.innerHTML = ILLUSTRATED;
+        select(textOf('#a'), 0, document.querySelector('figure'), 0);
+
+        const component = makeComponent();
+        component.openForm({ chapterId: 1, storyId: 2 });
+
+        expect(component.open).toBe(true);
+        expect(component.multiBlock).toBe(false);
+        expect(component.error).toBeNull();
+        expect(component._anchor.highlighted).toBe('le chat dort sur le tapis');
+    });
+
+    it('still flags a selection spanning two text blocks as multi-block', () => {
+        document.body.innerHTML = ILLUSTRATED;
+        select(textOf('#a'), 3, textOf('#b'), 8);
+
+        const component = makeComponent();
+        component.openForm({ chapterId: 1, storyId: 2 });
+
+        expect(component.open).toBe(true);
+        expect(component.multiBlock).toBe(true);
+        expect(component.error).toBe(MULTI_BLOCK);
     });
 });

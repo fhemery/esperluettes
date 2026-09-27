@@ -309,6 +309,7 @@ class E2eStorySeeder extends Seeder
                 'type' => 'image',
                 'path' => self::ILLUSTRATION_PATH,
                 'alt' => 'Illustration E2E',
+                'caption' => 'Légende de l\'illustration E2E',
                 'keep_original' => true,
             ],
             ['type' => 'text', 'html' => self::ILLUSTRATED_BLOCKS_TEXT[1]],

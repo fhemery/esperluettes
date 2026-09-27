@@ -98,3 +98,68 @@ describe('buildCanonicalText', () => {
         }
     });
 });
+
+describe('buildCanonicalText — within filter', () => {
+    const WITHIN = '.ce-block--text';
+    const MIXED = '<div class="ce-block ce-block--text"><p>avant</p></div>'
+        + '<figure class="ce-block ce-block--image"><img><figcaption>légende</figcaption></figure>'
+        + '<div class="ce-block ce-block--text"><p>après</p></div>';
+
+    it('excludes a figure and its caption between two matching blocks', () => {
+        const { text } = buildCanonicalText(makeEl(MIXED), { within: WITHIN });
+        expect(text).toBe('avant\naprès');
+    });
+
+    it('maps nodeMap offsets back to the matching text nodes', () => {
+        const el = makeEl(MIXED);
+        const { text, nodeMap } = buildCanonicalText(el, { within: WITHIN });
+        expect(nodeMap.length).toBe(2);
+        for (const entry of nodeMap) {
+            expect(entry.domNode.textContent).toBe(text.slice(entry.start, entry.end));
+            expect(entry.domNode.parentElement.closest('figcaption')).toBeNull();
+        }
+    });
+
+    it('ignores whitespace text nodes between areas', () => {
+        const el = makeEl(
+            '<div class="ce-block ce-block--text"><p>avant</p></div>\n'
+            + '<figure class="ce-block ce-block--image"><figcaption>légende</figcaption></figure>\n'
+            + '<div class="ce-block ce-block--text"><p>après</p></div>',
+        );
+        const { text, nodeMap } = buildCanonicalText(el, { within: WITHIN });
+        expect(text).toBe('avant\naprès');
+        expect(nodeMap.map(e => e.domNode.textContent)).toEqual(['avant', 'après']);
+    });
+
+    it('skips emoji blots outside the area and keeps them inside', () => {
+        const el = makeEl(
+            '<div class="ce-block ce-block--text"><p>Love <span class="ql-custom-emoji-heart"></span> you</p></div>'
+            + '<figure class="ce-block ce-block--image"><figcaption>Hi <span class="ql-custom-emoji-wave"></span></figcaption></figure>',
+        );
+        const { text } = buildCanonicalText(el, { within: WITHIN });
+        expect(text).toBe('Love :heart: you');
+    });
+
+    it('returns empty text when nothing matches', () => {
+        const { text, nodeMap } = buildCanonicalText(makeEl('<p>a</p><p>b</p>'), { within: WITHIN });
+        expect(text).toBe('');
+        expect(nodeMap).toEqual([]);
+    });
+
+    it('is unchanged when within is omitted', () => {
+        // Current output, pinned: FIGURE/FIGCAPTION are not in BLOCK_TAGS, so
+        // the caption runs into the next block without a newline.
+        const { text } = buildCanonicalText(makeEl(MIXED));
+        expect(text).toBe('avant\nlégendeaprès');
+    });
+
+    it('yields the same text for Simple content wrapped in one area', () => {
+        const unwrapped = buildCanonicalText(makeEl('<p>a</p>\n<p>b</p>'));
+        const wrapped = buildCanonicalText(
+            makeEl('<div class="ce-block ce-block--text"><p>a</p>\n<p>b</p></div>'),
+            { within: WITHIN },
+        );
+        expect(wrapped.text).toBe(unwrapped.text);
+        expect(wrapped.text).toBe('a\nb');
+    });
+});

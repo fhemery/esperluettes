@@ -209,6 +209,26 @@ describe('Chapter display', function () {
 
     describe('Page content', function () {
 
+        it('wraps simple-mode content in exactly one quotable text block', function () {
+            $author = alice($this);
+            $story = publicStory('Simple Story', $author->id);
+            $chapter = createPublishedChapter($this, $story, $author, [
+                'title' => 'Simple Chap',
+                'content' => '<p>Un</p><p>Deux</p>',
+            ]);
+            $storedBefore = DB::table('story_chapters')->where('id', $chapter->id)->value('content');
+
+            $html = $this->actingAs(bob($this))
+                ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->assertOk()
+                ->getContent();
+
+            $article = \Illuminate\Support\Str::between($html, 'data-quote-article', '</article>');
+            expect(substr_count($article, 'ce-block--text'))->toBe(1);
+            expect($article)->toMatch('#<div class="ce-block ce-block--text">\s*' . preg_quote($storedBefore, '#') . '#');
+            expect(DB::table('story_chapters')->where('id', $chapter->id)->value('content'))->toBe($storedBefore);
+        });
+
         it('shows a draft badge on unpublished chapter', function () {
             $author = alice($this);
             $story = publicStory('Draft Story', $author->id);

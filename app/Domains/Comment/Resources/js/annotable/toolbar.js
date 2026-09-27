@@ -5,7 +5,18 @@
  * The toolbar template (#comment-toolbar-template) is server-rendered by the
  * <x-comment::annotable> component. Each button inside the template carries its
  * own Alpine x-data / @click binding managed by the contributing domain.
+ *
+ * An action (an element child of [data-toolbar-actions], or a descendant of
+ * one) may carry data-requires-selection-within="<css selector>": it is then
+ * shown only when every non-blank text the selection covers lies inside an
+ * element matching that selector (a boundary merely touching a block, e.g. a
+ * triple-click ending at `(nextBlock, 0)`, covers nothing there — see Shared's
+ * `coveredTextSlices`, which anchor extraction also uses). Actions without the attribute are
+ * always shown. When no action applies, the toolbar is not shown at all. The
+ * selector belongs to the contributing domain; this module never knows it.
  */
+
+import { coveredTextSlices } from '../../../../Shared/Resources/js/anchoring/text-range.js';
 
 const TOOLBAR_ID = 'comment-toolbar-active';
 
@@ -61,7 +72,31 @@ function setTooLongState(toolbar, tooLong) {
     if (message) message.classList.toggle('hidden', !tooLong);
 }
 
-function showToolbar() {
+export function selectionIsWithin(range, selector) {
+    return coveredTextSlices(range)
+        .every(({ node }) => node.parentElement?.closest(selector));
+}
+
+const REQUIRES_ATTR = 'data-requires-selection-within';
+
+export function applyActionApplicability(toolbar, range) {
+    const actions = toolbar.querySelector('[data-toolbar-actions]');
+    if (!actions) return 0;
+
+    let visible = 0;
+    for (const action of actions.children) {
+        const declaring = action.hasAttribute(REQUIRES_ATTR)
+            ? action
+            : action.querySelector(`[${REQUIRES_ATTR}]`);
+        const applicable = !declaring
+            || selectionIsWithin(range, declaring.getAttribute(REQUIRES_ATTR));
+        action.style.display = applicable ? '' : 'none';
+        if (applicable) visible++;
+    }
+    return visible;
+}
+
+export function showToolbar() {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
         hideToolbar();
@@ -84,6 +119,12 @@ function showToolbar() {
     const toolbar = getOrCreateToolbar();
     if (!toolbar) return;
 
+    // No applicable action: show nothing rather than an empty bubble.
+    if (applyActionApplicability(toolbar, range) === 0) {
+        hideToolbar();
+        return;
+    }
+
     // A selection longer than the region's cap disables the actions and shows
     // a "selection too long" hint instead. The cap lives on the region so the
     // generic toolbar stays feature-agnostic.
@@ -98,7 +139,7 @@ function showToolbar() {
     toolbar.dataset.entityId = region.dataset.entityId;
 }
 
-function hideToolbar() {
+export function hideToolbar() {
     const toolbar = document.getElementById(TOOLBAR_ID);
     if (toolbar) toolbar.style.display = 'none';
 }

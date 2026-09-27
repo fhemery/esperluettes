@@ -222,6 +222,15 @@ block's keys.
   its labels are neither quotable nor part of the canonical text (#6). This task
   adds no anchoring code. If the prerequisite lands with a different mechanism,
   PLAN adapts this paragraph — it must not add an opt-out marker as a stopgap.
+- **Prerequisite met (2026-09-26)** — see
+  [`quotable-blocks-opt-in`](../_done/quotable-blocks-opt-in.md).
+  Mechanism as assumed: only `.ce-block--text` is quotable, hardcoded
+  client-side (`QUOTABLE_AREA_SELECTOR` in Quote's `author-anchoring.js` + the
+  « Citer » button's `data-requires-selection-within`). Constraints for PLAN:
+  the choice block's wrapper (`div.ce-block.ce-block--chapter-choice`, §3.2) must
+  **not** carry `ce-block--text` nor sit inside one. A selection covering a
+  label hides « Citer » (no toolbar at all on the chapter page). No Quote
+  change needed.
 
 ### 4.4 Strings
 

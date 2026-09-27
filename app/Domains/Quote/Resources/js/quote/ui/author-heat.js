@@ -1,5 +1,5 @@
 import { buildCanonicalText } from '../../../../../Shared/Resources/js/anchoring/canonical-text.js';
-import { annotateRanges } from './author-anchoring.js';
+import { annotateRanges, QUOTABLE_AREA_SELECTOR } from './author-anchoring.js';
 import { groupPassages, segmentByDepth } from './author-summary.js';
 
 /**
@@ -82,7 +82,7 @@ export function quoteAuthorHeat({
             this._clear();
             if (!rows.length) return;
 
-            const canonical = buildCanonicalText(this._articleEl);
+            const canonical = buildCanonicalText(this._articleEl, { within: QUOTABLE_AREA_SELECTOR });
             const resolved = annotateRanges(canonical, rows);
 
             this._resolved = resolved;

@@ -198,7 +198,7 @@ describe('author summary — chapter popup', () => {
     });
 
     it('loads the rows the first time it is opened, with the heat still off', async () => {
-        const { summary, store } = mount('<div class="ce-block"><p>le chat dort</p></div>', [
+        const { summary, store } = mount('<div class="ce-block ce-block--text"><p>le chat dort</p></div>', [
             passage(1, 'le chat', 10),
         ]);
         const spy = vi.spyOn(store, 'ensureLoaded');
@@ -211,7 +211,7 @@ describe('author summary — chapter popup', () => {
     });
 
     it('lists stale passages last with the stale badge', async () => {
-        const { summary } = mount('<div class="ce-block"><p>le chat dort sur le toit</p></div>', [
+        const { summary } = mount('<div class="ce-block ce-block--text"><p>le chat dort sur le toit</p></div>', [
             passage(1, 'le chien aboie', 10),
             passage(2, 'le chat', 11),
             passage(3, 'le chat', 12),
@@ -230,7 +230,7 @@ describe('author summary — chapter popup', () => {
         const handler = event => focused.push(event.detail.groupKey);
         window.addEventListener('quote:focus-passage', handler);
 
-        const { summary, store } = mount('<div class="ce-block"><p>le chat dort</p></div>', [
+        const { summary, store } = mount('<div class="ce-block ce-block--text"><p>le chat dort</p></div>', [
             passage(1, 'le chat', 10),
         ]);
         await summary.load();
@@ -250,7 +250,7 @@ describe('author summary — chapter popup', () => {
         const handler = event => focused.push(event.detail.groupKey);
         window.addEventListener('quote:focus-passage', handler);
 
-        const { summary, store } = mount('<div class="ce-block"><p>le chat dort</p></div>', [
+        const { summary, store } = mount('<div class="ce-block ce-block--text"><p>le chat dort</p></div>', [
             passage(1, 'le chien aboie', 10),
         ]);
         await summary.load();
@@ -265,7 +265,7 @@ describe('author summary — chapter popup', () => {
     });
 
     it('labels a row count with the counted string', async () => {
-        const { summary } = mount('<div class="ce-block"><p>le chat dort</p></div>', []);
+        const { summary } = mount('<div class="ce-block ce-block--text"><p>le chat dort</p></div>', []);
 
         expect(summary.countLabel(1)).toBe('1 citation sur ce passage');
         expect(summary.countLabel(3)).toBe('3 citations sur ce passage');

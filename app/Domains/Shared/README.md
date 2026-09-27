@@ -184,8 +184,9 @@ Checks that a display name produces a unique profile slug. Accepts an optional `
 | `badge-overflow.js` | `window.BadgeOverflow` | Detects overflowing badge lists and shows a `+N` overflow indicator. |
 | `date-utils.js` | `window.DateUtils` | Date formatting utilities. |
 | `bootstrap.js` | — | Axios setup, CSRF header. |
-| `anchoring/canonical-text.js` | `buildCanonicalText(rootEl)` | Normalised text extraction from rendered content. |
-| `anchoring/extract-anchor.js` | `extractAnchor(range, rootEl, canonicalText)` | Builds a quote anchor (prefix / highlighted / suffix) from a selection. |
+| `anchoring/canonical-text.js` | `buildCanonicalText(rootEl, { within? })` | Normalised text extraction from rendered content. `within` (a CSS selector) restricts the text to matching areas; consumers own the selector. |
+| `anchoring/extract-anchor.js` | `extractAnchor(range, rootEl, canonicalText)` | Builds a quote anchor (prefix / highlighted / suffix) from a selection, trimmed to the text it covers. |
+| `anchoring/text-range.js` | `coveredTextSlices(range)`, `trimRangeToText(range)` | The text a selection really covers: a boundary that touches a block without covering its text (triple-click ending at `(nextBlock, 0)`) is ignored. Anything deciding what was selected goes through here, so the toolbar's area check and anchor extraction agree. |
 | `anchoring/reanchor.js` | `findAnchor(canonicalText, anchor)` | Re-locates a stored anchor in edited text. |
 | `anchoring/block-elements.js` | `isBlockElement(node)`, `closestBlock(node)` | Tells whether a selection crosses two blocks, so the caller can refuse it. Deliberately a *narrower* block definition than `canonical-text.js` — see note below. |
 

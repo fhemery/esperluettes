@@ -128,6 +128,24 @@ describe('extractAnchor', () => {
         expect(anchor).toBeNull();
     });
 
+    it('ignores an end boundary at the start of a non-quotable block (triple-click before an image)', () => {
+        const el = makeEl(
+            '<div class="t"><p>le chat dort</p></div>'
+            + '<figure><figcaption>une légende</figcaption></figure>'
+            + '<div class="t"><p>le chien court</p></div>'
+        );
+        document.body.appendChild(el);
+        const canonical = buildCanonicalText(el, { within: '.t' });
+        const [textNode] = getTextNodes(el);
+
+        const anchor = extractAnchor(makeRange(textNode, 0, el.querySelector('figure'), 0), el, canonical);
+        el.remove();
+
+        expect(anchor).not.toBeNull();
+        expect(anchor.highlighted).toBe('le chat dort');
+        expect(anchor.suffix).toBe('le chien court');
+    });
+
     it('returns null when range container is not in the nodeMap', () => {
         const el = makeEl('<p>Hello world</p>');
         const canonical = buildCanonicalText(el);

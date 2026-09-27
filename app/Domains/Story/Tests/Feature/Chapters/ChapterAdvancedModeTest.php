@@ -361,4 +361,27 @@ describe('Chapter form and reading page under advanced mode', function () {
         expect($article)->toContain('Après l\'image');
         expect($article)->toContain('ce-block--image');
     });
+
+    it('does not wrap advanced content a second time', function () {
+        Storage::disk('public')->put('chapters/' . $this->author->id . '/sep.jpg', 'x');
+
+        $chapter = advancedChapter($this, [
+            ['type' => 'text', 'html' => '<p>Avant l\'image</p>'],
+            [
+                'type' => 'image',
+                'path' => 'chapters/' . $this->author->id . '/sep.jpg',
+                'alt' => 'Séparateur',
+            ],
+            ['type' => 'text', 'html' => '<p>Après l\'image</p>'],
+        ]);
+
+        $html = $this->get(route('chapters.show', [
+            'storySlug' => $this->story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]))->assertOk()->getContent();
+
+        $article = Str::between($html, 'data-quote-article', '</article>');
+        expect(substr_count($article, 'ce-block--text'))->toBe(2);
+        expect($article)->toContain('ce-block--image');
+    });
 });

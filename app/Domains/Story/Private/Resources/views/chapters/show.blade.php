@@ -218,7 +218,14 @@
 
                         <x-quote::author-heat :chapter-id="$vm->chapter->id">
                             <article data-quote-article class="prose rich-content max-w-none [text-indent:2rem] text-xl">
-                                {!! $vm->chapter->content !!}
+                                {{-- The quote system treats `.ce-block--text` as the only quotable area:
+                                     Advanced content already comes as `.ce-block` wrappers, so Simple
+                                     content is wrapped in one text block to obey the same rule. --}}
+                                @if ($vm->chapter->isAdvanced)
+                                    {!! $vm->chapter->content !!}
+                                @else
+                                    <div class="ce-block ce-block--text">{!! $vm->chapter->content !!}</div>
+                                @endif
                             </article>
                         </x-quote::author-heat>
                     </x-comment::annotable>
