@@ -13,7 +13,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Weekly aggregation service (`WeeklyAggregator` + `getWeeklyTimeSeries()`) | S | — | TODO |
+| 1 | Weekly aggregation service (`WeeklyAggregator` + `getWeeklyTimeSeries()`) | S | — | DONE |
 | 2 | Shared `x-shared::segmented-control` component (shared infrastructure) | S | — | TODO |
 | 3 | Chart components ship the weekly payload + weekly i18n strings | S | 1 | TODO |
 | 4 | `charts.js` weekly mode, chart registry and the switch on the page | M | 2, 3 | TODO |
