@@ -26,6 +26,13 @@ far:
    and only the following phases add the new feature — "make the change easy,
    then make the easy change". Pairs with suggestion 1: the checkpoint sits at
    the boundary between the two.
+4. **The gate passes with stale compiled assets.** The gate skips the vite
+   build when the branch only changes Blade files, but a new Tailwind class in
+   a Blade view needs a rebuild to exist in `public/build`. In
+   `multiedit-chapter-switch-block` VERIFY first saw broken styling
+   (underlined, indented buttons) because a class was missing until
+   `pnpm run build`. Fix: treat Blade changes as triggering the asset build
+   (Tailwind scans them), and/or have `verify-visually` / `e2e` rebuild first.
 
 ## Why
 
