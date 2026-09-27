@@ -1,6 +1,6 @@
 # Shared — button contrast in light themes — request
 
-*Filed at WRAP of `multiedit-chapter-switch-block/` (see `_done/` once archived).*
+*Filed at WRAP of [`multiedit-chapter-switch-block`](../_done/multiedit-chapter-switch-block.md), which kept the accent colour and left the contrast fix to this task.*
 
 ## What I want
 

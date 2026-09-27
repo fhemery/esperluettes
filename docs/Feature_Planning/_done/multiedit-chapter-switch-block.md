@@ -1,8 +1,8 @@
 # Multi-edit — chapter switch block
 
-**Status:** DONE — 2026-09-27 · **Domain(s):** `Editor`, `Story` · **Spec:**
-[functional](./01-functional.md) · [architecture](./02-architecture.md) ·
-[plan](./03-plan.md) · [decisions](./DECISIONS.md)
+**Status:** DONE — 2026-09-27 · **Domain(s):** `Editor`, `Story`. Decision
+numbers (#n, An) refer to the task's `DECISIONS.md`; "spec", "arch." and "plan"
+to its `01`–`03` documents. All are deleted; git history has them.
 
 ## What it does
 
@@ -20,8 +20,8 @@ chapter form opts into `chapter-choice`; News and static pages cannot reach it.
   check at all: a choice to an unpublished or deleted chapter is a plain link
   that 404s (deleted target → rendered as nothing, since no URL can be built).
 - **Reader page is identical for everyone**, author included — no « non publié »
-  marker (the functional spec's read-time visibility rules #1/#2/#4 were
-  replaced at DESIGN by #9–#11; `01-functional.md` §4.2–4.3 is stale on this).
+  marker (the spec's read-time visibility rules #1/#2/#4 were replaced at
+  DESIGN by #9–#11).
 - **Per-choice `enabled` toggle** (default on): a disabled choice is never
   rendered, for anyone. That is how an author prepares an unpublished branch.
   A block whose choices are all disabled renders nothing but stays in
@@ -77,7 +77,9 @@ chapter form opts into `chapter-choice`; News and static pages cannot reach it.
   props); `editorView()` is only used for plugin types.
 - Choice rows are server-rendered; the local Alpine scope moves DOM rows and
   re-indexes names — no `choices` array, no `x-model` on dynamic selects (A14).
-- Button colour: `accent` (#13), not `<x-shared::button>` primary.
+- Button colour: `accent` (#13), not `<x-shared::button>` primary. **Kept at
+  WRAP (2026-09-27, user)** despite spring-light contrast 3.02; the fix belongs
+  to `shared-button-contrast/`, not here.
 
 ## Assumptions to confirm (reversible)
 
@@ -89,13 +91,13 @@ chrome reads `blockTypes` via `@aware` · A11 stored text/image of a non-enabled
 type skipped too · A12 self-targeting choice rendered with pre-save slug/title ·
 A13 (superseded by #13) · A14 server-rendered rows · A15 last choice removable.
 
-## Unverified / open
+## Colour check at WRAP
 
-- **#13 accent colour was applied after VERIFY without a visual check.** At
-  WRAP the (now deleted) feature spec measured it: light 3.02 (spring) · 4.71
-  (summer) · 5.69 (winter) · 6.51 (autumn); dark 5.1–7.1. **Spring light is
-  below AA and worse than primary (3.1–3.6).** No screenshot taken. Needs a
-  user call — see backlog row below.
+- #13 (accent) was applied after VERIFY without a visual check. At WRAP the
+  feature spec measured it: light 3.02 (spring) · 4.71 (summer) · 5.69
+  (winter) · 6.51 (autumn); dark 5.1–7.1. Spring light is below AA and worse
+  than primary (3.1–3.6). No screenshot. User decision: keep accent, fix it in
+  `shared-button-contrast/`.
 
 ## Not done
 
@@ -108,7 +110,7 @@ A13 (superseded by #13) · A14 server-rendered rows · A15 last choice removable
   filed).
 - Stale `public/build` let the gate pass without `no-underline!` — already
   filed in `improve-loop/`.
-- Backlog: [`shared-button-contrast`](../shared-button-contrast/00-request.md) —
+- Backlog: [`shared-button-contrast`](../shared-button-contrast/) —
   light-theme contrast of accent/primary buttons.
 - E2E: `e2e/tests/features/multiedit-chapter-switch-block.spec.ts` **deleted**
   (all 18 tests green at WRAP; behaviour covered by PHP tests + core
