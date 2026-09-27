@@ -25,4 +25,5 @@ the user may want to reverse — surface these in the WRAP summary.
 | A7 | T1 — defaults live in a Shared-owned PHP `validation.php`, registered unnamespaced via `FileLoader::addPath()`; rejected root `lang/`, JSON, `laravel-lang` package | DESIGN | yes (cheap: one file moves) |
 | A8 | T2 — messages phrased without `:attribute` (supersedes A5's "French label" branch) | DESIGN | yes |
 | A9 | T4 — the three `validation.*` keys in `Shared/fr.json` are removed (JSON shadows PHP) | DESIGN | yes |
+| A10 | Plan cut into 2 phases (Shared defaults; block-error display in the 3 forms). Block errors: exact `blocks` errors merged with `Arr::flatten($errors->get('blocks.*'))`, de-duplicated (the wildcard returns a nested array); block-error tests added to each domain's existing `*AdvancedModeTest.php` rather than new files | PLAN | yes |
 | A6 | Tests keep `APP_LOCALE=zz`; the French text is verified by tests that switch to `fr` | REFINE | yes |
