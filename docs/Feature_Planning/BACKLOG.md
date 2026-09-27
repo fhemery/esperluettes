@@ -35,6 +35,8 @@ scoped to the task that actually changed.
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
 - **Improve loop** · `improve-loop/` · interactive · TODO
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
+- **Upgrade pnpm to 12** · `pnpm-12-upgrade/` · auto · TODO
+- **Make the e2e specs type-check (@types/node)** · `e2e-types-node/` · auto · TODO
 
 ## Done
 
