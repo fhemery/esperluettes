@@ -5,6 +5,7 @@ namespace App\Domains\Statistics\Private\Services;
 use App\Domains\Statistics\Private\Models\StatisticSnapshot;
 use App\Domains\Statistics\Private\Models\StatisticTimeSeries;
 use App\Domains\Statistics\Private\Support\TimeSeriesResampler;
+use App\Domains\Statistics\Private\Support\WeeklyAggregator;
 use App\Domains\Statistics\Public\DTOs\StatisticValue;
 use App\Domains\Statistics\Public\DTOs\TimeSeriesPoint;
 use Carbon\Carbon;
@@ -157,5 +158,20 @@ class StatisticQueryService
             $maxPoints,
             $cumulative,
         );
+    }
+
+    /**
+     * Get net deltas per calendar week (Monday → Sunday) up to the current week.
+     *
+     * @return TimeSeriesPoint[] one point per calendar week, oldest first
+     */
+    public function getWeeklyTimeSeries(
+        string $statisticKey,
+        string $scopeType = 'global',
+        mixed $scopeId = null,
+    ): array {
+        $points = $this->getTimeSeries($statisticKey, $scopeType, $scopeId, 'daily');
+
+        return app(WeeklyAggregator::class)->aggregate($points, now());
     }
 }

@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
                 \App\Domains\News\Database\Seeders\E2eNewsSeeder::class,
                 \App\Domains\Calendar\Database\Seeders\E2eCalendarSeeder::class,
                 \App\Domains\Calendar\Database\Seeders\E2eSecretGiftSeeder::class,
+                \App\Domains\Statistics\Database\Seeders\E2eStatisticsSeeder::class,
             ]);
         }
     }

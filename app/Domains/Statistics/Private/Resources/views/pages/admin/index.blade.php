@@ -27,6 +27,18 @@
             />
         </div>
 
+        <x-shared::segmented-control
+            name="statistics-graph-mode"
+            :label="__('statistics::admin.graph_mode_label')"
+            :options="[
+                'cumulative' => __('statistics::admin.graph_mode_cumulative'),
+                'weekly' => __('statistics::admin.graph_mode_weekly'),
+            ]"
+            selected="cumulative"
+            storage-key="statistics.admin.graph-mode"
+            class="self-start"
+        />
+
         <x-shared::tabs
             :tabs="[
                 ['key' => 'users', 'label' => __('statistics::admin.tab_users')],

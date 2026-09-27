@@ -22,6 +22,40 @@ describe('Statistics Admin Controller', function () {
             ->assertSee(__('statistics::admin.evolution', ['metric' => __('statistics::admin.users')]));
     });
 
+    it('renders the graph mode switch with both options, cumulative selected', function () {
+        $response = $this->actingAs(admin($this))
+            ->get(route('statistics.admin.index'))
+            ->assertOk()
+            ->assertSee('role="radiogroup"', false)
+            ->assertSee('aria-label="'.__('statistics::admin.graph_mode_label').'"', false)
+            ->assertSee('data-name="statistics-graph-mode"', false)
+            ->assertSee('data-value="cumulative"', false)
+            ->assertSee(__('statistics::admin.graph_mode_cumulative'))
+            ->assertSee(__('statistics::admin.graph_mode_weekly'))
+            ->assertSee('statistics.admin.graph-mode', false);
+
+        expect($response->getContent())
+            ->toMatch('/<button[^>]*aria-checked="true"[^>]*data-value="cumulative"/')
+            ->toMatch('/<button[^>]*aria-checked="false"[^>]*data-value="weekly"/');
+    });
+
+    it('keeps the summary tiles outside the graph mode switch', function () {
+        $html = $this->actingAs(admin($this))
+            ->get(route('statistics.admin.index'))
+            ->assertOk()
+            ->getContent();
+
+        $switchAt = strpos($html, 'data-name="statistics-graph-mode"');
+        $tabsAt = strpos($html, 'id="tabs-panel-users"');
+
+        expect($switchAt)->not->toBeFalse()
+            ->and(strrpos(substr($html, 0, $switchAt), 'stat-summary'))->not->toBeFalse()
+            ->and(strrpos(substr($html, 0, $switchAt), 'comment-summary'))->not->toBeFalse()
+            ->and(strpos($html, 'stat-summary', $switchAt))->toBeFalse()
+            ->and(strpos($html, 'comment-summary', $switchAt))->toBeFalse()
+            ->and($switchAt)->toBeLessThan($tabsAt);
+    });
+
     it('denies access to non-admins', function () {
         $user = alice($this, [], true, [Roles::USER_CONFIRMED]);
 

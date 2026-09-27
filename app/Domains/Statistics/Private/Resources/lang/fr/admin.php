@@ -17,4 +17,9 @@ return [
     'comments_breakdown' => ':root racines, :reply réponses',
     'comments_breakdown_chart_title' => 'Évolution : racines et réponses',
     'tab_comments' => 'Commentaires',
+    'graph_mode_label' => 'Mode d’affichage des graphiques',
+    'graph_mode_cumulative' => 'Cumulé',
+    'graph_mode_weekly' => 'Par semaine',
+    'current_week' => 'semaine en cours',
+    'week_tooltip' => 'Semaine du :date : :value',
 ];

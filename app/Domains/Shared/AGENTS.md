@@ -30,6 +30,7 @@
 | `Http/BackToCommentsRedirector.php` | Reconstruct `#comments` redirect after comment post |
 | `Helpers/VersionHelper.php` | Read and cache `version.json` for display in footer |
 | `Resources/js/tooltip.js` | Alpine `popover` component with viewport-aware positioning and keyboard activation |
+| `Resources/js/segmented-control.js` | Alpine `segmentedControl` component backing `<x-shared::segmented-control>`; dispatches `segmented-control-change` |
 | `Resources/js/anchoring/` | Read-side quote anchoring: `buildCanonicalText`, `extractAnchor`, `findAnchor`, `isBlockElement`/`closestBlock`, `coveredTextSlices`/`trimRangeToText` |
 | `Resources/css/app.css` | Site-wide styles, including the read-side rules for stored rich content |
 
@@ -56,6 +57,8 @@
 **The popover trigger must stay keyboard-operable.** `popover.blade.php`'s trigger is `tabindex="0"` with `onTriggerKeydown` handling Enter/Space and an `@keydown.escape.window` closing it; `aria-expanded` is bound to the open state. Any change to the trigger markup or `tooltip.js` must keep all three (Tab reachability, Enter/Space activation, Escape close) — this is covered by `Resources/js/tooltip.test.js`.
 
 **Tabs panel ARIA is a shared contract.** `tabs.blade.php` stamps `id="{id}-tab-{key}"` and `aria-controls="{id}-panel-{key}"` on each tab button (`id` prop defaults to `tabs`). Consumers own the panel markup in the slot and must set `role="tabpanel"`, `id="{id}-panel-{key}"`, and `aria-labelledby="{id}-tab-{key}"` on each panel root. Keep `x-show` for inactive panels. Covered by `Tests/Feature/View/Components/TabsA11yTest.php`.
+
+**`segmented-control.js` writes to `$root`, not `$el`.** `select()` and `onKeydown()` are invoked from a button's `@click`/`@keydown`, so inside those handlers `$el` is that button, not the control's root — writing the mirrored `data-value` to `$el` would stamp it on the wrong element. Always use `this.$root.dataset.value = this.value`. Covered by `Resources/js/segmented-control.test.js`.
 
 **Confirm-modal always moves focus on open.** It forwards `focusable` to `modal.blade.php` (no opt-out). Covered by `Tests/Feature/View/Components/ConfirmModalA11yTest.php`.
 

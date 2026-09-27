@@ -13,9 +13,15 @@
             'cumulativeValue' => $point->cumulativeValue,
         ])->values()->all();
 
+        $weeklyPoints = collect($item['weeklyData'] ?? [])->map(fn ($point) => [
+            'x' => $point->periodStart->format('Y-m-d'),
+            'value' => (float) $point->value,
+        ])->values()->all();
+
         return [
             'label' => $item['label'],
             'points' => $points,
+            'weeklyPoints' => $weeklyPoints,
             'color' => $item['color'] ?? 'rgb(99, 102, 241)',
             'backgroundColor' => $item['backgroundColor'] ?? 'rgba(99, 102, 241, 0.1)',
         ];
@@ -32,6 +38,8 @@
         'rangeMin' => $rangeMin,
         'rangeMax' => $rangeMax,
         'locale' => app()->getLocale(),
+        'weekTooltip' => __('statistics::admin.week_tooltip'),
+        'currentWeekLabel' => __('statistics::admin.current_week'),
     ];
 @endphp
 
