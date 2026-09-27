@@ -10,5 +10,5 @@ return [
     'delete' => 'Supprimer le bloc',
     'insert' => 'Insérer un bloc ici',
     'img_warning' => 'Les images insérées dans le texte ne seront pas conservées : ajoutez-les comme blocs image.',
-    'to_simple_disabled' => 'Retirez les images et ne gardez qu’un seul bloc de texte pour revenir en mode Simple.',
+    'to_simple_disabled' => 'Ne gardez qu’un seul bloc de texte (sans image ni autre bloc) pour revenir en mode Simple.',
 ];

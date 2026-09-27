@@ -25,7 +25,7 @@ import { expect, test } from '../../support/test';
  * left alone.
  */
 
-const TO_SIMPLE_DISABLED = 'Retirez les images et ne gardez qu’un seul bloc de texte pour revenir en mode Simple.';
+const TO_SIMPLE_DISABLED = 'Ne gardez qu’un seul bloc de texte (sans image ni autre bloc) pour revenir en mode Simple.';
 
 test('a block added under Alpine is a working writing surface', async ({ author }) => {
   const edit = new ChapterEditPage(author, STORY.slug, STORY.draftChapter.slug);

@@ -16,6 +16,15 @@ describe('StaticPage admin form renders the multi-editor', function () {
             ->assertSee('name="blocks_order"', false);
     });
 
+    it('does not offer the chapter choice block', function () {
+        $this->actingAs(admin($this))
+            ->get(route('static.admin.create'))
+            ->assertOk()
+            ->assertSee("appendBlock('text')", false)
+            ->assertDontSee("chapter-choice", false)
+            ->assertDontSee('story::chapters.choice.block_label');
+    });
+
     it('opens an advanced page in advanced mode', function () {
         $page = StaticPage::factory()->create([
             'content' => '<p>cache</p>',

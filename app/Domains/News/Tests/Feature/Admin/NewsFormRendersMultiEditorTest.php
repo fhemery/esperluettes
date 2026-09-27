@@ -16,6 +16,15 @@ describe('News admin form renders the multi-editor', function () {
             ->assertSee('name="blocks_order"', false);
     });
 
+    it('does not offer the chapter choice block', function () {
+        $this->actingAs(admin($this))
+            ->get(route('news.admin.create'))
+            ->assertOk()
+            ->assertSee("appendBlock('text')", false)
+            ->assertDontSee("chapter-choice", false)
+            ->assertDontSee('story::chapters.choice.block_label');
+    });
+
     it('opens an advanced article in advanced mode', function () {
         $news = News::create([
             'title' => 'Advanced', 'slug' => 'advanced-' . uniqid(), 'summary' => 's',

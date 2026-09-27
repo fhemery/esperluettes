@@ -22,10 +22,12 @@ final class EditorPublicApi
      *
      * @param array<int, array<string, mixed>> $blocks
      * @param string $profile Purifier profile applied to text blocks
+     * @param array<string, mixed> $context passed to every block type's
+     *        render(); `profile` is reserved and always set to $profile
      */
-    public function render(array $blocks, string $profile = 'multiedit-text'): string
+    public function render(array $blocks, string $profile = 'multiedit-text', array $context = []): string
     {
-        return $this->renderer->render($blocks, $profile);
+        return $this->renderer->render($blocks, $profile, $context);
     }
 
     /**

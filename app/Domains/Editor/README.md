@@ -16,8 +16,9 @@ the `<x-editor::…>` components in Blade.
 
 ## Block schema
 
-A block document is an **ordered array of plain arrays** — deliberately untyped,
-so a new block type costs one branch and no DTO. Two types exist:
+A block document is an **ordered array of plain arrays** — deliberately untyped:
+a new block type is one `EditorBlockType` registration and no DTO (see
+[Block-type registry](#block-type-registry)). Two types are built in:
 
 ```php
 ['type' => 'text',  'html' => '<p>…</p>']
@@ -37,7 +38,8 @@ Rules:
   Every MultiEdit profile strips `<img>`, so images only ever come from image
   blocks.
 - A text block that sanitizes to an empty string is skipped; an image block
-  without a `path` is skipped.
+  without a `path` is skipped; a block whose `type` is missing or not
+  registered is dropped.
 - `path` is a **Media** path. Editor never uploads or deletes files — the storing
   domain calls `MediaPublicApi` and registers its `MediaUsageProvider`.
 
@@ -50,7 +52,7 @@ for images, a `<x-media::image>` carrying `class="ce-block ce-block--image"`.
 
 | Method | Purpose |
 |--------|---------|
-| `render(array $blocks, string $profile = 'multiedit-text'): string` | Block document → sanitized HTML |
+| `render(array $blocks, string $profile = 'multiedit-text', array $context = []): string` | Block document → sanitized HTML; `$context` is passed to every block type's `render()` |
 | `sanitizeText(string $html, string $profile = 'multiedit-text'): string` | One text block's HTML through the given profile |
 | `plainTextLength(array $blocks): int` | Character count across **text** blocks only, for min/max validation |
 | `plainText(array $blocks): string` | Concatenated `html` of **text** blocks only, in order, **unmodified** |
@@ -64,6 +66,36 @@ trims — the right normalisation for a min/max bound, the wrong one for a count
 that must not move. `plainText()` returns the stored strings byte-identically, so
 a consumer can run its own counter and get the same number before and after a
 document is converted into a single text block.
+
+### Block-type registry
+
+`Public/Blocks/EditorBlockRegistry` (container singleton) holds every block type,
+in registration order. `EditorServiceProvider` registers the built-ins `text`
+then `image` inside the singleton factory, so they always come first; another
+domain registers its own type from its service provider with
+`app(EditorBlockRegistry::class)->register(new MyType())`. Registering a key
+twice throws `InvalidArgumentException`.
+
+A type implements `Public/Blocks/EditorBlockType`:
+
+| Method | Returns |
+|--------|---------|
+| `key()` | Stable key stored in the block's `type` |
+| `labelKey()` | Translation key of the palette / insert-menu label |
+| `icon()` | Material Symbols name of the palette / insert-menu icon |
+| `editorView()` | Blade view rendering one block in the editor |
+| `render(array $block, array $context)` | One block → HTML (`''` to skip it) |
+
+Contract rules:
+
+- `render()` receives the consumer's `$context` plus the **reserved `profile`
+  key** (the Purifier profile passed to `render()`); the renderer sets it and it
+  overrides a consumer key of the same name.
+- Editor does **not** re-sanitize a type's output. A plugin type escapes its own
+  HTML.
+- Normalisation and validation of a plugin type's block stay in the consumer
+  that stores it (its resolver / form request), not in the contract.
+- `plainText()` / `plainTextLength()` only ever read `text` blocks.
 
 ### Sanitizing profiles
 
@@ -83,7 +115,8 @@ before storing it, not something a profile does.
 
 ## Blade components
 
-Two anonymous components, registered by `EditorServiceProvider` under the
+Two anonymous components (plus the `<x-editor::multi.block>` chrome for plugin
+block partials, below), registered by `EditorServiceProvider` under the
 `editor` namespace. **Only the prefixed form exists** — there is deliberately no
 unprefixed `<x-editor>` alias.
 
@@ -141,12 +174,36 @@ and the `MediaUsageProvider` that keeps the file alive.
 | `contentValue` | `''` | Current simple-mode HTML |
 | `blocks` | `[]` | Stored blocks; a non-empty array opens in advanced mode |
 | `mode` | `'simple'` | Initial mode when `blocks` is empty |
-| `blockTypes` | `['text', 'image']` | Types the insert affordance offers |
+| `blockTypes` | `['text', 'image']` | Per-consumer opt-in list of registered types. Drives the palette, the "+" insert menu, the hidden templates and which stored blocks render (registry order; an unregistered key is ignored; a stored block of a non-enabled type is skipped) |
+| `blockContext` | `[]` | Passed untouched to plugin block partials as `$context`; Editor never reads it |
 | `toolbar` | `'default'` | Preset name or token array, resolved once and shared by both panes and every text block |
 | `min` / `max` | `null` | Bounds on the **summed** text length |
 | `placeholder` | `''` | Placeholder text |
 | `nbLines` | `5` | Height in lines of every writing surface — the simple pane and each text block |
 | `indentParagraphs` | `false` | Adds `ql-indent` to every writing surface |
+
+Switching back to *simple* is refused while any non-text block exists.
+
+#### Plugin block types
+
+A registered type's `editorView()` is `@include`d for each stored block of that
+type and once inside its hidden `<template data-block-template="{key}">` (the
+JS clones it by key). The partial receives:
+
+| Var | Value |
+|-----|-------|
+| `$name` | Base field name (`blocks`) |
+| `$uid` | Block uid; `__UID__` inside the template (replaced on clone) |
+| `$block` | The stored block array, `null` for a new one |
+| `$context` | The `blockContext` prop |
+
+It must wrap its fields in `<x-editor::multi.block :type :name :uid>`, which
+renders the chrome every block needs — root `[data-block][data-type][data-uid]`,
+move/delete controls, the hidden `{name}[{uid}][type]` input, then the "+"
+insert menu (it reads the enclosing editor's `blockTypes` itself). Its fields
+submit as `{name}[{uid}][…]`. The built-in text and image partials do not use
+it: they take component-level props (toolbar, bounds, scope) this contract does
+not carry.
 
 Translations live in `Private/Resources/lang/fr/` under the `editor::` namespace:
 `editor::rich-text.*` and `editor::multi.*`.
@@ -180,7 +237,6 @@ inside a fragment must push the assets itself (see
 - No image storage, upload or deletion — that is Media's.
 - No persistence of documents — the consuming domain owns the column, and the
   rendered HTML it may cache alongside it.
-- No block-type registry and no typed block DTOs: a third block type is the day
-  to introduce the registry, not before.
+- No typed block DTOs — blocks stay plain arrays.
 - No read-side rendering of stored HTML beyond `render()` — the `.rich-content`
   typography that displays it belongs to `Shared`.

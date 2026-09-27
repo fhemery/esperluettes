@@ -74,6 +74,23 @@ The custom tab is **not** a Media component: `cover-tab-custom.blade.php` is a b
 
 The children of that root are always `.ce-block` wrappers: Advanced content already is one wrapper per block, and Simple content (no `content_blocks`) is wrapped in a single `<div class="ce-block ce-block--text">` at display time — the stored `content` is never modified. Only `.ce-block--text` areas are read by the quote system, so an image block and its caption are never quotable.
 
+### Chapter choice block
+
+Advanced chapters may hold a `chapter-choice` block — a group of buttons linking to other chapters of the same story. Story registers it with Editor's block-type registry (`ChapterChoiceBlockType`); News and static pages do not accept it.
+
+```php
+['type' => 'chapter-choice', 'choices' => [
+    ['chapter_id' => 42, 'label' => 'Ouvrir la porte', 'enabled' => true],
+    ['chapter_id' => 43, 'label' => null, 'enabled' => false], // label max 120, trimmed, empty → null
+]]
+```
+
+- **Rendered at save time**, into `content`, by `ChapterContentResolver`. There is no read-time check: a choice to an unpublished or deleted chapter is a plain link that 404s for the reader. A **disabled** choice is never rendered; a block with no rendered choice emits nothing but stays in `content_blocks`. An empty label falls back to the target's title **as of that save** — renaming the target does not update it until the holding chapter is saved again.
+- **Same-story rule (security).** A `chapter_id` must be a chapter of the story (any status, `ChapterChoiceTargets`), or an id the edited chapter already stored — which is how a choice to a since-deleted chapter survives a save. Anything else is a validation error on `blocks`. Choices without a target, then blocks without a choice, are dropped.
+- **Relative URLs** (`chapters.show`, `absolute: false`), so stored HTML survives a domain change; stale slugs are absorbed by the canonical redirect of the reader page.
+- **Not quotable** and not counted: the wrapper is `ce-block--chapter-choice`, never `ce-block--text`, and word/character counts read text blocks only.
+- **Editor side.** Only the chapter form opts in (`blockTypes` `text`, `image`, `chapter-choice`), passing `blockContext['chapters']` from `ChapterChoiceTargets`. The partial `editor/chapter-choice-block` (+ `chapter-choice-row`) server-renders one row per choice; a local Alpine scope adds, moves and removes rows in the DOM and re-indexes their names, so the submitted order is the order on screen. A stored target missing from the list shows as « Chapitre supprimé » with a warning and is kept on save.
+
 ---
 
 ## Architecture Decisions

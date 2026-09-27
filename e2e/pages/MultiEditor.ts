@@ -1,5 +1,8 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { ChapterChoiceBlock } from './ChapterChoiceBlock';
 import { RichTextEditor } from './RichTextEditor';
+
+export type BlockType = 'text' | 'image' | 'chapter-choice';
 
 /**
  * Component object for `<x-editor::multi>` — the Simple/Avancé block editor.
@@ -83,15 +86,38 @@ export class MultiEditor {
     await expect(this.simple.body).toBeVisible();
   }
 
+  get choiceBlocks(): Locator {
+    return this.root.locator('.multi-editor__blocks > [data-block][data-type="chapter-choice"]');
+  }
+
+  /** The nth `chapter-choice` block (Story's plugin block type). */
+  choiceBlock(index: number): ChapterChoiceBlock {
+    return new ChapterChoiceBlock(this.choiceBlocks.nth(index));
+  }
+
+  /** One entry of the palette at the bottom of the advanced pane. */
+  paletteButton(type: BlockType): Locator {
+    return this.root.locator(`button[x-on\\:click="appendBlock('${type}')"]`);
+  }
+
+  /** One entry of the nth block's "+" menu (open it with `openInsertMenu`). */
+  insertMenuButton(index: number, type: BlockType): Locator {
+    return this.block(index).locator(`button[x-on\\:click="insertAfter($el, '${type}'); open = false"]`);
+  }
+
+  async openInsertMenu(index: number): Promise<void> {
+    await this.block(index).locator('button[x-on\\:click="open = !open"]').click();
+  }
+
   /** The palette at the bottom of the advanced pane. */
-  async addBlock(type: 'text' | 'image'): Promise<void> {
+  async addBlock(type: BlockType): Promise<void> {
     const before = await this.blocks.count();
     await this.root.locator(`button[x-on\\:click="appendBlock('${type}')"]`).click();
     await expect(this.blocks).toHaveCount(before + 1);
   }
 
   /** The "+" affordance at the bottom of a block, which inserts right after it. */
-  async insertAfter(index: number, type: 'text' | 'image'): Promise<void> {
+  async insertAfter(index: number, type: BlockType): Promise<void> {
     const before = await this.blocks.count();
     const block = this.block(index);
     await block.locator('button[x-on\\:click="open = !open"]').click();

@@ -31,13 +31,18 @@ class ChapterRequest extends FormRequest
             $rules['content'] = ['nullable', 'string'];
             $rules['blocks_order'] = ['nullable', 'string'];
             $rules['blocks'] = ['required', 'array', 'min:1'];
-            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image'])];
+            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image', 'chapter-choice'])];
             $rules['blocks.*.html'] = ['nullable', 'string'];
             $rules['blocks.*.path'] = ['nullable', 'string', 'max:1024'];
             $rules['blocks.*.alt'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.caption'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.keep_original'] = ['nullable'];
             $rules['blocks.*.file'] = ['nullable', 'image', 'max:2048'];
+            // chapter-choice: the same-story target check lives in ChapterContentResolver.
+            $rules['blocks.*.choices'] = ['nullable', 'array'];
+            $rules['blocks.*.choices.*.chapter_id'] = ['nullable', 'integer'];
+            $rules['blocks.*.choices.*.label'] = ['nullable', 'string', 'max:120'];
+            $rules['blocks.*.choices.*.enabled'] = ['nullable', 'boolean'];
         } else {
             $rules['content'] = ['required'];
         }
@@ -118,6 +123,13 @@ class ChapterRequest extends FormRequest
                     $blocks[$uid][$key] = trim($block[$key]);
                 }
             }
+            if (isset($block['choices']) && is_array($block['choices'])) {
+                foreach ($block['choices'] as $i => $choice) {
+                    if (is_array($choice) && isset($choice['label']) && is_string($choice['label'])) {
+                        $blocks[$uid]['choices'][$i]['label'] = trim($choice['label']);
+                    }
+                }
+            }
         }
 
         return $blocks;
@@ -132,6 +144,7 @@ class ChapterRequest extends FormRequest
             'publish_at.after' => __('story::validation.chapter.publish_at.after'),
             'blocks.required' => __('story::validation.chapter.blocks.required'),
             'blocks.min' => __('story::validation.chapter.blocks.required'),
+            'blocks.*.choices.*.label.max' => __('story::validation.chapter.choice.label_max'),
         ];
     }
 }

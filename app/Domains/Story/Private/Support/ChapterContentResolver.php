@@ -7,6 +7,8 @@ namespace App\Domains\Story\Private\Support;
 use App\Domains\Editor\Public\Api\EditorPublicApi;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Shared\Support\HtmlLinkUtils;
+use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Models\Story;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\ValidationException;
 
@@ -18,19 +20,27 @@ use Illuminate\Validation\ValidationException;
  * (text sanitized once with the narrative profile, images stored or reused),
  * persisted in `content_blocks`, and rendered into `content` — the display
  * cache the reading page prints.
+ *
+ * `chapter-choice` blocks are normalised (choices without a target dropped,
+ * then the block if none is left) and their targets checked: a choice may only
+ * point to a chapter of the same story, or to an id the edited chapter already
+ * stored (a since-deleted target survives a save). Links, titles and URLs are
+ * frozen into `content` at this point — nothing is re-resolved at read time.
  */
 class ChapterContentResolver
 {
     public function __construct(
         private readonly EditorPublicApi $editor,
         private readonly MediaPublicApi $media,
+        private readonly ChapterChoiceTargets $choiceTargets,
     ) {}
 
     /**
      * @param array<string,mixed> $data
+     * @param Chapter|null $chapter the chapter being edited, null on create
      * @return array{content: string, content_blocks: ?array<int,array<string,mixed>>}
      */
-    public function resolve(array $data, int $actingUserId): array
+    public function resolve(array $data, int $actingUserId, Story $story, ?Chapter $chapter): array
     {
         if (($data['mode'] ?? 'simple') !== 'advanced') {
             return [
@@ -89,6 +99,12 @@ class ChapterContentResolver
                     $block['caption'] = (string) $b['caption'];
                 }
                 $blocks[] = $block;
+            } elseif ($type === 'chapter-choice') {
+                $choices = $this->normaliseChoices($b['choices'] ?? null);
+                if ($choices === []) {
+                    continue; // drop a block left without choice
+                }
+                $blocks[] = ['type' => 'chapter-choice', 'choices' => $choices];
             }
         }
 
@@ -98,9 +114,90 @@ class ChapterContentResolver
             ]);
         }
 
+        $targets = $this->choiceTargets->forStory($story);
+        $this->assertChoiceTargets($blocks, $targets, $chapter);
+
         return [
-            'content' => $this->editor->render($blocks, 'multiedit-narrative'),
+            'content' => $this->editor->render($blocks, 'multiedit-narrative', ['chapters' => $targets]),
             'content_blocks' => $blocks,
         ];
+    }
+
+    /**
+     * @return list<array{chapter_id: int, label: ?string, enabled: bool}>
+     */
+    private function normaliseChoices(mixed $raw): array
+    {
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $choices = [];
+        foreach ($raw as $choice) {
+            if (!is_array($choice)) {
+                continue;
+            }
+            $id = $choice['chapter_id'] ?? null;
+            if (!is_numeric($id) || (int) $id <= 0) {
+                continue; // drop a choice without target
+            }
+            $label = trim((string) ($choice['label'] ?? ''));
+            $choices[] = [
+                'chapter_id' => (int) $id,
+                'label' => $label !== '' ? $label : null,
+                'enabled' => array_key_exists('enabled', $choice) && $choice['enabled'] !== null
+                    ? filter_var($choice['enabled'], FILTER_VALIDATE_BOOLEAN)
+                    : true,
+            ];
+        }
+
+        return $choices;
+    }
+
+    /**
+     * Security: a choice may only target a chapter of this story, or an id the
+     * edited chapter already stored (how a deleted target survives a save).
+     *
+     * @param array<int, array<string, mixed>> $blocks
+     * @param array<int, mixed> $targets
+     */
+    private function assertChoiceTargets(array $blocks, array $targets, ?Chapter $chapter): void
+    {
+        $allowed = array_fill_keys(array_keys($targets), true);
+        foreach ($this->choiceIds($chapter?->content_blocks) as $id) {
+            $allowed[$id] = true;
+        }
+
+        foreach ($this->choiceIds($blocks) as $id) {
+            if (!isset($allowed[$id])) {
+                throw ValidationException::withMessages([
+                    'blocks' => __('story::validation.chapter.choice.foreign_target'),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function choiceIds(mixed $blocks): array
+    {
+        if (!is_array($blocks)) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($blocks as $block) {
+            if (!is_array($block) || ($block['type'] ?? null) !== 'chapter-choice') {
+                continue;
+            }
+            foreach ((array) ($block['choices'] ?? []) as $choice) {
+                if (is_array($choice) && is_numeric($choice['chapter_id'] ?? null)) {
+                    $ids[] = (int) $choice['chapter_id'];
+                }
+            }
+        }
+
+        return $ids;
     }
 }

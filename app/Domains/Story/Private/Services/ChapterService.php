@@ -42,7 +42,7 @@ class ChapterService
     {
         $title = (string) $request->input('title');
         $authorNoteHtml = $request->input('author_note');
-        $content = $this->contentResolver->resolve($request->all(), $userId);
+        $content = $this->contentResolver->resolve($request->all(), $userId, $story, null);
         $published = (bool)($request->boolean('published', false));
         $publishAt = (!$published && $request->input('publish_at'))
             ? now()->parse($request->input('publish_at'))
@@ -230,7 +230,7 @@ class ChapterService
     {
         $title = (string) $request->input('title');
         $authorNoteHtml = $request->input('author_note'); // purified or null
-        $content = $this->contentResolver->resolve($request->all(), $userId);
+        $content = $this->contentResolver->resolve($request->all(), $userId, $story, $chapter);
         $published = (bool)($request->boolean('published', false));
         $publishAt = (!$published && $request->input('publish_at'))
             ? now()->parse($request->input('publish_at'))
