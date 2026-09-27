@@ -62,6 +62,8 @@ New statistics are registered in `StatisticsServiceProvider::registerStatistics(
 
 Raw time-series data is stored at **daily** granularity. Charts do not plot every daily point directly — `StatisticQueryService::getChartTimeSeries()` passes daily points through `TimeSeriesResampler`, which buckets them into at most 48 evenly spaced points over the selected date range. Charts are rendered with Chart.js (bundled via Vite in `Private/Resources/js/charts.js`), mounted through `data-statistics-line-chart` attributes rather than inline Alpine components.
 
+Charts also have a **weekly** view. `StatisticQueryService::getWeeklyTimeSeries()` passes the daily deltas through `WeeklyAggregator`: one point per calendar week (Monday → Sunday, app timezone), net value (may be negative), no gaps, the current partial week included as the last point. The chart components ship it next to the cumulative data — `data-weekly-points` on line charts, `weeklyPoints` per series on multi-line charts — with the tooltip strings in `data-options`. On the admin page, `charts.js` listens to the `statistics-graph-mode` segmented control (`segmented-control-change`, initial value read from its `data-value`) and destroys and re-creates every mounted chart in the chosen mode, hidden tabs included: bars per week (stacked for the comment breakdown), the current week lighter. A chart with no weekly payload stays cumulative. The choice is kept per browser in `localStorage` (`statistics.admin.graph-mode`).
+
 ## Architecture decisions
 
 ### No public API

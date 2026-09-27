@@ -16,7 +16,7 @@
 | 1 | Weekly aggregation service (`WeeklyAggregator` + `getWeeklyTimeSeries()`) | S | — | DONE |
 | 2 | Shared `x-shared::segmented-control` component (shared infrastructure) | S | — | DONE |
 | 3 | Chart components ship the weekly payload + weekly i18n strings | S | 1 | DONE |
-| 4 | `charts.js` weekly mode, chart registry and the switch on the page | M | 2, 3 | TODO |
+| 4 | `charts.js` weekly mode, chart registry and the switch on the page | M | 2, 3 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

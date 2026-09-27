@@ -40,7 +40,8 @@ export default function registerSegmentedControl(Alpine) {
         },
 
         dispatch() {
-            this.$el.dataset.value = this.value;
+            // $root, not $el: from a button's @click / @keydown, $el is that button.
+            this.$root.dataset.value = this.value;
             window.dispatchEvent(new CustomEvent('segmented-control-change', {
                 detail: { name, value: this.value },
             }));
@@ -61,7 +62,7 @@ export default function registerSegmentedControl(Alpine) {
             event.preventDefault();
             const index = targets[event.key];
             this.select(options[index]);
-            this.$el.querySelectorAll('[role="radio"]')[index]?.focus();
+            this.$root.querySelectorAll('[role="radio"]')[index]?.focus();
         },
     }));
 }

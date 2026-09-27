@@ -31,3 +31,5 @@ the user may want to reverse — surface these in the WRAP summary.
 | 4 | Hidden-tab graphs switch too (confirmed on replay) | REFINE | yes |
 | 5 | Switch is a keyboard-operable button group with selected state (confirmed on replay) | REFINE | yes |
 | 6 | No specific mobile work (confirmed on replay) | REFINE | yes |
+| 7 | Phase 2 bug fixed in Phase 4: `segmented-control.js` used `this.$el`, which Alpine 3.15 resolves to the clicked/keyed button, so arrow keys did not move focus and `data-value` was written on the button. Now `this.$root`; unit test stubs `$el` as a button to pin it | BUILD (4/4) | yes |
+| 8 | Weekly tooltip: title "Semaine du {date} : {sum of the stack}" (+ "(semaine en cours)" on the last bar); stacked chart adds one "{série} : {n}" line per series, single-series charts none. Values use `toLocaleString(locale)` | BUILD (4/4) | yes |

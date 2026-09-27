@@ -14,13 +14,18 @@ function makeRoot(options) {
     return root;
 }
 
-/** Builds the raw Alpine data object, `this.$el` stubbed with a real element, then runs init(). */
+/**
+ * Builds the raw Alpine data object, then runs init(). As in Alpine, `$root` is
+ * the x-data element while `$el` is the element whose handler runs — a button
+ * for @click / @keydown.
+ */
 function makeControl({ name = 'demo', options = ['a', 'b', 'c'], selected = 'a', storageKey = null } = {}) {
     let factory = null;
     registerSegmentedControl({ data: (id, f) => { if (id === 'segmentedControl') factory = f; } });
 
     const control = factory({ name, options, selected, storageKey });
-    control.$el = makeRoot(options);
+    control.$root = makeRoot(options);
+    control.$el = control.$root.querySelector('[role="radio"]');
     control.init();
     return control;
 }
@@ -112,16 +117,17 @@ describe('segmentedControl', () => {
 
     it('reflects the current value in data-value on its root', () => {
         const control = makeControl({ selected: 'b' });
-        expect(control.$el.dataset.value).toBe('b');
+        expect(control.$root.dataset.value).toBe('b');
 
         control.select('c');
 
-        expect(control.$el.dataset.value).toBe('c');
+        expect(control.$root.dataset.value).toBe('c');
+        expect(control.$el.dataset.value).toBe('a');
     });
 
     it('moves the selection with arrow keys, wrapping around', () => {
         const control = makeControl({ selected: 'c' });
-        const buttons = control.$el.querySelectorAll('[role="radio"]');
+        const buttons = control.$root.querySelectorAll('[role="radio"]');
 
         const right = keydown('ArrowRight');
         control.onKeydown(right);
