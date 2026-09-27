@@ -21,6 +21,11 @@ far:
    which rejects it (`Unrecognized argument: --`). Works without the `--`.
    Check other skills/docs that use `pnpm run <script> -- …` (e.g.
    `pnpm run gate -- --quick`) for the same issue.
+3. **PLAN orders refactoring before the feature.** When a feature needs existing
+   code reshaped, the plan's first phases refactor with no behaviour change,
+   and only the following phases add the new feature — "make the change easy,
+   then make the easy change". Pairs with suggestion 1: the checkpoint sits at
+   the boundary between the two.
 
 ## Why
 
