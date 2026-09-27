@@ -158,6 +158,41 @@ describe('News advanced mode — create', function () {
     });
 });
 
+describe('News advanced mode — form errors', function () {
+    function postNewsWithImageBlock(TestCase $t, UploadedFile $file): string
+    {
+        app()->setLocale('fr');
+
+        return $t->actingAs(admin($t))
+            ->from(route('news.admin.create'))
+            ->followingRedirects()
+            ->post(route('news.admin.store'), newsData([
+                'mode' => 'advanced',
+                'blocks_order' => 'b0',
+                'blocks' => ['b0' => ['type' => 'image', 'file' => $file]],
+            ]))
+            ->assertOk()
+            ->getContent();
+    }
+
+    it('shows an image block error in the blocks error area', function () {
+        $html = postNewsWithImageBlock($this, UploadedFile::fake()->create('doc.pdf', 10));
+
+        // The field-level error list, not the layout's flash block (which lists every error).
+        expect($html)->toMatch('#<ul class="text-sm text-red-600[^"]*">\s*<li>Le fichier doit être une image\.</li>#u');
+        expect($html)->not->toContain('validation.');
+        expect(News::query()->count())->toBe(0);
+    });
+
+    it('states the size limit of an oversize image block in Ko', function () {
+        $html = postNewsWithImageBlock($this, UploadedFile::fake()->image('big.jpg')->size(3000));
+
+        expect($html)->toMatch('#<ul class="text-sm text-red-600[^"]*">\s*<li>Le fichier ne doit pas dépasser 2048 Ko\.</li>#u');
+        expect($html)->not->toContain('validation.');
+        expect(News::query()->count())->toBe(0);
+    });
+});
+
 describe('News advanced mode — round trip', function () {
     it('switches an advanced article back to simple', function () {
         $news = newsSvc()->create(newsData([

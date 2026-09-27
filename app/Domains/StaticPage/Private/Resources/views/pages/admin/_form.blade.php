@@ -116,7 +116,7 @@
                 :nbLines="15"
             />
             <x-shared::input-error :messages="$errors->get('content')" class="mt-1" />
-            <x-shared::input-error :messages="$errors->get('blocks')" class="mt-1" />
+            <x-shared::input-error :messages="collect($errors->get('blocks'))->merge(\Illuminate\Support\Arr::flatten($errors->get('blocks.*')))->unique()->values()->all()" class="mt-1" />
         </div>
     </div>
 

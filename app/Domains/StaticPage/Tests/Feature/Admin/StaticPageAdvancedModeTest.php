@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\StaticPage\Private\Models\StaticPage;
 use App\Domains\StaticPage\Private\Services\StaticPageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -155,6 +156,28 @@ describe('Static page advanced mode — create', function () {
         expect($page->content_blocks)->toBeNull();
         expect($page->content)->toContain('Hello');
         expect($page->content)->toContain('target="_blank"');
+    });
+});
+
+describe('Static page advanced mode — form errors', function () {
+    it('shows an image block error in the blocks error area', function () {
+        app()->setLocale('fr');
+
+        $html = $this->actingAs(admin($this))
+            ->from(route('static.admin.create'))
+            ->followingRedirects()
+            ->post(route('static.admin.store'), staticPageData([
+                'mode' => 'advanced',
+                'blocks_order' => 'b0',
+                'blocks' => ['b0' => ['type' => 'image', 'file' => UploadedFile::fake()->create('doc.pdf', 10)]],
+            ]))
+            ->assertOk()
+            ->getContent();
+
+        // The field-level error list, not the layout's flash block (which lists every error).
+        expect($html)->toMatch('#<ul class="text-sm text-red-600[^"]*">\s*<li>Le fichier doit être une image\.</li>#u');
+        expect($html)->not->toContain('validation.');
+        expect(StaticPage::query()->count())->toBe(0);
     });
 });
 
