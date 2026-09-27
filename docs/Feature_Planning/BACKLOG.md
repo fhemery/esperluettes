@@ -34,6 +34,7 @@ scoped to the task that actually changed.
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **Admin pages — flash message shown twice** · `admin-double-flash/` · auto · TODO: leftover from `feature-toggle-registration`. The admin layout and ~23 admin page views both render `<x-shared::flash-block />`; pre-existing.
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
+- **Improve loop** · `improve-loop/` · interactive · TODO
 
 ## Done
 

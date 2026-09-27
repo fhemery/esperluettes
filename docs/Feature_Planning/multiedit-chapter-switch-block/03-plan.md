@@ -18,6 +18,7 @@
 |---|-------|------|------------|--------|
 | 1 | Editor — block-type registry and render delegation (shared infrastructure) | S | — | TODO |
 | 2 | Editor — `<x-editor::multi>` driven by the registry (`blockTypes`, `blockContext`, block chrome component) | M | 1 | TODO |
+| 2v | Checkpoint — visual regression check of the refactored editor on existing consumers (`visual-verifier`, no code) | S | 2 | TODO |
 | 3 | Story — `chapter-choice` server side: request, resolver, target check, rendering | M | 1 | TODO |
 | 4 | Story — `chapter-choice` editor partial and chapter form wiring | M | 2, 3 | TODO |
 
@@ -217,6 +218,30 @@ Architecture: §1.1 (Editor bullets), §4.1. Builds on phase 1:
   core e2e spec still passing + manual check in VERIFY).
 - ✅ `pnpm run e2e -- multi-editor` green.
 - ✅ `pnpm run gate` green.
+
+---
+
+## Checkpoint 2v — visual regression check after the Editor refactor
+
+Phases 1–2 refactor a component used by News, FAQ, static pages and chapters.
+Check them in a real browser before Story builds on top, so a regression is
+traced to the refactor and not to the new block. Dispatched to the
+`visual-verifier` agent; **no code change** — a regression goes back to a
+`phase-implementer` as a fix of phase 2 before phase 3 starts.
+
+**Scope.** Existing behaviour only; no chapter-choice block exists yet.
+- Run the full core e2e suite (`pnpm run e2e -- core`), not only `multi-editor`.
+- News, FAQ and static-page admin editors, Avancé mode: palette and "+" menu show
+  text + image with the same labels/icons as before; insert, reorder, delete,
+  image upload; block chrome (from `<x-editor::multi.block>` if text/image use it,
+  otherwise unchanged) looks as before at desktop and ≈375px.
+- « Simple » switch: disabled with an image block present, enabled again with a
+  single text block.
+- Save and reopen each form; the public page renders the same HTML as before.
+- Chapter edit form: unchanged (no `blockTypes` opt-in yet).
+
+**Output.** Screenshots in `shots/checkpoint-2v/`, a short pass/fail list
+appended under this section, status `DONE` in the phase index.
 
 ---
 
