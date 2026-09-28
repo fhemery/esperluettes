@@ -24,4 +24,6 @@ the user may want to reverse — surface these in the WRAP summary.
 | A7 | T1: CI keeps `npm install -g "<packageManager>"`; switch to `pnpm/action-setup` only if that yields a broken pnpm 12 | DESIGN | yes |
 | A8 | T2: CI pnpm store cache key unchanged (store path is layout-versioned) | DESIGN | yes |
 | A9 | T3: no `devEngines`/`engines` enforcement; local devs rely on pnpm self-switching + updated setup docs | DESIGN | yes |
+| A10 | Also update the `auditConfig.ignoreGhsas` mention in `.agents/skills/upgrade-dependencies/SKILL.md` to `audit.ignore` — it is a live instruction, not a historical record, and would otherwise point at a key that no longer exists | PLAN | yes |
+| A11 | Single phase: the pin and the audit-key rename cannot land separately (pnpm 12 rejects unknown keys), and the doc edits are not verifiable apart from the pin. No automated test is added; operational checks replace it | PLAN | yes |
 | A6 | Historical records (`_done/`, other requests, Done list) and the illustrative "pnpm 11" in `write-adr` skill stay untouched | REFINE | yes |
