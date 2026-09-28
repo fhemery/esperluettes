@@ -28,6 +28,8 @@ The site previously used Filament for the entire admin panel. The Administration
 
 The admin layout is exposed as a Blade component `<x-admin::layout>`. It is backed by `LayoutComponent`, which enforces that the user is authenticated and has at least one admin role (`moderator`, `admin`, or `tech_admin`) before rendering. Other admin pages use this component as their outer shell.
 
+The layout is the only renderer of `<x-shared::flash-block />` on admin pages. Page views must not include it: two copies made every flash message appear twice. A guard test forbids the block in any view under `app/Domains/*/Private/Resources/views/pages/admin/`. The component is `position: fixed` and takes no props, so no page needs its own placement.
+
 ### Role-Based Access Control
 
 Three roles exist in the admin context:
