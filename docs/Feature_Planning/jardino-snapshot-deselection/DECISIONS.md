@@ -23,3 +23,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | A5 | Drop the column in a new migration; the create migration is left untouched (already applied in production). | DESIGN 2026-09-28 | Yes — `down()` re-adds it |
 | A6 | No unique index on (goal_id, story_id): the service check-then-create is kept and tested. A unique index could fail the migration on a pre-existing duplicate. | DESIGN 2026-09-28 | Yes — add index later |
 | A7 | `updateSnapshotWordCount` loads the snapshot through `storySnapshots` filtered by `story_id`, replacing `currentStorySnapshot`. | DESIGN 2026-09-28 | Yes |
+| A8 | Single BUILD phase; VERIFY is N/A (no UI change). Migration, model and service edits cannot be split and each stay green. Jardino README clean-up left to WRAP per architecture §8. | PLAN 2026-09-28 | Yes |
