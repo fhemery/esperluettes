@@ -1,4 +1,4 @@
-# Allow dependency install scripts (pnpm 11+).
+# Allow dependency install scripts.
 # Packages not listed here cannot run postinstall/preinstall builds.
 # Do not use interactive `pnpm approve-builds` for day-to-day setup —
 # edit this file (or run `pnpm approve-builds <name>` and commit) when a
@@ -7,11 +7,11 @@ allowBuilds:
   esbuild: true
 
 # Supply-chain delay: a version must be published for 48 h before it can be
-# installed (pnpm 11 defaults to 24 h). See docs/adr/0001-use-pnpm.md.
+# installed (pnpm 12 defaults to 24 h). See docs/adr/0001-use-pnpm.md.
 minimumReleaseAge: 2880
 
-auditConfig:
-  ignoreGhsas:
+audit:
+  ignore:
     # Quill XSS via HTML export (low). No fixed release exists; the exported
     # HTML is sanitized server-side with HTML Purifier before storage/render.
     # Remove once a patched quill is out.

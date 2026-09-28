@@ -12,7 +12,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Move the pin, workspace settings and docs to pnpm 12.6.0 | S | — | TODO |
+| 1 | Move the pin, workspace settings and docs to pnpm 12.6.0 | S | — | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

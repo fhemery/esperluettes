@@ -161,7 +161,7 @@ Things to know about this repo:
   (typically the VS Code snap terminal's). Nothing is written. Ask the user;
   the usual fix is `rm -rf node_modules` and install again.
 - Known advisories with no fixed release and a documented mitigation sit in
-  `auditConfig.ignoreGhsas` in `pnpm-workspace.yaml`. Re-check each on every
+  `audit.ignore` in `pnpm-workspace.yaml`. Re-check each on every
   run: drop the entry once a fix ships.
 - For a major of **Vite, Tailwind, Vitest, Playwright, Quill, Alpine**, check
   the migration guide against this repo's config: `vite.config.*`, the CSS

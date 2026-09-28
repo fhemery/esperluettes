@@ -53,19 +53,25 @@ drifting.
 **Target: 48 hours** before a newly published package version may be installed.
 
 It is set explicitly in `pnpm-workspace.yaml` as `minimumReleaseAge: 2880`
-(minutes), not left to pnpm's default. We pin **pnpm 11.x** (see
-`packageManager`), which requires Node 22+ (CI uses Node 24) and would
+(minutes), not left to pnpm's default. We pin **pnpm 12.x** (see
+`packageManager`), which declares `node >=18` (CI uses Node 24) and would
 otherwise default to 24 h.
 
 *Amended 2026-09-27:* raised from pnpm's 24 h default to an explicit 48 h, so
 a compromised release has a wider window to be caught and pulled, and so the
 policy no longer depends on a pnpm default that a future major could change.
 
+*Amended 2026-09-28:* the pin moved up one major to pnpm 12.x, and the audit
+ignore list moved to pnpm 12's `audit.ignore` key. The
+lockfile now also records the pinned pnpm itself (`packageManagerDependencies`),
+which `pnpm install --frozen-lockfile` requires to match `packageManager`.
+
 The age is checked when a version is **resolved**, not when a lockfile is
 installed: after tightening it, regenerate `pnpm-lock.yaml` so every locked
 version is resolved under the new rule.
 
-**Dependency build scripts** are gated by pnpm 11 `strictDepBuilds`. Allowed
+**Dependency build scripts** are gated by pnpm's `strictDepBuilds`
+(default `true`). Allowed
 packages are listed explicitly in `pnpm-workspace.yaml` → `allowBuilds`
 (today: `esbuild`). That file is the allowlist — not an interactive
 per-machine prompt.
@@ -79,7 +85,8 @@ The script named **`package`** is kept for deploy/packaging. In documentation,
 prefer **`pnpm run package`** over a bare `pnpm package` in case a future pnpm
 built-in collides with that name.
 
-Audit commands for this repo use `pnpm audit`, not `npm audit`.
+Audit commands for this repo use `pnpm audit`, not `npm audit`. Known,
+mitigated advisories are listed under `audit.ignore` in `pnpm-workspace.yaml`.
 
 ### What we give up vs “Node ships npm”
 
