@@ -4,8 +4,6 @@
             <x-shared::title>{{ __('moderation::admin.reports.title') }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         {{-- Filters --}}
         <form method="GET" action="{{ route('moderation.admin.moderation-reports.index') }}"
               class="flex flex-wrap items-end gap-4">

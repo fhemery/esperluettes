@@ -7,8 +7,6 @@
             <x-shared::title>{{ $faqQuestion->question }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('faq.admin.faq-questions.update', $faqQuestion) }}"
               class="surface-bg p-6 rounded-lg"
               enctype="multipart/form-data">

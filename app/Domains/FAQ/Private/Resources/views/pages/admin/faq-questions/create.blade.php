@@ -7,8 +7,6 @@
             <x-shared::title>{{ __('faq::admin.questions.create_button') }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('faq.admin.faq-questions.store') }}"
               class="surface-bg p-6 rounded-lg"
               enctype="multipart/form-data">

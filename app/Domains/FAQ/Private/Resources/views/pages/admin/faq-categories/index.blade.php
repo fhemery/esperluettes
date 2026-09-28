@@ -19,8 +19,6 @@
             </div>
         </div>
 
-        <x-shared::flash-block />
-
         <div x-show="reordering" x-cloak>
             <x-administration::reorderable-table
                 :items="$categories"

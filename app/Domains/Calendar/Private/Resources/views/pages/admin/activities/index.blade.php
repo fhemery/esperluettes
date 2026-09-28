@@ -7,8 +7,6 @@
             </a>
         </div>
 
-        <x-shared::flash-block />
-
         <div class="surface-read p-4 overflow-x-auto">
             <table class="w-full admin">
                 <thead>

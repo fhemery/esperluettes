@@ -7,8 +7,6 @@
             <x-shared::title>{{ __('moderation::admin.reasons.edit_title') }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('moderation.admin.moderation-reasons.update', $reason) }}"
               class="surface-read p-6">
             @csrf

@@ -2,8 +2,6 @@
     <div class="flex flex-col gap-6">
         <x-shared::title>{{ __('config::admin.feature_toggles.edit_title') }}</x-shared::title>
 
-        <x-shared::flash-block />
-
         <div class="surface-read p-4 rounded-lg">
             <p class="text-sm text-fg/60">
                 <span class="font-medium text-fg">{{ __('config::admin.feature_toggles.columns.domain') }}:</span>
