@@ -4,8 +4,6 @@
             <x-shared::title>{{ __('events::admin.domain_events.title') }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         {{-- Filters --}}
         <form method="GET" action="{{ route('events.admin.domain-events.index') }}"
               class="flex flex-wrap items-end gap-4">

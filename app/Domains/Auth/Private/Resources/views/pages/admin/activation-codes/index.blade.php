@@ -9,8 +9,6 @@
             </a>
         </div>
 
-        <x-shared::flash-block />
-
         <form action="{{ route('auth.admin.activation-codes.index') }}" method="GET" class="surface-read p-4 flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-[200px]">
                 <x-shared::input-label for="code">{{ __('auth::admin.activation_codes.table.code') }}</x-shared::input-label>

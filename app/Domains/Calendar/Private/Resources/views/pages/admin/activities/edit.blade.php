@@ -7,8 +7,6 @@
             <x-shared::title>{{ __('calendar::admin.activities.edit_title') }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('calendar.admin.activities.update', $activity) }}"
               class="flex flex-col gap-6"
               enctype="multipart/form-data">

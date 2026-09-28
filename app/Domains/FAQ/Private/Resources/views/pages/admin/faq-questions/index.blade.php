@@ -19,8 +19,6 @@
             </div>
         </div>
 
-        <x-shared::flash-block />
-
         {{-- Category filter --}}
         <form method="GET" action="{{ route('faq.admin.faq-questions.index') }}" class="flex items-center gap-3" x-show="!reordering">
             <select name="category_id"

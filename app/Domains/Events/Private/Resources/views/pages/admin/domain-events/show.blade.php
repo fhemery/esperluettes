@@ -11,8 +11,6 @@
             </a>
         </div>
 
-        <x-shared::flash-block />
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {{-- Core fields --}}
             <div class="surface-read p-6 flex flex-col gap-4">

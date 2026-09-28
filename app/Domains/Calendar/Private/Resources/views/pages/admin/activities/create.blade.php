@@ -7,8 +7,6 @@
             <x-shared::title>{{ __('calendar::admin.activities.create_button') }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('calendar.admin.activities.store') }}"
               class="flex flex-col gap-6"
               x-data="{ activityType: @js(old('activity_type', '')) }"

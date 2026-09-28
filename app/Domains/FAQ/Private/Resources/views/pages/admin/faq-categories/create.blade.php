@@ -7,8 +7,6 @@
             <x-shared::title>{{ __('faq::admin.categories.create_button') }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('faq.admin.faq-categories.store') }}" class="surface-bg p-6 rounded-lg">
             @csrf
             @include('faq::pages.admin.faq-categories._form')
