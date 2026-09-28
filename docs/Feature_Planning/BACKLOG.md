@@ -34,7 +34,6 @@ scoped to the task that actually changed.
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
 - **Improve loop** · `improve-loop/` · interactive · TODO
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
-- **Upgrade pnpm to 12** · `pnpm-12-upgrade/` · auto · WIP:PLAN
 - **Make the e2e specs type-check (@types/node)** · `e2e-types-node/` · auto · TODO
 - **Calendar: dedicated time field for activity dates** · `calendar-activity-time-picker/` · interactive · TODO
 - **Secret Gift: admin feedback after shuffle** · `secret-gift-shuffle-feedback/` · interactive · TODO
@@ -46,6 +45,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`pnpm-12-upgrade`](_done/pnpm-12-upgrade.md) · pin moved to pnpm 12.6.0, `auditConfig.ignoreGhsas` → `audit.ignore`, lockfile records pnpm in `packageManagerDependencies`; no dependency moved (CI on the PR not yet run)
 - [`jardino-snapshot-deselection`](_done/jardino-snapshot-deselection.md) · dropped the never-written Jardino `deselected_at` column, `isActive()` and `currentStorySnapshot`; snapshots keyed on (goal, story), re-selection resumes the existing one
 - [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) · page-level *Cumulé / Par semaine* switch on `/admin/statistics`: weekly net bars (Monday weeks, current week lighter, stacked comment breakdown), remembered per browser; new generic `x-shared::segmented-control`
 - [`multiedit-chapter-switch-block`](_done/multiedit-chapter-switch-block.md) · « Choix de chapitres » block in chapter Avancé mode — buttons to chapters of the same story, rendered at save time, per-choice enabled toggle; Editor gained a block-type registry with per-consumer `blockTypes` opt-in

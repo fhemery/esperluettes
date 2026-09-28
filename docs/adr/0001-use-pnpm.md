@@ -55,7 +55,10 @@ drifting.
 It is set explicitly in `pnpm-workspace.yaml` as `minimumReleaseAge: 2880`
 (minutes), not left to pnpm's default. We pin **pnpm 12.x** (see
 `packageManager`), which declares `node >=18` (CI uses Node 24) and would
-otherwise default to 24 h.
+otherwise default to 24 h. Because the age is set explicitly, pnpm 12 also
+defaults `minimumReleaseAgeStrict` to `true`: a too-young version is refused
+(with a prompt) rather than silently added to `minimumReleaseAgeExclude`. We
+keep that stricter default.
 
 *Amended 2026-09-27:* raised from pnpm's 24 h default to an explicit 48 h, so
 a compromised release has a wider window to be caught and pulled, and so the
