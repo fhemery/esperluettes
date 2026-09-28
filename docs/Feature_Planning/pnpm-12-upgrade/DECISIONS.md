@@ -21,4 +21,7 @@ the user may want to reverse — surface these in the WRAP summary.
 | A3 | Update ADR 0001 **in place** (request says "update the ADR"), not a superseding ADR 0002 | REFINE | yes |
 | A4 | Leave `docker/8.4/Dockerfile` unpinned (`npm install -g pnpm`): it already gets 12 from `latest`, and pnpm self-switches to the `packageManager` pin | REFINE | yes — pin it later |
 | A5 | Lockfile may take a format-only rewrite under 12; no dependency version may move | REFINE | yes |
+| A7 | T1: CI keeps `npm install -g "<packageManager>"`; switch to `pnpm/action-setup` only if that yields a broken pnpm 12 | DESIGN | yes |
+| A8 | T2: CI pnpm store cache key unchanged (store path is layout-versioned) | DESIGN | yes |
+| A9 | T3: no `devEngines`/`engines` enforcement; local devs rely on pnpm self-switching + updated setup docs | DESIGN | yes |
 | A6 | Historical records (`_done/`, other requests, Done list) and the illustrative "pnpm 11" in `write-adr` skill stay untouched | REFINE | yes |
