@@ -153,7 +153,23 @@ pnpm install --frozen-lockfile`), then confirms CI is green on the PR.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| N/A — tooling only | Operational checks above replace the visual pass | |
+| N/A — tooling only | Operational checks above replace the visual pass | ✅ (CI pending) |
+
+### VERIFY results (2026-09-28)
+
+Run from a deleted `node_modules`:
+
+- ✅ `pnpm install --frozen-lockfile` — exit 0; `git diff --exit-code pnpm-lock.yaml` clean.
+- ✅ `pnpm --version` → `12.6.0`.
+- ✅ `pnpm audit` — "All found vulnerabilities were already reviewed and
+  decided to be ignored — 1 ignored: 1 low"; `audit.ignore` holds only
+  `GHSA-v3m3-f69x-jf25`, so that is the ignored one.
+- ✅ `pnpm config get minimumReleaseAge` → `2880`. `strictDepBuilds` prints
+  `undefined` (unset, so pnpm's default `true` applies).
+- ✅ `pnpm run build` — esbuild installed, vite build succeeds.
+- ✅ `pnpm run gate -- --all` — PASSED: docs, deptrac, js (151 tests), php
+  (3016 tests), build.
+- ⏳ CI (`pr-tests.yml`) green on the PR — pending; needs a push, left to the user.
 
 ## Open items
 
