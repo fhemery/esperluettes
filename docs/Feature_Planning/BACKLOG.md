@@ -30,7 +30,7 @@ scoped to the task that actually changed.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
-- **Admin pages — flash message shown twice** · `admin-double-flash/` · auto · WIP:BUILD (1/1): leftover from `feature-toggle-registration`. The admin layout and ~23 admin page views both render `<x-shared::flash-block />`; pre-existing.
+- **Admin pages — flash message shown twice** · `admin-double-flash/` · auto · WIP:VERIFY: leftover from `feature-toggle-registration`. The admin layout and ~23 admin page views both render `<x-shared::flash-block />`; pre-existing.
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
 - **Improve loop** · `improve-loop/` · interactive · TODO
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.

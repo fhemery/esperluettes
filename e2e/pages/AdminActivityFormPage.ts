@@ -107,8 +107,11 @@ export class AdminActivityFormPage {
     return this.page.locator('form button[type="submit"]').first();
   }
 
-  /** Rendered twice on admin pages — the layout prints one and the page another. */
+  /**
+   * No `.first()` on purpose: the admin layout is the only owner of the flash
+   * block, so a second copy is a strict-mode violation and fails the spec.
+   */
   flash(text: string | RegExp): Locator {
-    return this.page.getByText(text).first();
+    return this.page.getByText(text);
   }
 }

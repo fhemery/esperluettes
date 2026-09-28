@@ -116,17 +116,17 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Config › feature toggles, edit → save (admin/tech-admin) | Redirect to index shows the success toast **once**, auto-hides after ~10 s | |
-| Config › feature toggles edit, invalid submit (if reachable) | Validation-error toast shows once | |
-| Auth › roles, create a role | Success toast once on the roles index | |
-| Auth › activation codes, create a code | Success toast once | |
-| FAQ › categories or questions, create/edit | Success toast once; form validation error (empty required field) shows once | |
-| Moderation › reasons create; reports show → change status (moderator) | Toast once, as moderator (different role than admin) | |
-| Calendar › activities, create/edit | Toast once | |
-| Events › domain events index | Page renders normally, no stray empty toast/gap where the block was removed | |
-| Admin page that never had its own block (e.g. maintenance toggle or logs action) | Still shows its flash once — layout's block still works | |
-| Any of the above, mobile width (~375 px) | Single toast, positioned as before, not overlapping twice | |
-| Public page with a flash (e.g. profile save) | Unchanged: toast still shows once | |
+| Config › feature toggles, edit → save (admin/tech-admin) | Redirect to index shows the success toast **once**, auto-hides after ~10 s | ✅ tech-admin; one toast, hidden after 10.5 s (`shots/toggles-success.png`) |
+| Config › feature toggles edit, invalid submit (if reachable) | Validation-error toast shows once | ✅ forged `access` value → one error toast (`shots/toggles-validation.png`) |
+| Auth › roles, create a role | Success toast once on the roles index | ✅ success once on 1st run; re-run hit "déjà utilisée", validation toast also once (`shots/roles-success.png` shows the latter) |
+| Auth › activation codes, create a code | Success toast once | ✅ (`shots/activation-codes-success.png`) |
+| FAQ › categories or questions, create/edit | Success toast once; form validation error (empty required field) shows once | ✅ categories: whitespace name/slug → one error toast; valid create → one success toast (`shots/faq-validation.png`, `shots/faq-success.png`) |
+| Moderation › reasons create; reports show → change status (moderator) | Toast once, as moderator (different role than admin) | ✅ reasons create as moderator (`shots/moderator-reason-success.png`). Reports show: n/a, the e2e world seeds no report; covered by `AdminPagesFlashBlockGuardTest` |
+| Calendar › activities, create/edit | Toast once | ✅ edit → save (`shots/activity-success.png`); also guarded by `core/confirm-modal.spec.ts`, whose flash locator no longer uses `.first()` (strict mode fails on a second copy — checked by re-adding the block) |
+| Events › domain events index | Page renders normally, no stray empty toast/gap where the block was removed | ✅ no toast container, no gap (`shots/domain-events.png`) |
+| Admin page that never had its own block (e.g. maintenance toggle or logs action) | Still shows its flash once — layout's block still works | ✅ maintenance › empty cache (`shots/maintenance-success.png`) |
+| Any of the above, mobile width (~375 px) | Single toast, positioned as before, not overlapping twice | ✅ FAQ validation at 375 px, one toast (`shots/faq-validation-mobile.png`) |
+| Public page with a flash (e.g. profile save) | Unchanged: toast still shows once | ✅ confirmed user, profile save (`shots/public-profile-success.png`) |
 
 ## Open items
 
