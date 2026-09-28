@@ -16,8 +16,6 @@
             </div>
         </div>
 
-        <x-shared::flash-block />
-
         {{-- Filters --}}
         <div x-show="!reordering" x-cloak>
             <form method="GET" action="{{ route('moderation.admin.moderation-reasons.index') }}"

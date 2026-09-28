@@ -100,7 +100,7 @@ command. The only toggle in the code is `shared/dark_theme` (tech admins only).
   [`dark-theme-role-based/`](../dark-theme-role-based/00-request.md) —
   `shared/dark_theme` is checked at boot with no user, so `role_based` acts as
   `off` (spec §9);
-  [`admin-double-flash/`](../admin-double-flash/00-request.md) — admin layout and
+  [`admin-double-flash`](./admin-double-flash.md) — admin layout and
   ~23 admin pages both render `<x-shared::flash-block />`, so flashes show twice
   (pre-existing, seen at VERIFY).
 - **e2e:** `e2e/tests/features/feature-toggle-registration.spec.ts` **deleted**

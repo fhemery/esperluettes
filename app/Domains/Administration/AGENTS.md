@@ -19,6 +19,8 @@
 
 **Sidebar links carry `data-nav-key`** (registry page key, or `dashboard` / `back-to-site` for the hardcoded links). Keep `e2e/support/admin-nav-map.ts` in sync when registrations change — that is the permanent role→menu contract.
 
+**The admin layout owns the flash block.** `<x-admin::layout>` renders `<x-shared::flash-block />` once for every admin page. Admin page views must not render it themselves, or every flash and validation error shows twice. `Tests/Feature/AdminPagesFlashBlockGuardTest.php` scans `app/Domains/*/Private/Resources/views/pages/admin/**` and fails on any occurrence, so admin views must live under that path to be covered.
+
 **`LayoutComponent` throws exceptions on auth failure** — it does not redirect, it throws `\Exception`. Route middleware (`auth`, `role:...`) on the routes is what handles the redirect; the component's check is a secondary safety net for direct Blade rendering in tests.
 
 **Log file access is restricted to `storage/logs/*.log`.** The `LogsController` sanitises the `file` query parameter with `basename()` and then verifies the resolved path still starts with `storage_path('logs')`. Do not bypass this by constructing paths manually.

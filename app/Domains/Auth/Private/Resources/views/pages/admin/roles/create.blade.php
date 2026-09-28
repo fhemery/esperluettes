@@ -7,8 +7,6 @@
             <x-shared::title>{{ __('auth::admin.roles.create_title') }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('auth.admin.roles.store') }}" class="surface-read p-6 rounded-lg">
             @csrf
             @include('auth::pages.admin.roles._form')

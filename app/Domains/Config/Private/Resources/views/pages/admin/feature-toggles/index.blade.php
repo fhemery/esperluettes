@@ -10,8 +10,6 @@
             ];
         @endphp
 
-        <x-shared::flash-block />
-
         <div class="surface-read p-4 overflow-x-auto" data-testid="feature-toggles-declared">
             <table class="w-full admin">
                 <thead>

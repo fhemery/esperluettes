@@ -7,8 +7,6 @@
             <x-shared::title>{{ __('auth::admin.roles.edit_title', ['name' => $role->name]) }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('auth.admin.roles.update', $role) }}" class="surface-read p-6 rounded-lg">
             @csrf
             @method('PUT')

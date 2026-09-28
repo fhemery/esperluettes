@@ -7,8 +7,6 @@
             <x-shared::title>{{ $faqCategory->name }}</x-shared::title>
         </div>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('faq.admin.faq-categories.update', $faqCategory) }}" class="surface-bg p-6 rounded-lg">
             @csrf
             @method('PUT')

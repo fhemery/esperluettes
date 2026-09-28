@@ -2,8 +2,6 @@
     <div class="flex flex-col gap-6">
         <x-shared::title>{{ __('auth::admin.activation_codes.create_title') }}</x-shared::title>
 
-        <x-shared::flash-block />
-
         <form method="POST" action="{{ route('auth.admin.activation-codes.store') }}" class="flex flex-col gap-6 max-w-lg">
             @csrf
 
