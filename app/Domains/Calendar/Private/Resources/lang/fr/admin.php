@@ -19,7 +19,7 @@ return [
         'activity_type' => 'Type',
         'description' => 'Description',
         'image' => 'Image',
-        'role_restrictions' => 'Restrictions de rôle',
+        'role_restrictions' => 'Rôles autorisés',
         'preview_starts_at' => 'Début de visibilité',
         'active_starts_at' => 'Date de début',
         'active_ends_at' => 'Date de fin',

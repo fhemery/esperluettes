@@ -37,6 +37,8 @@ scoped to the task that actually changed.
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
 - **Upgrade pnpm to 12** · `pnpm-12-upgrade/` · auto · TODO
 - **Make the e2e specs type-check (@types/node)** · `e2e-types-node/` · auto · TODO
+- **Calendar: dedicated time field for activity dates** · `calendar-activity-time-picker/` · interactive · TODO
+- **Secret Gift: admin feedback after shuffle** · `secret-gift-shuffle-feedback/` · interactive · TODO
 
 ## Done
 
