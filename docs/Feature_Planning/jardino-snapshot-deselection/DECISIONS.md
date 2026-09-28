@@ -24,3 +24,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | A6 | No unique index on (goal_id, story_id): the service check-then-create is kept and tested. A unique index could fail the migration on a pre-existing duplicate. | DESIGN 2026-09-28 | Yes — add index later |
 | A7 | `updateSnapshotWordCount` loads the snapshot through `storySnapshots` filtered by `story_id`, replacing `currentStorySnapshot`. | DESIGN 2026-09-28 | Yes |
 | A8 | Single BUILD phase; VERIFY is N/A (no UI change). Migration, model and service edits cannot be split and each stay green. Jardino README clean-up left to WRAP per architecture §8. | PLAN 2026-09-28 | Yes |
+| A9 | Migration round trip checked by hand on the local sail DB (`migrate` → `migrate:rollback --step=1` → `migrate`, all OK). The first `migrate` also applied three unrelated pending migrations already on `main` to the local dev DB. | BUILD 2026-09-28 | N/A |

@@ -7,7 +7,6 @@ namespace App\Domains\Calendar\Private\Activities\Jardino\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Model;
 
 #[Table('calendar_jardino_goals')]
@@ -25,11 +24,6 @@ class JardinoGoal extends Model
     public function storySnapshots(): HasMany
     {
         return $this->hasMany(JardinoStorySnapshot::class, 'goal_id');
-    }
-
-    public function currentStorySnapshot(): HasOne
-    {
-        return $this->hasOne(JardinoStorySnapshot::class, 'goal_id')->whereNull('deselected_at');
     }
 
     public function gardenCells(): HasMany
