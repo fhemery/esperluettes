@@ -10,13 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Table('calendar_jardino_story_snapshots')]
-#[Fillable(['goal_id', 'story_id', 'story_title', 'initial_word_count', 'current_word_count', 'biggest_word_count', 'selected_at', 'deselected_at'])]
+#[Fillable(['goal_id', 'story_id', 'story_title', 'initial_word_count', 'current_word_count', 'biggest_word_count', 'selected_at'])]
 class JardinoStorySnapshot extends Model
 {
 
     protected $casts = [
         'selected_at' => 'datetime',
-        'deselected_at' => 'datetime',
         'initial_word_count' => 'integer',
         'current_word_count' => 'integer',
         'biggest_word_count' => 'integer',
@@ -43,13 +42,5 @@ class JardinoStorySnapshot extends Model
     public function getFlowerEligibleWordsAttribute(): int
     {
         return $this->biggest_word_count - $this->initial_word_count;
-    }
-
-    /**
-     * Check if this snapshot is currently active
-     */
-    public function isActive(): bool
-    {
-        return $this->deselected_at === null;
     }
 }

@@ -47,15 +47,14 @@ final class JardinoGoalService
 
     private function createInitialSnapshot(JardinoGoal $goal): void
     {
-        // Check if there's already an active snapshot for this story
+        // A snapshot for this (goal, story) already exists → resume it untouched
         $existingSnapshot = JardinoStorySnapshot::query()
             ->where('goal_id', $goal->id)
             ->where('story_id', $goal->story_id)
-            ->whereNull('deselected_at')
             ->first();
 
         if ($existingSnapshot) {
-            return; // Already have an active snapshot
+            return;
         }
 
         // Get current story info

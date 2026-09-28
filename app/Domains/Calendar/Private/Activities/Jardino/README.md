@@ -26,9 +26,9 @@ restrictions, the registry — are documented in the
 | `Story::ChapterUpdated` | `after.wordCount - before.wordCount` |
 | `Story::ChapterDeleted` | `- chapter.wordCount` |
 
-The delta is applied to the *active snapshot of the goal whose `story_id`
-matches the event's story*. A story that is not the current target of any goal
-produces no write. Chapter events are the only source of progress — nothing
+The delta is applied, for every goal whose `story_id` matches the event's story,
+to that goal's snapshot for that story. A story that is not the current target
+of any goal produces no write — including a story a goal tracked earlier. Chapter events are the only source of progress — nothing
 polls or recomputes word counts.
 
 ## Tables
@@ -44,8 +44,16 @@ polls or recomputes word counts.
 **Progress accumulates across story switches.** Words written = the sum of
 `current - initial` over *all* the goal's snapshots, not just the current one.
 Switching the tracked story therefore keeps everything already earned and starts
-a fresh snapshot for the new story. Re-selecting a story used earlier resumes its
-existing snapshot rather than resetting it.
+a fresh snapshot for the new story.
+
+**One snapshot per (goal, story), and no "current" snapshot.** The goal's
+`story_id` alone says which story is tracked; snapshots carry no active flag.
+`JardinoGoalService` creates a snapshot only if none exists for that
+(goal, story) — enforced in the service, not by a unique index. Re-selecting a
+story used earlier resumes its existing snapshot untouched (`initial` is not
+reset). Words written on that story while it was not tracked are never counted:
+the resumed snapshot's `current` is stale, and later chapter events apply only
+their own delta.
 
 **Flowers are computed from `biggest_word_count`, progress from
 `current_word_count`.** `biggest` never decreases, so deleting a chapter lowers
@@ -83,12 +91,5 @@ cells outside the new bounds.
 
 ## Not done
 
-- **`deselected_at` is never written.** The column and
-  `JardinoStorySnapshot::isActive()` exist, but nothing marks a snapshot as
-  deselected when the goal switches story. Progress stays correct only because
-  `JardinoProgressService::updateSnapshotWordCount()` constrains the eager-loaded
-  snapshot by `story_id`; `JardinoGoal::currentStorySnapshot` on its own can
-  return the wrong row once a goal has tracked more than one story. Fix the write
-  side before relying on that relation.
 - Goals can be created and updated but never deleted; there is no way to leave
   the challenge.

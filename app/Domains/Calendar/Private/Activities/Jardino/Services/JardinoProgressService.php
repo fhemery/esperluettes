@@ -50,25 +50,26 @@ final class JardinoProgressService
         // Find all goals that have this story as current target
         $goals = JardinoGoal::query()
             ->where('story_id', $storyId)
-            ->with(['currentStorySnapshot' => function ($query) use ($storyId) {
+            ->with(['storySnapshots' => function ($query) use ($storyId) {
                 $query->where('story_id', $storyId);
             }])
             ->get();
 
         foreach ($goals as $goal) {
-            $currentSnapshot = $goal->currentStorySnapshot;
+            // At most one snapshot per (goal, story)
+            $snapshot = $goal->storySnapshots->first();
 
-            if ($currentSnapshot) {
+            if ($snapshot) {
                 // Update existing snapshot
-                $newWordCount = $currentSnapshot->current_word_count + $wordDelta;
+                $newWordCount = $snapshot->current_word_count + $wordDelta;
 
                 // Update biggest count if this is higher than before
-                if ($newWordCount > $currentSnapshot->biggest_word_count) {
-                    $currentSnapshot->biggest_word_count = $newWordCount;
+                if ($newWordCount > $snapshot->biggest_word_count) {
+                    $snapshot->biggest_word_count = $newWordCount;
                 }
 
-                $currentSnapshot->current_word_count = $newWordCount;
-                $currentSnapshot->save();
+                $snapshot->current_word_count = $newWordCount;
+                $snapshot->save();
             }
         }
     }
