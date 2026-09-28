@@ -53,9 +53,9 @@ Note: For **Windows**: to avoid permission issues, you should launch command fro
 8. Build frontend assets (pnpm)
 
 Install the pnpm version pinned in `package.json` → `packageManager` (today
-`pnpm@11.21.0`). **Primary** — Node always ships npm:
+`pnpm@12.6.0`). **Primary** — Node always ships npm:
 
-> npm install -g pnpm@11.21.0
+> npm install -g pnpm@12.6.0
 
 Optional alternatives if you prefer them: `corepack enable` (when Corepack is
 available on your Node build), or the global `pnpm` already present inside the

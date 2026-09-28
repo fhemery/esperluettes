@@ -42,7 +42,7 @@ Or directly click on the lock icon on the home screen :
 8. In project directory, run :
 
 ```bash
-npm install -g pnpm@11.21.0
+npm install -g pnpm@12.6.0
 composer install
 pnpm install
 pnpm run build
@@ -53,7 +53,7 @@ php artisan db:seed
 php artisan storage:link
 ```
 
-`pnpm@11.21.0` must match `package.json` → `packageManager`. Optional:
+`pnpm@12.6.0` must match `package.json` → `packageManager`. Optional:
 `corepack enable` instead of `npm install -g`, if Corepack works on your Node.
 
 `pnpm install` installs Husky hooks via the root `prepare` script. If hooks are
