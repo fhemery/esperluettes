@@ -20,4 +20,7 @@ the user may want to reverse — surface these in the WRAP summary.
 | A1 | `@types/node` pinned to the major CI uses (24), per the request's own suggestion | REFINE | Yes — one line in `package.json` |
 | A2 | The request's "consider adding the type-check to the gate" is taken as **yes**: a new gate step | REFINE | Yes — drop the step |
 | A3 | That gate step is scoped like the others: runs only when `e2e/`, `playwright.config.ts`, `package.json` or the lockfile changed on the branch, always with `--all` | REFINE | Yes |
+| A5 | Fix via a direct `@types/node` dev dep (not a pnpm hoist pattern, not dropping `"node"` from `types`) — T1 in `02-architecture.md` | DESIGN | Yes |
+| A6 | Gate step id `e2e-types`, not skipped by `--quick`, triggers also on `package.json`/`pnpm-lock.yaml` — T3/T4 | DESIGN | Yes |
+| A7 | Spec fixes never loosen `e2e/tsconfig.json`; if errors are numerous or need behavioural rewrites, BUILD stops for the user | DESIGN | Yes |
 | A4 | Genuine type errors revealed once Node types resolve are fixed minimally in the specs (the request's out-of-scope line allows "what the type-check requires") | REFINE | Yes |
