@@ -29,10 +29,19 @@ rather than quietly changing it.
 4. **Shared infrastructure first.** Anything another planned feature will reuse
    (a JS helper, a component slot, a registry) goes in its own early phase and
    is called out as such.
-5. **Server-side security lands before the UI that relies on it.** The policy
+5. **Refactor before the feature.** When the feature needs existing code
+   reshaped, that reshaping is its own phase(s), first, with **no behaviour
+   change** — its tests are the existing ones, still green. The feature phases
+   come after. Make the change easy, then make the easy change. Mark such a
+   phase `Refactor —` in the index.
+6. **Checkpoint after a shared reshape.** Right after any phase that reshapes
+   code with **existing consumers** — a refactor, or infrastructure other
+   features already use — insert a checkpoint row (see below). Elsewhere, add
+   one wherever a regression would be expensive to trace later.
+7. **Server-side security lands before the UI that relies on it.** The policy
    phase always precedes the endpoint phase; never ship a UI whose only
    protection is the absence of a button.
-6. **Order by dependency, not by excitement.** If the user wants to see
+8. **Order by dependency, not by excitement.** If the user wants to see
    something on screen early, insert a thin vertical slice as an explicit
    phase — do not reorder the safety phases away.
 
@@ -65,6 +74,22 @@ through it for something you could have written in a line.
 Write the **test that proves the security rule** into the phase that introduces
 the rule, not into a later "hardening" phase.
 
+## Checkpoint rows
+
+A checkpoint checks that **existing** behaviour survived the phase before it,
+before later phases build on top. It changes no code, and it is run by the
+`visual-verifier`, not a `phase-implementer`.
+
+- Id: the preceding phase's number plus `v` — `2v` follows phase 2. It counts
+  in the BUILD counter like any row.
+- Its section is titled `## Checkpoint <id> — <what>` and names the existing
+  consumers to look at (pages, roles) and the e2e specs to run. It has no
+  Deliverables or Tests.
+- Output: screenshots under `shots/checkpoint-<id>/`, and a
+  `**Result (<date>, HEAD <sha>) — PASS|FAIL**` block appended to its section.
+- A FAIL sends a `phase-implementer` back to fix the preceding phase; the
+  checkpoint then runs again.
+
 ## Visual QA checklist
 
 Fill the checklist table at the bottom of the template *now*, while the flows
@@ -83,5 +108,5 @@ rather than leaving it to BUILD.
 ## Output
 
 Run `pnpm run gate` and commit `03-plan.md` (follow the `commit` skill), then
-return the phase index table and the total phase count. Flag any phase you were
-unsure how to cut.
+return the phase index table and the total phase count (checkpoints included).
+Flag any phase you were unsure how to cut.

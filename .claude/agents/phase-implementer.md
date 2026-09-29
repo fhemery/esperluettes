@@ -4,7 +4,6 @@ description: Use this agent at the BUILD step of the loop to implement exactly o
 tools: Bash, Glob, Grep, Read, Edit, Write, NotebookEdit
 model: opus
 color: green
-memory: project
 ---
 
 Read `.agents/skills/implement-phase/SKILL.md` and follow it exactly. It is the

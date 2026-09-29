@@ -17,11 +17,13 @@
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
 it is what lets `WIP:BUILD (3/7)` resume correctly.
+Checkpoint rows (`2v` — see `plan-phases`) are run by `visual-verifier` and
+change no code: `| 2v | Checkpoint — <existing consumers> | S | 2 | TODO |`.
 
 ## Working agreement
 
 - One phase = one commit (or one PR). Each phase ships independently, keeps
-  `npm run gate` green, and is revertable on its own.
+  `pnpm run gate` green, and is revertable on its own.
 - Failing test first, then the implementation.
 - We do not move to phase N+1 until phase N's acceptance criteria are met.
 - Re-ordering phases mid-build is a decision to surface, not to take silently.
@@ -40,7 +42,7 @@ it is what lets `WIP:BUILD (3/7)` resume correctly.
 
 **Acceptance.**
 - ✅ Checkable statements, not intentions.
-- ✅ `npm run gate` green.
+- ✅ `pnpm run gate` green.
 
 ---
 

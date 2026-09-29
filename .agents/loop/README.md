@@ -25,9 +25,9 @@ backlog and the task folders.
 | REFINE | `refine-feature` | **main thread** — it interviews the user | `01-functional.md` |
 | DESIGN | `design-architecture` | **main thread** — the user picks tradeoffs | `02-architecture.md` |
 | PLAN | `plan-phases` | subagent, user approves the result | `03-plan.md` |
-| BUILD | `implement-phase` | one subagent **per phase** | code + tests, green gate |
+| BUILD | `implement-phase` | one subagent **per phase**; a checkpoint row (`2v`) runs `verify-visually` instead | code + tests, green gate |
 | VERIFY | `verify-visually` | subagent (uses `run-app`) | `shots/`, filled QA checklist |
-| WRAP | `wrap-task` | subagent | `README.md`, backlog updates |
+| WRAP | `wrap-task` | subagent — opens with a retro | `README.md`, backlog updates, `loop-improvements/` findings |
 
 A subagent has no channel to the user: it can only report back. That is why
 REFINE and DESIGN are *not* subagents. They may still spawn read-only research
@@ -190,13 +190,25 @@ The steps do not restate procedures that already exist. `implement-phase` and
 `add-notification`, `add-setting`, `fix-deptrac` and `document-domain` for the
 recurring pieces of work. `verify-visually` defers to `run-app` for the browser.
 
+**Know-how lives in the skills.** The agents have no private memory: a trap an
+agent discovers — a command that misbehaves, an environment quirk — belongs in
+the skill or doc that would have prevented it, where every tool and worktree
+sees it. WRAP's retro collects them in `loop-improvements/` rather than letting
+them be fixed ad hoc.
+
+**Refactor first, then checkpoint.** `plan-phases` puts any reshaping of
+existing code in its own no-behaviour-change phase(s) before the feature, and
+follows each such phase with a checkpoint row that `visual-verifier` runs
+against the existing consumers. A regression is then traced to the phase that
+caused it, before anything builds on top.
+
 ## Gate
 
 Every BUILD phase and the VERIFY step end on a green gate:
 
 ```bash
 pnpm run gate            # docs + deptrac + php tests + vitest + vite build
-pnpm run gate -- --quick # skip the asset build (faster inner loop)
+pnpm run gate --quick    # skip the asset build (faster inner loop)
 ```
 
 The `docs` step enforces that no `app/Domains/**/{README,AGENTS}.md` and no

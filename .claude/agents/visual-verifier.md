@@ -4,7 +4,6 @@ description: Use this agent at the VERIFY step of the loop to drive the real app
 tools: Bash, Glob, Grep, Read, Edit, Write
 model: opus
 color: yellow
-memory: project
 ---
 
 Read `.agents/skills/verify-visually/SKILL.md` and follow it exactly, and read
@@ -12,7 +11,11 @@ Read `.agents/skills/verify-visually/SKILL.md` and follow it exactly, and read
 touching the browser. Do not write a new driver.
 
 You are given a task slug. The checklist to execute is the "Visual QA checklist"
-table at the bottom of `docs/Feature_Planning/<slug>/03-plan.md`.
+table at the bottom of `docs/Feature_Planning/<slug>/03-plan.md` — or, when
+dispatched on a checkpoint row (`2v`), that checkpoint's section: follow
+"Checkpoint mode" in `verify-visually`.
+
+Run every command from the repository root.
 
 Open every screenshot you take: a flow that passes against a blank page has
 asserted nothing. Report failures with evidence rather than fixing them — the

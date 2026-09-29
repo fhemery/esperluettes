@@ -7,14 +7,22 @@ touched, so specs are free to create, edit and delete whatever they need.
 ```bash
 pnpm run e2e                    # everything, headless
 pnpm run e2e:core               # only the permanent net
-pnpm run e2e -- --headed        # watch it happen
-pnpm run e2e -- editor          # only specs matching "editor"
+pnpm run e2e --headed           # watch it happen
+pnpm run e2e editor             # only specs matching "editor"
+pnpm run e2e e2e/tests/features/<slug>.spec.ts   # one file
 pnpm run e2e:ui                 # Playwright's interactive runner
 pnpm run e2e:report             # open the last HTML report
 E2E_SKIP_RESET=1 pnpm run e2e   # keep the current database between runs
 ```
 
+No `--` before the arguments: pnpm forwards it, and Playwright then ignores
+the filter and runs the whole suite.
+
 One-time: `pnpm run e2e:setup` (downloads the Chromium binary).
+
+**Build first** (`pnpm run build`) when you changed Blade or front-end code:
+the e2e app serves `public/build` as it is, and Tailwind only emits a class
+new to a view after a rebuild.
 
 ## What belongs in a browser at all
 
@@ -103,4 +111,9 @@ New specs go in `tests/features/`. Rules that keep this cheap to own:
 - `artisan serve` runs PHP's built-in server, not the nginx stack on `:80`.
   `PHP_CLI_SERVER_WORKERS` is set to 4 so asset requests do not serialise.
 - Playwright kills only the local `sail` wrapper; `global-teardown.ts` stops
-  the PHP process inside the container so `:8080` is actually released.
+  the PHP process inside the container so `:8080` is actually released. Its
+  `pkill -f 'artisan serve'` also stops the dev app on `:80`: run
+  `./vendor/bin/sail restart laravel.test` before using `http://localhost`.
+- The SQLite database outlives the run. To look at the post-run data, serve it
+  again with `./vendor/bin/sail artisan serve --env=e2e --host=0.0.0.0 --port=8080`
+  and log in as any `<role>@e2e.test` / `password` (`E2eAccountsSeeder`).

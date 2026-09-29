@@ -13,6 +13,18 @@ browser. That is what this step is for.
 in [`e2e/`](../../../e2e/README.md) that runs on every later `pnpm run e2e` and
 catches the regression next time. Read `e2e/README.md` before writing anything.
 
+## 0. Build the assets first
+
+```bash
+pnpm run build > /tmp/build.log 2>&1 || tail -20 /tmp/build.log
+```
+
+Always, before any browser run. Tailwind generates classes from what it finds
+in Blade, so a class new to a view exists only after a build — skip it and the
+browser shows a false defect (unstyled buttons, wrong spacing). When a style
+assertion fails anyway, grep `public/build/assets/app-*.css` for the class
+before reporting a defect.
+
 ## 1. Cut the checklist down — most rows do not belong here
 
 **A row belongs in the browser only if a PHP integration test cannot assert
@@ -63,12 +75,35 @@ every future run.
 ## 3. Run
 
 ```bash
-pnpm run e2e -- <your-spec>
-pnpm run e2e                    # then the whole suite, to catch regressions
+pnpm run e2e e2e/tests/features/<slug>.spec.ts   # your spec only
+pnpm run e2e                                      # then the whole suite, to catch regressions
 ```
+
+No `--` before the path: pnpm forwards it, and Playwright then ignores the
+filter and runs everything.
 
 The database is rebuilt before every run, so specs may write freely and must
 not clean up.
+
+**A run stops the dev app too.** The teardown kills every `artisan serve` in
+the container, `:80` included. Before driving `http://localhost` again:
+`./vendor/bin/sail restart laravel.test`.
+
+**Looking at the post-run e2e data** — for a row that needs eyes rather than an
+assertion. The SQLite database survives the run; only the server stops. Serve it
+again and point the `run-app` driver at it, as any seeded `<role>@e2e.test`
+account (password `password`, see `E2eAccountsSeeder`). Their first login goes
+through the CGU page, like in the suite.
+
+```bash
+./vendor/bin/sail artisan serve --env=e2e --host=0.0.0.0 --port=8080 &
+APP_BASE_URL=http://localhost:8080 APP_USER=author@e2e.test APP_PASSWORD=password \
+  pnpm run browser:drive --goto /dashboard --shot check.png
+./vendor/bin/sail exec -T laravel.test pkill -f 'artisan serve --env=e2e'
+```
+
+The dev database has no known passwords except `admin@example.com` /
+`password`; prefer the e2e accounts over creating users in dev data.
 
 If a spec passes first try and you are not sure it asserts anything, invert one
 expectation and confirm it fails. A green test that cannot fail is worse than
@@ -92,6 +127,38 @@ screenshot dump.
 
 A defect goes back to BUILD as a fix, not into the summary as a known issue,
 unless the user decides otherwise.
+
+## Checkpoint mode
+
+Dispatched on a checkpoint row (`2v`) during BUILD instead of at VERIFY. The
+question is narrower: did the preceding phase break **existing** behaviour?
+Write no spec and change no code.
+
+1. Build the assets (§0).
+2. Run the e2e specs the checkpoint section names, and look at the existing
+   consumers it lists, per role, through the `run-app` driver. For "looks as
+   before", compare against the pre-phase code: capture on HEAD,
+   `git checkout <pre-phase sha> -- <paths>` + `./vendor/bin/sail artisan view:clear`,
+   capture again, restore with `git checkout HEAD -- <paths>` +
+   `git clean -fd <paths>`. Identical screenshots or DOM is strong evidence.
+3. Screenshots go in `docs/Feature_Planning/<slug>/shots/checkpoint-<id>/`.
+4. Append `**Result (<date>, HEAD <sha>) — PASS|FAIL**` and a line per check
+   to the checkpoint's section of `03-plan.md`. On FAIL, name the regression
+   precisely enough for a `phase-implementer` to fix it without re-deriving it.
+
+## Browser tricks
+
+- **Touch selection.** Playwright cannot long-press to select. Use a context
+  from `devices['Pixel 7']` with the role's storageState, set the Range
+  programmatically, then dispatch `touchend` on an element *inside* the text —
+  handlers call `e.target.closest`.
+- **Mouse-drag selections** need both ends on screen: scroll the start to the
+  top (minus ~150px for the sticky top bar), then measure the end without
+  scrolling again.
+- **Alpine slug fields.** Admin News/StaticPage forms derive the slug from the
+  title; filling the slug after the title appends to it. Fill the title only.
+- **Evidence shots in a spec.** Gate them behind an env var
+  (`E2E_SHOTS_DIR`) in the page object, so later suite runs take none.
 
 ## 5. At WRAP
 

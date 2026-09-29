@@ -59,7 +59,7 @@ one word; a red one is worth its failures. Redirect, then read only what broke:
 
 ```bash
 pnpm run gate > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
-pnpm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+pnpm run gate --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
 ./vendor/bin/sail artisan test --filter=X > /tmp/test.log 2>&1 && echo PASS || tail -30 /tmp/test.log
 ```
 
@@ -74,6 +74,20 @@ it rather than deciding alone.
 
 If the gate fails twice for the same reason, stop and report. Do not disable a
 test, loosen an assertion, or add a deptrac exception to get green.
+
+Failures that are not your branch's — check these before debugging your code:
+
+- **Dozens of PHP tests 500 with `Unable to locate file in Vite manifest`.**
+  The gate skipped the asset build and PHP tests rendered against a stale
+  `public/build/manifest.json`. Run `pnpm run gate --all` once to rebuild.
+- **Only `EditorAssetsTest` (asset counts) fails.** A leftover `public/hot`
+  points `@vite` at a dead dev server. If `curl $(cat public/hot)/@vite/client`
+  gets no answer, delete `public/hot` (gitignored) and re-run.
+
+Deptrac does not analyse Pest test files — its collectors are class-based and
+a Pest file declares no class. A test may use another domain's public API or
+constants when that is the clearest way to write it; production code under
+`Public/`/`Private/` is fully checked.
 
 ## Related skills
 

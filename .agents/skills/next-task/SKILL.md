@@ -74,7 +74,7 @@ most expensive rule to break.
 | REFINE | invoke the `refine-feature` skill **in this thread** (it interviews the user) |
 | DESIGN | invoke the `design-architecture` skill **in this thread** |
 | PLAN | spawn the `feature-planner` agent |
-| BUILD | spawn one `phase-implementer` agent **per phase** of `03-plan.md` |
+| BUILD | spawn one `phase-implementer` agent **per phase** of `03-plan.md`; a checkpoint row (`2v`) goes to `visual-verifier` instead — see below |
 | VERIFY | spawn the `visual-verifier` agent |
 | WRAP | spawn the `task-wrapper` agent |
 
@@ -86,6 +86,14 @@ spawn/Task capability is missing) do you run them here via their skills, and
 then you say so explicitly. A model refusal, rate limit, or premium-credit
 exhaustion is not that case — pick another available model and keep spawning.
 
+
+**Checkpoint rows.** A phase-index row whose id ends in `v` (see `plan-phases`)
+changes no code. Spawn `visual-verifier` on that checkpoint's section only; it
+builds assets, checks the listed existing consumers, writes
+`shots/checkpoint-<id>/` and appends a PASS/FAIL result. PASS → mark the row
+`DONE` and keep chaining. FAIL → spawn a `phase-implementer` to fix the
+preceding phase from the checkpoint's findings, then run the checkpoint again —
+no user stop, in either mode. A second FAIL for the same reason is a §5 stop.
 
 Delegate research to read-only `Explore` agents too. "How does the FAQ image
 flow work?" costs the orchestrator one paragraph instead of six file reads it

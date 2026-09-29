@@ -33,7 +33,7 @@ should be.
 | `01-functional.md` exists, no `02-architecture.md` | DESIGN pending |
 | `02-architecture.md` exists, no `03-plan.md` | PLAN pending |
 | `03-plan.md` exists | BUILD — the phase index table says which phase |
-| all phases `DONE`, `shots/` empty | VERIFY pending |
+| all phases `DONE`, no shots outside `shots/checkpoint-*/` | VERIFY pending |
 | VERIFY done, no `README.md` | WRAP pending |
 
 Also check reality, not just files:
@@ -50,7 +50,7 @@ Also check reality, not just files:
   output out of your thread:
 
   ```bash
-  pnpm run gate -- --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
+  pnpm run gate --quick > /tmp/gate.log 2>&1 && echo GATE_GREEN || tail -40 /tmp/gate.log
   ```
 
 If the files and the status field disagree, **fix the status field** and say so
@@ -77,8 +77,8 @@ yourself. Start at the reconciled step and honour the entry's mode:
 
 - `interactive` — one step, then stop and ask the user to `/clear` and run
   `/continue-task` in a new chat. **BUILD is the exception**: chain its remaining
-  phases in this chat, one `phase-implementer` each, two lines of report per
-  phase, and stop once they are all `DONE` (or when a §5 condition fires).
+  phases in this chat, one `phase-implementer` each (`visual-verifier` for a
+  checkpoint row), two lines of report per phase, and stop once they are all `DONE` (or when a §5 condition fires).
 - `auto` — keep dispatching the remaining steps until the task is `DONE` or a
   `next-task` §5 stop condition fires. Still one subagent per step and per
   phase; `auto` drops the approval stops, not the context boundaries.
