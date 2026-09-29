@@ -111,7 +111,7 @@ the upgrade guide says so.
 
 ```bash
 ./vendor/bin/sail composer audit                 # expected: only the "D" items remain
-pnpm run gate -- --all                           # --all: the lockfile alone doesn't trigger scoped steps
+pnpm run gate --all                           # --all: the lockfile alone doesn't trigger scoped steps
 pnpm run e2e                                     # needs the app running — see e2e/README.md
 ```
 
@@ -198,7 +198,7 @@ Never add a `package-lock.json`. Only `pnpm-lock.yaml` changes.
 ```bash
 pnpm audit                    # expected: only the "D" items remain
 pnpm install --frozen-lockfile   # what CI does: the lockfile must be consistent
-pnpm run gate -- --all        # full, including the asset build
+pnpm run gate --all        # full, including the asset build
 pnpm run e2e:setup            # only if playwright moved — downloads its Chromium
 pnpm run e2e
 ```

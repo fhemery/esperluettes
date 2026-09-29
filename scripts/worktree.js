@@ -20,7 +20,7 @@
   This script copies .env and shifts exactly those values.
 
   Usage:
-    pnpm run worktree -- <name> [--offset=N]
+    pnpm run worktree <name> [--offset=N]
 
     <name>     worktree directory + branch name, e.g. `b`, `annotations`
     --offset   port offset, default: first free slot starting at 1
@@ -75,7 +75,7 @@ function main() {
   const { name, offset: explicitOffset } = parseArgs(process.argv.slice(2));
 
   if (!name || !/^[a-z0-9][a-z0-9-]*$/.test(name)) {
-    console.error('[worktree] Usage: pnpm run worktree -- <name> [--offset=N]');
+    console.error('[worktree] Usage: pnpm run worktree <name> [--offset=N]');
     console.error('[worktree] <name> must be lowercase letters, digits and dashes.');
     process.exit(1);
   }
