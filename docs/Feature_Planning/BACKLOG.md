@@ -31,7 +31,6 @@ scoped to the task that actually changed.
 - **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
-- **Improve loop** · `improve-loop/` · interactive · WIP:WRAP
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
 - **Make the e2e specs type-check (@types/node)** · `e2e-types-node/` · auto · TODO
 - **Calendar: dedicated time field for activity dates** · `calendar-activity-time-picker/` · interactive · TODO
@@ -45,6 +44,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`improve-loop`](_done/improve-loop.md) · checkpoint rows after shared refactors, refactor-first PLAN, gate builds on Blade changes, `--` dropped from pnpm commands, agent memory folded into skills, WRAP opens with a retro feeding `loop-improvements/`
 - [`pnpm-12-upgrade`](_done/pnpm-12-upgrade.md) · pin moved to pnpm 12.6.0, `auditConfig.ignoreGhsas` → `audit.ignore`, lockfile records pnpm in `packageManagerDependencies`; no dependency moved (CI on the PR not yet run)
 - [`admin-double-flash`](_done/admin-double-flash.md) · admin flashes show once: `<x-admin::layout>` is the sole owner of `<x-shared::flash-block />`, removed from 23 admin page views; file-scan guard forbids it under `pages/admin/`
 - [`jardino-snapshot-deselection`](_done/jardino-snapshot-deselection.md) · dropped the never-written Jardino `deselected_at` column, `isActive()` and `currentStorySnapshot`; snapshots keyed on (goal, story), re-selection resumes the existing one
