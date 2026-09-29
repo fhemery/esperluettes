@@ -183,7 +183,8 @@ export class AdminStatisticsPage {
     if (!box) throw new Error('Canvas not visible');
     // Bars of a slot share their centre; a zero-height bar may be missing, so
     // fall back to an even split of the chart width.
-    const x = xs.length === slots ? xs[index] : box.width * ((index + 0.5) / slots);
+    const evenSplit = box.width * ((index + 0.5) / slots);
+    const x = xs.length === slots ? (xs[index] ?? evenSplit) : evenSplit;
     await this.page.mouse.move(box.x + x, box.y + box.height / 2);
   }
 

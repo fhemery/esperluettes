@@ -24,6 +24,9 @@ One-time: `pnpm run e2e:setup` (downloads the Chromium binary).
 the e2e app serves `public/build` as it is, and Tailwind only emits a class
 new to a view after a rebuild.
 
+`pnpm exec tsc -p e2e` type-checks the specs; `pnpm run gate` runs it whenever
+`e2e/` (or the Playwright config or dependencies) changed.
+
 ## What belongs in a browser at all
 
 **If a PHP integration test can assert it, it does not belong here.** A feature

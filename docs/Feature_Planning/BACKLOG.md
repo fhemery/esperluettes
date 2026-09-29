@@ -32,7 +32,6 @@ scoped to the task that actually changed.
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
-- **Make the e2e specs type-check (@types/node)** · `e2e-types-node/` · auto · TODO
 - **Calendar: dedicated time field for activity dates** · `calendar-activity-time-picker/` · interactive · TODO
 - **Secret Gift: admin feedback after shuffle** · `secret-gift-shuffle-feedback/` · interactive · TODO
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
@@ -44,6 +43,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`e2e-types-node`](_done/e2e-types-node.md) · `@types/node@^24` direct dev dep so `tsc -p e2e` passes (one `hoverSlot` type fix); new gate step `e2e-types`, scoped to `e2e/`/Playwright config/`package.json`/lockfile, kept under `--quick`
 - [`improve-loop`](_done/improve-loop.md) · checkpoint rows after shared refactors, refactor-first PLAN, gate builds on Blade changes, `--` dropped from pnpm commands, agent memory folded into skills, WRAP opens with a retro feeding `loop-improvements/`
 - [`pnpm-12-upgrade`](_done/pnpm-12-upgrade.md) · pin moved to pnpm 12.6.0, `auditConfig.ignoreGhsas` → `audit.ignore`, lockfile records pnpm in `packageManagerDependencies`; no dependency moved (CI on the PR not yet run)
 - [`admin-double-flash`](_done/admin-double-flash.md) · admin flashes show once: `<x-admin::layout>` is the sole owner of `<x-shared::flash-block />`, removed from 23 admin page views; file-scan guard forbids it under `pages/admin/`

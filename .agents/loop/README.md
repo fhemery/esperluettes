@@ -207,7 +207,7 @@ caused it, before anything builds on top.
 Every BUILD phase and the VERIFY step end on a green gate:
 
 ```bash
-pnpm run gate            # docs + deptrac + php tests + vitest + vite build
+pnpm run gate            # docs + deptrac + php tests + vitest + e2e type-check + vite build
 pnpm run gate --quick    # skip the asset build (faster inner loop)
 ```
 
