@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | `@types/node` dev dependency + minimal spec type fix | S | — | DONE |
-| 2 | `e2e-types` gate step + docs listing the gate steps | S | 1 | TODO |
+| 2 | `e2e-types` gate step + docs listing the gate steps | S | 1 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

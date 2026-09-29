@@ -33,7 +33,7 @@ Fold what matters into the domain docs or the ADR instead. Planning may link to
 code docs / ADRs, never the reverse. Use the `write-adr` skill for new ADRs.
 
 ## Definition of done
-- `pnpm run gate` — docs + deptrac + PHP tests + vitest + asset build. Green, or
+- `pnpm run gate` — docs + deptrac + PHP tests + vitest + e2e type-check + asset build. Green, or
   the work is not finished. `-- --quick` skips the asset build. Steps are scoped
   to what the branch changed; `-- --all` forces the full run.
 - `pnpm run e2e` — Playwright, for features with browser-only behaviour. Kept

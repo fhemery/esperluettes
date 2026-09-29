@@ -50,14 +50,16 @@ reports once. Use `auto` for bugfixes and chores.
 ## Definition of done
 
 ```bash
-pnpm run gate            # docs + deptrac + php tests + vitest + vite build
+pnpm run gate            # docs + deptrac + php tests + vitest + e2e type-check + vite build
 pnpm run gate --quick    # skip the asset build
 pnpm run gate --all      # ignore change detection, run everything
 ```
 
 The gate scopes itself to what the branch changed (commits since `main` plus
 the working tree): PHP tests run for the impacted domains and their deptrac
-dependents, and vitest/vite are skipped when no JS or CSS was touched.
+dependents, vitest/vite are skipped when no JS or CSS was touched, and the e2e
+type-check (`tsc -p e2e`) runs only when `e2e/`, `playwright.config.*`,
+`package.json` or `pnpm-lock.yaml` changed.
 
 Green, or the work is not finished. Every BUILD phase ends here.
 

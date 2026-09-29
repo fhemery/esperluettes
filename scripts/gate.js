@@ -12,13 +12,15 @@
     the full suite still runs when the change reaches outside app/Domains.
   - JS tests are skipped when no front-end asset changed; the asset build too,
     unless a Blade view changed (Tailwind reads classes from Blade).
+  - The e2e type-check runs only when e2e/, playwright.config.*, package.json
+    or pnpm-lock.yaml changed.
   Use --all to force every step over the whole codebase.
 
   Usage:
-    pnpm run gate                 # docs + deptrac + php tests + js tests + asset build
+    pnpm run gate                 # docs + deptrac + php tests + js tests + e2e type-check + asset build
     pnpm run gate --quick         # skip the asset build
     pnpm run gate --all           # ignore change detection, run everything
-    pnpm run gate --only=php      # run a single step (docs|deptrac|php|js|build)
+    pnpm run gate --only=php      # run a single step (docs|deptrac|php|js|e2e-types|build)
 
   Honours LOCAL_RUNNER (php|sail) exactly like the husky hooks.
 */
@@ -77,6 +79,14 @@ function touchesAssets(files) {
 // need a rebuild even though vitest has nothing to run.
 const BLADE_FILE = /\.blade\.php$/i;
 
+// The specs, their config, or a dependency bump (e.g. @types/node) can each
+// break the e2e type-check.
+const E2E_TYPES_FILE = /^(e2e\/|playwright\.config\.[cm]?[jt]s$|package\.json$|pnpm-lock\.yaml$)/;
+
+function touchesE2eTypes(files) {
+  return files.some(f => E2E_TYPES_FILE.test(f.replace(/\\/g, '/')));
+}
+
 function artisan(runner, extra) {
   return runner === 'sail'
     ? { cmd: path.join('vendor', 'bin', 'sail'), args: ['artisan', ...extra] }
@@ -105,12 +115,14 @@ async function main() {
   const assetsTouched = args.all || touchesAssets(changed);
   const noAssetChange = 'no JS/CSS change on this branch';
   const buildNeeded = assetsTouched || changed.some(f => BLADE_FILE.test(f));
+  const e2eTypesTouched = args.all || touchesE2eTypes(changed);
 
   const steps = [
     { id: 'docs', label: 'Documentation consistency', cmd: 'node', args: [path.join('scripts', 'check-docs.js')] },
     { id: 'deptrac', label: 'Deptrac (architecture boundaries)', cmd: 'node', args: [path.join('scripts', 'launch_deptrac.js')] },
     { id: 'php', label: phpStep.label, cmd: phpStep.cmd, args: phpStep.args, skipReason: phpPlan.mode === 'none' ? phpPlan.reason : null },
     { id: 'js', label: 'JS test suite (vitest)', cmd: 'pnpm', args: ['exec', 'vitest', 'run'], skipReason: assetsTouched ? null : noAssetChange },
+    { id: 'e2e-types', label: 'E2E type-check (tsc)', cmd: 'pnpm', args: ['exec', 'tsc', '-p', 'e2e'], skipReason: e2eTypesTouched ? null : 'no e2e/, Playwright config or dependency change on this branch' },
     { id: 'build', label: 'Asset build (vite)', cmd: 'pnpm', args: ['exec', 'vite', 'build'], skip: args.quick, skipReason: buildNeeded ? null : 'no JS/CSS/Blade change on this branch' },
   ];
 
