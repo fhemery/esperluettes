@@ -12,7 +12,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | `@types/node` dev dependency + minimal spec type fix | S | — | TODO |
+| 1 | `@types/node` dev dependency + minimal spec type fix | S | — | DONE |
 | 2 | `e2e-types` gate step + docs listing the gate steps | S | 1 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
