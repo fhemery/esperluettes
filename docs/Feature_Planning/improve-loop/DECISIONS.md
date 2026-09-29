@@ -14,6 +14,7 @@ a new row that supersedes it and note the number.
 | 4 | 2026-09-29 | REFINE | When PLAN inserts a checkpoint row | Required after any phase reshaping code with existing consumers; optional elsewhere | — |
 | 5 | 2026-09-29 | REFINE | Stale compiled assets | Gate builds on `*.blade.php` changes AND VERIFY/checkpoints build first | — |
 | 6 | 2026-09-29 | REFINE | pnpm 12 forwards a literal `--` | Drop `--` in docs only; scripts unchanged | — |
+| 7 | 2026-09-29 | REFINE | Run DESIGN / PLAN / VERIFY for a docs-and-one-script task? | No — skip them; edit directly in the orchestrator thread, commits by theme, light WRAP | — |
 
 ## Assumptions made without asking
 
