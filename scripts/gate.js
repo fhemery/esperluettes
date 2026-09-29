@@ -10,14 +10,15 @@
   `main`, plus staged/unstaged/untracked files):
   - PHP tests run only for the impacted domains and their deptrac dependents;
     the full suite still runs when the change reaches outside app/Domains.
-  - JS tests and the asset build are skipped when no front-end asset changed.
+  - JS tests are skipped when no front-end asset changed; the asset build too,
+    unless a Blade view changed (Tailwind reads classes from Blade).
   Use --all to force every step over the whole codebase.
 
   Usage:
     pnpm run gate                 # docs + deptrac + php tests + js tests + asset build
-    pnpm run gate -- --quick      # skip the asset build
-    pnpm run gate -- --all        # ignore change detection, run everything
-    pnpm run gate -- --only=php   # run a single step (docs|deptrac|php|js|build)
+    pnpm run gate --quick         # skip the asset build
+    pnpm run gate --all           # ignore change detection, run everything
+    pnpm run gate --only=php      # run a single step (docs|deptrac|php|js|build)
 
   Honours LOCAL_RUNNER (php|sail) exactly like the husky hooks.
 */
@@ -72,6 +73,10 @@ function touchesAssets(files) {
   });
 }
 
+// Tailwind generates classes from what it finds in Blade, so a view change can
+// need a rebuild even though vitest has nothing to run.
+const BLADE_FILE = /\.blade\.php$/i;
+
 function artisan(runner, extra) {
   return runner === 'sail'
     ? { cmd: path.join('vendor', 'bin', 'sail'), args: ['artisan', ...extra] }
@@ -99,13 +104,14 @@ async function main() {
 
   const assetsTouched = args.all || touchesAssets(changed);
   const noAssetChange = 'no JS/CSS change on this branch';
+  const buildNeeded = assetsTouched || changed.some(f => BLADE_FILE.test(f));
 
   const steps = [
     { id: 'docs', label: 'Documentation consistency', cmd: 'node', args: [path.join('scripts', 'check-docs.js')] },
     { id: 'deptrac', label: 'Deptrac (architecture boundaries)', cmd: 'node', args: [path.join('scripts', 'launch_deptrac.js')] },
     { id: 'php', label: phpStep.label, cmd: phpStep.cmd, args: phpStep.args, skipReason: phpPlan.mode === 'none' ? phpPlan.reason : null },
     { id: 'js', label: 'JS test suite (vitest)', cmd: 'pnpm', args: ['exec', 'vitest', 'run'], skipReason: assetsTouched ? null : noAssetChange },
-    { id: 'build', label: 'Asset build (vite)', cmd: 'pnpm', args: ['exec', 'vite', 'build'], skip: args.quick, skipReason: assetsTouched ? null : noAssetChange },
+    { id: 'build', label: 'Asset build (vite)', cmd: 'pnpm', args: ['exec', 'vite', 'build'], skip: args.quick, skipReason: buildNeeded ? null : 'no JS/CSS/Blade change on this branch' },
   ];
 
   const selected = steps.filter(s => (args.only ? s.id === args.only : !s.skip));

@@ -46,7 +46,10 @@ export APP_PASSWORD='…'          # a local seeded account
 export APP_BASE_URL='http://localhost'   # optional, this is the default
 ```
 
-Ask the user for a local account if you do not have one. `login()` fails loudly
+The dev database has one known login, `admin@example.com` / `password`. For
+any other role, drive the e2e instance instead (`APP_BASE_URL=http://localhost:8080`,
+`<role>@e2e.test` / `password`) — see "Looking at the post-run e2e data" in
+`verify-visually`. Otherwise ask the user for a local account. `login()` fails loudly
 with the app's own error message rather than silently continuing as a guest.
 
 ## Run: a flow (the main path)
@@ -55,7 +58,7 @@ A flow is a `.mjs` file that default-exports `async ({ page, ctx, browser, helpe
 Run one:
 
 ```bash
-APP_USER=… APP_PASSWORD=… pnpm run browser:drive -- .agents/skills/run-app/flows/profile-tabs.mjs
+APP_USER=… APP_PASSWORD=… pnpm run browser:drive .agents/skills/run-app/flows/profile-tabs.mjs
 ```
 
 `flows/profile-tabs.mjs` is a complete worked example — copy it. It logs in,
@@ -86,7 +89,7 @@ blank page is a flow that asserted nothing.
 For a quick look, skip the flow file:
 
 ```bash
-APP_USER=… APP_PASSWORD=… pnpm run browser:drive -- \
+APP_USER=… APP_PASSWORD=… pnpm run browser:drive \
   --goto /profile/logistix/quotes \
   --shot adhoc.png \
   --eval "document.querySelectorAll('[role=\"tab\"]').length"

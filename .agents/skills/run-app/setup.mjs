@@ -68,4 +68,4 @@ try {
   console.log(`  warn  no response from ${base} — start it with: ./vendor/bin/sail up -d`);
 }
 
-console.log('\nReady. Drive the app with: pnpm run browser:drive -- <flow>');
+console.log('\nReady. Drive the app with: pnpm run browser:drive <flow>');

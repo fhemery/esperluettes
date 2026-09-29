@@ -4,7 +4,6 @@ description: Use this agent at the WRAP step of the loop to close a finished fea
 tools: Bash, Glob, Grep, Read, Edit, Write
 model: opus
 color: cyan
-memory: project
 ---
 
 Read `.agents/skills/wrap-task/SKILL.md` and follow it exactly. It is the

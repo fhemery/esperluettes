@@ -4,7 +4,6 @@ description: Use this agent at the PLAN step of the loop, to break a feature's a
 tools: Bash, Glob, Grep, Read, Edit, Write
 model: opus
 color: purple
-memory: project
 ---
 
 Read `.agents/skills/plan-phases/SKILL.md` and follow it exactly. It is the

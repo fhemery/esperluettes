@@ -51,8 +51,8 @@ reports once. Use `auto` for bugfixes and chores.
 
 ```bash
 pnpm run gate            # docs + deptrac + php tests + vitest + vite build
-pnpm run gate -- --quick # skip the asset build
-pnpm run gate -- --all   # ignore change detection, run everything
+pnpm run gate --quick    # skip the asset build
+pnpm run gate --all      # ignore change detection, run everything
 ```
 
 The gate scopes itself to what the branch changed (commits since `main` plus
@@ -68,7 +68,7 @@ Two agents can work the loop at the same time, each in its own git worktree.
 ### Create one
 
 ```bash
-pnpm run worktree -- b        # ../esperluettes-b, on a new branch `b`
+pnpm run worktree b           # ../esperluettes-b, on a new branch `b`
 cd ../esperluettes-b
 composer install && pnpm install
 ./vendor/bin/sail up -d

@@ -27,7 +27,10 @@ research agents:
 - the **extension points** the feature will plug into, and their real
   signatures — `ProfileTabRegistry`, `SettingsPublicApi`, `NotificationPublicApi`,
   `ModerationRegistry`, `MediaPublicApi`, `EventPublicApi`, `StatisticDefinition`;
-- `deptrac.yaml` — which edges already exist between the domains involved;
+- `deptrac.yaml` — which edges already exist between the domains involved.
+  A domain's ServiceProvider sits in `Public/Providers`, so registering into
+  another domain's registry is a `<Domain>Public → XPublic` edge, not a
+  `Private` one — check that list before claiming "no new edge";
 - `docs/Domain_Structure.md` and `docs/Architecture.md`.
 
 Verify signatures rather than remembering them. A design built on a method that

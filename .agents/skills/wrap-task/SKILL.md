@@ -8,6 +8,30 @@ description: Close a finished feature — write the compact README, update the d
 Two jobs: leave a record a future agent can load cheaply, and make sure nothing
 that was dropped gets forgotten.
 
+## 0. Retro — improve the loop from this task
+
+Before the record, look back on *how* the task went, while the folder still
+holds the evidence. Look for friction the next task will hit again:
+
+- `DECISIONS.md` rows that supersede others, and assumptions the user reversed;
+- phases that contradicted the plan, were re-cut, or needed a fix phase;
+- checkpoint or VERIFY results that FAILed, and why;
+- gate failures unrelated to the change (stale build, environment);
+- fix-up commits in `git log`, and anything an agent reported having had to
+  discover the hard way — a missing command, a wrong doc, a trap.
+
+Each finding that a change to a skill, the loop protocol, a doc or a script
+would prevent becomes a numbered suggestion appended to
+`docs/Feature_Planning/loop-improvements/00-request.md`, under "What I want",
+continuing its numbering: what happened, in which task, and the fix you
+propose. If that folder does not exist, create the entry first —
+`pnpm run add-task --slug=loop-improvements --title="Loop improvements" --mode=interactive`
+— and write its `00-request.md` from the template. Skip anything the
+collector already lists. No finding is a valid outcome; do not invent one.
+
+Findings about the feature itself (a bug, a missing capability) go in §3 as
+usual, not here.
+
 ## 1. Establish what actually happened
 
 Do not summarise the plan — summarise the code. Read:
@@ -136,5 +160,5 @@ skill.
 ## 8. Report
 
 Five to ten lines: what shipped, what did not, the new backlog rows created, the
-docs that need attention, and the single thing you would tell the next person
+retro findings filed in `loop-improvements/`, the docs that need attention, and the single thing you would tell the next person
 touching this feature.
