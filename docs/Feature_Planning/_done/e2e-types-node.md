@@ -68,7 +68,7 @@ named three; all three were updated, plus `e2e/README.md` (not in the plan's §8
   `e2e/` and `playwright.config.ts`; changing the Node version of CI or Sail;
   rewriting specs beyond what `tsc` required.
 - Nothing cut mid-build. No open questions.
-- `e2e/pages/AdminStatisticsPage.ts` (the page object fixed here) is **not used
-  by any spec** in `e2e/tests/` — found at VERIFY, not acted on. Not pushed to
-  the backlog: delete it or wire it up when next touching the admin statistics e2e.
+- `e2e/pages/AdminStatisticsPage.ts` (the page object fixed here) was used by no
+  spec when found at VERIFY; it is now exercised by
+  `e2e/tests/core/admin-statistics.spec.ts`, added after WRAP.
 - e2e specs: this task added none to `e2e/tests/features/`, nothing to retire.
