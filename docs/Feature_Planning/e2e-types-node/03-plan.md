@@ -146,10 +146,10 @@ No UI surface — tooling only. VERIFY checks terminal output instead.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| `pnpm run gate` on the branch | `e2e-types` runs and appears in `PASSED:` | |
-| `pnpm run gate -- --only=e2e-types` with a planted type error | Fails, `tsc` error with file/line printed, `FAILED: e2e-types` | |
-| Gate on a branch that touches no e2e/dependency file | `SKIP: E2E type-check (tsc) (<reason>)` line | |
-| `pnpm run gate -- --quick` | `e2e-types` still runs, `build` skipped | |
+| `pnpm run gate` on the branch | `e2e-types` runs and appears in `PASSED:` | ✅ `PASSED: docs, e2e-types, deptrac, js, php, build`; `tsc -p e2e --noEmit` exits 0 |
+| `pnpm run gate -- --only=e2e-types` with a planted type error | Fails, `tsc` error with file/line printed, `FAILED: e2e-types` | ✅ `e2e/support/zz-planted.ts(1,7): error TS2322 …`, `FAILED: e2e-types`, exit 1 (file removed after) |
+| Gate on a branch that touches no e2e/dependency file | `SKIP: E2E type-check (tsc) (<reason>)` line | ✅ temp worktree off `main` with only `scripts/gate.js` changed: `SKIP: E2E type-check (tsc) (no e2e/, Playwright config or dependency change on this branch)` |
+| `pnpm run gate -- --quick` | `e2e-types` still runs, `build` skipped | ✅ `PASSED: docs, e2e-types, deptrac, js, php` (no `build`) |
 
 ## Open items
 
