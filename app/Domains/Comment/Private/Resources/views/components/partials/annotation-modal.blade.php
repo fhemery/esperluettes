@@ -38,7 +38,7 @@
             <ul class="space-y-4">
                 <template x-for="row in items" :key="row.id">
                     <li class="border-b border-gray-200 pb-4 last:border-b-0">
-                        <div x-show="showsProcessed(row)" class="mb-2">
+                        <div x-show="showsProcessed(row)" data-testid="annotation-processed" class="mb-2">
                             <span class="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
                                 <span class="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">check</span>
                                 {{ __('comment::annotations.server_modal.processed') }}

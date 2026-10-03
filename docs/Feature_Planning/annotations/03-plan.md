@@ -32,7 +32,7 @@
 | 11 | Drafts banner, drafts-mode pop-up, publish with the root comment | M | 4, 10 | DONE |
 | 12 | « N annotations » button and server-mode pop-up | M | 6, 7, 11 | DONE |
 | 12v | Checkpoint — comment lists on chapters and news | S | 12 | DONE |
-| 13 | End-to-end spec and domain documentation sweep | S | 12 | TODO |
+| 13 | End-to-end spec and domain documentation sweep | S | 12 | DONE |
 
 17 rows: 13 phases + 4 checkpoints.
 

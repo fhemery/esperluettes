@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The Quote domain lets a reader save meaningful passages from chapters to a personal **quote book** ("Citations"). A quote is a personal keepsake — the reader collects passages that resonate with them and can attach a private note. It is deliberately **not** a feedback tool aimed at the author (that is what the future Annotations feature is for); the author only learns a passage was quoted through a notification.
+The Quote domain lets a reader save meaningful passages from chapters to a personal **quote book** ("Citations"). A quote is a personal keepsake — the reader collects passages that resonate with them and can attach a private note. It is deliberately **not** a feedback tool aimed at the author (that is what [Comment](../Comment/README.md) annotations are for); the author only learns a passage was quoted through a notification.
 
 The domain also carries the **in-chapter author view**: on their own chapter, an author (or co-author) can turn on a heat map of the passages readers quoted, see who quoted each one, and open a chapter summary listing every quoted passage with its count. **Notes are never part of it** — the aggregate payload has no note field at all.
 
@@ -34,7 +34,7 @@ Out of scope: moderation of quotes/notes, organising quotes into collections, an
 - **Standalone domain.** Quotes are a personal reading artefact with their own table, service, and public API. They are not comments (no comment dependency), not story content, and Profile only renders them — so none of those domains own the data.
 - **No cross-domain foreign keys.** `chapter_id` and `story_id` are plain integers; `story_id` is denormalised onto the row so the quote book can show story title/authors without a join. Story/chapter references are resolved at render time through `StoryPublicApi`, and missing references surface as "chapter unavailable" rather than cascading deletes. `user_id` is nullable in the schema, but in practice a quote never outlives its owner: user deletion hard-deletes the user's quotes (deactivation/reactivation still soft-delete/restore), so a live quote always has a live owner.
 - **No local-storage drafts.** Unlike annotations, each quote is an immediate, independent AJAX call. The only client state is an Alpine store populated from the server on chapter open.
-- **Shared anchoring, established here.** The three pure anchoring functions (`buildCanonicalText`, `extractAnchor`, `findAnchor`) live in `app/Domains/Shared/Resources/js/anchoring/`. Quote is the first consumer; the future Annotations feature reuses them from the same location. Full Vitest coverage lives beside them.
+- **Shared anchoring, established here.** The three pure anchoring functions (`buildCanonicalText`, `extractAnchor`, `findAnchor`) live in `app/Domains/Shared/Resources/js/anchoring/`. Quote is the first consumer; Comment's annotation capture form reuses them from the same location. Full Vitest coverage lives beside them.
 - **Own sanitizer profile.** Notes are cleaned through a dedicated `quote-note` HTMLPurifier profile (see `config/purifier.php`) rather than reaching into Comment's sanitizer, to avoid a cross-domain dependency.
 
 ## Front-end architecture

@@ -197,7 +197,7 @@ The rich-text editor bundle lives in the **Editor** domain
 
 `Resources/js/anchoring/` **stays in Shared** and is not editor code: canonical
 text, anchor extraction and re-anchoring are *read-side* concerns, consumed by
-Quote (and later annotations) on rendered pages that load no editor at all.
+Quote and Comment annotations on rendered pages that load no editor at all.
 Different consumers, different lifecycle — do not move it into `Editor`.
 
 **Two definitions of "block" live side by side in this folder, on purpose.**

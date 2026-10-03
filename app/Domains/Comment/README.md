@@ -8,6 +8,8 @@ Comments are stored in a single `comments` table using a polymorphic-style `comm
 
 Replies are one level deep only: a reply's `parent_comment_id` must point to a root comment. Nesting beyond one level is rejected by the API.
 
+A root comment may also carry **annotations** — remarks anchored on a passage of the commented text, posted together with it (see [Annotations](#annotations)). Only chapters enable them today.
+
 The domain is built around three extension points:
 
 1. **CommentPolicyRegistry** — per-entity-type rules (who can post, length limits, edit permissions)
@@ -45,7 +47,17 @@ System-level operations. Intended for use by other domains cleaning up their own
 
 | Method | Description |
 |--------|-------------|
-| `deleteFor(entityType, entityId)` | Soft-deletes all comments (roots and replies) for a given target. Returns affected row count. |
+| `deleteFor(entityType, entityId)` | Force-deletes all comments (roots and replies) for a given target; their annotations go with them through the `comment_id` FK cascade. Returns affected row count. |
+
+### AnnotationPublicApi
+
+Reads and acts on the annotations of one root comment. Creation is not here: annotations are only created by `CommentPublicApi::create` with their root comment.
+
+| Method | Description |
+|--------|-------------|
+| `getForComment(commentId, viewerId)` | `AnnotationListDto` of the root annotations the viewer may see, with per-row action flags. 404 (`ModelNotFoundException`) for an unknown or trashed comment, 403 (`AuthorizationException`) for a viewer who may see none. |
+| `setProcessed(annotationId, byUserId, value)` | Author / co-author toggle of the processed flag. 403 unless the user resolves to the `author` role on that comment (an author who is also the commenter does not); 422 on a reply row. |
+| `moderatorDelete(annotationId, byUserId)` | Soft-deletes one annotation and its replies. No role check inside: the route's `role` middleware is the gate. |
 
 ### CommentPolicyRegistry
 
@@ -64,6 +76,10 @@ A singleton registry that maps entity type strings to `CommentPolicy` implementa
 | `getReplyCommentMinLength(entityType)` | Min plain-text length for replies (null = no limit) |
 | `getReplyCommentMaxLength(entityType)` | Max plain-text length for replies (null = no limit) |
 | `getUrl(entityType, entityId, commentId)` | Contextual URL to view the comment (used by Moderation) |
+| `canAnnotate(entityType, entityId, userId)` | Can the user attach annotations to their root comment? (default `false`: entity not annotatable) |
+| `canMarkAsProcessed(entityType, entityId, userId)` | Is the user an author of the entity — sees every annotation, may mark them processed? (default `false`) |
+| `getAnnotationBodyMaxLength(entityType)` | Max plain-text length of an annotation body (default 1000) |
+| `getAnnotationHighlightMaxLength(entityType)` | Max length of the highlighted passage (default 500) |
 
 ## Registering a policy
 
@@ -85,8 +101,9 @@ Example implementation: `App\Domains\Story\Private\Services\ChapterCommentPolicy
 
 | Class | Description |
 |-------|-------------|
-| `CommentToCreateDto` | Input for `create()` — entity type, entity ID, body, optional parent comment ID |
-| `CommentDto` | A single comment with author profile, permission flags (`canReply`, `canEditOwn`), and nested children |
+| `CommentToCreateDto` | Input for `create()` — entity type, entity ID, body, optional parent comment ID, optional list of `AnnotationToCreateDto` |
+| `CommentDto` | A single comment with author profile, permission flags (`canReply`, `canEditOwn`), `annotationCount` (root annotations **the viewer** may see), and nested children |
+| `AnnotationListDto` / `AnnotationDto` | Payload of `getForComment`: the viewer's role (`commenter`, `author`, `moderator`) and the rows, each with `highlighted_text`, sanitized `body`, `is_processed` (null for the commenter), `can_mark_as_processed`, `can_delete` |
 | `CommentListDto` | Paginated list of `CommentDto` items plus a `CommentUiConfigDto` |
 | `CommentUiConfigDto` | UI configuration: length limits and `canCreateRoot` flag |
 
@@ -107,7 +124,7 @@ All events implement `DomainEvent` and are registered with the `EventBus` in `Co
 
 | Event | Action |
 |-------|--------|
-| `Auth::UserDeleted` | Nullifies `author_id` on all comments by that user (content is preserved) |
+| `Auth::UserDeleted` | Nullifies `author_id` on all comments by that user (content is preserved), and on their annotations — trashed ones included |
 | `Auth::UserDeactivated` | Soft-deletes all comments by that user |
 | `Auth::UserReactivated` | Restores soft-deleted comments by that user |
 
@@ -179,6 +196,101 @@ consumed marker clears `root` **and** `annotations`; a `reply` marker clears onl
 `comment-draft/index.test.js`. Browser:
 `e2e/tests/core/comment-draft-consume.spec.ts`.
 
+## Annotations
+
+An annotation is a remark on one passage of the commented text: the highlighted
+passage (plain text, plus a short `prefix`/`suffix` for re-anchoring) and a
+short rich body. It is feedback to the entity's authors, attached to the
+reader's **root comment**, and has no life of its own:
+
+- **Created only with the root comment.** The reader collects drafts in the
+  browser, then `POST /comments` sends them with the root body; both are written
+  in one transaction or not at all. There is no endpoint to add, edit or reply to
+  an annotation afterwards, so a reader who already has a root comment on the
+  entity gets no « Annoter » action. `comment_annotations.parent_annotation_id`
+  exists for replies, which no code path creates yet.
+- **No events.** `CommentPosted` fires once for the root comment; credits and
+  notifications ignore annotations.
+- **Opt-in per entity type** through `CommentPolicy::canAnnotate` (chapters: the
+  same audience as a root comment, never a guest; news: never).
+
+### Who sees what
+
+`AnnotationAccessService` resolves the viewer of a root comment to one role:
+
+| Role | Who | Sees | May |
+|------|-----|------|-----|
+| `commenter` | author of the root comment | their own annotations, **without** the processed flag | read |
+| `author` | `canMarkAsProcessed` is true (chapter authors and co-authors, not beta readers) | all annotations and the processed flag | mark processed / not processed |
+| `moderator` | moderator, admin, tech-admin | all annotations | delete one |
+
+Anyone else gets a 403 on the list and a count of 0. The commenter wins over
+author: an author who commented on their own entity is a commenter there. The
+same rule drives `CommentDto::annotationCount`, computed for a whole page in one
+grouped query (`visibleCounts`).
+
+### Front-end
+
+All JavaScript is in `Resources/js/annotations/` (one Vite entry, `index.js`),
+pushed with `@pushOnce('head-scripts', 'comment-annotations-bundle')` by every
+component that needs it, so it is emitted once. It loads in `<head>`, before the
+comment-draft module, which is why the banner re-reads the drafts slot on
+`DOMContentLoaded`.
+
+- **« Annoter »** — `<x-comment::annotate-button :can-annotate>`, placed by the
+  consumer in `<x-comment::annotable>`'s `toolbar-actions` slot. It carries
+  `data-requires-selection-within=".ce-block--text"` (text blocks only; images,
+  captions and chapter-choice blocks are excluded) and only dispatches
+  `annotation:open-form`: the slot is cloned from a `<template>`, so it cannot
+  host the form.
+- **Capture form** — `<x-comment::annotation-form :entity-type :entity-id>`,
+  rendered by the consumer **outside** the annotable region and teleported to
+  `body` (`capture-form.js`). Quill with the Editor `inline` preset (bold,
+  italic, custom emoji); limits read from the policy registry. A selection that
+  spans two text blocks, or exceeds the highlight limit, opens the form with an
+  inline error and Save disabled. Save (button or Ctrl/Cmd+Enter) stores a draft
+  in the comment-draft `annotations` slot; Escape or a click outside discards.
+  The window event `annotation:open-edit` `{ tempId }` reopens it on a draft.
+- **Drafts banner and pop-up** — `partials/annotation-banner.blade.php`, inside
+  the root-comment form (`drafts.js`, Alpine `annotationDrafts`). Shows
+  « N annotations, écrivez votre commentaire… » while the slot is not empty and
+  opens the `annotation-drafts` modal (edit / delete each draft). On submit it
+  writes the slot into the hidden `annotations` input; the `root` consumed
+  marker then clears the slot. A refused post keeps both the drafts and the typed
+  root body.
+- **« N annotations » and the server pop-up** — `comment-item` shows the button
+  when `annotationCount > 0`; it dispatches `annotations:open` `{ commentId }`
+  to the one `annotation-modal` partial per list (`modal.js` + `api.js`, Alpine
+  `annotationsModal`, modal `annotations-server`). The list is fetched on first
+  open and cached; toggling or deleting updates the cached rows in place and the
+  button's label (hidden at 0). The highlighted passage is rendered as text
+  (`x-text`), the body as sanitized HTML. Buttons follow the per-row
+  `can_mark_as_processed` / `can_delete` flags; the processed marker is shown
+  to the `author` role only.
+
+Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts`.
+
+### Lifecycle
+
+| Event | Annotations |
+|-------|-------------|
+| Moderator empties the root comment | Soft-deleted (the comment stays, with the default text) |
+| Moderator deletes the root comment | Gone: the comment is force-deleted, the `comment_id` FK cascades |
+| Moderator deletes one annotation | That row and its replies soft-deleted |
+| Owning entity deleted (`CommentMaintenancePublicApi::deleteFor`) | Gone through the same cascade |
+| User deleted | Kept, `author_id` set to null (trashed rows too); authors still see them |
+| User deactivated / reactivated | No row change: the root comment's own soft delete hides them and its restore shows them again, so an annotation a moderator removed never comes back |
+
+### Known gaps
+
+- `visibleCounts` gives authors and moderators a count without asking the
+  entity's `canAnnotate`. Harmless while no non-annotatable entity can hold
+  annotation rows (creation checks `canAnnotate`).
+- `GET /comments/{id}/annotations` sends `is_processed` to moderators too; the
+  pop-up shows it to authors only.
+- Reporting an annotation on its own is not supported: reports target the root
+  comment.
+
 ## Routes
 
 | Method | Path | Auth | Description |
@@ -188,6 +300,9 @@ consumed marker clears `root` **and** `annotations`; a `reply` marker clears onl
 | `POST` | `/comments/{commentId}/empty-content` | Moderator+ | Replace body with default text |
 | `DELETE` | `/comments/{commentId}` | Moderator+ | Hard-delete comment and its replies |
 | `GET` | `/comments/fragments` | public | Return HTML fragment for lazy-load pagination |
+| `GET` | `/comments/{commentId}/annotations` | `auth`, `compliant` | JSON list of the root comment's annotations visible to the viewer (403 / 404 otherwise) |
+| `PUT` | `/comments/annotations/{annotationId}/processed` | `auth`, `compliant` | Body `{ value: bool }`; author / co-author only |
+| `DELETE` | `/comments/annotations/{annotationId}` | Moderator+ | Soft-delete one annotation and its replies |
 
 `POST /comments` accepts an optional `annotations` field: a JSON string (one
 hidden input) holding a list of `{ body, highlighted_text, prefix?, suffix? }`.
@@ -219,9 +334,27 @@ on the annotation count.
 
 Composite index on `(commentable_type, commentable_id, created_at)` for efficient listing.
 
+### `comment_annotations` table
+
+One row per annotation. `comment_id` always points to the **root comment**
+(reply rows too) with an FK that cascades on delete; `parent_annotation_id` is
+null for a root annotation (FK to the same table, cascading). `author_id` has no
+FK (cross-domain), like `comments`. `highlighted_text`, `prefix` and `suffix`
+are text (unsanitized, see below); `body` is sanitized HTML. `is_processed` / `processed_at` are
+the authors' flag; soft deletes. Indexes: `comment_annotations_tree_index` on
+`(comment_id, parent_annotation_id, deleted_at)` — named explicitly because the
+generated name exceeds MySQL's 64 characters — and `author_id`.
+
 ## Body sanitization
 
-All bodies pass through `CommentBodySanitizer`, which runs HTMLPurifier with the `strict` profile before persistence. Length checks operate on the plain-text length (after stripping tags) of the sanitized output.
+All bodies pass through `CommentBodySanitizer`, which runs HTMLPurifier before persistence. Length checks operate on the plain-text length (after stripping tags) of the sanitized output. Two profiles, both in `config/purifier.php`:
+
+| Profile | Used for | Allows |
+|---------|----------|--------|
+| `strict` | comment and reply bodies | the comment editor's formatting |
+| `annotation` | annotation bodies | `p`, `br`, `strong`, `em` and the custom-emoji `span` classes only |
+
+The highlighted passage (and `prefix` / `suffix`) is **not** sanitized: it is stored as submitted and must always be rendered as text (`x-text`, `{{ }}`), never as HTML.
 
 ## Moderation integration
 

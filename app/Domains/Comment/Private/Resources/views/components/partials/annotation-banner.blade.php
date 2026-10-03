@@ -19,6 +19,7 @@
     <div
         x-show="visible"
         x-cloak
+        data-testid="annotation-banner"
         class="flex flex-wrap items-center justify-between gap-2 p-3 rounded border border-primary/30 bg-primary/5 text-sm"
     >
         <span class="flex items-center gap-2">

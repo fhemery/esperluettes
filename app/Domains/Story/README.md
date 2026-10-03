@@ -74,6 +74,12 @@ The custom tab is **not** a Media component: `cover-tab-custom.blade.php` is a b
 
 The children of that root are always `.ce-block` wrappers: Advanced content already is one wrapper per block, and Simple content (no `content_blocks`) is wrapped in a single `<div class="ce-block ce-block--text">` at display time — the stored `content` is never modified. Only `.ce-block--text` areas are read by the quote system, so an image block and its caption are never quotable.
 
+### Chapter page hosts Comment annotations
+
+The same page also wires [Comment](../Comment/README.md) annotations (a reader's remarks on passages, posted with their root comment). `ChapterController::show` passes `canAnnotate` from `ChapterCommentPolicy::canAnnotate` — the root-comment audience of `canCreateRoot` (not an author or co-author of the story, no root comment on the chapter yet), never a guest. The `<x-comment::annotable>` toolbar is enabled for the **union** of the two actions (`$canQuoteStory || $canAnnotate`), and each action gates itself: `<x-quote::toolbar-button :can-quote>` and `<x-comment::annotate-button :can-annotate>` sit side by side in the `toolbar-actions` slot, both restricted to `.ce-block--text`. `<x-comment::annotation-form>` is rendered next to `<x-quote::mini-form />`, outside the annotable region, only when `canAnnotate`. Annotations re-anchor on the same `.ce-block--text` areas as quotes, so the single-root rule above applies to them too.
+
+`ChapterCommentPolicy::canMarkAsProcessed` answers "is an author or co-author of the chapter" (beta readers are not); Comment uses it to let authors see every annotation and mark them processed. Annotation limits: 1000 characters of body, 500 of highlighted passage.
+
 ### Chapter choice block
 
 Advanced chapters may hold a `chapter-choice` block — a group of buttons linking to other chapters of the same story. Story registers it with Editor's block-type registry (`ChapterChoiceBlockType`); News and static pages do not accept it.

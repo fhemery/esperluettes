@@ -52,6 +52,10 @@ whose article had gone back to draft. `canReply()` stays a constant `true` on
 purpose — Comment calls it once per rendered comment, so looking the article up
 there would cost one query per comment in the thread.
 
+News comments carry no annotations: `NewsCommentPolicy::canAnnotate()` and
+`canMarkAsProcessed()` return `false`, so Comment refuses any `annotations`
+payload on a news root and shows no annotation UI.
+
 The entity type string `'news'` is persisted in `comments.commentable_type` —
 never rename it.
 
