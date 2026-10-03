@@ -71,6 +71,28 @@ class AnnotationService
     }
 
     /**
+     * Live root annotations per comment, in one grouped query. Comments without any are absent.
+     *
+     * @param int[] $commentIds
+     * @return array<int,int> [commentId => count]
+     */
+    public function countRootsByComment(array $commentIds): array
+    {
+        if ($commentIds === []) {
+            return [];
+        }
+
+        return CommentAnnotation::query()
+            ->roots()
+            ->whereIn('comment_id', $commentIds)
+            ->groupBy('comment_id')
+            ->selectRaw('comment_id, COUNT(*) as aggregate')
+            ->pluck('aggregate', 'comment_id')
+            ->map(fn ($count) => (int) $count)
+            ->all();
+    }
+
+    /**
      * Live root annotations under a comment, oldest first, optionally limited to one author.
      *
      * @return Collection<int, CommentAnnotation>

@@ -23,7 +23,7 @@
 | 4v | Checkpoint — comment posting on chapters and news | S | 4 | DONE |
 | 5 | Read path — `AnnotationAccessService`, `AnnotationPublicApi::getForComment`, `GET /comments/{id}/annotations` | M | 4 | DONE |
 | 6 | Author and moderator actions — `PUT …/processed`, `DELETE /comments/annotations/{id}` | S | 5 | DONE |
-| 7 | `annotationCount` on `CommentDto` (page render + fragments) | S | 5 | TODO |
+| 7 | `annotationCount` on `CommentDto` (page render + fragments) | S | 5 | DONE |
 | 8 | Lifecycle — moderation cascades, user deleted / deactivated / reactivated, chapter deleted | S | 5, 7 | TODO |
 | 9 | Shared infrastructure — comment-draft `annotations` slot API + consumed marker clears it | S | — | TODO |
 | 9v | Checkpoint — root and reply comment drafts on chapters and news | S | 9 | TODO |

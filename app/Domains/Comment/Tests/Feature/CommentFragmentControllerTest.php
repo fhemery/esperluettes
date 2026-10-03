@@ -368,4 +368,31 @@ describe('Comment list partial display', function () {
             $resp->assertSee('id="comment-moderator-btn"', false);
         });
     });
+
+    it('fragments carry annotation_count through the DTO used by comment-item', function () {
+        $entityType = 'default';
+        $entityId = 123;
+
+        $user = alice($this, roles: [Roles::USER]);
+        $this->actingAs($user);
+        $commentId = createComment($entityType, $entityId, 'Annotated');
+        \App\Domains\Comment\Private\Models\CommentAnnotation::query()->create([
+            'comment_id' => $commentId,
+            'author_id' => $user->id,
+            'body' => '<p>Avis</p>',
+            'highlighted_text' => 'passage',
+        ]);
+
+        $list = app(\App\Domains\Comment\Public\Api\CommentPublicApi::class)->getFor($entityType, $entityId, 1, 10);
+
+        expect($list->items[0]->annotationCount)->toBe(1)
+            ->and($list->items[0]->toArray()['annotation_count'])->toBe(1);
+
+        $this->get(route('comments.fragments', [
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
+            'page' => 1,
+            'per_page' => 10,
+        ]))->assertOk()->assertSee('Annotated', false);
+    });
 });

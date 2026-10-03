@@ -9,6 +9,7 @@ use App\Domains\Comment\Public\Api\Contracts\CommentUiConfigDto;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Private\Mappers\CommentDtoMapper;
 use App\Domains\Comment\Private\Mappers\CommentListDtoMapper;
+use App\Domains\Comment\Private\Services\AnnotationAccessService;
 use App\Domains\Comment\Private\Services\CommentService;
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Comment\Private\Support\CommentBodySanitizer;
@@ -27,6 +28,7 @@ class CommentPublicApi
         private AuthPublicApi $authApi,
         private CommentPolicyRegistry $policies,
         private readonly CommentBodySanitizer $sanitizer,
+        private readonly AnnotationAccessService $annotationAccess,
         private readonly CommentDtoMapper $dtoMapper = new CommentDtoMapper(),
         private readonly CommentListDtoMapper $listDtoMapper = new CommentListDtoMapper(),
     ) {}
@@ -111,6 +113,10 @@ class CommentPublicApi
 
         // Map roots with their children and attach permissions via mapper
         $items = $this->dtoMapper->mapRootWithChildren($models, $profiles, $this->policies, $entityType, $userId);
+        $annotationCounts = $this->annotationAccess->visibleCounts($entityType, $entityId, $models, $userId);
+        foreach ($items as $item) {
+            $item->annotationCount = $annotationCounts[$item->id] ?? 0;
+        }
 
         return $this->listDtoMapper->make(
             entityType: $entityType,
@@ -245,7 +251,15 @@ class CommentPublicApi
         $dto = $this->dtoMapper->mapRootWithChildren([$comment], $profiles, $this->policies, (string)$comment->commentable_type, $contextUserId)[0];
         $dto->canReply = $this->policies->canReply($comment->commentable_type, $dto, $contextUserId);
         $dto->canEditOwn = $this->policies->canEditOwn($comment->commentable_type, $dto, $contextUserId);
-        
+        if ($comment->parent_comment_id === null) {
+            $dto->annotationCount = $this->annotationAccess->visibleCounts(
+                (string) $comment->commentable_type,
+                (int) $comment->commentable_id,
+                [$comment],
+                $contextUserId,
+            )[$dto->id] ?? 0;
+        }
+
         return $dto;
     }
 
