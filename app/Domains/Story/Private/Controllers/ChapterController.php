@@ -4,6 +4,7 @@ namespace App\Domains\Story\Private\Controllers;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\ViewModels\BreadcrumbViewModel;
 use App\Domains\Shared\ViewModels\PageViewModel;
@@ -42,6 +43,7 @@ class ChapterController
         private CoverService $coverService,
         private ChapterChoiceTargets $choiceTargets,
         private ChapterCommentPolicy $chapterCommentPolicy,
+        private CommentPublicApi $comments,
     ) {
     }
 
@@ -186,6 +188,11 @@ class ChapterController
             }
         }
 
+        $rootComment = $userId
+            ? ($this->comments->getRootCommentsByAuthorAndEntities('chapter', $userId, [(int) $chapter->id])[(int) $chapter->id] ?? null)
+            : null;
+        $canAnnotate = $userId !== null && $this->chapterCommentPolicy->canAnnotate((int) $chapter->id, $userId);
+
         return view('story::chapters.show', [
             'vm' => $vm,
             'page' => $page,
@@ -195,7 +202,10 @@ class ChapterController
                 Roles::TECH_ADMIN,
             ]),
             'canCreateChapter' => $isAuthor && $this->chapterCreditService->availableForUser($userId) > 0,
-            'canAnnotate' => $userId !== null && $this->chapterCommentPolicy->canAnnotate((int) $chapter->id, $userId),
+            // v2 phase 8 removes the draft-only gate
+            'canAnnotate' => $canAnnotate && $rootComment === null,
+            'annotationMode' => $rootComment ? 'pending' : 'draft',
+            'rootCommentId' => $rootComment?->id,
             'audienceInfo' => $audienceInfo,
         ]);
     }

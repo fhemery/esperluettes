@@ -209,6 +209,8 @@ class CommentPublicApi
         if (
             $comment->parentCommentId !== null
             || !$this->policies->canAnnotate($comment->entityType, (int) $comment->entityId, $userId)
+            // canAnnotate no longer implies "no root yet": keep the refusal under `annotations`.
+            || !$this->policies->canCreateRoot($comment->entityType, (int) $comment->entityId, $userId)
         ) {
             throw ValidationException::withMessages(['annotations' => [__('comment::annotations.errors.not_allowed')]]);
         }

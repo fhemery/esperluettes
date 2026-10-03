@@ -30,7 +30,37 @@ describe('« Annoter » toolbar button and capture form on the chapter page', fu
             ->assertSee('data-entity-id="' . $chapter->id . '"', false);
     });
 
-    it('a reader who already posted a root comment does not see « Annoter » (A5) but still sees « Citer »', function () {
+    it('renders data-annotation-mode="draft" and no root id for a reader without a root comment', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($reader)
+            ->get(chapterShowUrl($story, $chapter))
+            ->assertOk()
+            ->assertSeeInOrder(['data-annotable', 'data-annotation-mode="draft"'], false)
+            ->assertSeeInOrder(['data-annotation-form', 'data-annotation-mode="draft"'], false)
+            ->assertDontSee('data-root-comment-id', false);
+    });
+
+    it('renders data-annotation-mode="pending" and the root comment id for a reader with one', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($reader);
+        $commentId = createComment('chapter', $chapter->id, generateDummyText(150));
+
+        $this->get(chapterShowUrl($story, $chapter))
+            ->assertOk()
+            ->assertSeeInOrder(['data-annotable', 'data-annotation-mode="pending"', 'data-root-comment-id="' . $commentId . '"'], false)
+            ->assertDontSee('data-annotation-mode="draft"', false);
+    });
+
+    // v2 phase 8 flips this: the toolbar then writes pending changes.
+    it('still hides « Annoter » for a reader with a root comment', function () {
         $author = alice($this);
         $reader = bob($this);
         $story = publicStory('Story', $author->id);

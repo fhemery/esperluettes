@@ -1,4 +1,4 @@
-@props(['entityType', 'entityId'])
+@props(['entityType', 'entityId', 'annotationMode' => 'draft', 'rootCommentId' => null])
 @inject('commentPolicies', 'App\Domains\Comment\Public\Api\CommentPolicyRegistry')
 @php
     $bodyMax = $commentPolicies->getAnnotationBodyMaxLength($entityType);
@@ -25,6 +25,8 @@
     data-user-id="{{ (int) Auth::id() }}"
     data-entity-type="{{ $entityType }}"
     data-entity-id="{{ (int) $entityId }}"
+    data-annotation-mode="{{ $annotationMode }}"
+    @if($rootCommentId) data-root-comment-id="{{ (int) $rootCommentId }}" @endif
     data-body-max-length="{{ (int) $bodyMax }}"
     data-highlight-max-length="{{ (int) $highlightMax }}"
     data-error-blank="{{ __('comment::annotations.errors.body_blank') }}"
