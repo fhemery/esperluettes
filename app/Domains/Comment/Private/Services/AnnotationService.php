@@ -176,4 +176,24 @@ class AnnotationService
             ->orderBy('id')
             ->get();
     }
+
+    /**
+     * Live replies under the given roots, oldest first, in one query. Not restricted by writer.
+     *
+     * @param int[] $rootIds
+     * @return Collection<int, CommentAnnotation>
+     */
+    public function getRepliesForRoots(array $rootIds): Collection
+    {
+        if ($rootIds === []) {
+            return new Collection();
+        }
+
+        return CommentAnnotation::query()
+            ->repliesOnly()
+            ->whereIn('parent_annotation_id', $rootIds)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+    }
 }

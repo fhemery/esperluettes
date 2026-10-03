@@ -45,35 +45,64 @@ class AnnotationPublicApi
         }
 
         $models = $this->annotations->getRootsForComment($commentId, $this->access->restrictToAuthorId($role, $viewerId));
+        $replies = $this->access->filterActiveReplyWriters(
+            $this->annotations->getRepliesForRoots($models->pluck('id')->map(fn ($id) => (int) $id)->all()),
+        );
+        $repliesByRoot = $replies->groupBy('parent_annotation_id');
 
-        $authorIds = $models->pluck('author_id')->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
+        $authorIds = $models->concat($replies)->pluck('author_id')->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
         $profiles = $authorIds === [] ? [] : $this->profiles->getPublicProfiles($authorIds);
+        $profileOf = fn (CommentAnnotation $a) => $profiles[(int) $a->author_id] ?? new ProfileDto(
+            user_id: (int) $a->author_id,
+            display_name: '',
+            slug: '',
+            avatar_url: '',
+        );
 
         $seesProcessed = $this->access->seesProcessedFlag($role);
         $canMark = $this->access->canMarkAsProcessed($role);
         $canDelete = $this->access->canDelete($role);
+        $isCommenter = $role === AnnotationListDto::ROLE_COMMENTER;
 
-        $items = $models->map(fn (CommentAnnotation $a) => new AnnotationDto(
-            id: (int) $a->id,
-            commentId: (int) $a->comment_id,
-            parentAnnotationId: $a->parent_annotation_id,
-            authorId: $a->author_id,
-            authorProfile: $profiles[(int) $a->author_id] ?? new ProfileDto(
-                user_id: (int) $a->author_id,
-                display_name: '',
-                slug: '',
-                avatar_url: '',
-            ),
-            body: (string) $a->body,
-            highlightedText: (string) $a->highlighted_text,
-            prefix: $a->prefix,
-            suffix: $a->suffix,
-            isProcessed: $seesProcessed ? (bool) $a->is_processed : null,
-            createdAt: $a->created_at?->toISOString() ?? '',
-            replies: [],
-            canMarkAsProcessed: $canMark,
-            canDelete: $canDelete,
-        ))->all();
+        $items = $models->map(function (CommentAnnotation $a) use ($repliesByRoot, $profileOf, $seesProcessed, $canMark, $canDelete, $isCommenter, $role, $viewerId) {
+            $rootReplies = $repliesByRoot->get($a->id, collect());
+
+            return new AnnotationDto(
+                id: (int) $a->id,
+                commentId: (int) $a->comment_id,
+                parentAnnotationId: $a->parent_annotation_id,
+                authorId: $a->author_id,
+                authorProfile: $profileOf($a),
+                body: (string) $a->body,
+                highlightedText: (string) $a->highlighted_text,
+                prefix: $a->prefix,
+                suffix: $a->suffix,
+                isProcessed: $seesProcessed ? (bool) $a->is_processed : null,
+                createdAt: $a->created_at?->toISOString() ?? '',
+                replies: $rootReplies->map(fn (CommentAnnotation $r) => new AnnotationDto(
+                    id: (int) $r->id,
+                    commentId: (int) $r->comment_id,
+                    parentAnnotationId: $r->parent_annotation_id,
+                    authorId: $r->author_id,
+                    authorProfile: $profileOf($r),
+                    body: (string) $r->body,
+                    highlightedText: '',
+                    prefix: null,
+                    suffix: null,
+                    isProcessed: null,
+                    createdAt: $r->created_at?->toISOString() ?? '',
+                    replies: [],
+                    canMarkAsProcessed: false,
+                    canDelete: $canDelete || ($r->author_id !== null && (int) $r->author_id === $viewerId),
+                    canEdit: false,
+                    canReply: false,
+                ))->values()->all(),
+                canMarkAsProcessed: $canMark,
+                canDelete: $canDelete,
+                canEdit: $isCommenter && $a->author_id !== null && (int) $a->author_id === $viewerId,
+                canReply: $this->access->canReply($role, $a, $rootReplies, $viewerId),
+            );
+        })->all();
 
         return new AnnotationListDto(
             commentId: (int) $comment->id,
