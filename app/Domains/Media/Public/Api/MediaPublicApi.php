@@ -11,12 +11,12 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Sole entry point other domains use for managed images.
- * Images are addressed by storage path — no ids, no reference table.
+ * Sole entry point other domains use for managed images and private files.
+ * Media is addressed by storage path — no ids, no reference table.
  *
  * Two halves: public images have variants and URLs; private images
- * (storePrivate) have neither and are only ever streamed back by the domain
- * that owns their visibility rules.
+ * (storePrivate) and raw private files (storePrivateFile) have neither and are
+ * only ever streamed back by the domain that owns their visibility rules.
  */
 class MediaPublicApi
 {
@@ -46,6 +46,19 @@ class MediaPublicApi
     public function storePrivate(string $scope, UploadedFile $file, array $widths = []): string
     {
         return $this->media->storePrivate($scope, $file, $widths);
+    }
+
+    /**
+     * Store an uploaded file's raw bytes on the private disk; returns its
+     * stored path (extension guessed from the MIME type, not the client name).
+     *
+     * No processing, no URL, no variants and **no content validation** — the
+     * caller validates the upload. Served back via stream(); collected by GC
+     * like any private file once no provider claims it.
+     */
+    public function storePrivateFile(string $scope, UploadedFile $file): string
+    {
+        return $this->media->storePrivateFile($scope, $file);
     }
 
     /**

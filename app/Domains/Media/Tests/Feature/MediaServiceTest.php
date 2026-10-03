@@ -299,4 +299,58 @@ describe('gc', function () {
         Storage::disk('private')->assertMissing('secret-gift/7/orphan.jpg');
         Storage::disk('private')->assertExists('secret-gift/9/keep.jpg');
     });
+
+    it('garbage collects an unclaimed private mp3 past the grace window', function () {
+        Storage::disk('private')->put('secret-gift/7/keep.mp3', 'x');
+        Storage::disk('private')->put('secret-gift/9/gone.mp3', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['secret-gift/7/keep.mp3']));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toBe(['secret-gift/9/gone.mp3']);
+        Storage::disk('private')->assertMissing('secret-gift/9/gone.mp3');
+    });
+
+    it('keeps a claimed private mp3', function () {
+        Storage::disk('private')->put('secret-gift/7/keep.mp3', 'x');
+        Storage::disk('private')->put('secret-gift/7/gone.mp3', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['secret-gift/7/keep.mp3']));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toBe(['secret-gift/7/gone.mp3']);
+        Storage::disk('private')->assertExists('secret-gift/7/keep.mp3');
+    });
+
+    it('keeps a private mp3 inside the grace window', function () {
+        Storage::disk('private')->put('secret-gift/7/keep.mp3', 'x');
+        Storage::disk('private')->put('secret-gift/7/fresh.mp3', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['secret-gift/7/keep.mp3']));
+
+        $result = app(MediaService::class)->gc(7);
+
+        expect($result['deleted'])->toBeEmpty();
+        Storage::disk('private')->assertExists('secret-gift/7/fresh.mp3');
+    });
+
+    it('still skips the private root when only mp3 files sit under it unclaimed', function () {
+        Storage::disk('private')->put('secret-gift/7/orphan.mp3', 'x');
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['skipped'])->toContain('secret-gift');
+        expect($result['deleted'])->toBeEmpty();
+        Storage::disk('private')->assertExists('secret-gift/7/orphan.mp3');
+    });
+
+    it('still ignores non-image files on the public disk', function () {
+        Storage::disk('public')->put('news/keep.jpg', 'x');
+        Storage::disk('public')->put('news/readme.txt', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['news/keep.jpg']));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toBeEmpty();
+        Storage::disk('public')->assertExists('news/readme.txt');
+    });
 });

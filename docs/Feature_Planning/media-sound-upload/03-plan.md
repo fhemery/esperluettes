@@ -17,7 +17,7 @@
 | 1v | Checkpoint — gift preparation form (sound tab) | S | 1 | DONE |
 | 2 | Media — Range-capable `stream()` for private paths (shared infra) | S | — | DONE |
 | 2v | Checkpoint — gift image view / download | S | 2 | DONE |
-| 3 | Media — raw private file store `storePrivateFile()` + GC treats every private file as an original (shared infra) | S | — | TODO |
+| 3 | Media — raw private file store `storePrivateFile()` + GC treats every private file as an original (shared infra) | S | — | DONE |
 | 4 | SecretGift — `LegacyGiftSoundMover` (class + tests, not wired yet) | S | — | TODO |
 | 5 | SecretGift — sound on Media: store, claim, serve, migrate existing files | M | 2, 3, 4 | TODO |
 

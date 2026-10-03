@@ -103,6 +103,19 @@ class MediaService
     }
 
     /**
+     * Store an uploaded file's raw bytes on the private disk; returns its path.
+     * No processing and no content validation. The extension comes from the
+     * guessed MIME type (hashName()), never from the client file name.
+     */
+    public function storePrivateFile(string $scope, UploadedFile $file): string
+    {
+        if (!$this->isPrivateScope($scope)) {
+            throw new InvalidArgumentException("Not a private media scope: {$scope}");
+        }
+        return Storage::disk(self::PRIVATE_DISK)->putFileAs($this->folderFor($scope), $file, $file->hashName());
+    }
+
+    /**
      * Stream a stored file back, on whichever disk its path resolves to.
      * Performs **no** authorization: the caller has already decided the
      * requester may see these bytes.
@@ -216,6 +229,7 @@ class MediaService
 
     /**
      * Garbage-collect originals no provider claims and older than $days.
+     * On the private disk every file under a root counts as an original.
      *
      * Safety guard: a folder that holds originals but has zero claimed paths is
      * treated as an unclaimed scope (probable missing provider) and skipped, not
@@ -306,9 +320,10 @@ class MediaService
     }
 
     /**
-     * Original images under a folder, variants excluded. Non-recursive on the
-     * public disk; recursive under a private root, whose images live one level
-     * down in per-scope subfolders.
+     * Originals under a folder. On the public disk: images only, variants
+     * excluded, non-recursive. On the private disk: every file, recursively —
+     * private files (images or not) have no variants by construction, and live
+     * one level down in per-scope subfolders.
      *
      * @return list<string>
      */
@@ -318,9 +333,11 @@ class MediaService
         if (!$fs->exists($folder)) {
             return [];
         }
-        $files = $disk === self::PRIVATE_DISK ? $fs->allFiles($folder) : $fs->files($folder);
+        if ($disk === self::PRIVATE_DISK) {
+            return array_values($fs->allFiles($folder));
+        }
         $originals = [];
-        foreach ($files as $file) {
+        foreach ($fs->files($folder) as $file) {
             $base = pathinfo($file, PATHINFO_BASENAME);
             if (preg_match('/-\d+w\.(jpg|jpeg|png|webp)$/i', $base) === 1) {
                 continue; // a generated variant
