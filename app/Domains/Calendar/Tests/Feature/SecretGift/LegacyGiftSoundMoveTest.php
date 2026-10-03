@@ -145,4 +145,21 @@ describe('SecretGift - Legacy gift sound move', function () {
         expect($assignment->gift_sound_path)->toBe("secret-gift/{$result->id}/sound-{$user1->id}-1700000000.mp3");
         Storage::disk('local')->assertExists($imagePath);
     });
+
+    it('serves a migrated legacy sound through the sound route', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+        $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+        giveLegacyGiftSound($assignment);
+
+        app(LegacyGiftSoundMover::class)->toMedia();
+
+        $this->actingAs($user1);
+        $response = $this->get(route('secret-gift.sound', [$result->activity, $assignment]));
+
+        $response->assertStatus(200);
+        expect($response->streamedContent())->toBe('legacy-sound-bytes');
+    });
 });
