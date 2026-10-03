@@ -8,6 +8,7 @@ use App\Domains\Comment\Private\Models\CommentAnnotation;
 use App\Domains\Comment\Private\Support\CommentBodySanitizer;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AnnotationService
 {
@@ -34,6 +35,39 @@ class AnnotationService
                 'suffix' => $item->suffix,
             ]);
         }
+    }
+
+    /**
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException when unknown or soft-deleted
+     */
+    public function getAnnotation(int $annotationId): CommentAnnotation
+    {
+        return CommentAnnotation::query()->findOrFail($annotationId);
+    }
+
+    public function setProcessed(CommentAnnotation $annotation, bool $value): void
+    {
+        $annotation->update([
+            'is_processed' => $value,
+            'processed_at' => $value ? now() : null,
+        ]);
+    }
+
+    /**
+     * Soft-delete one annotation and its replies.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException when unknown or already deleted
+     */
+    public function moderatorDelete(int $annotationId): void
+    {
+        $annotation = $this->getAnnotation($annotationId);
+
+        DB::transaction(function () use ($annotation) {
+            CommentAnnotation::query()
+                ->where('parent_annotation_id', $annotation->id)
+                ->delete();
+            $annotation->delete();
+        });
     }
 
     /**
