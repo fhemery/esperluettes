@@ -1,7 +1,9 @@
 <?php
 
 use App\Domains\Comment\Private\Models\CommentAnnotation;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy;
 use App\Domains\Comment\Public\Api\Contracts\CommentDto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -113,9 +115,55 @@ describe('annotationCount on CommentDto', function () {
             ->and($annotationQueries)->toHaveCount(1);
     });
 
+    it('gives a beta reader a zero count', function () {
+        $beta = daniel($this);
+        addCollaborator($this->story->id, $beta->id, 'betareader');
+
+        expect(annotationCountsSeenBy($this, $beta, $this->chapter->id))->toBe([
+            $this->carolComment => 0,
+            $this->bobComment => 0,
+        ]);
+    });
+
     it('getComment carries the count for a root comment', function () {
         $this->actingAs($this->author);
 
         expect(app(CommentPublicApi::class)->getComment($this->bobComment)->annotationCount)->toBe(2);
+    });
+});
+
+describe('annotationCount on a type without annotation support', function () {
+    it('gives a zero count to a moderator on a type without annotation support', function () {
+        $author = alice($this);
+        app(CommentPolicyRegistry::class)->register('default', new class($author->id) extends DefaultCommentPolicy {
+            public function __construct(private readonly int $authorId) {}
+
+            public function supportsAnnotations(): bool
+            {
+                return false;
+            }
+
+            public function canMarkAsProcessed(int $entityId, int $userId): bool
+            {
+                return $userId === $this->authorId;
+            }
+        });
+
+        $commenter = bob($this);
+        $this->actingAs($commenter);
+        $commentId = createComment('default', 123, generateDummyText(140));
+        CommentAnnotation::query()->create([
+            'comment_id' => $commentId,
+            'author_id' => $commenter->id,
+            'body' => '<p>Avis</p>',
+            'highlighted_text' => 'passage',
+        ]);
+
+        foreach ([moderator($this), $author] as $viewer) {
+            $this->actingAs($viewer);
+            $list = app(CommentPublicApi::class)->getFor('default', 123, 1, 20);
+
+            expect($list->items[0]->annotationCount)->toBe(0);
+        }
     });
 });

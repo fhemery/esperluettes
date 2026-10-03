@@ -372,6 +372,13 @@ describe('Comment list partial display', function () {
     it('fragments carry annotation_count through the DTO used by comment-item', function () {
         $entityType = 'default';
         $entityId = 123;
+        // Counts are zero on a type without annotation support
+        app(\App\Domains\Comment\Public\Api\CommentPolicyRegistry::class)->register($entityType, new class extends \App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy {
+            public function supportsAnnotations(): bool
+            {
+                return true;
+            }
+        });
 
         $user = alice($this, roles: [Roles::USER]);
         $this->actingAs($user);

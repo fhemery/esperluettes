@@ -52,6 +52,7 @@ class AnnotationAccessService
     /**
      * Visible root-annotation count per root comment of one page: authors/co-authors and
      * moderators see every count, the commenter only their own, anyone else 0.
+     * All zeros, for everyone, on a type without annotation support.
      * At most one policy call, one role lookup and one grouped COUNT, whatever the page size.
      *
      * @param Comment[] $rootComments
@@ -61,7 +62,7 @@ class AnnotationAccessService
     {
         $ids = array_map(fn (Comment $c) => (int) $c->id, $rootComments);
         $counts = array_fill_keys($ids, 0);
-        if ($viewerId <= 0 || $ids === []) {
+        if ($viewerId <= 0 || $ids === [] || !$this->policies->supportsAnnotations($entityType)) {
             return $counts;
         }
 
