@@ -395,4 +395,63 @@ describe('Comment list partial display', function () {
             'per_page' => 10,
         ]))->assertOk()->assertSee('Annotated', false);
     });
+
+    describe('« N annotations » button', function () {
+        beforeEach(function () {
+            $this->author = alice($this);
+            $story = publicStory('Annotated Story', $this->author->id);
+            $this->chapter = createPublishedChapter($this, $story, $this->author, ['title' => 'Chap']);
+            $this->commenter = bob($this);
+
+            $this->actingAs($this->commenter);
+            $this->commentId = createComment('chapter', $this->chapter->id, generateDummyText(140));
+            foreach ([1, 2] as $i) {
+                \App\Domains\Comment\Private\Models\CommentAnnotation::query()->create([
+                    'comment_id' => $this->commentId,
+                    'author_id' => $this->commenter->id,
+                    'body' => '<p>Avis ' . $i . '</p>',
+                    'highlighted_text' => 'passage ' . $i,
+                ]);
+            }
+            auth()->logout();
+
+            $this->fragmentFor = function ($viewer) {
+                $this->actingAs($viewer);
+
+                return $this->get(route('comments.fragments', [
+                    'entity_type' => 'chapter',
+                    'entity_id' => $this->chapter->id,
+                    'page' => 1,
+                    'per_page' => 10,
+                ]));
+            };
+        });
+
+        it('the fragment shows « N annotations » to the commenter, the author and a moderator', function () {
+            foreach ([$this->commenter, $this->author, moderator($this)] as $viewer) {
+                ($this->fragmentFor)($viewer)
+                    ->assertOk()
+                    ->assertSee('data-annotations-button', false)
+                    ->assertSee('data-comment-id="' . $this->commentId . '"', false)
+                    ->assertSee(trans_choice('comment::annotations.button', 2, ['count' => 2]), false)
+                    ->assertSee("\$dispatch('annotations:open', { commentId: {$this->commentId} })", false);
+            }
+        });
+
+        it('the fragment shows no annotation button to another reader', function () {
+            ($this->fragmentFor)(carol($this))
+                ->assertOk()
+                ->assertDontSee('data-annotations-button', false)
+                ->assertDontSee(trans_choice('comment::annotations.button', 2, ['count' => 2]), false);
+        });
+
+        it('no button when the comment has no annotation', function () {
+            \App\Domains\Comment\Private\Models\CommentAnnotation::query()
+                ->where('comment_id', $this->commentId)->delete();
+
+            ($this->fragmentFor)($this->author)
+                ->assertOk()
+                ->assertDontSee('data-annotations-button', false);
+        });
+    });
 });

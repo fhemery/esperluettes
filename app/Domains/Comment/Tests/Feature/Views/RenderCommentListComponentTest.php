@@ -197,6 +197,61 @@ describe('CommentListComponent', function () {
         })->with(['annotations', 'annotations.0.highlighted_text']);
     });
 
+    describe('Annotations server-mode pop-up', function () {
+        it('the annotations modal is rendered once and the bundle pushed for an authenticated viewer', function () {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+
+            $html = Blade::render(
+                '<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />@stack(\'head-scripts\')',
+                ['id' => 123]
+            );
+
+            $bundleUrl = app(\Illuminate\Foundation\Vite::class)->asset('app/Domains/Comment/Resources/js/annotations/index.js');
+            $formEnd = strpos($html, '</form>');
+            $modalAt = strpos($html, 'x-data="annotationsModal()"');
+
+            expect(substr_count($html, 'src="' . $bundleUrl . '"'))->toBe(1)
+                ->and(substr_count($html, 'x-data="annotationsModal()"'))->toBe(1)
+                // Outside the root-comment form, so its buttons never submit it.
+                ->and($modalAt)->toBeGreaterThan($formEnd)
+                ->and($html)->toContain('x-on:annotations:open.window="open($event.detail.commentId)"')
+                ->and($html)->toContain('data-label-one="' . e(trans_choice('comment::annotations.button', 1, ['count' => 1])) . '"')
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.title')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.mark_processed')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.delete')))
+                // Highlighted text is bound as text, the server-sanitized body as HTML.
+                ->and($html)->toContain('x-text="row.highlighted_text"')
+                ->and($html)->not->toContain('x-html="row.highlighted_text"')
+                ->and($html)->toContain('x-html="row.body"');
+        });
+
+        it('the annotations modal is rendered for a viewer who cannot create a root comment', function () {
+            app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
+                public function canCreateRoot(int $entityId, int $userId): bool
+                {
+                    return false;
+                }
+            });
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            expect($html)->toContain('x-data="annotationsModal()"');
+        });
+
+        it('no annotations modal for a guest', function () {
+            Auth::logout();
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            expect($html)->not->toContain('annotationsModal()');
+        });
+    });
+
     describe('Comment Share Button', function () {
         beforeEach(function () {
             $this->user = alice($this, roles: [Roles::USER_CONFIRMED]);

@@ -31,4 +31,17 @@ return [
         'close' => 'Fermer',
         'empty' => 'Aucune annotation en attente.',
     ],
+    'button' => '{1} :count annotation|[2,*] :count annotations',
+    'server_modal' => [
+        'title' => 'Annotations',
+        'close' => 'Fermer',
+        'loading' => 'Chargement…',
+        'empty' => 'Aucune annotation.',
+        'processed' => 'Traitée',
+        'mark_processed' => 'Marquer comme traitée',
+        'mark_unprocessed' => 'Marquer comme non traitée',
+        'delete' => 'Supprimer l\'annotation',
+        'load_error' => 'Impossible de charger les annotations. Réessayez plus tard.',
+        'action_error' => 'L\'action n\'a pas pu aboutir. Réessayez.',
+    ],
 ];
