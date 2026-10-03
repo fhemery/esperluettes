@@ -15,7 +15,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Refactor — extract `AnnotationItemValidator` from `CommentPublicApi` | S | — | DONE |
-| 1v | Checkpoint — posting root comments (with and without annotation drafts) on chapters and news | S | 1 | TODO |
+| 1v | Checkpoint — posting root comments (with and without annotation drafts) on chapters and news | S | 1 | DONE |
 | 2 | v1 leftovers — policy highlight cap, counts respect `supportsAnnotations`, beta-reader count test | S | 1 | TODO |
 | 3 | Story — lift A5 in `canAnnotate`, annotation mode + root id on the chapter page (toolbar still draft-only) | S | 2 | TODO |
 | 4 | `saveChanges` — DTOs, service, public API, `PUT /comments/{id}/annotations` | M | 3 | TODO |
@@ -118,6 +118,15 @@ comment post goes through.
 
 Output: `shots/checkpoint-1v/`, then a `**Result (<date>, HEAD <sha>) — PASS|FAIL**`
 block appended here.
+
+**Result (2026-10-03, HEAD 5072646e) — PASS**
+
+- E2E: `pnpm run e2e:core` — 28/28 green, `chapter-annotations.spec.ts` included.
+- Chapter `chapitre-simple-3`, `confirmed`: two drafts via « Annoter » → banner « 2 annotations »; 140+ char root posted → « 2 annotations » on the comment, banner gone, pop-up lists both passages with their bodies (`01`–`03`).
+- Same chapter, `moderator`: plain root (no drafts) posted and listed, no annotation count (`04`).
+- Reply by `confirmed` under the moderator's root: posted and nested (`05`).
+- News `actualite-e2e`: root posted and listed; no annotation banner, form or count button on the page (`06`).
+- No HTTP ≥400 or page error during the run.
 
 ---
 
