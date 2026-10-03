@@ -1,14 +1,13 @@
-{{-- 
-    Sound Upload Component
-    
-    A reusable sound upload component with preview and delete functionality.
-    
+{{--
+    Sound field component
+
+    Sound upload with preview player, drag & drop and remove control.
+    The component never builds a URL: the consumer passes `previewUrl`.
+
     Props:
-    - name: Input name for the file upload
+    - name: Input name for the file upload; the remove flag is posted as `{name}_remove`
     - id: Unique identifier
-    - currentPath: Path to current sound file (relative to storage disk)
-    - currentUrl: Direct URL to current sound file (overrides currentPath URL generation)
-    - disk: Storage disk (default: 'public')
+    - previewUrl: URL of the current sound (nullable)
     - maxSize: Max file size in KB (default: 10240 = 10MB)
     - accept: Accepted file types (default: 'audio/mp3')
     - removable: Whether to show delete option (default: true)
@@ -18,9 +17,7 @@
 @props([
     'name',
     'id' => null,
-    'currentPath' => null,
-    'currentUrl' => null,
-    'disk' => 'public',
+    'previewUrl' => null,
     'maxSize' => 10240,
     'accept' => 'audio/mp3',
     'removable' => true,
@@ -29,18 +26,16 @@
 ])
 
 @php
-    $inputId = $id ?? 'sound-upload-' . Str::random(8);
-    $hasCurrentSound = !empty($currentPath) || !empty($currentUrl);
-    // Use provided URL directly, or construct from path for public disk
-    $resolvedUrl = $currentUrl ?? ($currentPath ? asset('storage/' . $currentPath) : null);
-    
+    $inputId = $id ?? 'sound-field-' . Str::random(8);
+    $hasCurrentSound = !empty($previewUrl);
+
     $maxSizeMB = round($maxSize / 1024, 1);
 @endphp
 
-<div 
-    x-data="soundUpload({ 
-        hasCurrentSound: @js($hasCurrentSound), 
-        currentUrl: @js($resolvedUrl),
+<div
+    x-data="mediaSoundField({
+        hasCurrentSound: @js($hasCurrentSound),
+        currentUrl: @js($previewUrl),
         inputId: @js($inputId)
     })"
     {{ $attributes->merge(['class' => 'flex flex-col gap-2']) }}
@@ -57,15 +52,15 @@
             <div class="relative w-full max-w-md">
                 <div class="bg-surface border border-border rounded-lg p-4 shadow-sm">
                     {{-- Audio player --}}
-                    <audio 
-                        controls 
+                    <audio
+                        controls
                         :src="previewUrl"
                         class="w-full mb-3"
                         preload="metadata"
                     >
-                        {{ __('shared::sound-upload.browser_no_support') }}
+                        {{ __('media::sound-field.browser_no_support') }}
                     </audio>
-                    
+
                     {{-- File info --}}
                     <div class="flex items-center justify-between text-sm text-fg/70">
                         <div class="flex items-center gap-2">
@@ -75,27 +70,27 @@
                         <span x-text="fileSize" class="text-xs"></span>
                     </div>
                 </div>
-                
+
                 {{-- Delete button for current sound (not new) --}}
                 @if($removable)
-                <button 
+                <button
                     type="button"
                     x-show="!isNewFile"
                     x-on:click="markForDeletion()"
                     class="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center rounded-full border border-border bg-surface text-error hover:bg-error hover:text-white transition-colors shadow-sm"
-                    title="{{ __('shared::sound-upload.delete') }}"
+                    title="{{ __('media::sound-field.delete') }}"
                 >
                     <span class="material-symbols-outlined text-[18px]">delete</span>
                 </button>
                 @endif
-                
+
                 {{-- Cancel button for new upload --}}
-                <button 
+                <button
                     type="button"
                     x-show="isNewFile"
                     x-on:click="clearNewFile()"
                     class="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center rounded-full border border-border bg-surface text-error hover:bg-error hover:text-white transition-colors shadow-sm"
-                    title="{{ __('shared::sound-upload.cancel') }}"
+                    title="{{ __('media::sound-field.cancel') }}"
                 >
                     <span class="material-symbols-outlined text-[18px]">close</span>
                 </button>
@@ -104,7 +99,7 @@
 
         {{-- Empty state / Upload prompt --}}
         <template x-if="!previewUrl">
-            <div 
+            <div
                 class="relative border-2 border-dashed border-border rounded-lg p-6 transition-colors cursor-pointer"
                 :class="{ 'border-primary bg-primary/5': isDragging, 'hover:border-primary/50 hover:bg-primary/5': !isDragging }"
                 x-on:dragover.prevent="isDragging = true"
@@ -115,16 +110,16 @@
                 <div class="flex flex-col items-center gap-3 text-fg/60">
                     <span class="material-symbols-outlined text-[48px]">upload_audio_file</span>
                     <div class="text-center">
-                        <p class="text-sm font-medium">{{ __('shared::sound-upload.drop_or_click') }}</p>
-                        <p class="text-xs mt-1">{{ __('shared::sound-upload.allowed_formats') }}</p>
-                        <p class="text-xs mt-1">{{ __('shared::sound-upload.max_size', ['size' => $maxSizeMB]) }}</p>
+                        <p class="text-sm font-medium">{{ __('media::sound-field.drop_or_click') }}</p>
+                        <p class="text-xs mt-1">{{ __('media::sound-field.allowed_formats') }}</p>
+                        <p class="text-xs mt-1">{{ __('media::sound-field.max_size', ['size' => $maxSizeMB]) }}</p>
                     </div>
                 </div>
             </div>
         </template>
 
         {{-- Hidden file input --}}
-        <input 
+        <input
             type="file"
             name="{{ $name }}"
             id="{{ $inputId }}"
@@ -133,9 +128,9 @@
             class="hidden"
             x-on:change="handleFileSelect($event)"
         />
-        
+
         {{-- Hidden delete marker --}}
-        <input 
+        <input
             type="hidden"
             name="{{ $name }}_remove"
             x-model="markedForRemoval"
@@ -155,7 +150,7 @@
 @push('scripts')
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('soundUpload', ({ hasCurrentSound, currentUrl, inputId }) => ({
+        Alpine.data('mediaSoundField', ({ hasCurrentSound, currentUrl, inputId }) => ({
             previewUrl: currentUrl,
             isNewFile: false,
             markedForRemoval: false,

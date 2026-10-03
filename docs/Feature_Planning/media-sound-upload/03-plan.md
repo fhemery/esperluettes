@@ -13,7 +13,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Refactor — move the sound widget from Shared to Media (`<x-media::sound-field>`) | S | — | TODO |
+| 1 | Refactor — move the sound widget from Shared to Media (`<x-media::sound-field>`) | S | — | DONE |
 | 1v | Checkpoint — gift preparation form (sound tab) | S | 1 | TODO |
 | 2 | Media — Range-capable `stream()` for private paths (shared infra) | S | — | TODO |
 | 2v | Checkpoint — gift image view / download | S | 2 | TODO |

@@ -63,6 +63,7 @@ The sweep covers both disks. On `public` it walks each scope folder non-recursiv
 
 - `<x-media::image>` — read-only responsive display by path, with a `raw` mode that serves the original at natural size (used by keep-original images and Editor's block renderer).
 - `<x-media::image-field>` — the editable control: upload, remove, "Choose existing" picker, alt/caption, optional usage count, optional "keep original" checkbox. Two props tune it for scopes that have no reusable library: `allowLibrary` (default `true`; when `false` neither the "Choose existing" button nor the picker modal is rendered) and `previewUrl` (default `null`; when set it is used as the initial preview instead of a Media-built URL — which is what makes the field usable for an image whose bytes are not web-reachable).
+- `<x-media::sound-field>` — sound upload with drag & drop, preview player and remove control. Props: `name`, `id`, `previewUrl` (URL of the current sound, nullable), `maxSize` (Ko, default `10240`), `accept` (default `audio/mp3`), `removable`, `label`, `helpText`. Form contract: the file is posted as `{name}`, the remove flag as hidden `{name}_remove`. The component never builds a URL — the consumer passes `previewUrl` (typically its own authorized serving route).
 
 The reuse picker is backed by the authenticated `GET /media/library?scope=…` endpoint.
 
