@@ -14,6 +14,39 @@ export const EDITOR_ID = 'annotation-body-editor';
 
 const FORM_WIDTH = 360;
 
+/**
+ * Reads the current selection inside a chapter article and anchors it like
+ * Quote does. Returns null when there is nothing to anchor; otherwise
+ * `{ selection, range, articleEl, anchor, selectedText, tooLong, multiBlock }`,
+ * where `anchor` may be null on an over-long selection (extractAnchor gives up).
+ * Shared by the capture form and the reaction buttons.
+ */
+export function readSelection(maxLength) {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || selection.rangeCount === 0) return null;
+
+    const range = selection.getRangeAt(0);
+    const container = range.commonAncestorContainer;
+    const articleEl = (container.nodeType === 3 ? container.parentElement : container)
+        ?.closest?.('[data-quote-article]');
+    if (!articleEl) return null;
+
+    // One editor block only (decision #1): several paragraphs inside a
+    // block are fine; a boundary merely touching the next block is not a span.
+    const covered = trimRangeToText(range);
+    if (!covered) return null;
+    const multiBlock = closestBlock(covered.startContainer) !== closestBlock(covered.endContainer);
+
+    const { text, nodeMap } = buildCanonicalText(articleEl, { within: ANNOTATABLE_AREA_SELECTOR });
+    const anchor = extractAnchor(range, articleEl, { text, nodeMap });
+    // extractAnchor gives up on long selections: still tell the reader why.
+    const selectedText = anchor?.highlighted ?? selection.toString();
+    const tooLong = maxLength > 0 && selectedText.length > maxLength;
+    if (!anchor && !tooLong) return null;
+
+    return { selection, range, articleEl, anchor, selectedText, tooLong, multiBlock };
+}
+
 function editorTextarea() {
     return document.getElementById('quill-editor-area-' + EDITOR_ID);
 }
@@ -26,10 +59,12 @@ function plainText(html) {
 }
 
 /**
- * Capture form for a chapter annotation draft. Reads the current selection,
- * anchors it like Quote does, and stores `{ body, highlighted, prefix, suffix }`
- * in the comment-draft `annotations` slot. Nothing is sent to the server here:
- * drafts are posted with the root comment.
+ * Capture form for a chapter annotation. Reads the current selection, anchors
+ * it like Quote does, and stores `{ body, highlighted, prefix, suffix }` in the
+ * comment-draft store: the `annotations` slot when `data-annotation-mode` is
+ * `draft` (posted with the root comment), `annotationChanges.adds` when it is
+ * `pending` (the root exists; saved by the save banner). Editing a saved row
+ * stores a pending edit. Nothing is sent to the server here.
  *
  * Configuration comes from data attributes on the component root
  * (`<x-comment::annotation-form>`), always read through `$root`: inside a
@@ -46,6 +81,7 @@ export function annotationForm() {
         highlighted: '',
         _anchor: null,
         _tempId: null,
+        _savedId: null,
         _pos: { top: 0, left: 0 },
 
         get canSave() {
@@ -82,29 +118,19 @@ export function annotationForm() {
             this.$nextTick?.(() => this.$root.querySelector('.ql-editor')?.focus());
         },
 
+        _isPending() {
+            return this.$root.dataset.annotationMode === 'pending';
+        },
+
+        _resetTarget() {
+            this._tempId = null;
+            this._savedId = null;
+        },
+
         openForm() {
-            const selection = window.getSelection();
-            if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
-
-            const range = selection.getRangeAt(0);
-            const container = range.commonAncestorContainer;
-            const articleEl = (container.nodeType === 3 ? container.parentElement : container)
-                ?.closest?.('[data-quote-article]');
-            if (!articleEl) return;
-
-            // One editor block only (decision #1): several paragraphs inside a
-            // block are fine; a boundary merely touching the next block is not a span.
-            const covered = trimRangeToText(range);
-            if (!covered) return;
-            const spansSeveralBlocks = closestBlock(covered.startContainer) !== closestBlock(covered.endContainer);
-
-            const maxLength = Number(this.$root.dataset.highlightMaxLength);
-            const { text, nodeMap } = buildCanonicalText(articleEl, { within: ANNOTATABLE_AREA_SELECTOR });
-            const anchor = extractAnchor(range, articleEl, { text, nodeMap });
-            // extractAnchor gives up on long selections: still tell the reader why.
-            const selectedText = anchor?.highlighted ?? selection.toString();
-            const tooLong = maxLength > 0 && selectedText.length > maxLength;
-            if (!anchor && !tooLong) return;
+            const read = readSelection(Number(this.$root.dataset.highlightMaxLength));
+            if (!read) return;
+            const { selection, range, anchor, selectedText, tooLong, multiBlock } = read;
 
             const rect = range.getBoundingClientRect();
             const left = Math.min(
@@ -121,10 +147,10 @@ export function annotationForm() {
             selection.removeAllRanges();
 
             this._anchor = anchor;
-            this._tempId = null;
+            this._resetTarget();
             this.highlighted = selectedText;
             this.tooLong = tooLong;
-            this.multiBlock = spansSeveralBlocks;
+            this.multiBlock = multiBlock;
             this.error = this.tooLong
                 ? this.$root.dataset.errorHighlightTooLong
                 : (this.multiBlock ? this.$root.dataset.errorHighlightMultiBlock : null);
@@ -132,21 +158,39 @@ export function annotationForm() {
             this._show();
         },
 
+        /** Edit a draft (draft mode) or a pending add (pending mode), by tempId. */
         openEdit({ tempId } = {}) {
             const { userId, entityType, entityId } = this._context();
-            const draft = window.commentDrafts
-                ?.listAnnotations(userId, entityType, entityId)
-                .find((item) => item.tempId === tempId);
+            const items = this._isPending()
+                ? window.commentDrafts?.getAnnotationChanges(userId, entityType, entityId).adds
+                : window.commentDrafts?.listAnnotations(userId, entityType, entityId);
+            const draft = items?.find((item) => item.tempId === tempId);
             if (!draft) return;
 
-            this._anchor = { highlighted: draft.highlighted, prefix: draft.prefix, suffix: draft.suffix };
+            this._resetTarget();
             this._tempId = draft.tempId;
-            this.highlighted = draft.highlighted;
+            this._openCentred({ highlighted: draft.highlighted, prefix: draft.prefix, suffix: draft.suffix }, draft.body);
+        },
+
+        /**
+         * Edit an already saved annotation: body only, stored as a pending
+         * edit (the anchor never changes). Event `annotations:edit-saved-row`.
+         */
+        openForEdit({ id, body, highlighted } = {}) {
+            if (!id) return;
+            this._resetTarget();
+            this._savedId = id;
+            this._openCentred({ highlighted: highlighted ?? '' }, body ?? '');
+        },
+
+        _openCentred(anchor, body) {
+            this._anchor = anchor;
+            this.highlighted = anchor.highlighted;
             this.tooLong = false;
             this.multiBlock = false;
             this.error = null;
             this.centred = true;
-            this._setBody(draft.body);
+            this._setBody(body);
             this._show();
         },
 
@@ -160,7 +204,7 @@ export function annotationForm() {
         cancel() {
             this.open = false;
             this._anchor = null;
-            this._tempId = null;
+            this._resetTarget();
         },
 
         save() {
@@ -179,15 +223,24 @@ export function annotationForm() {
             }
 
             const { userId, entityType, entityId } = this._context();
-            if (this._tempId) {
-                window.commentDrafts?.updateAnnotation(userId, entityType, entityId, this._tempId, body);
+            const store = window.commentDrafts;
+            const pending = this._isPending();
+            const item = {
+                body,
+                highlighted: this._anchor.highlighted,
+                prefix: this._anchor.prefix ?? '',
+                suffix: this._anchor.suffix ?? '',
+            };
+            if (this._savedId) {
+                store?.setPendingEdit(userId, entityType, entityId, this._savedId, body);
+            } else if (this._tempId && pending) {
+                store?.updatePendingAdd(userId, entityType, entityId, this._tempId, body);
+            } else if (this._tempId) {
+                store?.updateAnnotation(userId, entityType, entityId, this._tempId, body);
+            } else if (pending) {
+                store?.addPendingAnnotation(userId, entityType, entityId, item);
             } else {
-                window.commentDrafts?.addAnnotation(userId, entityType, entityId, {
-                    body,
-                    highlighted: this._anchor.highlighted,
-                    prefix: this._anchor.prefix ?? '',
-                    suffix: this._anchor.suffix ?? '',
-                });
+                store?.addAnnotation(userId, entityType, entityId, item);
             }
             this.cancel();
         },

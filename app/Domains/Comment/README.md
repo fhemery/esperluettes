@@ -264,14 +264,28 @@ comment-draft module, which is why the banner re-reads the drafts slot on
   captions and chapter-choice blocks are excluded) and only dispatches
   `annotation:open-form`: the slot is cloned from a `<template>`, so it cannot
   host the form.
-- **Capture form** — `<x-comment::annotation-form :entity-type :entity-id>`,
+- **Reactions ❤️ 🔥 👍** — `<x-comment::reaction-buttons :entity-type
+  :can-annotate>`, placed right after « Annoter » in the same slot, same
+  `data-requires-selection-within` rule (`reactions.js`, Alpine
+  `annotationReactions`). A click stores `<p>EMOJI</p>` anchored to the
+  selection, with no form, and clears the selection; a multi-block or over-cap
+  selection is ignored. French `aria-label`s.
+- **Draft vs pending mode** — the annotable and the form carry
+  `data-annotation-mode`: `draft` (the viewer has no root comment yet; writes go
+  to the comment-draft `annotations` slot) or `pending` (a root exists, its id in
+  `data-root-comment-id`; writes go to `annotationChanges.adds`). The form and
+  the reactions both follow it.
+- **Capture form** — `<x-comment::annotation-form :entity-type :entity-id
+  :annotation-mode :root-comment-id>`,
   rendered by the consumer **outside** the annotable region and teleported to
   `body` (`capture-form.js`). Quill with the Editor `inline` preset (bold,
   italic, custom emoji); limits read from the policy registry. A selection that
   spans two text blocks, or exceeds the highlight limit, opens the form with an
   inline error and Save disabled. Save (button or Ctrl/Cmd+Enter) stores a draft
-  in the comment-draft `annotations` slot; Escape or a click outside discards.
-  The window event `annotation:open-edit` `{ tempId }` reopens it on a draft.
+  or a pending add, per the mode; Escape or a click outside discards.
+  The window event `annotation:open-edit` `{ tempId }` reopens it on a draft (or
+  pending add); `annotations:edit-saved-row` `{ id, body, highlighted }` opens it
+  on a saved annotation, body only, and stores a pending edit.
 - **Drafts banner and pop-up** — `partials/annotation-banner.blade.php`, inside
   the root-comment form (`drafts.js`, Alpine `annotationDrafts`). Shows
   « N annotations, écrivez votre commentaire… » while the slot is not empty and

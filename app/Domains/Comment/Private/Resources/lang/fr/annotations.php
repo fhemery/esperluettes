@@ -16,6 +16,11 @@ return [
         'label' => 'Annoter',
         'title' => 'Annoter ce passage',
     ],
+    'reactions' => [
+        'heart' => 'Réagir avec un cœur',
+        'fire' => 'Réagir avec une flamme',
+        'thumbs_up' => 'Réagir avec un pouce levé',
+    ],
     'form' => [
         'title' => 'Annoter le passage',
         'body_label' => 'Votre annotation',

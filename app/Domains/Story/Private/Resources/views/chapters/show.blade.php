@@ -217,6 +217,7 @@
                                 :can-quote="$canQuoteStory"
                             />
                             <x-comment::annotate-button :can-annotate="$canAnnotate" />
+                            <x-comment::reaction-buttons entity-type="chapter" :can-annotate="$canAnnotate" />
                         </x-slot:toolbar-actions>
 
                         <x-quote::author-heat :chapter-id="$vm->chapter->id">

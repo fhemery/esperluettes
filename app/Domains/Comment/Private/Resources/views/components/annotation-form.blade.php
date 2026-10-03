@@ -6,8 +6,10 @@
 @endphp
 {{-- Rendered by the consumer outside the annotable region (the toolbar's
      <template> is cloned, so it cannot host this form). Opened by
-     <x-comment::annotate-button> (`annotation:open-form`) or to edit a draft
-     (`annotation:open-edit`, detail `{ tempId }`). --}}
+     <x-comment::annotate-button> (`annotation:open-form`), to edit a draft or
+     pending add (`annotation:open-edit`, detail `{ tempId }`), or to edit a
+     saved annotation as a pending edit (`annotations:edit-saved-row`, detail
+     `{ id, body, highlighted }`). --}}
 <template x-teleport="body">
 <div
     x-data="annotationForm()"
@@ -15,6 +17,7 @@
     x-cloak
     @annotation:open-form.window="openForm()"
     @annotation:open-edit.window="openEdit($event.detail)"
+    @annotations:edit-saved-row.window="openForEdit($event.detail)"
     @keydown.escape.window="open && cancel()"
     @keydown="onKeydown($event)"
     @click.outside="open && cancel()"

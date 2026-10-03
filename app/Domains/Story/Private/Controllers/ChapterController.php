@@ -202,8 +202,7 @@ class ChapterController
                 Roles::TECH_ADMIN,
             ]),
             'canCreateChapter' => $isAuthor && $this->chapterCreditService->availableForUser($userId) > 0,
-            // v2 phase 8 removes the draft-only gate
-            'canAnnotate' => $canAnnotate && $rootComment === null,
+            'canAnnotate' => $canAnnotate,
             'annotationMode' => $rootComment ? 'pending' : 'draft',
             'rootCommentId' => $rootComment?->id,
             'audienceInfo' => $audienceInfo,
