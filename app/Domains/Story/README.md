@@ -78,7 +78,7 @@ The children of that root are always `.ce-block` wrappers: Advanced content alre
 
 The same page also wires [Comment](../Comment/README.md) annotations (a reader's remarks on passages, posted with their root comment). `ChapterController::show` passes `canAnnotate` from `ChapterCommentPolicy::canAnnotate` — the root-comment audience of `canCreateRoot` (not an author or co-author of the story, no root comment on the chapter yet), never a guest. The `<x-comment::annotable>` toolbar is enabled for the **union** of the two actions (`$canQuoteStory || $canAnnotate`), and each action gates itself: `<x-quote::toolbar-button :can-quote>` and `<x-comment::annotate-button :can-annotate>` sit side by side in the `toolbar-actions` slot, both restricted to `.ce-block--text`. `<x-comment::annotation-form>` is rendered next to `<x-quote::mini-form />`, outside the annotable region, only when `canAnnotate`. Annotations re-anchor on the same `.ce-block--text` areas as quotes, so the single-root rule above applies to them too.
 
-`ChapterCommentPolicy::canMarkAsProcessed` answers "is an author or co-author of the chapter" (beta readers are not); Comment uses it to let authors see every annotation and mark them processed. Annotation limits: 1000 characters of body, 500 of highlighted passage.
+`ChapterCommentPolicy::supportsAnnotations` returns true, which makes the chapter comment list render the drafts banner, the « N annotations » pop-up and the annotations script. `ChapterCommentPolicy::canMarkAsProcessed` answers "is an author or co-author of the chapter" (beta readers are not); Comment uses it to let authors see every annotation and mark them processed. Annotation limits: 1000 characters of body, 500 of highlighted passage.
 
 ### Chapter choice block
 

@@ -65,6 +65,12 @@ interface CommentPolicy
     public function getUrl(int $entityId, int $commentId): ?string;
 
     /**
+     * Whether this entity type carries annotations at all — whatever the viewer.
+     * Gates the annotation UI and its script on the comment list. Default: false
+     */
+    public function supportsAnnotations(): bool;
+
+    /**
      * Whether the user can attach annotations (anchored on the entity's text) to their root comment.
      * Default: false (the entity type is not annotatable).
      */

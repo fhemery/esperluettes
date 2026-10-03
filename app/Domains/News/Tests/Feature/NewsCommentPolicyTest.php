@@ -209,7 +209,8 @@ describe('News comment policy — annotations', function () {
 
         $policy = new NewsCommentPolicy();
 
-        expect($policy->canAnnotate($news->id, $reader->id))->toBeFalse()
+        expect($policy->supportsAnnotations())->toBeFalse()
+            ->and($policy->canAnnotate($news->id, $reader->id))->toBeFalse()
             ->and($policy->canMarkAsProcessed($news->id, $author->id))->toBeFalse()
             ->and($policy->getAnnotationBodyMaxLength())->toBe(1000)
             ->and($policy->getAnnotationHighlightMaxLength())->toBe(500);

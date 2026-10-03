@@ -107,6 +107,14 @@ class CommentPolicyRegistry
     }
 
     /**
+     * Whether the entity type carries annotations at all. Default: false
+     */
+    public function supportsAnnotations(string $entityType): bool
+    {
+        return $this->getPolicy($entityType)->supportsAnnotations();
+    }
+
+    /**
      * Whether the user can attach annotations to their root comment. Default: false
      */
     public function canAnnotate(string $entityType, int $entityId, int $userId): bool

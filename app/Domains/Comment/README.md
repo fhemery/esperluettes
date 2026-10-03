@@ -76,6 +76,7 @@ A singleton registry that maps entity type strings to `CommentPolicy` implementa
 | `getReplyCommentMinLength(entityType)` | Min plain-text length for replies (null = no limit) |
 | `getReplyCommentMaxLength(entityType)` | Max plain-text length for replies (null = no limit) |
 | `getUrl(entityType, entityId, commentId)` | Contextual URL to view the comment (used by Moderation) |
+| `supportsAnnotations(entityType)` | Does the entity type carry annotations at all? Gates the annotation UI and script on the comment list (default `false`) |
 | `canAnnotate(entityType, entityId, userId)` | Can the user attach annotations to their root comment? (default `false`: entity not annotatable) |
 | `canMarkAsProcessed(entityType, entityId, userId)` | Is the user an author of the entity — sees every annotation, may mark them processed? (default `false`) |
 | `getAnnotationBodyMaxLength(entityType)` | Max plain-text length of an annotation body (default 1000) |
@@ -211,8 +212,9 @@ reader's **root comment**, and has no life of its own:
   exists for replies, which no code path creates yet.
 - **No events.** `CommentPosted` fires once for the root comment; credits and
   notifications ignore annotations.
-- **Opt-in per entity type** through `CommentPolicy::canAnnotate` (chapters: the
-  same audience as a root comment, never a guest; news: never).
+- **Opt-in per entity type** through `CommentPolicy::supportsAnnotations` (type
+  level: chapters yes, news no), then per user through `canAnnotate` (chapters:
+  the same audience as a root comment, never a guest).
 
 ### Who sees what
 
@@ -222,7 +224,7 @@ reader's **root comment**, and has no life of its own:
 |------|-----|------|-----|
 | `commenter` | author of the root comment | their own annotations, **without** the processed flag | read |
 | `author` | `canMarkAsProcessed` is true (chapter authors and co-authors, not beta readers) | all annotations and the processed flag | mark processed / not processed |
-| `moderator` | moderator, admin, tech-admin | all annotations | delete one |
+| `moderator` | moderator, admin, tech-admin | all annotations and the processed flag (in the JSON; the pop-up does not display it) | delete one |
 
 Anyone else gets a 403 on the list and a count of 0. The commenter wins over
 author: an author who commented on their own entity is a commenter there. The
@@ -233,7 +235,10 @@ grouped query (`visibleCounts`).
 
 All JavaScript is in `Resources/js/annotations/` (one Vite entry, `index.js`),
 pushed with `@pushOnce('head-scripts', 'comment-annotations-bundle')` by every
-component that needs it, so it is emitted once. It loads in `<head>`, before the
+component that needs it, so it is emitted once. `comment-list` pushes it — and
+renders the drafts banner and the server pop-up — only for an authenticated
+viewer on an entity type whose policy `supportsAnnotations()`; news pages load
+none of it. It loads in `<head>`, before the
 comment-draft module, which is why the banner re-reads the drafts slot on
 `DOMContentLoaded`.
 
@@ -286,8 +291,6 @@ Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts`.
 - `visibleCounts` gives authors and moderators a count without asking the
   entity's `canAnnotate`. Harmless while no non-annotatable entity can hold
   annotation rows (creation checks `canAnnotate`).
-- `GET /comments/{id}/annotations` sends `is_processed` to moderators too; the
-  pop-up shows it to authors only.
 - Reporting an annotation on its own is not supported: reports target the root
   comment.
 

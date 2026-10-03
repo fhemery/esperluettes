@@ -113,6 +113,10 @@ describe('Regarding annotations', function () {
         $this->chapter = createPublishedChapter($this, $this->story, $this->author, ['title' => 'Pub Chap']);
     });
 
+    it('supportsAnnotations: chapters are annotatable', function () {
+        expect($this->policy->supportsAnnotations())->toBeTrue();
+    });
+
     it('canAnnotate: true for a reader who has not commented yet', function () {
         $reader = bob($this);
 

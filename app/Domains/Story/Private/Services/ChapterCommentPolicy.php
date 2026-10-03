@@ -89,6 +89,11 @@ class ChapterCommentPolicy implements CommentPolicy
         ]) . '?comment=' . $commentId;
     }
 
+    public function supportsAnnotations(): bool
+    {
+        return true;
+    }
+
     /**
      * Same audience as a root comment (annotations are posted with it), but
      * never a guest: canCreateRoot alone answers true for user id 0.

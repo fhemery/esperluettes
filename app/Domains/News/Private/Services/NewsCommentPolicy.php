@@ -96,6 +96,11 @@ class NewsCommentPolicy implements CommentPolicy
     /**
      * News articles are not annotatable.
      */
+    public function supportsAnnotations(): bool
+    {
+        return false;
+    }
+
     public function canAnnotate(int $entityId, int $userId): bool
     {
         return false;

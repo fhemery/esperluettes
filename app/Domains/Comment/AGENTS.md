@@ -50,7 +50,7 @@
 
 **Annotations emit no events.** `CommentPosted` fires once, after the transaction, and carries nothing about annotations; processed toggles and moderator deletes are silent. Credits, notifications and statistics must not depend on annotations.
 
-**The processed flag is hidden from the commenter.** `AnnotationAccessService` resolves the viewer to `commenter`, `author` or `moderator` (in that order — an author commenting their own chapter is a `commenter`). For `commenter`, `getForComment` sends `is_processed: null`; only `author` may toggle it, only `moderator` may delete. Any new read path must go through `AnnotationAccessService`, not the raw policy, or it leaks the flag or other readers' annotations.
+**The processed flag is hidden from the commenter.** `AnnotationAccessService` resolves the viewer to `commenter`, `author` or `moderator` (in that order — an author commenting their own chapter is a `commenter`). For `commenter`, `getForComment` sends `is_processed: null`; authors and moderators receive it (moderators on purpose, though the pop-up displays it to authors only); only `author` may toggle it, only `moderator` may delete. Any new read path must go through `AnnotationAccessService`, not the raw policy, or it leaks the flag or other readers' annotations.
 
 **Annotations are reachable only through their root comment.** Reads load the comment with the default soft-delete scope, and counts are computed for listed comments only. That is why deactivating/reactivating a user touches no annotation row: the root comment's soft delete hides them, its restore brings them back, and annotations a moderator soft-deleted stay deleted. Emptying a root comment by moderation soft-deletes its annotations (`emptyContentByModeration`).
 
@@ -62,6 +62,6 @@
 
 ## Registry integrations
 
-- **CommentPolicyRegistry** (this domain) — other domains call `register(entityType, policy)` in their `boot()` to enforce domain-specific comment rules. A policy implementing `CommentPolicy` directly must also answer the four annotation methods (`canAnnotate`, `canMarkAsProcessed`, the two max lengths); extending `DefaultCommentPolicy` leaves the entity non-annotatable.
+- **CommentPolicyRegistry** (this domain) — other domains call `register(entityType, policy)` in their `boot()` to enforce domain-specific comment rules. A policy implementing `CommentPolicy` directly must also answer the five annotation methods (`supportsAnnotations`, `canAnnotate`, `canMarkAsProcessed`, the two max lengths); extending `DefaultCommentPolicy` leaves the entity non-annotatable. `supportsAnnotations()` is type-level: false means `comment-list` renders no banner, no pop-up and pushes no annotations bundle.
 - **ModerationRegistry** (`Moderation` domain) — registered as topic `'comment'` with `CommentSnapshotFormatter` so moderators can view and act on reported comments.
 - **EventBus** (`Events` domain) — all four comment events are registered in `CommentServiceProvider::boot()`.

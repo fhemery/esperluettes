@@ -54,6 +54,11 @@ class DefaultCommentPolicy implements CommentPolicy
         return null;
     }
 
+    public function supportsAnnotations(): bool
+    {
+        return false;
+    }
+
     public function canAnnotate(int $entityId, int $userId): bool
     {
         return false;

@@ -12,6 +12,16 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+function registerAnnotatableDefaultPolicy(): void
+{
+    app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
+        public function supportsAnnotations(): bool
+        {
+            return true;
+        }
+    });
+}
+
 describe('CommentListComponent', function () {
     describe('Access', function () {
         it('should display an alert if user is not logged, with a login button redirecting directly to comment area', function () {
@@ -139,6 +149,8 @@ describe('CommentListComponent', function () {
     });
 
     describe('Annotation drafts banner', function () {
+        beforeEach(fn () => registerAnnotatableDefaultPolicy());
+
         it('the root form contains the hidden annotations input and the banner markup for a user who can comment', function () {
             $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
 
@@ -165,6 +177,11 @@ describe('CommentListComponent', function () {
 
         it('no banner when the viewer cannot create a root comment', function () {
             app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
+                public function supportsAnnotations(): bool
+                {
+                    return true;
+                }
+
                 public function canCreateRoot(int $entityId, int $userId): bool
                 {
                     return false;
@@ -198,6 +215,8 @@ describe('CommentListComponent', function () {
     });
 
     describe('Annotations server-mode pop-up', function () {
+        beforeEach(fn () => registerAnnotatableDefaultPolicy());
+
         it('the annotations modal is rendered once and the bundle pushed for an authenticated viewer', function () {
             $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
 
@@ -227,6 +246,11 @@ describe('CommentListComponent', function () {
 
         it('the annotations modal is rendered for a viewer who cannot create a root comment', function () {
             app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
+                public function supportsAnnotations(): bool
+                {
+                    return true;
+                }
+
                 public function canCreateRoot(int $entityId, int $userId): bool
                 {
                     return false;
@@ -249,6 +273,25 @@ describe('CommentListComponent', function () {
             ]);
 
             expect($html)->not->toContain('annotationsModal()');
+        });
+    });
+
+    describe('Entity type without annotations', function () {
+        it('renders no banner, no pop-up and pushes no annotations bundle', function () {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+
+            $html = Blade::render(
+                '<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />@stack(\'head-scripts\')',
+                ['id' => 123]
+            );
+
+            $bundleUrl = app(\Illuminate\Foundation\Vite::class)->asset('app/Domains/Comment/Resources/js/annotations/index.js');
+
+            expect($html)->toContain('data-comment-draft="root"')
+                ->and($html)->not->toContain($bundleUrl)
+                ->and($html)->not->toContain('annotationDrafts()')
+                ->and($html)->not->toContain('name="annotations"')
+                ->and($html)->not->toContain('annotationsModal()');
         });
     });
 
