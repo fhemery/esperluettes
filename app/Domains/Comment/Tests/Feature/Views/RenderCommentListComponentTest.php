@@ -6,6 +6,8 @@ use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -134,6 +136,65 @@ describe('CommentListComponent', function () {
 
             expect($html)->not()->toContain('<form');
         });
+    });
+
+    describe('Annotation drafts banner', function () {
+        it('the root form contains the hidden annotations input and the banner markup for a user who can comment', function () {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+
+            $html = Blade::render(
+                '<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />@stack(\'head-scripts\')',
+                ['id' => 123]
+            );
+
+            $form = substr($html, strpos($html, 'data-comment-draft="root"'));
+            $form = substr($form, 0, strpos($form, '</form>'));
+            $bundleUrl = app(\Illuminate\Foundation\Vite::class)->asset('app/Domains/Comment/Resources/js/annotations/index.js');
+
+            expect(substr_count($html, 'src="' . $bundleUrl . '"'))->toBe(1)
+                ->and($form)->toContain('<input type="hidden" name="annotations"')
+                ->and($form)->toContain('x-data="annotationDrafts()"')
+                ->and($form)->toContain('data-entity-type="default"')
+                ->and($form)->toContain('data-entity-id="123"')
+                ->and($form)->toContain(e(trans_choice('comment::annotations.banner.text', 1)))
+                ->and($form)->toContain(__('comment::annotations.banner.show'))
+                ->and($form)->toContain(__('comment::annotations.drafts_modal.title'))
+                ->and($form)->toContain(__('comment::annotations.drafts_modal.edit'))
+                ->and($form)->toContain(__('comment::annotations.drafts_modal.delete'));
+        });
+
+        it('no banner when the viewer cannot create a root comment', function () {
+            app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
+                public function canCreateRoot(int $entityId, int $userId): bool
+                {
+                    return false;
+                }
+            });
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            expect($html)->not->toContain('name="annotations"')
+                ->and($html)->not->toContain('annotationDrafts()')
+                ->and($html)->not->toContain(__('comment::annotations.banner.show'));
+        });
+
+        it('an annotations validation error is displayed in the banner', function (string $key) {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+            view()->share('errors', (new ViewErrorBag())->put('default', new MessageBag([
+                $key => ['Annotation refusée ici'],
+            ])));
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            $form = substr($html, strpos($html, 'data-comment-draft="root"'));
+            $form = substr($form, 0, strpos($form, '</form>'));
+            expect($form)->toContain('Annotation refusée ici');
+        })->with(['annotations', 'annotations.0.highlighted_text']);
     });
 
     describe('Comment Share Button', function () {

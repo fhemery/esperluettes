@@ -201,6 +201,39 @@ describe('POST /comments with annotations', function () {
             ->and(countEvents(CommentPosted::name()))->toBe(1);
     });
 
+    it('the JSON produced by the banner (fixture string) is accepted end to end', function () {
+        $this->actingAs($this->reader);
+        // Exactly what drafts.js `serialise()` writes into the hidden input:
+        // JSON.stringify of the slot items, tempId dropped, highlighted → highlighted_text.
+        $fixture = '[{"body":"<p>Bien <strong>vu</strong>, l’image</p>","highlighted_text":"le passage choisi","prefix":"avant ","suffix":" après"},'
+            . '{"body":"<p><em>Coquille</em> ici</p>","highlighted_text":"« second »","prefix":"","suffix":""}]';
+
+        $response = $this->post('/comments', annotatedChapterCommentPayload($this->chapter->id, [], [
+            'annotations' => $fixture,
+        ]));
+
+        $response->assertSessionHasNoErrors();
+        $response->assertSessionHas('comment.draft_consumed');
+        $annotations = CommentAnnotation::query()->orderBy('id')->get();
+        expect($annotations)->toHaveCount(2)
+            ->and($annotations[0]->highlighted_text)->toBe('le passage choisi')
+            ->and($annotations[0]->body)->toContain('<strong>vu</strong>')
+            ->and($annotations[0]->body)->toContain('l’image')
+            ->and($annotations[1]->highlighted_text)->toBe('« second »')
+            ->and($annotations[1]->body)->toContain('<em>Coquille</em>');
+    });
+
+    it('accepts the empty hidden input the banner leaves when there is no draft', function () {
+        $this->actingAs($this->reader);
+
+        $this->post('/comments', annotatedChapterCommentPayload($this->chapter->id, [], [
+            'annotations' => '',
+        ]))->assertSessionHasNoErrors();
+
+        expect(Comment::query()->count())->toBe(1)
+            ->and(CommentAnnotation::query()->count())->toBe(0);
+    });
+
     it('rejects an annotations input that is not valid JSON', function () {
         $this->actingAs($this->reader);
 

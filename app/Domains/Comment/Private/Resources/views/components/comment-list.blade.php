@@ -51,6 +51,7 @@
       @csrf
       <input type="hidden" name="entity_type" value="{{ $entityType }}">
       <input type="hidden" name="entity_id" value="{{ $entityId }}">
+      @include('comment::components.partials.annotation-banner')
       <x-editor::rich-text
         id="comment-body-editor"
         name="body"
@@ -92,6 +93,13 @@
     @endpush
   @endif
 @endonce
+@if(!$isGuest)
+  {{-- annotationDrafts (banner above the root form); same key as the other
+       components that need the annotations bundle. --}}
+  @pushOnce('head-scripts', 'comment-annotations-bundle')
+    @vite('app/Domains/Comment/Resources/js/annotations/index.js')
+  @endPushOnce
+@endif
 
 @if(!$isGuest && session()->has('comment.draft_consumed'))
   @push('scripts')

@@ -17,9 +17,7 @@
     <span>{{ __('comment::annotations.toolbar_button.label') }}</span>
 </button>
 
-@once
-    @push('head-scripts')
-        @vite('app/Domains/Comment/Resources/js/annotations/index.js')
-    @endpush
-@endonce
+@pushOnce('head-scripts', 'comment-annotations-bundle')
+    @vite('app/Domains/Comment/Resources/js/annotations/index.js')
+@endPushOnce
 @endif

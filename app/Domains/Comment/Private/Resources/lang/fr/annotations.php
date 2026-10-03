@@ -20,4 +20,15 @@ return [
         'save' => 'Enregistrer',
         'cancel' => 'Annuler',
     ],
+    'banner' => [
+        'text' => '{1} :count annotation, écrivez votre commentaire pour la sauvegarder|[2,*] :count annotations, écrivez votre commentaire pour les sauvegarder',
+        'show' => 'Voir les annotations',
+    ],
+    'drafts_modal' => [
+        'title' => 'Vos annotations en attente',
+        'edit' => 'Modifier',
+        'delete' => 'Supprimer',
+        'close' => 'Fermer',
+        'empty' => 'Aucune annotation en attente.',
+    ],
 ];
