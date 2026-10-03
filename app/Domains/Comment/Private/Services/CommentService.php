@@ -176,6 +176,7 @@ class CommentService
         DB::transaction(function () use ($commentId) {
             $default = e(__('comment::moderation.default_text'));
             $updated = $this->repository->updateBody($commentId, $default);
+            $this->annotations->softDeleteForComment($commentId);
 
             $this->eventBus->emit(new CommentContentModerated(
                 commentId: (int)$updated->id,

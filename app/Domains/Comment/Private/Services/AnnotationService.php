@@ -71,6 +71,21 @@ class AnnotationService
     }
 
     /**
+     * Soft-delete every annotation (roots and replies) under a comment.
+     */
+    public function softDeleteForComment(int $commentId): void
+    {
+        CommentAnnotation::query()->where('comment_id', $commentId)->delete();
+    }
+
+    public function nullifyAuthor(int $userId): int
+    {
+        return CommentAnnotation::withTrashed()
+            ->where('author_id', $userId)
+            ->update(['author_id' => null]);
+    }
+
+    /**
      * Live root annotations per comment, in one grouped query. Comments without any are absent.
      *
      * @param int[] $commentIds
