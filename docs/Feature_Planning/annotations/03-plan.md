@@ -17,7 +17,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Schema and model — `comment_annotations`, `CommentAnnotation` | S | — | DONE |
-| 2 | Policy contract — annotation methods on `CommentPolicy` (Default, Registry, News, Chapter) | S | — | TODO |
+| 2 | Policy contract — annotation methods on `CommentPolicy` (Default, Registry, News, Chapter) | S | — | DONE |
 | 3 | Shared infrastructure — sanitizer `annotation` profile + Editor `inline` preset | S | — | TODO |
 | 4 | Create path — `POST /comments` accepts `annotations`, one transaction | M | 1, 2, 3 | TODO |
 | 4v | Checkpoint — comment posting on chapters and news | S | 4 | TODO |

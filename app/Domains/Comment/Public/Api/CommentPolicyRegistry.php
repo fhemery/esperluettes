@@ -106,6 +106,38 @@ class CommentPolicyRegistry
         return $this->getPolicy($entityType)->getUrl($entityId, $commentId);
     }
 
+    /**
+     * Whether the user can attach annotations to their root comment. Default: false
+     */
+    public function canAnnotate(string $entityType, int $entityId, int $userId): bool
+    {
+        return $this->getPolicy($entityType)->canAnnotate($entityId, $userId);
+    }
+
+    /**
+     * Whether the user can mark annotations on the entity as processed. Default: false
+     */
+    public function canMarkAsProcessed(string $entityType, int $entityId, int $userId): bool
+    {
+        return $this->getPolicy($entityType)->canMarkAsProcessed($entityId, $userId);
+    }
+
+    /**
+     * Maximum allowed annotation body length. Default: 1000
+     */
+    public function getAnnotationBodyMaxLength(string $entityType): ?int
+    {
+        return $this->getPolicy($entityType)->getAnnotationBodyMaxLength();
+    }
+
+    /**
+     * Maximum allowed annotation highlighted text length. Default: 500
+     */
+    public function getAnnotationHighlightMaxLength(string $entityType): ?int
+    {
+        return $this->getPolicy($entityType)->getAnnotationHighlightMaxLength();
+    }
+
 
     private function getPolicy(string $entityType): CommentPolicy
     {

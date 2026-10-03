@@ -200,3 +200,18 @@ describe('News comment policy — URL generation', function () {
         expect($policy->getUrl(999999, 123))->toBeNull();
     });
 });
+
+describe('News comment policy — annotations', function () {
+    it('refuses annotations on news', function () {
+        $author = admin($this);
+        $news = publishedNews($author->id);
+        $reader = alice($this, roles: [Roles::USER_CONFIRMED]);
+
+        $policy = new NewsCommentPolicy();
+
+        expect($policy->canAnnotate($news->id, $reader->id))->toBeFalse()
+            ->and($policy->canMarkAsProcessed($news->id, $author->id))->toBeFalse()
+            ->and($policy->getAnnotationBodyMaxLength())->toBe(1000)
+            ->and($policy->getAnnotationHighlightMaxLength())->toBe(500);
+    });
+});

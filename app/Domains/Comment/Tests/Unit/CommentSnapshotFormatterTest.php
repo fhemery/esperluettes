@@ -92,6 +92,10 @@ describe('CommentSnapshotFormatter', function () {
             public function getUrl(int $entityId, int $commentId): ?string {
                 return 'http://localhost/fake-entity/' . $entityId . '?comment=' . $commentId;
             }
+            public function canAnnotate(int $entityId, int $userId): bool { return false; }
+            public function canMarkAsProcessed(int $entityId, int $userId): bool { return false; }
+            public function getAnnotationBodyMaxLength(): ?int { return null; }
+            public function getAnnotationHighlightMaxLength(): ?int { return null; }
         };
         
         $commentId = createComment('fake', 123, generateDummyText(150));

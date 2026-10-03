@@ -53,4 +53,24 @@ class DefaultCommentPolicy implements CommentPolicy
     {
         return null;
     }
+
+    public function canAnnotate(int $entityId, int $userId): bool
+    {
+        return false;
+    }
+
+    public function canMarkAsProcessed(int $entityId, int $userId): bool
+    {
+        return false;
+    }
+
+    public function getAnnotationBodyMaxLength(): ?int
+    {
+        return 1000;
+    }
+
+    public function getAnnotationHighlightMaxLength(): ?int
+    {
+        return 500;
+    }
 }

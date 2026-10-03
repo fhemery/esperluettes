@@ -63,4 +63,26 @@ interface CommentPolicy
      * Should return null if entity doesn't exist or URL cannot be generated.
      */
     public function getUrl(int $entityId, int $commentId): ?string;
+
+    /**
+     * Whether the user can attach annotations (anchored on the entity's text) to their root comment.
+     * Default: false (the entity type is not annotatable).
+     */
+    public function canAnnotate(int $entityId, int $userId): bool;
+
+    /**
+     * Whether the user can mark annotations on this entity as processed.
+     * Default: false
+     */
+    public function canMarkAsProcessed(int $entityId, int $userId): bool;
+
+    /**
+     * Maximum allowed annotation body length. Default: 1000
+     */
+    public function getAnnotationBodyMaxLength(): ?int;
+
+    /**
+     * Maximum allowed highlighted text length for a root annotation. Default: 500
+     */
+    public function getAnnotationHighlightMaxLength(): ?int;
 }

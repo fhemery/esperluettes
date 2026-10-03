@@ -97,3 +97,54 @@ describe('Regarding root comment creation', function () {
         })->toThrow(ValidationException::withMessages(['body' => ['Comment not allowed']]));
     });
 });
+
+describe('Regarding annotations', function () {
+    beforeEach(function () {
+        $this->policy = new ChapterCommentPolicy(
+            app(ChapterService::class),
+            app(StoryService::class),
+            app(CommentPublicApi::class)
+        );
+        $this->author = alice($this);
+        $this->story = publicStory('Public Story', $this->author->id);
+        $this->chapter = createPublishedChapter($this, $this->story, $this->author, ['title' => 'Pub Chap']);
+    });
+
+    it('canAnnotate: true for a reader who has not commented yet', function () {
+        $reader = bob($this);
+
+        expect($this->policy->canAnnotate($this->chapter->id, $reader->id))->toBeTrue();
+    });
+
+    it('canAnnotate: false for the author, a co-author, a reader who already posted a root comment, and user id 0', function () {
+        $coAuthor = carol($this);
+        addCollaborator($this->story->id, $coAuthor->id, 'author');
+
+        $commenter = bob($this);
+        $this->actingAs($commenter);
+        createComment('chapter', $this->chapter->id, generateDummyText(140), null);
+
+        expect($this->policy->canAnnotate($this->chapter->id, $this->author->id))->toBeFalse()
+            ->and($this->policy->canAnnotate($this->chapter->id, $coAuthor->id))->toBeFalse()
+            ->and($this->policy->canAnnotate($this->chapter->id, $commenter->id))->toBeFalse()
+            ->and($this->policy->canAnnotate($this->chapter->id, 0))->toBeFalse();
+    });
+
+    it('canMarkAsProcessed: true for the author and a co-author; false for a beta reader and for a plain reader', function () {
+        $coAuthor = carol($this);
+        addCollaborator($this->story->id, $coAuthor->id, 'author');
+        $betaReader = daniel($this);
+        addCollaborator($this->story->id, $betaReader->id, 'betareader');
+        $reader = bob($this);
+
+        expect($this->policy->canMarkAsProcessed($this->chapter->id, $this->author->id))->toBeTrue()
+            ->and($this->policy->canMarkAsProcessed($this->chapter->id, $coAuthor->id))->toBeTrue()
+            ->and($this->policy->canMarkAsProcessed($this->chapter->id, $betaReader->id))->toBeFalse()
+            ->and($this->policy->canMarkAsProcessed($this->chapter->id, $reader->id))->toBeFalse();
+    });
+
+    it('caps annotation bodies at 1000 and highlights at 500 characters', function () {
+        expect($this->policy->getAnnotationBodyMaxLength())->toBe(1000)
+            ->and($this->policy->getAnnotationHighlightMaxLength())->toBe(500);
+    });
+});
