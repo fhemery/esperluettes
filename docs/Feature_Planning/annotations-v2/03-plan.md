@@ -21,7 +21,7 @@
 | 4 | `saveChanges` — DTOs, service, public API, `PUT /comments/{id}/annotations` | M | 3 | DONE |
 | 5 | Replies, read side — `getForComment` returns replies, `can_edit`/`can_reply`/`can_delete`, deactivated-writer filter | M | 4 | DONE |
 | 6 | Replies, write side — `reply`, `deleteOwnReply`, their routes | S | 5 | DONE |
-| 7 | JS infrastructure — `annotationChanges` slot in the comment-draft store (schema v2) + `api.js` calls | S | 4, 6 | TODO |
+| 7 | JS infrastructure — `annotationChanges` slot in the comment-draft store (schema v2) + `api.js` calls | S | 4, 6 | DONE |
 | 7v | Checkpoint — existing comment drafts and v1 annotation drafts survive the store bump | S | 7 | TODO |
 | 8 | Toolbar — pending mode for the capture form + ❤️ 🔥 👍 reaction buttons | M | 7 | TODO |
 | 9 | Save banner — `annotationChangesBanner` (count, Enregistrer, Tout annuler, 422 mapping) | M | 8 | TODO |

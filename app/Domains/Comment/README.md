@@ -195,7 +195,21 @@ prefix, suffix }`, posted with the root comment. `window.commentDrafts` exposes
 fires a `comment-drafts:annotations-changed` window event with
 `{ entityType, entityId, count }`. Malformed items are dropped on load. A `root`
 consumed marker clears `root` **and** `annotations`; a `reply` marker clears only
-`reply`. The key is removed once all three slots are empty. Vitest:
+`reply`. The key is removed once every slot is empty.
+
+A fourth slot, `annotationChanges` — `{ adds: [{ tempId, body, highlighted,
+prefix, suffix }], edits: { [id]: body }, deletes: [id] }` — holds pending
+changes to the annotations of an already-posted root comment, saved in one
+`PUT /comments/{id}/annotations` (`saveAnnotationChanges` in
+`annotations/api.js`, which maps `tempId` to the `key` the server echoes in
+`adds.<key>` errors). `window.commentDrafts` exposes `getAnnotationChanges`,
+`countAnnotationChanges`, `addPendingAnnotation` (returns the `tempId`),
+`updatePendingAdd`, `removePendingAdd`, `setPendingEdit`, `undoPendingEdit`,
+`setPendingDelete` (also drops a pending edit of that id), `undoPendingDelete`
+and `clearAnnotationChanges`; each write fires
+`comment-drafts:annotation-changes-changed` with `{ entityType, entityId, count }`.
+The root consumed marker leaves this slot alone. The payload is schema version 2;
+version-1 payloads still load, with an empty `annotationChanges`. Vitest:
 `comment-draft/index.test.js`. Browser:
 `e2e/tests/core/comment-draft-consume.spec.ts`.
 

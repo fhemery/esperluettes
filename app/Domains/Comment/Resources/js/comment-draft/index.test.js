@@ -1,8 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   addAnnotation,
+  addPendingAnnotation,
   bootstrap,
+  clearAnnotationChanges,
   clearAnnotations,
+  countAnnotationChanges,
+  getAnnotationChanges,
+  removePendingAdd,
+  setPendingDelete,
+  setPendingEdit,
+  undoPendingDelete,
+  undoPendingEdit,
+  updatePendingAdd,
   clearRoot,
   clearReply,
   listAnnotations,
@@ -273,6 +283,172 @@ describe('comment-draft annotations slot', () => {
         { entityType: 'chapter', entityId: '42', count: 1 },
         { entityType: 'chapter', entityId: '42', count: 0 },
       ]);
+    });
+  });
+});
+
+describe('comment-draft annotationChanges slot', () => {
+  const anchor = (body = '<p>❤️</p>') => ({
+    body,
+    highlighted: 'the quoted passage',
+    prefix: 'before ',
+    suffix: ' after',
+  });
+
+  beforeEach(() => {
+    localStorage.clear();
+    document.body.innerHTML = '';
+    delete window.__commentDraftConsumed;
+  });
+
+  it('loads a version-1 payload with its annotations and an empty annotationChanges slot', () => {
+    const draft = { tempId: 'a1', body: '<p>ok</p>', highlighted: 'passage', prefix: '', suffix: '' };
+    localStorage.setItem(draftKey(7, 'chapter', '42'), JSON.stringify({
+      version: 1,
+      root: { body: '<p>root</p>', savedAt: 1 },
+      reply: { parentCommentId: 99, body: '<p>reply</p>', savedAt: 1 },
+      annotations: [draft],
+    }));
+
+    const state = load(7, 'chapter', '42');
+    expect(state.root?.body).toBe('<p>root</p>');
+    expect(state.reply?.body).toBe('<p>reply</p>');
+    expect(state.annotations).toEqual([draft]);
+    expect(state.annotationChanges).toEqual({ adds: [], edits: {}, deletes: [] });
+
+    // The next write upgrades the payload to version 2 without losing anything.
+    setPendingDelete(7, 'chapter', '42', 5);
+    const stored = JSON.parse(localStorage.getItem(draftKey(7, 'chapter', '42')));
+    expect(stored.version).toBe(2);
+    expect(stored.annotations).toEqual([draft]);
+    expect(stored.root.body).toBe('<p>root</p>');
+  });
+
+  it('drops malformed annotationChanges items on load', () => {
+    const add = { tempId: 't1', ...anchor() };
+    localStorage.setItem(draftKey(7, 'chapter', '42'), JSON.stringify({
+      version: 2,
+      root: null,
+      reply: null,
+      annotations: [],
+      annotationChanges: {
+        adds: [add, null, { tempId: 't2', body: 3, highlighted: 'x' }],
+        edits: { 12: '<p>edit</p>', abc: '<p>bad id</p>', 13: 7 },
+        deletes: [14, 'x', -1, 1.5],
+      },
+    }));
+
+    expect(getAnnotationChanges(7, 'chapter', '42')).toEqual({
+      adds: [add],
+      edits: { 12: '<p>edit</p>' },
+      deletes: [14],
+    });
+  });
+
+  it('adds, edits, deletes and undoes pending changes and counts them', () => {
+    const t1 = addPendingAnnotation(7, 'chapter', '42', anchor('<p>one</p>'));
+    const t2 = addPendingAnnotation(7, 'chapter', '42', anchor('<p>two</p>'));
+    expect(typeof t1).toBe('string');
+    expect(t1).not.toBe(t2);
+
+    updatePendingAdd(7, 'chapter', '42', t1, '<p>one edited</p>');
+    setPendingEdit(7, 'chapter', '42', 12, '<p>edited 12</p>');
+    setPendingDelete(7, 'chapter', '42', 13);
+    setPendingDelete(7, 'chapter', '42', 13);
+
+    expect(getAnnotationChanges(7, 'chapter', '42')).toEqual({
+      adds: [
+        { tempId: t1, ...anchor('<p>one edited</p>') },
+        { tempId: t2, ...anchor('<p>two</p>') },
+      ],
+      edits: { 12: '<p>edited 12</p>' },
+      deletes: [13],
+    });
+    expect(countAnnotationChanges(7, 'chapter', '42')).toBe(4);
+
+    removePendingAdd(7, 'chapter', '42', t2);
+    undoPendingEdit(7, 'chapter', '42', 12);
+    undoPendingDelete(7, 'chapter', '42', 13);
+    expect(getAnnotationChanges(7, 'chapter', '42')).toEqual({
+      adds: [{ tempId: t1, ...anchor('<p>one edited</p>') }],
+      edits: {},
+      deletes: [],
+    });
+    expect(countAnnotationChanges(7, 'chapter', '42')).toBe(1);
+
+    clearAnnotationChanges(7, 'chapter', '42');
+    expect(countAnnotationChanges(7, 'chapter', '42')).toBe(0);
+    expect(localStorage.getItem(draftKey(7, 'chapter', '42'))).toBeNull();
+  });
+
+  it('drops a pending edit when the same id is marked for deletion', () => {
+    setPendingEdit(7, 'chapter', '42', 12, '<p>edited</p>');
+    setPendingEdit(7, 'chapter', '42', 13, '<p>kept</p>');
+    setPendingDelete(7, 'chapter', '42', 12);
+
+    expect(getAnnotationChanges(7, 'chapter', '42')).toEqual({
+      adds: [],
+      edits: { 13: '<p>kept</p>' },
+      deletes: [12],
+    });
+  });
+
+  it('keeps annotationChanges when the root consumed marker clears the root draft', () => {
+    saveRoot(7, 'chapter', '42', '<p>root</p>');
+    addAnnotation(7, 'chapter', '42', anchor());
+    const tempId = addPendingAnnotation(7, 'chapter', '42', anchor());
+    setPendingDelete(7, 'chapter', '42', 13);
+
+    window.__commentDraftConsumed = { scope: 'root', userId: 7, entityType: 'chapter', entityId: '42' };
+    bootstrap(document);
+    delete window.__commentDraftConsumed;
+
+    const state = load(7, 'chapter', '42');
+    expect(state.root).toBeNull();
+    expect(state.annotations).toEqual([]);
+    expect(state.annotationChanges.adds.map((a) => a.tempId)).toEqual([tempId]);
+    expect(state.annotationChanges.deletes).toEqual([13]);
+    expect(localStorage.getItem(draftKey(7, 'chapter', '42'))).not.toBeNull();
+  });
+
+  it('scopes the slot per user and per entity', () => {
+    addPendingAnnotation(7, 'chapter', '42', anchor());
+    setPendingEdit(7, 'chapter', '42', 12, '<p>edit</p>');
+
+    expect(countAnnotationChanges(8, 'chapter', '42')).toBe(0);
+    expect(countAnnotationChanges(7, 'chapter', '43')).toBe(0);
+    expect(countAnnotationChanges(7, 'news', '42')).toBe(0);
+    expect(localStorage.getItem(draftKey(8, 'chapter', '42'))).toBeNull();
+    expect(countAnnotationChanges(7, 'chapter', '42')).toBe(2);
+  });
+
+  describe('change events', () => {
+    let events;
+    const listener = (e) => events.push(e.detail);
+
+    beforeEach(() => {
+      events = [];
+      window.addEventListener('comment-drafts:annotation-changes-changed', listener);
+    });
+
+    afterEach(() => {
+      window.removeEventListener('comment-drafts:annotation-changes-changed', listener);
+    });
+
+    it('dispatches comment-drafts:annotation-changes-changed with the count', () => {
+      const tempId = addPendingAnnotation(7, 'chapter', '42', anchor());
+      updatePendingAdd(7, 'chapter', '42', tempId, '<p>edited</p>');
+      setPendingEdit(7, 'chapter', '42', 12, '<p>edit</p>');
+      setPendingDelete(7, 'chapter', '42', 12);
+      undoPendingDelete(7, 'chapter', '42', 12);
+      setPendingEdit(7, 'chapter', '42', 13, '<p>edit</p>');
+      undoPendingEdit(7, 'chapter', '42', 13);
+      removePendingAdd(7, 'chapter', '42', tempId);
+      setPendingDelete(7, 'chapter', '42', 14);
+      clearAnnotationChanges(7, 'chapter', '42');
+
+      expect(events.map((e) => e.count)).toEqual([1, 1, 2, 2, 1, 2, 1, 0, 1, 0]);
+      expect(events[0]).toEqual({ entityType: 'chapter', entityId: '42', count: 1 });
     });
   });
 });
