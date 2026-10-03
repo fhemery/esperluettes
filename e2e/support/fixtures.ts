@@ -75,7 +75,10 @@ export const STORY = {
    * thread belongs to the annotations spec: `confirmed` posts its root there.
    */
   countedChapter: { slug: 'chapitre-compte-5', title: 'Chapitre compté' },
-  /** Advanced: inline formatting, then a raw lazily-loaded image with a caption, then prose. */
+  /**
+   * Advanced: inline formatting, then a raw lazily-loaded image with a caption, then prose.
+   * Its comment thread belongs to the annotations-v2 spec: `confirmed` posts its root there.
+   */
   illustratedChapter: {
     slug: 'chapitre-illustre-7',
     title: 'Chapitre illustré',

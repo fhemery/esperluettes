@@ -27,7 +27,7 @@
 | 9 | Save banner — `annotationChangesBanner` (count, Enregistrer, Tout annuler, 422 mapping) | M | 8 | DONE |
 | 10 | Pop-up, commenter overlay — pending markers, undo, pending adds, Modifier / Supprimer | M | 9 | DONE |
 | 11 | Pop-up, replies — thread, Répondre, delete own / moderator delete, author hint | M | 6, 10 | DONE |
-| 12 | E2E — commenter ↔ author round trip; reuse or prune v1's orphan helpers | S | 11 | TODO |
+| 12 | E2E — commenter ↔ author round trip; reuse or prune v1's orphan helpers | S | 11 | DONE |
 
 14 rows (12 phases + 2 checkpoints).
 

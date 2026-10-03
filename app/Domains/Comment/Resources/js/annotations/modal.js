@@ -55,7 +55,8 @@ export function annotationsModal() {
     let context = { userId: null, entityType: null, entityId: null };
     let replyMax = 0;
     let listeners = [];
-    // The reply editor and its resting place in the partial (absent in unit tests).
+    // The component root, the reply editor and its resting place in the partial.
+    let rootEl = null;
     let replyEditor = null;
     let replyHome = null;
 
@@ -133,7 +134,8 @@ export function annotationsModal() {
                 replyTooLong: data.replyTooLong ?? '',
             };
             replyMax = Number(data.replyMaxLength ?? 0);
-            replyEditor = this.$root.querySelector('[data-reply-editor]');
+            rootEl = this.$root;
+            replyEditor = rootEl.querySelector('[data-reply-editor]');
             replyHome = replyEditor?.parentElement ?? null;
             context = {
                 userId: data.userId ? parseInt(data.userId, 10) : null,
@@ -374,7 +376,7 @@ export function annotationsModal() {
             this.replyValid = false;
             resetReplyBody();
             const move = () => {
-                const slot = this.$root?.querySelector(`[data-reply-slot="${row.id}"]`);
+                const slot = rootEl?.querySelector(`[data-reply-slot="${row.id}"]`);
                 if (slot && replyEditor) {
                     slot.appendChild(replyEditor);
                     replyEditor.querySelector('.ql-editor')?.focus();

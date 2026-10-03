@@ -350,6 +350,23 @@ describe('annotationsModal — replies', () => {
         expect(component.replyingTo).toBeNull();
     });
 
+    it('moves the reply editor under the row even when called from a nested x-data button', async () => {
+        fetchMock.mockResolvedValueOnce(jsonResponse(listResponse('author', [item(1, { can_reply: true, replies: [] })])));
+        const root = mount().$root;
+        root.innerHTML = '<div data-reply-slot="1"></div><div hidden><div data-reply-editor></div></div>';
+        component.init();
+        await component.open(10);
+
+        // <x-shared::button> has its own x-data: there, $root is the button.
+        component.$root = document.createElement('button');
+        component.startReply(component.rows[0]);
+
+        const editor = root.querySelector('[data-reply-editor]');
+        expect(editor.parentElement).toBe(root.querySelector('[data-reply-slot="1"]'));
+        component.cancelReply();
+        expect(editor.parentElement.hidden).toBe(true);
+    });
+
     it('tracks the reply editor’s validity from its editor-valid events only', async () => {
         await openAs('author', [item(1, { can_reply: true, replies: [] })]);
         component.startReply(component.rows[0]);
