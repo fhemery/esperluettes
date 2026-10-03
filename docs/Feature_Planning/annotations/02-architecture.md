@@ -8,8 +8,8 @@
 > comment-draft store. This revision realigns the design on the code as it is
 > today; superseded choices are kept in §7 with the reason they changed.
 
-- Functional spec: [`01-functional.md`](./01-functional.md) — the long-term
-  vision. **v1 is narrower** (§1.2); the spec stays the target for vNext.
+- Functional spec: [`01-functional.md`](./01-functional.md) — v1 only.
+  Everything after v1 lives in [`annotations-v2/`](../annotations-v2/00-request.md).
 - Decisions log: [`DECISIONS.md`](./DECISIONS.md)
 
 ## 1. Domain placement
@@ -53,11 +53,9 @@ tests), 9 (anchoring) and 10 (annotable component) are done. The old
   - chapter author / co-author: **Marquer comme traitée / non traitée**;
   - moderator: **Supprimer l'annotation**.
 
-**Out of v1** (vNext, roadmap in §10): quick-emoji reactions; any in-chapter
-display (tint, gutter, popover, filter menu) and therefore client-side
-re-anchoring; post-publish add/edit/delete; replies; **per-annotation Report**
-(decision #3 — report the root comment); moderator « Vider le contenu » on an
-annotation; image annotation.
+**Out of v1:** everything else, owned by
+[`annotations-v2/`](../annotations-v2/00-request.md). v1 only has to keep the
+schema ready for it (replies, processed flag, immutable anchors).
 
 A direct consequence worth stating: in v1 annotations only travel with a new
 root comment, so a reader who **already posted** their root comment on the
@@ -158,8 +156,7 @@ DTOs (`Comment/Public/Api/Contracts/`):
   'commenter'|'author'|'moderator'`.
 - `AnnotationToCreateDto` — `body, highlightedText, prefix, suffix`.
 
-No events emitted in v1 (spec §10). vNext adds `applyChanges` (post-publish
-batch, **PUT**), `addReply`, and an entity-wide `getForEntity` for the gutter.
+No events emitted in v1 (spec §7).
 
 ### 3.2 Services
 
@@ -339,12 +336,6 @@ app/Domains/Comment/
 
 ## 9. Risks acknowledged
 
-- **Three highlighters on one article (vNext).** Quote's reader tint and author
-  heat each strip their marks, `normalize()` and re-wrap; an annotation tint
-  would be a third. Before vNext adds in-chapter display, coordinate the
-  renderers (or move to the CSS Custom Highlight API) and share Quote's
-  right-margin gutter rather than adding a second one. Not a v1 concern — v1
-  adds no mark.
 - **`data-quote-article` as a shared root.** Annotations anchor on a
   Quote-named attribute. Fine while both live on the chapter page; rename to a
   neutral attribute if a second annotable entity appears.
@@ -355,15 +346,3 @@ app/Domains/Comment/
   re-anchored), surfaces as `missing` once vNext displays them.
 - **Selection gesture** remains untested by Vitest (happy-dom); covered in VERIFY.
 
-## 10. Post-v1 roadmap (not committed)
-
-| Letter | Theme | Notes |
-|--------|-------|-------|
-| A | Quick-emoji reactions | Three more toolbar buttons; no schema change. |
-| B | Post-publish add / edit / delete | Pending-changes slot, save banner, `PUT /comments/{id}/annotations`, `applyChanges`. `canAnnotate` stops requiring "no root comment yet". |
-| C | Replies | `addReply`; schema ready. |
-| D | In-chapter display | Re-anchoring via `findAnchor`, tint + gutter shared with Quote (§9), popover with processed toggle. |
-| E | Filter menu | Commenter checklist + show processed, right margin only. |
-| F | Per-annotation Report | `chapter-annotation` moderation topic + formatter + seeded reasons. |
-| G | Moderator « Vider le contenu » | On a single annotation. |
-| H | Image annotation | Needs a stable block anchor; `buildCanonicalText` `within` is the text-side hook. |

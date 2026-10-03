@@ -7,7 +7,8 @@ Format: one row per decision. Never edit a row — if a decision is reversed, ad
 a new row that supersedes it and note the number.
 
 Decisions taken before the loop existed (June 2026) live in `01-functional.md`
-§11 and `02-architecture.md` §7 rows 1–5; they are not repeated here.
+§10 (full list: `annotations-v2/vision-spec.md` §11) and `02-architecture.md`
+§7 rows 1–5; they are not repeated here.
 
 | # | Date | Step | Question | Decision | Supersedes |
 |---|------|------|----------|----------|------------|
