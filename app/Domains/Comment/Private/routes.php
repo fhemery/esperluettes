@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Route;
+use App\Domains\Comment\Private\Controllers\AnnotationController;
 use App\Domains\Comment\Private\Controllers\CommentController;
 use App\Domains\Comment\Private\Controllers\CommentModerationController;
 
@@ -11,6 +12,9 @@ Route::middleware(['web', 'auth', 'compliant'])
     ->group(function () {
         Route::post('/', [CommentController::class, 'store'])->name('store');
         Route::patch('/{commentId}', [CommentController::class, 'update'])->name('update');
+        Route::get('/{commentId}/annotations', [AnnotationController::class, 'index'])
+            ->whereNumber('commentId')
+            ->name('annotations.index');
         
         Route::middleware('role:'.Roles::MODERATOR.','.Roles::ADMIN.','.Roles::TECH_ADMIN)->name('moderation.')->group(function(){
             Route::post('/{commentId}/empty-content', [CommentModerationController::class, 'emptyContent'])->name('empty-content');

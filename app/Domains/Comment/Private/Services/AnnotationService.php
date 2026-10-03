@@ -7,6 +7,7 @@ namespace App\Domains\Comment\Private\Services;
 use App\Domains\Comment\Private\Models\CommentAnnotation;
 use App\Domains\Comment\Private\Support\CommentBodySanitizer;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
+use Illuminate\Database\Eloquent\Collection;
 
 class AnnotationService
 {
@@ -33,5 +34,21 @@ class AnnotationService
                 'suffix' => $item->suffix,
             ]);
         }
+    }
+
+    /**
+     * Live root annotations under a comment, oldest first, optionally limited to one author.
+     *
+     * @return Collection<int, CommentAnnotation>
+     */
+    public function getRootsForComment(int $commentId, ?int $authorId = null): Collection
+    {
+        return CommentAnnotation::query()
+            ->roots()
+            ->where('comment_id', $commentId)
+            ->when($authorId !== null, fn ($q) => $q->where('author_id', $authorId))
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
     }
 }

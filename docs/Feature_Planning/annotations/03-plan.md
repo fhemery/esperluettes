@@ -21,7 +21,7 @@
 | 3 | Shared infrastructure — sanitizer `annotation` profile + Editor `inline` preset | S | — | DONE |
 | 4 | Create path — `POST /comments` accepts `annotations`, one transaction | M | 1, 2, 3 | DONE |
 | 4v | Checkpoint — comment posting on chapters and news | S | 4 | DONE |
-| 5 | Read path — `AnnotationAccessService`, `AnnotationPublicApi::getForComment`, `GET /comments/{id}/annotations` | M | 4 | TODO |
+| 5 | Read path — `AnnotationAccessService`, `AnnotationPublicApi::getForComment`, `GET /comments/{id}/annotations` | M | 4 | DONE |
 | 6 | Author and moderator actions — `PUT …/processed`, `DELETE /comments/annotations/{id}` | S | 5 | TODO |
 | 7 | `annotationCount` on `CommentDto` (page render + fragments) | S | 5 | TODO |
 | 8 | Lifecycle — moderation cascades, user deleted / deactivated / reactivated, chapter deleted | S | 5, 7 | TODO |
