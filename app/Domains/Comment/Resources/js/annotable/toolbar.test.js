@@ -135,6 +135,25 @@ describe('showToolbar', () => {
         expect(action('declaring').style.display).toBe('');
     });
 
+    it('an annotate button is hidden like the quote button when the selection touches an image caption', () => {
+        const quote = '<button data-action="quote" data-requires-selection-within=".ce-block--text">Citer</button>';
+        const annotate = '<button data-action="annotate" data-requires-selection-within=".ce-block--text">Annoter</button>';
+        setup(quote + annotate, `
+            <div class="ce-block ce-block--text"><p id="a">a</p></div>
+            <figure class="ce-block ce-block--image"><figcaption id="c">c</figcaption></figure>`);
+
+        select(range(textOf('a'), 0, textOf('a'), 1));
+        showToolbar();
+        expect(action('quote').style.display).toBe('');
+        expect(action('annotate').style.display).toBe('');
+
+        select(range(textOf('a'), 0, textOf('c'), 1));
+        showToolbar();
+        expect(toolbar().style.display).toBe('none');
+        expect(action('quote').style.display).toBe('none');
+        expect(action('annotate').style.display).toBe('none');
+    });
+
     it('applies the too-long state only when an action is applicable', () => {
         const long = 'x'.repeat(600);
         setup(DECLARING, `<div class="ok"><p id="a">${long}</p></div><figure><figcaption id="c">${long}</figcaption></figure>`);

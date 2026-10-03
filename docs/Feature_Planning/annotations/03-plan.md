@@ -27,7 +27,7 @@
 | 8 | Lifecycle — moderation cascades, user deleted / deactivated / reactivated, chapter deleted | S | 5, 7 | DONE |
 | 9 | Shared infrastructure — comment-draft `annotations` slot API + consumed marker clears it | S | — | DONE |
 | 9v | Checkpoint — root and reply comment drafts on chapters and news | S | 9 | DONE |
-| 10 | Capture — « Annoter » button, capture form, chapter-page wiring | M | 2, 3, 9 | TODO |
+| 10 | Capture — « Annoter » button, capture form, chapter-page wiring | M | 2, 3, 9 | DONE |
 | 10v | Checkpoint — Quote on the chapter page (toolbar, mini-form, highlights, heat) | S | 10 | TODO |
 | 11 | Drafts banner, drafts-mode pop-up, publish with the root comment | M | 4, 10 | TODO |
 | 12 | « N annotations » button and server-mode pop-up | M | 6, 7, 11 | TODO |

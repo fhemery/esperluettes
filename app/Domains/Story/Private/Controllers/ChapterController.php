@@ -13,6 +13,7 @@ use App\Domains\Story\Private\Http\Requests\ChapterRequest;
 use App\Domains\Story\Private\Http\Requests\ReorderChaptersRequest;
 use App\Domains\Story\Private\Models\Story;
 use App\Domains\Story\Private\Models\Chapter;
+use App\Domains\Story\Private\Services\ChapterCommentPolicy;
 use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\ReadingProgressService;
@@ -40,6 +41,7 @@ class ChapterController
         private StoryRefPublicApi $storyRefs,
         private CoverService $coverService,
         private ChapterChoiceTargets $choiceTargets,
+        private ChapterCommentPolicy $chapterCommentPolicy,
     ) {
     }
 
@@ -193,6 +195,7 @@ class ChapterController
                 Roles::TECH_ADMIN,
             ]),
             'canCreateChapter' => $isAuthor && $this->chapterCreditService->availableForUser($userId) > 0,
+            'canAnnotate' => $userId !== null && $this->chapterCommentPolicy->canAnnotate((int) $chapter->id, $userId),
             'audienceInfo' => $audienceInfo,
         ]);
     }
