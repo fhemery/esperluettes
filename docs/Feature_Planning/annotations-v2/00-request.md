@@ -21,6 +21,31 @@ The cut list, from the v1 architecture's roadmap (2026-10-03):
 | G | Moderator « Vider le contenu » | On a single annotation. |
 | H | Image annotation | Annotate an image block; needs a stable block anchor that does not exist today. |
 
+Small v1 leftovers, found at v1 WRAP (2026-10-03) — fold into whichever item
+touches the code, or do them first:
+
+- **A5 lifts with B.** v1 hides « Annoter » once the reader has a root comment
+  (`ChapterCommentPolicy::canAnnotate` = `canCreateRoot`). B must change that
+  gate, and the drafts banner that lives in the root-comment form.
+- **F needs decision #3 reopened**: v1 has no `chapter-annotation` moderation
+  topic; reports target the root comment.
+- `AnnotationAccessService::visibleCounts` gives authors/moderators a count
+  without asking `canAnnotate` (harmless while creation checks it).
+- `GET /comments/{id}/annotations` sends `is_processed` to moderators; the
+  pop-up shows it to authors only. Decide, then align payload and UI.
+- `StoreCommentRequest` hard-codes `highlighted_text` `max:500`, ignoring
+  `getAnnotationHighlightMaxLength` — a policy raising it would still be capped.
+- The `annotation` purifier profile duplicates the custom-emoji class list of
+  the other profiles in `config/purifier.php`; a new emoji must be added twice.
+- The annotations bundle loads on every authenticated comment list, news
+  included (inert there). Gating it needs `canAnnotate` on `CommentUiConfigDto`.
+- No direct PHP test for "a beta reader sees 0" in `AnnotationCountTest`; the
+  only seeded beta reader is also a moderator, so the browser cannot isolate it.
+- Unused e2e helpers left by the deleted VERIFY spec (`ChapterAnnotations`
+  `evidence`/`storedDrafts`/`storedRootBody`/`editDraft`/`allCountButtons`,
+  `ChapterPage.touchSelectText`/`quoteMiniForm`/`quotePanel`,
+  `LoginPage.logout`): reuse them in v2's specs or prune.
+
 ## Why
 
 The functional vision (in-context feedback the author can triage along the
