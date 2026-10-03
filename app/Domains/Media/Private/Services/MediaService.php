@@ -10,7 +10,9 @@ use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
  * Path-addressed image domain: storage, variant URLs, reuse listing and GC.
@@ -104,10 +106,25 @@ class MediaService
      * Stream a stored file back, on whichever disk its path resolves to.
      * Performs **no** authorization: the caller has already decided the
      * requester may see these bytes.
+     *
+     * Private paths come back as a BinaryFileResponse, which answers Range
+     * requests once the router prepares it. Its defaults are set here because
+     * prepare() is what would otherwise fill them, and a direct call skips it.
+     * Requires the private disk to be local (it needs an absolute path).
      */
-    public function stream(string $path, array $headers = []): StreamedResponse
+    public function stream(string $path, array $headers = []): Response
     {
-        return Storage::disk($this->diskFor($path))->response($path, null, $headers);
+        if (!$this->isPrivatePath($path)) {
+            return Storage::disk(self::DISK)->response($path, null, $headers);
+        }
+
+        $disk = Storage::disk(self::PRIVATE_DISK);
+        $response = new BinaryFileResponse($disk->path($path), 200, [], false);
+        $response->headers->set('Content-Type', $disk->mimeType($path) ?: 'application/octet-stream');
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, basename($path));
+        $response->headers->add($headers);
+
+        return $response;
     }
 
     public function exists(string $path): bool

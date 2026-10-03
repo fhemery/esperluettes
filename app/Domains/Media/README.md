@@ -43,7 +43,9 @@ Some images must not be web-reachable at all — a Secret Gift picture is confid
 
 `originalUrl()`, `variantUrl()` and `listByScope()` **throw** on a private path rather than inventing a `/storage/…` URL to a file that is not served. `store()` and `storePrivate()` likewise refuse each other's scopes, so bytes cannot land on the wrong disk by a typo in a scope string.
 
-A private image is served by the domain that owns its visibility rules: it checks its own rule, then calls `MediaPublicApi::stream($path, $headers)`, which returns a `StreamedResponse` with the right `Content-Type` and **performs no authorization of its own**. Media never learns a consumer's rules; the consumer never touches a disk. `exists($path)` resolves the same disk, so a 404 for a missing file is the consumer's own check.
+A private image is served by the domain that owns its visibility rules: it checks its own rule, then calls `MediaPublicApi::stream($path, $headers)`, which returns a `BinaryFileResponse` with the right `Content-Type`, an inline `Content-Disposition` under the stored basename (caller headers win), and **performs no authorization of its own**. Media never learns a consumer's rules; the consumer never touches a disk. `exists($path)` resolves the same disk, so a 404 for a missing file is the consumer's own check.
+
+That response honours HTTP `Range` once the router prepares it — `206` with `Content-Range`, and `Accept-Ranges: bytes` on a plain request — so audio seeking needs no consumer code. It relies on the `private` disk being `local` (it needs an absolute file path); moving that disk to object storage would lose Range and needs revisiting.
 
 ### Responsive variants vs. "keep original"
 

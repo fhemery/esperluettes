@@ -4,7 +4,7 @@ use App\Domains\Media\Public\Api\MediaPublicApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -54,7 +54,7 @@ describe('stream', function () {
 
         $response = $api->stream($path);
 
-        expect($response)->toBeInstanceOf(StreamedResponse::class);
+        expect($response)->toBeInstanceOf(BinaryFileResponse::class);
         expect($response->getStatusCode())->toBe(200);
         expect($response->headers->get('Content-Type'))->toBe('image/jpeg');
 
@@ -77,6 +77,15 @@ describe('stream', function () {
         expect($response->headers->get('Cache-Control'))->toContain('max-age=3600');
         expect($response->headers->get('Content-Disposition'))->toBe('attachment; filename="gift.jpg"');
         expect($response->headers->get('Content-Type'))->toBe('image/jpeg');
+    });
+
+    it('defaults to an inline disposition under the stored basename', function () {
+        $api = app(MediaPublicApi::class);
+        $path = $api->storePrivate('secret-gift/7', UploadedFile::fake()->image('gift.jpg', 40, 40));
+
+        $response = $api->stream($path);
+
+        expect($response->headers->get('Content-Disposition'))->toBe('inline; filename=' . basename($path));
     });
 });
 

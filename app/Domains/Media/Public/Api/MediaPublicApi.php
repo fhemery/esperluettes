@@ -8,7 +8,7 @@ use App\Domains\Media\Private\Services\MediaService;
 use App\Domains\Media\Public\Contracts\Dto\MediaPathPageDto;
 use Illuminate\Http\UploadedFile;
 use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Sole entry point other domains use for managed images.
@@ -53,9 +53,13 @@ class MediaPublicApi
      *
      * Performs **no** authorization — the caller must already have decided the
      * requester may see these bytes. Supplied headers win over the defaults
-     * (`Content-Type`, `Content-Length`, inline `Content-Disposition`).
+     * (`Content-Type`, inline `Content-Disposition`).
+     *
+     * Private paths come back as a `BinaryFileResponse` that honours `Range`
+     * (206, `Content-Range`, `Accept-Ranges: bytes`) once prepared by the
+     * router — so audio/video seeking works without consumer code.
      */
-    public function stream(string $path, array $headers = []): StreamedResponse
+    public function stream(string $path, array $headers = []): Response
     {
         return $this->media->stream($path, $headers);
     }

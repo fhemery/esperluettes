@@ -299,6 +299,67 @@ describe('SecretGift - Serve Files', function () {
                 ->toContain('gift-image-' . $user1->id . '-' . $assignment->id . '.jpg');
         });
 
+        it('answers a Range request on the image with 206 and Content-Range', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
+            ]);
+
+            $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+            $size = Storage::disk('private')->size($assignment->gift_image_path);
+
+            $response = $this->withHeaders(['Range' => 'bytes=0-9'])
+                ->get(route('secret-gift.image', [$result->activity, $assignment]));
+
+            $response->assertStatus(206);
+            $response->assertHeader('Content-Range', 'bytes 0-9/' . $size);
+            expect(strlen($response->streamedContent()))->toBe(10);
+        });
+
+        it('advertises byte ranges on a plain image request', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
+            ]);
+
+            $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
+
+            $response = $this->get(route('secret-gift.image', [$result->activity, $assignment]));
+
+            $response->assertStatus(200);
+            $response->assertHeader('Accept-Ranges', 'bytes');
+        });
+
+        it('still refuses the image to a recipient before the end even with a Range header', function () {
+            $user1 = alice($this);
+            $user2 = bob($this);
+
+            $result = createShuffledSecretGift($this, [$user1->id, $user2->id]);
+
+            $this->actingAs($user1);
+            $this->post(route('secret-gift.save-gift', $result->activity), [
+                'gift_image' => ['file' => UploadedFile::fake()->image('gift.jpg', 800, 600)],
+            ]);
+
+            $assignment = getSecretGiftAssignmentAsRecipient($result->id, $user2->id);
+
+            $this->actingAs($user2);
+            $response = $this->withHeaders(['Range' => 'bytes=0-9'])
+                ->get(route('secret-gift.image', [$result->activity, $assignment]));
+
+            $response->assertStatus(403);
+        });
+
         it('never exposes a gift image under a public storage url', function () {
             $user1 = alice($this);
             $user2 = bob($this);

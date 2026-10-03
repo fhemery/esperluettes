@@ -15,7 +15,7 @@
 |---|-------|------|------------|--------|
 | 1 | Refactor — move the sound widget from Shared to Media (`<x-media::sound-field>`) | S | — | DONE |
 | 1v | Checkpoint — gift preparation form (sound tab) | S | 1 | DONE |
-| 2 | Media — Range-capable `stream()` for private paths (shared infra) | S | — | TODO |
+| 2 | Media — Range-capable `stream()` for private paths (shared infra) | S | — | DONE |
 | 2v | Checkpoint — gift image view / download | S | 2 | TODO |
 | 3 | Media — raw private file store `storePrivateFile()` + GC treats every private file as an original (shared infra) | S | — | TODO |
 | 4 | SecretGift — `LegacyGiftSoundMover` (class + tests, not wired yet) | S | — | TODO |
