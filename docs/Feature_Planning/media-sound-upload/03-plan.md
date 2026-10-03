@@ -560,26 +560,37 @@ preparing a gift; **recipient** = the participant who receives it.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Gift preparation, sound tab, giver, ACTIVE, no sound (desktop) | Empty drop zone, MP3 / 10 Mo copy, label + help text from SecretGift | |
-| Same, file picker | Choosing an mp3 shows the preview player with name + size; × cancels back to empty | |
-| Same, drag & drop | Dropping an mp3 shows the preview; dropping a non-audio file is ignored | |
-| Same, save new sound | Success flash; after reload the current sound plays from the sound route | |
-| Same, seek in the preparation player | Dragging the scrubber jumps mid-track and plays from there | |
-| Same, replace | Upload a different mp3 → save → reload: the new one plays | |
-| Same, remove | Delete → save → reload: drop zone back, gift mode falls back correctly | |
-| Same, invalid file | A `.wav` or > 10 Mo file → French validation error under the field, nothing saved | |
-| Same, mobile (≈ 390 px) | Drop zone and player fit, buttons tappable, no overflow | |
-| Reveal, recipient, ENDED | Sound card shows with player; plays | |
-| Reveal, recipient, seek | Scrubbing mid-track works (Range) — DevTools shows a 206 on the sound request | |
-| Reveal, recipient, download | File saved as `gift-audio-{giver}-{id}.mp3` and plays locally | |
-| Reveal, recipient, ARCHIVED | Same as ENDED (player + download) | |
-| Recipient while ACTIVE | Direct GET of the sound / download URL → 403 | |
-| Non-participant | Direct GET of the sound / download URL → 403 | |
-| Guest | Sound URL → redirect to login | |
-| Gift with no sound | Reveal shows no sound card; sound URL → 404 | |
-| Migrated legacy sound | A sound uploaded before deploy (seed a `local` file + row, run the migration) plays and downloads in reveal | |
-| Gift image (regression) | Image preview in preparation and image + download in reveal still work | |
-| Browser console | No Alpine/JS errors on the preparation page | |
+| Gift preparation, sound tab, giver, ACTIVE, no sound (desktop) | Empty drop zone, MP3 / 10 Mo copy, label + help text from SecretGift | ✅ spec (`01-prepare-empty`); markup also in `MediaSoundFieldComponentTest` |
+| Same, file picker | Choosing an mp3 shows the preview player with name + size; × cancels back to empty | ✅ spec: `gift-sound.mp3` / `78.49 KB`, preview decodes 20 s; × empties player and file input (`02`, `03`) |
+| Same, drag & drop | Dropping an mp3 shows the preview; dropping a non-audio file is ignored | ✅ spec: real `DataTransfer` drop; `text/plain` ignored, mp3 taken into the file input (`04`) |
+| Same, save new sound | Success flash; after reload the current sound plays from the sound route | ✅ spec: flash, `src` = `secret-gift.sound` route, decodes 20 s, plays (`05`, `06`) |
+| Same, seek in the preparation player | Dragging the scrubber jumps mid-track and plays from there | ✅ spec: seek to 12 s → plays from 12–14 s (scrubber set via `currentTime`; native controls are a closed shadow root) (`06`) |
+| Same, replace | Upload a different mp3 → save → reload: the new one plays | ✅ spec: 8 s mp3 replaces the 20 s one, reloaded player reports 8 s (`07`) |
+| Same, remove | Delete → save → reload: drop zone back, gift mode falls back correctly | ✅ spec: `gift_sound_remove=true`, reload falls back to Texte mode, Son shows the drop zone, old sound URL → 404 (`11`) |
+| Same, invalid file | A `.wav` or > 10 Mo file → French validation error under the field, nothing saved | ✅ spec (`.wav`): "Le fichier audio doit être au format MP3." visible under the field, previous 8 s sound kept (`08`). > 10 Mo: `SaveGiftTest` |
+| Same, mobile (≈ 390 px) | Drop zone and player fit, buttons tappable, no overflow | ✅ spec: no clipped element with player, picked file or drop zone; bin 28 px inside the viewport (`09`, `10`) |
+| Reveal, recipient, ENDED | Sound card shows with player; plays | ✅ spec on new seeded `cadeau-surprise-termine`: player decodes 20 s and plays (`13`) |
+| Reveal, recipient, seek | Scrubbing mid-track works (Range) — DevTools shows a 206 on the sound request | ✅ spec: seek to 15 s plays from there; the player's own requests answered `206,206`; ranged fetch → 206 `bytes 0-9/80371` |
+| Reveal, recipient, download | File saved as `gift-audio-{giver}-{id}.mp3` and plays locally | ✅ spec: saved as `gift-audio-5-7.mp3`, byte-identical to the uploaded mp3 |
+| Reveal, recipient, ARCHIVED | Same as ENDED (player + download) | ✅ manual: the activity page itself 404s once ARCHIVED (base Calendar `findVisibleBySlugOrFail`, pre-existing, so there is no reveal to look at); the recipient's sound / download routes still answer 206 with `attachment; filename="gift-audio-5-7.mp3"`. No PHP test covers the ARCHIVED branch of `canViewSound` → BUILD |
+| Recipient while ACTIVE | Direct GET of the sound / download URL → 403 | ✅ `ServeFileTest`; checked by hand: 403 / 403 / 403 with Range, giver 200 on the same URL (`verify-14`) |
+| Non-participant | Direct GET of the sound / download URL → 403 | ✅ `ServeFileTest`; checked by hand as moderator: 403 / 403 (`verify-15`) |
+| Guest | Sound URL → redirect to login | ✅ manual: lands on `/login` (`verify-16`). No PHP test → BUILD |
+| Gift with no sound | Reveal shows no sound card; sound URL → 404 | ✅ 404: `ServeFileTest`; reveal checked by hand: "aucun cadeau" card, no audio, no sound link (`verify-17`). No Blade test of the reveal without a sound → BUILD |
+| Migrated legacy sound | A sound uploaded before deploy (seed a `local` file + row, run the migration) plays and downloads in reveal | ✅ manual on the e2e DB: `local:calendar/secret-gift/15/sound-2-1759000000.mp3` + row, `migrate:rollback --step=1` then `migrate` → `{moved: 2, already_migrated: 0, missing: []}`, source gone; recipient plays it (8 s, seek to 5 s) and downloads `gift-audio-6-8.mp3`, same bytes (`verify-18`). Also `LegacyGiftSoundMoveTest` |
+| Gift image (regression) | Image preview in preparation and image + download in reveal still work | ✅ spec: PNG preview before save and from `secret-gift.image` after reload (320 px); reveal image decodes, download `gift-image-5-7.png` (`12`, `13`) |
+| Browser console | No Alpine/JS errors on the preparation page | ✅ spec: no page error, console error or warning across pick / drop / save / reload |
+
+**VERIFY (2026-10-03, HEAD 1efc9f6a) — PASS.** Spec
+`e2e/tests/features/media-sound-upload.spec.ts` (7 tests) + fixtures
+`e2e/fixtures/gift-sound{,-short}.mp3`, `gift-image.png` and the new ENDED
+activity in `E2eSecretGiftSeeder`. Evidence in `shots/` (`E2E_SHOTS_DIR`) and
+`shots/verify-*` (run-app driver on the post-run e2e data). Feature tests to add
+in BUILD: guest → login on `secret-gift.sound`; recipient of an ARCHIVED
+activity → 200 on sound / download; reveal without a sound renders no audio.
+Noted, pre-existing (same in `checkpoint-1v/baseline-pre-phase-01-empty`): the
+drop-zone icon `upload_audio_file` is not in the icon font and renders as
+"upload _ audio_file"; a saved sound shows no file name/size.
 
 ## Open items
 

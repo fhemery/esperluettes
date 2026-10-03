@@ -184,7 +184,7 @@ export const CONTEST = {
 } as const;
 
 /**
- * The nine *Cadeau surprise* activities, written by
+ * The ten *Cadeau surprise* activities, written by
  * `app/Domains/Calendar/Database/Seeders/E2eSecretGiftSeeder.php`.
  *
  * Both the activity state and the registration window come from the clock, and
@@ -210,6 +210,21 @@ export const GIFTS = {
   toShuffle: { slug: 'cadeau-surprise-a-tirer', name: 'Cadeau surprise — tirage à lancer' },
   /** Admins only. */
   restricted: { slug: 'cadeau-surprise-reserve', name: 'Cadeau surprise — réservé' },
+  /** Ended: `author` gave `confirmed` the fixture sound and image below — the reveal. */
+  ended: { slug: 'cadeau-surprise-termine', name: 'Cadeau surprise — terminé' },
+} as const;
+
+/**
+ * Real media files, under `e2e/fixtures/`. The seeder stores `sound` and
+ * `image` as the ended gift; specs upload them through the gift form.
+ */
+export const GIFT_MEDIA = {
+  /** 20 s mono mp3. */
+  sound: { path: 'e2e/fixtures/gift-sound.mp3', seconds: 20 },
+  /** 8 s mono mp3 — tells a replaced sound from the first one by duration. */
+  shortSound: { path: 'e2e/fixtures/gift-sound-short.mp3', seconds: 8 },
+  /** 320×200 PNG. */
+  image: { path: 'e2e/fixtures/gift-image.png', width: 320, height: 200 },
 } as const;
 
 export const GIFT = {
