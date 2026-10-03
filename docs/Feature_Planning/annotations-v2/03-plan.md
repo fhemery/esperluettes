@@ -14,7 +14,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Refactor — extract `AnnotationItemValidator` from `CommentPublicApi` | S | — | TODO |
+| 1 | Refactor — extract `AnnotationItemValidator` from `CommentPublicApi` | S | — | DONE |
 | 1v | Checkpoint — posting root comments (with and without annotation drafts) on chapters and news | S | 1 | TODO |
 | 2 | v1 leftovers — policy highlight cap, counts respect `supportsAnnotations`, beta-reader count test | S | 1 | TODO |
 | 3 | Story — lift A5 in `canAnnotate`, annotation mode + root id on the chapter page (toolbar still draft-only) | S | 2 | TODO |
