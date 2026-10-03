@@ -16,6 +16,7 @@ Decisions taken before the loop existed (June 2026) live in `01-functional.md`
 | 2 | 2026-10-03 | DESIGN | Annotatable areas in v1 | Text blocks only (`.ce-block--text`, same selector as Quote); images, captions, chapter-choice excluded | — |
 | 3 | 2026-10-03 | DESIGN | Per-annotation Report (spec/arch contradicted each other) | Deferred to vNext; reports target the root comment. No `chapter-annotation` moderation topic in v1 | spec §11 #20, arch rev. 1 decision #10 |
 | 4 | 2026-10-03 | DESIGN | Moderator empties the root comment | Its annotations are soft-deleted too | arch rev. 1 §2.3 "keep as-is" |
+| 5 | 2026-10-03 | PLAN | Deactivation/reactivation vs moderator soft-deleted annotations | Leave annotation rows alone on deactivate/reactivate; the root comment's soft-delete hides them, so moderator removals never come back | arch rev. 2 §2.3 deactivation/reactivation cascade |
 
 ## Assumptions made without asking
 
