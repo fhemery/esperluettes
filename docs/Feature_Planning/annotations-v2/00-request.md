@@ -31,14 +31,10 @@ touches the code, or do them first:
   topic; reports target the root comment.
 - `AnnotationAccessService::visibleCounts` gives authors/moderators a count
   without asking `canAnnotate` (harmless while creation checks it).
-- `GET /comments/{id}/annotations` sends `is_processed` to moderators; the
-  pop-up shows it to authors only. Decide, then align payload and UI.
 - `StoreCommentRequest` hard-codes `highlighted_text` `max:500`, ignoring
   `getAnnotationHighlightMaxLength` — a policy raising it would still be capped.
 - The `annotation` purifier profile duplicates the custom-emoji class list of
   the other profiles in `config/purifier.php`; a new emoji must be added twice.
-- The annotations bundle loads on every authenticated comment list, news
-  included (inert there). Gating it needs `canAnnotate` on `CommentUiConfigDto`.
 - No direct PHP test for "a beta reader sees 0" in `AnnotationCountTest`; the
   only seeded beta reader is also a moderator, so the browser cannot isolate it.
 - Unused e2e helpers left by the deleted VERIFY spec (`ChapterAnnotations`
@@ -57,8 +53,8 @@ them with the comment, review them in a pop-up".
 - `vision-spec.md` in this folder is the original full functional spec (copy of
   `annotations/01-functional.md` as of 2026-10-03, with the v1 revisions
   noted). REFINE starts from it rather than from scratch; v1's finished record
-  (`_done/annotations.md` once wrapped) says what actually shipped.
-- Decisions already settled in `annotations/` apply unless deliberately
+  [`_done/annotations.md`](../_done/annotations.md) says what actually shipped.
+- Decisions already settled in v1 (listed in that record) apply unless deliberately
   reopened: cross-block selections refused, text blocks only (#1, #2),
   emptying a root comment deletes its annotations (#4). #3 deferred the
   per-annotation Report to here (item F).
