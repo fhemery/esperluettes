@@ -5,6 +5,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\Story\Public\Events\ChapterDeleted;
 
@@ -168,6 +169,28 @@ describe('Delete chapter', function () {
         expect($comments->getFor('chapter', (int) $c1->id, 1, 10)->total)->toBe(0);
         expect($comments->getFor('chapter', (int) $c2->id, 1, 10)->total)->toBe(1);
     });
+
+    it('deleting a chapter removes the annotations under its comments', function () {
+        $author = alice($this);
+        $story = publicStory('Annotated', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Annotated Chap']);
+
+        $this->actingAs(bob($this));
+        app(CommentPublicApi::class)->create(new CommentToCreateDto(
+            'chapter',
+            (int) $chapter->id,
+            str_repeat('y', 160),
+            null,
+            [new AnnotationToCreateDto('<p>Avis</p>', 'un passage', null, null)],
+        ));
+        expect(DB::table('comment_annotations')->count())->toBe(1);
+
+        $this->actingAs($author);
+        $this->delete('/stories/' . $story->slug . '/chapters/' . $chapter->slug)->assertRedirect();
+
+        expect(DB::table('comment_annotations')->count())->toBe(0);
+    });
+
     describe('Events', function () {
         it('is emitted when deleting a chapter and contains a snapshot', function () {
             $user = alice($this);

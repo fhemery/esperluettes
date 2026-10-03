@@ -28,6 +28,31 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
    Consider a documented rule — e.g. REFINE → direct edits → light WRAP when
    the spec is settled and no app code changes — so the next such task does
    not have to argue for it.
+4. **Alpine `$el` / `$root` trap, rediscovered twice.** *(annotations)* At
+   checkpoint 10v the capture form's « Enregistrer » stored nothing: methods
+   read config from `this.$el.dataset`, and `$el` is the clicked button
+   (fix `9dbeecf3`); in phase 11 `$root` was not the banner inside
+   `<x-shared::modal>` / `<x-shared::button>`'s own `x-data` (A11). Vitest
+   called methods directly, so it missed both. Fix: a front-end rule in
+   `app/Domains/Shared/AGENTS.md` — read component config once in `init()`
+   (closure or `x-ref`), never from `$el`/`$root` in methods — and a vitest
+   pattern that clicks the button.
+5. **SQLite tests do not catch MySQL's 64-char identifier limit.**
+   *(annotations, A6)* The generated name of a composite index was 68 chars;
+   found by reading, not by a test. Fix: a line in `AGENTS.md` § Migrations
+   ("name composite indexes explicitly; MySQL caps identifiers at 64") or a
+   gate check on migration index names.
+6. **E2E seed gaps forced throwaway-DB edits.** *(annotations)* No seeded
+   chapter has a `chapter-choice` block (injected by hand at 10v and again at
+   VERIFY), no single text block was over 500 chars (seeder extended), and the
+   only beta reader is also a moderator, so beta-reader visibility cannot be
+   checked in a browser. Fix: seed a chapter-choice block and a pure beta
+   reader in `E2eStorySeeder`.
+7. **PLAN named a `tests/core/` path for a new spec.** *(annotations, A13)*
+   The plan put the feature's e2e spec straight into `core/`, against
+   `e2e/README.md`'s `features/` default, leaving BUILD to arbitrate. Fix:
+   `plan-phases` skill says new specs go to `features/` unless the plan states
+   the promotion reason.
 
 ## Why
 

@@ -22,6 +22,7 @@ class CommentDto
         public bool $canReply = true,
         public bool $canEditOwn = false,
         public readonly array $children = [],
+        public int $annotationCount = 0,
     ) {
     }
 
@@ -61,6 +62,7 @@ class CommentDto
             'can_reply' => $this->canReply,
             'can_edit_own' => $this->canEditOwn,
             'children' => array_map(fn(self $c) => $c->toArray(), $this->children),
+            'annotation_count' => $this->annotationCount,
         ];
     }
 }

@@ -6,6 +6,7 @@
 
 - [CommentPublicApi](Public/Api/CommentPublicApi.php) — CRUD and read operations; main entry point for all comment interactions. Requires authenticated user for write and read. Delegates body sanitization to `CommentBodySanitizer` and permission decisions to `CommentPolicyRegistry`.
 - [CommentMaintenancePublicApi](Public/Api/CommentMaintenancePublicApi.php) — system-level bulk delete for use by owning domains (e.g. when a chapter is deleted).
+- [AnnotationPublicApi](Public/Api/AnnotationPublicApi.php) — read the annotations of one root comment (filtered by viewer role), toggle the processed flag, moderator delete. No create method: see invariants.
 - [CommentPolicyRegistry](Public/Api/CommentPolicyRegistry.php) — singleton; maps entity type strings to `CommentPolicy` implementations. Falls back to `DefaultCommentPolicy` (allow all, no length limits) when no policy is registered.
 
 ## Events emitted
@@ -21,7 +22,7 @@
 
 | Event | Action |
 |-------|--------|
-| `Auth::UserDeleted` | Nullifies `author_id` on all comments (content preserved) |
+| `Auth::UserDeleted` | Nullifies `author_id` on all comments (content preserved) and on all annotations, trashed included |
 | `Auth::UserDeactivated` | Soft-deletes all comments by that user |
 | `Auth::UserReactivated` | Restores soft-deleted comments by that user |
 
@@ -43,12 +44,24 @@
 
 **Editor assets must load on the list shell, not on fragments.** Reply/edit `<x-editor::rich-text>` instances often render only inside `GET /comments/fragments` HTML or when `canCreateRoot` is false — both paths discard `@push`. `comment-list.blade.php` includes `@include('editor::components._assets')` when `!$isGuest && !$error`; Alpine calls `initQuillEditor` when Répondre/Éditer opens. See README § Editor assets and inline composers.
 
-**`CommentMaintenancePublicApi::deleteFor()` is a hard soft-delete on all comments for a target.** It uses `deleteByTarget()` on the repository, which applies Laravel soft deletes to roots and replies in one query. Call this when deleting the owning entity (e.g. a chapter), not when moderating individual comments.
+**`CommentMaintenancePublicApi::deleteFor()` force-deletes all comments for a target.** It uses `deleteByTarget()` on the repository, which force-deletes roots and replies in one query; their annotations go through the `comment_id` FK cascade. Call this when deleting the owning entity (e.g. a chapter), not when moderating individual comments.
+
+**Annotations are only created with their root comment.** The sole write path is `CommentPublicApi::create` → `CommentService::postComment`, which inserts the root comment and its annotations in one transaction; annotation checks run first so a refusal lands on the `annotations` key and nothing is written. A reply carrying annotations is refused. Do not add a standalone create endpoint without revisiting the « Annoter » gating (a reader who already has a root gets none) and the drafts flow.
+
+**Annotations emit no events.** `CommentPosted` fires once, after the transaction, and carries nothing about annotations; processed toggles and moderator deletes are silent. Credits, notifications and statistics must not depend on annotations.
+
+**The processed flag is hidden from the commenter.** `AnnotationAccessService` resolves the viewer to `commenter`, `author` or `moderator` (in that order — an author commenting their own chapter is a `commenter`). For `commenter`, `getForComment` sends `is_processed: null`; authors and moderators receive it (moderators on purpose, though the pop-up displays it to authors only); only `author` may toggle it, only `moderator` may delete. Any new read path must go through `AnnotationAccessService`, not the raw policy, or it leaks the flag or other readers' annotations.
+
+**Annotations are reachable only through their root comment.** Reads load the comment with the default soft-delete scope, and counts are computed for listed comments only. That is why deactivating/reactivating a user touches no annotation row: the root comment's soft delete hides them, its restore brings them back, and annotations a moderator soft-deleted stay deleted. Emptying a root comment by moderation soft-deletes its annotations (`emptyContentByModeration`).
+
+**`highlighted_text`, `prefix` and `suffix` are stored unsanitized.** Only the body goes through HTMLPurifier (`annotation` profile). Always render the passage as text (`x-text`, `{{ }}`), never `x-html` / `{!! !!}`.
+
+**The « Annoter » button cannot host the capture form.** `<x-comment::annotable>` clones its `toolbar-actions` slot from a `<template>` on each selection; the button only dispatches `annotation:open-form`. The consumer renders `<x-comment::annotation-form>` once, outside the annotable region.
 
 **Moderation actions emit distinct events.** `emptyContentByModeration` emits `CommentContentModerated`; `deleteByModeration` emits `CommentDeletedByModeration`. Story domain listens to `CommentDeletedByModeration` to revoke chapter credits.
 
 ## Registry integrations
 
-- **CommentPolicyRegistry** (this domain) — other domains call `register(entityType, policy)` in their `boot()` to enforce domain-specific comment rules.
+- **CommentPolicyRegistry** (this domain) — other domains call `register(entityType, policy)` in their `boot()` to enforce domain-specific comment rules. A policy implementing `CommentPolicy` directly must also answer the five annotation methods (`supportsAnnotations`, `canAnnotate`, `canMarkAsProcessed`, the two max lengths); extending `DefaultCommentPolicy` leaves the entity non-annotatable. `supportsAnnotations()` is type-level: false means `comment-list` renders no banner, no pop-up and pushes no annotations bundle.
 - **ModerationRegistry** (`Moderation` domain) — registered as topic `'comment'` with `CommentSnapshotFormatter` so moderators can view and act on reported comments.
 - **EventBus** (`Events` domain) — all four comment events are registered in `CommentServiceProvider::boot()`.

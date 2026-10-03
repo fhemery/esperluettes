@@ -148,6 +148,7 @@ Both components take `toolbar` as a **preset name** resolved by
 | `links` | `default` + `link` |
 | `editorial` | `bold, italic, underline, strike, header, blockquote, align, list, custom-emoji, link` |
 | `narrative` | `default` + `link` + `spoiler` |
+| `inline` | `bold, italic, custom-emoji` |
 
 Presets are named after the **capability** they add, never after the domain that
 uses them — Editor does not encode who its consumers are. An unknown name falls

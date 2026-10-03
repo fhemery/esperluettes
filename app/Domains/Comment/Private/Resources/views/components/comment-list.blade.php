@@ -51,6 +51,9 @@
       @csrf
       <input type="hidden" name="entity_type" value="{{ $entityType }}">
       <input type="hidden" name="entity_id" value="{{ $entityId }}">
+      @if($annotationsEnabled)
+        @include('comment::components.partials.annotation-banner')
+      @endif
       <x-editor::rich-text
         id="comment-body-editor"
         name="body"
@@ -82,6 +85,10 @@
       <div class="mt-3 text-sm text-gray-500" x-show="loading">Loading…</div>
       <div class="h-1" x-ref="sentinel" x-intersect="loadMore()"></div>
     @endif
+
+    @if($annotationsEnabled)
+      @include('comment::components.partials.annotation-modal')
+    @endif
   @endif
 </div>
 
@@ -92,6 +99,15 @@
     @endpush
   @endif
 @endonce
+@if($annotationsEnabled)
+  {{-- annotationDrafts (banner above the root form) and annotationsModal (the
+       « N annotations » pop-up); same key as the other components that need
+       the annotations bundle. Only for entity types whose policy
+       supportsAnnotations(). --}}
+  @pushOnce('head-scripts', 'comment-annotations-bundle')
+    @vite('app/Domains/Comment/Resources/js/annotations/index.js')
+  @endPushOnce
+@endif
 
 @if(!$isGuest && session()->has('comment.draft_consumed'))
   @push('scripts')
@@ -109,6 +125,7 @@
           if (!userId || !entityType || !entityId) return;
           if (scope === 'root') {
             window.commentDrafts.clearRoot(userId, entityType, entityId);
+            window.commentDrafts.clearAnnotations(userId, entityType, entityId);
           } else if (scope === 'reply') {
             window.commentDrafts.clearReply(userId, entityType, entityId);
           }

@@ -79,6 +79,34 @@ export class ChapterPage {
   }
 
   /**
+   * Touch variant of `selectText`: Playwright cannot long-press to select, so
+   * the range is set programmatically and a `touchend` is dispatched on the
+   * element — the toolbar's touch handler reads `e.target`.
+   */
+  async touchSelectText(target: Locator): Promise<void> {
+    await target.evaluate((el) => {
+      const node = document.createTreeWalker(el, NodeFilter.SHOW_TEXT).nextNode() as Text;
+      const range = document.createRange();
+      range.setStart(node, 0);
+      range.setEnd(node, node.length);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      el.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
+    });
+  }
+
+  /** Quote's mini-form (« Citer »), teleported to <body>. */
+  get quoteMiniForm(): Locator {
+    return this.page.locator('[aria-labelledby="quote-mini-form-title"]');
+  }
+
+  /** The reader's own quote panel, opened by clicking one of their tints. */
+  get quotePanel(): Locator {
+    return this.page.locator('[aria-labelledby="quote-panel-title"]');
+  }
+
+  /**
    * Selects from the start of `from`'s first text node to the end of `to`'s,
    * then releases the mouse — a drag that starts in one element and ends in
    * another.

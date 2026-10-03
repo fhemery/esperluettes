@@ -92,6 +92,15 @@ class E2eStorySeeder extends Seeder
     public const LONG_CHAPTER_ID = 10;
     public const LONG_CHAPTER_SLUG = 'chapitre-long-10';
 
+    /** Over 500 plain-text characters, in the co-authored chapter. */
+    public const LONG_PARAGRAPH = 'Un long paragraphe pour les sélections trop longues. '
+        . 'Il raconte une promenade sans fin le long d\'une rivière tranquille, où chaque pierre, '
+        . 'chaque roseau et chaque reflet de lumière mérite sa propre phrase, de sorte que le '
+        . 'lecteur qui voudrait tout surligner d\'un seul geste dépasse forcément la limite permise. '
+        . 'La promenade continue encore, passe un vieux moulin, longe un champ de blé, traverse un '
+        . 'pont de bois qui grince, puis revient vers le village par un sentier bordé de haies, '
+        . 'sans que rien ne vienne interrompre ce flot de mots volontairement interminable et sage.';
+
     /** Fixture image of the illustrated chapter, copied from the repo on seed. */
     public const ILLUSTRATION_PATH = 'chapters/e2e/illustration.jpg';
 
@@ -385,7 +394,11 @@ class E2eStorySeeder extends Seeder
         }
 
         $this->createChapter(self::COAUTHORED_CHAPTER_ID, 'Chapitre coécrit', self::COAUTHORED_CHAPTER_SLUG, [
-            'content' => '<p>Un chapitre que deux personnes peuvent modifier.</p>',
+            // The second paragraph alone is over 500 characters: the longest
+            // passage a reader may annotate or quote, so a spec can exceed it
+            // inside one text block.
+            'content' => '<p>Un chapitre que deux personnes peuvent modifier.</p>'
+                . '<p>' . self::LONG_PARAGRAPH . '</p>',
             'sort_order' => 1,
             'status' => Chapter::STATUS_PUBLISHED,
             'first_published_at' => now(),

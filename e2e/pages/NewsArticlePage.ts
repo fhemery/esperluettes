@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { NEWS } from '../support/fixtures';
 import { CommentThread } from './CommentThread';
 
@@ -11,6 +11,11 @@ export class NewsArticlePage {
     private readonly slug: string = NEWS.slug,
   ) {
     this.comments = new CommentThread(page);
+  }
+
+  /** The rendered article body. */
+  get content(): Locator {
+    return this.page.locator('.news-content');
   }
 
   get path(): string {

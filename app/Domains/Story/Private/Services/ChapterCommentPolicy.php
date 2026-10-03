@@ -88,4 +88,36 @@ class ChapterCommentPolicy implements CommentPolicy
             'chapterSlug' => $chapter->slug,
         ]) . '?comment=' . $commentId;
     }
+
+    public function supportsAnnotations(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Same audience as a root comment (annotations are posted with it), but
+     * never a guest: canCreateRoot alone answers true for user id 0.
+     */
+    public function canAnnotate(int $entityId, int $userId): bool
+    {
+        return $userId > 0 && $this->canCreateRoot($entityId, $userId);
+    }
+
+    /**
+     * Authors and co-authors only; beta readers are collaborators, not authors.
+     */
+    public function canMarkAsProcessed(int $entityId, int $userId): bool
+    {
+        return $this->chapters->isUserAuthorOfChapter($entityId, $userId);
+    }
+
+    public function getAnnotationBodyMaxLength(): ?int
+    {
+        return 1000;
+    }
+
+    public function getAnnotationHighlightMaxLength(): ?int
+    {
+        return 500;
+    }
 }

@@ -21,6 +21,11 @@ class StoreCommentRequest extends FormRequest
             'entity_id' => ['required', 'integer'],
             'body' => ['required', 'string'],
             'parent_comment_id' => ['nullable', 'integer'],
+            'annotations' => ['nullable', 'array'],
+            'annotations.*.body' => ['required', 'string'],
+            'annotations.*.highlighted_text' => ['required', 'string', 'max:500'],
+            'annotations.*.prefix' => ['nullable', 'string', 'max:255'],
+            'annotations.*.suffix' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -36,6 +41,24 @@ class StoreCommentRequest extends FormRequest
             'entity_id' => isset($entityId) ? (int) $entityId : null,
             // Keep null when not provided; cast to int when provided (even if a numeric string)
             'parent_comment_id' => $parentId === null || $parentId === '' ? null : (int) $parentId,
+            'annotations' => $this->decodeAnnotations($this->input('annotations')),
         ]);
+    }
+
+    /**
+     * The client serialises annotation drafts into one hidden input (JSON string).
+     * Empty / missing → []; undecodable → left as is so the `array` rule fails.
+     */
+    private function decodeAnnotations(mixed $raw): mixed
+    {
+        if ($raw === null || $raw === '') {
+            return [];
+        }
+        if (!is_string($raw)) {
+            return $raw;
+        }
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : $raw;
     }
 }

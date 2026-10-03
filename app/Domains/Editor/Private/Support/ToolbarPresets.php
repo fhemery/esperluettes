@@ -25,6 +25,7 @@ final class ToolbarPresets
             // `header` sits after `strike`, where every call site's literal had it.
             'editorial' => ['bold', 'italic', 'underline', 'strike', 'header', 'blockquote', 'align', 'list', 'custom-emoji', 'link'],
             'narrative' => [...self::DEFAULT, 'link', 'spoiler'],
+            'inline' => ['bold', 'italic', 'custom-emoji'],
         ];
     }
 

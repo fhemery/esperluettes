@@ -89,6 +89,20 @@
     </div>
 
     <div class="col-span-2">
+      @if(($comment->annotationCount ?? 0) > 0)
+      <!-- « N annotations »: opens the server-mode pop-up held by comment-list -->
+      <div class="pl-2 sm:pl-6 mb-2">
+        <button
+          type="button"
+          class="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80"
+          data-annotations-button
+          data-comment-id="{{ $comment->id }}"
+          x-on:click="$dispatch('annotations:open', { commentId: {{ $comment->id }} })">
+          <span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">edit_note</span>
+          <span data-annotations-count>{{ trans_choice('comment::annotations.button', $comment->annotationCount, ['count' => $comment->annotationCount]) }}</span>
+        </button>
+      </div>
+      @endif
       <!-- Body or Edit form -->
       <div class="rich-content comment-body text-lg pl-2 sm:pl-6" x-show="activeEditId !== {{ $comment->id }}">
         {!! $comment->body !!}

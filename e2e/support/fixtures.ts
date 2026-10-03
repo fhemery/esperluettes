@@ -70,7 +70,10 @@ export const STORY = {
   simpleChapter: { slug: 'chapitre-simple-3', title: 'Chapitre simple' },
   /** The same six paragraphs, split 2/2/2 across three text blocks. Never mutated. */
   advancedChapter: { slug: 'chapitre-avance-4', title: 'Chapitre avancé' },
-  /** Used only for the no-op-conversion word-count check. */
+  /**
+   * Content used only for the no-op-conversion word-count check. Its comment
+   * thread belongs to the annotations spec: `confirmed` posts its root there.
+   */
   countedChapter: { slug: 'chapitre-compte-5', title: 'Chapitre compté' },
   /** Advanced: inline formatting, then a raw lazily-loaded image with a caption, then prose. */
   illustratedChapter: {
@@ -88,6 +91,7 @@ export const STORY = {
 export const COAUTHORED_STORY = {
   slug: 'histoire-coecrite-2',
   title: 'Histoire coécrite E2E',
+  /** Two paragraphs; the second (`E2eStorySeeder::LONG_PARAGRAPH`) is over 500 characters. */
   chapter: { slug: 'chapitre-coecrit-6', title: 'Chapitre coécrit' },
 } as const;
 

@@ -74,7 +74,8 @@ Clicking one of the three quick-emoji buttons (heart, fire, thumbs up):
 - The user can later edit the annotation (e.g., to add text after the emoji) from the review tab in the root-comment form (see §4.5).
 
 #### Highlight constraints
-- A single selection may span multiple paragraphs / blocks.
+- A single selection may span multiple paragraphs **within one block**. A selection whose start and end lie in two different chapter blocks (Advanced chapters) is refused at capture with an inline error, exactly as for quotes. *(Revised 2026-10-03, DECISIONS #1 — was "may span multiple paragraphs / blocks".)*
+- Only **text blocks** are annotatable: image blocks, their captions and chapter-choice blocks are not. The toolbar hides « Annoter » when the selection covers text outside a text block, as it does for « Citer ». *(DECISIONS #2.)*
 - Maximum highlighted text length: **TBD (proposed: 500 plain-text characters)**. Selections beyond the cap show a tooltip "Selection too long" and disable the toolbar.
 - Empty / whitespace-only selections do not show the toolbar.
 - Overlapping annotations from the same user are allowed.
@@ -287,7 +288,8 @@ To make selection capture (creation time) and re-anchoring (later) consistent, b
 - HTML tags are stripped — only text nodes contribute.
 - Custom emoji blots (`<span class="ql-custom-emoji-{name}">`) are replaced by `:{name}:` in the canonical view (e.g., `:fire:`, `:heart:`). This makes them addressable, selectable, and stable across re-renders, and it survives the round-trip into the blockquote shown in the per-commenter pop-up.
 - Whitespace is preserved as it appears in the DOM (no collapsing beyond what the browser already does).
-- Block boundaries (`</p>`, `</blockquote>`, etc.) contribute a single space, so two adjacent paragraphs don't fuse word-wise.
+- Block boundaries (`</p>`, `</blockquote>`, etc.) contribute a single newline, so two adjacent paragraphs don't fuse word-wise. *(As implemented by the shared `buildCanonicalText`, which Quote and annotations both use.)*
+- Only text blocks (`.ce-block--text`) contribute; Simple chapters are rendered as one text block.
 
 Only the chapter body is annotatable — never the `author_note` or any other chrome.
 
@@ -300,7 +302,7 @@ Only the chapter body is annotatable — never the `author_note` or any other ch
 | Highlighted text max length (plain text) | **Proposed: 500** |
 | Annotation body max length on replies | Same as annotation body |
 | Number of annotations per (user, chapter) | **No hard cap** — but capped indirectly by max-length-of-highlighted-text + UI usability |
-| Editor formatting allowed | Bold, italic, custom emojis only. Implemented by extending `editor.blade.php` with an explicit list-of-options prop (the set of toolbar features to expose) that propagates down to `editor-bundle.js` — replacing the current ad-hoc `withHeadings` / `withLinks` / `withSpoiler` toggles. |
+| Editor formatting allowed | Bold, italic, custom emojis only — a dedicated toolbar preset of the Editor domain's rich-text editor. |
 | Anchor context size (each side) | Up to 5 words |
 | Root comment min length | **140** (unchanged) |
 | Root comment can be published without annotations | **Yes** (unchanged behavior) |
@@ -326,6 +328,8 @@ Annotations and annotation replies **never** trigger a notification, in v1. Spec
 
 ## 9. Moderation
 
+> **v1 (DECISIONS #3, 2026-10-03):** there is **no per-annotation Report** in v1 — reports target the root comment through the existing comment flow (as §4.4, §4.5 and §12.4 already say). The `chapter-annotation` topic below is vNext. Emptying or deleting the root comment deletes its annotations (DECISIONS #4).
+
 Annotations are reportable in their own right. A new moderation topic **`chapter-annotation`** is registered with `ModerationRegistry` (alongside the existing `comment` topic), with its own snapshot formatter and its own dedicated set of moderation reasons.
 
 Moderation actions available on individual annotations:
@@ -346,7 +350,7 @@ Notes:
 
 ## 10. Out of Scope (v1) — Reserved for Later
 
-- **Annotating images.** Once chapters support multi-block content (text + images) via the MultiEdit feature (see `MultiEdit.md`), readers should be able to annotate an **image block** — attach a comment/reaction to a whole image (and later, possibly a region of it), analogous to annotating a text passage. v1 annotations anchor to plain text only (§5); image blocks are neither annotatable nor part of the canonical text projection. To be designed once MultiEdit lands on chapters.
+- **Annotating images.** Chapters now support multi-block content (text, images, chapter-choice). Readers should eventually be able to annotate an **image block** — attach a comment/reaction to a whole image (and later, possibly a region of it). v1 annotations anchor to text blocks only (§5); image blocks and captions are neither annotatable nor part of the canonical text projection. Needs a stable block anchor, which does not exist today.
 - **Surfacing "processed" state to the commenter.** v1 keeps the processed flag strictly author-side. A future enhancement could optionally show readers when their annotation has been processed, or even let the reader request a re-review.
 - **In-chapter annotation icons on mobile (below `md`).** v1 deliberately has no inline UI on phones. A future enhancement could add a discreet inline indicator if user testing shows the pop-up-only flow is insufficient.
 - **Cross-device draft / pending-change sync.** Drafts and post-publish pending changes live in local storage; no server-side draft persistence. If a user starts on phone and switches to desktop, drafts/pending edits don't follow.
@@ -388,6 +392,8 @@ Notes:
 | 22 | Annotatable chapter regions | Chapter body only — `author_note` is not annotatable |
 | 23 | Annotation editor formatting | Bold, italic, custom emojis only. Delivered by refactoring `editor.blade.php` to accept an explicit list-of-toolbar-options prop (propagated to `editor-bundle.js`), replacing the current `withHeadings` / `withLinks` / `withSpoiler` toggles |
 | 24 | Save trigger for in-progress annotation body | Save button or Ctrl/Cmd+Enter only (focus-out does **not** auto-save) |
+
+Revisions after the Quote / MultiEdit work (2026-10-03, see `DECISIONS.md`): cross-block selections refused (#1); text blocks only (#2); #20 superseded for v1 — no per-annotation Report (#3); emptying a root comment deletes its annotations (#4); #23's editor refactor is replaced by an Editor-domain preset.
 
 ## 12. User Flows (illustrative)
 
@@ -438,7 +444,8 @@ Notes:
 ## Next steps — **done**
 
 This spec is locked. The architecture document
-([`02-architecture.md`](./02-architecture.md)) covers, as planned:
+(`annotations/02-architecture.md`, deleted at v1 WRAP — git history; what
+shipped is in [`_done/annotations.md`](../_done/annotations.md)) covers, as planned:
 
 - Domain ownership (annotations live in the Comment domain or in Story?).
 - Data model (a new `chapter_annotations` table vs. reusing `comments`).

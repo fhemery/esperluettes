@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Editor\Private\Support\ToolbarPresets;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -57,6 +58,16 @@ describe('toolbar presets', function () {
 
         $html->assertSee('data-spoiler-label=', false);
         $html->assertSee('data-link-visit=', false);
+    });
+
+    it('resolves the inline preset to bold, italic and custom-emoji', function () {
+        expect(ToolbarPresets::resolve('inline'))->toBe(['bold', 'italic', 'custom-emoji']);
+    });
+
+    it('rich-text with toolbar="inline" renders data-toolbar with exactly those tokens', function () {
+        $html = $this->blade('<x-editor::rich-text name="x" id="x" toolbar="inline" />');
+
+        $html->assertSee(toolbarAttribute(['bold', 'italic', 'custom-emoji']), false);
     });
 
     it('resolves presets in <x-editor::multi> too, in both panes', function () {

@@ -6,6 +6,7 @@ use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\View\Component;
 use Illuminate\Contracts\View\View as ViewContract;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Comment\Public\Api\Contracts\CommentListDto;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +21,7 @@ class CommentListComponent extends Component
     public function __construct(
         private readonly AuthPublicApi $authApi,
         private readonly CommentPublicApi $api,
+        private readonly CommentPolicyRegistry $policies,
         public string $entityType,
         public int $entityId,
         public int $perPage = 5,
@@ -57,6 +59,7 @@ class CommentListComponent extends Component
             'error' => $this->error,
             'isGuest' => $this->isGuest,
             'isModerator' => $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]),
+            'annotationsEnabled' => !$this->isGuest && $this->policies->supportsAnnotations($this->entityType),
         ]);
     }
 

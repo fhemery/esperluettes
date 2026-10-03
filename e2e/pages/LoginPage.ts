@@ -55,6 +55,13 @@ export class LoginPage {
     ).toBeVisible();
   }
 
+  /** Submit the navigation's logout form, the way the user menu does. */
+  async logout(): Promise<void> {
+    await this.page.locator('form[action$="/logout"]').first().evaluate((form: HTMLFormElement) => form.submit());
+    await this.page.waitForLoadState('networkidle');
+    await expect(this.page.locator('form[action$="/logout"]')).toHaveCount(0);
+  }
+
   /**
    * Accept the terms when the app asks. It only asks once per account, and the
    * e2e database is rebuilt per run, so this fires on the first login of a run

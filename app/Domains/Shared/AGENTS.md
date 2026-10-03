@@ -50,7 +50,7 @@
 
 **The editor is not here — but the read side is.** The Quill bundle, the editor chrome CSS and the `<x-editor::…>` components belong to the `Editor` domain. What stays in Shared is everything a page needs to *display* stored content without an editor: the `.rich-content` / `.ql-align-*` / `.ql-custom-emoji*` / read-only spoiler rules in `Resources/css/app.css`, and the `app.js` spoiler-reveal delegate. Moving one of those to Editor silently breaks read-only pages, since they load no editor asset.
 
-**`Resources/js/anchoring/` stays in Shared.** Canonical text, anchor extraction and re-anchoring run on *rendered* pages, for Quote (and later annotations) — they are a read-side concern with different consumers and a different lifecycle from authoring. This is deliberate, not an unfinished extraction: do not move it into `Editor`.
+**`Resources/js/anchoring/` stays in Shared.** Canonical text, anchor extraction and re-anchoring run on *rendered* pages, for Quote and Comment annotations — they are a read-side concern with different consumers and a different lifecycle from authoring. This is deliberate, not an unfinished extraction: do not move it into `Editor`.
 
 **`anchoring/block-elements.js` and `anchoring/canonical-text.js` define "block" differently — on purpose.** `canonical-text.js`'s `BLOCK_TAGS` includes bare `DIV` (any block-level wrapper should insert a space in the extracted text). `block-elements.js`'s `isBlockElement()` excludes bare `DIV` and only recognises `div.ce-block`, because it answers a different question (does a selection cross two blocks, so the caller can refuse it). Do not merge these two sets or reuse one for the other's purpose.
 
