@@ -31,7 +31,7 @@
 | 10v | Checkpoint — Quote on the chapter page (toolbar, mini-form, highlights, heat) | S | 10 | DONE |
 | 11 | Drafts banner, drafts-mode pop-up, publish with the root comment | M | 4, 10 | DONE |
 | 12 | « N annotations » button and server-mode pop-up | M | 6, 7, 11 | DONE |
-| 12v | Checkpoint — comment lists on chapters and news | S | 12 | TODO |
+| 12v | Checkpoint — comment lists on chapters and news | S | 12 | DONE |
 | 13 | End-to-end spec and domain documentation sweep | S | 12 | TODO |
 
 17 rows: 13 phases + 4 checkpoints.
@@ -855,6 +855,47 @@ fragments) and `comment-list`. Check that the existing list survived.
   `e2e/tests/core/comment-draft-consume.spec.ts`.
 
 Screenshots under `shots/checkpoint-12v/`.
+
+**Result (2026-10-03, HEAD 2c48eb67) — PASS**
+
+The three e2e specs pass (13/13). Then driven on the e2e instance (`:8080`)
+through the `run-app` driver, as guest, confirmed, author and moderator, from
+each role's e2e storage state. Throwaway-DB additions, no code change: seven
+more root comments and one author reply on `chapitre-publie-1`; two
+annotations on root #1 (one processed) and one on the newest root.
+
+- Moderator, chapter: infinite scroll loads all 8 roots and the reply, all from
+  fragments; « 2 annotations » on #1, « 1 annotation » on the newest root,
+  between header and body (`01`). Moderator dropdown opens on #1 next to the
+  button (`02`). Server pop-up lists 2 rows with delete actions (`03`).
+  « Répondre » on a fragment-loaded root opens the Quill reply composer (`04`).
+- Moderator « Vider le contenu » on a root → `<Commentaire supprimé>`;
+  « Supprimer » on another → gone (`07`).
+- Deep link `?comment=1#comments`: #1 ringed and scrolled into view (`08`).
+- Modals: with a drafts slot injected in localStorage, the banner shows; drafts
+  pop-up opens alone (`05`), Escape closes it; server pop-up then opens alone
+  (`06`), Escape closes it; drafts pop-up reopens alone, Escape; nothing left
+  open and `body.overflow-y-hidden` cleared.
+- Confirmed (commenter of #1): button on #1 only; pop-up read-only, no
+  processed marker (`09`); edit own root opens Quill with the body (`10`).
+- Author: both buttons; pop-up shows « Traitée » on the processed row and the
+  toggle buttons (`11`); reply on a loaded root opens the composer.
+- Guest: « Seuls les membres… » as before; no button, pop-up or banner markup.
+- News, all four roles: list loads, no « N annotations » button, banner hidden;
+  confirmed reply and edit open their composers (`12`); moderator dropdown
+  opens (`13`).
+- 375 px, moderator and author: no horizontal overflow (document 365, header
+  right edge 349, button 24–141) (`14-*`); pop-up fits the viewport (`15-*`).
+- No HTTP ≥ 400 or page error for confirmed, author or moderator on either
+  page. Not regressions: guest `GET /quotes?chapter_id=…` → 401 on the chapter
+  page (Quote JS, unchanged on this branch); avatar URLs on `:8081` refused
+  (e2e `APP_URL` vs the `:8080` serve used here).
+
+Observation, not a regression: an annotation row seeded directly on a news
+comment did show « 1 annotation » to its commenter and to moderators —
+`AnnotationAccessService::visibleCounts` counts by viewer role without asking
+the entity's policy. Unreachable through the app (news policy refuses
+annotations at create, phase 4); removed before the news checks above.
 
 ---
 
