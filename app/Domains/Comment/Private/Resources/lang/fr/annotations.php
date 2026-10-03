@@ -31,6 +31,18 @@ return [
         'text' => '{1} :count annotation, écrivez votre commentaire pour la sauvegarder|[2,*] :count annotations, écrivez votre commentaire pour les sauvegarder',
         'show' => 'Voir les annotations',
     ],
+    'changes_banner' => [
+        'text' => '{1} Vous avez :count annotation non sauvegardée|[2,*] Vous avez :count annotations non sauvegardées',
+        'save' => 'Enregistrer',
+        'show' => 'Voir',
+        'discard' => 'Tout annuler',
+        'discard_confirm' => 'Abandonner toutes vos modifications d\'annotations non sauvegardées ?',
+        'saving' => 'Enregistrement…',
+        'error_items' => 'Rien n\'a été enregistré : corrigez ou retirez ces modifications.',
+        'error_generic' => 'L\'enregistrement a échoué. Vos modifications sont conservées ; réessayez.',
+        'item_edit' => 'Modification d\'une annotation',
+        'item_delete' => 'Suppression d\'une annotation',
+    ],
     'drafts_modal' => [
         'title' => 'Vos annotations en attente',
         'edit' => 'Modifier',

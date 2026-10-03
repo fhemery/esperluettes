@@ -24,7 +24,7 @@
 | 7 | JS infrastructure — `annotationChanges` slot in the comment-draft store (schema v2) + `api.js` calls | S | 4, 6 | DONE |
 | 7v | Checkpoint — existing comment drafts and v1 annotation drafts survive the store bump | S | 7 | DONE |
 | 8 | Toolbar — pending mode for the capture form + ❤️ 🔥 👍 reaction buttons | M | 7 | DONE |
-| 9 | Save banner — `annotationChangesBanner` (count, Enregistrer, Tout annuler, 422 mapping) | M | 8 | TODO |
+| 9 | Save banner — `annotationChangesBanner` (count, Enregistrer, Tout annuler, 422 mapping) | M | 8 | DONE |
 | 10 | Pop-up, commenter overlay — pending markers, undo, pending adds, Modifier / Supprimer | M | 9 | TODO |
 | 11 | Pop-up, replies — thread, Répondre, delete own / moderator delete, author hint | M | 6, 10 | TODO |
 | 12 | E2E — commenter ↔ author round trip; reuse or prune v1's orphan helpers | S | 11 | TODO |

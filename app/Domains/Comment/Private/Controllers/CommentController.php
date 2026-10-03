@@ -5,6 +5,7 @@ namespace App\Domains\Comment\Private\Controllers;
 
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
@@ -22,8 +23,9 @@ use Illuminate\Validation\ValidationException;
 class CommentController extends Controller
 {
     public function __construct(
-        private CommentPublicApi $api, 
-        private AuthPublicApi $authApi)
+        private CommentPublicApi $api,
+        private AuthPublicApi $authApi,
+        private CommentPolicyRegistry $policies)
     {
     }
 
@@ -110,6 +112,7 @@ class CommentController extends Controller
             'items' => $list->items,
             'config' => $list->config,
             'isModerator' => $this->authApi->hasAnyRole([Roles::MODERATOR, Roles::ADMIN, Roles::TECH_ADMIN]),
+            'annotationsEnabled' => $this->policies->supportsAnnotations($data['entity_type']),
         ])->render();
 
         $response = new Response($html, 200, [

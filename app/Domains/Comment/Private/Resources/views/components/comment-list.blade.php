@@ -87,6 +87,7 @@
     @endif
 
     @if($annotationsEnabled)
+      @include('comment::components.partials.annotation-changes-banner')
       @include('comment::components.partials.annotation-modal')
     @endif
   @endif

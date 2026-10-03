@@ -89,12 +89,17 @@
     </div>
 
     <div class="col-span-2">
-      @if(($comment->annotationCount ?? 0) > 0)
+      @php($annotationCount = $comment->annotationCount ?? 0)
+      {{-- The viewer's own root comment always carries the button (hidden at 0),
+           so the save banner can reveal it after the first save. --}}
+      @php($isOwnAnnotatableRoot = ($annotationsEnabled ?? false) && !($isChild ?? false) && Auth::check() && Auth::id() === $comment->authorId)
+      @if($annotationCount > 0 || $isOwnAnnotatableRoot)
       <!-- « N annotations »: opens the server-mode pop-up held by comment-list -->
       <div class="pl-2 sm:pl-6 mb-2">
         <button
           type="button"
           class="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80"
+          @if($annotationCount === 0) hidden @endif
           data-annotations-button
           data-comment-id="{{ $comment->id }}"
           x-on:click="$dispatch('annotations:open', { commentId: {{ $comment->id }} })">
