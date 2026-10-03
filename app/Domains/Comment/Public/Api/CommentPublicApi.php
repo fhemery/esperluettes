@@ -138,7 +138,13 @@ class CommentPublicApi
     {
         $this->checkAccess();
 
-        $user = Auth::user();    
+        $user = Auth::user();
+
+        // Annotations are checked first: a refusal must reach the `annotations` key, before anything is written
+        if ($comment->annotations !== []) {
+            $this->validateAnnotations($comment, (int) $user->id);
+        }
+
         // Compute plain length once using sanitizer
         $len = $this->sanitizer->plainTextLength($comment->body);
 
@@ -183,7 +189,34 @@ class CommentPublicApi
         // Apply domain-specific posting policies if any
         $this->policies->validateCreate($comment);
 
-        return $this->service->postComment($comment->entityType, $comment->entityId, $user->id, $comment->body, $comment->parentCommentId)->id;
+        return $this->service->postComment($comment->entityType, $comment->entityId, $user->id, $comment->body, $comment->parentCommentId, $comment->annotations)->id;
+    }
+
+    /**
+     * Annotations ride on a root comment only, need the policy's consent, and each item
+     * must have a non-blank body and a highlight within the policy's caps.
+     */
+    private function validateAnnotations(CommentToCreateDto $comment, int $userId): void
+    {
+        if (
+            $comment->parentCommentId !== null
+            || !$this->policies->canAnnotate($comment->entityType, (int) $comment->entityId, $userId)
+        ) {
+            throw ValidationException::withMessages(['annotations' => [__('comment::annotations.errors.not_allowed')]]);
+        }
+
+        $bodyMax = $this->policies->getAnnotationBodyMaxLength($comment->entityType);
+        $highlightMax = $this->policies->getAnnotationHighlightMaxLength($comment->entityType);
+
+        foreach ($comment->annotations as $annotation) {
+            $bodyLength = $this->sanitizer->plainTextLength($annotation->body, CommentBodySanitizer::ANNOTATION);
+            $invalid = $bodyLength < 1
+                || ($bodyMax !== null && $bodyLength > $bodyMax)
+                || ($highlightMax !== null && mb_strlen($annotation->highlightedText) > $highlightMax);
+            if ($invalid) {
+                throw ValidationException::withMessages(['annotations' => [__('comment::annotations.errors.invalid')]]);
+            }
+        }
     }
 
     public function getComment(int $commentId, bool $withChildren = false): CommentDto

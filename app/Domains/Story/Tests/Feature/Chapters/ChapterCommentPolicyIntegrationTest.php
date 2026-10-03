@@ -2,7 +2,10 @@
 
 use App\Domains\Comment\Public\Api\CommentPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Notification\Private\Models\Notification;
 use App\Domains\Story\Private\Services\ChapterCommentPolicy;
+use App\Domains\Story\Private\Services\ChapterCreditService;
+use App\Domains\Story\Public\Notifications\ChapterRootCommentNotification;
 use App\Domains\Story\Private\Services\ChapterService;
 use App\Domains\Story\Private\Services\StoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -146,5 +149,26 @@ describe('Regarding annotations', function () {
     it('caps annotation bodies at 1000 and highlights at 500 characters', function () {
         expect($this->policy->getAnnotationBodyMaxLength())->toBe(1000)
             ->and($this->policy->getAnnotationHighlightMaxLength())->toBe(500);
+    });
+
+    it('posting a root comment with annotations grants one credit and sends one ChapterRootCommentNotification', function () {
+        $reader = bob($this);
+        $credits = app(ChapterCreditService::class);
+        $credits->grantInitialOnRegistration($reader->id);
+        $before = $credits->availableForUser($reader->id);
+
+        $this->actingAs($reader);
+        $this->post('/comments', [
+            'entity_type' => 'chapter',
+            'entity_id' => $this->chapter->id,
+            'body' => generateDummyText(140),
+            'annotations' => json_encode([
+                ['body' => '<p>Un</p>', 'highlighted_text' => 'premier passage'],
+                ['body' => '<p>Deux</p>', 'highlighted_text' => 'second passage'],
+            ]),
+        ])->assertSessionHasNoErrors();
+
+        expect($credits->availableForUser($reader->id))->toBe($before + 1)
+            ->and(Notification::query()->where('content_key', ChapterRootCommentNotification::type())->count())->toBe(1);
     });
 });

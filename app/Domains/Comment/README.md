@@ -178,6 +178,18 @@ was invisible there. Vitest: `comment-draft/index.test.js`. Browser:
 | `DELETE` | `/comments/{commentId}` | Moderator+ | Hard-delete comment and its replies |
 | `GET` | `/comments/fragments` | public | Return HTML fragment for lazy-load pagination |
 
+`POST /comments` accepts an optional `annotations` field: a JSON string (one
+hidden input) holding a list of `{ body, highlighted_text, prefix?, suffix? }`.
+`StoreCommentRequest` decodes and shape-checks it (`highlighted_text` ≤ 500,
+`prefix`/`suffix` ≤ 255); `CommentPublicApi::create` then refuses it on a reply
+or when the policy's `canAnnotate` is false, and checks each body (1 to
+`getAnnotationBodyMaxLength` plain chars under the `annotation` sanitizer
+profile) and highlight (`getAnnotationHighlightMaxLength`). Any refusal rejects
+the whole post with one error under `annotations`, nothing written. Otherwise
+the root comment and its annotations are inserted in one transaction, and
+`CommentPosted` fires once, after it — credits and notifications do not depend
+on the annotation count.
+
 ## Database
 
 ### `comments` table

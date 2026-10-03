@@ -19,7 +19,7 @@
 | 1 | Schema and model — `comment_annotations`, `CommentAnnotation` | S | — | DONE |
 | 2 | Policy contract — annotation methods on `CommentPolicy` (Default, Registry, News, Chapter) | S | — | DONE |
 | 3 | Shared infrastructure — sanitizer `annotation` profile + Editor `inline` preset | S | — | DONE |
-| 4 | Create path — `POST /comments` accepts `annotations`, one transaction | M | 1, 2, 3 | TODO |
+| 4 | Create path — `POST /comments` accepts `annotations`, one transaction | M | 1, 2, 3 | DONE |
 | 4v | Checkpoint — comment posting on chapters and news | S | 4 | TODO |
 | 5 | Read path — `AnnotationAccessService`, `AnnotationPublicApi::getForComment`, `GET /comments/{id}/annotations` | M | 4 | TODO |
 | 6 | Author and moderator actions — `PUT …/processed`, `DELETE /comments/annotations/{id}` | S | 5 | TODO |

@@ -21,6 +21,7 @@ class CommentService
         private readonly CommentRepository $repository,
         private readonly CommentBodySanitizer $sanitizer,
         private readonly EventBus $eventBus,
+        private readonly AnnotationService $annotations,
     ) {}
 
     /**
@@ -61,11 +62,18 @@ class CommentService
     /**
      * Create a root comment (no parent). No policy checks for now.
      */
-    public function postComment(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null): Comment
+    public function postComment(string $entityType, int $entityId, int $authorId, string $body, ?int $parentCommentId = null, array $annotations = []): Comment
     {
         $cleanBody = $this->sanitizeBody($body);
-        $comment = $this->repository->create($entityType, $entityId, $authorId, $cleanBody, $parentCommentId);
-        
+        $comment = DB::transaction(function () use ($entityType, $entityId, $authorId, $cleanBody, $parentCommentId, $annotations) {
+            $comment = $this->repository->create($entityType, $entityId, $authorId, $cleanBody, $parentCommentId);
+            if ($annotations !== []) {
+                $this->annotations->createForComment((int) $comment->id, $authorId, $annotations);
+            }
+            return $comment;
+        });
+
+        // Emitted after the transaction: listeners never run inside it.
         $snapshot = CommentSnapshot::fromModel($comment);
         $this->eventBus->emit(new CommentPosted($snapshot));
         

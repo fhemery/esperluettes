@@ -6,6 +6,7 @@ namespace App\Domains\Comment\Private\Controllers;
 use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Private\Requests\UpdateCommentRequest;
 use App\Domains\Comment\Private\Requests\StoreCommentRequest;
@@ -36,6 +37,15 @@ class CommentController extends Controller
                 entityId: $data['entity_id'],
                 body: $data['body'],
                 parentCommentId: $data['parent_comment_id'],
+                annotations: array_map(
+                    fn (array $item) => new AnnotationToCreateDto(
+                        body: $item['body'],
+                        highlightedText: $item['highlighted_text'],
+                        prefix: $item['prefix'] ?? null,
+                        suffix: $item['suffix'] ?? null,
+                    ),
+                    array_values($data['annotations'] ?? []),
+                ),
             );
     
             $commentId = $this->api->create($dto);
@@ -58,9 +68,9 @@ class CommentController extends Controller
                     'parentCommentId' => $isReply ? (int) $data['parent_comment_id'] : null,
                 ]);
         } catch (ValidationException $e) {
-            return back()->withErrors($e->errors());
+            return back()->withErrors($e->errors())->withInput();
         }
-        
+
     }
 
     public function update(UpdateCommentRequest $request, int $commentId): RedirectResponse
