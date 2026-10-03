@@ -1,10 +1,19 @@
-import { fetchAnnotations, setProcessed, deleteAnnotation } from './api.js';
+import { fetchAnnotations, setProcessed, deleteAnnotation, postReply, deleteReply } from './api.js';
+import { plainText } from './capture-form.js';
+import { appendReply, removeReply } from './replies.js';
+import { formatDate } from '../../../../Shared/Resources/js/date-utils.js';
 
 /** `<x-shared::modal>` name of the server-mode pop-up. */
 export const MODAL_NAME = 'annotations-server';
 
+/** Id of the single reply editor rendered in the pop-up partial. */
+export const REPLY_EDITOR_ID = 'annotation-reply-editor';
+
 const ROLE_AUTHOR = 'author';
 const ROLE_COMMENTER = 'commenter';
+const ROLE_MODERATOR = 'moderator';
+
+const replyTextarea = () => document.getElementById(`quill-editor-area-${REPLY_EDITOR_ID}`);
 
 export const STATE_EDITED = 'edited';
 export const STATE_DELETED = 'deleted';
@@ -26,7 +35,14 @@ const emptyChanges = () => ({ adds: [], edits: {}, deletes: [] });
  * sends them. Window events listened to:
  *  - `comment-drafts:annotation-changes-changed` — re-read the slot;
  *  - `annotations:save-errors` { commentId, errors } — per-row error lines;
- *  - `annotations:list-refreshed` { commentId, list } — replace the cache.
+ *  - `annotations:list-refreshed` { commentId, list } — replace the cache;
+ *  - `editor-valid` { id, valid } — validity of the reply editor.
+ *
+ * For everyone, each root shows its reply thread (oldest first, as served).
+ * « Répondre » (row `can_reply`) moves the single reply editor of the partial
+ * under that row — one open at a time — and « Envoyer » posts it at once.
+ * Reply « Supprimer » (`can_delete`) asks first, then uses the writer's reply
+ * route, or the moderator delete for a moderator.
  *
  * Context lives in this closure, read once in init(): methods are called from
  * inside <x-shared::modal> and <x-shared::button> (their own x-data), where
@@ -35,9 +51,34 @@ const emptyChanges = () => ({ adds: [], edits: {}, deletes: [] });
 export function annotationsModal() {
     const cache = new Map();
     let labels = { one: '', many: '' };
-    let messages = { load: '', action: '', deleteWithReplies: '' };
+    let messages = { load: '', action: '', deleteWithReplies: '', deleteReply: '', replyEmpty: '', replyTooLong: '' };
     let context = { userId: null, entityType: null, entityId: null };
+    let replyMax = 0;
     let listeners = [];
+    // The reply editor and its resting place in the partial (absent in unit tests).
+    let replyEditor = null;
+    let replyHome = null;
+
+    /** Replace the cached list of `commentId`, and the shown one when it is on screen. */
+    const setItems = (self, commentId, transform) => {
+        const entry = cache.get(commentId);
+        const next = transform(entry?.items ?? (self.commentId === commentId ? self.items : []));
+        if (entry) entry.items = next;
+        if (self.commentId === commentId) self.items = next;
+        return next;
+    };
+
+    const parkReplyEditor = () => {
+        if (replyEditor && replyHome && replyEditor.parentElement !== replyHome) replyHome.appendChild(replyEditor);
+    };
+
+    const resetReplyBody = () => {
+        window.initQuillEditor?.(REPLY_EDITOR_ID);
+        const textarea = replyTextarea();
+        if (!textarea) return;
+        textarea.value = '';
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    };
 
     const updateButton = (commentId, count) => {
         const button = document.querySelector(`[data-annotations-button][data-comment-id="${commentId}"]`);
@@ -74,6 +115,11 @@ export function annotationsModal() {
         loading: false,
         busyId: null,
         error: '',
+        replyingTo: null,
+        replyValid: false,
+        replyError: '',
+        sendingReply: false,
+        hintFor: null,
 
         init() {
             const data = this.$root.dataset;
@@ -82,7 +128,13 @@ export function annotationsModal() {
                 load: data.loadError ?? '',
                 action: data.actionError ?? '',
                 deleteWithReplies: data.deleteWithRepliesConfirm ?? '',
+                deleteReply: data.deleteReplyConfirm ?? '',
+                replyEmpty: data.replyEmpty ?? '',
+                replyTooLong: data.replyTooLong ?? '',
             };
+            replyMax = Number(data.replyMaxLength ?? 0);
+            replyEditor = this.$root.querySelector('[data-reply-editor]');
+            replyHome = replyEditor?.parentElement ?? null;
             context = {
                 userId: data.userId ? parseInt(data.userId, 10) : null,
                 entityType: data.entityType ?? null,
@@ -114,6 +166,10 @@ export function annotationsModal() {
                 this.viewerRole = entry.viewerRole;
                 this.items = entry.items;
                 this.saveErrors = {};
+            });
+            on('editor-valid', (event) => {
+                if (event.detail?.id !== REPLY_EDITOR_ID) return;
+                this.replyValid = !!event.detail.valid;
             });
         },
 
@@ -168,7 +224,11 @@ export function annotationsModal() {
 
         async open(commentId) {
             const id = Number(commentId);
-            if (this.commentId !== id) this.saveErrors = {};
+            if (this.commentId !== id) {
+                this.saveErrors = {};
+                this.hintFor = null;
+            }
+            this.cancelReply();
             this.commentId = id;
             this.error = '';
             this.refreshChanges();
@@ -283,6 +343,100 @@ export function annotationsModal() {
             if (row.state === STATE_ADDED) drafts.removePendingAdd(...args, row.tempId);
             else if (row.state === STATE_DELETED) drafts.undoPendingDelete(...args, row.id);
             else drafts.undoPendingEdit(...args, row.id);
+        },
+
+        replyAuthor(reply) {
+            return reply.author_profile?.display_name ?? '';
+        },
+
+        replyDate(reply) {
+            return reply.created_at ? formatDate(reply.created_at) : '';
+        },
+
+        canReply(row) {
+            return !!row.can_reply;
+        },
+
+        canDeleteReply(reply) {
+            return !!reply.can_delete;
+        },
+
+        /** The hint after an author's reply: replies notify nobody, the root comment does. */
+        showsHint(row) {
+            return this.viewerRole === ROLE_AUTHOR && this.hintFor === row.id;
+        },
+
+        /** Move the reply editor, emptied, under `row`; it replaces any other open one. */
+        startReply(row) {
+            if (!this.canReply(row)) return;
+            this.replyingTo = row.id;
+            this.replyError = '';
+            this.replyValid = false;
+            resetReplyBody();
+            const move = () => {
+                const slot = this.$root?.querySelector(`[data-reply-slot="${row.id}"]`);
+                if (slot && replyEditor) {
+                    slot.appendChild(replyEditor);
+                    replyEditor.querySelector('.ql-editor')?.focus();
+                }
+            };
+            if (this.$nextTick) this.$nextTick(move);
+            else move();
+        },
+
+        cancelReply() {
+            this.replyingTo = null;
+            this.replyError = '';
+            parkReplyEditor();
+        },
+
+        async sendReply() {
+            if (this.replyingTo === null || this.sendingReply) return;
+            const body = replyTextarea()?.value ?? '';
+            const length = plainText(body).trim().length;
+            if (length === 0) {
+                this.replyError = messages.replyEmpty;
+                return;
+            }
+            if (replyMax > 0 && length > replyMax) {
+                this.replyError = messages.replyTooLong;
+                return;
+            }
+
+            const commentId = this.commentId;
+            const rootId = this.replyingTo;
+            this.sendingReply = true;
+            this.replyError = '';
+            try {
+                const reply = await postReply(rootId, body);
+                setItems(this, commentId, (list) => appendReply(list, rootId, reply));
+                if (this.commentId === commentId) {
+                    this.hintFor = rootId;
+                    this.cancelReply();
+                }
+            } catch (e) {
+                if (this.commentId === commentId) this.replyError = messages.action;
+            } finally {
+                this.sendingReply = false;
+            }
+        },
+
+        /** Writer: their reply route. Moderator: the moderator delete, which also takes replies. */
+        async removeReply(reply) {
+            if (!this.canDeleteReply(reply) || this.busyId !== null) return;
+            if (!window.confirm(messages.deleteReply)) return;
+            const commentId = this.commentId;
+            this.busyId = reply.id;
+            this.error = '';
+            try {
+                if (this.viewerRole === ROLE_MODERATOR) await deleteAnnotation(reply.id);
+                else await deleteReply(reply.id);
+                setItems(this, commentId, (list) => removeReply(list, reply.id));
+            } catch (e) {
+                this.error = messages.action;
+            } finally {
+                this.busyId = null;
+            }
         },
     };
 }

@@ -256,6 +256,36 @@ describe('CommentListComponent', function () {
                 ->and($html)->toContain('x-text="rowError(row)"');
         });
 
+        it('renders the reply editor in the annotations modal on a chapter', function () {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+            $max = app(CommentPolicyRegistry::class)->getAnnotationBodyMaxLength('default');
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            $modal = substr($html, strpos($html, 'x-data="annotationsModal()"'));
+
+            expect(substr_count($html, 'data-testid="rich-text-annotation-reply-editor"'))->toBe(1)
+                ->and($modal)->toContain('data-testid="rich-text-annotation-reply-editor"')
+                ->and($modal)->toContain('data-reply-editor')
+                ->and($modal)->toContain('id="quill-editor-area-annotation-reply-editor"')
+                ->and($modal)->toContain('data-max="' . $max . '"')
+                ->and($modal)->toContain('data-reply-max-length="' . $max . '"')
+                ->and($modal)->toContain('x-bind:data-reply-slot="row.id"')
+                ->and($modal)->toContain('x-for="reply in (row.replies ?? [])"')
+                ->and($modal)->toContain('x-text="replyAuthor(reply)"')
+                ->and($modal)->toContain('x-html="reply.body"')
+                ->and($modal)->toContain('data-delete-reply-confirm="' . e(__('comment::annotations.replies.delete_confirm')) . '"')
+                ->and($modal)->toContain('data-reply-empty="' . e(__('comment::annotations.replies.empty_body')) . '"')
+                ->and($modal)->toContain('data-reply-too-long="' . e(__('comment::annotations.replies.too_long', ['max' => $max])) . '"')
+                ->and($modal)->toContain(e(__('comment::annotations.replies.reply')))
+                ->and($modal)->toContain(e(__('comment::annotations.replies.send')))
+                ->and($modal)->toContain(e(__('comment::annotations.replies.delete')))
+                ->and($modal)->toContain(e(__('comment::annotations.replies.author_hint')))
+                ->and($modal)->toContain(e(__('comment::annotations.server_modal.undo_edit')));
+        });
+
         it('the annotations modal is rendered for a viewer who cannot create a root comment', function () {
             app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
                 public function supportsAnnotations(): bool

@@ -51,8 +51,8 @@ function editorTextarea() {
     return document.getElementById('quill-editor-area-' + EDITOR_ID);
 }
 
-/** Plain text of the editor's HTML, parsed inert (a <template> runs nothing). */
-function plainText(html) {
+/** Plain text of the editor's HTML, parsed inert (a <template> runs nothing). Shared with the pop-up's reply editor. */
+export function plainText(html) {
     const template = document.createElement('template');
     template.innerHTML = html ?? '';
     return (template.content.textContent ?? '').replace(/ /g, ' ');

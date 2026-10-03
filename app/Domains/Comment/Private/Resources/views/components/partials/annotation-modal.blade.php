@@ -5,7 +5,14 @@
      Row actions follow the per-row flags of GET /comments/{id}/annotations.
      For the root's writer, rows carry the pending state of the comment-draft
      annotationChanges slot and pending adds follow them; their bodies come from
-     the writer's own Quill editor and are rendered like the v1 drafts modal. --}}
+     the writer's own Quill editor and are rendered like the v1 drafts modal.
+     Each root shows its reply thread (bodies sanitized server-side); the single
+     reply editor rests hidden at the bottom and is moved under the row being
+     answered by annotationsModal.startReply(). --}}
+@inject('annotationPolicies', 'App\Domains\Comment\Public\Api\CommentPolicyRegistry')
+@php
+    $replyMax = $annotationPolicies->getAnnotationBodyMaxLength($entityType);
+@endphp
 <div
     x-data="annotationsModal()"
     x-on:annotations:open.window="open($event.detail.commentId)"
@@ -13,6 +20,10 @@
     data-entity-type="{{ $entityType }}"
     data-entity-id="{{ (int) $entityId }}"
     data-delete-with-replies-confirm="{{ __('comment::annotations.server_modal.delete_with_replies_confirm') }}"
+    data-delete-reply-confirm="{{ __('comment::annotations.replies.delete_confirm') }}"
+    data-reply-max-length="{{ (int) $replyMax }}"
+    data-reply-empty="{{ __('comment::annotations.replies.empty_body') }}"
+    data-reply-too-long="{{ __('comment::annotations.replies.too_long', ['max' => (int) $replyMax]) }}"
     data-label-one="{{ trans_choice('comment::annotations.button', 1, ['count' => 1]) }}"
     data-label-many="{{ trans_choice('comment::annotations.button', 2, ['count' => '__COUNT__']) }}"
     data-load-error="{{ __('comment::annotations.server_modal.load_error') }}"
@@ -74,10 +85,11 @@
                                 {{ __('comment::annotations.server_modal.remove_stale') }}
                             </x-shared::button>
                         </div>
-                        <div x-show="canToggle(row) || canRemove(row) || canEdit(row) || (canUndo(row) && !rowError(row))" class="mt-2 flex justify-end gap-2">
+                        <div x-show="canToggle(row) || canRemove(row) || canEdit(row) || (canUndo(row) && !rowError(row))" class="mt-2 flex flex-wrap justify-end gap-2">
                             <template x-if="canUndo(row) && !rowError(row)">
                                 <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="undo(row)">
-                                    {{ __('comment::annotations.server_modal.undo') }}
+                                    <span x-show="row.state === 'edited'">{{ __('comment::annotations.server_modal.undo_edit') }}</span>
+                                    <span x-show="row.state !== 'edited'">{{ __('comment::annotations.server_modal.undo') }}</span>
                                 </x-shared::button>
                             </template>
                             <template x-if="canEdit(row)">
@@ -97,9 +109,71 @@
                                 </x-shared::button>
                             </template>
                         </div>
+
+                        <div class="mt-3 pl-4 sm:pl-6 space-y-3">
+                            <ul x-show="(row.replies ?? []).length > 0" class="space-y-3">
+                                <template x-for="reply in (row.replies ?? [])" :key="reply.id">
+                                    <li class="border-l-2 border-gray-200 pl-3" data-testid="annotation-reply">
+                                        <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                                            <img
+                                                x-bind:src="reply.author_profile?.avatar_url || '{{ asset('images/default-avatar.svg') }}'"
+                                                alt=""
+                                                class="h-6 w-6 rounded-full object-cover"
+                                            />
+                                            <span class="font-medium text-gray-700" x-text="replyAuthor(reply)"></span>
+                                            <time x-bind:datetime="reply.created_at" x-text="replyDate(reply)"></time>
+                                        </div>
+                                        <div class="comment-body rich-content mt-1 text-sm" x-html="reply.body"></div>
+                                        <template x-if="canDeleteReply(reply)">
+                                            <div class="mt-1 flex justify-end">
+                                                <x-shared::button type="button" size="sm" color="danger" :outline="true" x-on:click="removeReply(reply)" x-bind:disabled="busyId !== null">
+                                                    {{ __('comment::annotations.replies.delete') }}
+                                                </x-shared::button>
+                                            </div>
+                                        </template>
+                                    </li>
+                                </template>
+                            </ul>
+                            <p x-show="showsHint(row)" class="text-sm text-gray-600" role="status">
+                                {{ __('comment::annotations.replies.author_hint') }}
+                            </p>
+                            <div x-bind:data-reply-slot="row.id"></div>
+                            <template x-if="canReply(row) && replyingTo !== row.id">
+                                <div class="flex flex-wrap justify-end gap-2">
+                                    <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="startReply(row)">
+                                        {{ __('comment::annotations.replies.reply') }}
+                                    </x-shared::button>
+                                </div>
+                            </template>
+                        </div>
                     </li>
                 </template>
             </ul>
+
+            {{-- Resting place of the single reply editor; startReply() moves it under a row. --}}
+            <div hidden>
+                <div data-reply-editor class="mt-2">
+                    <span class="sr-only">{{ __('comment::annotations.replies.body_label') }}</span>
+                    <x-editor::rich-text
+                        id="annotation-reply-editor"
+                        name="annotation_reply_body"
+                        toolbar="inline"
+                        :max="$replyMax"
+                        :nbLines="3"
+                        :resizable="false"
+                        isMandatory="true"
+                    />
+                    <p x-show="replyError" x-text="replyError" class="mt-2 text-sm text-red-600" role="alert"></p>
+                    <div class="mt-2 flex flex-wrap justify-end gap-2">
+                        <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="cancelReply()">
+                            {{ __('comment::annotations.replies.cancel') }}
+                        </x-shared::button>
+                        <x-shared::button type="button" size="sm" color="accent" x-on:click="sendReply()" x-bind:disabled="!replyValid || sendingReply">
+                            {{ __('comment::annotations.replies.send') }}
+                        </x-shared::button>
+                    </div>
+                </div>
+            </div>
         </div>
     </x-shared::modal>
 </div>

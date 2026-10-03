@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { annotationsModal, MODAL_NAME, STATE_ADDED, STATE_DELETED, STATE_EDITED } from './modal.js';
+import { annotationsModal, MODAL_NAME, REPLY_EDITOR_ID, STATE_ADDED, STATE_DELETED, STATE_EDITED } from './modal.js';
 import * as drafts from '../comment-draft/index.js';
 
 const LABEL_ONE = '1 annotation';
@@ -7,6 +7,9 @@ const LABEL_MANY = '__COUNT__ annotations';
 const LOAD_ERROR = 'Impossible de charger';
 const ACTION_ERROR = 'Action impossible';
 const DELETE_CONFIRM = 'Les réponses seront aussi supprimées.';
+const DELETE_REPLY_CONFIRM = 'Supprimer cette réponse ?';
+const REPLY_EMPTY = 'Réponse vide.';
+const REPLY_TOO_LONG = 'Réponse trop longue.';
 const CSRF = 'csrf-token-value';
 const USER_ID = 7;
 const CHAPTER_ID = 42;
@@ -59,6 +62,10 @@ function mount() {
     root.dataset.loadError = LOAD_ERROR;
     root.dataset.actionError = ACTION_ERROR;
     root.dataset.deleteWithRepliesConfirm = DELETE_CONFIRM;
+    root.dataset.deleteReplyConfirm = DELETE_REPLY_CONFIRM;
+    root.dataset.replyMaxLength = '20';
+    root.dataset.replyEmpty = REPLY_EMPTY;
+    root.dataset.replyTooLong = REPLY_TOO_LONG;
     root.dataset.userId = String(USER_ID);
     root.dataset.entityType = 'chapter';
     root.dataset.entityId = String(CHAPTER_ID);
@@ -270,6 +277,199 @@ describe('annotationsModal — commenter overlay', () => {
             detail: { commentId: 10, errors: { 'edits.1': 'Introuvable.' } },
         }));
         expect(component.rowError(rowById(1))).toBe('');
+    });
+});
+
+describe('annotationsModal — replies', () => {
+    function reply(id, overrides = {}) {
+        return {
+            id,
+            comment_id: 10,
+            parent_annotation_id: 1,
+            author_profile: { user_id: 3, display_name: `Plume ${id}`, slug: `plume-${id}`, avatar_url: '' },
+            body: `<p>Réponse ${id}</p>`,
+            created_at: '2026-10-01T10:00:00.000000Z',
+            replies: [],
+            can_delete: false,
+            ...overrides,
+        };
+    }
+
+    function editorBody(html) {
+        let textarea = document.getElementById(`quill-editor-area-${REPLY_EDITOR_ID}`);
+        if (!textarea) {
+            textarea = document.createElement('textarea');
+            textarea.id = `quill-editor-area-${REPLY_EDITOR_ID}`;
+            document.body.appendChild(textarea);
+        }
+        textarea.value = html;
+    }
+
+    async function openAs(role, items) {
+        fetchMock.mockResolvedValueOnce(jsonResponse(listResponse(role, items)));
+        mount();
+        await component.open(10);
+    }
+
+    it('renders each root’s replies in date order with writer and date', async () => {
+        document.documentElement.lang = 'fr';
+        await openAs('author', [item(1, {
+            replies: [
+                reply(20, { created_at: '2026-09-30T08:00:00.000000Z' }),
+                reply(21, { created_at: '2026-10-01T09:00:00.000000Z' }),
+            ],
+        })]);
+
+        const replies = component.rows[0].replies;
+        expect(replies.map((r) => r.id)).toEqual([20, 21]);
+        expect(component.replyAuthor(replies[0])).toBe('Plume 20');
+        expect(component.replyDate(replies[0])).toBe('30/09/2026');
+        expect(component.replyDate(replies[1])).toBe('01/10/2026');
+    });
+
+    it('shows « Répondre » only when can_reply is true', async () => {
+        await openAs('author', [item(1, { can_reply: true, replies: [] }), item(2, { can_reply: false, replies: [] })]);
+
+        expect(component.canReply(component.rows[0])).toBe(true);
+        expect(component.canReply(component.rows[1])).toBe(false);
+
+        component.startReply(component.rows[1]);
+        expect(component.replyingTo).toBeNull();
+        component.startReply(component.rows[0]);
+        expect(component.replyingTo).toBe(1);
+    });
+
+    it('opens one reply editor at a time and closes it on cancel', async () => {
+        await openAs('author', [item(1, { can_reply: true, replies: [] }), item(2, { can_reply: true, replies: [] })]);
+
+        component.startReply(component.rows[0]);
+        component.startReply(component.rows[1]);
+        expect(component.replyingTo).toBe(2);
+
+        component.cancelReply();
+        expect(component.replyingTo).toBeNull();
+    });
+
+    it('tracks the reply editor’s validity from its editor-valid events only', async () => {
+        await openAs('author', [item(1, { can_reply: true, replies: [] })]);
+        component.startReply(component.rows[0]);
+        expect(component.replyValid).toBe(false);
+
+        window.dispatchEvent(new CustomEvent('editor-valid', { detail: { id: 'another-editor', valid: true } }));
+        expect(component.replyValid).toBe(false);
+        window.dispatchEvent(new CustomEvent('editor-valid', { detail: { id: REPLY_EDITOR_ID, valid: true } }));
+        expect(component.replyValid).toBe(true);
+    });
+
+    it.each([
+        ['author', true],
+        ['commenter', false],
+    ])('posts a reply, appends it and shows the author hint to an author only (%s)', async (role, hint) => {
+        const created = reply(30, { body: '<p>Merci</p>', can_delete: true });
+        await openAs(role, [item(1, { can_reply: true, replies: [reply(20)] })]);
+        fetchMock.mockResolvedValueOnce(jsonResponse(created, 201));
+
+        component.startReply(component.rows[0]);
+        editorBody('<p>Merci</p>');
+        await component.sendReply();
+
+        const [url, init] = fetchMock.mock.calls[1];
+        expect(url).toBe('/comments/annotations/1/replies');
+        expect(init.method).toBe('POST');
+        expect(init.headers['X-CSRF-TOKEN']).toBe(CSRF);
+        expect(JSON.parse(init.body)).toEqual({ body: '<p>Merci</p>' });
+
+        expect(component.rows[0].replies.map((r) => r.id)).toEqual([20, 30]);
+        expect(component.replyingTo).toBeNull();
+        expect(component.showsHint(component.rows[0])).toBe(hint);
+
+        // The cached copy follows: reopening shows the reply without a fetch.
+        await component.open(10);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(component.rows[0].replies.map((r) => r.id)).toEqual([20, 30]);
+    });
+
+    it.each([
+        ['<p><br></p>', REPLY_EMPTY],
+        [`<p>${'a'.repeat(21)}</p>`, REPLY_TOO_LONG],
+    ])('refuses an invalid reply body without calling the server (%s)', async (body, message) => {
+        await openAs('author', [item(1, { can_reply: true, replies: [] })]);
+
+        component.startReply(component.rows[0]);
+        editorBody(body);
+        await component.sendReply();
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(component.replyError).toBe(message);
+        expect(component.replyingTo).toBe(1);
+    });
+
+    it('keeps the editor open with an error when the POST fails', async () => {
+        await openAs('author', [item(1, { can_reply: true, replies: [] })]);
+        fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'nope', errors: { body: ['Trop long'] } }, 422));
+
+        component.startReply(component.rows[0]);
+        editorBody('<p>Merci</p>');
+        await component.sendReply();
+
+        expect(component.replyingTo).toBe(1);
+        expect(component.replyError).toBe(ACTION_ERROR);
+        expect(component.rows[0].replies).toEqual([]);
+        expect(component.showsHint(component.rows[0])).toBe(false);
+    });
+
+    it('deletes the viewer’s own reply after confirmation via the reply route', async () => {
+        const confirm = vi.fn().mockReturnValueOnce(false).mockReturnValueOnce(true);
+        vi.stubGlobal('confirm', confirm);
+        await openAs('author', [item(1, { replies: [reply(20, { can_delete: true }), reply(21)] })]);
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 204, text: async () => '' });
+
+        expect(component.canDeleteReply(component.rows[0].replies[0])).toBe(true);
+        expect(component.canDeleteReply(component.rows[0].replies[1])).toBe(false);
+
+        await component.removeReply(component.rows[0].replies[0]);
+        expect(confirm).toHaveBeenCalledWith(DELETE_REPLY_CONFIRM);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+
+        await component.removeReply(component.rows[0].replies[0]);
+        const [url, init] = fetchMock.mock.calls[1];
+        expect(url).toBe('/comments/annotations/replies/20');
+        expect(init.method).toBe('DELETE');
+        expect(init.headers['X-CSRF-TOKEN']).toBe(CSRF);
+        expect(component.rows[0].replies.map((r) => r.id)).toEqual([21]);
+
+        // A reply the viewer may not delete is never sent.
+        await component.removeReply(component.rows[0].replies[0]);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('lets a moderator delete a reply through the moderator route', async () => {
+        vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+        const button = addButton(10, 1);
+        await openAs('moderator', [item(1, { can_delete: true, can_reply: false, replies: [reply(20, { can_delete: true })] })]);
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 204, text: async () => '' });
+
+        expect(component.canReply(component.rows[0])).toBe(false);
+        await component.removeReply(component.rows[0].replies[0]);
+
+        const [url, init] = fetchMock.mock.calls[1];
+        expect(url).toBe('/comments/annotations/20');
+        expect(init.method).toBe('DELETE');
+        expect(component.rows.map((r) => r.id)).toEqual([1]);
+        expect(component.rows[0].replies).toEqual([]);
+        // Replies are not counted on the « N annotations » button.
+        expect(button.querySelector('[data-annotations-count]').textContent).toBe('1 annotations');
+    });
+
+    it('shows the action error when a reply delete fails', async () => {
+        vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+        await openAs('author', [item(1, { replies: [reply(20, { can_delete: true })] })]);
+        fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'nope' }, 403));
+
+        await component.removeReply(component.rows[0].replies[0]);
+
+        expect(component.error).toBe(ACTION_ERROR);
+        expect(component.rows[0].replies.map((r) => r.id)).toEqual([20]);
     });
 });
 
