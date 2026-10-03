@@ -28,7 +28,7 @@
 | 9 | Shared infrastructure — comment-draft `annotations` slot API + consumed marker clears it | S | — | DONE |
 | 9v | Checkpoint — root and reply comment drafts on chapters and news | S | 9 | DONE |
 | 10 | Capture — « Annoter » button, capture form, chapter-page wiring | M | 2, 3, 9 | DONE |
-| 10v | Checkpoint — Quote on the chapter page (toolbar, mini-form, highlights, heat) | S | 10 | TODO |
+| 10v | Checkpoint — Quote on the chapter page (toolbar, mini-form, highlights, heat) | S | 10 | DONE |
 | 11 | Drafts banner, drafts-mode pop-up, publish with the root comment | M | 4, 10 | TODO |
 | 12 | « N annotations » button and server-mode pop-up | M | 6, 7, 11 | TODO |
 | 12v | Checkpoint — comment lists on chapters and news | S | 12 | TODO |
@@ -681,6 +681,47 @@ Check that Quote is unaffected.
 - No Quote e2e exists; visual only.
 
 Screenshots under `shots/checkpoint-10v/`.
+
+**Result (2026-10-03, HEAD d5206951) — PASS**
+
+Driven on the e2e instance (`:8080`) through the `run-app` driver. Two
+throwaway-DB additions, no code change: a long paragraph (> 500 chars) on
+`chapitre-compte-5`, and a rendered `ce-block--chapter-choice` between blocks
+1 and 2 of `chapitre-avance-4` (no seeded chapter has one).
+
+- Confirmed, `chapitre-compte-5`: selection → « Citer » and « Annoter » side
+  by side, same row, Citer first (`01`); « Citer » → mini-form (`02`) → save →
+  new `mark.quote-tint`, form closed (`03`).
+- Selection of 850 chars → « Sélection trop longue » (`06`).
+- `chapitre-illustre-7`: caption only, and text + caption → no toolbar (`07`);
+  text below the image → both buttons.
+- `chapitre-avance-4`: chapter-choice only, and text + chapter-choice → no
+  toolbar (`08`); text block 2 → 3 → both shown, « Citer » gives Quote's
+  multi-block error (`10`).
+- Confirmed on `chapitre-publie-1` (already commented): « Citer » only, no
+  annotation form in the DOM (`11`).
+- Author, `chapitre-simple-3`: badge (`12a`), heat toggle → 4 `mark.quote-heat`
+  (`12`), passage panel on click (`13`), summary present (`14`); selection
+  shows no toolbar.
+- 375 px touch (`touchend`): toolbar with both buttons (`15`); Quote mini-form
+  360 px wide, inside the viewport (`16`).
+- No HTTP ≥ 400 or page error.
+
+Annotation capture — observations (phase 10, not Quote regressions):
+- Quill initialises inside the teleported form; toolbar bold / italic / clean /
+  emoji (`04`). Desktop width 360 px; 375 px: 359 px, left 8 / right 367 (`17`).
+- Cross-block selection → form opens with « La sélection doit rester dans un
+  même bloc de texte. », Enregistrer disabled (`09`).
+- **Defect: the Enregistrer button stores nothing.** The form closes, no
+  `comment-drafts:*` key is written (`05`). Ctrl+Enter on the same form stores
+  the draft correctly. Cause: `capture-form.js` `_context()` reads
+  `this.$el.dataset`; when `save()` runs from the button's `@click`, Alpine's
+  `$el` is the button, so `userId`/`entityType`/`entityId` are `undefined` →
+  `addAnnotation(null, …)` returns early. Same for `data-error-blank` /
+  `data-error-body-too-long` (blank body via the button shows no error). Fix:
+  read the dataset from the component root (e.g. `x-ref` on the root, or
+  `this.$root`), and add a Vitest case that clicks the button rather than
+  calling `save()` directly. To route back to phase 10.
 
 ---
 
