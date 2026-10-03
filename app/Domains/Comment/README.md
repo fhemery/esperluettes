@@ -302,6 +302,19 @@ comment-draft module, which is why the banner re-reads the drafts slot on
   (`x-text`), the body as sanitized HTML. Buttons follow the per-row
   `can_mark_as_processed` / `can_delete` flags; the processed marker is shown
   to the `author` role only.
+- **Commenter overlay in the pop-up** — for `viewer_role === 'commenter'` the
+  rendered rows (`rows`) overlay the `annotationChanges` slot on the cached
+  server rows: a pending edit shows its pending body flagged « Modifiée — non
+  enregistrée », a pending delete « Sera supprimée », and pending adds follow
+  as « Ajoutée — non enregistrée » rows (shown even when the server list is
+  empty). Rows with `can_edit` get « Modifier » (dispatches
+  `annotations:edit-saved-row` for the capture form; never offered on a row
+  pending deletion) and « Supprimer » (a pending delete; `confirm()` first when
+  the row has replies). Every pending row has « Annuler la modification ». The
+  pop-up re-reads the slot on `comment-drafts:annotation-changes-changed`,
+  shows the banner's `annotations:save-errors` on the matching row with
+  « Retirer » (undoes that item), and replaces its cached list on
+  `annotations:list-refreshed`. Authors and moderators see none of it.
 
 Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts`.
 

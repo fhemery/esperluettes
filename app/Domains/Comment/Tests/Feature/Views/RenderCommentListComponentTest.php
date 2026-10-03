@@ -241,7 +241,19 @@ describe('CommentListComponent', function () {
                 // Highlighted text is bound as text, the server-sanitized body as HTML.
                 ->and($html)->toContain('x-text="row.highlighted_text"')
                 ->and($html)->not->toContain('x-html="row.highlighted_text"')
-                ->and($html)->toContain('x-html="row.body"');
+                ->and($html)->toContain('x-html="row.body"')
+                // Commenter overlay: store context, pending markers, row actions, error line as text.
+                ->and($html)->toContain('x-for="row in rows"')
+                ->and($html)->toContain('data-entity-type="default"')
+                ->and($html)->toContain('data-entity-id="123"')
+                ->and($html)->toContain('data-delete-with-replies-confirm="' . e(__('comment::annotations.server_modal.delete_with_replies_confirm')) . '"')
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.pending_edited')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.pending_deleted')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.pending_added')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.edit')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.undo')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.remove_stale')))
+                ->and($html)->toContain('x-text="rowError(row)"');
         });
 
         it('the annotations modal is rendered for a viewer who cannot create a root comment', function () {

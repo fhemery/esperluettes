@@ -62,5 +62,12 @@ return [
         'delete' => 'Supprimer l\'annotation',
         'load_error' => 'Impossible de charger les annotations. Réessayez plus tard.',
         'action_error' => 'L\'action n\'a pas pu aboutir. Réessayez.',
+        'pending_edited' => 'Modifiée — non enregistrée',
+        'pending_deleted' => 'Sera supprimée',
+        'pending_added' => 'Ajoutée — non enregistrée',
+        'edit' => 'Modifier',
+        'undo' => 'Annuler la modification',
+        'remove_stale' => 'Retirer',
+        'delete_with_replies_confirm' => 'Les réponses seront aussi supprimées.',
     ],
 ];
