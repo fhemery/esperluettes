@@ -165,7 +165,18 @@ list shell sets `window.__commentDraftConsumed` **before** the deferred Vite
 module boots. Bootstrap clears the matching slot and skips restore — otherwise
 hosts that keep the root form visible (news: unlimited roots) re-show the
 just-posted body. Chapters hide the root form after one root, so the same race
-was invisible there. Vitest: `comment-draft/index.test.js`. Browser:
+was invisible there.
+
+The same key (`comment-drafts:{userId}:{entityType}:{entityId}`) also holds the
+`annotations` slot: chapter annotation drafts `{ tempId, body, highlighted,
+prefix, suffix }`, posted with the root comment. `window.commentDrafts` exposes
+`listAnnotations`, `addAnnotation` (returns the item with a generated `tempId`),
+`updateAnnotation`, `removeAnnotation` and `clearAnnotations`; each mutation
+fires a `comment-drafts:annotations-changed` window event with
+`{ entityType, entityId, count }`. Malformed items are dropped on load. A `root`
+consumed marker clears `root` **and** `annotations`; a `reply` marker clears only
+`reply`. The key is removed once all three slots are empty. Vitest:
+`comment-draft/index.test.js`. Browser:
 `e2e/tests/core/comment-draft-consume.spec.ts`.
 
 ## Routes

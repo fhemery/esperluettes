@@ -3,7 +3,8 @@
 // One key per (user, entityType, entityId) holds an object with three slots:
 //   - root:        { body, savedAt }         | null  — the root-comment editor draft
 //   - reply:       { parentCommentId, body, savedAt } | null  — a single reply-in-progress
-//   - annotations: [...]                              — reserved for phase 11 (Chapter Annotations)
+//   - annotations: [{ tempId, body, highlighted, prefix, suffix }] — chapter annotation drafts,
+//                  posted with the root comment and cleared with it by the root consumed marker
 //
 // Forms opt in by adding `data-comment-draft="root"` (or `="reply"`) plus
 // `data-user-id`, `data-entity-type`, `data-entity-id`, and for replies `data-parent-comment-id`.
@@ -25,6 +26,15 @@ function isEmpty(state) {
     && (!Array.isArray(state.annotations) || state.annotations.length === 0);
 }
 
+function isAnnotationItem(item) {
+  return !!item
+    && typeof item === 'object'
+    && typeof item.tempId === 'string'
+    && item.tempId !== ''
+    && typeof item.body === 'string'
+    && typeof item.highlighted === 'string';
+}
+
 export function load(userId, entityType, entityId) {
   if (!userId) return emptyState();
   let raw;
@@ -43,7 +53,7 @@ export function load(userId, entityType, entityId) {
       reply: parsed.reply && typeof parsed.reply.body === 'string' && Number.isInteger(parsed.reply.parentCommentId)
         ? parsed.reply
         : null,
-      annotations: Array.isArray(parsed.annotations) ? parsed.annotations : [],
+      annotations: Array.isArray(parsed.annotations) ? parsed.annotations.filter(isAnnotationItem) : [],
     };
   } catch (e) {
     return emptyState();
@@ -91,6 +101,62 @@ export function clearReply(userId, entityType, entityId) {
   persist(userId, entityType, entityId, state);
 }
 
+// ---------- Annotations slot ----------
+
+function generateTempId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+function writeAnnotations(userId, entityType, entityId, state, annotations) {
+  state.annotations = annotations;
+  persist(userId, entityType, entityId, state);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('comment-drafts:annotations-changed', {
+      detail: { entityType, entityId, count: annotations.length },
+    }));
+  }
+}
+
+export function listAnnotations(userId, entityType, entityId) {
+  return load(userId, entityType, entityId).annotations;
+}
+
+export function addAnnotation(userId, entityType, entityId, { body, highlighted, prefix = '', suffix = '' }) {
+  if (!userId) return null;
+  const state = load(userId, entityType, entityId);
+  const item = {
+    tempId: generateTempId(),
+    body: String(body ?? ''),
+    highlighted: String(highlighted ?? ''),
+    prefix: String(prefix ?? ''),
+    suffix: String(suffix ?? ''),
+  };
+  writeAnnotations(userId, entityType, entityId, state, [...state.annotations, item]);
+  return item;
+}
+
+export function updateAnnotation(userId, entityType, entityId, tempId, body) {
+  if (!userId) return;
+  const state = load(userId, entityType, entityId);
+  writeAnnotations(userId, entityType, entityId, state, state.annotations.map(
+    (item) => (item.tempId === tempId ? { ...item, body: String(body ?? '') } : item),
+  ));
+}
+
+export function removeAnnotation(userId, entityType, entityId, tempId) {
+  if (!userId) return;
+  const state = load(userId, entityType, entityId);
+  writeAnnotations(userId, entityType, entityId, state, state.annotations.filter((item) => item.tempId !== tempId));
+}
+
+export function clearAnnotations(userId, entityType, entityId) {
+  if (!userId) return;
+  writeAnnotations(userId, entityType, entityId, load(userId, entityType, entityId), []);
+}
+
 /**
  * Flash-driven "this draft was just posted" marker, set by an inline script
  * before the Vite module runs. Applied before any restore so a deferred module
@@ -113,7 +179,9 @@ function applyConsumedMarker() {
   const payload = readConsumedMarker();
   if (!payload) return null;
   if (payload.scope === 'root') {
+    // Annotations are posted with the root comment, so they are consumed with it.
     clearRoot(payload.userId, payload.entityType, payload.entityId);
+    clearAnnotations(payload.userId, payload.entityType, payload.entityId);
   } else {
     clearReply(payload.userId, payload.entityType, payload.entityId);
   }
@@ -261,6 +329,11 @@ if (typeof window !== 'undefined') {
     clearRoot,
     saveReply,
     clearReply,
+    listAnnotations,
+    addAnnotation,
+    updateAnnotation,
+    removeAnnotation,
+    clearAnnotations,
     bootstrap,
   };
 }

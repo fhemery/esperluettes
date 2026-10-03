@@ -109,6 +109,7 @@
           if (!userId || !entityType || !entityId) return;
           if (scope === 'root') {
             window.commentDrafts.clearRoot(userId, entityType, entityId);
+            window.commentDrafts.clearAnnotations(userId, entityType, entityId);
           } else if (scope === 'reply') {
             window.commentDrafts.clearReply(userId, entityType, entityId);
           }
