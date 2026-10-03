@@ -99,6 +99,30 @@ class AnnotationService
         return CommentAnnotation::query()->findOrFail($annotationId);
     }
 
+    /**
+     * Store a reply under a root annotation: no anchor, body sanitized. Callers validate and authorize.
+     */
+    public function createReply(CommentAnnotation $root, int $authorId, string $body): CommentAnnotation
+    {
+        return CommentAnnotation::query()->create([
+            'comment_id' => $root->comment_id,
+            'parent_annotation_id' => $root->id,
+            'author_id' => $authorId,
+            'body' => $this->sanitizer->sanitizeToHtml($body, CommentBodySanitizer::ANNOTATION),
+            'highlighted_text' => null,
+            'prefix' => null,
+            'suffix' => null,
+        ]);
+    }
+
+    /**
+     * Soft-delete one reply. Callers check it is a reply and authorize.
+     */
+    public function deleteReply(CommentAnnotation $reply): void
+    {
+        $reply->delete();
+    }
+
     public function setProcessed(CommentAnnotation $annotation, bool $value): void
     {
         $annotation->update([

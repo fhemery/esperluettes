@@ -79,23 +79,10 @@ class AnnotationPublicApi
                 suffix: $a->suffix,
                 isProcessed: $seesProcessed ? (bool) $a->is_processed : null,
                 createdAt: $a->created_at?->toISOString() ?? '',
-                replies: $rootReplies->map(fn (CommentAnnotation $r) => new AnnotationDto(
-                    id: (int) $r->id,
-                    commentId: (int) $r->comment_id,
-                    parentAnnotationId: $r->parent_annotation_id,
-                    authorId: $r->author_id,
-                    authorProfile: $profileOf($r),
-                    body: (string) $r->body,
-                    highlightedText: '',
-                    prefix: null,
-                    suffix: null,
-                    isProcessed: null,
-                    createdAt: $r->created_at?->toISOString() ?? '',
-                    replies: [],
-                    canMarkAsProcessed: false,
-                    canDelete: $canDelete || ($r->author_id !== null && (int) $r->author_id === $viewerId),
-                    canEdit: false,
-                    canReply: false,
+                replies: $rootReplies->map(fn (CommentAnnotation $r) => $this->toReplyDto(
+                    $r,
+                    $profileOf($r),
+                    $canDelete || ($r->author_id !== null && (int) $r->author_id === $viewerId),
                 ))->values()->all(),
                 canMarkAsProcessed: $canMark,
                 canDelete: $canDelete,
@@ -176,6 +163,69 @@ class AnnotationPublicApi
     }
 
     /**
+     * Reply under a root annotation: authors/co-authors on any root, the commenter once an author replied.
+     *
+     * @throws ModelNotFoundException when the parent annotation or its comment is unknown or trashed
+     * @throws AuthorizationException when the viewer may not reply here
+     * @throws ValidationException when the body is empty or too long, or the parent is itself a reply
+     */
+    public function reply(int $parentAnnotationId, int $byUserId, string $body): AnnotationDto
+    {
+        $root = $this->annotations->getAnnotation($parentAnnotationId);
+        $comment = $this->comments->getComment((int) $root->comment_id);
+
+        if ($root->parent_annotation_id !== null) {
+            throw ValidationException::withMessages([
+                'body' => [__('comment::annotations.errors.reply_to_reply')],
+            ]);
+        }
+
+        $role = $this->access->resolveViewerRole($comment, $byUserId);
+        if ($role === null || $role === AnnotationListDto::ROLE_MODERATOR) {
+            throw new AuthorizationException();
+        }
+
+        $visibleReplies = $this->access->filterActiveReplyWriters(
+            $this->annotations->getRepliesForRoots([(int) $root->id]),
+        );
+        if (!$this->access->canReply($role, $root, $visibleReplies, $byUserId)) {
+            throw new AuthorizationException();
+        }
+
+        $error = $this->itemValidator->firstError((string) $comment->commentable_type, $body, null, null, null);
+        if ($error !== null) {
+            throw ValidationException::withMessages(['body' => [__($error)]]);
+        }
+
+        $reply = $this->annotations->createReply($root, $byUserId, $body);
+        $profile = $this->profiles->getPublicProfiles([$byUserId])[$byUserId] ?? new ProfileDto(
+            user_id: $byUserId,
+            display_name: '',
+            slug: '',
+            avatar_url: '',
+        );
+
+        return $this->toReplyDto($reply, $profile, true);
+    }
+
+    /**
+     * Writer deletes their own reply.
+     *
+     * @throws ModelNotFoundException when the reply is unknown or already deleted
+     * @throws AuthorizationException when the row is not a reply, or not written by the user
+     */
+    public function deleteOwnReply(int $replyId, int $byUserId): void
+    {
+        $reply = $this->annotations->getAnnotation($replyId);
+
+        if ($reply->parent_annotation_id === null || $reply->author_id === null || (int) $reply->author_id !== $byUserId) {
+            throw new AuthorizationException();
+        }
+
+        $this->annotations->deleteReply($reply);
+    }
+
+    /**
      * Author/co-author toggle of the "processed" flag on a root annotation.
      *
      * @throws ModelNotFoundException when the annotation or its comment is unknown or trashed
@@ -209,5 +259,28 @@ class AnnotationPublicApi
     public function moderatorDelete(int $annotationId, int $byUserId): void
     {
         $this->annotations->moderatorDelete($annotationId);
+    }
+
+    /** A reply has no anchor, no processed flag, no children and is never edited nor replied to. */
+    private function toReplyDto(CommentAnnotation $reply, ProfileDto $profile, bool $canDelete): AnnotationDto
+    {
+        return new AnnotationDto(
+            id: (int) $reply->id,
+            commentId: (int) $reply->comment_id,
+            parentAnnotationId: $reply->parent_annotation_id,
+            authorId: $reply->author_id,
+            authorProfile: $profile,
+            body: (string) $reply->body,
+            highlightedText: '',
+            prefix: null,
+            suffix: null,
+            isProcessed: null,
+            createdAt: $reply->created_at?->toISOString() ?? '',
+            replies: [],
+            canMarkAsProcessed: false,
+            canDelete: $canDelete,
+            canEdit: false,
+            canReply: false,
+        );
     }
 }

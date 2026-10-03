@@ -4,6 +4,7 @@ use App\Domains\Auth\Public\Api\Roles;
 use Illuminate\Support\Facades\Route;
 use App\Domains\Comment\Private\Controllers\AnnotationController;
 use App\Domains\Comment\Private\Controllers\AnnotationModerationController;
+use App\Domains\Comment\Private\Controllers\AnnotationReplyController;
 use App\Domains\Comment\Private\Controllers\CommentController;
 use App\Domains\Comment\Private\Controllers\CommentModerationController;
 
@@ -22,6 +23,12 @@ Route::middleware(['web', 'auth', 'compliant'])
         Route::put('/annotations/{annotationId}/processed', [AnnotationController::class, 'processed'])
             ->whereNumber('annotationId')
             ->name('annotations.processed');
+        Route::post('/annotations/{annotationId}/replies', [AnnotationReplyController::class, 'store'])
+            ->whereNumber('annotationId')
+            ->name('annotations.replies.store');
+        Route::delete('/annotations/replies/{replyId}', [AnnotationReplyController::class, 'destroy'])
+            ->whereNumber('replyId')
+            ->name('annotations.replies.destroy');
 
         Route::middleware('role:'.Roles::MODERATOR.','.Roles::ADMIN.','.Roles::TECH_ADMIN)->name('moderation.')->group(function(){
             Route::delete('/annotations/{annotationId}', [AnnotationModerationController::class, 'delete'])

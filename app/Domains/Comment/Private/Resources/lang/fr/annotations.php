@@ -6,6 +6,7 @@ return [
         'invalid' => 'Une annotation est invalide : vérifiez qu\'elle n\'est pas vide et qu\'elle ne dépasse pas la longueur autorisée.',
         'stale' => 'Cette annotation n\'existe plus. Retirez-la de vos modifications.',
         'reply_not_processable' => 'Seule une annotation principale peut être marquée comme traitée.',
+        'reply_to_reply' => 'On ne peut pas répondre à une réponse.',
         'body_blank' => 'Votre annotation est vide.',
         'body_too_long' => 'Votre annotation est trop longue (:max caractères maximum).',
         'highlight_too_long' => 'Le passage sélectionné est trop long (:max caractères maximum).',

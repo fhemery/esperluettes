@@ -6,6 +6,7 @@ use App\Domains\Comment\Private\Models\CommentAnnotation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -218,5 +219,183 @@ describe('Annotation replies — list', function () {
         DB::disableQueryLog();
 
         expect($statusQueries)->toBe(1);
+    });
+});
+
+describe('Annotation replies — write', function () {
+    beforeEach(function () {
+        Cache::flush();
+
+        $this->author = alice($this);
+        $this->story = publicStory('Public Story', $this->author->id);
+        $this->chapter = createPublishedChapter($this, $this->story, $this->author, ['title' => 'Pub Chap']);
+        $this->reader = bob($this);
+        $this->coAuthor = carol($this);
+        addCollaborator($this->story->id, $this->coAuthor->id, 'author');
+
+        $this->actingAs($this->reader);
+        $this->from('/chapters/whatever#comments')->post('/comments', annotatedChapterCommentPayload($this->chapter->id, [
+            annotationItem(['body' => '<p>Premier avis</p>', 'highlighted_text' => 'premier passage']),
+            annotationItem(['body' => '<p>Second avis</p>', 'highlighted_text' => 'second passage']),
+        ]))->assertSessionHasNoErrors();
+        auth()->logout();
+
+        $this->comment = Comment::query()->sole();
+        [$this->first, $this->second] = CommentAnnotation::query()->orderBy('id')->get()->all();
+        $this->replyUrl = fn (int $annotationId) => '/comments/annotations/' . $annotationId . '/replies';
+        $this->deleteUrl = fn (int $replyId) => '/comments/annotations/replies/' . $replyId;
+        $this->postReply = fn ($user, int $annotationId, string $body = '<p>Merci pour la remarque</p>') => $this->actingAs($user)
+            ->postJson(($this->replyUrl)($annotationId), ['body' => $body]);
+    });
+
+    it('lets the chapter author and a co-author reply to any root annotation', function () {
+        $response = ($this->postReply)($this->author, $this->first->id, '<p>Bien vu</p>')->assertCreated();
+
+        $reply = CommentAnnotation::query()->repliesOnly()->sole();
+        expect($reply->parent_annotation_id)->toBe($this->first->id)
+            ->and((int) $reply->comment_id)->toBe($this->comment->id)
+            ->and((int) $reply->author_id)->toBe($this->author->id)
+            ->and($reply->highlighted_text)->toBeNull()
+            ->and($reply->prefix)->toBeNull()
+            ->and($reply->suffix)->toBeNull()
+            ->and($reply->body)->toContain('Bien vu');
+
+        $response->assertJsonPath('id', $reply->id)
+            ->assertJsonPath('parent_annotation_id', $this->first->id)
+            ->assertJsonPath('author_id', $this->author->id)
+            ->assertJsonPath('author_profile.user_id', $this->author->id)
+            ->assertJsonPath('highlighted_text', '')
+            ->assertJsonPath('is_processed', null)
+            ->assertJsonPath('replies', [])
+            ->assertJsonPath('can_delete', true)
+            ->assertJsonPath('can_edit', false)
+            ->assertJsonPath('can_reply', false)
+            ->assertJsonPath('can_mark_as_processed', false);
+
+        ($this->postReply)($this->coAuthor, $this->second->id)->assertCreated();
+
+        expect(CommentAnnotation::query()->repliesOnly()->count())->toBe(2);
+    });
+
+    it('sanitizes the reply body', function () {
+        ($this->postReply)($this->author, $this->first->id, '<p>Ok<script>alert(1)</script></p>')->assertCreated();
+
+        expect(CommentAnnotation::query()->repliesOnly()->sole()->body)->not->toContain('script');
+    });
+
+    it('refuses a beta reader with 403', function () {
+        $beta = daniel($this);
+        addCollaborator($this->story->id, $beta->id, 'beta-reader');
+
+        ($this->postReply)($beta, $this->first->id)->assertForbidden();
+
+        expect(CommentAnnotation::query()->repliesOnly()->count())->toBe(0);
+    });
+
+    it('refuses the commenter before any author reply and accepts after one', function () {
+        ($this->postReply)($this->reader, $this->first->id)->assertForbidden();
+
+        ($this->postReply)($this->author, $this->first->id)->assertCreated();
+
+        ($this->postReply)($this->reader, $this->first->id, '<p>Merci à vous</p>')->assertCreated()
+            ->assertJsonPath('author_id', $this->reader->id)
+            ->assertJsonPath('can_delete', true);
+        // An author reply under one root does not unlock the other.
+        ($this->postReply)($this->reader, $this->second->id)->assertForbidden();
+    });
+
+    it('refuses a moderator with 403', function () {
+        ($this->postReply)(moderator($this), $this->first->id)->assertForbidden();
+        ($this->postReply)(admin($this), $this->first->id)->assertForbidden();
+
+        expect(CommentAnnotation::query()->repliesOnly()->count())->toBe(0);
+    });
+
+    it('refuses another reader with 403', function () {
+        $other = alice($this, ['name' => 'Eve', 'email' => 'eve@example.com']);
+        ($this->postReply)($this->author, $this->first->id)->assertCreated();
+
+        ($this->postReply)($other, $this->first->id)->assertForbidden();
+
+        expect(CommentAnnotation::query()->repliesOnly()->count())->toBe(1);
+    });
+
+    it('refuses a reply to a reply with 422', function () {
+        $replyId = ($this->postReply)($this->author, $this->first->id)->assertCreated()->json('id');
+
+        ($this->postReply)($this->author, $replyId)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['body' => __('comment::annotations.errors.reply_to_reply')]);
+
+        expect(CommentAnnotation::query()->repliesOnly()->count())->toBe(1);
+    });
+
+    it('refuses an empty body and a body over 1000 characters with 422', function () {
+        ($this->postReply)($this->author, $this->first->id, '<p>   </p>')
+            ->assertUnprocessable()->assertJsonValidationErrors('body');
+        ($this->postReply)($this->author, $this->first->id, '<p>' . generateDummyText(1001) . '</p>')
+            ->assertUnprocessable()->assertJsonValidationErrors('body');
+        $this->actingAs($this->author)->postJson(($this->replyUrl)($this->first->id), [])
+            ->assertUnprocessable()->assertJsonValidationErrors('body');
+
+        ($this->postReply)($this->author, $this->first->id, '<p>' . generateDummyText(1000) . '</p>')->assertCreated();
+        expect(CommentAnnotation::query()->repliesOnly()->count())->toBe(1);
+    });
+
+    it('returns 404 for a deleted root annotation', function () {
+        $this->actingAs(moderator($this))->deleteJson('/comments/annotations/' . $this->first->id)->assertNoContent();
+
+        ($this->postReply)($this->author, $this->first->id)->assertNotFound();
+        ($this->postReply)($this->author, 999999)->assertNotFound();
+    });
+
+    it('lets the writer delete their own reply', function () {
+        $replyId = ($this->postReply)($this->coAuthor, $this->first->id)->assertCreated()->json('id');
+        $sibling = ($this->postReply)($this->author, $this->first->id)->assertCreated()->json('id');
+
+        $this->actingAs($this->coAuthor)->deleteJson(($this->deleteUrl)($replyId))->assertNoContent();
+
+        expect(CommentAnnotation::withTrashed()->find($replyId)->trashed())->toBeTrue()
+            ->and(CommentAnnotation::query()->find($sibling))->not->toBeNull()
+            ->and($this->first->fresh()->trashed())->toBeFalse();
+
+        $this->actingAs($this->coAuthor)->deleteJson(($this->deleteUrl)($replyId))->assertNotFound();
+    });
+
+    it('refuses deleting another user’s reply, and a root annotation through the reply route, with 403', function () {
+        $replyId = ($this->postReply)($this->author, $this->first->id)->assertCreated()->json('id');
+
+        foreach ([$this->coAuthor, $this->reader, moderator($this)] as $user) {
+            $this->actingAs($user)->deleteJson(($this->deleteUrl)($replyId))->assertForbidden();
+        }
+        $this->actingAs($this->reader)->deleteJson(($this->deleteUrl)($this->first->id))->assertForbidden();
+
+        expect(CommentAnnotation::query()->find($replyId))->not->toBeNull()
+            ->and($this->first->fresh()->trashed())->toBeFalse();
+    });
+
+    it('lets a moderator delete a reply through the existing route without touching siblings', function () {
+        $replyId = ($this->postReply)($this->author, $this->first->id)->assertCreated()->json('id');
+        $sibling = ($this->postReply)($this->coAuthor, $this->first->id)->assertCreated()->json('id');
+
+        $this->actingAs(moderator($this))->deleteJson('/comments/annotations/' . $replyId)->assertNoContent();
+
+        expect(CommentAnnotation::withTrashed()->find($replyId)->trashed())->toBeTrue()
+            ->and(CommentAnnotation::query()->find($sibling))->not->toBeNull()
+            ->and($this->first->fresh()->trashed())->toBeFalse();
+    });
+
+    it('dispatches no notification and no event', function () {
+        Notification::fake();
+        $events = DB::table('events_domain')->count();
+        $notifications = DB::table('notifications')->count();
+
+        $replyId = ($this->postReply)($this->author, $this->first->id)->assertCreated()->json('id');
+        ($this->postReply)($this->reader, $this->first->id)->assertCreated();
+        $this->actingAs($this->author)->deleteJson(($this->deleteUrl)($replyId))->assertNoContent();
+
+        Notification::assertNothingSent();
+        expect(DB::table('events_domain')->count())->toBe($events)
+            ->and(DB::table('notifications')->count())->toBe($notifications);
     });
 });
