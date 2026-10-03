@@ -936,31 +936,31 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter, confirmed reader | Selection inside one text block → « Citer » + « Annoter » side by side | |
-| Chapter, capture form | Form under the selection; bold / italic / emoji toolbar only; counter /1000; Save + Cancel; Ctrl/Cmd+Enter saves; clicking elsewhere does not save | |
-| Chapter, cross-block selection (Advanced chapter) | Inline multi-block error, Save disabled | |
-| Chapter, image caption / chapter-choice block | Selection touching them hides both buttons | |
-| Chapter, selection > 500 chars | « Sélection trop longue », no action | |
-| Chapter, reader with 0 drafts | No banner above the root form (empty state) | |
-| Chapter, reader with 3 drafts | Banner « 3 annotations, écrivez votre commentaire pour les sauvegarder » + « Voir les annotations » | |
-| Drafts pop-up | Each draft: plain quote + body + Modifier / Supprimer; edit round trip; deleting the last draft hides the banner | |
-| Reload | Drafts and in-progress root comment survive a reload | |
-| Second user, same browser | Sees none of the first user's drafts | |
-| Publish | Root comment + annotations posted; banner gone; « N annotations » on the new comment | |
-| Publish failure (root < 140 chars) | Error shown, drafts and typed root body kept | |
-| Reader who already commented | No « Annoter » (A5); « Citer » still there; no banner | |
-| Commenter's pop-up | Own annotations, read-only, no processed marker | |
-| Author / co-author pop-up | All annotations; « Marquer comme traitée / non traitée » toggles; marker visible; shared between co-authors | |
-| Beta reader / other reader | No « N annotations » button on anyone's comment | |
-| Moderator pop-up | « Supprimer l'annotation » removes the row; count decrements | |
-| Root comment emptied by moderation | Button gone (annotations deleted) | |
-| Root comment deleted by moderation | Comment and annotations gone | |
-| Deactivated commenter | Comment and button hidden; restored on reactivation, without resurrecting a moderator-deleted annotation | |
-| Deleted commenter | Comment by « Esperluette disparue »; author still sees its annotations | |
-| Guest | No toolbar, no banner, no button | |
-| Mobile (375 px) | Touch selection → toolbar; capture form fits the viewport; pop-ups scroll | |
-| Quote regression | Quote tints, panel, author heat unchanged | |
-| News article | Comment list unchanged, no annotation UI | |
+| Chapter, confirmed reader | Selection inside one text block → « Citer » + « Annoter » side by side | ✅ same row, Citer first (spec; `shots/01`) |
+| Chapter, capture form | Form under the selection; bold / italic / emoji toolbar only; counter /1000; Save + Cancel; Ctrl/Cmd+Enter saves; clicking elsewhere does not save | ✅ all asserted (spec; `02`). Toolbar also ends with Quill's « Effacer la mise en forme », which the Editor appends to every preset by design |
+| Chapter, cross-block selection (Advanced chapter) | Inline multi-block error, Save disabled | ✅ (spec; `04`) |
+| Chapter, image caption / chapter-choice block | Selection touching them hides both buttons | ✅ caption (spec; `05`); chapter-choice driven on the post-run DB with two blocks injected into `chapitre-avance-4`, as no seeded chapter has one (`24`) |
+| Chapter, selection > 500 chars | « Sélection trop longue », no action | ✅ on the new > 500-char paragraph of `chapitre-coecrit-6` (spec; `03`) |
+| Chapter, reader with 0 drafts | No banner above the root form (empty state) | ✅ (spec) |
+| Chapter, reader with 3 drafts | Banner « 3 annotations, écrivez votre commentaire pour les sauvegarder » + « Voir les annotations » | ✅ exact text; singular « 1 annotation, … pour la sauvegarder » too (spec; `06`) |
+| Drafts pop-up | Each draft: plain quote + body + Modifier / Supprimer; edit round trip; deleting the last draft hides the banner | ✅ (spec; `07`) |
+| Reload | Drafts and in-progress root comment survive a reload | ✅ (spec) |
+| Second user, same browser | Sees none of the first user's drafts | ✅ one context, logout → login: `user`'s key stays in localStorage, `confirmed` sees only its own draft (spec; `16`) |
+| Publish | Root comment + annotations posted; banner gone; « N annotations » on the new comment | ✅ « 2 annotations », drafts key cleared (spec; `09`) |
+| Publish failure (root < 140 chars) | Error shown, drafts and typed root body kept | ✅ submit forced past the disabled button (spec; `08`). Message « Comment too short » is untranslated — pre-existing, see checkpoint 4v |
+| Reader who already commented | No « Annoter » (A5); « Citer » still there; no banner | ✅ (spec; `10`) |
+| Commenter's pop-up | Own annotations, read-only, no processed marker | ✅ also while one row is processed by the author (spec; `11`) |
+| Author / co-author pop-up | All annotations; « Marquer comme traitée / non traitée » toggles; marker visible; shared between co-authors | ✅ author marks, co-author sees and unmarks, author sees it unmarked (spec; `13`, `14`) |
+| Beta reader / other reader | No « N annotations » button on anyone's comment | ✅ other reader (spec). The only seeded beta reader is also a moderator, so the beta-reader half rests on PHP (`GetAnnotationsEndpointTest` 403, `canMarkAsProcessed` false for a beta reader) |
+| Moderator pop-up | « Supprimer l'annotation » removes the row; count decrements | ✅ « 2 annotations » → « 1 annotation » (spec; `15`) |
+| Root comment emptied by moderation | Button gone (annotations deleted) | ✅ driven; rows soft-deleted (`25`) |
+| Root comment deleted by moderation | Comment and annotations gone | ✅ driven; rows gone (`26`) |
+| Deactivated commenter | Comment and button hidden; restored on reactivation, without resurrecting a moderator-deleted annotation | ✅ driven: hidden, then back with « 1 annotation », not 2 (`27`, `28`) |
+| Deleted commenter | Comment by « Esperluette disparue »; author still sees its annotations | ✅ driven; `author_id` null on both rows (`29b`, `29`) |
+| Guest | No toolbar, no banner, no button | ✅ (spec; `12`) |
+| Mobile (375 px) | Touch selection → toolbar; capture form fits the viewport; pop-ups scroll | ✅ form 8 px margins; drafts (9 rows) and server pop-ups scroll to the last row; no horizontal overflow (spec; `20`–`23`) |
+| Quote regression | Quote tints, panel, author heat unchanged | ✅ tint + reader panel, author heat (spec; `17`, `18`) |
+| News article | Comment list unchanged, no annotation UI | ✅ root posted, no toolbar / banner / button / form (spec; `19`) |
 
 ## Open items
 
@@ -1003,3 +1003,64 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 6. **Existing `PATCH /comments/{commentId}` route**, information only: comment
    edit predates the no-PATCH rule (`Comment/Private/routes.php`). Out of scope;
    no new route in this plan uses PATCH.
+
+## VERIFY result
+
+**Result (2026-10-03, HEAD 67099688 + this commit) — PASS, 25/25 rows ✅**
+
+Assets built first. Screenshots in `shots/` (numbers in the checklist).
+
+**New spec** — `e2e/tests/features/annotations.spec.ts`, 8 serial tests, all
+green. It covers the browser-only edges around the core happy path
+(`e2e/tests/core/chapter-annotations.spec.ts`): toolbar layout, capture form
+(inline toolbar, counter, Ctrl/Cmd+Enter, click-outside), too-long and
+cross-block selections, caption, banner wording, drafts pop-up edit round trip,
+reload, forced failed publish, publish, reader who already commented,
+commenter / author / co-author / moderator pop-ups, other reader, guest, two
+users in one browser, Quote, news, and 375 px touch with scrolling pop-ups.
+Evidence screenshots are taken only when `E2E_SHOTS_DIR` is set
+(`ChapterAnnotations.evidence`). Two assertions failed during development
+before they were corrected (the processed marker counted hidden elements; a
+491-char selection was under the limit), so the spec does fail when it should.
+
+Supporting changes, no product code:
+- Fixture: `E2eStorySeeder::LONG_PARAGRAPH`, a second paragraph of more than
+  500 characters in `chapitre-coecrit-6`, mirrored in `e2e/support/fixtures.ts`.
+  No existing chapter had more than 500 characters in a single text block (the
+  six paragraphs of `chapitre-simple-3` add up to 491).
+- Page objects: `ChapterAnnotations` (toolbar, « Citer », too-long hint,
+  capture form parts, `editDraft`, `storedDrafts` / `storedRootBody`,
+  `allCountButtons`, `evidence`), `ChapterPage` (`touchSelectText`,
+  `quoteMiniForm`, `quotePanel`), `LoginPage.logout`, `NewsArticlePage.content`.
+
+**Driven on the post-run e2e DB** (run-app driver, `:8080`), for rows a spec
+could not hold cheaply. Their logic is also covered in PHP
+(`AnnotationLifecycleTest`):
+- chapter-choice: two blocks injected into `chapitre-avance-4` (throwaway DB);
+  choice alone, and text + choice → no toolbar (`24`).
+- Moderator « Vider le contenu » on a root with 2 annotations →
+  `<Commentaire supprimé>`, no button, both rows soft-deleted (`25`).
+  « Supprimer » on a root with 9 annotations → comment gone, rows gone (`26`).
+- Admin deactivates `user` (204) → their comment and button hidden from the
+  author (`27`); reactivates (204) → back with « 1 annotation », the
+  moderator-deleted one stays deleted (`28`); deletes `user` → « Esperluette
+  disparue », « 1 annotation », the author's pop-up still lists it, `author_id`
+  null on the live and the trashed row (`29b`, `29`).
+
+**e2e:** `pnpm run e2e annotation comment` → 22/22; full `pnpm run e2e` →
+36/36. **Gate:** `pnpm run gate` green (docs, e2e-types, deptrac, js, php, build).
+
+Observations, none caused by this branch:
+- After deactivate → reactivate, the restored comment shows « Modifié le … »,
+  because restoring it touches `updated_at`. Existing Comment lifecycle
+  behaviour; the listeners are not changed on this branch (`29b`).
+- « Comment too short » is untranslated (already noted at 4v).
+- The illustration image does not load on the `:8080` instance (`APP_URL`
+  points to `:8081`).
+- The beta-reader half of the "Beta reader / other reader" row cannot be
+  isolated in the browser, because the seeded beta reader is also a moderator.
+  A one-line case in `AnnotationCountTest` ("a beta reader sees 0") would pin
+  it directly; it is covered today only by combining the two existing tests.
+
+At WRAP: `e2e/tests/features/annotations.spec.ts` is meant to be deleted (the
+default). The core spec stays as the permanent net (A13).

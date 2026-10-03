@@ -91,6 +91,7 @@ export const STORY = {
 export const COAUTHORED_STORY = {
   slug: 'histoire-coecrite-2',
   title: 'Histoire coécrite E2E',
+  /** Two paragraphs; the second (`E2eStorySeeder::LONG_PARAGRAPH`) is over 500 characters. */
   chapter: { slug: 'chapitre-coecrit-6', title: 'Chapitre coécrit' },
 } as const;
 
