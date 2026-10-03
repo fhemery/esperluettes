@@ -18,6 +18,8 @@ a new row that supersedes it and note the number.
 | 8 | 2026-10-03 | REFINE | Toolbar content | « Annoter » + ❤️ 🔥 👍 (unicode), no « + » | — |
 | 9 | 2026-10-03 | REFINE | Reply edit/delete | Writer may delete, immediately; no edit | — |
 | 10 | 2026-10-03 | REFINE | Replies of a deactivated user | Hidden while deactivated, back on reactivation, no row touched | — |
+| 11 | 2026-10-03 | DESIGN | Where pending post-publish changes live | New `annotationChanges` slot in the comment-draft store (not a separate module/key) | — |
+| 12 | 2026-10-03 | DESIGN | How "an author has replied" is decided | Derived: a visible reply whose writer ≠ the root's writer; no `is_author_reply` column | — |
 
 ## Assumptions made without asking
 
