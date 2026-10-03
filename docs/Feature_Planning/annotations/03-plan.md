@@ -722,6 +722,7 @@ Annotation capture — observations (phase 10, not Quote regressions):
   read the dataset from the component root (e.g. `x-ref` on the root, or
   `this.$root`), and add a Vitest case that clicks the button rather than
   calling `save()` directly. To route back to phase 10.
+- Fixed in `9dbeecf3` (`fix(comment)`): config read via `$root`; button save browser-confirmed.
 
 ---
 
