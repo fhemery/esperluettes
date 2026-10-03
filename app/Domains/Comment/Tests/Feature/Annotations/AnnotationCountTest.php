@@ -117,7 +117,7 @@ describe('annotationCount on CommentDto', function () {
 
     it('gives a beta reader a zero count', function () {
         $beta = daniel($this);
-        addCollaborator($this->story->id, $beta->id, 'betareader');
+        addCollaborator($this->story->id, $beta->id, 'beta-reader');
 
         expect(annotationCountsSeenBy($this, $beta, $this->chapter->id))->toBe([
             $this->carolComment => 0,

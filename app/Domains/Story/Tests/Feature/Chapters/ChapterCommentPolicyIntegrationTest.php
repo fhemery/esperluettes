@@ -154,7 +154,7 @@ describe('Regarding annotations', function () {
 
     it('canAnnotate: true for a beta reader', function () {
         $betaReader = daniel($this);
-        addCollaborator($this->story->id, $betaReader->id, 'betareader');
+        addCollaborator($this->story->id, $betaReader->id, 'beta-reader');
 
         expect($this->policy->canAnnotate($this->chapter->id, $betaReader->id))->toBeTrue();
     });
@@ -163,7 +163,7 @@ describe('Regarding annotations', function () {
         $coAuthor = carol($this);
         addCollaborator($this->story->id, $coAuthor->id, 'author');
         $betaReader = daniel($this);
-        addCollaborator($this->story->id, $betaReader->id, 'betareader');
+        addCollaborator($this->story->id, $betaReader->id, 'beta-reader');
         $reader = bob($this);
 
         expect($this->policy->canMarkAsProcessed($this->chapter->id, $this->author->id))->toBeTrue()
