@@ -32,6 +32,9 @@ function makeComponent() {
     document.body.appendChild(el);
 
     const component = annotationForm();
+    // Alpine: $root is the x-data element; $el is whichever element fired the
+    // directive (the root for window listeners, a button for @click).
+    component.$root = el;
     component.$el = el;
 
     return component;
@@ -176,6 +179,32 @@ describe('annotationForm.save', () => {
         expect(stored).toHaveLength(1);
         expect(stored[0]).toMatchObject({ body: '<p>une <strong>note</strong></p>', highlighted: 'chat dort' });
         spy.mockRestore();
+    });
+
+    it('save triggered from the Enregistrer button ($el is the button) stores the draft', () => {
+        const component = openOnChat();
+        const button = document.createElement('button');
+        component.$root.appendChild(button);
+        component.$el = button;
+        typeBody('<p>une note</p>');
+
+        component.save();
+
+        expect(storedAnnotations()).toHaveLength(1);
+        expect(component.open).toBe(false);
+    });
+
+    it('a blank body saved from the Enregistrer button shows the blank error', () => {
+        const component = openOnChat();
+        const button = document.createElement('button');
+        component.$root.appendChild(button);
+        component.$el = button;
+        typeBody('<p> </p>');
+
+        component.save();
+
+        expect(component.open).toBe(true);
+        expect(component.error).toBe(BLANK);
     });
 
     it('Ctrl+Enter saves; blur does not', () => {

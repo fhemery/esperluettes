@@ -32,7 +32,9 @@ function plainText(html) {
  * drafts are posted with the root comment.
  *
  * Configuration comes from data attributes on the component root
- * (`<x-comment::annotation-form>`).
+ * (`<x-comment::annotation-form>`), always read through `$root`: inside a
+ * directive Alpine's `$el` is the element that fired it (e.g. the « Enregistrer »
+ * button), not the component root.
  */
 export function annotationForm() {
     return {
@@ -59,7 +61,7 @@ export function annotationForm() {
         },
 
         _context() {
-            const data = this.$el.dataset;
+            const data = this.$root.dataset;
             return {
                 userId: data.userId ? parseInt(data.userId, 10) : null,
                 entityType: data.entityType,
@@ -77,7 +79,7 @@ export function annotationForm() {
 
         _show() {
             this.open = true;
-            this.$nextTick?.(() => this.$el.querySelector('.ql-editor')?.focus());
+            this.$nextTick?.(() => this.$root.querySelector('.ql-editor')?.focus());
         },
 
         openForm() {
@@ -96,7 +98,7 @@ export function annotationForm() {
             if (!covered) return;
             const spansSeveralBlocks = closestBlock(covered.startContainer) !== closestBlock(covered.endContainer);
 
-            const maxLength = Number(this.$el.dataset.highlightMaxLength);
+            const maxLength = Number(this.$root.dataset.highlightMaxLength);
             const { text, nodeMap } = buildCanonicalText(articleEl, { within: ANNOTATABLE_AREA_SELECTOR });
             const anchor = extractAnchor(range, articleEl, { text, nodeMap });
             // extractAnchor gives up on long selections: still tell the reader why.
@@ -124,8 +126,8 @@ export function annotationForm() {
             this.tooLong = tooLong;
             this.multiBlock = spansSeveralBlocks;
             this.error = this.tooLong
-                ? this.$el.dataset.errorHighlightTooLong
-                : (this.multiBlock ? this.$el.dataset.errorHighlightMultiBlock : null);
+                ? this.$root.dataset.errorHighlightTooLong
+                : (this.multiBlock ? this.$root.dataset.errorHighlightMultiBlock : null);
             this._setBody('');
             this._show();
         },
@@ -167,12 +169,12 @@ export function annotationForm() {
             const body = editorTextarea()?.value ?? '';
             const length = plainText(body).trim().length;
             if (length === 0) {
-                this.error = this.$el.dataset.errorBlank;
+                this.error = this.$root.dataset.errorBlank;
                 return;
             }
-            const bodyMax = Number(this.$el.dataset.bodyMaxLength);
+            const bodyMax = Number(this.$root.dataset.bodyMaxLength);
             if (bodyMax > 0 && length > bodyMax) {
-                this.error = this.$el.dataset.errorBodyTooLong;
+                this.error = this.$root.dataset.errorBodyTooLong;
                 return;
             }
 
