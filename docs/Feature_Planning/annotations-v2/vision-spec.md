@@ -444,7 +444,7 @@ Revisions after the Quote / MultiEdit work (2026-10-03, see `DECISIONS.md`): cro
 ## Next steps — **done**
 
 This spec is locked. The architecture document
-([`02-architecture.md`](./02-architecture.md)) covers, as planned:
+([`annotations/02-architecture.md`](../annotations/02-architecture.md)) covers, as planned:
 
 - Domain ownership (annotations live in the Comment domain or in Story?).
 - Data model (a new `chapter_annotations` table vs. reusing `comments`).
