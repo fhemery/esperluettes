@@ -22,7 +22,7 @@
 | 5 | Replies, read side — `getForComment` returns replies, `can_edit`/`can_reply`/`can_delete`, deactivated-writer filter | M | 4 | DONE |
 | 6 | Replies, write side — `reply`, `deleteOwnReply`, their routes | S | 5 | DONE |
 | 7 | JS infrastructure — `annotationChanges` slot in the comment-draft store (schema v2) + `api.js` calls | S | 4, 6 | DONE |
-| 7v | Checkpoint — existing comment drafts and v1 annotation drafts survive the store bump | S | 7 | TODO |
+| 7v | Checkpoint — existing comment drafts and v1 annotation drafts survive the store bump | S | 7 | DONE |
 | 8 | Toolbar — pending mode for the capture form + ❤️ 🔥 👍 reaction buttons | M | 7 | TODO |
 | 9 | Save banner — `annotationChangesBanner` (count, Enregistrer, Tout annuler, 422 mapping) | M | 8 | TODO |
 | 10 | Pop-up, commenter overlay — pending markers, undo, pending adds, Modifier / Supprimer | M | 9 | TODO |
@@ -515,6 +515,16 @@ which root comments, comment replies and v1 annotation drafts all use.
 
 Output: `shots/checkpoint-7v/`, then a `**Result (<date>, HEAD <sha>) — PASS|FAIL**`
 block appended here.
+
+**Result (2026-10-03, HEAD 6fd451ba) — PASS**
+
+- E2E: `pnpm run e2e:core` — 28/28 green.
+- Drafts seeded by hand as `version: 1` localStorage payloads on the e2e instance, as `confirmed`, then the page reloaded on phase 7 HEAD.
+- Chapter `chapitre-avance-4`: a v1 root body and two v1 annotation drafts restore. The editor holds the body, the banner reads « 2 annotations », the pop-up lists both passages (`01`, `02`).
+- Root posted: the store key is removed (root and annotation drafts cleared), and the new comment shows « 2 annotations » (`03`).
+- Chapter `chapitre-publie-1`: a v1 reply draft (parent 1) auto-opens the reply composer with its body (`04`).
+- News `actualite-e2e`: a v1 root draft restores into the editor (`05`).
+- No HTTP ≥400 or page error during the run.
 
 ---
 
