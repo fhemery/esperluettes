@@ -26,7 +26,7 @@
 | 7 | `annotationCount` on `CommentDto` (page render + fragments) | S | 5 | DONE |
 | 8 | Lifecycle — moderation cascades, user deleted / deactivated / reactivated, chapter deleted | S | 5, 7 | DONE |
 | 9 | Shared infrastructure — comment-draft `annotations` slot API + consumed marker clears it | S | — | DONE |
-| 9v | Checkpoint — root and reply comment drafts on chapters and news | S | 9 | TODO |
+| 9v | Checkpoint — root and reply comment drafts on chapters and news | S | 9 | DONE |
 | 10 | Capture — « Annoter » button, capture form, chapter-page wiring | M | 2, 3, 9 | TODO |
 | 10v | Checkpoint — Quote on the chapter page (toolbar, mini-form, highlights, heat) | S | 10 | TODO |
 | 11 | Drafts banner, drafts-mode pop-up, publish with the root comment | M | 4, 10 | TODO |
@@ -555,6 +555,26 @@ path. Check that the existing draft behaviour survived.
   `e2e/tests/core/comment-thread.spec.ts`.
 
 Screenshots under `shots/checkpoint-9v/`.
+
+**Result (2026-10-03, HEAD 0e196e40) — PASS**
+
+- e2e `comment-draft-consume`, `comment-thread`: 11/11 green (incl. auth setup).
+- Chapter `chapitre-compte-5`, confirmed: root draft restored after reload
+  (`01`); posted → redirect `?comment=11#comments`, storage key removed — an
+  annotation seeded via `window.commentDrafts.addAnnotation` was consumed with
+  the root, as phase 9 intends; root form gone (`02`).
+- Reply draft on own root: reload → reply form auto-opens with the body (`03`);
+  posted → reply slot null, a seeded annotation survives the reply marker, no
+  reply form on next reload (`04`).
+- News `actualite-e2e`: root draft restored (`05`); posted → editor empty,
+  key removed, nothing restored on next visit (`06`).
+- Same browser, two users: author sees an empty editor while confirmed's key
+  stays (`07`); back as confirmed, own draft back, not author's (`08`).
+- Pre-existing, not a regression: reloading on `?comment=<id>#comments` does
+  not auto-open the reply form (draft body is restored into the hidden form).
+  Same on pre-phase code (`probe-reply-query-pre` vs `-head`); the round
+  above reloads on the plain chapter URL.
+- No HTTP ≥ 400 or page error.
 
 ---
 
