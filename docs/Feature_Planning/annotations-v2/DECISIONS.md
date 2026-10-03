@@ -34,3 +34,5 @@ the user may want to reverse — surface these in the WRAP summary.
 | A4 | No events, no statistics, no new moderation topic | REFINE (replayed, accepted) | yes |
 | A5 | v1 leftovers folded in (highlight cap from policy, counts respect gate, beta-reader test, e2e helpers); emoji-list de-dup → v3 | REFINE (replayed, accepted) | yes |
 | A6 | v3 = D+E+G (+ emoji de-dup); v4 = F+H | REFINE (replayed, accepted) | yes |
+| A7 | `PUT …/annotations` is a JSON body, so Laravel's TrimStrings trims edge spaces of `prefix`/`suffix` on adds (the v1 create path, a JSON string in one input, keeps them). Left as is: Quote already lives with it and re-anchoring compares normalized words | BUILD phase 4 | yes |
+| A8 | `annotatedChapterCommentPayload` / `annotationItem` moved from `PostCommentWithAnnotationsTest` to `Comment/Tests/helpers.php` — file-local Pest helpers broke under parallel runs once a second file used them | BUILD phase 4 | yes |

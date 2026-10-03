@@ -16,6 +16,9 @@ Route::middleware(['web', 'auth', 'compliant'])
         Route::get('/{commentId}/annotations', [AnnotationController::class, 'index'])
             ->whereNumber('commentId')
             ->name('annotations.index');
+        Route::put('/{commentId}/annotations', [AnnotationController::class, 'save'])
+            ->whereNumber('commentId')
+            ->name('annotations.save');
         Route::put('/annotations/{annotationId}/processed', [AnnotationController::class, 'processed'])
             ->whereNumber('annotationId')
             ->name('annotations.processed');

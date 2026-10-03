@@ -51,10 +51,11 @@ System-level operations. Intended for use by other domains cleaning up their own
 
 ### AnnotationPublicApi
 
-Reads and acts on the annotations of one root comment. Creation is not here: annotations are only created by `CommentPublicApi::create` with their root comment.
+Reads and acts on the annotations of one root comment. The first annotations are created by `CommentPublicApi::create` with their root comment; later ones go through `saveChanges`.
 
 | Method | Description |
 |--------|-------------|
+| `saveChanges(commentId, byUserId, AnnotationChangeSetDto)` | The commenter's adds / edits / deletes under their own root comment, in one transaction; returns the refreshed `AnnotationListDto`. 404 for an unknown or trashed comment; 403 unless the user wrote this root comment and `canAnnotate` holds. Every item error is collected into one 422 keyed `adds.<clientKey>` / `edits.<id>` / `deletes.<id>`; an id that is not a live root of this comment written by the user (deleted, foreign, reply) is `errors.stale`, never a 403. An edit resets the processed flag and leaves the anchor untouched; a delete takes the replies with it. No event. |
 | `getForComment(commentId, viewerId)` | `AnnotationListDto` of the root annotations the viewer may see, with per-row action flags. 404 (`ModelNotFoundException`) for an unknown or trashed comment, 403 (`AuthorizationException`) for a viewer who may see none. |
 | `setProcessed(annotationId, byUserId, value)` | Author / co-author toggle of the processed flag. 403 unless the user resolves to the `author` role on that comment (an author who is also the commenter does not); 422 on a reply row. |
 | `moderatorDelete(annotationId, byUserId)` | Soft-deletes one annotation and its replies. No role check inside: the route's `role` middleware is the gate. |
@@ -103,6 +104,7 @@ Example implementation: `App\Domains\Story\Private\Services\ChapterCommentPolicy
 | Class | Description |
 |-------|-------------|
 | `CommentToCreateDto` | Input for `create()` — entity type, entity ID, body, optional parent comment ID, optional list of `AnnotationToCreateDto` |
+| `AnnotationChangeSetDto` | Input for `saveChanges()` — `adds` (`AnnotationToCreateDto[]`, each with its `clientKey`), `edits` (id => body), `deletes` (ids) |
 | `CommentDto` | A single comment with author profile, permission flags (`canReply`, `canEditOwn`), `annotationCount` (root annotations **the viewer** may see), and nested children |
 | `AnnotationListDto` / `AnnotationDto` | Payload of `getForComment`: the viewer's role (`commenter`, `author`, `moderator`) and the rows, each with `highlighted_text`, sanitized `body`, `is_processed` (null for the commenter), `can_mark_as_processed`, `can_delete` |
 | `CommentListDto` | Paginated list of `CommentDto` items plus a `CommentUiConfigDto` |
@@ -304,6 +306,7 @@ Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts`.
 | `DELETE` | `/comments/{commentId}` | Moderator+ | Hard-delete comment and its replies |
 | `GET` | `/comments/fragments` | public | Return HTML fragment for lazy-load pagination |
 | `GET` | `/comments/{commentId}/annotations` | `auth`, `compliant` | JSON list of the root comment's annotations visible to the viewer (403 / 404 otherwise) |
+| `PUT` | `/comments/{commentId}/annotations` | `auth`, `compliant` | Body `{ adds: [{key, body, highlighted_text, prefix, suffix}], edits: [{id, body}], deletes: [id] }`; the root comment's author only. 200 + list, 422 keyed per item |
 | `PUT` | `/comments/annotations/{annotationId}/processed` | `auth`, `compliant` | Body `{ value: bool }`; author / co-author only |
 | `DELETE` | `/comments/annotations/{annotationId}` | Moderator+ | Soft-delete one annotation and its replies |
 

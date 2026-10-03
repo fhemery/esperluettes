@@ -14,30 +14,6 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-/**
- * Build a POST /comments payload for a chapter root comment carrying annotations,
- * serialised the way the client does it: one hidden `annotations` JSON input.
- */
-function annotatedChapterCommentPayload(int $chapterId, array $annotations, array $overrides = []): array
-{
-    return array_merge([
-        'entity_type' => 'chapter',
-        'entity_id' => $chapterId,
-        'body' => generateDummyText(140),
-        'annotations' => json_encode($annotations),
-    ], $overrides);
-}
-
-function annotationItem(array $overrides = []): array
-{
-    return array_merge([
-        'body' => '<p>Belle phrase</p>',
-        'highlighted_text' => 'le passage choisi',
-        'prefix' => 'avant ',
-        'suffix' => ' après',
-    ], $overrides);
-}
-
 describe('POST /comments with annotations', function () {
     beforeEach(function () {
         $this->author = alice($this);

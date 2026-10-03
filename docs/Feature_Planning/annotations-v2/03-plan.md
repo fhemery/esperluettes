@@ -18,7 +18,7 @@
 | 1v | Checkpoint — posting root comments (with and without annotation drafts) on chapters and news | S | 1 | DONE |
 | 2 | v1 leftovers — policy highlight cap, counts respect `supportsAnnotations`, beta-reader count test | S | 1 | DONE |
 | 3 | Story — lift A5 in `canAnnotate`, annotation mode + root id on the chapter page (toolbar still draft-only) | S | 2 | DONE |
-| 4 | `saveChanges` — DTOs, service, public API, `PUT /comments/{id}/annotations` | M | 3 | TODO |
+| 4 | `saveChanges` — DTOs, service, public API, `PUT /comments/{id}/annotations` | M | 3 | DONE |
 | 5 | Replies, read side — `getForComment` returns replies, `can_edit`/`can_reply`/`can_delete`, deactivated-writer filter | M | 4 | TODO |
 | 6 | Replies, write side — `reply`, `deleteOwnReply`, their routes | S | 5 | TODO |
 | 7 | JS infrastructure — `annotationChanges` slot in the comment-draft store (schema v2) + `api.js` calls | S | 4, 6 | TODO |

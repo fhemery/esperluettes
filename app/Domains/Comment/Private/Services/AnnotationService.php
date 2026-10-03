@@ -6,6 +6,7 @@ namespace App\Domains\Comment\Private\Services;
 
 use App\Domains\Comment\Private\Models\CommentAnnotation;
 use App\Domains\Comment\Private\Support\CommentBodySanitizer;
+use App\Domains\Comment\Public\Api\Contracts\AnnotationChangeSetDto;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,59 @@ class AnnotationService
                 'suffix' => $item->suffix,
             ]);
         }
+    }
+
+    /**
+     * Apply a commenter's changes under their root comment in one transaction:
+     * deletes (with their replies), then edits (body only, processed flag reset), then adds.
+     * Callers validate first (ids are live roots of this comment written by $authorId).
+     */
+    public function applyChanges(int $commentId, int $authorId, AnnotationChangeSetDto $changes): void
+    {
+        DB::transaction(function () use ($commentId, $authorId, $changes) {
+            if ($changes->deletes !== []) {
+                CommentAnnotation::query()
+                    ->whereIn('parent_annotation_id', $changes->deletes)
+                    ->delete();
+                CommentAnnotation::query()
+                    ->whereIn('id', $changes->deletes)
+                    ->delete();
+            }
+
+            foreach ($changes->edits as $id => $body) {
+                CommentAnnotation::query()
+                    ->whereKey($id)
+                    ->update([
+                        'body' => $this->sanitizer->sanitizeToHtml($body, CommentBodySanitizer::ANNOTATION),
+                        'is_processed' => false,
+                        'processed_at' => null,
+                    ]);
+            }
+
+            $this->createForComment($commentId, $authorId, $changes->adds);
+        });
+    }
+
+    /**
+     * Which of $ids are live root annotations of $commentId written by $authorId.
+     *
+     * @param int[] $ids
+     * @return int[]
+     */
+    public function filterOwnRootIds(int $commentId, int $authorId, array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return CommentAnnotation::query()
+            ->roots()
+            ->where('comment_id', $commentId)
+            ->where('author_id', $authorId)
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
     }
 
     /**
