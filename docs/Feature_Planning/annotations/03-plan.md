@@ -20,7 +20,7 @@
 | 2 | Policy contract — annotation methods on `CommentPolicy` (Default, Registry, News, Chapter) | S | — | DONE |
 | 3 | Shared infrastructure — sanitizer `annotation` profile + Editor `inline` preset | S | — | DONE |
 | 4 | Create path — `POST /comments` accepts `annotations`, one transaction | M | 1, 2, 3 | DONE |
-| 4v | Checkpoint — comment posting on chapters and news | S | 4 | TODO |
+| 4v | Checkpoint — comment posting on chapters and news | S | 4 | DONE |
 | 5 | Read path — `AnnotationAccessService`, `AnnotationPublicApi::getForComment`, `GET /comments/{id}/annotations` | M | 4 | TODO |
 | 6 | Author and moderator actions — `PUT …/processed`, `DELETE /comments/annotations/{id}` | S | 5 | TODO |
 | 7 | `annotationCount` on `CommentDto` (page render + fragments) | S | 5 | TODO |
@@ -281,6 +281,24 @@ the app. Check that it still behaves as before, with no annotation involved.
   `e2e/tests/core/comment-draft-consume.spec.ts`.
 
 Screenshots under `shots/checkpoint-4v/`.
+
+**Result (2026-10-03, HEAD 5c3ba053) — PASS**
+
+- e2e `chapter-comments`, `comment-thread`, `comment-draft-consume`: 13/13 green.
+- Chapter `chapitre-compte-5`, confirmed: root comment (≥ 140 chars) redirects
+  to `?comment=11#comments`, visible, root form gone; credits row created
+  (gained 6 = base 5 + 1, same as the seeded author's base 5); author got one
+  `story.chapter.root_comment` notification (`01`, `02`).
+- Confirmed reply on own root and edit of own root both work (`03`, `04`).
+- Author: no root form; reply works; confirmed notified
+  (`story.chapter.reply_comment`) (`05`).
+- News `actualite-e2e`, confirmed: root + reply posted and visible (`06`).
+- Too-short root (submit forced past the client-side disable): server HTML
+  re-renders the typed text via `old('body')`, editor keeps it, error under
+  the form (`01`) — A7 behaves. The message is the untranslated
+  « Comment too short », pre-existing (`CommentPublicApi`, unchanged by
+  phase 4), not a regression.
+- `comment_annotations` stays empty; no HTTP ≥ 400 or page error.
 
 ---
 
