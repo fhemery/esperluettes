@@ -4,7 +4,7 @@
 > Every statement here is either something the user confirmed or a stated
 > assumption. No invented requirements.
 >
-> Starts from [`vision-spec.md`](./vision-spec.md) (the original full spec) and
+> Starts from [`vision-spec.md`](../annotations-v3/vision-spec.md) (moved there at WRAP) (the original full spec) and
 > what v1 shipped ([`_done/annotations.md`](../_done/annotations.md)). Everything
 > v1 settled still holds unless this document says otherwise. v2 covers items
 > **A** (quick-emoji reactions), **B** (post-publish add / edit / delete) and
