@@ -17,7 +17,7 @@
 | 2 | Refactor — annotation list builder over preloaded collections | S | — | DONE |
 | 2v | Checkpoint — comment / quote-note / annotation rendering and the « N annotations » pop-up | S | 1, 2 | DONE |
 | 3 | Emptied annotations: column, model, `is_emptied`, edit lock | S | 2 | DONE |
-| 4 | Moderator « Vider le contenu » endpoint | S | 3 | TODO |
+| 4 | Moderator « Vider le contenu » endpoint | S | 3 | DONE |
 | 5 | `GET in-entity` read endpoint (`getForEntity`) | M | 2, 3 | TODO |
 | 6 | Pop-up: « Vider le contenu » button, emptied rows, « Passage absent du chapitre » badge | M | 4 | TODO |
 | 6v | Checkpoint — « N annotations » pop-up for commenter / author / moderator | S | 6 | TODO |

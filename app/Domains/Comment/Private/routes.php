@@ -34,6 +34,9 @@ Route::middleware(['web', 'auth', 'compliant'])
             Route::delete('/annotations/{annotationId}', [AnnotationModerationController::class, 'delete'])
                 ->whereNumber('annotationId')
                 ->name('annotations.delete');
+            Route::post('/annotations/{annotationId}/empty-content', [AnnotationModerationController::class, 'empty'])
+                ->whereNumber('annotationId')
+                ->name('annotations.empty-content');
             Route::post('/{commentId}/empty-content', [CommentModerationController::class, 'emptyContent'])->name('empty-content');
             Route::delete('/{commentId}', [CommentModerationController::class, 'delete'])->name('delete');
         });

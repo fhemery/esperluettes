@@ -232,6 +232,42 @@ class AnnotationPublicApi
     }
 
     /**
+     * Replace a root annotation's body with the placeholder; idempotent. Callers gate on the moderator roles.
+     *
+     * @return AnnotationDto the refreshed row as seen by a moderator
+     * @throws ModelNotFoundException when the annotation is unknown or deleted
+     * @throws ValidationException when the annotation is a reply
+     */
+    public function moderatorEmpty(int $annotationId, int $byUserId): AnnotationDto
+    {
+        $annotation = $this->annotations->getAnnotation($annotationId);
+
+        if ($annotation->parent_annotation_id !== null) {
+            throw ValidationException::withMessages([
+                'annotation' => [__('comment::annotations.errors.reply_not_emptiable')],
+            ]);
+        }
+
+        $this->annotations->emptyContent($annotation);
+
+        $roots = new Collection([$annotation->fresh()]);
+        $replies = $this->access->filterActiveReplyWriters(
+            $this->annotations->getRepliesForRoots([(int) $annotation->id]),
+        );
+
+        $authorIds = $roots->concat($replies)->pluck('author_id')->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
+        $profiles = $authorIds === [] ? [] : $this->profiles->getPublicProfiles($authorIds);
+
+        return $this->buildItems(
+            $roots,
+            $replies->groupBy('parent_annotation_id'),
+            $profiles,
+            AnnotationListDto::ROLE_MODERATOR,
+            $byUserId,
+        )[0];
+    }
+
+    /**
      * Root annotation DTOs from already-loaded rows, with the viewer-role derived flags.
      *
      * @param Collection<int, CommentAnnotation> $roots

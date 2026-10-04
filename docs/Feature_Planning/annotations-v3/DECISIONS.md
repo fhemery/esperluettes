@@ -38,3 +38,5 @@ the user may want to reverse — surface these in the WRAP summary.
 | A8 | « Vider le contenu » on root annotations only; replies keep « Supprimer »; processed flag kept | REFINE | yes |
 | A9 | No notification, event or audit entry for « Vider le contenu » | REFINE | yes |
 | A10 | Avatars / arrows keyboard-focusable with labels, same bar as Quote's pills | REFINE | yes |
+| A11 | Non-moderators on `POST /comments/annotations/{id}/empty-content` get the `role` middleware's redirect to the dashboard (as `moderatorDelete`), not the 403 the plan named; the middleware is unchanged | BUILD phase 4 | yes |
+| A12 | 422 on a reply is keyed `annotation` with the new message `errors.reply_not_emptiable` (mirrors `reply_not_processable`) | BUILD phase 4 | yes |

@@ -152,6 +152,22 @@ class AnnotationService
     }
 
     /**
+     * Replace the body with the placeholder and stamp content_emptied_at. Anchor, processed flag
+     * and replies are kept. No-op on an already emptied row. Callers check it is a root.
+     */
+    public function emptyContent(CommentAnnotation $annotation): void
+    {
+        if ($annotation->isEmptied()) {
+            return;
+        }
+
+        $annotation->update([
+            'body' => e(__('comment::annotations.emptied_body')),
+            'content_emptied_at' => now(),
+        ]);
+    }
+
+    /**
      * Soft-delete one annotation and its replies.
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException when unknown or already deleted
