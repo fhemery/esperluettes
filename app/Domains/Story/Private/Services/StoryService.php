@@ -556,6 +556,7 @@ class StoryService
     /**
      * Random discover stories for the dashboard/component.
      * Excludes stories authored by the user and respects visibility rules.
+     * Excludes stories the viewer has started (at least one chapter marked as read).
      * Honours the viewer's « masquer les histoires avec avertissement » preference:
      * discover is a discovery list, and the viewer id is always known here.
      *

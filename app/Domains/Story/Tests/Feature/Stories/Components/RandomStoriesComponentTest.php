@@ -140,4 +140,80 @@ describe('RandomStoriesComponent', function () {
             ->not->toContain('No Chapters')
             ->not->toContain('Only Drafts');
     });
+
+    it('excludes stories in which the viewer has marked a chapter as read', function () {
+        $author = alice($this);
+        $started = publicStory('Started Story', $author->id);
+        $c1 = createPublishedChapter($this, $started, $author, ['title' => 'C1']);
+        createPublishedChapter($this, $started, $author, ['title' => 'C2']);
+        $fresh = publicStory('Fresh Story', $author->id);
+        createPublishedChapter($this, $fresh, $author, ['title' => 'C1']);
+
+        $viewer = bob($this, roles: [Roles::USER]);
+        $this->actingAs($viewer);
+        markAsRead($this, $c1)->assertNoContent();
+
+        $html = Blade::render('<x-story::random-stories-component />');
+        expect($html)
+            ->toContain('Fresh Story')
+            ->not->toContain('Started Story');
+    });
+
+    it('still shows a story another user has marked as read', function () {
+        $author = alice($this);
+        $story = publicStory('Read By Someone Else', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+
+        $other = carol($this);
+        $this->actingAs($other);
+        markAsRead($this, $chapter)->assertNoContent();
+
+        $viewer = bob($this, roles: [Roles::USER]);
+        $this->actingAs($viewer);
+
+        $html = Blade::render('<x-story::random-stories-component />');
+        expect($html)->toContain('Read By Someone Else');
+    });
+
+    it('still shows a story in the viewer read list with no chapter read', function () {
+        $author = alice($this);
+        $story = publicStory('In Read List', $author->id);
+        createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+
+        $viewer = bob($this, roles: [Roles::USER]);
+        $this->actingAs($viewer);
+        addToReadList($this, $story->id);
+
+        $html = Blade::render('<x-story::random-stories-component />');
+        expect($html)->toContain('In Read List');
+    });
+
+    it('shows a story again once the viewer unmarks every chapter', function () {
+        $author = alice($this);
+        $story = publicStory('Unmarked Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+
+        $viewer = bob($this, roles: [Roles::USER]);
+        $this->actingAs($viewer);
+        markAsRead($this, $chapter)->assertNoContent();
+        markAsUnread($this, $chapter)->assertNoContent();
+
+        $html = Blade::render('<x-story::random-stories-component />');
+        expect($html)->toContain('Unmarked Story');
+    });
+
+    it('renders only the placeholder when every eligible story has been read', function () {
+        $author = alice($this);
+        $story = publicStory('Only Story Read', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author, ['title' => 'C1']);
+
+        $viewer = bob($this, roles: [Roles::USER]);
+        $this->actingAs($viewer);
+        markAsRead($this, $chapter)->assertNoContent();
+
+        $html = Blade::render('<x-story::random-stories-component />');
+        expect($html)
+            ->toContain(__('story::discover.placeholder_cta'))
+            ->not->toContain('Only Story Read');
+    });
 });
