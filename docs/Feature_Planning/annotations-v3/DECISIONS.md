@@ -19,6 +19,7 @@ a new row that supersedes it and note the number.
 | 9 | 2026-10-04 | DESIGN | How do in-chapter annotations reach the page? | Lazy chapter-level `GET in-entity` endpoint, fetched only by authors and commenters with a root | — |
 | 10 | 2026-10-04 | DESIGN | Where do avatars live / how they yield to the heat | Comment's own gutter overlay in Quote's column, hidden while `quoteAggregate.visible` | — |
 | 11 | 2026-10-04 | DESIGN | How is « Vider le contenu » recorded? | Overwrite body + nullable `content_emptied_at` column | — |
+| 12 | 2026-10-04 | PLAN | Moderator who annotated a chapter they don't author — in-chapter display? | Own only: treated as a commenter (follows `canAnnotate`). #4 only rules out a moderation view of everyone's annotations | — |
 
 ## Assumptions made without asking
 
