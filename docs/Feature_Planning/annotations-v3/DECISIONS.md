@@ -15,6 +15,10 @@ a new row that supersedes it and note the number.
 | 5 | 2026-10-04 | REFINE | Moderator « Vider le contenu » on one annotation | Body → « <Annotation supprimée> »; anchor, tint, replies kept; commenter may delete, no longer edit | — |
 | 6 | 2026-10-04 | REFINE | Commenter's own popover | Full: « Modifier » / « Supprimer » (draft or pending change), « Répondre » per v2 rule; pending-deleted annotations hidden from text | — |
 | 7 | 2026-10-04 | REFINE | Replay of the whole flow + assumptions A1–A10 | Approved as written | — |
+| 8 | 2026-10-04 | DESIGN | How is the annotation tint drawn? | CSS Custom Highlight API; ranges rebuilt after Quote renders; Quote untouched | — |
+| 9 | 2026-10-04 | DESIGN | How do in-chapter annotations reach the page? | Lazy chapter-level `GET in-entity` endpoint, fetched only by authors and commenters with a root | — |
+| 10 | 2026-10-04 | DESIGN | Where do avatars live / how they yield to the heat | Comment's own gutter overlay in Quote's column, hidden while `quoteAggregate.visible` | — |
+| 11 | 2026-10-04 | DESIGN | How is « Vider le contenu » recorded? | Overwrite body + nullable `content_emptied_at` column | — |
 
 ## Assumptions made without asking
 
