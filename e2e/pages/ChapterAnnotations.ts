@@ -73,6 +73,11 @@ export class ChapterAnnotations {
     return this.captureForm.getByRole('button', { name: 'Enregistrer', exact: true });
   }
 
+  /** The passage the capture form is about (read-only: an edit changes the body only). */
+  get captureHighlight(): Locator {
+    return this.captureForm.locator('blockquote');
+  }
+
   get captureEditor(): RichTextEditor {
     return new RichTextEditor(this.page, 'annotation-body-editor');
   }
@@ -119,11 +124,55 @@ export class ChapterAnnotations {
     await expect(this.saveBanner).toBeHidden();
   }
 
-  /** « Tout annuler » on the save banner, accepting its confirmation. */
-  async discardChanges(): Promise<void> {
-    this.page.once('dialog', (dialog) => dialog.accept());
+  /** « Tout annuler » on the save banner, accepting its confirmation; returns the confirmation text. */
+  async discardChanges(): Promise<string> {
+    const asked = new Promise<string>((resolve) => {
+      this.page.once('dialog', (dialog) => {
+        resolve(dialog.message());
+        void dialog.accept();
+      });
+    });
     await this.saveBanner.getByRole('button', { name: 'Tout annuler', exact: true }).click();
     await expect(this.saveBanner).toBeHidden();
+    return asked;
+  }
+
+  /** « Enregistrer » on the save banner when the save is expected to be refused. */
+  async attemptSave(): Promise<void> {
+    await this.saveBanner.getByRole('button', { name: 'Enregistrer', exact: true }).click();
+    await expect(this.saveBannerError).toBeVisible();
+  }
+
+  /** The banner's error block: the general message, then one line per refused item. */
+  get saveBannerError(): Locator {
+    return this.saveBanner.getByRole('alert');
+  }
+
+  /** « Voir » on the save banner opens the pop-up of the viewer's root comment. */
+  async openFromSaveBanner(): Promise<void> {
+    await this.saveBanner.getByRole('button', { name: 'Voir', exact: true }).click();
+    await expect(this.serverDialog).toBeVisible();
+  }
+
+  /** The viewer's own root comment id, as the chapter exposes it to the annotation scripts. */
+  async rootCommentId(): Promise<number> {
+    const id = await this.page.locator('[data-annotable]').first().getAttribute('data-root-comment-id');
+    expect(id, 'no root comment for this viewer').not.toBeNull();
+    return Number(id);
+  }
+
+  /**
+   * Evidence screenshot for VERIFY, taken only when `E2E_SHOTS_DIR` is set, so
+   * later suite runs take none.
+   */
+  async evidence(name: string, target?: Locator): Promise<void> {
+    const dir = process.env.E2E_SHOTS_DIR;
+    if (!dir) return;
+    const path = `${dir}/${name}.png`;
+    // Modals fade in: shoot the settled state.
+    await this.page.evaluate(() => Promise.allSettled(document.getAnimations().map((a) => a.finished)));
+    if (target) await target.screenshot({ path });
+    else await this.page.screenshot({ path });
   }
 
   /** « N annotations » on a published root comment. */
@@ -180,6 +229,38 @@ export class ChapterAnnotations {
     return row.getByRole('button', { name: "Supprimer l'annotation", exact: true });
   }
 
+  editButton(row: Locator): Locator {
+    return row.getByRole('button', { name: 'Modifier', exact: true });
+  }
+
+  /** Commenter: « Supprimer l'annotation » stores a pending delete; returns any confirmation text. */
+  async deleteRowPending(row: Locator, options: { accept?: boolean } = {}): Promise<string | null> {
+    let asked: string | null = null;
+    const onDialog = (dialog: import('@playwright/test').Dialog) => {
+      asked = dialog.message();
+      void (options.accept === false ? dialog.dismiss() : dialog.accept());
+    };
+    this.page.once('dialog', onDialog);
+    await this.deleteButton(row).click();
+    // No dialog when the row has no replies: drop the listener.
+    this.page.off('dialog', onDialog);
+    return asked;
+  }
+
+  /** Commenter: per-row undo — « Annuler la modification » on an edit, « Annuler » otherwise. */
+  undoButton(row: Locator): Locator {
+    return row.getByRole('button', { name: /^Annuler( la modification)?$/ });
+  }
+
+  /** Commenter: the line flagging a row the server refused, and its « Retirer ». */
+  rowError(row: Locator): Locator {
+    return row.getByRole('alert').filter({ visible: true });
+  }
+
+  removeStaleButton(row: Locator): Locator {
+    return row.getByRole('button', { name: 'Retirer', exact: true });
+  }
+
   /** The reply thread under a root annotation row. */
   replies(row: Locator): Locator {
     return row.getByTestId('annotation-reply');
@@ -194,21 +275,34 @@ export class ChapterAnnotations {
     return row.getByText('Pour que le lecteur soit notifié, répondez aussi à son commentaire.');
   }
 
+  /** The pop-up's single reply editor, moved under the row being answered. */
+  get replyEditor(): RichTextEditor {
+    return new RichTextEditor(this.page, 'annotation-reply-editor');
+  }
+
+  sendReplyButton(row: Locator): Locator {
+    return row.getByRole('button', { name: 'Envoyer', exact: true });
+  }
+
   /** « Répondre » → type the body in the shared reply editor → « Envoyer ». */
   async reply(row: Locator, body: string): Promise<void> {
     const before = await this.replies(row).count();
     await this.replyButton(row).click();
-    const editor = new RichTextEditor(this.page, 'annotation-reply-editor');
+    const editor = this.replyEditor;
     await editor.waitUntilReady();
     await editor.fill(body);
-    await row.getByRole('button', { name: 'Envoyer', exact: true }).click();
+    await this.sendReplyButton(row).click();
     await expect(this.replies(row)).toHaveCount(before + 1);
     await expect(editor.body).toBeHidden();
+  }
+
+  deleteReplyButton(reply: Locator): Locator {
+    return reply.getByRole('button', { name: 'Supprimer la réponse', exact: true });
   }
 
   /** « Supprimer la réponse », accepting its confirmation. */
   async deleteReply(reply: Locator): Promise<void> {
     this.page.once('dialog', (dialog) => dialog.accept());
-    await reply.getByRole('button', { name: 'Supprimer la réponse', exact: true }).click();
+    await this.deleteReplyButton(reply).click();
   }
 }

@@ -56,8 +56,9 @@ export class ChapterPage {
     return this.page.locator('#comment-toolbar-active');
   }
 
+  /** Quote's « Citer » (the emoji and « Annoter » share its selection attribute). */
   get citeButton(): Locator {
-    return this.selectionToolbar.locator('[data-requires-selection-within]');
+    return this.selectionToolbar.locator('.quote-toolbar-btn');
   }
 
   /**

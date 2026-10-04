@@ -817,27 +817,37 @@ save banner, pop-up overlay, replies).
 Filled by VERIFY. One row per surface worth looking at with real eyes, written
 during PLAN while the flows are fresh.
 
+VERIFY run 2026-10-04 on HEAD `9a200e98` (+ the fix below).
+Spec: `e2e/tests/features/annotations-v2.spec.ts` — 16 tests, all green, plus one
+declared `test.fail` for row 3. Shots: `shots/*.png` (taken only with
+`E2E_SHOTS_DIR` set). Full `pnpm run e2e` green (44 passed),
+`pnpm run gate -- --quick` green.
+
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter, reader without a root comment (desktop) | Selection toolbar: « Citer » (if allowed), « Annoter », ❤️ 🔥 👍; clicking ❤️ adds a draft, v1 banner in the root form counts it | |
-| Chapter, reader with a root comment (desktop) | Same toolbar; clicking 🔥 shows the sticky banner « Vous avez 1 annotation non sauvegardée » | |
-| Chapter, refused selection | Cross-block or over-cap selection hides « Annoter » and the three emojis alike | |
-| Save banner, plural + reload | « 2 annotations non sauvegardées »; reload keeps it; « Tout annuler » asks then clears | |
-| Save banner, success | « Enregistrer » → banner gone, « N annotations » on the comment updated (also from 0) | |
-| Save banner, stale item | Moderator deletes an annotation in another session, commenter saves an edit of it → error names it, row flagged, « Retirer » then save succeeds | |
-| Pop-up, commenter | Rows show « Modifiée — non enregistrée », « Sera supprimée », pending adds; per-row undo; « Modifier » reopens the form with the body only | |
-| Pop-up, delete with replies | Confirmation « Les réponses seront aussi supprimées. »; after save, root and replies gone | |
-| Pop-up, author | Sees all rows + replies, « Répondre » on every root, processed toggle; after an edit by the commenter, « Traitée » is reset | |
-| Pop-up, author reply hint | After « Envoyer », hint about replying on the root comment is visible | |
-| Pop-up, commenter before/after author reply | No « Répondre » before; present after reopening | |
-| Pop-up, moderator | Sees replies, « Supprimer » on a reply removes only that reply; no « Répondre » | |
-| Pop-up, beta reader | No « N annotations » button at all | |
-| Emptied root comment | Moderator empties the root; reader can still annotate/react; banner and save work | |
-| Deactivated reply writer | Deactivate a co-author who replied under an annotation → the reply is hidden for the commenter, other authors and moderators; back after reactivation | |
-| Deleted user | Reply of a deleted user still shown, anonymised | |
-| News article | No reaction buttons, no banner, no pop-up | |
-| Mobile (≈375 px) | Touch selection shows the emoji buttons; banner does not cover the root form or reply submit buttons; pop-up thread readable, buttons wrap | |
-| Accessibility | Emoji buttons announce « Réagir avec un cœur » etc.; banner is a polite live region; reply editor and buttons reachable by keyboard | |
+| Chapter, reader without a root comment (desktop) | Selection toolbar: « Citer » (if allowed), « Annoter », ❤️ 🔥 👍; clicking ❤️ adds a draft, v1 banner in the root form counts it | ✅ spec « without a root comment… »; `toolbar-no-root.png` |
+| Chapter, reader with a root comment (desktop) | Same toolbar; clicking 🔥 shows the sticky banner « Vous avez 1 annotation non sauvegardée » | ✅ round trip (❤️) + touch test (🔥); `save-banner-plural.png` |
+| Chapter, refused selection | Cross-block or over-cap selection hides « Annoter » and the three emojis alike | ❌ over-cap ✅ (« Sélection trop longue » replaces all actions). **Cross-block: « Annoter » and ❤️ 🔥 👍 stay visible** (`cross-block-toolbar.png`); « Annoter » then shows the multi-block error in its form, an emoji click is a silent no-op (nothing stored — asserted). Cause: the shared toolbar (`annotable/toolbar.js`) shows an action when every covered text lies in *some* `.ce-block--text`, not in a single one; Quote's « Citer » uses the same rule. Not fixed (touches the shared toolbar and Quote). Spec keeps the expectation as `test.fail` |
+| Save banner, plural + reload | « 2 annotations non sauvegardées »; reload keeps it; « Tout annuler » asks then clears | ✅ confirm text asserted; `save-banner-plural.png` |
+| Save banner, success | « Enregistrer » → banner gone, « N annotations » on the comment updated (also from 0) | ✅ 0→1 (round trip), 1→2; `save-success-count.png` |
+| Save banner, stale item | Moderator deletes an annotation in another session, commenter saves an edit of it → error names it, row flagged, « Retirer » then save succeeds | ✅ `stale-banner-error.png`, `stale-row-flagged.png` (see DECISIONS A16 for the after-reload case) |
+| Pop-up, commenter | Rows show « Modifiée — non enregistrée », « Sera supprimée », pending adds; per-row undo; « Modifier » reopens the form with the body only | ✅ `popup-commenter-pending.png`, `popup-commenter-edit-form.png` (passage read-only, body pre-filled) |
+| Pop-up, delete with replies | Confirmation « Les réponses seront aussi supprimées. »; after save, root and replies gone | ✅ refuse keeps the row, accept + save removes row and reply |
+| Pop-up, author | Sees all rows + replies, « Répondre » on every root, processed toggle; after an edit by the commenter, « Traitée » is reset | ✅ `popup-author.png`; reset asserted after the commenter's saved edit |
+| Pop-up, author reply hint | After « Envoyer », hint about replying on the root comment is visible | ✅ `author-reply-hint.png` |
+| Pop-up, commenter before/after author reply | No « Répondre » before; present after reopening | ✅ `popup-commenter-before-reply.png`, `popup-commenter-after-reply.png` |
+| Pop-up, moderator | Sees replies, « Supprimer » on a reply removes only that reply; no « Répondre » | ✅ after fix: « Supprimer la réponse » was unreadable (contrast 1.2:1, `danger` + `outline`); now filled `danger` like « Supprimer l'annotation »; contrast ≥ 4.5 asserted; `popup-moderator.png` |
+| Pop-up, beta reader | No « N annotations » button at all | n/a browser — PHP: `AnnotationCountTest` « gives a beta reader a zero count », `GetAnnotationsEndpointTest` « a beta reader gets 403 » (button renders only at count > 0 except on the viewer's own root) |
+| Emptied root comment | Moderator empties the root; reader can still annotate/react; banner and save work | ✅ moderator empties through the UI, reader reacts and saves; `emptied-root-saved.png` |
+| Deactivated reply writer | Deactivate a co-author who replied under an annotation → the reply is hidden for the commenter, other authors and moderators; back after reactivation | n/a browser — PHP: `AnnotationRepliesTest` « hides a reply whose writer is deactivated and shows it again after reactivation » (see A9) |
+| Deleted user | Reply of a deleted user still shown, anonymised | n/a browser — PHP: `AnnotationRepliesTest` « keeps the reply of a deleted user, anonymised » |
+| News article | No reaction buttons, no banner, no pop-up | n/a browser — PHP: `RenderCommentListComponentTest` « renders no banner, no pop-up and pushes no annotations bundle », « renders no changes banner on a news list », `NewsCommentPolicyTest` « refuses annotations on news » |
+| Mobile (≈375 px) | Touch selection shows the emoji buttons; banner does not cover the root form or reply submit buttons; pop-up thread readable, buttons wrap | ✅ `mobile-toolbar.png`, `mobile-banner-reply-form.png` (reply submit and banner boxes do not overlap — asserted), `mobile-popup-commenter.png`, `mobile-popup-author.png`. A commenter with a root has no root form, so that half is moot |
+| Accessibility | Emoji buttons announce « Réagir avec un cœur » etc.; banner is a polite live region; reply editor and buttons reachable by keyboard | ✅ emoji found by accessible name throughout; banner `role="status"` + `aria-live="polite"` asserted; « Répondre » → Enter opens the editor, « Envoyer » focused → Enter sends |
+
+Out of scope, seen on the way: reply avatars and the chapter illustration are
+broken images in the e2e instance only — `.env.e2e` has
+`APP_URL=http://localhost:8081` while the suite serves on `:8080`.
 
 ## Open items
 
