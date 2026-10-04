@@ -20,7 +20,7 @@
 | 4 | Moderator « Vider le contenu » endpoint | S | 3 | DONE |
 | 5 | `GET in-entity` read endpoint (`getForEntity`) | M | 2, 3 | DONE |
 | 6 | Pop-up: « Vider le contenu » button, emptied rows, « Passage absent du chapitre » badge | M | 4 | DONE |
-| 6v | Checkpoint — « N annotations » pop-up for commenter / author / moderator | S | 6 | TODO |
+| 6v | Checkpoint — « N annotations » pop-up for commenter / author / moderator | S | 6 | DONE |
 | 7 | Shared infra — `rangeFromCanonical` anchoring helper | S | — | TODO |
 | 8 | `<x-comment::annotation-overlay>` component wired into the chapter page (inert) | S | — | TODO |
 | 8v | Checkpoint — Quote on the chapter page: reader tint, author heat map + gutter pills, summary | S | 8 | TODO |
@@ -405,28 +405,31 @@ Checks that phase 6's pop-up changes left the v1/v2 pop-up intact.
   - Any role: an annotation whose passage was removed from the chapter shows
     « Passage absent du chapitre »; desktop and mobile widths.
 
-**Result (2026-10-04, HEAD cbcf5482) — FAIL**
+**Result (2026-10-04, HEAD afb040cb) — PASS**
 
-- **Regression (phase 6): the « Vider le contenu » label is illegible.** The
-  button is `<x-shared::button color="danger" :outline="true">` in
-  `Comment/Private/Resources/views/components/partials/annotation-modal.blade.php`,
-  the first `danger` + `outline` button in the app. `.surface-error.is-outline`
-  (`Shared/Resources/css/app.css`) uses `--color-error-bg` for its text and
-  border. Computed style for the moderator: text `rgb(254,226,226)` on
-  `rgb(255,253,251)`, about 1.2:1 contrast, on every root row at both widths.
-  The button is enabled (`disabled=false`, opacity 1) — the colours are the
-  only problem. See `moderator-popup-buttons.png` and
-  `moderator-missing-mobile.png`. The fix is in BUILD: either another
-  colour/outline combination on the modal button, or make
-  `.surface-error.is-outline` use a readable foreground.
+The first run (HEAD cbcf5482) failed: « Vider le contenu » was a `danger` +
+`outline` button with pale pink text on near-white, about 1.2:1 contrast.
+afb040cb made it a solid `danger` button, like « Supprimer ». This re-run
+checks that fix and runs the whole checklist again.
+
+- « Vider le contenu » is readable now. For the moderator, its computed style
+  is text `rgb(185,28,28)` on background `rgb(254,226,226)`, a **5.30:1**
+  contrast, at desktop and at 390px. That clears WCAG AA (4.5:1) and matches
+  the neighbouring « Supprimer l'annotation ». See
+  `moderator-popup-buttons.png`, `moderator-missing-desktop.png` and
+  `moderator-missing-mobile.png`. These are the only shots re-taken; the other
+  shots date from the first run and were checked again in this one.
 - e2e: `chapter-annotations.spec.ts` and `chapter-annotation-round-trip.spec.ts`
   pass (8/8 incl. auth setup).
-- Data added to the post-run e2e DB through the UI on `chapitre-illustre-7`,
-  root 7 (`confirmed`): three more annotations, saved from the banner. Then one
-  data-only edit through tinker: the « Epsilon un. … » paragraph was rewritten.
-  The app was served on `:8080`, because `:8081` on this host belongs to another
-  worktree's container. The flow rewrote `localhost:8081` → `:8080` with
-  `ctx.route`, so avatars load.
+- The data was rebuilt by the same scratch flows on the post-run e2e DB, on
+  `chapitre-illustre-7`, root 7. `confirmed` added three annotations through
+  the UI and saved them from the banner. Then one data-only edit through
+  tinker rewrote the « Epsilon un. … » paragraph. The paragraph was rewritten
+  twice. The first rewrite also removed the « au milieu » suffix, which gives
+  that row the badge in `moderator-popup-buttons.png`. The final rewrite keeps
+  that suffix, so only the rewritten passage's row carries the badge. The app
+  was served on `:8080` (`:8081` belongs to another worktree's container), and
+  `ctx.route` rewrote `localhost:8081` → `:8080`.
 - Commenter (desktop): the emptied row shows « <Annotation supprimée> » with
   « Supprimer l'annotation » only, and the other rows keep « Modifier ». The
   pending edit, pending delete and pending add rows each carry their marker.
