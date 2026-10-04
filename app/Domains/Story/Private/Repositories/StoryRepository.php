@@ -338,6 +338,14 @@ final class StoryRepository
             $query->where('tw_disclosure', Story::TW_NO_TW);
         }
 
+        // Exclude stories the viewer has started (≥1 chapter marked as read)
+        $query->whereNotExists(function ($q) use ($viewerId) {
+            $q->selectRaw('1')
+                ->from('story_reading_progress')
+                ->where('story_reading_progress.user_id', $viewerId)
+                ->whereColumn('story_reading_progress.story_id', 'stories.id');
+        });
+
         return $query->inRandomOrder()->limit($nbStories)->get()->all();
     }
 }
