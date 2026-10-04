@@ -241,7 +241,49 @@ describe('CommentListComponent', function () {
                 // Highlighted text is bound as text, the server-sanitized body as HTML.
                 ->and($html)->toContain('x-text="row.highlighted_text"')
                 ->and($html)->not->toContain('x-html="row.highlighted_text"')
-                ->and($html)->toContain('x-html="row.body"');
+                ->and($html)->toContain('x-html="row.body"')
+                // Commenter overlay: store context, pending markers, row actions, error line as text.
+                ->and($html)->toContain('x-for="row in rows"')
+                ->and($html)->toContain('data-entity-type="default"')
+                ->and($html)->toContain('data-entity-id="123"')
+                ->and($html)->toContain('data-delete-with-replies-confirm="' . e(__('comment::annotations.server_modal.delete_with_replies_confirm')) . '"')
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.pending_edited')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.pending_deleted')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.pending_added')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.edit')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.undo')))
+                ->and($html)->toContain(e(__('comment::annotations.server_modal.remove_stale')))
+                ->and($html)->toContain('x-text="rowError(row)"');
+        });
+
+        it('renders the reply editor in the annotations modal on a chapter', function () {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+            $max = app(CommentPolicyRegistry::class)->getAnnotationBodyMaxLength('default');
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            $modal = substr($html, strpos($html, 'x-data="annotationsModal()"'));
+
+            expect(substr_count($html, 'data-testid="rich-text-annotation-reply-editor"'))->toBe(1)
+                ->and($modal)->toContain('data-testid="rich-text-annotation-reply-editor"')
+                ->and($modal)->toContain('data-reply-editor')
+                ->and($modal)->toContain('id="quill-editor-area-annotation-reply-editor"')
+                ->and($modal)->toContain('data-max="' . $max . '"')
+                ->and($modal)->toContain('data-reply-max-length="' . $max . '"')
+                ->and($modal)->toContain('x-bind:data-reply-slot="row.id"')
+                ->and($modal)->toContain('x-for="reply in (row.replies ?? [])"')
+                ->and($modal)->toContain('x-text="replyAuthor(reply)"')
+                ->and($modal)->toContain('x-html="reply.body"')
+                ->and($modal)->toContain('data-delete-reply-confirm="' . e(__('comment::annotations.replies.delete_confirm')) . '"')
+                ->and($modal)->toContain('data-reply-empty="' . e(__('comment::annotations.replies.empty_body')) . '"')
+                ->and($modal)->toContain('data-reply-too-long="' . e(__('comment::annotations.replies.too_long', ['max' => $max])) . '"')
+                ->and($modal)->toContain(e(__('comment::annotations.replies.reply')))
+                ->and($modal)->toContain(e(__('comment::annotations.replies.send')))
+                ->and($modal)->toContain(e(__('comment::annotations.replies.delete')))
+                ->and($modal)->toContain(e(__('comment::annotations.replies.author_hint')))
+                ->and($modal)->toContain(e(__('comment::annotations.server_modal.undo_edit')));
         });
 
         it('the annotations modal is rendered for a viewer who cannot create a root comment', function () {
@@ -273,6 +315,64 @@ describe('CommentListComponent', function () {
             ]);
 
             expect($html)->not->toContain('annotationsModal()');
+        });
+    });
+
+    describe('Annotation changes save banner', function () {
+        it('renders the changes banner outside the root form on a chapter for a logged-in user', function () {
+            registerAnnotatableDefaultPolicy();
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            $bannerAt = strpos($html, 'x-data="annotationChangesBanner"');
+            expect(substr_count($html, 'x-data="annotationChangesBanner"'))->toBe(1)
+                ->and($bannerAt)->toBeGreaterThan(strpos($html, '</form>'))
+                ->and($bannerAt)->toBeLessThan(strpos($html, 'x-data="annotationsModal()"'))
+                ->and($html)->toContain('x-show="count > 0"')
+                ->and($html)->toContain('sticky bottom-0 z-30')
+                ->and($html)->toContain('role="status"')
+                ->and($html)->toContain('aria-live="polite"')
+                ->and($html)->toContain('data-label-many="' . e(trans_choice('comment::annotations.changes_banner.text', 2, ['count' => '__COUNT__'])) . '"')
+                ->and($html)->toContain(e(__('comment::annotations.changes_banner.save')))
+                ->and($html)->toContain(e(__('comment::annotations.changes_banner.show')))
+                ->and($html)->toContain(e(__('comment::annotations.changes_banner.discard')));
+        });
+
+        it('renders no changes banner on a news list and for a guest', function () {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+            $news = Blade::render('<x-comment::comment-list-component entity-type="news" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            registerAnnotatableDefaultPolicy();
+            Auth::logout();
+            $guest = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            expect($news)->not->toContain('annotationChangesBanner')
+                ->and($guest)->not->toContain('annotationChangesBanner');
+        });
+
+        it('renders a hidden annotations button on the viewer’s own root comment at count 0', function () {
+            registerAnnotatableDefaultPolicy();
+            $alice = alice($this, roles: [Roles::USER_CONFIRMED]);
+            $bob = bob($this, roles: [Roles::USER_CONFIRMED]);
+            $this->actingAs($bob);
+            $bobRootId = createComment('default', 123, 'Bob root');
+            $this->actingAs($alice);
+            $aliceRootId = createComment('default', 123, 'Alice root');
+            createComment('default', 123, 'Alice reply', $bobRootId);
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            expect(substr_count($html, 'data-annotations-button'))->toBe(1)
+                ->and($html)->toMatch('/hidden\s+data-annotations-button\s+data-comment-id="' . $aliceRootId . '"/');
         });
     });
 

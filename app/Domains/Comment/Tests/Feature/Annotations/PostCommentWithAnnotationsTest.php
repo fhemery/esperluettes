@@ -2,7 +2,9 @@
 
 use App\Domains\Comment\Private\Models\Comment;
 use App\Domains\Comment\Private\Models\CommentAnnotation;
+use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Comment\Public\Api\CommentPublicApi;
+use App\Domains\Comment\Public\Api\Contracts\DefaultCommentPolicy;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
 use App\Domains\Comment\Public\Api\Contracts\CommentToCreateDto;
 use App\Domains\Comment\Public\Events\CommentPosted;
@@ -11,30 +13,6 @@ use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
-
-/**
- * Build a POST /comments payload for a chapter root comment carrying annotations,
- * serialised the way the client does it: one hidden `annotations` JSON input.
- */
-function annotatedChapterCommentPayload(int $chapterId, array $annotations, array $overrides = []): array
-{
-    return array_merge([
-        'entity_type' => 'chapter',
-        'entity_id' => $chapterId,
-        'body' => generateDummyText(140),
-        'annotations' => json_encode($annotations),
-    ], $overrides);
-}
-
-function annotationItem(array $overrides = []): array
-{
-    return array_merge([
-        'body' => '<p>Belle phrase</p>',
-        'highlighted_text' => 'le passage choisi',
-        'prefix' => 'avant ',
-        'suffix' => ' après',
-    ], $overrides);
-}
 
 describe('POST /comments with annotations', function () {
     beforeEach(function () {
@@ -138,6 +116,46 @@ describe('POST /comments with annotations', function () {
             parentCommentId: null,
             annotations: [new AnnotationToCreateDto('<p>ok</p>', str_repeat('a', 501), null, null)],
         )))->toThrow(ValidationException::class);
+
+        expect(Comment::query()->count())->toBe(0)
+            ->and(CommentAnnotation::query()->count())->toBe(0);
+    });
+
+    it('reads the highlight cap from the policy, not the request', function () {
+        app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
+            public function supportsAnnotations(): bool
+            {
+                return true;
+            }
+
+            public function canAnnotate(int $entityId, int $userId): bool
+            {
+                return true;
+            }
+
+            public function getAnnotationHighlightMaxLength(): ?int
+            {
+                return 800;
+            }
+        });
+        $this->actingAs($this->reader);
+        $payload = fn (int $length) => annotatedChapterCommentPayload(123, [
+            annotationItem(['highlighted_text' => str_repeat('a', $length)]),
+        ], ['entity_type' => 'default']);
+
+        $this->post('/comments', $payload(801))->assertSessionHasErrors('annotations');
+        expect(Comment::query()->count())->toBe(0);
+
+        $this->post('/comments', $payload(600))->assertSessionHasNoErrors();
+        expect(CommentAnnotation::query()->sole()->highlighted_text)->toBe(str_repeat('a', 600));
+    });
+
+    it('refuses a 501-char highlight on a chapter under the annotations key', function () {
+        $this->actingAs($this->reader);
+
+        $this->post('/comments', annotatedChapterCommentPayload($this->chapter->id, [
+            annotationItem(['highlighted_text' => str_repeat('a', 501)]),
+        ]))->assertSessionHasErrors('annotations');
 
         expect(Comment::query()->count())->toBe(0)
             ->and(CommentAnnotation::query()->count())->toBe(0);

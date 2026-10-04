@@ -4,7 +4,9 @@ return [
     'errors' => [
         'not_allowed' => 'Vous ne pouvez pas annoter ce contenu.',
         'invalid' => 'Une annotation est invalide : vérifiez qu\'elle n\'est pas vide et qu\'elle ne dépasse pas la longueur autorisée.',
+        'stale' => 'Cette annotation n\'existe plus. Retirez-la de vos modifications.',
         'reply_not_processable' => 'Seule une annotation principale peut être marquée comme traitée.',
+        'reply_to_reply' => 'On ne peut pas répondre à une réponse.',
         'body_blank' => 'Votre annotation est vide.',
         'body_too_long' => 'Votre annotation est trop longue (:max caractères maximum).',
         'highlight_too_long' => 'Le passage sélectionné est trop long (:max caractères maximum).',
@@ -13,6 +15,11 @@ return [
     'toolbar_button' => [
         'label' => 'Annoter',
         'title' => 'Annoter ce passage',
+    ],
+    'reactions' => [
+        'heart' => 'Réagir avec un cœur',
+        'fire' => 'Réagir avec une flamme',
+        'thumbs_up' => 'Réagir avec un pouce levé',
     ],
     'form' => [
         'title' => 'Annoter le passage',
@@ -23,6 +30,18 @@ return [
     'banner' => [
         'text' => '{1} :count annotation, écrivez votre commentaire pour la sauvegarder|[2,*] :count annotations, écrivez votre commentaire pour les sauvegarder',
         'show' => 'Voir les annotations',
+    ],
+    'changes_banner' => [
+        'text' => '{1} Vous avez :count annotation non sauvegardée|[2,*] Vous avez :count annotations non sauvegardées',
+        'save' => 'Enregistrer',
+        'show' => 'Voir',
+        'discard' => 'Tout annuler',
+        'discard_confirm' => 'Abandonner toutes vos modifications d\'annotations non sauvegardées ?',
+        'saving' => 'Enregistrement…',
+        'error_items' => 'Rien n\'a été enregistré : corrigez ou retirez ces modifications.',
+        'error_generic' => 'L\'enregistrement a échoué. Vos modifications sont conservées ; réessayez.',
+        'item_edit' => 'Modification d\'une annotation',
+        'item_delete' => 'Suppression d\'une annotation',
     ],
     'drafts_modal' => [
         'title' => 'Vos annotations en attente',
@@ -43,5 +62,24 @@ return [
         'delete' => 'Supprimer l\'annotation',
         'load_error' => 'Impossible de charger les annotations. Réessayez plus tard.',
         'action_error' => 'L\'action n\'a pas pu aboutir. Réessayez.',
+        'pending_edited' => 'Modifiée — non enregistrée',
+        'pending_deleted' => 'Sera supprimée',
+        'pending_added' => 'Ajoutée — non enregistrée',
+        'edit' => 'Modifier',
+        'undo' => 'Annuler',
+        'undo_edit' => 'Annuler la modification',
+        'remove_stale' => 'Retirer',
+        'delete_with_replies_confirm' => 'Les réponses seront aussi supprimées.',
+    ],
+    'replies' => [
+        'reply' => 'Répondre',
+        'body_label' => 'Votre réponse',
+        'send' => 'Envoyer',
+        'cancel' => 'Annuler',
+        'delete' => 'Supprimer la réponse',
+        'delete_confirm' => 'Supprimer cette réponse ?',
+        'author_hint' => 'Pour que le lecteur soit notifié, répondez aussi à son commentaire.',
+        'empty_body' => 'Votre réponse est vide.',
+        'too_long' => 'Votre réponse est trop longue (:max caractères maximum).',
     ],
 ];

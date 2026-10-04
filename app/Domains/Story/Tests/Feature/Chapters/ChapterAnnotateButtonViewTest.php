@@ -24,13 +24,42 @@ describe('« Annoter » toolbar button and capture form on the chapter page', fu
             ->assertOk()
             ->assertSee('class="annotation-toolbar-btn', false)
             ->assertSee(__('comment::annotations.toolbar_button.label'))
-            ->assertSeeInOrder(['annotation-toolbar-btn', 'data-requires-selection-within=".ce-block--text"'], false)
+            ->assertSeeInOrder(['annotation-toolbar-btn', 'data-requires-selection-within=".ce-block--text"', 'data-requires-single-area'], false)
             ->assertSee('data-annotation-form', false)
             ->assertSee('data-user-id="' . $reader->id . '"', false)
             ->assertSee('data-entity-id="' . $chapter->id . '"', false);
     });
 
-    it('a reader who already posted a root comment does not see « Annoter » (A5) but still sees « Citer »', function () {
+    it('renders data-annotation-mode="draft" and no root id for a reader without a root comment', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($reader)
+            ->get(chapterShowUrl($story, $chapter))
+            ->assertOk()
+            ->assertSeeInOrder(['data-annotable', 'data-annotation-mode="draft"'], false)
+            ->assertSeeInOrder(['data-annotation-form', 'data-annotation-mode="draft"'], false)
+            ->assertDontSee('data-root-comment-id', false);
+    });
+
+    it('renders data-annotation-mode="pending" and the root comment id for a reader with one', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($reader);
+        $commentId = createComment('chapter', $chapter->id, generateDummyText(150));
+
+        $this->get(chapterShowUrl($story, $chapter))
+            ->assertOk()
+            ->assertSeeInOrder(['data-annotable', 'data-annotation-mode="pending"', 'data-root-comment-id="' . $commentId . '"'], false)
+            ->assertDontSee('data-annotation-mode="draft"', false);
+    });
+
+    it('shows « Annoter » and the three reaction buttons to a reader with a root comment', function () {
         $author = alice($this);
         $reader = bob($this);
         $story = publicStory('Story', $author->id);
@@ -42,8 +71,54 @@ describe('« Annoter » toolbar button and capture form on the chapter page', fu
         $this->get(chapterShowUrl($story, $chapter))
             ->assertOk()
             ->assertSee('quote-toolbar-btn', false)
-            ->assertDontSee('annotation-toolbar-btn', false)
-            ->assertDontSee('data-annotation-form', false);
+            ->assertSeeInOrder(['annotation-toolbar-btn', 'data-annotation-reactions'], false)
+            ->assertSee('data-annotation-form', false)
+            ->assertSeeInOrder(['data-annotation-form', 'data-annotation-mode="pending"'], false);
+    });
+
+    it('shows the reaction buttons with accessible labels to a reader without a root comment', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($reader)
+            ->get(chapterShowUrl($story, $chapter))
+            ->assertOk()
+            ->assertSee('data-annotation-reactions', false)
+            ->assertSeeInOrder([
+                'data-annotation-reactions',
+                'aria-label="' . __('comment::annotations.reactions.heart') . '"', '❤️',
+                'aria-label="' . __('comment::annotations.reactions.fire') . '"', '🔥',
+                'aria-label="' . __('comment::annotations.reactions.thumbs_up') . '"', '👍',
+            ], false)
+            ->assertSeeInOrder(['data-annotation-reactions', 'data-requires-selection-within=".ce-block--text"', 'data-requires-single-area'], false)
+            ->assertSee('data-user-id="' . $reader->id . '"', false);
+    });
+
+    it('shows no reaction buttons to the author, a guest, or on a page where canAnnotate is false', function () {
+        $author = alice($this);
+        $coAuthor = carol($this);
+        $story = publicStory('Story', $author->id);
+        addCollaborator($story->id, $coAuthor->id, 'author');
+        $chapter = createPublishedChapter($this, $story, $author);
+
+        $this->actingAs($author)
+            ->get(chapterShowUrl($story, $chapter))
+            ->assertOk()
+            ->assertDontSee('data-annotation-reactions', false);
+
+        // canAnnotate is false for a co-author: the page renders no reaction.
+        $this->actingAs($coAuthor)
+            ->get(chapterShowUrl($story, $chapter))
+            ->assertOk()
+            ->assertSee('data-can-annotate="false"', false)
+            ->assertDontSee('data-annotation-reactions', false);
+
+        Auth::logout();
+        $this->get(chapterShowUrl($story, $chapter))
+            ->assertOk()
+            ->assertDontSee('data-annotation-reactions', false);
     });
 
     it('the author and a co-author see neither the button nor the form', function () {

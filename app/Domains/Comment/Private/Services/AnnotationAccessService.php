@@ -8,8 +8,10 @@ use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Dto\RoleDto;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Comment\Private\Models\Comment;
+use App\Domains\Comment\Private\Models\CommentAnnotation;
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationListDto;
+use Illuminate\Support\Collection;
 
 /**
  * Who may see the annotations under a root comment, and with which actions.
@@ -52,6 +54,7 @@ class AnnotationAccessService
     /**
      * Visible root-annotation count per root comment of one page: authors/co-authors and
      * moderators see every count, the commenter only their own, anyone else 0.
+     * All zeros, for everyone, on a type without annotation support.
      * At most one policy call, one role lookup and one grouped COUNT, whatever the page size.
      *
      * @param Comment[] $rootComments
@@ -61,7 +64,7 @@ class AnnotationAccessService
     {
         $ids = array_map(fn (Comment $c) => (int) $c->id, $rootComments);
         $counts = array_fill_keys($ids, 0);
-        if ($viewerId <= 0 || $ids === []) {
+        if ($viewerId <= 0 || $ids === [] || !$this->policies->supportsAnnotations($entityType)) {
             return $counts;
         }
 
@@ -106,5 +109,47 @@ class AnnotationAccessService
     public function canDelete(string $viewerRole): bool
     {
         return $viewerRole === AnnotationListDto::ROLE_MODERATOR;
+    }
+
+    /**
+     * Drop replies whose writer is deactivated; rows are left untouched. Anonymised replies
+     * (author_id null) are kept. One Auth call for the distinct writer ids.
+     *
+     * @param Collection<int, CommentAnnotation> $replies
+     * @return Collection<int, CommentAnnotation>
+     */
+    public function filterActiveReplyWriters(Collection $replies): Collection
+    {
+        $writerIds = $replies->pluck('author_id')->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
+        if ($writerIds === []) {
+            return $replies;
+        }
+
+        $users = $this->authApi->getUsersById($writerIds);
+
+        return $replies
+            ->filter(fn (CommentAnnotation $r) => $r->author_id === null
+                || ($users[(int) $r->author_id]['isActive'] ?? false) !== false)
+            ->values();
+    }
+
+    /**
+     * Authors may reply on any root; the commenter on their own root once a visible reply
+     * from someone else (an author) exists; moderators never.
+     *
+     * @param Collection<int, CommentAnnotation> $visibleReplies replies under $root, already filtered
+     */
+    public function canReply(string $viewerRole, CommentAnnotation $root, Collection $visibleReplies, int $viewerId): bool
+    {
+        if ($viewerRole === AnnotationListDto::ROLE_AUTHOR) {
+            return true;
+        }
+
+        if ($viewerRole !== AnnotationListDto::ROLE_COMMENTER || $root->author_id === null || (int) $root->author_id !== $viewerId) {
+            return false;
+        }
+
+        return $visibleReplies->contains(fn (CommentAnnotation $r) => $r->author_id !== null
+            && (int) $r->author_id !== (int) $root->author_id);
     }
 }

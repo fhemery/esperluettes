@@ -1,4 +1,4 @@
-@props(['entityType', 'entityId'])
+@props(['entityType', 'entityId', 'annotationMode' => 'draft', 'rootCommentId' => null])
 @inject('commentPolicies', 'App\Domains\Comment\Public\Api\CommentPolicyRegistry')
 @php
     $bodyMax = $commentPolicies->getAnnotationBodyMaxLength($entityType);
@@ -6,8 +6,10 @@
 @endphp
 {{-- Rendered by the consumer outside the annotable region (the toolbar's
      <template> is cloned, so it cannot host this form). Opened by
-     <x-comment::annotate-button> (`annotation:open-form`) or to edit a draft
-     (`annotation:open-edit`, detail `{ tempId }`). --}}
+     <x-comment::annotate-button> (`annotation:open-form`), to edit a draft or
+     pending add (`annotation:open-edit`, detail `{ tempId }`), or to edit a
+     saved annotation as a pending edit (`annotations:edit-saved-row`, detail
+     `{ id, body, highlighted }`). --}}
 <template x-teleport="body">
 <div
     x-data="annotationForm()"
@@ -15,6 +17,7 @@
     x-cloak
     @annotation:open-form.window="openForm()"
     @annotation:open-edit.window="openEdit($event.detail)"
+    @annotations:edit-saved-row.window="openForEdit($event.detail)"
     @keydown.escape.window="open && cancel()"
     @keydown="onKeydown($event)"
     @click.outside="open && cancel()"
@@ -25,6 +28,8 @@
     data-user-id="{{ (int) Auth::id() }}"
     data-entity-type="{{ $entityType }}"
     data-entity-id="{{ (int) $entityId }}"
+    data-annotation-mode="{{ $annotationMode }}"
+    @if($rootCommentId) data-root-comment-id="{{ (int) $rootCommentId }}" @endif
     data-body-max-length="{{ (int) $bodyMax }}"
     data-highlight-max-length="{{ (int) $highlightMax }}"
     data-error-blank="{{ __('comment::annotations.errors.body_blank') }}"

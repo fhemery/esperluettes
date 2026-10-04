@@ -9,7 +9,10 @@ use App\Domains\Shared\Dto\ProfileDto;
 class AnnotationDto
 {
     /**
-     * @param AnnotationDto[] $replies Same shape as roots; always empty in v1
+     * @param AnnotationDto[] $replies Oldest first, same shape as roots; always empty on a reply
+     * @param bool $canEdit Display hint: the viewer wrote this root (commenter)
+     * @param bool $canReply Display hint: the viewer may reply under this root
+     * @param bool $canDelete Display hint: moderator, or the writer of this reply
      */
     public function __construct(
         public readonly int $id,
@@ -26,6 +29,8 @@ class AnnotationDto
         public readonly array $replies,
         public readonly bool $canMarkAsProcessed,
         public readonly bool $canDelete,
+        public readonly bool $canEdit,
+        public readonly bool $canReply,
     ) {}
 
     public function toArray(): array
@@ -50,6 +55,8 @@ class AnnotationDto
             'replies' => array_map(fn (self $r) => $r->toArray(), $this->replies),
             'can_mark_as_processed' => $this->canMarkAsProcessed,
             'can_delete' => $this->canDelete,
+            'can_edit' => $this->canEdit,
+            'can_reply' => $this->canReply,
         ];
     }
 }

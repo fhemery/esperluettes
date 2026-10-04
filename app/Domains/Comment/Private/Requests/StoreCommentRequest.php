@@ -23,7 +23,7 @@ class StoreCommentRequest extends FormRequest
             'parent_comment_id' => ['nullable', 'integer'],
             'annotations' => ['nullable', 'array'],
             'annotations.*.body' => ['required', 'string'],
-            'annotations.*.highlighted_text' => ['required', 'string', 'max:500'],
+            'annotations.*.highlighted_text' => ['required', 'string'],
             'annotations.*.prefix' => ['nullable', 'string', 'max:255'],
             'annotations.*.suffix' => ['nullable', 'string', 'max:255'],
         ];

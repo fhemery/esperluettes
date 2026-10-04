@@ -288,3 +288,71 @@ describe('annotationForm.openEdit', () => {
         expect(component.open).toBe(false);
     });
 });
+
+describe('annotationForm in pending mode (reader with a root comment)', () => {
+    function storedChanges() {
+        const raw = localStorage.getItem(storageKey());
+        return raw ? JSON.parse(raw).annotationChanges : null;
+    }
+
+    it('stores a pending add in pending mode and a draft in draft mode', () => {
+        chapter('<div class="ce-block ce-block--text"><p id="a">le chat dort sur le tapis</p></div>');
+
+        select(textOf('#a'), 3, textOf('#a'), 12);
+        const pending = makeComponent();
+        pending.$root.dataset.annotationMode = 'pending';
+        pending.openForm();
+        typeBody('<p>après coup</p>');
+        pending.save();
+
+        expect(storedAnnotations()).toEqual([]);
+        const adds = storedChanges().adds;
+        expect(adds).toHaveLength(1);
+        expect(adds[0]).toMatchObject({
+            body: '<p>après coup</p>', highlighted: 'chat dort', prefix: 'le', suffix: 'sur le tapis',
+        });
+        expect(pending.open).toBe(false);
+
+        // Editing that pending add updates it in place.
+        pending.openEdit({ tempId: adds[0].tempId });
+        expect(pending.open).toBe(true);
+        expect(editorTextarea().value).toBe('<p>après coup</p>');
+        typeBody('<p>corrigée</p>');
+        pending.save();
+        expect(storedChanges().adds).toEqual([{ ...adds[0], body: '<p>corrigée</p>' }]);
+
+        select(textOf('#a'), 3, textOf('#a'), 12);
+        const draft = makeComponent();
+        draft.$root.dataset.annotationMode = 'draft';
+        draft.openForm();
+        typeBody('<p>avant</p>');
+        draft.save();
+
+        expect(storedAnnotations()).toHaveLength(1);
+        expect(storedAnnotations()[0]).toMatchObject({ body: '<p>avant</p>', highlighted: 'chat dort' });
+        expect(storedChanges().adds).toHaveLength(1);
+    });
+
+    it('saves an edit of a saved row as a pending edit, body only', () => {
+        chapter('<div class="ce-block ce-block--text"><p id="a">le chat dort</p></div>');
+        const component = makeComponent();
+        component.$root.dataset.annotationMode = 'pending';
+        const spy = vi.spyOn(window.commentDrafts, 'setPendingEdit');
+
+        component.openForEdit({ id: 31, body: '<p>publiée</p>', highlighted: 'chat' });
+
+        expect(component.open).toBe(true);
+        expect(component.centred).toBe(true);
+        expect(component.highlighted).toBe('chat');
+        expect(editorTextarea().value).toBe('<p>publiée</p>');
+
+        typeBody('<p>retouchée</p>');
+        component.save();
+
+        expect(spy).toHaveBeenCalledWith(USER_ID, 'chapter', String(CHAPTER_ID), 31, '<p>retouchée</p>');
+        expect(storedChanges()).toEqual({ adds: [], edits: { 31: '<p>retouchée</p>' }, deletes: [] });
+        expect(storedAnnotations()).toEqual([]);
+        expect(component.open).toBe(false);
+        spy.mockRestore();
+    });
+});

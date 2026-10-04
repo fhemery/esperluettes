@@ -207,6 +207,8 @@
                         entity-type="chapter"
                         :entity-id="$vm->chapter->id"
                         :can-annotate="$canQuoteStory || $canAnnotate"
+                        :annotation-mode="$annotationMode"
+                        :root-comment-id="$rootCommentId"
                     >
                         <x-slot:toolbar-actions>
                             <x-quote::toolbar-button
@@ -215,6 +217,7 @@
                                 :can-quote="$canQuoteStory"
                             />
                             <x-comment::annotate-button :can-annotate="$canAnnotate" />
+                            <x-comment::reaction-buttons entity-type="chapter" :can-annotate="$canAnnotate" />
                         </x-slot:toolbar-actions>
 
                         <x-quote::author-heat :chapter-id="$vm->chapter->id">
@@ -233,7 +236,7 @@
 
                     <x-quote::mini-form />
                     @if($canAnnotate)
-                        <x-comment::annotation-form entity-type="chapter" :entity-id="$vm->chapter->id" />
+                        <x-comment::annotation-form entity-type="chapter" :entity-id="$vm->chapter->id" :annotation-mode="$annotationMode" :root-comment-id="$rootCommentId" />
                     @endif
                 </div>
                 <x-quote::chapter-panel />

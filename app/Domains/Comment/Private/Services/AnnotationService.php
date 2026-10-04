@@ -6,6 +6,7 @@ namespace App\Domains\Comment\Private\Services;
 
 use App\Domains\Comment\Private\Models\CommentAnnotation;
 use App\Domains\Comment\Private\Support\CommentBodySanitizer;
+use App\Domains\Comment\Public\Api\Contracts\AnnotationChangeSetDto;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -38,11 +39,88 @@ class AnnotationService
     }
 
     /**
+     * Apply a commenter's changes under their root comment in one transaction:
+     * deletes (with their replies), then edits (body only, processed flag reset), then adds.
+     * Callers validate first (ids are live roots of this comment written by $authorId).
+     */
+    public function applyChanges(int $commentId, int $authorId, AnnotationChangeSetDto $changes): void
+    {
+        DB::transaction(function () use ($commentId, $authorId, $changes) {
+            if ($changes->deletes !== []) {
+                CommentAnnotation::query()
+                    ->whereIn('parent_annotation_id', $changes->deletes)
+                    ->delete();
+                CommentAnnotation::query()
+                    ->whereIn('id', $changes->deletes)
+                    ->delete();
+            }
+
+            foreach ($changes->edits as $id => $body) {
+                CommentAnnotation::query()
+                    ->whereKey($id)
+                    ->update([
+                        'body' => $this->sanitizer->sanitizeToHtml($body, CommentBodySanitizer::ANNOTATION),
+                        'is_processed' => false,
+                        'processed_at' => null,
+                    ]);
+            }
+
+            $this->createForComment($commentId, $authorId, $changes->adds);
+        });
+    }
+
+    /**
+     * Which of $ids are live root annotations of $commentId written by $authorId.
+     *
+     * @param int[] $ids
+     * @return int[]
+     */
+    public function filterOwnRootIds(int $commentId, int $authorId, array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return CommentAnnotation::query()
+            ->roots()
+            ->where('comment_id', $commentId)
+            ->where('author_id', $authorId)
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException when unknown or soft-deleted
      */
     public function getAnnotation(int $annotationId): CommentAnnotation
     {
         return CommentAnnotation::query()->findOrFail($annotationId);
+    }
+
+    /**
+     * Store a reply under a root annotation: no anchor, body sanitized. Callers validate and authorize.
+     */
+    public function createReply(CommentAnnotation $root, int $authorId, string $body): CommentAnnotation
+    {
+        return CommentAnnotation::query()->create([
+            'comment_id' => $root->comment_id,
+            'parent_annotation_id' => $root->id,
+            'author_id' => $authorId,
+            'body' => $this->sanitizer->sanitizeToHtml($body, CommentBodySanitizer::ANNOTATION),
+            'highlighted_text' => null,
+            'prefix' => null,
+            'suffix' => null,
+        ]);
+    }
+
+    /**
+     * Soft-delete one reply. Callers check it is a reply and authorize.
+     */
+    public function deleteReply(CommentAnnotation $reply): void
+    {
+        $reply->delete();
     }
 
     public function setProcessed(CommentAnnotation $annotation, bool $value): void
@@ -118,6 +196,26 @@ class AnnotationService
             ->roots()
             ->where('comment_id', $commentId)
             ->when($authorId !== null, fn ($q) => $q->where('author_id', $authorId))
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * Live replies under the given roots, oldest first, in one query. Not restricted by writer.
+     *
+     * @param int[] $rootIds
+     * @return Collection<int, CommentAnnotation>
+     */
+    public function getRepliesForRoots(array $rootIds): Collection
+    {
+        if ($rootIds === []) {
+            return new Collection();
+        }
+
+        return CommentAnnotation::query()
+            ->repliesOnly()
+            ->whereIn('parent_annotation_id', $rootIds)
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();

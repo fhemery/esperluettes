@@ -34,11 +34,6 @@ export class CommentThread {
     return this.rootForm.locator('button[type="submit"]');
   }
 
-  /** Every comment on screen, roots and replies alike. */
-  get items(): Locator {
-    return this.root.locator('li[id^="comment-"]');
-  }
-
   item(commentId: number): Locator {
     return this.root.locator(`#comment-${commentId}`);
   }

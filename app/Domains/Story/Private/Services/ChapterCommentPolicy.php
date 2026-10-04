@@ -95,12 +95,14 @@ class ChapterCommentPolicy implements CommentPolicy
     }
 
     /**
-     * Same audience as a root comment (annotations are posted with it), but
-     * never a guest: canCreateRoot alone answers true for user id 0.
+     * Any logged-in reader who is not an author/co-author (beta readers are
+     * readers), whether or not they already have a root comment — an emptied
+     * root still qualifies. Posting annotations together with a new root stays
+     * guarded by canCreateRoot.
      */
     public function canAnnotate(int $entityId, int $userId): bool
     {
-        return $userId > 0 && $this->canCreateRoot($entityId, $userId);
+        return $userId > 0 && !$this->chapters->isUserAuthorOfChapter($entityId, $userId);
     }
 
     /**

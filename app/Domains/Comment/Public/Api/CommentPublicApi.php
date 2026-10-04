@@ -12,6 +12,7 @@ use App\Domains\Comment\Private\Mappers\CommentListDtoMapper;
 use App\Domains\Comment\Private\Services\AnnotationAccessService;
 use App\Domains\Comment\Private\Services\CommentService;
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
+use App\Domains\Comment\Private\Support\AnnotationItemValidator;
 use App\Domains\Comment\Private\Support\CommentBodySanitizer;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Auth\Public\Api\Roles;
@@ -29,6 +30,7 @@ class CommentPublicApi
         private CommentPolicyRegistry $policies,
         private readonly CommentBodySanitizer $sanitizer,
         private readonly AnnotationAccessService $annotationAccess,
+        private readonly AnnotationItemValidator $annotationItemValidator,
         private readonly CommentDtoMapper $dtoMapper = new CommentDtoMapper(),
         private readonly CommentListDtoMapper $listDtoMapper = new CommentListDtoMapper(),
     ) {}
@@ -207,20 +209,22 @@ class CommentPublicApi
         if (
             $comment->parentCommentId !== null
             || !$this->policies->canAnnotate($comment->entityType, (int) $comment->entityId, $userId)
+            // canAnnotate no longer implies "no root yet": keep the refusal under `annotations`.
+            || !$this->policies->canCreateRoot($comment->entityType, (int) $comment->entityId, $userId)
         ) {
             throw ValidationException::withMessages(['annotations' => [__('comment::annotations.errors.not_allowed')]]);
         }
 
-        $bodyMax = $this->policies->getAnnotationBodyMaxLength($comment->entityType);
-        $highlightMax = $this->policies->getAnnotationHighlightMaxLength($comment->entityType);
-
         foreach ($comment->annotations as $annotation) {
-            $bodyLength = $this->sanitizer->plainTextLength($annotation->body, CommentBodySanitizer::ANNOTATION);
-            $invalid = $bodyLength < 1
-                || ($bodyMax !== null && $bodyLength > $bodyMax)
-                || ($highlightMax !== null && mb_strlen($annotation->highlightedText) > $highlightMax);
-            if ($invalid) {
-                throw ValidationException::withMessages(['annotations' => [__('comment::annotations.errors.invalid')]]);
+            $error = $this->annotationItemValidator->firstError(
+                $comment->entityType,
+                $annotation->body,
+                $annotation->highlightedText,
+                $annotation->prefix,
+                $annotation->suffix,
+            );
+            if ($error !== null) {
+                throw ValidationException::withMessages(['annotations' => [__($error)]]);
             }
         }
     }

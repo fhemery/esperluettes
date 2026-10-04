@@ -1,29 +1,65 @@
 // Comment domain — draft local-storage autosave.
 //
-// One key per (user, entityType, entityId) holds an object with three slots:
+// One key per (user, entityType, entityId) holds an object with four slots:
 //   - root:        { body, savedAt }         | null  — the root-comment editor draft
 //   - reply:       { parentCommentId, body, savedAt } | null  — a single reply-in-progress
 //   - annotations: [{ tempId, body, highlighted, prefix, suffix }] — chapter annotation drafts,
 //                  posted with the root comment and cleared with it by the root consumed marker
+//   - annotationChanges: { adds: [{ tempId, body, highlighted, prefix, suffix }],
+//                          edits: { [annotationId]: body }, deletes: [annotationId] }
+//                  — pending changes to the annotations of an already-posted root comment,
+//                  saved in one PUT. The root consumed marker leaves it alone; only a
+//                  successful save clears it.
+//
+// Version 1 payloads (before annotationChanges) still load, with an empty slot.
 //
 // Forms opt in by adding `data-comment-draft="root"` (or `="reply"`) plus
 // `data-user-id`, `data-entity-type`, `data-entity-id`, and for replies `data-parent-comment-id`.
 // The Quill editor inside the form is discovered via its `data-toolbar` attribute.
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
+const READABLE_VERSIONS = [1, 2];
 
 function keyFor(userId, entityType, entityId) {
   return `comment-drafts:${userId}:${entityType}:${entityId}`;
 }
 
+function emptyChanges() {
+  return { adds: [], edits: {}, deletes: [] };
+}
+
 function emptyState() {
-  return { version: SCHEMA_VERSION, root: null, reply: null, annotations: [] };
+  return { version: SCHEMA_VERSION, root: null, reply: null, annotations: [], annotationChanges: emptyChanges() };
+}
+
+function countChanges(changes) {
+  return changes.adds.length + Object.keys(changes.edits).length + changes.deletes.length;
 }
 
 function isEmpty(state) {
   return !state.root
     && !state.reply
-    && (!Array.isArray(state.annotations) || state.annotations.length === 0);
+    && (!Array.isArray(state.annotations) || state.annotations.length === 0)
+    && countChanges(state.annotationChanges) === 0;
+}
+
+function isAnnotationId(value) {
+  return Number.isInteger(value) && value > 0;
+}
+
+function normalizeChanges(raw) {
+  if (!raw || typeof raw !== 'object') return emptyChanges();
+  const edits = {};
+  if (raw.edits && typeof raw.edits === 'object' && !Array.isArray(raw.edits)) {
+    Object.entries(raw.edits).forEach(([id, body]) => {
+      if (/^[1-9]\d*$/.test(id) && typeof body === 'string') edits[id] = body;
+    });
+  }
+  return {
+    adds: Array.isArray(raw.adds) ? raw.adds.filter(isAnnotationItem) : [],
+    edits,
+    deletes: Array.isArray(raw.deletes) ? [...new Set(raw.deletes.filter(isAnnotationId))] : [],
+  };
 }
 
 function isAnnotationItem(item) {
@@ -46,7 +82,7 @@ export function load(userId, entityType, entityId) {
   if (!raw) return emptyState();
   try {
     const parsed = JSON.parse(raw);
-    if (!parsed || parsed.version !== SCHEMA_VERSION) return emptyState();
+    if (!parsed || !READABLE_VERSIONS.includes(parsed.version)) return emptyState();
     return {
       version: SCHEMA_VERSION,
       root: parsed.root && typeof parsed.root.body === 'string' ? parsed.root : null,
@@ -54,6 +90,7 @@ export function load(userId, entityType, entityId) {
         ? parsed.reply
         : null,
       annotations: Array.isArray(parsed.annotations) ? parsed.annotations.filter(isAnnotationItem) : [],
+      annotationChanges: parsed.version === 1 ? emptyChanges() : normalizeChanges(parsed.annotationChanges),
     };
   } catch (e) {
     return emptyState();
@@ -157,6 +194,87 @@ export function clearAnnotations(userId, entityType, entityId) {
   writeAnnotations(userId, entityType, entityId, load(userId, entityType, entityId), []);
 }
 
+// ---------- AnnotationChanges slot (post-publish pending changes) ----------
+
+function writeChanges(userId, entityType, entityId, state, changes) {
+  state.annotationChanges = changes;
+  persist(userId, entityType, entityId, state);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('comment-drafts:annotation-changes-changed', {
+      detail: { entityType, entityId, count: countChanges(changes) },
+    }));
+  }
+}
+
+function changeChanges(userId, entityType, entityId, mutate) {
+  if (!userId) return;
+  const state = load(userId, entityType, entityId);
+  writeChanges(userId, entityType, entityId, state, mutate(state.annotationChanges));
+}
+
+export function getAnnotationChanges(userId, entityType, entityId) {
+  return load(userId, entityType, entityId).annotationChanges;
+}
+
+export function countAnnotationChanges(userId, entityType, entityId) {
+  return countChanges(getAnnotationChanges(userId, entityType, entityId));
+}
+
+export function addPendingAnnotation(userId, entityType, entityId, { body, highlighted, prefix = '', suffix = '' }) {
+  if (!userId) return null;
+  const item = {
+    tempId: generateTempId(),
+    body: String(body ?? ''),
+    highlighted: String(highlighted ?? ''),
+    prefix: String(prefix ?? ''),
+    suffix: String(suffix ?? ''),
+  };
+  changeChanges(userId, entityType, entityId, (c) => ({ ...c, adds: [...c.adds, item] }));
+  return item.tempId;
+}
+
+export function updatePendingAdd(userId, entityType, entityId, tempId, body) {
+  changeChanges(userId, entityType, entityId, (c) => ({
+    ...c,
+    adds: c.adds.map((item) => (item.tempId === tempId ? { ...item, body: String(body ?? '') } : item)),
+  }));
+}
+
+export function removePendingAdd(userId, entityType, entityId, tempId) {
+  changeChanges(userId, entityType, entityId, (c) => ({ ...c, adds: c.adds.filter((item) => item.tempId !== tempId) }));
+}
+
+export function setPendingEdit(userId, entityType, entityId, id, body) {
+  changeChanges(userId, entityType, entityId, (c) => ({ ...c, edits: { ...c.edits, [id]: String(body ?? '') } }));
+}
+
+export function undoPendingEdit(userId, entityType, entityId, id) {
+  changeChanges(userId, entityType, entityId, (c) => {
+    const edits = { ...c.edits };
+    delete edits[id];
+    return { ...c, edits };
+  });
+}
+
+export function setPendingDelete(userId, entityType, entityId, id) {
+  const annotationId = Number(id);
+  changeChanges(userId, entityType, entityId, (c) => {
+    const edits = { ...c.edits };
+    delete edits[annotationId];
+    const deletes = c.deletes.includes(annotationId) ? c.deletes : [...c.deletes, annotationId];
+    return { ...c, edits, deletes };
+  });
+}
+
+export function undoPendingDelete(userId, entityType, entityId, id) {
+  const annotationId = Number(id);
+  changeChanges(userId, entityType, entityId, (c) => ({ ...c, deletes: c.deletes.filter((d) => d !== annotationId) }));
+}
+
+export function clearAnnotationChanges(userId, entityType, entityId) {
+  changeChanges(userId, entityType, entityId, () => emptyChanges());
+}
+
 /**
  * Flash-driven "this draft was just posted" marker, set by an inline script
  * before the Vite module runs. Applied before any restore so a deferred module
@@ -180,6 +298,7 @@ function applyConsumedMarker() {
   if (!payload) return null;
   if (payload.scope === 'root') {
     // Annotations are posted with the root comment, so they are consumed with it.
+    // annotationChanges are not: they belong to an already-posted root.
     clearRoot(payload.userId, payload.entityType, payload.entityId);
     clearAnnotations(payload.userId, payload.entityType, payload.entityId);
   } else {
@@ -334,6 +453,16 @@ if (typeof window !== 'undefined') {
     updateAnnotation,
     removeAnnotation,
     clearAnnotations,
+    getAnnotationChanges,
+    countAnnotationChanges,
+    addPendingAnnotation,
+    updatePendingAdd,
+    removePendingAdd,
+    setPendingEdit,
+    undoPendingEdit,
+    setPendingDelete,
+    undoPendingDelete,
+    clearAnnotationChanges,
     bootstrap,
   };
 }

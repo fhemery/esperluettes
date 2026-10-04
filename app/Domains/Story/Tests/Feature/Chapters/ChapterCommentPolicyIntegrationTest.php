@@ -123,25 +123,47 @@ describe('Regarding annotations', function () {
         expect($this->policy->canAnnotate($this->chapter->id, $reader->id))->toBeTrue();
     });
 
-    it('canAnnotate: false for the author, a co-author, a reader who already posted a root comment, and user id 0', function () {
+    it('canAnnotate: false for the author, a co-author, and user id 0', function () {
         $coAuthor = carol($this);
         addCollaborator($this->story->id, $coAuthor->id, 'author');
 
+        expect($this->policy->canAnnotate($this->chapter->id, $this->author->id))->toBeFalse()
+            ->and($this->policy->canAnnotate($this->chapter->id, $coAuthor->id))->toBeFalse()
+            ->and($this->policy->canAnnotate($this->chapter->id, 0))->toBeFalse();
+    });
+
+    it('canAnnotate: true for a reader who already posted a root comment', function () {
         $commenter = bob($this);
         $this->actingAs($commenter);
         createComment('chapter', $this->chapter->id, generateDummyText(140), null);
 
-        expect($this->policy->canAnnotate($this->chapter->id, $this->author->id))->toBeFalse()
-            ->and($this->policy->canAnnotate($this->chapter->id, $coAuthor->id))->toBeFalse()
-            ->and($this->policy->canAnnotate($this->chapter->id, $commenter->id))->toBeFalse()
-            ->and($this->policy->canAnnotate($this->chapter->id, 0))->toBeFalse();
+        expect($this->policy->canAnnotate($this->chapter->id, $commenter->id))->toBeTrue();
+    });
+
+    it('canAnnotate: true for a reader whose root comment was emptied by a moderator', function () {
+        $commenter = bob($this);
+        $this->actingAs($commenter);
+        $commentId = createComment('chapter', $this->chapter->id, generateDummyText(140), null);
+
+        $this->actingAs(moderator($this))
+            ->post(route('comments.moderation.empty-content', ['commentId' => $commentId]))
+            ->assertRedirect();
+
+        expect($this->policy->canAnnotate($this->chapter->id, $commenter->id))->toBeTrue();
+    });
+
+    it('canAnnotate: true for a beta reader', function () {
+        $betaReader = daniel($this);
+        addCollaborator($this->story->id, $betaReader->id, 'beta-reader');
+
+        expect($this->policy->canAnnotate($this->chapter->id, $betaReader->id))->toBeTrue();
     });
 
     it('canMarkAsProcessed: true for the author and a co-author; false for a beta reader and for a plain reader', function () {
         $coAuthor = carol($this);
         addCollaborator($this->story->id, $coAuthor->id, 'author');
         $betaReader = daniel($this);
-        addCollaborator($this->story->id, $betaReader->id, 'betareader');
+        addCollaborator($this->story->id, $betaReader->id, 'beta-reader');
         $reader = bob($this);
 
         expect($this->policy->canMarkAsProcessed($this->chapter->id, $this->author->id))->toBeTrue()

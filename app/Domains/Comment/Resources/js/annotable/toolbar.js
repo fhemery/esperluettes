@@ -11,8 +11,10 @@
  * shown only when every non-blank text the selection covers lies inside an
  * element matching that selector (a boundary merely touching a block, e.g. a
  * triple-click ending at `(nextBlock, 0)`, covers nothing there — see Shared's
- * `coveredTextSlices`, which anchor extraction also uses). Actions without the attribute are
- * always shown. When no action applies, the toolbar is not shown at all. The
+ * `coveredTextSlices`, which anchor extraction also uses). If the same element
+ * also carries data-requires-single-area, that text must moreover lie in one
+ * single matching element (a selection spanning two of them hides the action).
+ * Actions without the attribute are always shown. When no action applies, the toolbar is not shown at all. The
  * selector belongs to the contributing domain; this module never knows it.
  */
 
@@ -77,7 +79,15 @@ export function selectionIsWithin(range, selector) {
         .every(({ node }) => node.parentElement?.closest(selector));
 }
 
+/** Like selectionIsWithin, and all of that text lies in one single matching element. */
+export function selectionIsWithinOne(range, selector) {
+    const areas = new Set(coveredTextSlices(range)
+        .map(({ node }) => node.parentElement?.closest(selector) ?? null));
+    return !areas.has(null) && areas.size <= 1;
+}
+
 const REQUIRES_ATTR = 'data-requires-selection-within';
+const SINGLE_AREA_ATTR = 'data-requires-single-area';
 
 export function applyActionApplicability(toolbar, range) {
     const actions = toolbar.querySelector('[data-toolbar-actions]');
@@ -88,8 +98,9 @@ export function applyActionApplicability(toolbar, range) {
         const declaring = action.hasAttribute(REQUIRES_ATTR)
             ? action
             : action.querySelector(`[${REQUIRES_ATTR}]`);
+        const test = declaring?.hasAttribute(SINGLE_AREA_ATTR) ? selectionIsWithinOne : selectionIsWithin;
         const applicable = !declaring
-            || selectionIsWithin(range, declaring.getAttribute(REQUIRES_ATTR));
+            || test(range, declaring.getAttribute(REQUIRES_ATTR));
         action.style.display = applicable ? '' : 'none';
         if (applicable) visible++;
     }

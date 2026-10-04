@@ -1,10 +1,12 @@
-@props(['entityType', 'entityId', 'canAnnotate' => false, 'viewerRole' => null, 'maxSelection' => 500])
+@props(['entityType', 'entityId', 'canAnnotate' => false, 'viewerRole' => null, 'maxSelection' => 500, 'annotationMode' => 'draft', 'rootCommentId' => null])
 <div
     class="annotable-region"
     data-annotable
     data-entity-type="{{ $entityType }}"
     data-entity-id="{{ $entityId }}"
     data-can-annotate="{{ $canAnnotate ? 'true' : 'false' }}"
+    data-annotation-mode="{{ $annotationMode }}"
+    @if($rootCommentId) data-root-comment-id="{{ (int) $rootCommentId }}" @endif
     data-max-selection="{{ (int) $maxSelection }}"
     @if($viewerRole) data-viewer-role="{{ $viewerRole }}" @endif
     x-data

@@ -61,6 +61,25 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
    `verify-visually` appends a fix phase row (`6 · TODO`) to `03-plan.md`'s
    index for any pushed-back item and leaves the backlog at `WIP:BUILD`;
    `continue-task` refuses to advance to WRAP while a phase row is `TODO`.
+9. **Retiring a feature spec orphans its page-object helpers.** *(annotations,
+   annotations-v2)* v1's WRAP deleted its spec and left ten callerless helpers
+   that v2 had to prune (A15); v2's spec would orphan ~35 more. Fix: `wrap-task`
+   §4 says "delete the spec **and** every page-object member / fixture left
+   without a caller, in the same commit"; or `verify-visually` keeps
+   feature-only helpers inside the spec file, so they die with it.
+10. **PLAN silently weakened a spec requirement.** *(annotations-v2, A17)* Spec
+   §4.1.3 said a cross-block selection *hides* the emoji; plan phase 8 made it a
+   click no-op. VERIFY failed the row and a decision + fix commit followed
+   (#13). Fix: `plan-phases` — any acceptance criterion that differs from the
+   spec's wording goes to "Open items", never silently into a phase.
+11. **File-local Pest helpers break under `test:parallel`.** *(annotations-v2,
+    A8)* Two test files defining/using the same top-level helper failed only
+    in parallel runs. Fix: one line in `AGENTS.md` § Testing — shared Pest
+    helpers live in the domain's `Tests/helpers.php`, never in a test file.
+12. **`.env.e2e` `APP_URL` points at the wrong port.** *(annotations-v2,
+    VERIFY)* `APP_URL=http://localhost:8081` while the suite serves on `:8080`:
+    avatars and chapter illustrations are broken images in every e2e
+    screenshot. Fix the env file (or derive the port in `e2e/support/sail.ts`).
 
 ## Why
 
