@@ -26,7 +26,6 @@ scoped to the task that actually changed.
 - **Chapter annotations — v3 (in-chapter display)** · `annotations-v3/` · interactive · TODO: split from `annotations-v2/` REFINE — re-anchoring, tint, margin avatars + popover, filter menu, moderator « Vider le contenu » on one annotation, purifier emoji-list de-dup. Starts after v2 is wrapped.
 - **Chapter annotations — v4 (report + images)** · `annotations-v4/` · interactive · TODO: split from `annotations-v2/` REFINE — per-annotation Report (`chapter-annotation` topic, reopens v1 #3) and image annotation. Starts after v3.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
-- **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · WIP:BUILD (1/1)
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
@@ -47,6 +46,7 @@ tracking down why something is the way it is.
 
 - [`media-sound-upload`](_done/media-sound-upload.md) · Secret Gift sound stored, served (Range) and garbage-collected through Media's private half; `<x-shared::sound-upload>` replaced by `<x-media::sound-field>`
 - [`annotations-v2`](_done/annotations-v2.md) · chapter annotations writer side: ❤️ 🔥 👍 reactions, post-publish add/edit/delete as browser-side pending changes saved in one atomic `PUT` from a sticky banner, one-level author ↔ commenter replies in the pop-up
+- [`dashboard-discover-exclude-read`](_done/dashboard-discover-exclude-read.md) · the dashboard « Histoires à découvrir » block no longer offers stories the viewer has already started (≥1 chapter marked read)
 - [`annotations`](_done/annotations.md) · chapter annotations v1: readers annotate passages as local drafts posted with their root comment; « N annotations » pop-up where authors mark them processed and moderators delete one; type-level `supportsAnnotations()` keeps the UI and script off news
 - [`e2e-types-node`](_done/e2e-types-node.md) · `@types/node@^24` direct dev dep so `tsc -p e2e` passes (one `hoverSlot` type fix); new gate step `e2e-types`, scoped to `e2e/`/Playwright config/`package.json`/lockfile, kept under `--quick`
 - [`improve-loop`](_done/improve-loop.md) · checkpoint rows after shared refactors, refactor-first PLAN, gate builds on Blade changes, `--` dropped from pnpm commands, agent memory folded into skills, WRAP opens with a retro feeding `loop-improvements/`
