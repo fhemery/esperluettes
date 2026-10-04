@@ -26,7 +26,7 @@ scoped to the task that actually changed.
 - **Chapter annotations — v3 (in-chapter display)** · `annotations-v3/` · interactive · TODO: split from `annotations-v2/` REFINE — re-anchoring, tint, margin avatars + popover, filter menu, moderator « Vider le contenu » on one annotation, purifier emoji-list de-dup. Starts after v2 is wrapped.
 - **Chapter annotations — v4 (report + images)** · `annotations-v4/` · interactive · TODO: split from `annotations-v2/` REFINE — per-annotation Report (`chapter-annotation` topic, reopens v1 #3) and image annotation. Starts after v3.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
-- **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · TODO
+- **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · WIP:DESIGN
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
