@@ -34,11 +34,6 @@ export class CommentThread {
     return this.rootForm.locator('button[type="submit"]');
   }
 
-  /** Every comment on screen, roots and replies alike. */
-  get items(): Locator {
-    return this.root.locator('li[id^="comment-"]');
-  }
-
   item(commentId: number): Locator {
     return this.root.locator(`#comment-${commentId}`);
   }
@@ -47,15 +42,6 @@ export class CommentThread {
   async scrollToBottom(): Promise<void> {
     await this.page.mouse.wheel(0, 20000);
     await this.page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  }
-
-  /**
-   * Half a screen down, like a finger would. A single jump to the bottom can
-   * skip the 4 px sentinel on a short mobile page whose bottom is padded by the
-   * sticky save banner: it is never inside the viewport on any frame.
-   */
-  async scrollDown(): Promise<void> {
-    await this.page.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
   }
 
   /**
@@ -72,20 +58,6 @@ export class CommentThread {
     return this.awaitPostedId(before);
   }
 
-  /**
-   * Moderator: « Vider le contenu » from the comment's moderation popover. The
-   * popover panel is teleported to <body>, hence the page-wide, visible-only
-   * lookup of the action.
-   */
-  async emptyContent(commentId: number): Promise<void> {
-    await this.item(commentId).locator('[aria-haspopup="dialog"]').first().click();
-    const action = this.page
-      .getByRole('button', { name: 'Vider le contenu', exact: true })
-      .filter({ visible: true });
-    await action.click();
-    await this.page.waitForLoadState('load');
-  }
-
   replyForm(parentCommentId: number): Locator {
     return this.root.locator(
       `form[data-comment-draft="reply"][data-parent-comment-id="${parentCommentId}"]`,
@@ -94,16 +66,6 @@ export class CommentThread {
 
   replyEditor(parentCommentId: number): RichTextEditor {
     return new RichTextEditor(this.page, `reply-editor-${parentCommentId}`);
-  }
-
-  replySubmit(parentCommentId: number): Locator {
-    return this.replyForm(parentCommentId).locator('button[type="submit"]');
-  }
-
-  /** The id of a comment item found by other means (e.g. by its text). */
-  async idOf(item: Locator): Promise<number> {
-    const id = await item.getAttribute('id');
-    return Number(id?.replace('comment-', ''));
   }
 
   async openReply(parentCommentId: number): Promise<void> {

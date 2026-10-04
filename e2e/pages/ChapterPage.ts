@@ -56,11 +56,6 @@ export class ChapterPage {
     return this.page.locator('#comment-toolbar-active');
   }
 
-  /** Quote's « Citer » (the emoji and « Annoter » share its selection attribute). */
-  get citeButton(): Locator {
-    return this.selectionToolbar.locator('.quote-toolbar-btn');
-  }
-
   /**
    * Selects the first `length` characters of the first text node of `target`
    * (all of it by default) and releases the mouse, which is what the toolbar
@@ -79,54 +74,6 @@ export class ChapterPage {
     }, length);
   }
 
-  /**
-   * Touch variant of `selectText`: Playwright cannot long-press to select, so
-   * the range is set programmatically and a `touchend` is dispatched on the
-   * element — the toolbar's touch handler reads `e.target`.
-   */
-  async touchSelectText(target: Locator): Promise<void> {
-    await target.evaluate((el) => {
-      const node = document.createTreeWalker(el, NodeFilter.SHOW_TEXT).nextNode() as Text;
-      const range = document.createRange();
-      range.setStart(node, 0);
-      range.setEnd(node, node.length);
-      const selection = window.getSelection()!;
-      selection.removeAllRanges();
-      selection.addRange(range);
-      el.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
-    });
-  }
-
-  /** Quote's mini-form (« Citer »), teleported to <body>. */
-  get quoteMiniForm(): Locator {
-    return this.page.locator('[aria-labelledby="quote-mini-form-title"]');
-  }
-
-  /** The reader's own quote panel, opened by clicking one of their tints. */
-  get quotePanel(): Locator {
-    return this.page.locator('[aria-labelledby="quote-panel-title"]');
-  }
-
-  /**
-   * Selects from the start of `from`'s first text node to the end of `to`'s,
-   * then releases the mouse — a drag that starts in one element and ends in
-   * another.
-   */
-  async selectAcross(from: Locator, to: Locator): Promise<void> {
-    const end = await to.elementHandle();
-    await from.evaluate((start, endEl) => {
-      const first = document.createTreeWalker(start, NodeFilter.SHOW_TEXT).nextNode() as Text;
-      const last = document.createTreeWalker(endEl!, NodeFilter.SHOW_TEXT).nextNode() as Text;
-      const range = document.createRange();
-      range.setStart(first, 0);
-      range.setEnd(last, last.length);
-      const selection = window.getSelection()!;
-      selection.removeAllRanges();
-      selection.addRange(range);
-      endEl!.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-    }, end);
-  }
-
   /** Switches the page's season/appearance the way the layout sets them. */
   async setTheme(season: string, appearance: string): Promise<void> {
     await this.page.evaluate(([s, a]) => {
@@ -135,34 +82,6 @@ export class ChapterPage {
     }, [season, appearance]);
     // Buttons transition their colours: measure the settled state.
     await this.page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished)));
-  }
-
-  /**
-   * WCAG contrast ratio between an element's text colour and its background,
-   * both resolved to sRGB through a canvas (computed colours may be oklch).
-   */
-  async contrast(target: Locator): Promise<number> {
-    return target.evaluate(el => {
-      const s = getComputedStyle(el);
-      const ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!;
-      const rgb = (color: string) => {
-        ctx.clearRect(0, 0, 1, 1);
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, 1, 1);
-        return Array.from(ctx.getImageData(0, 0, 1, 1).data.slice(0, 3));
-      };
-      const lum = (c: number[]) => {
-        const [r = 0, g = 0, b = 0] = c.map(v => {
-          const x = v / 255;
-          return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
-        });
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      };
-      const fg = lum(rgb(s.color));
-      const bg = lum(rgb(s.backgroundColor));
-      const ratio = (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05);
-      return Math.round(ratio * 100) / 100;
-    });
   }
 
   async goto(): Promise<void> {

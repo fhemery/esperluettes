@@ -41,26 +41,15 @@ export class ChapterAnnotations {
     return this.page.locator('#comment-toolbar-active');
   }
 
-  /** « Sélection trop longue », shown in place of the actions. */
-  get toolbarTooLong(): Locator {
-    return this.toolbar.locator('[data-toolbar-too-long]');
-  }
-
-  /** The group of ❤️ 🔥 👍 buttons in the selection toolbar. */
-  get reactions(): Locator {
-    return this.toolbar.locator('[data-annotation-reactions]');
-  }
-
   reactionButton(reaction: Reaction): Locator {
     return this.toolbar.getByRole('button', { name: REACTIONS[reaction], exact: true });
   }
 
   /** Assumes a selection is live: one click stores the emoji, no form opens. */
-  async react(reaction: Reaction, options: { tap?: boolean } = {}): Promise<void> {
+  async react(reaction: Reaction): Promise<void> {
     const button = this.reactionButton(reaction);
     await expect(button).toBeVisible();
-    if (options.tap) await button.tap();
-    else await button.click();
+    await button.click();
     await expect(this.toolbar).toBeHidden();
     await expect(this.captureForm).toBeHidden();
   }
@@ -71,11 +60,6 @@ export class ChapterAnnotations {
 
   get captureSave(): Locator {
     return this.captureForm.getByRole('button', { name: 'Enregistrer', exact: true });
-  }
-
-  /** The passage the capture form is about (read-only: an edit changes the body only). */
-  get captureHighlight(): Locator {
-    return this.captureForm.locator('blockquote');
   }
 
   get captureEditor(): RichTextEditor {
@@ -124,55 +108,11 @@ export class ChapterAnnotations {
     await expect(this.saveBanner).toBeHidden();
   }
 
-  /** « Tout annuler » on the save banner, accepting its confirmation; returns the confirmation text. */
-  async discardChanges(): Promise<string> {
-    const asked = new Promise<string>((resolve) => {
-      this.page.once('dialog', (dialog) => {
-        resolve(dialog.message());
-        void dialog.accept();
-      });
-    });
-    await this.saveBanner.getByRole('button', { name: 'Tout annuler', exact: true }).click();
-    await expect(this.saveBanner).toBeHidden();
-    return asked;
-  }
-
-  /** « Enregistrer » on the save banner when the save is expected to be refused. */
-  async attemptSave(): Promise<void> {
-    await this.saveBanner.getByRole('button', { name: 'Enregistrer', exact: true }).click();
-    await expect(this.saveBannerError).toBeVisible();
-  }
-
-  /** The banner's error block: the general message, then one line per refused item. */
-  get saveBannerError(): Locator {
-    return this.saveBanner.getByRole('alert');
-  }
-
-  /** « Voir » on the save banner opens the pop-up of the viewer's root comment. */
-  async openFromSaveBanner(): Promise<void> {
-    await this.saveBanner.getByRole('button', { name: 'Voir', exact: true }).click();
-    await expect(this.serverDialog).toBeVisible();
-  }
-
   /** The viewer's own root comment id, as the chapter exposes it to the annotation scripts. */
   async rootCommentId(): Promise<number> {
     const id = await this.page.locator('[data-annotable]').first().getAttribute('data-root-comment-id');
     expect(id, 'no root comment for this viewer').not.toBeNull();
     return Number(id);
-  }
-
-  /**
-   * Evidence screenshot for VERIFY, taken only when `E2E_SHOTS_DIR` is set, so
-   * later suite runs take none.
-   */
-  async evidence(name: string, target?: Locator): Promise<void> {
-    const dir = process.env.E2E_SHOTS_DIR;
-    if (!dir) return;
-    const path = `${dir}/${name}.png`;
-    // Modals fade in: shoot the settled state.
-    await this.page.evaluate(() => Promise.allSettled(document.getAnimations().map((a) => a.finished)));
-    if (target) await target.screenshot({ path });
-    else await this.page.screenshot({ path });
   }
 
   /** « N annotations » on a published root comment. */
@@ -227,38 +167,6 @@ export class ChapterAnnotations {
 
   deleteButton(row: Locator): Locator {
     return row.getByRole('button', { name: "Supprimer l'annotation", exact: true });
-  }
-
-  editButton(row: Locator): Locator {
-    return row.getByRole('button', { name: 'Modifier', exact: true });
-  }
-
-  /** Commenter: « Supprimer l'annotation » stores a pending delete; returns any confirmation text. */
-  async deleteRowPending(row: Locator, options: { accept?: boolean } = {}): Promise<string | null> {
-    let asked: string | null = null;
-    const onDialog = (dialog: import('@playwright/test').Dialog) => {
-      asked = dialog.message();
-      void (options.accept === false ? dialog.dismiss() : dialog.accept());
-    };
-    this.page.once('dialog', onDialog);
-    await this.deleteButton(row).click();
-    // No dialog when the row has no replies: drop the listener.
-    this.page.off('dialog', onDialog);
-    return asked;
-  }
-
-  /** Commenter: per-row undo — « Annuler la modification » on an edit, « Annuler » otherwise. */
-  undoButton(row: Locator): Locator {
-    return row.getByRole('button', { name: /^Annuler( la modification)?$/ });
-  }
-
-  /** Commenter: the line flagging a row the server refused, and its « Retirer ». */
-  rowError(row: Locator): Locator {
-    return row.getByRole('alert').filter({ visible: true });
-  }
-
-  removeStaleButton(row: Locator): Locator {
-    return row.getByRole('button', { name: 'Retirer', exact: true });
   }
 
   /** The reply thread under a root annotation row. */

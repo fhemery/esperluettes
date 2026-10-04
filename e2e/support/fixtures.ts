@@ -77,7 +77,8 @@ export const STORY = {
   countedChapter: { slug: 'chapitre-compte-5', title: 'Chapitre compté' },
   /**
    * Advanced: inline formatting, then a raw lazily-loaded image with a caption, then prose.
-   * Its comment thread belongs to the annotations-v2 spec: `confirmed` posts its root there.
+   * Its comment thread belongs to the core `chapter-annotation-round-trip` spec:
+   * `confirmed` posts its root there.
    */
   illustratedChapter: {
     slug: 'chapitre-illustre-7',

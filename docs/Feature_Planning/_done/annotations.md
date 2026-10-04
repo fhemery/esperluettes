@@ -111,7 +111,7 @@ in-chapter display, no reactions, no replies, no editing after publish (all v2).
 
 ## Not done
 
-- **Non-goals (v1)**, all in [`annotations-v2/`](../annotations-v2/00-request.md):
+- **Non-goals (v1)**, all in [`annotations-v2`](./annotations-v2.md):
   reactions, post-publish add/edit/delete (lifts A5), replies (schema has
   `parent_annotation_id`), in-chapter display/re-anchoring, filter, per-annotation
   Report (#3), moderator empty on one annotation, image annotation. Also out:

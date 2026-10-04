@@ -1,8 +1,7 @@
 # Chapter annotations — v2 (writer side)
 
-**Status:** DONE — 2026-10-04 · **Domain(s):** `Comment` (core), `Story` (policy + chapter page) · **Spec:**
-[functional](./01-functional.md) · [architecture](./02-architecture.md) ·
-[plan](./03-plan.md) · [decisions](./DECISIONS.md) · v1: [`_done/annotations.md`](../_done/annotations.md)
+**Status:** DONE — 2026-10-04 · **Domain(s):** `Comment` (core), `Story` (policy + chapter page) ·
+v1: [`annotations.md`](./annotations.md)
 
 ## What it does
 
@@ -48,7 +47,7 @@ answer once an author has. No migration: v1's `parent_annotation_id`, `is_proces
 | Views | `components/reaction-buttons.blade.php`, `partials/annotation-changes-banner.blade.php`, `partials/annotation-modal.blade.php`, `partials/comment-item.blade.php` (hidden 0-count button on own root) |
 | JS | `Resources/js/annotations/{reactions,changes-banner,replies,modal,capture-form,api}.js`, `comment-draft/index.js` (schema v2, `annotationChanges` slot), `annotable/toolbar.js` |
 | Story | `app/Domains/Story/Private/Services/ChapterCommentPolicy.php`, `Private/Controllers/ChapterController.php`, `chapters/show.blade.php` |
-| Tests | `Tests/Feature/Annotations/{SaveAnnotationChangesTest,AnnotationRepliesTest,AnnotationCountTest}.php`, `Tests/Unit/AnnotationItemValidatorTest.php`, `Tests/helpers.php`, vitest beside each JS file; Story `ChapterCommentPolicyIntegrationTest`, `ChapterAnnotateButtonViewTest`; e2e `e2e/tests/features/annotations-v2.spec.ts` (to retire, see below) |
+| Tests | `Tests/Feature/Annotations/{SaveAnnotationChangesTest,AnnotationRepliesTest,AnnotationCountTest}.php`, `Tests/Unit/AnnotationItemValidatorTest.php`, `Tests/helpers.php`, vitest beside each JS file; Story `ChapterCommentPolicyIntegrationTest`, `ChapterAnnotateButtonViewTest`; e2e `e2e/tests/core/chapter-annotation-round-trip.spec.ts` |
 
 ## Extension points used
 
@@ -106,8 +105,8 @@ answer once an author has. No migration: v1's `parent_annotation_id`, `is_proces
   per-annotation Report, image annotation → [`annotations-v4/`](../annotations-v4/00-request.md).
 - **Known limits:** pending changes are browser-local (a cleared browser loses them silently); the deactivation
   filter costs one Auth call per pop-up open; chapter edits can orphan anchors until v3.
-- **E2E spec — pending the user's call:** `e2e/tests/features/annotations-v2.spec.ts` is still in place. Default is
-  delete, but ~35 page-object helpers (`ChapterAnnotations`, `CommentThread.scrollDown/emptyContent/replySubmit/idOf`,
-  `ChapterPage.touchSelectText`, …) would go callerless and must be pruned with it. Alternative:
-  promote only the round-trip test to `e2e/tests/core/` (pending slot + banner + `PUT` are breakable from the
-  comment-draft store and toolbar, the same reason v1's spec is core).
+- **E2E (user's call at WRAP):** only the commenter ↔ author round trip was promoted, to
+  `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (pending slot + banner + `PUT` + replies are breakable from
+  the comment-draft store, toolbar and comment list, as v1's core spec). The other 14 VERIFY tests were deleted
+  (git: `e2e/tests/features/annotations-v2.spec.ts` at `6e034be5`) with the page-object helpers they alone used.
+  `COAUTHORED_STORY` and the seeder's `LONG_PARAGRAPH` are now unused by any spec; left in place.

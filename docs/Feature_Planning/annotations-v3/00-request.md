@@ -1,6 +1,6 @@
 # Chapter annotations — v3 (in-chapter display) — request
 
-Split out of [`annotations-v2/`](../annotations-v2/01-functional.md) at its
+Split out of [`annotations-v2`](../_done/annotations-v2.md) at its
 REFINE (2026-10-03, decision #1). v2 ships the writer side (reactions,
 post-publish add/edit/delete, replies); everything still happens in the
 « N annotations » pop-up. v3 brings annotations into the chapter.

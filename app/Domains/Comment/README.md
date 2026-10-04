@@ -326,7 +326,9 @@ comment-draft module, which is why the banner re-reads the drafts slot on
   with `errors.stale` and « Retirer », so it can be dropped without « Tout
   annuler ». Authors and moderators see none of it.
 
-Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts`.
+Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts` (before the root
+comment) and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions,
+pending changes, save banner, replies).
 
 ### Lifecycle
 

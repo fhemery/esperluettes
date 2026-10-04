@@ -1,6 +1,6 @@
 # Chapter annotations — v4 (report + images) — request
 
-Split out of [`annotations-v2/`](../annotations-v2/01-functional.md) at its
+Split out of [`annotations-v2`](../_done/annotations-v2.md) at its
 REFINE (2026-10-03, decision #1). Starts after `annotations-v3/`.
 
 ## What I want
