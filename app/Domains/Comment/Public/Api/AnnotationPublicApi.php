@@ -16,6 +16,7 @@ use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\ProfileDto;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class AnnotationPublicApi
@@ -52,49 +53,11 @@ class AnnotationPublicApi
 
         $authorIds = $models->concat($replies)->pluck('author_id')->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
         $profiles = $authorIds === [] ? [] : $this->profiles->getPublicProfiles($authorIds);
-        $profileOf = fn (CommentAnnotation $a) => $profiles[(int) $a->author_id] ?? new ProfileDto(
-            user_id: (int) $a->author_id,
-            display_name: '',
-            slug: '',
-            avatar_url: '',
-        );
-
-        $seesProcessed = $this->access->seesProcessedFlag($role);
-        $canMark = $this->access->canMarkAsProcessed($role);
-        $canDelete = $this->access->canDelete($role);
-        $isCommenter = $role === AnnotationListDto::ROLE_COMMENTER;
-
-        $items = $models->map(function (CommentAnnotation $a) use ($repliesByRoot, $profileOf, $seesProcessed, $canMark, $canDelete, $isCommenter, $role, $viewerId) {
-            $rootReplies = $repliesByRoot->get($a->id, collect());
-
-            return new AnnotationDto(
-                id: (int) $a->id,
-                commentId: (int) $a->comment_id,
-                parentAnnotationId: $a->parent_annotation_id,
-                authorId: $a->author_id,
-                authorProfile: $profileOf($a),
-                body: (string) $a->body,
-                highlightedText: (string) $a->highlighted_text,
-                prefix: $a->prefix,
-                suffix: $a->suffix,
-                isProcessed: $seesProcessed ? (bool) $a->is_processed : null,
-                createdAt: $a->created_at?->toISOString() ?? '',
-                replies: $rootReplies->map(fn (CommentAnnotation $r) => $this->toReplyDto(
-                    $r,
-                    $profileOf($r),
-                    $canDelete || ($r->author_id !== null && (int) $r->author_id === $viewerId),
-                ))->values()->all(),
-                canMarkAsProcessed: $canMark,
-                canDelete: $canDelete,
-                canEdit: $isCommenter && $a->author_id !== null && (int) $a->author_id === $viewerId,
-                canReply: $this->access->canReply($role, $a, $rootReplies, $viewerId),
-            );
-        })->all();
 
         return new AnnotationListDto(
             commentId: (int) $comment->id,
             viewerRole: $role,
-            items: $items,
+            items: $this->buildItems($models, $repliesByRoot, $profiles, $role, $viewerId),
         );
     }
 
@@ -259,6 +222,56 @@ class AnnotationPublicApi
     public function moderatorDelete(int $annotationId, int $byUserId): void
     {
         $this->annotations->moderatorDelete($annotationId);
+    }
+
+    /**
+     * Root annotation DTOs from already-loaded rows, with the viewer-role derived flags.
+     *
+     * @param Collection<int, CommentAnnotation> $roots
+     * @param Collection<int|string, Collection<int, CommentAnnotation>> $repliesByRoot visible replies keyed by parent_annotation_id
+     * @param array<int, ProfileDto> $profiles keyed by user id
+     * @return AnnotationDto[]
+     */
+    private function buildItems(Collection $roots, Collection $repliesByRoot, array $profiles, string $role, int $viewerId): array
+    {
+        $profileOf = fn (CommentAnnotation $a) => $profiles[(int) $a->author_id] ?? new ProfileDto(
+            user_id: (int) $a->author_id,
+            display_name: '',
+            slug: '',
+            avatar_url: '',
+        );
+
+        $seesProcessed = $this->access->seesProcessedFlag($role);
+        $canMark = $this->access->canMarkAsProcessed($role);
+        $canDelete = $this->access->canDelete($role);
+        $isCommenter = $role === AnnotationListDto::ROLE_COMMENTER;
+
+        return $roots->map(function (CommentAnnotation $a) use ($repliesByRoot, $profileOf, $seesProcessed, $canMark, $canDelete, $isCommenter, $role, $viewerId) {
+            $rootReplies = $repliesByRoot->get($a->id, collect());
+
+            return new AnnotationDto(
+                id: (int) $a->id,
+                commentId: (int) $a->comment_id,
+                parentAnnotationId: $a->parent_annotation_id,
+                authorId: $a->author_id,
+                authorProfile: $profileOf($a),
+                body: (string) $a->body,
+                highlightedText: (string) $a->highlighted_text,
+                prefix: $a->prefix,
+                suffix: $a->suffix,
+                isProcessed: $seesProcessed ? (bool) $a->is_processed : null,
+                createdAt: $a->created_at?->toISOString() ?? '',
+                replies: $rootReplies->map(fn (CommentAnnotation $r) => $this->toReplyDto(
+                    $r,
+                    $profileOf($r),
+                    $canDelete || ($r->author_id !== null && (int) $r->author_id === $viewerId),
+                ))->values()->all(),
+                canMarkAsProcessed: $canMark,
+                canDelete: $canDelete,
+                canEdit: $isCommenter && $a->author_id !== null && (int) $a->author_id === $viewerId,
+                canReply: $this->access->canReply($role, $a, $rootReplies, $viewerId),
+            );
+        })->all();
     }
 
     /** A reply has no anchor, no processed flag, no children and is never edited nor replied to. */

@@ -14,7 +14,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Refactor — purifier custom-emoji class list defined once | S | — | DONE |
-| 2 | Refactor — annotation list builder over preloaded collections | S | — | TODO |
+| 2 | Refactor — annotation list builder over preloaded collections | S | — | DONE |
 | 2v | Checkpoint — comment / quote-note / annotation rendering and the « N annotations » pop-up | S | 1, 2 | TODO |
 | 3 | Emptied annotations: column, model, `is_emptied`, edit lock | S | 2 | TODO |
 | 4 | Moderator « Vider le contenu » endpoint | S | 3 | TODO |
