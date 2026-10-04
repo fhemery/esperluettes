@@ -19,7 +19,7 @@
 | 3 | Emptied annotations: column, model, `is_emptied`, edit lock | S | 2 | DONE |
 | 4 | Moderator « Vider le contenu » endpoint | S | 3 | DONE |
 | 5 | `GET in-entity` read endpoint (`getForEntity`) | M | 2, 3 | DONE |
-| 6 | Pop-up: « Vider le contenu » button, emptied rows, « Passage absent du chapitre » badge | M | 4 | TODO |
+| 6 | Pop-up: « Vider le contenu » button, emptied rows, « Passage absent du chapitre » badge | M | 4 | DONE |
 | 6v | Checkpoint — « N annotations » pop-up for commenter / author / moderator | S | 6 | TODO |
 | 7 | Shared infra — `rangeFromCanonical` anchoring helper | S | — | TODO |
 | 8 | `<x-comment::annotation-overlay>` component wired into the chapter page (inert) | S | — | TODO |

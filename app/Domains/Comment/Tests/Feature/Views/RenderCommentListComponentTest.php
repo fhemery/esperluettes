@@ -286,6 +286,22 @@ describe('CommentListComponent', function () {
                 ->and($modal)->toContain(e(__('comment::annotations.server_modal.undo_edit')));
         });
 
+        it('renders « Vider le contenu » and the « Passage absent du chapitre » badge in the annotations modal', function () {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            $modal = substr($html, strpos($html, 'x-data="annotationsModal()"'));
+
+            expect($modal)->toContain(e(__('comment::annotations.empty_content')))
+                ->and($modal)->toContain(e(__('comment::annotations.passage_missing')))
+                ->and($modal)->toContain('data-empty-content-confirm="' . e(__('comment::annotations.empty_content_confirm')) . '"')
+                ->and($modal)->toContain('x-if="canEmpty(row)"')
+                ->and($modal)->toContain('x-show="row.missing"');
+        });
+
         it('the annotations modal is rendered for a viewer who cannot create a root comment', function () {
             app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
                 public function supportsAnnotations(): bool

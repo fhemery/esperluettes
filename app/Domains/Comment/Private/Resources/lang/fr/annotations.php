@@ -14,6 +14,9 @@ return [
         'highlight_multi_block' => 'La sélection doit rester dans un même bloc de texte.',
     ],
     'emptied_body' => '<Annotation supprimée>',
+    'empty_content' => 'Vider le contenu',
+    'empty_content_confirm' => 'Vider le contenu de cette annotation ? Le passage et les réponses sont conservés.',
+    'passage_missing' => 'Passage absent du chapitre',
     'toolbar_button' => [
         'label' => 'Annoter',
         'title' => 'Annoter ce passage',
