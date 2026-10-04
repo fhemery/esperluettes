@@ -22,7 +22,7 @@
 | 6 | Pop-up: « Vider le contenu » button, emptied rows, « Passage absent du chapitre » badge | M | 4 | DONE |
 | 6v | Checkpoint — « N annotations » pop-up for commenter / author / moderator | S | 6 | DONE |
 | 7 | Shared infra — `rangeFromCanonical` anchoring helper | S | — | DONE |
-| 8 | `<x-comment::annotation-overlay>` component wired into the chapter page (inert) | S | — | TODO |
+| 8 | `<x-comment::annotation-overlay>` component wired into the chapter page (inert) | S | — | DONE |
 | 8v | Checkpoint — Quote on the chapter page: reader tint, author heat map + gutter pills, summary | S | 8 | TODO |
 | 9 | Overlay store + Highlight-API tint (+ heat suppression) | M | 5, 7, 8 | TODO |
 | 9v | Checkpoint — quote tint vs annotation tint, heat on/off, quote/unquote | S | 9 | TODO |

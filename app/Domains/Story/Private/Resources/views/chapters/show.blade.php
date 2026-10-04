@@ -221,6 +221,7 @@
                         </x-slot:toolbar-actions>
 
                         <x-quote::author-heat :chapter-id="$vm->chapter->id">
+                            <x-comment::annotation-overlay entity-type="chapter" :entity-id="$vm->chapter->id" :root-comment-id="$rootCommentId" :annotation-mode="$annotationMode">
                             <article data-quote-article class="prose rich-content max-w-none [text-indent:2rem] text-xl">
                                 {{-- The quote system treats `.ce-block--text` as the only quotable area:
                                      Advanced content already comes as `.ce-block` wrappers, so Simple
@@ -231,6 +232,7 @@
                                     <div class="ce-block ce-block--text">{!! $vm->chapter->content !!}</div>
                                 @endif
                             </article>
+                            </x-comment::annotation-overlay>
                         </x-quote::author-heat>
                     </x-comment::annotable>
 
