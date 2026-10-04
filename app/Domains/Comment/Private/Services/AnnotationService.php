@@ -92,6 +92,26 @@ class AnnotationService
     }
 
     /**
+     * Which of $ids are live annotations whose content a moderator emptied.
+     *
+     * @param int[] $ids
+     * @return int[]
+     */
+    public function filterEmptiedIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return CommentAnnotation::query()
+            ->whereIn('id', $ids)
+            ->whereNotNull('content_emptied_at')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException when unknown or soft-deleted
      */
     public function getAnnotation(int $annotationId): CommentAnnotation

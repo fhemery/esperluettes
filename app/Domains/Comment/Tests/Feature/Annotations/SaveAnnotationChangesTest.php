@@ -181,6 +181,29 @@ describe('PUT /comments/{commentId}/annotations', function () {
         expect(annotationRowsSnapshot())->toBe($before);
     });
 
+    it('rejects an edit on an emptied annotation as stale', function () {
+        $this->first->update(['content_emptied_at' => now()]);
+        $before = annotationRowsSnapshot();
+
+        $response = $this->actingAs($this->reader)->putJson($this->url, [
+            'edits' => [['id' => $this->first->id, 'body' => '<p>Avis revu</p>']],
+        ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['edits.' . $this->first->id => __('comment::annotations.errors.stale')]);
+        expect(annotationRowsSnapshot())->toBe($before);
+    });
+
+    it('accepts a delete on an emptied annotation', function () {
+        $this->first->update(['content_emptied_at' => now()]);
+
+        $this->actingAs($this->reader)->putJson($this->url, ['deletes' => [$this->first->id]])
+            ->assertOk();
+
+        expect(CommentAnnotation::query()->find($this->first->id))->toBeNull()
+            ->and(CommentAnnotation::withTrashed()->find($this->first->id)->trashed())->toBeTrue();
+    });
+
     it('names an id both edited and deleted as a stale edit', function () {
         $before = annotationRowsSnapshot();
 

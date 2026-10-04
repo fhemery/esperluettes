@@ -61,6 +61,18 @@ describe('CommentAnnotation model', function () {
             ->and($annotation->fresh()->processed_at)->toBeNull();
     });
 
+    it('is not emptied by default, and is once content_emptied_at is set', function () {
+        $annotation = makeRootAnnotation(makeAnnotatedComment());
+
+        expect($annotation->fresh()->content_emptied_at)->toBeNull()
+            ->and($annotation->fresh()->isEmptied())->toBeFalse();
+
+        $annotation->update(['content_emptied_at' => now()]);
+
+        expect($annotation->fresh()->content_emptied_at)->toBeInstanceOf(\Carbon\CarbonInterface::class)
+            ->and($annotation->fresh()->isEmptied())->toBeTrue();
+    });
+
     it('soft-deletes and restores an annotation', function () {
         $annotation = makeRootAnnotation(makeAnnotatedComment());
 

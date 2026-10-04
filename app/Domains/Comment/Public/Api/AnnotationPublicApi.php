@@ -98,8 +98,15 @@ class AnnotationPublicApi
             }
         }
 
+        // An emptied annotation can still be deleted by its commenter, never edited.
+        $emptiedIds = $this->annotations->filterEmptiedIds(array_keys($changes->edits));
+
         foreach ($changes->edits as $id => $body) {
-            if (!in_array($id, $ownIds, true) || in_array($id, $changes->deletes, true)) {
+            if (
+                !in_array($id, $ownIds, true)
+                || in_array($id, $changes->deletes, true)
+                || in_array($id, $emptiedIds, true)
+            ) {
                 $errors['edits.' . $id] = $stale;
                 continue;
             }
@@ -268,8 +275,9 @@ class AnnotationPublicApi
                 ))->values()->all(),
                 canMarkAsProcessed: $canMark,
                 canDelete: $canDelete,
-                canEdit: $isCommenter && $a->author_id !== null && (int) $a->author_id === $viewerId,
+                canEdit: $isCommenter && $a->author_id !== null && (int) $a->author_id === $viewerId && !$a->isEmptied(),
                 canReply: $this->access->canReply($role, $a, $rootReplies, $viewerId),
+                isEmptied: $a->isEmptied(),
             );
         })->all();
     }

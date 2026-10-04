@@ -58,6 +58,18 @@ describe('GET /comments/{commentId}/annotations', function () {
         expect($response->json('items.1.highlighted_text'))->toBe('second passage');
     });
 
+    it('flags an emptied annotation as is_emptied and no longer editable by the commenter', function () {
+        $this->annotations[1]->update(['content_emptied_at' => now()]);
+
+        $response = $this->actingAs($this->reader)->getJson($this->url);
+
+        $response->assertOk();
+        $response->assertJsonPath('items.0.is_emptied', false);
+        $response->assertJsonPath('items.0.can_edit', true);
+        $response->assertJsonPath('items.1.is_emptied', true);
+        $response->assertJsonPath('items.1.can_edit', false);
+    });
+
     it('the chapter author gets them with is_processed and can_mark_as_processed', function () {
         $this->annotations[1]->update(['is_processed' => true]);
 

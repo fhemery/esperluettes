@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'suffix',
     'is_processed',
     'processed_at',
+    'content_emptied_at',
 ])]
 class CommentAnnotation extends Model
 {
@@ -32,7 +33,13 @@ class CommentAnnotation extends Model
         'author_id' => 'integer',
         'is_processed' => 'boolean',
         'processed_at' => 'datetime',
+        'content_emptied_at' => 'datetime',
     ];
+
+    public function isEmptied(): bool
+    {
+        return $this->content_emptied_at !== null;
+    }
 
     public function comment(): BelongsTo
     {

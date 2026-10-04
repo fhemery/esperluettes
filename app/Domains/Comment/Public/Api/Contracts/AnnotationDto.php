@@ -13,6 +13,7 @@ class AnnotationDto
      * @param bool $canEdit Display hint: the viewer wrote this root (commenter)
      * @param bool $canReply Display hint: the viewer may reply under this root
      * @param bool $canDelete Display hint: moderator, or the writer of this reply
+     * @param bool $isEmptied A moderator replaced this root's body; it can no longer be edited
      */
     public function __construct(
         public readonly int $id,
@@ -31,6 +32,7 @@ class AnnotationDto
         public readonly bool $canDelete,
         public readonly bool $canEdit,
         public readonly bool $canReply,
+        public readonly bool $isEmptied = false,
     ) {}
 
     public function toArray(): array
@@ -51,6 +53,7 @@ class AnnotationDto
             'prefix' => $this->prefix,
             'suffix' => $this->suffix,
             'is_processed' => $this->isProcessed,
+            'is_emptied' => $this->isEmptied,
             'created_at' => $this->createdAt,
             'replies' => array_map(fn (self $r) => $r->toArray(), $this->replies),
             'can_mark_as_processed' => $this->canMarkAsProcessed,
