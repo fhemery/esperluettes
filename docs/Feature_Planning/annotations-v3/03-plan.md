@@ -15,7 +15,7 @@
 |---|-------|------|------------|--------|
 | 1 | Refactor — purifier custom-emoji class list defined once | S | — | DONE |
 | 2 | Refactor — annotation list builder over preloaded collections | S | — | DONE |
-| 2v | Checkpoint — comment / quote-note / annotation rendering and the « N annotations » pop-up | S | 1, 2 | TODO |
+| 2v | Checkpoint — comment / quote-note / annotation rendering and the « N annotations » pop-up | S | 1, 2 | DONE |
 | 3 | Emptied annotations: column, model, `is_emptied`, edit lock | S | 2 | TODO |
 | 4 | Moderator « Vider le contenu » endpoint | S | 3 | TODO |
 | 5 | `GET in-entity` read endpoint (`getForEntity`) | M | 2, 3 | TODO |
@@ -163,6 +163,26 @@ visible.
   - « N annotations » pop-up on a chapter with annotations and replies, opened
     as the commenter, as the author (processed toggle visible), as a moderator
     (« Supprimer » visible). An annotation body with an emoji renders it.
+
+**Result (2026-10-04, HEAD f07d41d2) — PASS**
+
+- e2e: the three specs pass (10/10 incl. auth setup).
+- Emoji data added to the post-run e2e DB (data only, through the real
+  `CommentBodySanitizer` / `QuoteNoteSanitizer`): root comment 7 and a reply on
+  `chapitre-illustre-7`, annotation 1 and its reply, a quote note for `confirmed`.
+- Comment list (commenter, author, moderator): root and reply emoji render
+  (background PNG, 22×22) — `*-comment-thread.png`.
+- Pop-up: annotation and reply emoji render for all three roles; commenter sees
+  Modifier / Supprimer l'annotation and no processed toggle; author sees
+  « Marquer comme traitée »; moderator sees « Supprimer l'annotation » —
+  `*-annotations-popup.png`.
+- Citations tab (owner `confirmed`): note emoji render — `owner-citations-tab.png`.
+- `getForComment(7, viewer)` JSON for commenter / author / moderator is
+  byte-identical between HEAD and pre-phase `2e8a20c0`
+  (`AnnotationPublicApi.php` + `config/purifier.php` swapped back).
+- The reply avatar is broken in the pop-up only because the e2e `APP_URL` is
+  `:8081` and the app was served on `:8080`; this comes from the environment and
+  does not depend on these phases (identical payload before and after).
 
 ---
 
