@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Story\Private\Services\CollaboratorService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
@@ -66,7 +67,7 @@ describe('ProfileStoriesComponent', function () {
             $contrib = bob($this);
 
             $private = privateStory('Contributor Private', $owner->id);
-            addCollaborator($private->id, $contrib->id, 'betareader');
+            addCollaborator($private->id, $contrib->id, CollaboratorService::ROLE_BETA_READER);
 
             $this->actingAs($contrib);
             $html = Blade::render('<x-story::profile-stories-component :owner-user-id="$userId" />', ['userId' => $owner->id]);
