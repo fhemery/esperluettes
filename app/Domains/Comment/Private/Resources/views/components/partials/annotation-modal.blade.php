@@ -126,7 +126,7 @@
                                         <div class="comment-body rich-content mt-1 text-sm" x-html="reply.body"></div>
                                         <template x-if="canDeleteReply(reply)">
                                             <div class="mt-1 flex justify-end">
-                                                <x-shared::button type="button" size="sm" color="danger" :outline="true" x-on:click="removeReply(reply)" x-bind:disabled="busyId !== null">
+                                                <x-shared::button type="button" size="sm" color="danger" x-on:click="removeReply(reply)" x-bind:disabled="busyId !== null">
                                                     {{ __('comment::annotations.replies.delete') }}
                                                 </x-shared::button>
                                             </div>
