@@ -238,6 +238,29 @@ class AnnotationService
     }
 
     /**
+     * Live root annotations under several comments in one query, per comment oldest first,
+     * optionally limited to one author.
+     *
+     * @param int[] $commentIds
+     * @return Collection<int, CommentAnnotation>
+     */
+    public function getRootsForComments(array $commentIds, ?int $authorId = null): Collection
+    {
+        if ($commentIds === []) {
+            return new Collection();
+        }
+
+        return CommentAnnotation::query()
+            ->roots()
+            ->whereIn('comment_id', $commentIds)
+            ->when($authorId !== null, fn ($q) => $q->where('author_id', $authorId))
+            ->orderBy('comment_id')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
      * Live replies under the given roots, oldest first, in one query. Not restricted by writer.
      *
      * @param int[] $rootIds

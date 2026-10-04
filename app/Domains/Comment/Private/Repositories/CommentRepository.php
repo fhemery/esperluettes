@@ -4,6 +4,7 @@ namespace App\Domains\Comment\Private\Repositories;
 
 use App\Domains\Comment\Private\Models\Comment;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CommentRepository
@@ -161,6 +162,21 @@ class CommentRepository
             ->whereNull('parent_comment_id')
             ->where('author_id', $userId)
             ->exists();
+    }
+
+    /**
+     * Live root comments of a target, oldest first, with only id and author_id loaded.
+     *
+     * @return Collection<int, Comment>
+     */
+    public function getRootsByTarget(string $entityType, int $entityId): Collection
+    {
+        return Comment::query()
+            ->where('commentable_type', $entityType)
+            ->where('commentable_id', $entityId)
+            ->whereNull('parent_comment_id')
+            ->orderBy('id')
+            ->get(['id', 'author_id']);
     }
 
     /**

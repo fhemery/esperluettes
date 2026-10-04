@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domains\Comment\Private\Controllers;
 
+use App\Domains\Comment\Private\Requests\AnnotationsInEntityRequest;
 use App\Domains\Comment\Private\Requests\SaveAnnotationChangesRequest;
 use App\Domains\Comment\Private\Requests\SetAnnotationProcessedRequest;
 use App\Domains\Comment\Public\Api\AnnotationPublicApi;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationChangeSetDto;
+use App\Domains\Comment\Public\Api\Contracts\AnnotationListDto;
 use App\Domains\Comment\Public\Api\Contracts\AnnotationToCreateDto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -24,6 +26,19 @@ class AnnotationController extends Controller
         return response()->json(
             $this->api->getForComment($commentId, (int) Auth::id())->toArray()
         );
+    }
+
+    public function inEntity(AnnotationsInEntityRequest $request): JsonResponse
+    {
+        $lists = $this->api->getForEntity(
+            (string) $request->validated('entity_type'),
+            (int) $request->validated('entity_id'),
+            (int) Auth::id(),
+        );
+
+        return response()->json([
+            'lists' => array_map(fn (AnnotationListDto $list) => $list->toArray(), $lists),
+        ]);
     }
 
     public function save(SaveAnnotationChangesRequest $request, int $commentId): JsonResponse

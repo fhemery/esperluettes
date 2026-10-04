@@ -40,3 +40,4 @@ the user may want to reverse — surface these in the WRAP summary.
 | A10 | Avatars / arrows keyboard-focusable with labels, same bar as Quote's pills | REFINE | yes |
 | A11 | Non-moderators on `POST /comments/annotations/{id}/empty-content` get the `role` middleware's redirect to the dashboard (as `moderatorDelete`), not the 403 the plan named; the middleware is unchanged | BUILD phase 4 | yes |
 | A12 | 422 on a reply is keyed `annotation` with the new message `errors.reply_not_emptiable` (mirrors `reply_not_processable`) | BUILD phase 4 | yes |
+| A13 | `in-entity` lists are ordered by root comment id (oldest root first); roots are fetched once and the commenter's own-annotation restriction is applied in memory on one batched root-annotation query. Entity type is validated `required|string|max:64` only — an unknown type answers `lists: []` (plan Open item #2) | BUILD phase 5 | yes |

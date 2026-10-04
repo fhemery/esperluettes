@@ -62,6 +62,64 @@ class AnnotationPublicApi
     }
 
     /**
+     * One list per root comment of the entity on which the viewer is the commenter (own root)
+     * or an author; moderator-only and no-role roots, and roots without annotations, are omitted.
+     * Constant number of queries whatever the number of roots.
+     *
+     * @return AnnotationListDto[]
+     */
+    public function getForEntity(string $entityType, int $entityId, int $viewerId): array
+    {
+        if ($viewerId <= 0 || !$this->policies->supportsAnnotations($entityType)) {
+            return [];
+        }
+
+        $roots = $this->comments->getRootCommentsFor($entityType, $entityId);
+        $isAuthor = $this->policies->canMarkAsProcessed($entityType, $entityId, $viewerId);
+
+        // Same precedence as resolveViewerRole, with the author check done once for the entity.
+        $roleByComment = [];
+        foreach ($roots as $root) {
+            if ($root->author_id !== null && (int) $root->author_id === $viewerId) {
+                $roleByComment[(int) $root->id] = AnnotationListDto::ROLE_COMMENTER;
+            } elseif ($isAuthor) {
+                $roleByComment[(int) $root->id] = AnnotationListDto::ROLE_AUTHOR;
+            }
+        }
+        if ($roleByComment === []) {
+            return [];
+        }
+
+        $models = $this->annotations->getRootsForComments(array_keys($roleByComment))
+            ->filter(function (CommentAnnotation $a) use ($roleByComment, $viewerId) {
+                $restrictTo = $this->access->restrictToAuthorId($roleByComment[(int) $a->comment_id], $viewerId);
+
+                return $restrictTo === null || ($a->author_id !== null && (int) $a->author_id === $restrictTo);
+            })
+            ->values();
+        if ($models->isEmpty()) {
+            return [];
+        }
+
+        $replies = $this->access->filterActiveReplyWriters(
+            $this->annotations->getRepliesForRoots($models->pluck('id')->map(fn ($id) => (int) $id)->all()),
+        );
+        $repliesByRoot = $replies->groupBy('parent_annotation_id');
+
+        $authorIds = $models->concat($replies)->pluck('author_id')->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
+        $profiles = $authorIds === [] ? [] : $this->profiles->getPublicProfiles($authorIds);
+
+        return $models->groupBy('comment_id')
+            ->map(fn (Collection $rootsOfComment, $commentId) => new AnnotationListDto(
+                commentId: (int) $commentId,
+                viewerRole: $roleByComment[(int) $commentId],
+                items: $this->buildItems($rootsOfComment, $repliesByRoot, $profiles, $roleByComment[(int) $commentId], $viewerId),
+            ))
+            ->values()
+            ->all();
+    }
+
+    /**
      * Apply a commenter's pending changes under their own root comment, atomically.
      *
      * @return AnnotationListDto the viewer's list after the save
