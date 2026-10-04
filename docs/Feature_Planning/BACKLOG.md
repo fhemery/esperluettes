@@ -24,7 +24,6 @@ scoped to the task that actually changed.
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO: leftover from `role-gated-notification-settings/` REFINE — Quote Contest already broadcasts lifecycle to all active `user-confirmed`, ignoring each activity’s `role_restrictions`. Recipients must be the users authorized to *that* activity, not a type-level role list and not every confirmed user.
 - **Chapter annotations — v2** · `annotations-v2/` · interactive · TODO: everything cut from `annotations/` v1 (reactions, in-chapter display, post-publish edits — lifts A5 —, replies, filter, per-annotation report — reopens decision #3 —, image annotation), plus small v1 leftovers listed in its `00-request.md` (counts ignore `canAnnotate`, hard-coded highlight cap, duplicated emoji list, beta-reader test). Starts after v1 is wrapped; REFINE from `vision-spec.md`.
-- **Gift sound on Media, retire `<x-shared::sound-upload>`** · `media-sound-upload/` · interactive · TODO: leftover from `shared-image-upload-cleanup/`. Images are on Media's private disk, sound still raw on `local`. First tradeoff to arbitrate: teach Media a raw private-file store (Range support) or leave sound out
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
 - **Dashboard — story to discover: exclude already-read** · `dashboard-discover-exclude-read/` · interactive · TODO
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
@@ -34,6 +33,8 @@ scoped to the task that actually changed.
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
 - **Calendar: dedicated time field for activity dates** · `calendar-activity-time-picker/` · interactive · TODO
 - **Secret Gift: admin feedback after shuffle** · `secret-gift-shuffle-feedback/` · interactive · TODO
+- **Secret Gift — reveal follow-ups (ARCHIVED access, ENDED tab, missing tests)** · `secret-gift-reveal-followups/` · interactive · TODO: leftover from `media-sound-upload/` VERIFY — 3 feature tests pushed back to BUILD and never written; activity page 404s once ARCHIVED while gift routes still serve; page opens on the prepare tab once ENDED
+- **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
 
 ## Done
@@ -43,6 +44,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`media-sound-upload`](_done/media-sound-upload.md) · Secret Gift sound stored, served (Range) and garbage-collected through Media's private half; `<x-shared::sound-upload>` replaced by `<x-media::sound-field>`
 - [`annotations`](_done/annotations.md) · chapter annotations v1: readers annotate passages as local drafts posted with their root comment; « N annotations » pop-up where authors mark them processed and moderators delete one; type-level `supportsAnnotations()` keeps the UI and script off news
 - [`e2e-types-node`](_done/e2e-types-node.md) · `@types/node@^24` direct dev dep so `tsc -p e2e` passes (one `hoverSlot` type fix); new gate step `e2e-types`, scoped to `e2e/`/Playwright config/`package.json`/lockfile, kept under `--quick`
 - [`improve-loop`](_done/improve-loop.md) · checkpoint rows after shared refactors, refactor-first PLAN, gate builds on Blade changes, `--` dropped from pnpm commands, agent memory folded into skills, WRAP opens with a retro feeding `loop-improvements/`

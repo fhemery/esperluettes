@@ -321,8 +321,31 @@ describe('SecretGift - Save Gift', function () {
         $response->assertSessionHas('success');
 
         $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
-        expect($assignment->gift_sound_path)->not->toBeNull();
-        Storage::disk('local')->assertExists($assignment->gift_sound_path);
+        expect($assignment->gift_sound_path)->toStartWith('secret-gift/' . $result->id . '/')
+            ->and($assignment->gift_sound_path)->toEndWith('.mp3');
+        Storage::disk('private')->assertExists($assignment->gift_sound_path);
+        expect(Storage::disk('local')->allFiles())->toBeEmpty();
+    });
+
+    it('refuses a sound upload when the activity is not active', function () {
+        $user1 = alice($this);
+        $user2 = bob($this);
+
+        $result = createEndedSecretGift($this);
+        registerSecretGiftParticipants($result->id, [$user1->id, $user2->id]);
+        shuffleSecretGift($result->activity);
+
+        $this->actingAs($user1);
+
+        $response = $this->post(route('secret-gift.save-gift', $result->activity), [
+            'gift_sound' => UploadedFile::fake()->create('gift.mp3', 1000, 'audio/mpeg'),
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        expect(getSecretGiftAssignmentAsGiver($result->id, $user1->id)->gift_sound_path)->toBeNull();
+        expect(Storage::disk('private')->allFiles())->toBeEmpty();
+        expect(Storage::disk('local')->allFiles())->toBeEmpty();
     });
 
     it('validates sound file type', function () {
@@ -375,7 +398,7 @@ describe('SecretGift - Save Gift', function () {
 
         $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
         $originalPath = $assignment->gift_sound_path;
-        Storage::disk('local')->assertExists($originalPath);
+        Storage::disk('private')->assertExists($originalPath);
 
         // Then remove it
         $response = $this->post(route('secret-gift.save-gift', $result->activity), [
@@ -387,7 +410,8 @@ describe('SecretGift - Save Gift', function () {
 
         $assignment->refresh();
         expect($assignment->gift_sound_path)->toBeNull();
-        Storage::disk('local')->assertMissing($originalPath);
+        // Detached only: Media GC reclaims the file later.
+        Storage::disk('private')->assertExists($originalPath);
     });
 
     it('replaces sound file when uploading a new one', function () {
@@ -406,10 +430,9 @@ describe('SecretGift - Save Gift', function () {
 
         $assignment = getSecretGiftAssignmentAsGiver($result->id, $user1->id);
         $originalPath = $assignment->gift_sound_path;
-        Storage::disk('local')->assertExists($originalPath);
+        Storage::disk('private')->assertExists($originalPath);
 
         // Upload new file
-        sleep(1); // Ensure different timestamp
         $file2 = UploadedFile::fake()->create('gift2.mp3', 2000, 'audio/mpeg');
         $response = $this->post(route('secret-gift.save-gift', $result->activity), [
             'gift_sound' => $file2,
@@ -420,8 +443,9 @@ describe('SecretGift - Save Gift', function () {
 
         $assignment->refresh();
         expect($assignment->gift_sound_path)->not->toBe($originalPath);
-        Storage::disk('local')->assertMissing($originalPath);
-        Storage::disk('local')->assertExists($assignment->gift_sound_path);
+        // The old file stays until Media GC reclaims it.
+        Storage::disk('private')->assertExists($originalPath);
+        Storage::disk('private')->assertExists($assignment->gift_sound_path);
     });
 
     it('allows saving text and sound together', function () {

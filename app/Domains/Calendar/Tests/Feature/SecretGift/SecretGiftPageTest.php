@@ -56,7 +56,8 @@ describe('Secret Gift Page Display', function () {
 
         // Assert editor is enabled (form is present)
         $response->assertSee('<form', false)
-            ->assertSee('name="gift_text"', false);
+            ->assertSee('name="gift_text"', false)
+            ->assertSee('name="gift_sound_remove"', false);
 
         // Assert save button is present and enabled
         $response->assertSee(__('secret-gift::secret-gift.save_gift'))

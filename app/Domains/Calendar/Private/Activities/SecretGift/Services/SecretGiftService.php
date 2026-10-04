@@ -9,7 +9,6 @@ use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftParticip
 use App\Domains\Calendar\Private\Models\Activity;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use App\Domains\Calendar\Public\Contracts\ActivityState;
 
 class SecretGiftService
@@ -144,17 +143,13 @@ class SecretGiftService
         return $assignment->recipient_user_id === $userId && $isEnded;
     }
 
+    /**
+     * Store a gift sound on Media's private disk and point the row at it.
+     * The previous file is left alone: Media GC reclaims it once no row claims it.
+     */
     public function saveGiftSound(SecretGiftAssignment $assignment, UploadedFile $file): string
     {
-        // Delete old sound if exists
-        if ($assignment->gift_sound_path) {
-            Storage::disk('local')->delete($assignment->gift_sound_path);
-        }
-
-        $extension = $file->getClientOriginalExtension();
-        $path = "calendar/secret-gift/{$assignment->activity_id}/sound-{$assignment->giver_user_id}-" . time() . ".{$extension}";
-
-        Storage::disk('local')->put($path, file_get_contents($file->getRealPath()));
+        $path = $this->media->storePrivateFile('secret-gift/' . $assignment->activity_id, $file);
 
         $assignment->gift_sound_path = $path;
         $assignment->save();
@@ -162,10 +157,10 @@ class SecretGiftService
         return $path;
     }
 
+    /** Clears the reference only — the file is Media GC's to delete. */
     public function removeGiftSound(SecretGiftAssignment $assignment): void
     {
         if ($assignment->gift_sound_path) {
-            Storage::disk('local')->delete($assignment->gift_sound_path);
             $assignment->gift_sound_path = null;
             $assignment->save();
         }

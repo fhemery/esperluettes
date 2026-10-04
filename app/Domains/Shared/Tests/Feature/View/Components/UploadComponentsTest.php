@@ -16,11 +16,19 @@ describe('Shared upload components', function () {
             ->toThrow(InvalidArgumentException::class);
     });
 
-    it('still ships the sound upload component', function () {
-        $this->withViewErrors([])
-            ->blade('<x-shared::sound-upload name="gift_sound" />')
-            ->assertSee('name="gift_sound"', false)
-            ->assertSee(__('shared::sound-upload.drop_or_click'));
+    it('no longer ships the sound upload component', function () {
+        expect(file_exists(base_path('app/Domains/Shared/Resources/views/components/sound-upload.blade.php')))
+            ->toBeFalse();
+
+        expect(fn () => $this->withViewErrors([])->blade('<x-shared::sound-upload name="gift_sound" />'))
+            ->toThrow(InvalidArgumentException::class);
+    });
+
+    it('no longer ships the sound upload lang file', function () {
+        expect(file_exists(base_path('app/Domains/Shared/Resources/lang/fr/sound-upload.php')))
+            ->toBeFalse();
+
+        expect(Lang::has('shared::sound-upload.drop_or_click', 'fr'))->toBeFalse();
     });
 
     it('no longer ships the image upload lang file', function () {

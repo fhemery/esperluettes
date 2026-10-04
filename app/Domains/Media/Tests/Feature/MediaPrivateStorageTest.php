@@ -4,7 +4,7 @@ use App\Domains\Media\Public\Api\MediaPublicApi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -47,6 +47,38 @@ describe('storePrivate', function () {
     });
 });
 
+describe('storePrivateFile', function () {
+    it('stores raw bytes on the private disk under the scope with the guessed extension', function () {
+        $file = UploadedFile::fake()->create('song.mp3', 100, 'audio/mpeg');
+
+        $path = app(MediaPublicApi::class)->storePrivateFile('secret-gift/7', $file);
+
+        expect($path)->toMatch('#^secret-gift/7/[A-Za-z0-9]{40}\.mp3$#');
+        Storage::disk('private')->assertExists($path);
+        expect(Storage::disk('private')->get($path))->toBe(file_get_contents($file->getRealPath()));
+        expect(Storage::disk('public')->allFiles())->toBe([]);
+    });
+
+    it('does not take the extension from the client file name', function () {
+        $path = app(MediaPublicApi::class)->storePrivateFile(
+            'secret-gift/7',
+            UploadedFile::fake()->create('evil.php', 10, 'audio/mpeg'),
+        );
+
+        expect($path)->toEndWith('.mp3');
+    });
+
+    it('rejects a public scope', function () {
+        expect(fn () => app(MediaPublicApi::class)->storePrivateFile(
+            'news',
+            UploadedFile::fake()->create('song.mp3', 10, 'audio/mpeg'),
+        ))->toThrow(InvalidArgumentException::class);
+
+        expect(Storage::disk('public')->allFiles())->toBe([]);
+        expect(Storage::disk('private')->allFiles())->toBe([]);
+    });
+});
+
 describe('stream', function () {
     it('streams a private image back with its mime type', function () {
         $api = app(MediaPublicApi::class);
@@ -54,7 +86,7 @@ describe('stream', function () {
 
         $response = $api->stream($path);
 
-        expect($response)->toBeInstanceOf(StreamedResponse::class);
+        expect($response)->toBeInstanceOf(BinaryFileResponse::class);
         expect($response->getStatusCode())->toBe(200);
         expect($response->headers->get('Content-Type'))->toBe('image/jpeg');
 
@@ -77,6 +109,15 @@ describe('stream', function () {
         expect($response->headers->get('Cache-Control'))->toContain('max-age=3600');
         expect($response->headers->get('Content-Disposition'))->toBe('attachment; filename="gift.jpg"');
         expect($response->headers->get('Content-Type'))->toBe('image/jpeg');
+    });
+
+    it('defaults to an inline disposition under the stored basename', function () {
+        $api = app(MediaPublicApi::class);
+        $path = $api->storePrivate('secret-gift/7', UploadedFile::fake()->image('gift.jpg', 40, 40));
+
+        $response = $api->stream($path);
+
+        expect($response->headers->get('Content-Disposition'))->toBe('inline; filename=' . basename($path));
     });
 });
 

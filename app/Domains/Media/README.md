@@ -2,7 +2,7 @@
 
 ## Purpose and scope
 
-The Media domain owns **image handling** for the whole application: uploading, generating responsive variants, the reuse picker, garbage-collecting unused files, and the reusable Blade components that display and edit images. Every other domain reaches it through `MediaPublicApi`; none touch the filesystem or `ImageService` directly.
+The Media domain owns **image handling** for the whole application: uploading, generating responsive variants, the reuse picker, garbage-collecting unused files, and the reusable Blade components that display and edit images. It also stores **private files** of any type (raw bytes, no processing — today the Secret Gift sound) and owns the `<x-media::sound-field>` upload widget. Every other domain reaches it through `MediaPublicApi`; none touch the filesystem or `ImageService` directly.
 
 Its defining choice is that **an image is identified by its storage path** — there is no asset id, no reference table, and the domain owns **no database tables**. The content that uses an image (a column like `image_path`, or an image block inside `content_blocks`) *is* the record of that usage. This keeps a single source of truth and avoids a denormalized reference cache that could drift.
 
@@ -29,21 +29,26 @@ A **scope** is a logical bucket that maps to a folder on a disk:
 
 The caller builds the scope string; `folderFor()` resolves the folder and rejects unknown scopes. The disk is implied by the scope's first segment — no caller passes a disk. The reuse picker (`listByScope`) lists originals **directly under** the scope folder — it is **non-recursive**, so it never descends into dated subfolders left by pre-migration uploads.
 
-### Private images
+### Private images and files
 
-Some images must not be web-reachable at all — a Secret Gift picture is confidential until the activity ends. Those live on the `private` disk (`storage/app/private`, `serve => false`), reached through a separate half of the API:
+Some files must not be web-reachable at all — a Secret Gift picture or sound is confidential until the activity ends. Those live on the `private` disk (`storage/app/private`, `serve => false`), reached through a separate half of the API:
 
-| | Public images | Private images |
-|---|---|---|
-| Stored by | `store($scope, $file)` | `storePrivate($scope, $file)` |
-| Variants | `-400w` / `-800w`, jpg + webp | **none** — the original only |
-| Displayed by | `originalUrl()` / `variantUrl()` → `/storage/…` | **no URL exists**; the consumer streams it |
-| In the reuse picker | yes | no |
-| Collected by `media:gc` | yes | yes |
+| | Public images | Private images | Private files (any type) |
+|---|---|---|---|
+| Stored by | `store($scope, $file)` | `storePrivate($scope, $file)` | `storePrivateFile($scope, $file)` |
+| Processing | `ImageService` | `ImageService`, original only | **none** — raw bytes; the caller validates the upload |
+| Variants | `-400w` / `-800w`, jpg + webp | **none** — the original only | **none** |
+| Displayed by | `originalUrl()` / `variantUrl()` → `/storage/…` | **no URL exists**; the consumer streams it | **no URL exists**; the consumer streams it |
+| In the reuse picker | yes | no | no |
+| Collected by `media:gc` | yes | yes | yes |
 
-`originalUrl()`, `variantUrl()` and `listByScope()` **throw** on a private path rather than inventing a `/storage/…` URL to a file that is not served. `store()` and `storePrivate()` likewise refuse each other's scopes, so bytes cannot land on the wrong disk by a typo in a scope string.
+`storePrivateFile()` names the file `hashName()` — the extension is guessed from the file's MIME type, never taken from the client file name.
 
-A private image is served by the domain that owns its visibility rules: it checks its own rule, then calls `MediaPublicApi::stream($path, $headers)`, which returns a `StreamedResponse` with the right `Content-Type` and **performs no authorization of its own**. Media never learns a consumer's rules; the consumer never touches a disk. `exists($path)` resolves the same disk, so a 404 for a missing file is the consumer's own check.
+`originalUrl()`, `variantUrl()` and `listByScope()` **throw** on a private path rather than inventing a `/storage/…` URL to a file that is not served. `store()` and `storePrivate()` / `storePrivateFile()` likewise refuse each other's scopes, so bytes cannot land on the wrong disk by a typo in a scope string.
+
+A private file is served by the domain that owns its visibility rules: it checks its own rule, then calls `MediaPublicApi::stream($path, $headers)`, which returns a `BinaryFileResponse` with the right `Content-Type`, an inline `Content-Disposition` under the stored basename (caller headers win), and **performs no authorization of its own**. Media never learns a consumer's rules; the consumer never touches a disk. `exists($path)` resolves the same disk, so a 404 for a missing file is the consumer's own check.
+
+That response honours HTTP `Range` once the router prepares it — `206` with `Content-Range`, and `Accept-Ranges: bytes` on a plain request — so audio seeking needs no consumer code. It relies on the `private` disk being `local` (it needs an absolute file path); moving that disk to object storage would lose Range and needs revisiting.
 
 ### Responsive variants vs. "keep original"
 
@@ -57,12 +62,13 @@ Media never learns which files are in use by scanning other domains' tables. Ins
 
 Deletion is therefore always **deferred and swept**, never synchronous: removing an image from a document merely stops the content from referencing its path; the file is reclaimed later, if still unused. A guard makes this safe against a forgotten provider — a whole scope folder that holds files but has *zero* claimed paths is treated as an unclaimed scope and **skipped**, not emptied.
 
-The sweep covers both disks. On `public` it walks each scope folder non-recursively. On `private` it walks each scope **root** (`secret-gift/`) recursively, and applies the zero-claim guard at that root rather than per `secret-gift/{activityId}` subfolder — otherwise an activity whose gifts were all removed would have no claimed path, be skipped forever, and leak its orphans permanently.
+The sweep covers both disks. On `public` it walks each scope folder non-recursively and considers only image originals (variants and non-image files are ignored). On `private` it walks each scope **root** (`secret-gift/`) recursively and treats **every** file as an original — private files have no variants by construction, so no extension list is needed (an image and an mp3 are collected alike). It applies the zero-claim guard at that root rather than per `secret-gift/{activityId}` subfolder — otherwise an activity whose gifts were all removed would have no claimed path, be skipped forever, and leak its orphans permanently.
 
 ### Components
 
 - `<x-media::image>` — read-only responsive display by path, with a `raw` mode that serves the original at natural size (used by keep-original images and Editor's block renderer).
 - `<x-media::image-field>` — the editable control: upload, remove, "Choose existing" picker, alt/caption, optional usage count, optional "keep original" checkbox. Two props tune it for scopes that have no reusable library: `allowLibrary` (default `true`; when `false` neither the "Choose existing" button nor the picker modal is rendered) and `previewUrl` (default `null`; when set it is used as the initial preview instead of a Media-built URL — which is what makes the field usable for an image whose bytes are not web-reachable).
+- `<x-media::sound-field>` — sound upload with drag & drop, preview player and remove control. Props: `name`, `id`, `previewUrl` (URL of the current sound, nullable), `maxSize` (Ko, default `10240`), `accept` (default `audio/mp3`), `removable`, `label`, `helpText`. Form contract: the file is posted as `{name}`, the remove flag as hidden `{name}_remove`. The component never builds a URL — the consumer passes `previewUrl` (typically its own authorized serving route).
 
 The reuse picker is backed by the authenticated `GET /media/library?scope=…` endpoint.
 

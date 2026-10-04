@@ -125,11 +125,10 @@
 
             {{-- Sound Upload --}}
             <div x-show="giftMode === 'sound'" x-cloak class="mb-6">
-                <x-shared::sound-upload
+                <x-media::sound-field
                     name="gift_sound"
                     :label="__('secret-gift::secret-gift.upload_sound')"
-                    :currentUrl="$assignment->gift_sound_path ? route('secret-gift.sound', [$activity, $assignment]) : null"
-                    :currentPath="$assignment->gift_sound_path"
+                    :previewUrl="$assignment->gift_sound_path ? route('secret-gift.sound', [$activity, $assignment]) : null"
                     :maxSize="10240"
                     accept="audio/mp3"
                     :helpText="__('secret-gift::secret-gift.sound_help')"

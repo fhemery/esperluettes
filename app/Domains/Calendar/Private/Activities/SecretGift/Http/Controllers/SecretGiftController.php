@@ -11,8 +11,6 @@ use App\Domains\Calendar\Private\Models\Activity;
 use App\Domains\Calendar\Public\Contracts\ActivityState;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Mews\Purifier\Facades\Purifier;
 
 class SecretGiftController
@@ -121,71 +119,13 @@ class SecretGiftController
 
         $path = $assignment->gift_sound_path;
 
-        if (!Storage::disk('local')->exists($path)) {
+        if (!$this->media->exists($path)) {
             abort(404);
         }
 
-        $fullPath = Storage::disk('local')->path($path);
-        $fileSize = filesize($fullPath);
-        $mimeType = File::mimeType($fullPath);
-        
-        // Handle Range requests for proper audio playback
-        $range = request()->header('Range');
-        
-        if (!$range) {
-            // No range request - stream with proper headers
-            $stream = Storage::disk('local')->readStream($path);
-            
-            return response()->stream(function() use ($stream) {
-                fpassthru($stream);
-                if (is_resource($stream)) {
-                    fclose($stream);
-                }
-            }, 200, [
-                'Content-Type' => $mimeType,
-                'Content-Length' => $fileSize,
-                'Accept-Ranges' => 'bytes',
-                'Cache-Control' => 'private, max-age=3600',
-            ]);
-        }
-        
-        // Handle Range request for seeking
-        if (preg_match('/bytes=(\d+)-(\d*)/', $range, $matches)) {
-            $start = (int)$matches[1];
-            $end = $matches[2] ? (int)$matches[2] : $fileSize - 1;
-            $length = $end - $start + 1;
-            
-            if ($start >= $fileSize || $end >= $fileSize || $start > $end) {
-                return response('Invalid Range', 416);
-            }
-            
-            $stream = fopen($fullPath, 'rb');
-            fseek($stream, $start);
-            
-            return response()->stream(function() use ($stream, $length) {
-                echo fread($stream, $length);
-                fclose($stream);
-            }, 206, [
-                'Content-Type' => $mimeType,
-                'Content-Length' => $length,
-                'Content-Range' => "bytes $start-$end/$fileSize",
-                'Accept-Ranges' => 'bytes',
-                'Cache-Control' => 'private, max-age=3600',
-            ]);
-        }
-        
-        // Fallback to full response
-        $stream = Storage::disk('local')->readStream($path);
-        
-        return response()->stream(function() use ($stream) {
-            fpassthru($stream);
-            if (is_resource($stream)) {
-                fclose($stream);
-            }
-        }, 200, [
-            'Content-Type' => $mimeType,
-            'Content-Length' => $fileSize,
-            'Accept-Ranges' => 'bytes',
+        // Range (seeking) is answered by Media's BinaryFileResponse.
+        return $this->media->stream($path, [
+            'Content-Type' => 'audio/mpeg',
             'Cache-Control' => 'private, max-age=3600',
         ]);
     }
@@ -207,15 +147,16 @@ class SecretGiftController
 
         $path = $assignment->gift_sound_path;
 
-        if (!Storage::disk('local')->exists($path)) {
+        if (!$this->media->exists($path)) {
             abort(404);
         }
 
-        $fullPath = Storage::disk('local')->path($path);
         $filename = 'gift-audio-' . $assignment->giver_user_id . '-' . $assignment->id . '.' . pathinfo($path, PATHINFO_EXTENSION);
-        
-        return response()->download($fullPath, $filename, [
+
+        return $this->media->stream($path, [
+            'Content-Type' => 'audio/mpeg',
             'Cache-Control' => 'private, max-age=3600',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 }

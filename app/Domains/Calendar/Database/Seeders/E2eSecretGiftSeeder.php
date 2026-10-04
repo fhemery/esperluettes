@@ -9,11 +9,13 @@ use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftParticip
 use App\Domains\Calendar\Private\Activities\SecretGift\Models\SecretGiftSettings;
 use App\Domains\Calendar\Private\Activities\SecretGift\SecretGiftRegistration;
 use App\Domains\Calendar\Private\Models\Activity;
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Eight *Cadeau surprise* activities for the E2E environment (see .env.e2e),
+ * Ten *Cadeau surprise* activities for the E2E environment (see .env.e2e),
  * mirrored in `e2e/support/fixtures.ts`.
  *
  * An activity's state and its registration window both come from the clock
@@ -48,6 +50,12 @@ class E2eSecretGiftSeeder extends Seeder
     public const SHUFFLE_ME_SLUG = 'cadeau-surprise-a-tirer';
     /** Restricted to admins: every other role must get a 404, not a page with the button missing. */
     public const RESTRICTED_SLUG = 'cadeau-surprise-reserve';
+    /** ENDED: `author` gave `confirmed` a sound and an image — the reveal. */
+    public const ENDED_SLUG = 'cadeau-surprise-termine';
+
+    /** Real media files the ended gift is made of, shared with the specs that upload them. */
+    private const GIFT_SOUND_FIXTURE = 'e2e/fixtures/gift-sound.mp3';
+    private const GIFT_IMAGE_FIXTURE = 'e2e/fixtures/gift-image.png';
 
     /**
      * `author`'s preferences on the open activity. Private to whoever draws them,
@@ -149,6 +157,39 @@ class E2eSecretGiftSeeder extends Seeder
         $this->join($toShuffle, $admin);
 
         $this->activity(self::RESTRICTED_SLUG, 'Cadeau surprise — réservé', $previewOpen, now()->addDays(5), [Roles::ADMIN]);
+
+        // Over: `author` gives to `confirmed`, so `confirmed` sees the reveal.
+        $ended = $this->activity(self::ENDED_SLUG, 'Cadeau surprise — terminé', [
+            'preview_starts_at' => now()->subDays(20),
+            'active_starts_at' => now()->subDays(10),
+            'active_ends_at' => now()->subDay(),
+        ], now()->subDays(15));
+        $this->join($ended, $author);
+        $this->join($ended, $confirmed);
+        $this->join($ended, $admin);
+        $this->assign($ended, [$author, $confirmed, $admin]);
+        $this->giveSoundAndImage($ended, $author);
+    }
+
+    /** Stores the fixture files through Media's private half, as an upload would. */
+    private function giveSoundAndImage(Activity $activity, int $giver): void
+    {
+        $media = app(MediaPublicApi::class);
+        $scope = 'secret-gift/'.$activity->id;
+
+        SecretGiftAssignment::where('activity_id', $activity->id)
+            ->where('giver_user_id', $giver)
+            ->update([
+                'gift_sound_path' => $media->storePrivateFile($scope, $this->fixture(self::GIFT_SOUND_FIXTURE, 'audio/mpeg')),
+                'gift_image_path' => $media->storePrivate($scope, $this->fixture(self::GIFT_IMAGE_FIXTURE, 'image/png')),
+            ]);
+    }
+
+    private function fixture(string $relativePath, string $mime): UploadedFile
+    {
+        $path = base_path($relativePath);
+
+        return new UploadedFile($path, basename($path), $mime, null, true);
     }
 
     private function activity(string $slug, string $name, array $dates, mixed $registrationEndsAt, ?array $roles = null): Activity

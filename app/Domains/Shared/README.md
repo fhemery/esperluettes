@@ -235,7 +235,7 @@ Located in `Resources/views/components/`. Referenced as `<x-shared::component-na
 - `fields/time-field`, `fields/range-field`, `fields/multi-select-field`
 
 **Uploads**
-- `sound-upload` — the only upload widget left here. Images are handled by the Media domain's `<x-media::image-field>`, which owns paths, variants and garbage collection; there is no `image-upload` component or lang file anymore.
+- None. Shared ships no upload widget: images are handled by the Media domain's `<x-media::image-field>` and sounds by `<x-media::sound-field>`. There is no `image-upload` or `sound-upload` component or lang file anymore.
 
 **UI primitives**
 - `badge`, `badge-overflow`, `metric-badge` — badge display

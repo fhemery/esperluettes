@@ -8,15 +8,15 @@ use App\Domains\Media\Private\Services\MediaService;
 use App\Domains\Media\Public\Contracts\Dto\MediaPathPageDto;
 use Illuminate\Http\UploadedFile;
 use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Sole entry point other domains use for managed images.
- * Images are addressed by storage path — no ids, no reference table.
+ * Sole entry point other domains use for managed images and private files.
+ * Media is addressed by storage path — no ids, no reference table.
  *
  * Two halves: public images have variants and URLs; private images
- * (storePrivate) have neither and are only ever streamed back by the domain
- * that owns their visibility rules.
+ * (storePrivate) and raw private files (storePrivateFile) have neither and are
+ * only ever streamed back by the domain that owns their visibility rules.
  */
 class MediaPublicApi
 {
@@ -49,13 +49,30 @@ class MediaPublicApi
     }
 
     /**
+     * Store an uploaded file's raw bytes on the private disk; returns its
+     * stored path (extension guessed from the MIME type, not the client name).
+     *
+     * No processing, no URL, no variants and **no content validation** — the
+     * caller validates the upload. Served back via stream(); collected by GC
+     * like any private file once no provider claims it.
+     */
+    public function storePrivateFile(string $scope, UploadedFile $file): string
+    {
+        return $this->media->storePrivateFile($scope, $file);
+    }
+
+    /**
      * Stream a stored file back, resolving its disk from its path.
      *
      * Performs **no** authorization — the caller must already have decided the
      * requester may see these bytes. Supplied headers win over the defaults
-     * (`Content-Type`, `Content-Length`, inline `Content-Disposition`).
+     * (`Content-Type`, inline `Content-Disposition`).
+     *
+     * Private paths come back as a `BinaryFileResponse` that honours `Range`
+     * (206, `Content-Range`, `Accept-Ranges: bytes`) once prepared by the
+     * router — so audio/video seeking works without consumer code.
      */
-    public function stream(string $path, array $headers = []): StreamedResponse
+    public function stream(string $path, array $headers = []): Response
     {
         return $this->media->stream($path, $headers);
     }

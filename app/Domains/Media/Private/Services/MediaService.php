@@ -10,7 +10,9 @@ use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
  * Path-addressed image domain: storage, variant URLs, reuse listing and GC.
@@ -101,13 +103,41 @@ class MediaService
     }
 
     /**
+     * Store an uploaded file's raw bytes on the private disk; returns its path.
+     * No processing and no content validation. The extension comes from the
+     * guessed MIME type (hashName()), never from the client file name.
+     */
+    public function storePrivateFile(string $scope, UploadedFile $file): string
+    {
+        if (!$this->isPrivateScope($scope)) {
+            throw new InvalidArgumentException("Not a private media scope: {$scope}");
+        }
+        return Storage::disk(self::PRIVATE_DISK)->putFileAs($this->folderFor($scope), $file, $file->hashName());
+    }
+
+    /**
      * Stream a stored file back, on whichever disk its path resolves to.
      * Performs **no** authorization: the caller has already decided the
      * requester may see these bytes.
+     *
+     * Private paths come back as a BinaryFileResponse, which answers Range
+     * requests once the router prepares it. Its defaults are set here because
+     * prepare() is what would otherwise fill them, and a direct call skips it.
+     * Requires the private disk to be local (it needs an absolute path).
      */
-    public function stream(string $path, array $headers = []): StreamedResponse
+    public function stream(string $path, array $headers = []): Response
     {
-        return Storage::disk($this->diskFor($path))->response($path, null, $headers);
+        if (!$this->isPrivatePath($path)) {
+            return Storage::disk(self::DISK)->response($path, null, $headers);
+        }
+
+        $disk = Storage::disk(self::PRIVATE_DISK);
+        $response = new BinaryFileResponse($disk->path($path), 200, [], false);
+        $response->headers->set('Content-Type', $disk->mimeType($path) ?: 'application/octet-stream');
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, basename($path));
+        $response->headers->add($headers);
+
+        return $response;
     }
 
     public function exists(string $path): bool
@@ -199,6 +229,7 @@ class MediaService
 
     /**
      * Garbage-collect originals no provider claims and older than $days.
+     * On the private disk every file under a root counts as an original.
      *
      * Safety guard: a folder that holds originals but has zero claimed paths is
      * treated as an unclaimed scope (probable missing provider) and skipped, not
@@ -289,9 +320,10 @@ class MediaService
     }
 
     /**
-     * Original images under a folder, variants excluded. Non-recursive on the
-     * public disk; recursive under a private root, whose images live one level
-     * down in per-scope subfolders.
+     * Originals under a folder. On the public disk: images only, variants
+     * excluded, non-recursive. On the private disk: every file, recursively —
+     * private files (images or not) have no variants by construction, and live
+     * one level down in per-scope subfolders.
      *
      * @return list<string>
      */
@@ -301,9 +333,11 @@ class MediaService
         if (!$fs->exists($folder)) {
             return [];
         }
-        $files = $disk === self::PRIVATE_DISK ? $fs->allFiles($folder) : $fs->files($folder);
+        if ($disk === self::PRIVATE_DISK) {
+            return array_values($fs->allFiles($folder));
+        }
         $originals = [];
-        foreach ($files as $file) {
+        foreach ($fs->files($folder) as $file) {
             $base = pathinfo($file, PATHINFO_BASENAME);
             if (preg_match('/-\d+w\.(jpg|jpeg|png|webp)$/i', $base) === 1) {
                 continue; // a generated variant

@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 import { ConfirmModal } from './ConfirmModal';
 import { RichTextEditor } from './RichTextEditor';
+import { SoundField } from './SoundField';
 
 /**
  * The reader-facing calendar activity page for a *Cadeau surprise*.
@@ -94,6 +95,69 @@ export class SecretGiftActivityPage {
 
   get giftReceivedPanel(): Locator {
     return this.page.locator('#tabs-panel-received');
+  }
+
+  /**
+   * Evidence screenshot for a VERIFY run, taken only when `E2E_SHOTS_DIR` is
+   * set — later suite runs take none.
+   */
+  async evidence(name: string, target?: Locator): Promise<void> {
+    const dir = process.env.E2E_SHOTS_DIR;
+    if (!dir) return;
+    if (target) {
+      await target.scrollIntoViewIfNeeded();
+      await target.screenshot({ path: `${dir}/${name}.png` });
+      return;
+    }
+    await this.page.screenshot({ path: `${dir}/${name}.png` });
+  }
+
+  /** The gift form of the prepare tab. */
+  get giftForm(): Locator {
+    return this.giftPreparePanel.locator('form[action$="/gift"]');
+  }
+
+  /** Text / Image / Sound switch of the gift form. */
+  giftModeButton(label: 'Texte' | 'Image' | 'Son'): Locator {
+    return this.giftForm.locator('button[type="button"][\\@click^="giftMode"]').filter({ hasText: label });
+  }
+
+  get soundField(): SoundField {
+    return new SoundField(this.giftForm.locator('[x-data^="mediaSoundField"]'));
+  }
+
+  /** `<x-media::image-field>` of the gift form. */
+  get imageField(): Locator {
+    return this.giftForm.locator('[x-data^="mediaImageField"]');
+  }
+
+  get imageFileInput(): Locator {
+    return this.imageField.locator('input[type="file"]');
+  }
+
+  get imagePreview(): Locator {
+    return this.imageField.locator('img').first();
+  }
+
+  get saveGiftButton(): Locator {
+    return this.giftForm.locator('button[type="submit"]');
+  }
+
+  /** The sound card of the reveal; absent when the gift has no sound. */
+  get revealSound(): Locator {
+    return this.giftReceivedPanel.locator('audio');
+  }
+
+  get revealSoundDownload(): Locator {
+    return this.giftReceivedPanel.locator('a[href*="/sound/"][href$="/download"]');
+  }
+
+  get revealImage(): Locator {
+    return this.giftReceivedPanel.locator('img[src*="/image/"]');
+  }
+
+  get revealImageDownload(): Locator {
+    return this.giftReceivedPanel.locator('a[href*="/image/"][href$="/download"]');
   }
 
   /** Rendered twice on some layouts (responsive duplicates) — always `.first()`. */

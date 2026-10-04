@@ -62,7 +62,7 @@
 
 **Confirm-modal always moves focus on open.** It forwards `focusable` to `modal.blade.php` (no opt-out). Covered by `Tests/Feature/View/Components/ConfirmModalA11yTest.php`.
 
-**No image upload lives here.** The `image-upload` component and its lang file are both gone — Media's `<x-media::image-field>` covers every case, and Story's cover tab owns its own dropzone copy under `story::shared.cover.custom_*`. Do not reintroduce an image upload widget here — image handling belongs to Media. `sound-upload` is still Shared's, until sound gets the same treatment.
+**No upload widget lives here.** The `image-upload` and `sound-upload` components and their lang files are gone — Media's `<x-media::image-field>` and `<x-media::sound-field>` cover every case, and Story's cover tab owns its own dropzone copy under `story::shared.cover.custom_*`. Do not reintroduce an upload widget here — file handling belongs to Media.
 
 **`BackToCommentsRedirector` only uses the path and query string.** Browsers never send the fragment in the `Referer` header; the `#comments` anchor is always appended by the helper, not read from the request.
 
