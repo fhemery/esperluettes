@@ -6,7 +6,7 @@
 
 - [CommentPublicApi](Public/Api/CommentPublicApi.php) — CRUD and read operations; main entry point for all comment interactions. Requires authenticated user for write and read. Delegates body sanitization to `CommentBodySanitizer` and permission decisions to `CommentPolicyRegistry`.
 - [CommentMaintenancePublicApi](Public/Api/CommentMaintenancePublicApi.php) — system-level bulk delete for use by owning domains (e.g. when a chapter is deleted).
-- [AnnotationPublicApi](Public/Api/AnnotationPublicApi.php) — read the annotations of one root comment (filtered by viewer role), toggle the processed flag, moderator delete. No create method: see invariants.
+- [AnnotationPublicApi](Public/Api/AnnotationPublicApi.php) — read the annotations of one root comment (filtered by viewer role), toggle the processed flag, moderator delete, plus the commenter's `saveChanges` (adds/edits/deletes in one transaction; `PUT /comments/{id}/annotations`) and the replies (`reply`, `deleteOwnReply`). First annotations are created by `CommentPublicApi::create`: see invariants.
 - [CommentPolicyRegistry](Public/Api/CommentPolicyRegistry.php) — singleton; maps entity type strings to `CommentPolicy` implementations. Falls back to `DefaultCommentPolicy` (allow all, no length limits) when no policy is registered.
 
 ## Events emitted
@@ -46,9 +46,13 @@
 
 **`CommentMaintenancePublicApi::deleteFor()` force-deletes all comments for a target.** It uses `deleteByTarget()` on the repository, which force-deletes roots and replies in one query; their annotations go through the `comment_id` FK cascade. Call this when deleting the owning entity (e.g. a chapter), not when moderating individual comments.
 
-**Annotations are only created with their root comment.** The sole write path is `CommentPublicApi::create` → `CommentService::postComment`, which inserts the root comment and its annotations in one transaction; annotation checks run first so a refusal lands on the `annotations` key and nothing is written. A reply carrying annotations is refused. Do not add a standalone create endpoint without revisiting the « Annoter » gating (a reader who already has a root gets none) and the drafts flow.
+**Annotations have two write paths.** (1) `CommentPublicApi::create` → `CommentService::postComment` inserts the root comment and its first annotations in one transaction; annotation checks run first so a refusal lands on the `annotations` key and nothing is written; a reply carrying annotations is refused. (2) Once the root exists, `AnnotationPublicApi::saveChanges` applies the commenter's pending adds / edits / deletes atomically: 403 unless the viewer wrote this root comment and `canAnnotate` holds, every item error collected in one 422 keyed `adds.<clientKey>` / `edits.<id>` / `deletes.<id>`. An id that is not a live root of this comment by this user is `errors.stale`, never a 403. An edit resets the processed flag and keeps the anchor; a delete takes the replies. Keep the two paths on the shared item validator.
 
-**Annotations emit no events.** `CommentPosted` fires once, after the transaction, and carries nothing about annotations; processed toggles and moderator deletes are silent. Credits, notifications and statistics must not depend on annotations.
+**Annotation replies are one level deep and role-gated.** `reply` targets a root annotation only (422 on a reply). Authors may reply on any root; the commenter only on their own root once a visible reply from someone else exists; moderators never. `deleteOwnReply` is for the writer only (a moderator deletes via the root). `can_edit` / `can_reply` / `can_delete` on `AnnotationDto` are display hints, recomputed by the API; always re-check server-side. `AnnotationAccessService::filterActiveReplyWriters` hides replies of deactivated (or unresolvable) writers at read time and feeds `can_reply`; anonymised replies (`author_id` null) stay visible. Do not read replies around it.
+
+**The save banner and pop-up overlay are client state.** Pending changes live in the comment-draft `annotationChanges` slot; `annotationChangesBanner` (sticky, `changes-banner.js`) saves them in one PUT and emits `annotations:list-refreshed` / `annotations:save-errors`; the commenter's pop-up overlays the slot on the cached server rows. Annotating after a root exists uses `data-annotation-mode="pending"` (root id in `data-root-comment-id`), otherwise `draft`.
+
+**Annotations emit no events.** `CommentPosted` fires once, after the transaction, and carries nothing about annotations; saves, replies, processed toggles and moderator deletes are silent. Credits, notifications and statistics must not depend on annotations.
 
 **The processed flag is hidden from the commenter.** `AnnotationAccessService` resolves the viewer to `commenter`, `author` or `moderator` (in that order — an author commenting their own chapter is a `commenter`). For `commenter`, `getForComment` sends `is_processed: null`; authors and moderators receive it (moderators on purpose, though the pop-up displays it to authors only); only `author` may toggle it, only `moderator` may delete. Any new read path must go through `AnnotationAccessService`, not the raw policy, or it leaks the flag or other readers' annotations.
 
@@ -56,9 +60,11 @@
 
 **`highlighted_text`, `prefix` and `suffix` are stored unsanitized.** Only the body goes through HTMLPurifier (`annotation` profile). Always render the passage as text (`x-text`, `{{ }}`), never `x-html` / `{!! !!}`.
 
-**The « Annoter » button cannot host the capture form.** `<x-comment::annotable>` clones its `toolbar-actions` slot from a `<template>` on each selection; the button only dispatches `annotation:open-form`. The consumer renders `<x-comment::annotation-form>` once, outside the annotable region.
+**The « Annoter » button cannot host the capture form.** `<x-comment::annotable>` clones its `toolbar-actions` slot from a `<template>` on each selection; the button only dispatches `annotation:open-form`. Toolbar actions opt into region limits with `data-requires-selection-within="<selector>"`; the boolean `data-requires-single-area` additionally hides the action when the selection spans two matching elements (« Annoter » and the reactions carry both). The consumer renders `<x-comment::annotation-form>` once, outside the annotable region.
 
 **Moderation actions emit distinct events.** `emptyContentByModeration` emits `CommentContentModerated`; `deleteByModeration` emits `CommentDeletedByModeration`. Story domain listens to `CommentDeletedByModeration` to revoke chapter credits.
+
+**Tests.** PHP under `Tests/`; Vitest next to the JS (`annotations/*.test.js`, `comment-draft/index.test.js`); browser: `e2e/tests/core/chapter-annotations.spec.ts` and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions, pending changes, save banner, replies).
 
 ## Registry integrations
 

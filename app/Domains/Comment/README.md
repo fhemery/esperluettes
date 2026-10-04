@@ -51,12 +51,14 @@ System-level operations. Intended for use by other domains cleaning up their own
 
 ### AnnotationPublicApi
 
-Reads and acts on the annotations of one root comment. The first annotations are created by `CommentPublicApi::create` with their root comment; later ones go through `saveChanges`.
+Reads and acts on the annotations of one root comment. The first annotations are created by `CommentPublicApi::create` with their root comment; later ones go through `saveChanges`. Replies under a root annotation go through `reply` / `deleteOwnReply`.
 
 | Method | Description |
 |--------|-------------|
 | `saveChanges(commentId, byUserId, AnnotationChangeSetDto)` | The commenter's adds / edits / deletes under their own root comment, in one transaction; returns the refreshed `AnnotationListDto`. 404 for an unknown or trashed comment; 403 unless the user wrote this root comment and `canAnnotate` holds. Every item error is collected into one 422 keyed `adds.<clientKey>` / `edits.<id>` / `deletes.<id>`; an id that is not a live root of this comment written by the user (deleted, foreign, reply) is `errors.stale`, never a 403. An edit resets the processed flag and leaves the anchor untouched; a delete takes the replies with it. No event. |
 | `getForComment(commentId, viewerId)` | `AnnotationListDto` of the root annotations the viewer may see, with per-row action flags. 404 (`ModelNotFoundException`) for an unknown or trashed comment, 403 (`AuthorizationException`) for a viewer who may see none. |
+| `reply(parentAnnotationId, byUserId, body)` | Adds a reply under a **root** annotation and returns it as an `AnnotationDto`. Authors / co-authors may reply on any root; the commenter only on their own root, and only once a visible reply from someone else exists; moderators never (403). 404 for an unknown or trashed annotation or comment; 422 (`body`) on an empty / too long body or when the parent is itself a reply. No event. |
+| `deleteOwnReply(replyId, byUserId)` | The writer deletes their own reply (soft delete). 404 for an unknown reply; 403 when the row is not a reply or was not written by the user. |
 | `setProcessed(annotationId, byUserId, value)` | Author / co-author toggle of the processed flag. 403 unless the user resolves to the `author` role on that comment (an author who is also the commenter does not); 422 on a reply row. |
 | `moderatorDelete(annotationId, byUserId)` | Soft-deletes one annotation and its replies. No role check inside: the route's `role` middleware is the gate. |
 
@@ -106,7 +108,7 @@ Example implementation: `App\Domains\Story\Private\Services\ChapterCommentPolicy
 | `CommentToCreateDto` | Input for `create()` — entity type, entity ID, body, optional parent comment ID, optional list of `AnnotationToCreateDto` |
 | `AnnotationChangeSetDto` | Input for `saveChanges()` — `adds` (`AnnotationToCreateDto[]`, each with its `clientKey`), `edits` (id => body), `deletes` (ids) |
 | `CommentDto` | A single comment with author profile, permission flags (`canReply`, `canEditOwn`), `annotationCount` (root annotations **the viewer** may see), and nested children |
-| `AnnotationListDto` / `AnnotationDto` | Payload of `getForComment`: the viewer's role (`commenter`, `author`, `moderator`) and the rows, each with `highlighted_text`, sanitized `body`, `is_processed` (null for the commenter), `can_mark_as_processed`, `can_delete` |
+| `AnnotationListDto` / `AnnotationDto` | Payload of `getForComment`: the viewer's role (`commenter`, `author`, `moderator`) and the rows, each with `highlighted_text`, sanitized `body`, `is_processed` (null for the commenter), `replies` (oldest first), and the display hints `can_mark_as_processed`, `can_delete` (moderator; on a reply, its writer too), `can_edit` (the commenter, on their own root) and `can_reply` (see `reply`). A reply has no anchor and all its flags false except `can_delete` |
 | `CommentListDto` | Paginated list of `CommentDto` items plus a `CommentUiConfigDto` |
 | `CommentUiConfigDto` | UI configuration: length limits and `canCreateRoot` flag |
 
@@ -223,14 +225,25 @@ passage (plain text, plus a short `prefix`/`suffix` for re-anchoring) and a
 short rich body. It is feedback to the entity's authors, attached to the
 reader's **root comment**, and has no life of its own:
 
-- **Created only with the root comment.** The reader collects drafts in the
-  browser, then `POST /comments` sends them with the root body; both are written
-  in one transaction or not at all. There is no endpoint to add, edit or reply to
-  an annotation afterwards, so a reader who already has a root comment on the
-  entity gets no « Annoter » action. `comment_annotations.parent_annotation_id`
-  exists for replies, which no code path creates yet.
+- **Two write paths for the commenter.** Before a root comment exists, the
+  reader collects drafts in the browser and `POST /comments` sends them with the
+  root body; both are written in one transaction or not at all. Once the root
+  exists, « Annoter » stays available in *pending* mode: adds, edits and deletes
+  accumulate in the browser and are sent together by
+  `PUT /comments/{id}/annotations` (`AnnotationPublicApi::saveChanges`).
+- **Replies, one level deep.** `comment_annotations.parent_annotation_id` points
+  to a root annotation. Authors / co-authors reply on any root; the commenter
+  replies on their own root once an author has replied; moderators never. A reply
+  is deleted by its writer (`deleteOwnReply`) or, with its root, by a moderator.
+  Replies are never edited.
+- **Replies of deactivated writers are hidden.** `AnnotationAccessService::
+  filterActiveReplyWriters` drops, at read time, replies whose writer is no
+  longer active (deactivated, or no longer resolvable by Auth); rows are left
+  untouched and reappear on reactivation. Replies whose `author_id` was nulled by
+  a user deletion are kept (anonymised). The filtered list also feeds `can_reply`,
+  so a hidden author reply does not open the commenter's reply right.
 - **No events.** `CommentPosted` fires once for the root comment; credits and
-  notifications ignore annotations.
+  notifications ignore annotations, saves and replies.
 - **Opt-in per entity type** through `CommentPolicy::supportsAnnotations` (type
   level: chapters yes, news no), then per user through `canAnnotate` (chapters:
   the same audience as a root comment, never a guest).
@@ -299,6 +312,16 @@ comment-draft module, which is why the banner re-reads the drafts slot on
   writes the slot into the hidden `annotations` input; the `root` consumed
   marker then clears the slot. A refused post keeps both the drafts and the typed
   root body.
+- **Sticky save banner** — `partials/annotation-changes-banner.blade.php`
+  (`changes-banner.js`, Alpine `annotationChangesBanner`), sticky at the bottom
+  of the list, shown while the `annotationChanges` slot is non-empty and the
+  annotable carries `data-root-comment-id`. « Enregistrer » sends the whole slot
+  in one `PUT /comments/{id}/annotations`; on success it clears the slot and
+  dispatches `annotations:list-refreshed` `{ commentId, list }`; on a 422 (or a
+  404, read as stale for every item) it lists the refused items and dispatches
+  `annotations:save-errors` `{ commentId, errors }` (keys `adds.<tempId>`,
+  `edits.<id>`, `deletes.<id>`), keeping the slot. « Voir » opens the pop-up,
+  « Tout annuler » (after `confirm()`) clears the slot.
 - **« N annotations » and the server pop-up** — `comment-item` shows the button
   when `annotationCount > 0`; it dispatches `annotations:open` `{ commentId }`
   to the one `annotation-modal` partial per list (`modal.js` + `api.js`, Alpine
@@ -325,6 +348,12 @@ comment-draft module, which is why the banner re-reads the drafts slot on
   reloaded) gets a row of its own, before the pending adds, already flagged
   with `errors.stale` and « Retirer », so it can be dropped without « Tout
   annuler ». Authors and moderators see none of it.
+- **Replies in the pop-up** — every root shows its reply thread (oldest first, as
+  served). « Répondre » (row `can_reply`) moves the pop-up's single reply editor
+  (`<x-editor::rich-text>`, id `annotation-reply-editor`) under that root and
+  posts to `POST /comments/annotations/{id}/replies`; the reply is appended in
+  place (`replies.js`). A reply's « Supprimer » (`can_delete`, `confirm()` first)
+  calls `DELETE /comments/annotations/replies/{id}`. A 404 reads as stale.
 
 Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts` (before the root
 comment) and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions,
@@ -339,6 +368,7 @@ pending changes, save banner, replies).
 | Moderator deletes one annotation | That row and its replies soft-deleted |
 | Owning entity deleted (`CommentMaintenancePublicApi::deleteFor`) | Gone through the same cascade |
 | User deleted | Kept, `author_id` set to null (trashed rows too); authors still see them |
+| Reply writer deactivated / reactivated | No row change: the reply is filtered out of reads while the writer is inactive and shows again on reactivation |
 | User deactivated / reactivated | No row change: the root comment's own soft delete hides them and its restore shows them again, so an annotation a moderator removed never comes back |
 
 ### Known gaps
@@ -360,6 +390,8 @@ pending changes, save banner, replies).
 | `GET` | `/comments/fragments` | public | Return HTML fragment for lazy-load pagination |
 | `GET` | `/comments/{commentId}/annotations` | `auth`, `compliant` | JSON list of the root comment's annotations visible to the viewer (403 / 404 otherwise) |
 | `PUT` | `/comments/{commentId}/annotations` | `auth`, `compliant` | Body `{ adds: [{key, body, highlighted_text, prefix, suffix}], edits: [{id, body}], deletes: [id] }`; the root comment's author only. 200 + list, 422 keyed per item |
+| `POST` | `/comments/annotations/{annotationId}/replies` | `auth`, `compliant` | Body `{ body }`; reply under a root annotation (authors, or the commenter once an author replied). 403 / 404 / 422 per `AnnotationPublicApi::reply` |
+| `DELETE` | `/comments/annotations/replies/{replyId}` | `auth`, `compliant` | The reply's writer deletes it |
 | `PUT` | `/comments/annotations/{annotationId}/processed` | `auth`, `compliant` | Body `{ value: bool }`; author / co-author only |
 | `DELETE` | `/comments/annotations/{annotationId}` | Moderator+ | Soft-delete one annotation and its replies |
 
