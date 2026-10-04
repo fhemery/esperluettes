@@ -53,6 +53,14 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
    `e2e/README.md`'s `features/` default, leaving BUILD to arbitrate. Fix:
    `plan-phases` skill says new specs go to `features/` unless the plan states
    the promotion reason.
+8. **"Push back to BUILD" from VERIFY has no landing spot.**
+   *(media-sound-upload)* VERIFY passed and listed three feature tests "to add
+   in BUILD" (guest redirect, ARCHIVED recipient, reveal without a sound), but
+   every phase was already `DONE`, so the backlog moved straight to `WIP:WRAP`
+   and the tests were never written — WRAP found them by reading. Fix:
+   `verify-visually` appends a fix phase row (`6 · TODO`) to `03-plan.md`'s
+   index for any pushed-back item and leaves the backlog at `WIP:BUILD`;
+   `continue-task` refuses to advance to WRAP while a phase row is `TODO`.
 
 ## Why
 

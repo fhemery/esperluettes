@@ -6,7 +6,7 @@
 
 - [MediaPublicApi](Public/Api/MediaPublicApi.php) — the **only** entry point other domains use for images and private files: `store`, `storePrivate`, `storePrivateFile`, `stream`, `exists`, `listByScope`, `variantUrl`, `originalUrl`, `folderFor`, `countUsages`, `hasVariants`. Images are addressed by **storage path** (string) — there are no ids.
 - [MediaUsageRegistry](Public/Contracts/MediaUsageRegistry.php) + [MediaUsageProvider](Public/Contracts/MediaUsageProvider.php) — a consuming domain registers a provider so GC knows which files it still uses.
-- Blade components (owned here): `<x-media::image>` (read-only), `<x-media::image-field>` (editable). Reuse picker endpoint: `GET /media/library` (`media.library`, auth-gated).
+- Blade components (owned here): `<x-media::image>` (read-only), `<x-media::image-field>` (editable), `<x-media::sound-field>` (sound upload; form contract `{name}` + `{name}_remove`). Reuse picker endpoint: `GET /media/library` (`media.library`, auth-gated).
 
 ## Events emitted
 

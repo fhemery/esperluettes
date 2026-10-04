@@ -2,7 +2,7 @@
 
 ## Purpose and scope
 
-The Media domain owns **image handling** for the whole application: uploading, generating responsive variants, the reuse picker, garbage-collecting unused files, and the reusable Blade components that display and edit images. Every other domain reaches it through `MediaPublicApi`; none touch the filesystem or `ImageService` directly.
+The Media domain owns **image handling** for the whole application: uploading, generating responsive variants, the reuse picker, garbage-collecting unused files, and the reusable Blade components that display and edit images. It also stores **private files** of any type (raw bytes, no processing — today the Secret Gift sound) and owns the `<x-media::sound-field>` upload widget. Every other domain reaches it through `MediaPublicApi`; none touch the filesystem or `ImageService` directly.
 
 Its defining choice is that **an image is identified by its storage path** — there is no asset id, no reference table, and the domain owns **no database tables**. The content that uses an image (a column like `image_path`, or an image block inside `content_blocks`) *is* the record of that usage. This keeps a single source of truth and avoids a denormalized reference cache that could drift.
 
@@ -62,7 +62,7 @@ Media never learns which files are in use by scanning other domains' tables. Ins
 
 Deletion is therefore always **deferred and swept**, never synchronous: removing an image from a document merely stops the content from referencing its path; the file is reclaimed later, if still unused. A guard makes this safe against a forgotten provider — a whole scope folder that holds files but has *zero* claimed paths is treated as an unclaimed scope and **skipped**, not emptied.
 
-The sweep covers both disks. On `public` it walks each scope folder non-recursively and considers only image originals (variants and non-image files are ignored). On `private` it walks each scope **root** (`secret-gift/`) recursively and treats **every** file as an original — private files have no variants by construction, so no extension list is needed (an image and an mp3 are collected alike). It applies the zero-claim guard at that root applies the zero-claim guard at that root rather than per `secret-gift/{activityId}` subfolder — otherwise an activity whose gifts were all removed would have no claimed path, be skipped forever, and leak its orphans permanently.
+The sweep covers both disks. On `public` it walks each scope folder non-recursively and considers only image originals (variants and non-image files are ignored). On `private` it walks each scope **root** (`secret-gift/`) recursively and treats **every** file as an original — private files have no variants by construction, so no extension list is needed (an image and an mp3 are collected alike). It applies the zero-claim guard at that root rather than per `secret-gift/{activityId}` subfolder — otherwise an activity whose gifts were all removed would have no claimed path, be skipped forever, and leak its orphans permanently.
 
 ### Components
 
