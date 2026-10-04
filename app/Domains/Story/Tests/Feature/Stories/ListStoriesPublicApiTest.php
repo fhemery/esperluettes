@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\CollaboratorService;
 use App\Domains\Story\Private\Support\StoryFilterAndPagination;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -80,7 +81,7 @@ describe('StoryPublicApi::listStories', function () {
                 $aliceStory = privateStory('Alpha', alice($this)->id);
                 privateStory('Beta', bob($this)->id);
 
-                addCollaborator($aliceStory->id, bob($this)->id, 'betareader');
+                addCollaborator($aliceStory->id, bob($this)->id, CollaboratorService::ROLE_BETA_READER);
 
                 $this->actingAs(bob($this, roles: [Roles::USER_CONFIRMED]));
                 $result = $this->api->listStories();
@@ -600,7 +601,7 @@ describe('StoryPublicApi::listStories', function () {
             it('excludes collaborators by default', function () {
                 $alice = alice($this);
                 $story = publicStory('With Collaborators', $alice->id);
-                addCollaborator($story->id, bob($this)->id, 'betareader');
+                addCollaborator($story->id, bob($this)->id, CollaboratorService::ROLE_BETA_READER);
 
                 /** @var PaginatedStoryDto $result */
                 $result = $this->api->listStories();
@@ -612,7 +613,7 @@ describe('StoryPublicApi::listStories', function () {
             it('returns mapped collaborators when requested', function () {
                 $alice = alice($this);
                 $story = publicStory('With Collaborators', $alice->id);
-                addCollaborator($story->id, bob($this)->id, 'betareader');
+                addCollaborator($story->id, bob($this)->id, CollaboratorService::ROLE_BETA_READER);
 
                 $fields = new StoryQueryFieldsToReturnDto(
                     includeCollaborators: true,

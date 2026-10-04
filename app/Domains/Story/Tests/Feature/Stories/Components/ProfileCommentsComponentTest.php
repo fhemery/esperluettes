@@ -6,6 +6,7 @@ use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
+use App\Domains\Story\Private\Services\CollaboratorService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
@@ -479,7 +480,7 @@ describe('ProfileCommentsComponent', function () {
             $publicChapter = createPublishedChapter($this, $publicStory, $author, ['title' => 'Public Chapter']);
             $privateChapter = createPublishedChapter($this, $privateStory, $author, ['title' => 'Private Chapter']);
 
-            addCollaborator($privateStory->id, $commenter->id, 'betareader');
+            addCollaborator($privateStory->id, $commenter->id, CollaboratorService::ROLE_BETA_READER);
 
             $this->actingAs($commenter);
             createComment('chapter', $publicChapter->id, generateDummyText(150));
