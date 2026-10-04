@@ -294,6 +294,13 @@ describe('CommentListComponent', function () {
             ]);
 
             $modal = substr($html, strpos($html, 'x-data="annotationsModal()"'));
+            // Opening tag of the « Vider le contenu » button: solid danger, like « Supprimer »
+            // (the danger outline variant is unreadable).
+            $emptyButton = substr($modal, 0, strpos($modal, 'x-on:click="emptyContent(row)"'));
+            $emptyButton = substr($emptyButton, strrpos($emptyButton, '<button'));
+
+            expect($emptyButton)->toContain('surface-error')
+                ->and($emptyButton)->not->toContain('is-outline');
 
             expect($modal)->toContain(e(__('comment::annotations.empty_content')))
                 ->and($modal)->toContain(e(__('comment::annotations.passage_missing')))

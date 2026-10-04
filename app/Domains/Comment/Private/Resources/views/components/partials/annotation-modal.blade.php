@@ -115,7 +115,7 @@
                                 </x-shared::button>
                             </template>
                             <template x-if="canEmpty(row)">
-                                <x-shared::button type="button" size="sm" color="danger" :outline="true" x-on:click="emptyContent(row)" x-bind:disabled="busyId !== null">
+                                <x-shared::button type="button" size="sm" color="danger" x-on:click="emptyContent(row)" x-bind:disabled="busyId !== null">
                                     {{ __('comment::annotations.empty_content') }}
                                 </x-shared::button>
                             </template>

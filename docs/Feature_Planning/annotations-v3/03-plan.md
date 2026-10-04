@@ -405,6 +405,58 @@ Checks that phase 6's pop-up changes left the v1/v2 pop-up intact.
   - Any role: an annotation whose passage was removed from the chapter shows
     « Passage absent du chapitre »; desktop and mobile widths.
 
+**Result (2026-10-04, HEAD cbcf5482) — FAIL**
+
+- **Regression (phase 6): the « Vider le contenu » label is illegible.** The
+  button is `<x-shared::button color="danger" :outline="true">` in
+  `Comment/Private/Resources/views/components/partials/annotation-modal.blade.php`,
+  the first `danger` + `outline` button in the app. `.surface-error.is-outline`
+  (`Shared/Resources/css/app.css`) uses `--color-error-bg` for its text and
+  border. Computed style for the moderator: text `rgb(254,226,226)` on
+  `rgb(255,253,251)`, about 1.2:1 contrast, on every root row at both widths.
+  The button is enabled (`disabled=false`, opacity 1) — the colours are the
+  only problem. See `moderator-popup-buttons.png` and
+  `moderator-missing-mobile.png`. The fix is in BUILD: either another
+  colour/outline combination on the modal button, or make
+  `.surface-error.is-outline` use a readable foreground.
+- e2e: `chapter-annotations.spec.ts` and `chapter-annotation-round-trip.spec.ts`
+  pass (8/8 incl. auth setup).
+- Data added to the post-run e2e DB through the UI on `chapitre-illustre-7`,
+  root 7 (`confirmed`): three more annotations, saved from the banner. Then one
+  data-only edit through tinker: the « Epsilon un. … » paragraph was rewritten.
+  The app was served on `:8080`, because `:8081` on this host belongs to another
+  worktree's container. The flow rewrote `localhost:8081` → `:8080` with
+  `ctx.route`, so avatars load.
+- Commenter (desktop): the emptied row shows « <Annotation supprimée> » with
+  « Supprimer l'annotation » only, and the other rows keep « Modifier ». The
+  pending edit, pending delete and pending add rows each carry their marker.
+  The save banner reads « Vous avez 3 annotations non sauvegardées ». The
+  reply thread renders, and no « Traitée » marker leaks to the commenter. See
+  `commenter-emptied-and-missing.png`, `commenter-pending-rows*.png` and
+  `commenter-save-banner.png`.
+- Author: there is a processed toggle on every root row, and it flips to
+  « Marquer comme non traitée » with the « Traitée » marker. The reply editor
+  opens inside the row that was answered. There is no « Vider » and no
+  « Modifier ». See `author-processed-toggle.png` and
+  `author-reply-editor-under-row.png`.
+- Moderator: « Supprimer l'annotation » and « Vider le contenu » appear on all
+  4 root rows; the reply has « Supprimer la réponse » only. The native confirm
+  reads « Vider le contenu de cette annotation ? Le passage et les réponses
+  sont conservés. » After confirming, the row updates in place: there is one
+  POST and no refetch, the passage is kept, the row count is unchanged and
+  « Vider » is gone from that row. See `moderator-row-emptied-in-place.png`.
+- « Passage absent du chapitre » shows on the rewritten passage's row for the
+  commenter, author and moderator, at desktop and at 390px. The dialog fits
+  the 390px viewport with no horizontal overflow. A pending add is not
+  re-anchored. See `*-missing-desktop.png` and `*-missing-mobile.png`.
+- Observation (not a regression; product question): the « au milieu de la
+  phrase » annotation also gets the badge, even though its highlighted text is
+  still in the chapter, unchanged and unique. Its stored suffix
+  (« . Epsilon un. Le paragraphe ») ran into the rewritten paragraph, so both
+  steps of `findAnchor` fail. This matches the `missing` definition in
+  `01-functional.md` (« not found » = neither the triple nor prefix…suffix).
+  It will equally drop that annotation's tint in phase 9.
+
 ---
 
 ## Phase 7 — Shared infra — `rangeFromCanonical` anchoring helper
