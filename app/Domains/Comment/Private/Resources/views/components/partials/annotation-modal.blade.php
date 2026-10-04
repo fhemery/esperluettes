@@ -4,7 +4,9 @@
      text is plain text (x-text); bodies are sanitized server-side (x-html).
      Row actions follow the per-row flags of GET /comments/{id}/annotations.
      For the root's writer, rows carry the pending state of the comment-draft
-     annotationChanges slot and pending adds follow them; their bodies come from
+     annotationChanges slot; pending edits / deletes of annotations no longer
+     served get a stale row of their own (no passage, « Retirer »), and pending
+     adds follow them; their bodies come from
      the writer's own Quill editor and are rendered like the v1 drafts modal.
      Each root shows its reply thread (bodies sanitized server-side); the single
      reply editor rests hidden at the bottom and is moved under the row being
@@ -28,6 +30,7 @@
     data-label-many="{{ trans_choice('comment::annotations.button', 2, ['count' => '__COUNT__']) }}"
     data-load-error="{{ __('comment::annotations.server_modal.load_error') }}"
     data-action-error="{{ __('comment::annotations.server_modal.action_error') }}"
+    data-stale="{{ __('comment::annotations.errors.stale') }}"
 >
     <x-shared::modal name="annotations-server" maxWidth="2xl">
         <div class="p-4 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="annotations-server-title">
@@ -71,6 +74,7 @@
                             </span>
                         </div>
                         <blockquote
+                            x-show="row.highlighted_text"
                             class="border-l-4 border-primary/40 pl-3 mb-2 text-sm text-gray-700 whitespace-pre-line"
                             x-text="row.highlighted_text"
                         ></blockquote>

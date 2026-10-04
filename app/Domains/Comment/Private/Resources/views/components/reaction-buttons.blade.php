@@ -20,6 +20,7 @@
             class="inline-flex items-center px-2 py-1 text-base leading-none rounded
                    hover:bg-primary/10 border border-transparent hover:border-primary/30 transition-colors"
             data-requires-selection-within=".ce-block--text"
+            data-requires-single-area
             x-on:click="react('{{ $emoji }}')"
             aria-label="{{ __('comment::annotations.reactions.' . $key) }}"
             title="{{ __('comment::annotations.reactions.' . $key) }}"

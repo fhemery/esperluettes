@@ -51,7 +51,7 @@ const emptyChanges = () => ({ adds: [], edits: {}, deletes: [] });
 export function annotationsModal() {
     const cache = new Map();
     let labels = { one: '', many: '' };
-    let messages = { load: '', action: '', deleteWithReplies: '', deleteReply: '', replyEmpty: '', replyTooLong: '' };
+    let messages = { load: '', action: '', deleteWithReplies: '', deleteReply: '', replyEmpty: '', replyTooLong: '', stale: '' };
     let context = { userId: null, entityType: null, entityId: null };
     let replyMax = 0;
     let listeners = [];
@@ -132,6 +132,7 @@ export function annotationsModal() {
                 deleteReply: data.deleteReplyConfirm ?? '',
                 replyEmpty: data.replyEmpty ?? '',
                 replyTooLong: data.replyTooLong ?? '',
+                stale: data.stale ?? '',
             };
             replyMax = Number(data.replyMaxLength ?? 0);
             rootEl = this.$root;
@@ -187,7 +188,8 @@ export function annotationsModal() {
         /**
          * What the list renders. Authors and moderators: the server rows as is.
          * Commenter: server rows carrying their pending state (`edited` shows
-         * the pending body), then the pending adds.
+         * the pending body), then pending edits / deletes of annotations no
+         * longer served (flagged stale), then the pending adds.
          */
         get rows() {
             if (!this.isCommenter) return this.items;
@@ -202,6 +204,26 @@ export function annotationsModal() {
                     body: state === STATE_EDITED ? edits[item.id] : item.body,
                 };
             });
+            // Pending edits / deletes whose annotation is no longer served (e.g.
+            // a moderator deleted it, then the page was reloaded): a row of their
+            // own, flagged stale, so « Retirer » drops just that change. Only
+            // once the list has loaded, or every change would look stale.
+            const served = new Set(this.items.map((item) => item.id));
+            const orphan = (id, state) => ({
+                id,
+                state,
+                stale: true,
+                body: state === STATE_EDITED ? edits[id] : '',
+                highlighted_text: '',
+                replies: [],
+                can_edit: false,
+                can_delete: false,
+                can_mark_as_processed: false,
+            });
+            const stale = cache.has(this.commentId) ? [
+                ...Object.keys(edits).map(Number).filter((id) => !served.has(id)).map((id) => orphan(id, STATE_EDITED)),
+                ...deletes.filter((id) => !served.has(id)).map((id) => orphan(id, STATE_DELETED)),
+            ] : [];
             const added = adds.map((add) => ({
                 id: `add-${add.tempId}`,
                 tempId: add.tempId,
@@ -213,7 +235,7 @@ export function annotationsModal() {
                 can_delete: false,
                 can_mark_as_processed: false,
             }));
-            return [...saved, ...added];
+            return [...saved, ...stale, ...added];
         },
 
         refreshChanges() {
@@ -281,7 +303,8 @@ export function annotationsModal() {
         rowError(row) {
             if (!this.isCommenter) return '';
             const key = errorKeys(row).find((k) => this.saveErrors[k]);
-            return key ? this.saveErrors[key] : '';
+            if (key) return this.saveErrors[key];
+            return row.stale ? messages.stale : '';
         },
 
         /** The processed marker is for chapter authors only — never the commenter. */

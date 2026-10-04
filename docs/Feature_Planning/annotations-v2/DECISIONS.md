@@ -20,6 +20,8 @@ a new row that supersedes it and note the number.
 | 10 | 2026-10-03 | REFINE | Replies of a deactivated user | Hidden while deactivated, back on reactivation, no row touched | — |
 | 11 | 2026-10-03 | DESIGN | Where pending post-publish changes live | New `annotationChanges` slot in the comment-draft store (not a separate module/key) | — |
 | 12 | 2026-10-03 | DESIGN | How "an author has replied" is decided | Derived: a visible reply whose writer ≠ the root's writer; no `is_author_reply` column | — |
+| 13 | 2026-10-04 | VERIFY | Cross-block selection (A17): hide « Annoter » / emoji, and what about « Citer »? | Only « Annoter » and ❤️ 🔥 👍 must require a single text block; Quote's « Citer » keeps its rule. Built as an opt-in boolean `data-requires-single-area` on the declaring element, read by the shared toolbar (the selector stays the contributing domain's) | A17 |
+| 14 | 2026-10-04 | VERIFY | Stale pending edit after reload (A16): only « Tout annuler » clears it | The commenter must be able to remove just that change. Choice of means left to BUILD: the pop-up lists each pending edit / delete whose id is absent from the loaded server list as its own row, flagged `errors.stale` before any save, with « Retirer » (same `undo`). Chosen over auto-pruning in the banner, which would silently discard typed text (A3: the user discards it) | A16 |
 
 ## Assumptions made without asking
 

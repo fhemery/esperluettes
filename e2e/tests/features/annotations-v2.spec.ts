@@ -179,24 +179,7 @@ async function selectAcrossBlocks(chapter: ChapterPage): Promise<void> {
   );
 }
 
-test('a cross-block selection: an emoji click stores nothing', async ({ confirmed }) => {
-  const chapter = new ChapterPage(confirmed, STORY.slug, STORY.advancedChapter.slug);
-  const annotations = new ChapterAnnotations(confirmed);
-  await chapter.goto();
-
-  await selectAcrossBlocks(chapter);
-  await annotations.evidence('cross-block-toolbar');
-  await annotations.reactionButton('heart').click();
-  await expect(annotations.banner).toBeHidden();
-  await expect(annotations.saveBanner).toBeHidden();
-});
-
-test('a cross-block selection hides « Annoter » and the emoji alike', async ({ confirmed }) => {
-  test.fail(
-    true,
-    'VERIFY FAIL: the shared toolbar accepts a selection spanning two `.ce-block--text`, so « Annoter » ' +
-      '(form error on open) and the emoji (silent no-op) both show. Remove once BUILD hides them.',
-  );
+test('a cross-block selection hides « Annoter » and the emoji alike, « Citer » stays', async ({ confirmed }) => {
   const chapter = new ChapterPage(confirmed, STORY.slug, STORY.advancedChapter.slug);
   const annotations = new ChapterAnnotations(confirmed);
   await chapter.goto();
@@ -206,10 +189,12 @@ test('a cross-block selection hides « Annoter » and the emoji alike', async ({
   await expect(annotations.reactionButton('heart')).toBeVisible();
 
   await selectAcrossBlocks(chapter);
-  await expect(annotations.annotateButton).toBeHidden({ timeout: 2000 });
+  await expect(chapter.citeButton).toBeVisible();
+  await expect(annotations.annotateButton).toBeHidden();
   for (const reaction of ['heart', 'fire', 'thumbs_up'] as const) {
     await expect(annotations.reactionButton(reaction)).toBeHidden();
   }
+  await annotations.evidence('cross-block-toolbar');
 });
 
 test('touch selection: 🔥 becomes a pending add, « Tout annuler » drops it', async ({ browser }) => {
@@ -472,8 +457,18 @@ test('stale item: a moderator deletes the row being edited; the save names it, �
   const stale = annotations.pendingRow('edited');
   await expect(annotations.rowError(stale)).toContainText("Cette annotation n'existe plus");
   await annotations.evidence('stale-row-flagged', annotations.serverDialog);
+
+  // After a reload the server list no longer has the row: the stale edit still
+  // gets one of its own, flagged before any save, with « Retirer ».
+  await confirmed.keyboard.press('Escape');
+  await confirmed.reload();
+  await loadThread(thread);
+  await annotations.openFromSaveBanner();
+  await expect(annotations.rowError(stale)).toContainText("Cette annotation n'existe plus");
+  await annotations.evidence('stale-row-after-reload', annotations.serverDialog);
   await annotations.removeStaleButton(stale).click();
   await expect(annotations.pendingRow('edited')).toHaveCount(0);
+  await expect(annotations.pendingRow('added')).toHaveCount(1);
   await expect(annotations.saveBannerError).toBeHidden();
   await expect(annotations.saveBanner).toContainText('Vous avez 1 annotation non sauvegardée');
 

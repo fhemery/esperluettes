@@ -10,6 +10,7 @@
            rounded bg-primary/10 hover:bg-primary/20 text-primary
            border border-primary/30 transition-colors"
     data-requires-selection-within=".ce-block--text"
+    data-requires-single-area
     x-on:click="window.dispatchEvent(new CustomEvent('annotation:open-form'))"
     title="{{ __('comment::annotations.toolbar_button.title') }}"
 >

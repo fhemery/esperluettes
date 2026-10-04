@@ -24,7 +24,7 @@ describe('« Annoter » toolbar button and capture form on the chapter page', fu
             ->assertOk()
             ->assertSee('class="annotation-toolbar-btn', false)
             ->assertSee(__('comment::annotations.toolbar_button.label'))
-            ->assertSeeInOrder(['annotation-toolbar-btn', 'data-requires-selection-within=".ce-block--text"'], false)
+            ->assertSeeInOrder(['annotation-toolbar-btn', 'data-requires-selection-within=".ce-block--text"', 'data-requires-single-area'], false)
             ->assertSee('data-annotation-form', false)
             ->assertSee('data-user-id="' . $reader->id . '"', false)
             ->assertSee('data-entity-id="' . $chapter->id . '"', false);
@@ -92,7 +92,7 @@ describe('« Annoter » toolbar button and capture form on the chapter page', fu
                 'aria-label="' . __('comment::annotations.reactions.fire') . '"', '🔥',
                 'aria-label="' . __('comment::annotations.reactions.thumbs_up') . '"', '👍',
             ], false)
-            ->assertSeeInOrder(['data-annotation-reactions', 'data-requires-selection-within=".ce-block--text"'], false)
+            ->assertSeeInOrder(['data-annotation-reactions', 'data-requires-selection-within=".ce-block--text"', 'data-requires-single-area'], false)
             ->assertSee('data-user-id="' . $reader->id . '"', false);
     });
 

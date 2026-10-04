@@ -154,6 +154,38 @@ describe('showToolbar', () => {
         expect(action('annotate').style.display).toBe('none');
     });
 
+    it('hides an action declaring data-requires-single-area when the selection spans two matching areas, and only that one', () => {
+        const quote = '<button data-action="quote" data-requires-selection-within=".ce-block--text">Citer</button>';
+        const annotate = '<button data-action="annotate" data-requires-selection-within=".ce-block--text" data-requires-single-area>Annoter</button>';
+        const reactions = '<div data-action="reactions"><button data-requires-selection-within=".ce-block--text" data-requires-single-area>❤️</button></div>';
+        setup(quote + annotate + reactions, `
+            <div class="ce-block ce-block--text"><p id="a">a</p><p id="a2">a2</p></div>
+            <div class="ce-block ce-block--text"><p id="b">b</p></div>`);
+
+        // Several paragraphs of one block: still one area.
+        select(range(textOf('a'), 0, textOf('a2'), 2));
+        showToolbar();
+        expect(action('quote').style.display).toBe('');
+        expect(action('annotate').style.display).toBe('');
+        expect(action('reactions').style.display).toBe('');
+
+        select(range(textOf('a'), 0, textOf('b'), 1));
+        showToolbar();
+        expect(toolbar().style.display).toBe('');
+        expect(action('quote').style.display).toBe('');
+        expect(action('annotate').style.display).toBe('none');
+        expect(action('reactions').style.display).toBe('none');
+    });
+
+    it('keeps a single-area action for a triple-click that merely touches the next block', () => {
+        const annotate = '<button data-action="annotate" data-requires-selection-within=".ok" data-requires-single-area>Annoter</button>';
+        setup(annotate);
+        const figure = document.querySelector('figure');
+        select(range(textOf('a'), 0, figure, 0));
+        showToolbar();
+        expect(action('annotate').style.display).toBe('');
+    });
+
     it('applies the too-long state only when an action is applicable', () => {
         const long = 'x'.repeat(600);
         setup(DECLARING, `<div class="ok"><p id="a">${long}</p></div><figure><figcaption id="c">${long}</figcaption></figure>`);

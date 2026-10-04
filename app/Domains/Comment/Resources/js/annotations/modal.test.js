@@ -10,6 +10,7 @@ const DELETE_CONFIRM = 'Les réponses seront aussi supprimées.';
 const DELETE_REPLY_CONFIRM = 'Supprimer cette réponse ?';
 const REPLY_EMPTY = 'Réponse vide.';
 const REPLY_TOO_LONG = 'Réponse trop longue.';
+const STALE = 'Cette annotation n’existe plus.';
 const CSRF = 'csrf-token-value';
 const USER_ID = 7;
 const CHAPTER_ID = 42;
@@ -66,6 +67,7 @@ function mount() {
     root.dataset.replyMaxLength = '20';
     root.dataset.replyEmpty = REPLY_EMPTY;
     root.dataset.replyTooLong = REPLY_TOO_LONG;
+    root.dataset.stale = STALE;
     root.dataset.userId = String(USER_ID);
     root.dataset.entityType = 'chapter';
     root.dataset.entityId = String(CHAPTER_ID);
@@ -218,6 +220,48 @@ describe('annotationsModal — commenter overlay', () => {
         component.undo(added());
         expect(slot().adds).toEqual([]);
         expect(Object.keys(component.saveErrors)).toEqual(['deletes.2']);
+    });
+
+    it('lists a pending edit or delete whose annotation is gone from the server list, flagged stale, removable alone', async () => {
+        drafts.setPendingEdit(USER_ID, 'chapter', CHAPTER_ID, 9, '<p>trop tard</p>');
+        drafts.setPendingDelete(USER_ID, 'chapter', CHAPTER_ID, 8);
+        drafts.setPendingEdit(USER_ID, 'chapter', CHAPTER_ID, 1, '<p>revu</p>');
+        const tempId = addPending();
+        await openAsCommenter([own(1)]);
+
+        expect(component.rows.map((r) => r.state)).toEqual([STATE_EDITED, STATE_EDITED, STATE_DELETED, STATE_ADDED]);
+        const goneEdit = component.rows[1];
+        const goneDelete = component.rows[2];
+        expect(goneEdit.body).toBe('<p>trop tard</p>');
+        expect(goneEdit.highlighted_text).toBe('');
+        expect(component.rowError(goneEdit)).toBe(STALE);
+        expect(component.rowError(goneDelete)).toBe(STALE);
+        expect(component.rowError(rowById(1))).toBe('');
+        for (const row of [goneEdit, goneDelete]) {
+            expect(component.canEdit(row)).toBe(false);
+            expect(component.canRemove(row)).toBe(false);
+            expect(component.canReply(row)).toBe(false);
+        }
+
+        // « Retirer » drops only that change.
+        component.undo(goneEdit);
+        component.undo(component.rows.find((r) => r.state === STATE_DELETED));
+        expect(slot()).toEqual({
+            adds: [expect.objectContaining({ tempId })],
+            edits: { 1: '<p>revu</p>' },
+            deletes: [],
+        });
+        expect(component.rows.map((r) => r.state)).toEqual([STATE_EDITED, STATE_ADDED]);
+    });
+
+    it('flags no stale change while the list is loading or failed to load', async () => {
+        drafts.setPendingEdit(USER_ID, 'chapter', CHAPTER_ID, 9, '<p>trop tard</p>');
+        fetchMock.mockRejectedValueOnce(new Error('network'));
+        mount();
+        await component.open(10);
+
+        expect(component.error).toBe(LOAD_ERROR);
+        expect(component.rows).toEqual([]);
     });
 
     it('ignores save errors for another comment', async () => {

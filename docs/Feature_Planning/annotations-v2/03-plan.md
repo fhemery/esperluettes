@@ -819,7 +819,10 @@ during PLAN while the flows are fresh.
 
 VERIFY run 2026-10-04 on HEAD `9a200e98` (+ the fix below).
 Spec: `e2e/tests/features/annotations-v2.spec.ts` — 16 tests, all green, plus one
-declared `test.fail` for row 3. Shots: `shots/*.png` (taken only with
+declared `test.fail` for row 3. Follow-up 2026-10-04 (decisions #13, #14): row 3
+fixed, the after-reload stale case added; the spec is 15 tests, all green, no
+`test.fail` (the cross-block emoji no-op test was folded into the hiding test —
+a hidden button cannot be clicked). Shots: `shots/*.png` (taken only with
 `E2E_SHOTS_DIR` set). Full `pnpm run e2e` green (44 passed),
 `pnpm run gate -- --quick` green.
 
@@ -827,10 +830,10 @@ declared `test.fail` for row 3. Shots: `shots/*.png` (taken only with
 |---------|-------|-----|
 | Chapter, reader without a root comment (desktop) | Selection toolbar: « Citer » (if allowed), « Annoter », ❤️ 🔥 👍; clicking ❤️ adds a draft, v1 banner in the root form counts it | ✅ spec « without a root comment… »; `toolbar-no-root.png` |
 | Chapter, reader with a root comment (desktop) | Same toolbar; clicking 🔥 shows the sticky banner « Vous avez 1 annotation non sauvegardée » | ✅ round trip (❤️) + touch test (🔥); `save-banner-plural.png` |
-| Chapter, refused selection | Cross-block or over-cap selection hides « Annoter » and the three emojis alike | ❌ over-cap ✅ (« Sélection trop longue » replaces all actions). **Cross-block: « Annoter » and ❤️ 🔥 👍 stay visible** (`cross-block-toolbar.png`); « Annoter » then shows the multi-block error in its form, an emoji click is a silent no-op (nothing stored — asserted). Cause: the shared toolbar (`annotable/toolbar.js`) shows an action when every covered text lies in *some* `.ce-block--text`, not in a single one; Quote's « Citer » uses the same rule. Not fixed (touches the shared toolbar and Quote). Spec keeps the expectation as `test.fail` |
+| Chapter, refused selection | Cross-block or over-cap selection hides « Annoter » and the three emojis alike | ✅ over-cap (« Sélection trop longue » replaces all actions). Cross-block: ❌ on `9a200e98` (« Annoter » and ❤️ 🔥 👍 stayed visible); fixed after decision #13 — they carry `data-requires-single-area`, hidden on a two-block selection while « Citer » stays (`cross-block-toolbar.png`); the spec's `test.fail` is now a passing test |
 | Save banner, plural + reload | « 2 annotations non sauvegardées »; reload keeps it; « Tout annuler » asks then clears | ✅ confirm text asserted; `save-banner-plural.png` |
 | Save banner, success | « Enregistrer » → banner gone, « N annotations » on the comment updated (also from 0) | ✅ 0→1 (round trip), 1→2; `save-success-count.png` |
-| Save banner, stale item | Moderator deletes an annotation in another session, commenter saves an edit of it → error names it, row flagged, « Retirer » then save succeeds | ✅ `stale-banner-error.png`, `stale-row-flagged.png` (see DECISIONS A16 for the after-reload case) |
+| Save banner, stale item | Moderator deletes an annotation in another session, commenter saves an edit of it → error names it, row flagged, « Retirer » then save succeeds | ✅ `stale-banner-error.png`, `stale-row-flagged.png`. After a reload (A16, decision #14): the stale edit gets its own row, flagged before any save, « Retirer » drops it alone — `stale-row-after-reload.png` |
 | Pop-up, commenter | Rows show « Modifiée — non enregistrée », « Sera supprimée », pending adds; per-row undo; « Modifier » reopens the form with the body only | ✅ `popup-commenter-pending.png`, `popup-commenter-edit-form.png` (passage read-only, body pre-filled) |
 | Pop-up, delete with replies | Confirmation « Les réponses seront aussi supprimées. »; after save, root and replies gone | ✅ refuse keeps the row, accept + save removes row and reply |
 | Pop-up, author | Sees all rows + replies, « Répondre » on every root, processed toggle; after an edit by the commenter, « Traitée » is reset | ✅ `popup-author.png`; reset asserted after the commenter's saved edit |

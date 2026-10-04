@@ -154,7 +154,10 @@ slot's top-level element or a descendant of it). It is then shown only when
 every non-blank text the selection covers lies inside an element matching the
 selector (a boundary that merely touches a block without covering its text, e.g.
 a triple-click ending at `(nextBlock, 0)`, is ignored — Shared's
-`anchoring/text-range.js`); actions without the attribute are always shown. When no
+`anchoring/text-range.js`). If the declaring element also carries the boolean
+`data-requires-single-area`, that text must lie in **one single** matching
+element: a selection spanning two of them hides the action. Actions without the
+attribute are always shown. When no
 action applies, the toolbar is not shown at all. The selector is chosen by the
 contributing domain — Comment never knows which domain declared it.
 
@@ -261,15 +264,18 @@ comment-draft module, which is why the banner re-reads the drafts slot on
 - **« Annoter »** — `<x-comment::annotate-button :can-annotate>`, placed by the
   consumer in `<x-comment::annotable>`'s `toolbar-actions` slot. It carries
   `data-requires-selection-within=".ce-block--text"` (text blocks only; images,
-  captions and chapter-choice blocks are excluded) and only dispatches
+  captions and chapter-choice blocks are excluded) plus
+  `data-requires-single-area` (hidden when the selection spans two text blocks;
+  Quote's « Citer » does not carry it), and only dispatches
   `annotation:open-form`: the slot is cloned from a `<template>`, so it cannot
   host the form.
 - **Reactions ❤️ 🔥 👍** — `<x-comment::reaction-buttons :entity-type
   :can-annotate>`, placed right after « Annoter » in the same slot, same
-  `data-requires-selection-within` rule (`reactions.js`, Alpine
-  `annotationReactions`). A click stores `<p>EMOJI</p>` anchored to the
-  selection, with no form, and clears the selection; a multi-block or over-cap
-  selection is ignored. French `aria-label`s.
+  `data-requires-selection-within` + `data-requires-single-area` rules
+  (`reactions.js`, Alpine `annotationReactions`). A click stores `<p>EMOJI</p>`
+  anchored to the selection, with no form, and clears the selection; a
+  multi-block or over-cap selection is ignored (defence in depth: the toolbar
+  already hides the buttons on a multi-block one). French `aria-label`s.
 - **Draft vs pending mode** — the annotable and the form carry
   `data-annotation-mode`: `draft` (the viewer has no root comment yet; writes go
   to the comment-draft `annotations` slot) or `pending` (a root exists, its id in
@@ -314,7 +320,11 @@ comment-draft module, which is why the banner re-reads the drafts slot on
   pop-up re-reads the slot on `comment-drafts:annotation-changes-changed`,
   shows the banner's `annotations:save-errors` on the matching row with
   « Retirer » (undoes that item), and replaces its cached list on
-  `annotations:list-refreshed`. Authors and moderators see none of it.
+  `annotations:list-refreshed`. A pending edit / delete whose annotation is no
+  longer in the loaded server list (deleted by a moderator, then the page
+  reloaded) gets a row of its own, before the pending adds, already flagged
+  with `errors.stale` and « Retirer », so it can be dropped without « Tout
+  annuler ». Authors and moderators see none of it.
 
 Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts`.
 
