@@ -91,5 +91,9 @@ return [
         // :count = the other annotations grouped with this one
         'avatar_label' => '{0} Annotation de :name|{1} Annotation de :name et 1 autre|[2,*] Annotation de :name et :count autres',
         'more' => '+:count',
+        'position' => ':index / :total',
+        'previous' => 'Annotation précédente',
+        'next' => 'Annotation suivante',
+        'close' => 'Fermer',
     ],
 ];

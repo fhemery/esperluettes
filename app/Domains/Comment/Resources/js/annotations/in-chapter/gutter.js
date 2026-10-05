@@ -8,11 +8,12 @@
  *
  * Items are sorted by `top`, then canonical `start` (stable); a band runs while
  * consecutive tops differ by less than `minGap`. The lead is the band's first
- * visible item in reading order, `extra` its other visible roots (the « +N »,
- * A2). A band with no visible item yields no group.
+ * visible item in reading order, `members` every visible item in that order
+ * (what the popover pages through), `extra` the visible roots after the lead
+ * (the « +N », A2). A band with no visible item yields no group.
  *
  * @param {Array<{ key: string, top: number, start: number, visible: boolean, isRoot: boolean }>} items
- * @returns {Array<{ key: string, top: number, lead: object, extra: object[] }>}
+ * @returns {Array<{ key: string, top: number, lead: object, members: object[], extra: object[] }>}
  */
 export function groupByPosition(items, minGap = 20) {
     const sorted = items.slice().sort((a, b) => (a.top - b.top) || (a.start - b.start));
@@ -34,6 +35,7 @@ export function groupByPosition(items, minGap = 20) {
             key: lead.key,
             top: lead.top,
             lead,
+            members: visible,
             extra: visible.slice(1).filter((item) => item.isRoot),
         });
     }

@@ -63,6 +63,21 @@ describe('<x-comment::annotation-overlay>', function () {
             ->assertSee('data-more-label="comment::annotations.overlay.more"', false);
     });
 
+    it('renders the popover with its own reply editor', function () {
+        $this->actingAs($this->author);
+
+        renderAnnotationOverlay($this, 'chapter', $this->chapter->id)
+            ->assertSee('x-data="annotationPopover"', false)
+            ->assertSee('x-teleport="body"', false)
+            ->assertSee('data-annotation-popover-panel', false)
+            ->assertSee('id="annotation-overlay-reply-editor"', false)
+            ->assertDontSee('id="annotation-reply-editor"', false)
+            ->assertSee('x-html="current.body"', false)
+            ->assertSee('comment::annotations.overlay.position', false)
+            ->assertSee('comment::annotations.replies.author_hint', false)
+            ->assertSee('data-reply-max-length="1000"', false);
+    });
+
     it('carries the viewer profile for their unsaved annotations', function () {
         $this->actingAs(bob($this));
 

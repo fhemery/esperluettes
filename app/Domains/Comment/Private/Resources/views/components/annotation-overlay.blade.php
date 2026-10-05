@@ -34,7 +34,8 @@
                     :style="`top: ${group.top}px`"
                     :aria-label="group.label"
                     :data-annotation-group="group.key"
-                    @click="$dispatch('annotation-overlay:open', { groupKey: group.key })">
+                    aria-haspopup="dialog"
+                    @click="$dispatch('annotation-overlay:open', { groupKey: group.key, keys: group.members })">
                 <img :src="group.avatar" alt="" class="h-6 w-6 rounded-full object-cover"
                      @@error="if ($el.src !== defaultAvatar) $el.src = defaultAvatar">
                 <span x-show="group.more > 0"
@@ -42,6 +43,118 @@
                       aria-hidden="true"
                       class="absolute -bottom-1 -right-1 min-w-4 h-4 px-0.5 rounded-full text-[10px] leading-4 font-bold text-center surface-accent text-on-surface"></span>
             </button>
+        </template>
+    </div>
+
+    {{-- Popover on one gutter group (annotationPopover, popover.js). The panel is
+         teleported to body; bodies are sanitized server-side (x-html), the
+         emptied placeholder included. Actions follow the row's can_* flags. --}}
+    <div x-data="annotationPopover"
+         data-position="{{ __('comment::annotations.overlay.position', ['index' => '{index}', 'total' => '{total}']) }}"
+         data-action-error="{{ __('comment::annotations.server_modal.action_error') }}"
+         data-reply-max-length="{{ $replyMax }}"
+         data-reply-empty="{{ __('comment::annotations.replies.empty_body') }}"
+         data-reply-too-long="{{ __('comment::annotations.replies.too_long', ['max' => $replyMax]) }}"
+         data-user-name="{{ $userName }}"
+         data-user-avatar="{{ $userAvatar }}"
+         data-default-avatar="{{ asset('images/default-avatar.svg') }}">
+        <template x-teleport="body">
+            <div x-cloak x-show="open" style="display:none"
+                 data-annotation-popover-panel
+                 role="dialog"
+                 aria-label="{{ __('comment::annotations.server_modal.title') }}"
+                 tabindex="-1"
+                 :style="styleObj"
+                 x-effect="sync()"
+                 class="fixed z-[9999] w-80 p-3 rounded-md shadow-lg bg-white ring-1 ring-black/5 text-sm text-gray-700 focus:outline-none">
+                <div class="flex items-center gap-2">
+                    <template x-if="current">
+                        <div class="flex items-center gap-2 min-w-0 flex-1">
+                            <img :src="authorAvatar(current)" alt="" class="h-6 w-6 rounded-full object-cover"
+                                 @@error="if ($el.src !== defaultAvatar) $el.src = defaultAvatar">
+                            <span class="font-medium text-gray-900 truncate" x-text="authorName(current)"></span>
+                        </div>
+                    </template>
+                    <div x-show="members.length > 1" class="flex items-center gap-1 shrink-0">
+                        <button type="button" class="rounded-sm text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                                @click="previous()" aria-label="{{ __('comment::annotations.overlay.previous') }}">
+                            <span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">chevron_left</span>
+                        </button>
+                        <span class="text-xs tabular-nums" x-text="position" aria-live="polite"></span>
+                        <button type="button" class="rounded-sm text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                                @click="next()" aria-label="{{ __('comment::annotations.overlay.next') }}">
+                            <span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">chevron_right</span>
+                        </button>
+                    </div>
+                    <button type="button" class="ml-auto rounded-sm text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            @click="close(true)" aria-label="{{ __('comment::annotations.overlay.close') }}">
+                        <span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">close</span>
+                    </button>
+                </div>
+
+                <template x-if="current">
+                    <div>
+                        <div class="comment-body rich-content mt-2" x-html="current.body"></div>
+
+                        <ul x-show="(current.replies ?? []).length > 0" class="mt-3 pl-3 space-y-3">
+                            <template x-for="reply in (current.replies ?? [])" :key="reply.id">
+                                <li class="border-l-2 border-gray-200 pl-3" data-testid="annotation-popover-reply">
+                                    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                                        <img :src="replyAvatar(reply)" alt="" class="h-5 w-5 rounded-full object-cover"
+                                             @@error="if ($el.src !== defaultAvatar) $el.src = defaultAvatar">
+                                        <span class="font-medium text-gray-700" x-text="replyAuthor(reply)"></span>
+                                        <time :datetime="reply.created_at" x-text="replyDate(reply)"></time>
+                                    </div>
+                                    <div class="comment-body rich-content mt-1" x-html="reply.body"></div>
+                                </li>
+                            </template>
+                        </ul>
+
+                        <p x-show="showsHint(current)" class="mt-2 text-gray-600" role="status">
+                            {{ __('comment::annotations.replies.author_hint') }}
+                        </p>
+
+                        <div x-show="(canReply(current) && !replying) || canToggle(current)" class="mt-3 flex flex-wrap justify-end gap-2">
+                            <template x-if="canToggle(current)">
+                                <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="toggleProcessed()" x-bind:disabled="busy">
+                                    <span x-show="!current.is_processed">{{ __('comment::annotations.server_modal.mark_processed') }}</span>
+                                    <span x-show="current.is_processed">{{ __('comment::annotations.server_modal.mark_unprocessed') }}</span>
+                                </x-shared::button>
+                            </template>
+                            <template x-if="canReply(current) && !replying">
+                                <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="startReply()">
+                                    {{ __('comment::annotations.replies.reply') }}
+                                </x-shared::button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <p x-show="error" x-text="error" class="mt-2 text-red-600" role="alert"></p>
+
+                {{-- Kept out of the x-if above: Quill must survive paging between members. --}}
+                <div x-show="replying" class="mt-3">
+                    <span class="sr-only">{{ __('comment::annotations.replies.body_label') }}</span>
+                    <x-editor::rich-text
+                        id="annotation-overlay-reply-editor"
+                        name="annotation_overlay_reply_body"
+                        toolbar="inline"
+                        :max="$replyMax"
+                        :nbLines="3"
+                        :resizable="false"
+                        isMandatory="true"
+                    />
+                    <p x-show="replyError" x-text="replyError" class="mt-2 text-red-600" role="alert"></p>
+                    <div class="mt-2 flex flex-wrap justify-end gap-2">
+                        <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="cancelReply()">
+                            {{ __('comment::annotations.replies.cancel') }}
+                        </x-shared::button>
+                        <x-shared::button type="button" size="sm" color="accent" x-on:click="sendReply()" x-bind:disabled="!replyValid || sending">
+                            {{ __('comment::annotations.replies.send') }}
+                        </x-shared::button>
+                    </div>
+                </div>
+            </div>
         </template>
     </div>
 </div>

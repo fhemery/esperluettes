@@ -22,6 +22,8 @@ class AnnotationOverlayComponent extends Component
     /** A commenter's own profile, for the gutter avatar of their unsaved annotations. */
     public string $userName = '';
     public string $userAvatar = '';
+    /** Plain-text limit of the popover's reply editor. */
+    public int $replyMax = 0;
 
     public function __construct(
         private readonly CommentPolicyRegistry $policies,
@@ -45,6 +47,7 @@ class AnnotationOverlayComponent extends Component
 
         if ($this->inChapterRole !== null) {
             $this->inEntityUrl = route('comments.annotations.in-entity');
+            $this->replyMax = (int) $this->policies->getAnnotationBodyMaxLength($this->entityType);
         }
 
         // Only a commenter has local (draft / pending) rows, which carry no profile.

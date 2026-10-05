@@ -10,6 +10,13 @@ describe('groupByPosition', () => {
         expect(groups).toHaveLength(1);
         expect(groups[0].lead.key).toBe('a');
         expect(groups[0].extra.map((i) => i.key)).toEqual(['b']);
+        expect(groups[0].members.map((i) => i.key)).toEqual(['a', 'b']);
+    });
+
+    it('lists only the visible items of a band as members', () => {
+        const groups = groupByPosition([item('a', 100, 0, { visible: false }), item('b', 105, 10), item('c', 110, 20)]);
+
+        expect(groups[0].members.map((i) => i.key)).toEqual(['b', 'c']);
     });
 
     it('splits two items 25px apart into two groups', () => {
