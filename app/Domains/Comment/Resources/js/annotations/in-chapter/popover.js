@@ -11,6 +11,10 @@ export const POPOVER_ID = 'annotation-overlay-popover';
 export const REPLY_EDITOR_ID = 'annotation-overlay-reply-editor';
 
 const ROLE_AUTHOR = 'author';
+const ROLE_COMMENTER = 'commenter';
+const SOURCE_SERVER = 'server';
+const SOURCE_DRAFT = 'draft';
+const SOURCE_PENDING_ADD = 'pending-add';
 const PANEL_SELECTOR = '[data-annotation-popover-panel]';
 const AVATAR_SELECTOR = '[data-annotation-group]';
 const MARGIN = 8;
@@ -54,6 +58,10 @@ export function placePanel(trigger, width, height, viewportWidth, viewportHeight
  * current row is hidden.
  *
  * Actions follow the row's `can_*` flags: processed toggle, « Répondre ».
+ * The commenter's own rows get « Modifier » / « Supprimer » by `source`, as the
+ * drafts modal (draft) and the « N annotations » pop-up (saved row, pending
+ * add) do: the capture form opens by event, deletes go through
+ * `window.commentDrafts`, whose change event recomposes the overlay store.
  * After a server mutation nothing is refetched: the updated list is dispatched
  * as `annotations:list-refreshed { commentId, list }`, which both the overlay
  * store and the « N annotations » pop-up cache apply.
@@ -62,7 +70,7 @@ export function placePanel(trigger, width, height, viewportWidth, viewportHeight
  * inside `<x-shared::button>` (its own x-data).
  */
 export function annotationPopover() {
-    let messages = { position: '', action: '', replyEmpty: '', replyTooLong: '' };
+    let messages = { position: '', action: '', replyEmpty: '', replyTooLong: '', deleteWithReplies: '' };
     let defaultAvatar = '';
     let ownProfile = { name: '', avatar: '' };
     let replyMax = 0;
@@ -99,6 +107,7 @@ export function annotationPopover() {
                 action: data.actionError ?? '',
                 replyEmpty: data.replyEmpty ?? '',
                 replyTooLong: data.replyTooLong ?? '',
+                deleteWithReplies: data.deleteWithReplies ?? '',
             };
             defaultAvatar = data.defaultAvatar ?? '';
             ownProfile = { name: data.userName ?? '', avatar: data.userAvatar ?? '' };
@@ -284,6 +293,53 @@ export function annotationPopover() {
 
         canReply(row) {
             return !!row?.can_reply;
+        },
+
+        /** Commenter: local rows, or a saved row the server lets them edit — never an emptied one. */
+        canEdit(row) {
+            if (this.overlay.role !== ROLE_COMMENTER || !row || row.is_emptied) return false;
+            if (row.source === SOURCE_SERVER) return !!row.can_edit;
+            return row.source === SOURCE_DRAFT || row.source === SOURCE_PENDING_ADD;
+        },
+
+        /** Commenter: as « Modifier », plus an emptied saved row (decision #5). */
+        canDelete(row) {
+            if (this.overlay.role !== ROLE_COMMENTER || !row) return false;
+            if (row.source === SOURCE_SERVER) return !!row.can_edit || !!row.is_emptied;
+            return row.source === SOURCE_DRAFT || row.source === SOURCE_PENDING_ADD;
+        },
+
+        /** Commenter: close, then open the capture form on the row (draft, pending add or saved row). */
+        edit() {
+            const row = this.current;
+            if (!this.canEdit(row)) return;
+            const event = row.source === SOURCE_SERVER
+                ? new CustomEvent('annotations:edit-saved-row', {
+                    detail: { id: row.id, body: row.body, highlighted: row.highlighted_text },
+                })
+                : new CustomEvent('annotation:open-edit', { detail: { tempId: row.tempId } });
+            this.close(false);
+            // Opened after this click has finished bubbling, as the drafts modal
+            // does: the capture form's @click.outside would close it on this click.
+            setTimeout(() => window.dispatchEvent(event), 0);
+        },
+
+        /** Commenter: drop the draft / pending add, or store a pending delete of a saved row. */
+        remove() {
+            const row = this.current;
+            const drafts = window.commentDrafts;
+            if (!this.canDelete(row) || !drafts) return;
+            const { userId, entityType, entityId } = this.overlay.context;
+            const args = [userId, entityType, entityId];
+            if (row.source === SOURCE_DRAFT) {
+                drafts.removeAnnotation(...args, row.tempId);
+            } else if (row.source === SOURCE_PENDING_ADD) {
+                drafts.removePendingAdd(...args, row.tempId);
+            } else {
+                if ((row.replies?.length ?? 0) > 0 && !window.confirm(messages.deleteWithReplies)) return;
+                drafts.setPendingDelete(...args, row.id);
+            }
+            this.sync();
         },
 
         /** After an author's reply: replies notify nobody, the root comment does. */

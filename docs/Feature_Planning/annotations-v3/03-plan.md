@@ -28,7 +28,7 @@
 | 9v | Checkpoint — quote tint vs annotation tint, heat on/off, quote/unquote | S | 9 | DONE |
 | 10 | Gutter avatars and grouping | M | 9 | DONE |
 | 11 | Popover shell + author actions (reply, processed) | M | 10 | DONE |
-| 12 | Popover commenter actions (modifier / supprimer / répondre) | M | 11 | TODO |
+| 12 | Popover commenter actions (modifier / supprimer / répondre) | M | 11 | DONE |
 | 13 | Author filter menu + processed display | S | 11 | TODO |
 
 17 rows: 13 phases + 4 checkpoints.

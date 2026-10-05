@@ -55,6 +55,7 @@
          data-reply-max-length="{{ $replyMax }}"
          data-reply-empty="{{ __('comment::annotations.replies.empty_body') }}"
          data-reply-too-long="{{ __('comment::annotations.replies.too_long', ['max' => $replyMax]) }}"
+         data-delete-with-replies="{{ __('comment::annotations.server_modal.delete_with_replies_confirm') }}"
          data-user-name="{{ $userName }}"
          data-user-avatar="{{ $userAvatar }}"
          data-default-avatar="{{ asset('images/default-avatar.svg') }}">
@@ -114,7 +115,17 @@
                             {{ __('comment::annotations.replies.author_hint') }}
                         </p>
 
-                        <div x-show="(canReply(current) && !replying) || canToggle(current)" class="mt-3 flex flex-wrap justify-end gap-2">
+                        <div x-show="(canReply(current) && !replying) || canToggle(current) || canDelete(current)" class="mt-3 flex flex-wrap justify-end gap-2">
+                            <template x-if="canEdit(current)">
+                                <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="edit()">
+                                    {{ __('comment::annotations.server_modal.edit') }}
+                                </x-shared::button>
+                            </template>
+                            <template x-if="canDelete(current)">
+                                <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="remove()">
+                                    {{ __('comment::annotations.drafts_modal.delete') }}
+                                </x-shared::button>
+                            </template>
                             <template x-if="canToggle(current)">
                                 <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="toggleProcessed()" x-bind:disabled="busy">
                                     <span x-show="!current.is_processed">{{ __('comment::annotations.server_modal.mark_processed') }}</span>
