@@ -100,6 +100,62 @@ export const COAUTHORED_STORY = {
 } as const;
 
 /**
+ * Story 6 and its in-chapter annotations: `E2eStorySeeder` (story, written by
+ * `author`, co-written by `tech_admin`, beta-read by `moderator`) and
+ * `E2eCommentsSeeder::seedInChapterAnnotations()` (roots and annotations).
+ * `confirmed`'s quote on `ruisseau` comes from `E2eQuotesSeeder`.
+ */
+export const ANNOTATED = {
+  storySlug: 'histoire-annotee-6',
+  /** Advanced: two paragraphs, a raw lazily-loaded image, four paragraphs. */
+  chapter: { slug: 'chapitre-annote-11', title: 'Chapitre annoté' },
+  /** No root comment, no annotation. */
+  emptyChapter: { slug: 'chapitre-sans-annotation-12', title: 'Chapitre sans annotation' },
+  /** `user`'s root with three annotations; the author answered the first. */
+  reviewedChapter: { slug: 'chapitre-a-reviser-13', title: 'Chapitre à réviser' },
+  roots: { confirmed: 101, user: 102, anonymised: 103, deactivated: 104, reviewedUser: 105 },
+  /** Passages of chapter 11, by who annotated them. */
+  confirmed: {
+    /** Answered by `author` (and by a deactivated writer, whose reply must not show). */
+    fox: 'Le renard roux',
+    morning: 'au matin',
+    /** Processed: hidden from the author by default, never flagged to `confirmed`. */
+    processed: 'depuis la branche la plus haute',
+    /** Not in the chapter any more. */
+    missing: 'Un passage disparu du chapitre',
+    /** Stored text gone, context intact: tinted on its new place. */
+    movedTo: 'La boulangère ouvre',
+    /** Emptied by a moderator. */
+    emptied: "s'éveille et les volets",
+    /** Under `confirmed`'s own quote `Le ruisseau chante`. */
+    underQuote: 'ruisseau chante sous le pont',
+  },
+  user: { clearing: 'traverse la clairière', mill: 'le moulin tourne encore' },
+  anonymised: 'Plus loin',
+  deactivated: 'Thêta un',
+  quote: 'Le ruisseau chante',
+  bodies: {
+    fox: 'Joli début, le renard.',
+    morning: 'Quelle heure exactement ?',
+    clearing: 'La clairière est bien décrite.',
+    authorReply: 'Merci pour le renard.',
+    deactivatedReply: "Réponse d'un compte désactivé.",
+  },
+  /** Chapter 13, `user`'s root. */
+  reviewed: {
+    answered: 'La première remarque',
+    unanswered: 'ce passage précis',
+    toDelete: 'sera supprimée bientôt',
+    free: 'Une phrase libre',
+    answeredBody: 'Première remarque.',
+    unansweredBody: 'Deuxième remarque.',
+    authorReply: "Réponse de l'autrice.",
+  },
+  /** What the app shows for a deleted account. */
+  anonymisedName: 'Esperluette disparue',
+} as const;
+
+/**
  * Reader quotes, written by `app/Domains/Quote/Database/Seeders/E2eQuotesSeeder.php`.
  * The author cannot quote their own story, so these can only come from a seeder.
  */
@@ -111,6 +167,7 @@ export const QUOTES = {
     'chapitre-simple-3': 5,
     'chapitre-coecrit-6': 1,
     'chapitre-illustre-7': 2,
+    'chapitre-annote-11': 1,
   },
   /** Quoted twice, by `confirmed` and `admin` — one summary row with a count of 2. */
   sharedPassage: 'La première phrase du premier bloc,',
