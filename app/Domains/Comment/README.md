@@ -62,6 +62,7 @@ Reads and acts on the annotations of one root comment. The first annotations are
 | `deleteOwnReply(replyId, byUserId)` | The writer deletes their own reply (soft delete). 404 for an unknown reply; 403 when the row is not a reply or was not written by the user. |
 | `setProcessed(annotationId, byUserId, value)` | Author / co-author toggle of the processed flag. 403 unless the user resolves to the `author` role on that comment (an author who is also the commenter does not); 422 on a reply row. |
 | `moderatorDelete(annotationId, byUserId)` | Soft-deletes one annotation and its replies. No role check inside: the route's `role` middleware is the gate. |
+| `moderatorEmpty(annotationId, byUserId)` | Replaces a root annotation's body with the placeholder « &lt;Annotation supprimée&gt; », stamps `content_emptied_at`, and returns the refreshed `AnnotationDto` (moderator view). Idempotent; 404 for an unknown or deleted annotation, 422 (`annotation`) on a reply. Anchor, processed flag and replies are kept. Route-gated like `moderatorDelete`. |
 
 ### CommentPolicyRegistry
 
@@ -109,7 +110,7 @@ Example implementation: `App\Domains\Story\Private\Services\ChapterCommentPolicy
 | `CommentToCreateDto` | Input for `create()` — entity type, entity ID, body, optional parent comment ID, optional list of `AnnotationToCreateDto` |
 | `AnnotationChangeSetDto` | Input for `saveChanges()` — `adds` (`AnnotationToCreateDto[]`, each with its `clientKey`), `edits` (id => body), `deletes` (ids) |
 | `CommentDto` | A single comment with author profile, permission flags (`canReply`, `canEditOwn`), `annotationCount` (root annotations **the viewer** may see), and nested children |
-| `AnnotationListDto` / `AnnotationDto` | Payload of `getForComment`: the viewer's role (`commenter`, `author`, `moderator`) and the rows, each with `highlighted_text`, sanitized `body`, `is_processed` (null for the commenter), `replies` (oldest first), and the display hints `can_mark_as_processed`, `can_delete` (moderator; on a reply, its writer too), `can_edit` (the commenter, on their own root) and `can_reply` (see `reply`). A reply has no anchor and all its flags false except `can_delete` |
+| `AnnotationListDto` / `AnnotationDto` | Payload of `getForComment`: the viewer's role (`commenter`, `author`, `moderator`) and the rows, each with `highlighted_text`, sanitized `body`, `is_processed` (null for the commenter), `replies` (oldest first), and the display hints `can_mark_as_processed`, `can_delete` (moderator; on a reply, its writer too), `can_edit` (the commenter, on their own root, never on an emptied one), `can_reply` (see `reply`) and `is_emptied`. A reply has no anchor and all its flags false except `can_delete` |
 | `CommentListDto` | Paginated list of `CommentDto` items plus a `CommentUiConfigDto` |
 | `CommentUiConfigDto` | UI configuration: length limits and `canCreateRoot` flag |
 
@@ -356,9 +357,51 @@ comment-draft module, which is why the banner re-reads the drafts slot on
   place (`replies.js`). A reply's « Supprimer » (`can_delete`, `confirm()` first)
   calls `DELETE /comments/annotations/replies/{id}`. A 404 reads as stale.
 
+- **« Passage absent du chapitre » badge** — when a row's passage can no longer
+  be found in the chapter text (edited since), the pop-up flags the row with this
+  badge. Re-anchoring runs in the browser (`reanchor` in `modal.js`, prefix /
+  highlight / suffix looked up in `[data-quote-article]`); the server stores
+  nothing about it. Outside a chapter no row is flagged.
+- **« Vider le contenu » (moderators)** — on a root row not yet emptied, calls
+  `POST /comments/annotations/{id}/empty-content` and swaps the row for the
+  returned DTO.
+
 Browser coverage: `e2e/tests/core/chapter-annotations.spec.ts` (before the root
-comment) and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions,
-pending changes, save banner, replies).
+comment), `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions,
+pending changes, save banner, replies) and `e2e/tests/core/chapter-annotation-overlay.spec.ts`
+(in-chapter overlay).
+
+### In-chapter overlay (`<x-comment::annotation-overlay>`)
+
+`<x-comment::annotation-overlay :entity-type :entity-id :root-comment-id
+:annotation-mode>` wraps the annotatable chapter article (the consumer passes
+its article as the slot) and shows annotations **in place**, not only in the
+per-comment pop-up. The viewer resolves to an in-entity role: `author`
+(`canMarkAsProcessed`) or `commenter` (`canAnnotate`). With neither (guest,
+unsupported type) it renders the slot only and loads no script.
+
+- **Data** — `AnnotationPublicApi::getForEntity`, fetched once from
+  `GET /comments/annotations/in-entity?entity_type=&entity_id=` (`{ "lists": [...] }`).
+  A commenter gets only their own root and annotations; an author gets every
+  commenter's. Moderator-only viewers get nothing here.
+- **Rendering** — `Resources/js/annotations/in-chapter/` (Alpine `annotationOverlay`,
+  one Vite entry pushed once to `head-scripts`): passages are re-anchored in the
+  article and tinted with the CSS Highlight API (nothing tinted where
+  `CSS.highlights` is missing; `missing` passages are dropped), and one avatar per
+  group of nearby annotations sits in a right-hand gutter (md and up only, with a
+  « +N » counter). Processed groups are dimmed.
+- **Popover** — a click on a gutter avatar opens a popover (`annotationPopover`,
+  teleported to `body`) paging through the group's annotations with their reply
+  thread. Actions follow the `can_*` flags: edit / delete (commenter, locally via
+  pending changes, `annotations:edit-saved-row`), mark processed, reply (own
+  editor, `annotation-overlay-reply-editor`). An emptied row shows the placeholder
+  and offers « Supprimer » only. Unsaved draft / pending rows of the commenter
+  appear too, with the commenter's own avatar.
+- **Author filter** — `annotationFilterMenu`: md and up, authors only, shown when
+  at least one annotation exists; filters by commenter and toggles processed
+  annotations. State lasts for the visit.
+- **Heat map** — when Quote's heat map is on (`Alpine.store('quoteAggregate').visible`)
+  the overlay hides its tint and gutter.
 
 ### Lifecycle
 
@@ -395,6 +438,8 @@ pending changes, save banner, replies).
 | `DELETE` | `/comments/annotations/replies/{replyId}` | `auth`, `compliant` | The reply's writer deletes it |
 | `PUT` | `/comments/annotations/{annotationId}/processed` | `auth`, `compliant` | Body `{ value: bool }`; author / co-author only |
 | `DELETE` | `/comments/annotations/{annotationId}` | Moderator+ | Soft-delete one annotation and its replies |
+| `POST` | `/comments/annotations/{annotationId}/empty-content` | Moderator+ | Replace a root annotation's body with the placeholder; returns `{ "annotation": {...} }` (422 on a reply) |
+| `GET` | `/comments/annotations/in-entity` | `auth`, `compliant` | `?entity_type=&entity_id=`; `{ "lists": AnnotationListDto[] }` for the chapter overlay |
 
 `POST /comments` accepts an optional `annotations` field: a JSON string (one
 hidden input) holding a list of `{ body, highlighted_text, prefix?, suffix? }`.
@@ -433,7 +478,7 @@ One row per annotation. `comment_id` always points to the **root comment**
 null for a root annotation (FK to the same table, cascading). `author_id` has no
 FK (cross-domain), like `comments`. `highlighted_text`, `prefix` and `suffix`
 are text (unsanitized, see below); `body` is sanitized HTML. `is_processed` / `processed_at` are
-the authors' flag; soft deletes. Indexes: `comment_annotations_tree_index` on
+the authors' flag; `content_emptied_at` (nullable timestamp, surfaced as `is_emptied`) is set when a moderator empties the body; soft deletes. Indexes: `comment_annotations_tree_index` on
 `(comment_id, parent_annotation_id, deleted_at)` — named explicitly because the
 generated name exceeds MySQL's 64 characters — and `author_id`.
 

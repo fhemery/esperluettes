@@ -1,7 +1,7 @@
 # Chapter annotations — v4 (report + images) — request
 
 Split out of [`annotations-v2`](../_done/annotations-v2.md) at its
-REFINE (2026-10-03, decision #1). Starts after `annotations-v3/`.
+REFINE (2026-10-03, decision #1). Starts after `annotations-v3` (done, see `_done/annotations-v3.md`).
 
 ## What I want
 
@@ -14,5 +14,5 @@ These two are unrelated; REFINE may split them further.
 
 ## Constraints or ideas I already have
 
-- Original full spec: `vision-spec.md` (moved to `annotations-v3/` at v2 WRAP;
+- Original full spec: `vision-spec.md` (now in this folder;
   §9 for the report topic, §10 for images).

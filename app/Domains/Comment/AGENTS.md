@@ -6,7 +6,7 @@
 
 - [CommentPublicApi](Public/Api/CommentPublicApi.php) — CRUD and read operations; main entry point for all comment interactions. Requires authenticated user for write and read. Delegates body sanitization to `CommentBodySanitizer` and permission decisions to `CommentPolicyRegistry`.
 - [CommentMaintenancePublicApi](Public/Api/CommentMaintenancePublicApi.php) — system-level bulk delete for use by owning domains (e.g. when a chapter is deleted).
-- [AnnotationPublicApi](Public/Api/AnnotationPublicApi.php) — read the annotations of one root comment (filtered by viewer role), toggle the processed flag, moderator delete, plus the commenter's `saveChanges` (adds/edits/deletes in one transaction; `PUT /comments/{id}/annotations`) and the replies (`reply`, `deleteOwnReply`). First annotations are created by `CommentPublicApi::create`: see invariants.
+- [AnnotationPublicApi](Public/Api/AnnotationPublicApi.php) — read the annotations of one root comment (filtered by viewer role), toggle the processed flag, moderator delete (`moderatorDelete`) and moderator empty (`moderatorEmpty`: placeholder body, returns the refreshed `AnnotationDto`; roots only, idempotent, route-gated), `getForEntity` (one `AnnotationListDto` per root of the entity the viewer may see, constant query count; feeds the chapter overlay), plus the commenter's `saveChanges` (adds/edits/deletes in one transaction; `PUT /comments/{id}/annotations`) and the replies (`reply`, `deleteOwnReply`). First annotations are created by `CommentPublicApi::create`: see invariants.
 - [CommentPolicyRegistry](Public/Api/CommentPolicyRegistry.php) — singleton; maps entity type strings to `CommentPolicy` implementations. Falls back to `DefaultCommentPolicy` (allow all, no length limits) when no policy is registered.
 
 ## Events emitted
@@ -64,9 +64,15 @@
 
 **The in-chapter overlay reads Quote's stores by name.** `in-chapter/index.js` observes `Alpine.store('quotes').items` (rebuilds the Highlight-API tint after Quote re-wraps the article) and `Alpine.store('quoteAggregate').visible` (heat on → no annotation display). A rename in Quote silently breaks heat suppression.
 
+**Emptied annotations are a state, not a deletion.** `moderatorEmpty` swaps the body for the `annotations.emptied_body` placeholder and stamps `content_emptied_at` (`is_emptied` on the DTO, `isEmptied()` on the model); anchor, processed flag and replies stay. An emptied root can no longer be edited (`can_edit` false, `saveChanges` answers `errors.stale` for an edit) but its commenter may still delete it. Distinct from `emptyContentByModeration` on the root comment, which soft-deletes the annotations.
+
+**The « Passage absent du chapitre » badge is computed client-side.** `modal.js` re-anchors each row against `[data-quote-article]` and sets `row.missing`; the server never knows. The in-chapter renderer drops `missing` anchors from the tint and gutter.
+
+**`<x-comment::annotation-overlay>` is inert without an in-entity role.** It renders its slot only (no script) unless the viewer is `author` (`canMarkAsProcessed`) or `commenter` (`canAnnotate`) on a `supportsAnnotations` type; data comes from `GET /comments/annotations/in-entity`.
+
 **Moderation actions emit distinct events.** `emptyContentByModeration` emits `CommentContentModerated`; `deleteByModeration` emits `CommentDeletedByModeration`. Story domain listens to `CommentDeletedByModeration` to revoke chapter credits.
 
-**Tests.** PHP under `Tests/`; Vitest next to the JS (`annotations/*.test.js`, `comment-draft/index.test.js`); browser: `e2e/tests/core/chapter-annotations.spec.ts` and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions, pending changes, save banner, replies).
+**Tests.** PHP under `Tests/`; Vitest next to the JS (`annotations/*.test.js`, `comment-draft/index.test.js`); overlay tests: `Tests/Feature/Annotations/AnnotationOverlayComponentTest.php`, `AnnotationsInEntityTest.php`, `EmptyAnnotationContentTest.php`, and Vitest `annotations/in-chapter/*.test.js`; browser: `e2e/tests/core/chapter-annotations.spec.ts` and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions, pending changes, save banner, replies), `e2e/tests/core/chapter-annotation-overlay.spec.ts` (heat-map suppression, quote/annotation tint overlap).
 
 ## Registry integrations
 
