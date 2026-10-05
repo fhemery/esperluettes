@@ -11,6 +11,7 @@ import { renderHighlights } from './renderer.js';
 import { groupByPosition, gutterItems } from './gutter.js';
 import { annotationPopover } from './popover.js';
 import { annotationFilterMenu } from './filter-menu.js';
+import { annotatorName } from './annotator.js';
 
 document.addEventListener('alpine:init', () => {
     const Alpine = window.Alpine;
@@ -56,9 +57,17 @@ document.addEventListener('alpine:init', () => {
                 window.addEventListener('resize', relayout);
                 cleanups.push(() => window.removeEventListener('resize', relayout));
                 // Lazily-loaded images reflow every line below them (as in Quote's author heat).
+                // The gutter spans the whole root: it resizes when the filter menu
+                // appears above the article (shifting every passage down), and when
+                // it is shown again after the heat map. Alpine's x-show shows one
+                // frame late, after the render effect's own frame, hence observing.
                 if (typeof ResizeObserver !== 'undefined') {
                     const observer = new ResizeObserver(relayout);
                     observer.observe(articleEl);
+                    // x-ref is bound once the children are initialised, after init().
+                    this.$nextTick(() => {
+                        if (this.$refs.gutter) observer.observe(this.$refs.gutter);
+                    });
                     cleanups.push(() => observer.disconnect());
                 }
                 articleEl.querySelectorAll('img').forEach((img) => {
@@ -127,7 +136,10 @@ document.addEventListener('alpine:init', () => {
             /** Server rows carry their profile; the commenter's local rows are theirs. */
             annotator(row) {
                 if (row.source === 'server') {
-                    return { name: row.author_profile?.display_name ?? '', avatar: row.author_profile?.avatar_url ?? '' };
+                    return {
+                        name: annotatorName(row.author_profile, this.$el.dataset.unknownName ?? ''),
+                        avatar: row.author_profile?.avatar_url ?? '',
+                    };
                 }
                 return { name: this.$el.dataset.userName ?? '', avatar: this.$el.dataset.userAvatar ?? '' };
             },

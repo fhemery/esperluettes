@@ -2,6 +2,7 @@ import { setProcessed, postReply } from '../api.js';
 import { appendReply } from '../replies.js';
 import { plainText } from '../capture-form.js';
 import { rowKey } from './gutter.js';
+import { annotatorName } from './annotator.js';
 import { formatDate } from '../../../../../Shared/Resources/js/date-utils.js';
 
 /** Our id in `Alpine.store('popover').openId`, which keeps popovers exclusive. */
@@ -72,6 +73,7 @@ export function placePanel(trigger, width, height, viewportWidth, viewportHeight
 export function annotationPopover() {
     let messages = { position: '', action: '', replyEmpty: '', replyTooLong: '', deleteWithReplies: '' };
     let defaultAvatar = '';
+    let unknownName = '';
     let ownProfile = { name: '', avatar: '' };
     let replyMax = 0;
     let anchorEl = null;
@@ -110,6 +112,7 @@ export function annotationPopover() {
                 deleteWithReplies: data.deleteWithReplies ?? '',
             };
             defaultAvatar = data.defaultAvatar ?? '';
+            unknownName = data.unknownName ?? '';
             ownProfile = { name: data.userName ?? '', avatar: data.userAvatar ?? '' };
             replyMax = Number(data.replyMaxLength ?? 0);
 
@@ -267,7 +270,7 @@ export function annotationPopover() {
         /** Server rows carry their profile; the commenter's local rows are theirs. */
         authorName(row) {
             if (row?.source && row.source !== 'server') return ownProfile.name;
-            return row?.author_profile?.display_name ?? '';
+            return annotatorName(row?.author_profile, unknownName);
         },
 
         authorAvatar(row) {
@@ -276,7 +279,7 @@ export function annotationPopover() {
         },
 
         replyAuthor(reply) {
-            return reply.author_profile?.display_name ?? '';
+            return annotatorName(reply.author_profile, unknownName);
         },
 
         replyAvatar(reply) {

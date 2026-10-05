@@ -920,16 +920,16 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 | Chapter, commenter, reply | « Répondre » appears only after an author replied; reply posts; failure keeps text | ✅ failure forced with a routed 500 |
 | Chapter, commenter, quote overlap | Yellow quote mark + annotation underline on the same words; clicking yellow opens the quote | ✅ |
 | Chapter, commenter, privacy | No processed hint anywhere; never another reader's annotation | ✅ (payload side: `AnnotationsInEntityTest`) |
-| Chapter, author, happy path | All commenters' published annotations underlined; avatars aligned at `md` and `lg`; « +N » on close passages; popover « 1 / N » + arrows | ❌ tint, « +2 », « 1 / 3 » and arrows OK, but **on load every avatar sits ~32px (the filter menu's height) above its passage** at 768, 1024 and 1280; a window resize puts them right (`shots/verify/author-1280-gutter.png`) |
+| Chapter, author, happy path | All commenters' published annotations underlined; avatars aligned at `md` and `lg`; « +N » on close passages; popover « 1 / N » + arrows | ✅ (fixed after VERIFY: the gutter is now observed, so the filter menu appearing re-lays it out; was ~32px high on load, `shots/verify/author-1280-gutter.png`) |
 | Chapter, author, processed | « Marquer comme traitée » hides it at once (popover moves on / closes); « Afficher les annotations traitées » shows it dimmed; « non traitée » restores | ✅ |
 | Chapter, author, filter | Untick a commenter → tint + avatars gone, groups recompute; reload resets; pop-up not filtered | ✅ |
-| Chapter, author, heat map | Heat on → annotation tint, avatars, filter menu, popover gone; heat off → back in the same filter state | ❌ heat on OK; **heat off brings back the tint and the filter menu (filter state kept) but no gutter avatar** until a window resize |
+| Chapter, author, heat map | Heat on → annotation tint, avatars, filter menu, popover gone; heat off → back in the same filter state | ✅ (fixed after VERIFY: avatars came back only after a resize — the gutter was still `display:none` when laid out) |
 | Chapter, author, empty state | Chapter with no annotation → no filter menu, no gutter avatar | ✅ |
-| Chapter, co-author | Same as author | ✅ (shares the author overlay, so also the two ❌ above) |
+| Chapter, co-author | Same as author | ✅ (shares the author overlay) |
 | Chapter, moderator not author | No in-chapter display; pop-up has « Supprimer » + « Vider le contenu » (roots only) | ✅ |
 | Pop-up, moderator « Vider le contenu » | Confirm → « <Annotation supprimée> » in place; replies + processed kept; author and commenter see placeholder; commenter has « Supprimer » only (pop-up and popover) | ✅ (processed kept: `EmptyAnnotationContentTest`) |
 | Pop-up, stale data | Chapter edited so a passage vanishes → no tint/avatar in chapter, badge « Passage absent du chapitre » in the pop-up (all roles); moved passage → tint on new place, no badge | ✅ seeded missing / moved anchors, author in the browser; commenter and moderator badges seen at checkpoint 6v |
-| Deleted commenter (anonymised) | Default avatar + anonymised name in gutter, popover and filter list | ❌ default avatar and filter entry « Esperluette disparue » OK; **gutter label reads « Annotation de  et 1 autre » and the popover header name is empty** (`shots/verify/author-anonymised-popover.png`) |
+| Deleted commenter (anonymised) | Default avatar + anonymised name in gutter, popover and filter list | ✅ (fixed after VERIFY: gutter label and popover header were empty; now « Esperluette disparue » everywhere, replies included) |
 | Deactivated commenter | Their annotations gone from the chapter; deactivated reply writer's replies hidden | ✅ (payload side: `AnnotationsInEntityTest`) |
 | Mobile (< `md`) | Author and commenter: underline only, no avatar / popover / filter menu; tapping the underline does nothing; pop-up as before | ✅ |
 | Resize / images | Avatars follow passages after window resize and after chapter images load | ✅ commenter, image held back then released, then 900px |

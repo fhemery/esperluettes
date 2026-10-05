@@ -17,6 +17,7 @@
      data-user-name="{{ $userName }}"
      data-user-avatar="{{ $userAvatar }}"
      data-default-avatar="{{ asset('images/default-avatar.svg') }}"
+     data-unknown-name="{{ __('comment::comments.unknown_user') }}"
      data-avatar-labels="{{ json_encode($avatarLabels) }}"
      data-more-label="{{ __('comment::annotations.overlay.more', ['count' => '{count}']) }}"
      data-url="{{ $inEntityUrl }}">
@@ -108,6 +109,7 @@
          data-delete-with-replies="{{ __('comment::annotations.server_modal.delete_with_replies_confirm') }}"
          data-user-name="{{ $userName }}"
          data-user-avatar="{{ $userAvatar }}"
+         data-unknown-name="{{ __('comment::comments.unknown_user') }}"
          data-default-avatar="{{ asset('images/default-avatar.svg') }}">
         <template x-teleport="body">
             <div x-cloak x-show="open" style="display:none"

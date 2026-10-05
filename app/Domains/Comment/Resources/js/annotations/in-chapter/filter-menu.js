@@ -1,3 +1,5 @@
+import { annotatorName } from './annotator.js';
+
 /**
  * The author's filter menu, `Alpine.data('annotationFilterMenu')`: one entry per
  * commenter of the chapter (all ticked) and « Afficher les annotations
@@ -38,7 +40,7 @@ export function annotationFilterMenu() {
                     ? { id, name: unknownName, avatar: defaultAvatar }
                     : {
                         id,
-                        name: row.author_profile?.display_name || unknownName,
+                        name: annotatorName(row.author_profile, unknownName),
                         avatar: row.author_profile?.avatar_url || defaultAvatar,
                     });
             }

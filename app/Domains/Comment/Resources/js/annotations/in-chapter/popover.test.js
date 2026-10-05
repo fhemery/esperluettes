@@ -9,6 +9,7 @@ const ACTION_ERROR = 'Action impossible';
 const DELETE_WITH_REPLIES = 'Les réponses seront aussi supprimées.';
 const REPLY_EMPTY = 'Réponse vide.';
 const REPLY_TOO_LONG = 'Réponse trop longue.';
+const UNKNOWN_NAME = 'Esperluette disparue';
 
 let component;
 let overlay;
@@ -59,6 +60,7 @@ function mount() {
     root.dataset.replyMaxLength = '20';
     root.dataset.deleteWithReplies = DELETE_WITH_REPLIES;
     root.dataset.defaultAvatar = '/default.svg';
+    root.dataset.unknownName = UNKNOWN_NAME;
     document.body.appendChild(root);
 
     const panel = document.createElement('div');
@@ -192,6 +194,20 @@ describe('annotation popover — shell', () => {
         expect(component.current.body).toBe('<p>&lt;Annotation supprimée&gt;</p>');
         expect(component.authorName(component.current)).toBe('Lecteur 1');
         expect(component.authorAvatar(component.current)).toBe('/a/1.png');
+    });
+
+    it('names an anonymised commenter and replier with the unknown user', async () => {
+        await loadOverlay([{ comment_id: ROOT_A, items: [item(1, {
+            author_id: null,
+            author_profile: null,
+            replies: [{ id: 5, author_profile: { display_name: '', avatar_url: null }, body: '<p>R</p>' }],
+        })] }]);
+
+        openGroup(['id:1']);
+
+        expect(component.authorName(component.current)).toBe(UNKNOWN_NAME);
+        expect(component.authorAvatar(component.current)).toBe('/default.svg');
+        expect(component.replyAuthor(component.current.replies[0])).toBe(UNKNOWN_NAME);
     });
 });
 
