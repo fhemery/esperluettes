@@ -1,7 +1,8 @@
 // In-chapter annotation overlay: Alpine root wrapping the chapter article.
 // Loads the viewer's annotations into Alpine.store('annotationOverlay') and
 // tints their passages (renderer.js), with the annotators' avatars in the md+
-// gutter (gutter.js); an avatar opens the popover (popover.js). Observes Quote's stores — `quotes.items` (its re-wraps
+// gutter (gutter.js); an avatar opens the popover (popover.js); the author's
+// filter menu (filter-menu.js) writes the store's filters. Observes Quote's stores — `quotes.items` (its re-wraps
 // invalidate our ranges) and `quoteAggregate.visible` (heat map on → no
 // annotation display).
 import './overlay.css';
@@ -9,11 +10,13 @@ import { createOverlayStore } from './store.js';
 import { renderHighlights } from './renderer.js';
 import { groupByPosition, gutterItems } from './gutter.js';
 import { annotationPopover } from './popover.js';
+import { annotationFilterMenu } from './filter-menu.js';
 
 document.addEventListener('alpine:init', () => {
     const Alpine = window.Alpine;
     Alpine.store('annotationOverlay', createOverlayStore());
     Alpine.data('annotationPopover', annotationPopover);
+    Alpine.data('annotationFilterMenu', annotationFilterMenu);
 
     Alpine.data('annotationOverlay', () => {
         // Kept out of the reactive component: the render effect writes `frame`,
@@ -112,6 +115,8 @@ document.addEventListener('alpine:init', () => {
                         avatar: avatar || this.defaultAvatar,
                         label: (template ?? '').replace('{name}', name).replace('{count}', String(more)),
                         more,
+                        /** Shown processed (A5): the avatar is dimmed. */
+                        processed: group.lead.row.is_processed === true,
                         moreLabel: moreLabel.replace('{count}', String(more)),
                         /** Row keys the popover pages through. */
                         members: group.members.map((item) => item.key),

@@ -21,6 +21,55 @@
      data-more-label="{{ __('comment::annotations.overlay.more', ['count' => '{count}']) }}"
      data-url="{{ $inEntityUrl }}">
 
+    @if($inChapterRole === 'author')
+    {{-- Author's filter menu (annotationFilterMenu, filter-menu.js): md+ only, at least
+         one annotation, hidden while the heat map is on. State is per visit. --}}
+    <div x-data="annotationFilterMenu"
+         x-show="shown"
+         style="display:none"
+         data-unknown-name="{{ __('comment::comments.unknown_user') }}"
+         data-default-avatar="{{ asset('images/default-avatar.svg') }}"
+         class="hidden md:flex justify-end mb-2 relative"
+         @click.outside="open = false"
+         @keydown.escape="open = false">
+        <button type="button"
+                class="inline-flex items-center gap-1 text-sm text-fg/70 hover:text-fg rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                @click="open = !open"
+                :aria-expanded="open.toString()"
+                aria-controls="annotation-filter-panel">
+            <span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">filter_list</span>
+            {{ __('comment::annotations.filter.title') }}
+        </button>
+        <div id="annotation-filter-panel"
+             x-show="open" x-cloak style="display:none"
+             class="absolute right-0 top-full z-40 mt-1 w-64 p-3 rounded-md shadow-lg bg-white ring-1 ring-black/5 text-sm text-gray-700">
+            <fieldset>
+                <legend class="font-medium text-gray-900">{{ __('comment::annotations.filter.commenters') }}</legend>
+                <ul class="mt-2 space-y-1 max-h-64 overflow-y-auto">
+                    <template x-for="commenter in commenters" :key="commenter.id ?? 'anonymised'">
+                        <li>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent"
+                                       :checked="isTicked(commenter.id)"
+                                       @change="toggleCommenter(commenter.id)">
+                                <img :src="commenter.avatar" alt="" class="h-5 w-5 rounded-full object-cover"
+                                     @@error="if ($el.src !== $root.dataset.defaultAvatar) $el.src = $root.dataset.defaultAvatar">
+                                <span class="truncate" x-text="commenter.name"></span>
+                            </label>
+                        </li>
+                    </template>
+                </ul>
+            </fieldset>
+            <label class="mt-3 pt-3 border-t border-gray-200 flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent"
+                       :checked="showProcessed"
+                       @change="toggleProcessed()">
+                <span>{{ __('comment::annotations.show_processed') }}</span>
+            </label>
+        </div>
+    </div>
+    @endif
+
     {{ $slot }}
 
     {{-- Same geometry as Quote's heat gutter; below md it is display:none.
@@ -37,6 +86,7 @@
                     aria-haspopup="dialog"
                     @click="$dispatch('annotation-overlay:open', { groupKey: group.key, keys: group.members })">
                 <img :src="group.avatar" alt="" class="h-6 w-6 rounded-full object-cover"
+                     :class="{ 'opacity-50': group.processed }"
                      @@error="if ($el.src !== defaultAvatar) $el.src = defaultAvatar">
                 <span x-show="group.more > 0"
                       x-text="group.moreLabel"

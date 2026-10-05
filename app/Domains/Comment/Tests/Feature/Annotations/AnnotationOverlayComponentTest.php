@@ -78,6 +78,35 @@ describe('<x-comment::annotation-overlay>', function () {
             ->assertSee('data-reply-max-length="1000"', false);
     });
 
+    it('renders the filter menu for the author, at md+ above the article', function () {
+        $this->actingAs($this->author);
+
+        renderAnnotationOverlay($this, 'chapter', $this->chapter->id)
+            ->assertSee('x-data="annotationFilterMenu"', false)
+            ->assertSee('x-show="shown"', false)
+            ->assertSee('data-unknown-name="comment::comments.unknown_user"', false)
+            ->assertSee('comment::annotations.filter.title', false)
+            ->assertSee('comment::annotations.filter.commenters', false)
+            ->assertSee('comment::annotations.show_processed', false)
+            ->assertSeeInOrder(['x-data="annotationFilterMenu"', 'data-overlay-slot'], false);
+    });
+
+    it('dims the gutter avatar of a processed annotation', function () {
+        $this->actingAs($this->author);
+
+        renderAnnotationOverlay($this, 'chapter', $this->chapter->id)
+            ->assertSee("{ 'opacity-50': group.processed }", false);
+    });
+
+    it('renders no filter menu for a commenter', function () {
+        $this->actingAs(bob($this));
+
+        renderAnnotationOverlay($this, 'chapter', $this->chapter->id)
+            ->assertSee('data-role="commenter"', false)
+            ->assertDontSee('annotationFilterMenu', false)
+            ->assertDontSee('comment::annotations.show_processed', false);
+    });
+
     it('carries the viewer profile for their unsaved annotations', function () {
         $this->actingAs(bob($this));
 

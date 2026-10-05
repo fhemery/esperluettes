@@ -96,4 +96,9 @@ return [
         'next' => 'Annotation suivante',
         'close' => 'Fermer',
     ],
+    'filter' => [
+        'title' => 'Filtrer les annotations',
+        'commenters' => 'Lecteurices',
+    ],
+    'show_processed' => 'Afficher les annotations traitées',
 ];
