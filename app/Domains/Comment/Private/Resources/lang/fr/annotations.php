@@ -87,4 +87,9 @@ return [
         'empty_body' => 'Votre réponse est vide.',
         'too_long' => 'Votre réponse est trop longue (:max caractères maximum).',
     ],
+    'overlay' => [
+        // :count = the other annotations grouped with this one
+        'avatar_label' => '{0} Annotation de :name|{1} Annotation de :name et 1 autre|[2,*] Annotation de :name et :count autres',
+        'more' => '+:count',
+    ],
 ];

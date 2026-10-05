@@ -14,7 +14,7 @@ export const HIGHLIGHT_PROCESSED = 'annotation-processed';
  * `missing` passages are dropped. Without `CSS.highlights` nothing is tinted,
  * the ranges are still returned (the gutter positions from them).
  *
- * @returns {Array<{ row: object, range: Range }>}
+ * @returns {Array<{ row: object, range: Range, start: number }>} `start`: canonical offset
  */
 export function renderHighlights(articleEl, rows) {
     const placed = [];
@@ -28,7 +28,7 @@ export function renderHighlights(articleEl, rows) {
             });
             if (anchor.status === 'missing') continue;
             const range = rangeFromCanonical(canonical, anchor.start, anchor.end);
-            if (range) placed.push({ row, range });
+            if (range) placed.push({ row, range, start: anchor.start });
         }
     }
 

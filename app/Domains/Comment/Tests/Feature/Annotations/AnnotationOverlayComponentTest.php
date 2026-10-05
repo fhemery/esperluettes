@@ -48,6 +48,29 @@ describe('<x-comment::annotation-overlay>', function () {
             ->assertSeeInOrder(['data-annotation-overlay', 'data-overlay-slot'], false);
     });
 
+    it('renders the gutter avatar buttons, hidden while the heat map is on', function () {
+        $this->actingAs($this->author);
+
+        renderAnnotationOverlay($this, 'chapter', $this->chapter->id)
+            ->assertSee('x-show="!$store.annotationOverlay.heatOn"', false)
+            ->assertSee('<template x-for="group in groups" :key="group.key">', false)
+            ->assertSee('<button type="button"', false)
+            ->assertSee(':aria-label="group.label"', false)
+            ->assertSee('annotation-overlay:open', false)
+            ->assertSee('data-default-avatar="' . e(asset('images/default-avatar.svg')) . '"', false)
+            ->assertSee('data-avatar-labels=', false)
+            ->assertSee('comment::annotations.overlay.avatar_label', false)
+            ->assertSee('data-more-label="comment::annotations.overlay.more"', false);
+    });
+
+    it('carries the viewer profile for their unsaved annotations', function () {
+        $this->actingAs(bob($this));
+
+        renderAnnotationOverlay($this, 'chapter', $this->chapter->id)
+            ->assertSee('data-user-name="Bob"', false)
+            ->assertSee('data-user-avatar=', false);
+    });
+
     it('renders the author overlay for a co-author', function () {
         $coAuthor = bob($this);
         addCollaborator($this->story->id, $coAuthor->id, 'author');

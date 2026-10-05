@@ -26,7 +26,7 @@
 | 8v | Checkpoint — Quote on the chapter page: reader tint, author heat map + gutter pills, summary | S | 8 | DONE |
 | 9 | Overlay store + Highlight-API tint (+ heat suppression) | M | 5, 7, 8 | DONE |
 | 9v | Checkpoint — quote tint vs annotation tint, heat on/off, quote/unquote | S | 9 | DONE |
-| 10 | Gutter avatars and grouping | M | 9 | TODO |
+| 10 | Gutter avatars and grouping | M | 9 | DONE |
 | 11 | Popover shell + author actions (reply, processed) | M | 10 | TODO |
 | 12 | Popover commenter actions (modifier / supprimer / répondre) | M | 11 | TODO |
 | 13 | Author filter menu + processed display | S | 11 | TODO |

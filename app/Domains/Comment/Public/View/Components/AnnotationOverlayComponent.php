@@ -3,6 +3,7 @@
 namespace App\Domains\Comment\Public\View\Components;
 
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
@@ -18,9 +19,13 @@ class AnnotationOverlayComponent extends Component
     public ?string $inChapterRole = null;
     public ?int $userId = null;
     public string $inEntityUrl = '';
+    /** A commenter's own profile, for the gutter avatar of their unsaved annotations. */
+    public string $userName = '';
+    public string $userAvatar = '';
 
     public function __construct(
         private readonly CommentPolicyRegistry $policies,
+        private readonly ProfilePublicApi $profiles,
         public string $entityType,
         public int $entityId,
         public ?int $rootCommentId = null,
@@ -40,6 +45,13 @@ class AnnotationOverlayComponent extends Component
 
         if ($this->inChapterRole !== null) {
             $this->inEntityUrl = route('comments.annotations.in-entity');
+        }
+
+        // Only a commenter has local (draft / pending) rows, which carry no profile.
+        if ($this->inChapterRole === 'commenter') {
+            $profile =$this->profiles->getPublicProfile($this->userId);
+            $this->userName = $profile?->display_name ?? '';
+            $this->userAvatar = $profile?->avatar_url ?? '';
         }
     }
 
