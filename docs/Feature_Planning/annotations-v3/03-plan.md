@@ -25,7 +25,7 @@
 | 8 | `<x-comment::annotation-overlay>` component wired into the chapter page (inert) | S | — | DONE |
 | 8v | Checkpoint — Quote on the chapter page: reader tint, author heat map + gutter pills, summary | S | 8 | DONE |
 | 9 | Overlay store + Highlight-API tint (+ heat suppression) | M | 5, 7, 8 | DONE |
-| 9v | Checkpoint — quote tint vs annotation tint, heat on/off, quote/unquote | S | 9 | TODO |
+| 9v | Checkpoint — quote tint vs annotation tint, heat on/off, quote/unquote | S | 9 | DONE |
 | 10 | Gutter avatars and grouping | M | 9 | TODO |
 | 11 | Popover shell + author actions (reply, processed) | M | 10 | TODO |
 | 12 | Popover commenter actions (modifier / supprimer / répondre) | M | 11 | TODO |
@@ -684,6 +684,40 @@ Checks that the annotation tint (phase 9) coexists with Quote's renderers.
   - Author: heat on → underline gone, Quote pills and heat tint as in 8v; heat
     off → underline back.
   - Light and dark mode.
+
+**Result (2026-10-05, HEAD 7a13764a) — PASS**
+
+- e2e: `chapter-annotations`, `chapter-comments`, `chapter-annotation-round-trip`
+  and `comment-draft-consume` pass (14/14 incl. auth setup).
+- Method: a scratch driver flow on the post-run e2e DB, `chapitre-illustre-7`
+  (confirmed's root comment 7 carries the annotation « Delta un. Un paragraphe
+  avec »; confirmed's quote « de l'italique et du gras » sits next to it).
+  Served on `:8080` (`ctx.route` rewrites `:8081` → `:8080`), at 1280 and 390,
+  `deviceScaleFactor` 2. No page errors, console errors or HTTP ≥ 400 for any role.
+- Tint: `CSS.highlights.get('annotation')` holds exactly the annotated passage.
+  `getComputedStyle(p, '::highlight(annotation)')` gives a 2px underline,
+  `rgb(29, 78, 216)` in light mode and `rgb(147, 197, 253)` with
+  `data-appearance=dark`, and a transparent background (`confirmed-*-load-light.png`).
+- Commenter who quotes: quoting « un. Un paragraphe », inside the annotated
+  passage, shows the yellow mark and the underline on the same text, in light
+  and dark (`confirmed-*-quoted-{light,dark}.png`). After Quote re-wraps the
+  article, the highlight range is still exactly « Delta un. Un paragraphe avec ».
+  A click on the overlapped yellow mark opens « Ma citation »
+  (`confirmed-*-quote-panel.png`). « Supprimer » removes the mark, and the
+  underline stays on the same passage (`confirmed-*-unquoted-*.png`).
+- Author: with the heat off, the underline shows in light and dark. With the
+  heat on, the `annotation` highlight is deleted and the 5 `mark.quote-heat`
+  marks show. There are 2 gutter pills at 1280 and none at 390, as in 8v.
+  Heat off again: the underline is back and the heat marks are gone
+  (`author-{1280,390}-{light,dark}-heat-{off,on,off-again}.png`).
+- Observation, not phase 9: when a second quote is added in the same paragraph,
+  the existing tint « de l'italique et du gras » loses its leading « de l' ».
+  The marks change from `["de l'","italique"," et du ","gras"]` to
+  `["un. Un paragraphe","italique"," et du ","gras"]`, even though the store
+  still holds the full text. This survives a reload and reverts when the new
+  quote is deleted. With `in-chapter/` reverted to 1f9ee3b5 (before phase 9)
+  the result is identical (`ab-{head,pre}-*-quoted.png`), so the bug is in
+  Quote's tint rendering (`chapter-highlights.js`) and needs its own backlog item.
 
 ---
 
