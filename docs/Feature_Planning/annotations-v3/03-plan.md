@@ -23,7 +23,7 @@
 | 6v | Checkpoint — « N annotations » pop-up for commenter / author / moderator | S | 6 | DONE |
 | 7 | Shared infra — `rangeFromCanonical` anchoring helper | S | — | DONE |
 | 8 | `<x-comment::annotation-overlay>` component wired into the chapter page (inert) | S | — | DONE |
-| 8v | Checkpoint — Quote on the chapter page: reader tint, author heat map + gutter pills, summary | S | 8 | TODO |
+| 8v | Checkpoint — Quote on the chapter page: reader tint, author heat map + gutter pills, summary | S | 8 | DONE |
 | 9 | Overlay store + Highlight-API tint (+ heat suppression) | M | 5, 7, 8 | TODO |
 | 9v | Checkpoint — quote tint vs annotation tint, heat on/off, quote/unquote | S | 9 | TODO |
 | 10 | Gutter avatars and grouping | M | 9 | TODO |
@@ -558,6 +558,41 @@ features, which share the article and the gutter column.
     scrolls to the passage; toggle off clears.
   - Widths `md`, `lg`, and mobile (no gutter below `md`).
   - Guest: chapter renders as before.
+
+**Result (2026-10-05, HEAD 4025e756) — PASS**
+
+- e2e: `chapter-annotations.spec.ts` and `chapter-comments.spec.ts` pass (9/9
+  incl. auth setup).
+- Method: a scratch driver flow on the post-run e2e DB, `chapitre-simple-3`,
+  served on `:8080` (`ctx.route` rewrites `localhost:8081` → `:8080`). It ran
+  once on HEAD and once with `show.blade.php` reverted to the pre-phase
+  16e403d8. Article box, `mark.quote-tint` / `mark.quote-heat` boxes and
+  gutter-pill positions are **identical** in both, for guest 390/768/1280,
+  confirmed 390/768/1024 and author 390/768/1024/1280. The two runs were
+  repeated after the data changed, and were identical again. Most screenshots
+  are byte-identical. The rest differ only by a popover fade caught mid-way.
+- Guest: no `data-annotation-overlay`, and the chapter renders as before
+  (`head-guest-*.png`). The 401 on `GET /quotes` for guests is there before
+  phase 8 too; it is not a regression.
+- Confirmed: the overlay (`data-role="commenter"`) wraps the article. The
+  yellow `mark.quote-tint` marks show, and a click opens « Ma citation » at
+  every width. Select → toolbar shows « Citer », « Annoter » and the reactions.
+  Citer → mini-form → Enregistrer adds a new yellow tint, and clicking it opens
+  the panel. « Annoter » opens the capture form. ❤️ closes the toolbar and the
+  drafts banner reads « 1 annotation… » (`head-confirmed-*.png`).
+- Author: the order is `[data-quote-author-heat] > [data-annotation-overlay][data-role=author] > [data-quote-article]`.
+  With the heat on, the pills sit right of the article at `md`, `lg` and 1280
+  (article right edge 702/704/960, pills at +4px). They are level with their
+  passages (0px off). Pills that share a line are pushed down by the designed
+  22px step. A click on a pill opens « Cité par N lecteurice(s) ». Turning the
+  toggle off removes every mark and pill. In the summary popover, « focus »
+  turns the heat back on, scrolls to the passage and opens the panel, at 1280
+  and 390. At 390, both gutters are `display:none` and there are no pills
+  (`head-author-*.png`).
+- Observation, not phase 8: the run's first quote overlapped confirmed's own
+  quote on the same passage. It was saved, and the author sees it as its own pill. But
+  the reader's `mark.quote-tint` count did not change, because the new tint
+  merged into the existing one. This is the same before phase 8.
 
 ---
 
