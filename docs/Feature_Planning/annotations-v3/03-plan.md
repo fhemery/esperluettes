@@ -24,7 +24,7 @@
 | 7 | Shared infra — `rangeFromCanonical` anchoring helper | S | — | DONE |
 | 8 | `<x-comment::annotation-overlay>` component wired into the chapter page (inert) | S | — | DONE |
 | 8v | Checkpoint — Quote on the chapter page: reader tint, author heat map + gutter pills, summary | S | 8 | DONE |
-| 9 | Overlay store + Highlight-API tint (+ heat suppression) | M | 5, 7, 8 | TODO |
+| 9 | Overlay store + Highlight-API tint (+ heat suppression) | M | 5, 7, 8 | DONE |
 | 9v | Checkpoint — quote tint vs annotation tint, heat on/off, quote/unquote | S | 9 | TODO |
 | 10 | Gutter avatars and grouping | M | 9 | TODO |
 | 11 | Popover shell + author actions (reply, processed) | M | 10 | TODO |

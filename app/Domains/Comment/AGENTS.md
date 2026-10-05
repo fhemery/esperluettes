@@ -62,6 +62,8 @@
 
 **The « Annoter » button cannot host the capture form.** `<x-comment::annotable>` clones its `toolbar-actions` slot from a `<template>` on each selection; the button only dispatches `annotation:open-form`. Toolbar actions opt into region limits with `data-requires-selection-within="<selector>"`; the boolean `data-requires-single-area` additionally hides the action when the selection spans two matching elements (« Annoter » and the reactions carry both). The consumer renders `<x-comment::annotation-form>` once, outside the annotable region.
 
+**The in-chapter overlay reads Quote's stores by name.** `in-chapter/index.js` observes `Alpine.store('quotes').items` (rebuilds the Highlight-API tint after Quote re-wraps the article) and `Alpine.store('quoteAggregate').visible` (heat on → no annotation display). A rename in Quote silently breaks heat suppression.
+
 **Moderation actions emit distinct events.** `emptyContentByModeration` emits `CommentContentModerated`; `deleteByModeration` emits `CommentDeletedByModeration`. Story domain listens to `CommentDeletedByModeration` to revoke chapter credits.
 
 **Tests.** PHP under `Tests/`; Vitest next to the JS (`annotations/*.test.js`, `comment-draft/index.test.js`); browser: `e2e/tests/core/chapter-annotations.spec.ts` and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions, pending changes, save banner, replies).
