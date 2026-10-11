@@ -80,6 +80,27 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     VERIFY)* `APP_URL=http://localhost:8081` while the suite serves on `:8080`:
     avatars and chapter illustrations are broken images in every e2e
     screenshot. Fix the env file (or derive the port in `e2e/support/sail.ts`).
+13. **Script stack order for Alpine registrations is undocumented.**
+    *(annotations-v3, A15)* Architecture §9 flagged the risk, but PLAN still
+    wrote `@push('scripts')` for a bundle registering `Alpine.data` on
+    `alpine:init`. `scripts` is emitted after `app.js`'s `Alpine.start()`, so
+    BUILD had to rediscover `head-scripts`. The same phase hit a Blade trap:
+    `<x-comment::foo-bar>` looks for a class named `FooBar`, which needs an
+    explicit `Blade::component` alias. Fix: one rule each in
+    `app/Domains/Shared/AGENTS.md` (front-end): "bundles that register Alpine
+    data/stores go to `head-scripts`" and "class components whose name differs
+    from the tag need an explicit alias".
+14. **Alpine `x-show` shows one frame late.** *(annotations-v3, A21)* The
+    gutter layout ran in a `requestAnimationFrame` and measured an element
+    still `display:none` and an article not yet pushed down by a freshly shown
+    menu. Two VERIFY rows failed, which vitest cannot see. Fix: append to
+    item 4's Shared front-end rule: "measure layout from a `ResizeObserver` on
+    the toggled element, never in the same frame as an `x-show` change".
+15. **The VERIFY summary goes stale after a VERIFY fix.** *(annotations-v3)*
+    `03-plan.md` still says "54 passed, 5 failed" after `eac8fd90` fixed the
+    three ❌ rows and the spec passes 36/36; WRAP had to reconcile them from
+    the commit message. Fix: `verify-visually` rewrites its result paragraph
+    (counts, HEAD) whenever a fix lands before the step closes.
 
 ## Why
 

@@ -1,7 +1,9 @@
-import { fetchAnnotations, setProcessed, deleteAnnotation, postReply, deleteReply } from './api.js';
-import { plainText } from './capture-form.js';
+import { fetchAnnotations, setProcessed, deleteAnnotation, emptyAnnotation, postReply, deleteReply } from './api.js';
+import { plainText, ANNOTATABLE_AREA_SELECTOR } from './capture-form.js';
 import { appendReply, removeReply } from './replies.js';
 import { formatDate } from '../../../../Shared/Resources/js/date-utils.js';
+import { buildCanonicalText } from '../../../../Shared/Resources/js/anchoring/canonical-text.js';
+import { findAnchor } from '../../../../Shared/Resources/js/anchoring/reanchor.js';
 
 /** `<x-shared::modal>` name of the server-mode pop-up. */
 export const MODAL_NAME = 'annotations-server';
@@ -20,6 +22,25 @@ export const STATE_DELETED = 'deleted';
 export const STATE_ADDED = 'added';
 
 const emptyChanges = () => ({ adds: [], edits: {}, deletes: [] });
+
+/**
+ * Copies of `items` flagged `missing` when their passage can no longer be found
+ * in the chapter text. No `[data-quote-article]` on the page (not a chapter):
+ * `items` unchanged, no flag.
+ */
+const reanchor = (items) => {
+    const article = document.querySelector('[data-quote-article]');
+    if (!article) return items;
+    const canonical = buildCanonicalText(article, { within: ANNOTATABLE_AREA_SELECTOR });
+    return items.map((item) => ({
+        ...item,
+        missing: findAnchor(canonical, {
+            prefix: item.prefix ?? '',
+            highlighted: item.highlighted_text ?? '',
+            suffix: item.suffix ?? '',
+        }).status === 'missing',
+    }));
+};
 
 /**
  * Server-mode pop-up: the published annotations under one root comment, opened
@@ -51,7 +72,7 @@ const emptyChanges = () => ({ adds: [], edits: {}, deletes: [] });
 export function annotationsModal() {
     const cache = new Map();
     let labels = { one: '', many: '' };
-    let messages = { load: '', action: '', deleteWithReplies: '', deleteReply: '', replyEmpty: '', replyTooLong: '', stale: '' };
+    let messages = { load: '', action: '', deleteWithReplies: '', deleteReply: '', replyEmpty: '', replyTooLong: '', stale: '', emptyContent: '' };
     let context = { userId: null, entityType: null, entityId: null };
     let replyMax = 0;
     let listeners = [];
@@ -133,6 +154,7 @@ export function annotationsModal() {
                 replyEmpty: data.replyEmpty ?? '',
                 replyTooLong: data.replyTooLong ?? '',
                 stale: data.stale ?? '',
+                emptyContent: data.emptyContentConfirm ?? '',
             };
             replyMax = Number(data.replyMaxLength ?? 0);
             rootEl = this.$root;
@@ -163,7 +185,7 @@ export function annotationsModal() {
                 const detail = event.detail ?? {};
                 if (!detail.list) return;
                 const id = Number(detail.commentId);
-                const entry = { viewerRole: detail.list.viewer_role, items: detail.list.items ?? [] };
+                const entry = { viewerRole: detail.list.viewer_role, items: reanchor(detail.list.items ?? []) };
                 cache.set(id, entry);
                 if (this.commentId !== id) return;
                 this.viewerRole = entry.viewerRole;
@@ -260,6 +282,7 @@ export function annotationsModal() {
 
             const cached = cache.get(id);
             if (cached) {
+                cached.items = reanchor(cached.items);
                 this.viewerRole = cached.viewerRole;
                 this.items = cached.items;
                 return;
@@ -270,7 +293,7 @@ export function annotationsModal() {
             this.loading = true;
             try {
                 const payload = await fetchAnnotations(id);
-                const entry = { viewerRole: payload.viewer_role, items: payload.items ?? [] };
+                const entry = { viewerRole: payload.viewer_role, items: reanchor(payload.items ?? []) };
                 cache.set(id, entry);
                 if (this.commentId !== id) return;
                 this.viewerRole = entry.viewerRole;
@@ -287,13 +310,20 @@ export function annotationsModal() {
         },
 
         canRemove(row) {
-            if (this.isCommenter) return !!row.can_edit && row.state !== STATE_DELETED && row.state !== STATE_ADDED;
+            // An emptied row is locked for edit (`can_edit` false) but stays deletable by its writer.
+            if (this.isCommenter) return (!!row.can_edit || !!row.is_emptied) && row.state !== STATE_DELETED && row.state !== STATE_ADDED;
             return !!row.can_delete;
         },
 
         /** Never on a row pending deletion: the store would keep both changes. */
         canEdit(row) {
-            return this.isCommenter && !!row.can_edit && (row.state === null || row.state === STATE_EDITED);
+            return this.isCommenter && !!row.can_edit && !row.is_emptied
+                && (row.state === null || row.state === STATE_EDITED);
+        },
+
+        /** Moderator: « Vider le contenu » on a root row not yet emptied (rows are roots; replies are nested). */
+        canEmpty(row) {
+            return this.viewerRole === ROLE_MODERATOR && !row.is_emptied;
         },
 
         canUndo(row) {
@@ -353,6 +383,23 @@ export function annotationsModal() {
                 if (entry) entry.items = remaining;
                 if (this.commentId === commentId) this.items = remaining;
                 updateButton(commentId, remaining.length);
+            } catch (e) {
+                this.error = messages.action;
+            } finally {
+                this.busyId = null;
+            }
+        },
+
+        /** Moderator: replace the body by the placeholder; the row takes the server DTO. */
+        async emptyContent(row) {
+            if (!this.canEmpty(row) || this.busyId !== null) return;
+            if (!window.confirm(messages.emptyContent)) return;
+            const commentId = this.commentId;
+            this.busyId = row.id;
+            this.error = '';
+            try {
+                const annotation = await emptyAnnotation(row.id);
+                setItems(this, commentId, (items) => items.map((r) => (r.id === row.id ? { ...r, ...annotation } : r)));
             } catch (e) {
                 this.error = messages.action;
             } finally {

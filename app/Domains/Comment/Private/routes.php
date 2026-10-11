@@ -14,6 +14,8 @@ Route::middleware(['web', 'auth', 'compliant'])
     ->group(function () {
         Route::post('/', [CommentController::class, 'store'])->name('store');
         Route::patch('/{commentId}', [CommentController::class, 'update'])->name('update');
+        Route::get('/annotations/in-entity', [AnnotationController::class, 'inEntity'])
+            ->name('annotations.in-entity');
         Route::get('/{commentId}/annotations', [AnnotationController::class, 'index'])
             ->whereNumber('commentId')
             ->name('annotations.index');
@@ -34,6 +36,9 @@ Route::middleware(['web', 'auth', 'compliant'])
             Route::delete('/annotations/{annotationId}', [AnnotationModerationController::class, 'delete'])
                 ->whereNumber('annotationId')
                 ->name('annotations.delete');
+            Route::post('/annotations/{annotationId}/empty-content', [AnnotationModerationController::class, 'empty'])
+                ->whereNumber('annotationId')
+                ->name('annotations.empty-content');
             Route::post('/{commentId}/empty-content', [CommentModerationController::class, 'emptyContent'])->name('empty-content');
             Route::delete('/{commentId}', [CommentModerationController::class, 'delete'])->name('delete');
         });

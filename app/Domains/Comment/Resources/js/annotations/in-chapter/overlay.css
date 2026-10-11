@@ -1,0 +1,24 @@
+/*
+ * In-chapter annotation tint (CSS Custom Highlight API, see renderer.js).
+ * An underline only, never a background: Quote's yellow mark.quote-tint must
+ * stay visible underneath. Colours are the info-fg theme values, written as
+ * literals because custom properties do not reliably reach ::highlight().
+ * Dark mode follows the theme switch, :root[data-appearance=dark].
+ */
+::highlight(annotation) {
+    text-decoration: underline 2px rgb(29 78 216);
+    text-underline-offset: 3px;
+}
+
+::highlight(annotation-processed) {
+    text-decoration: underline 2px rgb(29 78 216 / 0.4);
+    text-underline-offset: 3px;
+}
+
+:root[data-appearance=dark] ::highlight(annotation) {
+    text-decoration-color: rgb(147 197 253);
+}
+
+:root[data-appearance=dark] ::highlight(annotation-processed) {
+    text-decoration-color: rgb(147 197 253 / 0.4);
+}

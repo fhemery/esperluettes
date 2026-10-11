@@ -9,6 +9,9 @@ import { getChapterAggregate } from '../api/client.js';
  *
  * `totalCount` is seeded server-side by the badge, so it is correct at first
  * paint; the rows themselves are fetched only when the heat is first turned on.
+ *
+ * `available` is set by the badge, which only renders for a viewer of the
+ * aggregate: the page's view-mode control reads it to offer the heat map.
  */
 export function createAggregateStore() {
     return {
@@ -17,6 +20,7 @@ export function createAggregateStore() {
         loaded: false,
         loading: false,
         visible: false,
+        available: false,
 
         async ensureLoaded(chapterId) {
             if (this.loaded || this.loading) return;

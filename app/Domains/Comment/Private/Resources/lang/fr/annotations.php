@@ -6,12 +6,21 @@ return [
         'invalid' => 'Une annotation est invalide : vérifiez qu\'elle n\'est pas vide et qu\'elle ne dépasse pas la longueur autorisée.',
         'stale' => 'Cette annotation n\'existe plus. Retirez-la de vos modifications.',
         'reply_not_processable' => 'Seule une annotation principale peut être marquée comme traitée.',
+        'reply_not_emptiable' => 'Seule une annotation principale peut être vidée de son contenu.',
         'reply_to_reply' => 'On ne peut pas répondre à une réponse.',
         'body_blank' => 'Votre annotation est vide.',
         'body_too_long' => 'Votre annotation est trop longue (:max caractères maximum).',
         'highlight_too_long' => 'Le passage sélectionné est trop long (:max caractères maximum).',
         'highlight_multi_block' => 'La sélection doit rester dans un même bloc de texte.',
     ],
+    'emptied_body' => '<Annotation supprimée>',
+    'empty_content' => 'Vider le contenu',
+    'empty_content_confirm' => 'Vider le contenu de cette annotation ? Le passage et les réponses sont conservés.',
+    'badge' => [
+        'one' => '1 annotation sur ce chapitre',
+        'many' => ':count annotations sur ce chapitre',
+    ],
+    'passage_missing' =>'Passage absent du chapitre',
     'toolbar_button' => [
         'label' => 'Annoter',
         'title' => 'Annoter ce passage',
@@ -82,4 +91,18 @@ return [
         'empty_body' => 'Votre réponse est vide.',
         'too_long' => 'Votre réponse est trop longue (:max caractères maximum).',
     ],
+    'overlay' => [
+        // :count = the other annotations grouped with this one
+        'avatar_label' => '{0} Annotation de :name|{1} Annotation de :name et 1 autre|[2,*] Annotation de :name et :count autres',
+        'more' => '+:count',
+        'position' => ':index / :total',
+        'previous' => 'Annotation précédente',
+        'next' => 'Annotation suivante',
+        'close' => 'Fermer',
+    ],
+    'filter' => [
+        'title' => 'Filtrer les annotations',
+        'commenters' => 'Lecteurices',
+    ],
+    'show_processed' => 'Afficher les annotations traitées',
 ];

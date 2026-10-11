@@ -19,6 +19,10 @@ Measured in a browser (Playwright, computed colours) at 2026-09-27:
 Both are below AA in at least one light season, and primary is the default
 colour of every shared button in the app.
 
+- **danger + `outline`**: pale pink text on near-white, about **1.2:1** (found at
+  `annotations-v3` checkpoint 6v, 2026-10-04, on « Vider le contenu »; that
+  button was switched to solid danger instead). Check every `outline` variant.
+
 ## Constraints or ideas I already have
 
 - First question: fix the palette (season surface/on-surface tokens) or pick

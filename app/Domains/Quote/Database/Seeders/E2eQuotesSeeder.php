@@ -32,6 +32,7 @@ class E2eQuotesSeeder extends Seeder
     private const PRIVATE_STORY_ID = 3;
     private const EXCLUDED_STORY_ID = 4;
     private const LONG_STORY_ID = 5;
+    private const ANNOTATED_STORY_ID = 6;
 
     private const DRAFT_CHAPTER_ID = 2;
     private const SIMPLE_CHAPTER_ID = 3;
@@ -40,6 +41,10 @@ class E2eQuotesSeeder extends Seeder
     private const PRIVATE_CHAPTER_ID = 8;
     private const EXCLUDED_CHAPTER_ID = 9;
     private const LONG_CHAPTER_ID = 10;
+    private const ANNOTATED_CHAPTER_ID = 11;
+
+    /** Overlaps one of `confirmed`'s annotations on the annotated chapter. */
+    public const UNDER_ANNOTATION_PASSAGE = 'Le ruisseau chante';
 
     /** Quoted from a private story: the contest picker must grey it with a reason. */
     public const PRIVATE_STORY_PASSAGE = 'Un passage tiré d\'une histoire privée';
@@ -123,6 +128,10 @@ class E2eQuotesSeeder extends Seeder
                 null, null, 'Une note sur une histoire privée.', 3],
             [$confirmed, self::EXCLUDED_CHAPTER_ID, self::EXCLUDED_STORY_ID, self::EXCLUDED_STORY_PASSAGE,
                 null, null, null, 3],
+
+            // The annotated chapter: a quote and an annotation on the same words.
+            [$confirmed, self::ANNOTATED_CHAPTER_ID, self::ANNOTATED_STORY_ID, self::UNDER_ANNOTATION_PASSAGE,
+                null, null, null, 1],
         ];
 
         foreach ($rows as [$userId, $chapterId, $storyId, $text, $prefix, $suffix, $note, $daysAgo]) {

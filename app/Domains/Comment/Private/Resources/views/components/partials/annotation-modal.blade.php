@@ -31,6 +31,7 @@
     data-load-error="{{ __('comment::annotations.server_modal.load_error') }}"
     data-action-error="{{ __('comment::annotations.server_modal.action_error') }}"
     data-stale="{{ __('comment::annotations.errors.stale') }}"
+    data-empty-content-confirm="{{ __('comment::annotations.empty_content_confirm') }}"
 >
     <x-shared::modal name="annotations-server" maxWidth="2xl">
         <div class="p-4 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="annotations-server-title">
@@ -73,6 +74,12 @@
                                 {{ __('comment::annotations.server_modal.processed') }}
                             </span>
                         </div>
+                        <div x-show="row.missing" data-testid="annotation-passage-missing" class="mb-2">
+                            <span class="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
+                                <span class="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">link_off</span>
+                                {{ __('comment::annotations.passage_missing') }}
+                            </span>
+                        </div>
                         <blockquote
                             x-show="row.highlighted_text"
                             class="border-l-4 border-primary/40 pl-3 mb-2 text-sm text-gray-700 whitespace-pre-line"
@@ -89,7 +96,7 @@
                                 {{ __('comment::annotations.server_modal.remove_stale') }}
                             </x-shared::button>
                         </div>
-                        <div x-show="canToggle(row) || canRemove(row) || canEdit(row) || (canUndo(row) && !rowError(row))" class="mt-2 flex flex-wrap justify-end gap-2">
+                        <div x-show="canToggle(row) || canEmpty(row) || canRemove(row) || canEdit(row) || (canUndo(row) && !rowError(row))" class="mt-2 flex flex-wrap justify-end gap-2">
                             <template x-if="canUndo(row) && !rowError(row)">
                                 <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="undo(row)">
                                     <span x-show="row.state === 'edited'">{{ __('comment::annotations.server_modal.undo_edit') }}</span>
@@ -105,6 +112,11 @@
                                 <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="toggle(row)" x-bind:disabled="busyId !== null">
                                     <span x-show="!row.is_processed">{{ __('comment::annotations.server_modal.mark_processed') }}</span>
                                     <span x-show="row.is_processed">{{ __('comment::annotations.server_modal.mark_unprocessed') }}</span>
+                                </x-shared::button>
+                            </template>
+                            <template x-if="canEmpty(row)">
+                                <x-shared::button type="button" size="sm" color="danger" x-on:click="emptyContent(row)" x-bind:disabled="busyId !== null">
+                                    {{ __('comment::annotations.empty_content') }}
                                 </x-shared::button>
                             </template>
                             <template x-if="canRemove(row)">

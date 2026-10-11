@@ -92,6 +92,26 @@ class AnnotationService
     }
 
     /**
+     * Which of $ids are live annotations whose content a moderator emptied.
+     *
+     * @param int[] $ids
+     * @return int[]
+     */
+    public function filterEmptiedIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return CommentAnnotation::query()
+            ->whereIn('id', $ids)
+            ->whereNotNull('content_emptied_at')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException when unknown or soft-deleted
      */
     public function getAnnotation(int $annotationId): CommentAnnotation
@@ -128,6 +148,22 @@ class AnnotationService
         $annotation->update([
             'is_processed' => $value,
             'processed_at' => $value ? now() : null,
+        ]);
+    }
+
+    /**
+     * Replace the body with the placeholder and stamp content_emptied_at. Anchor, processed flag
+     * and replies are kept. No-op on an already emptied row. Callers check it is a root.
+     */
+    public function emptyContent(CommentAnnotation $annotation): void
+    {
+        if ($annotation->isEmptied()) {
+            return;
+        }
+
+        $annotation->update([
+            'body' => e(__('comment::annotations.emptied_body')),
+            'content_emptied_at' => now(),
         ]);
     }
 
@@ -196,6 +232,29 @@ class AnnotationService
             ->roots()
             ->where('comment_id', $commentId)
             ->when($authorId !== null, fn ($q) => $q->where('author_id', $authorId))
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * Live root annotations under several comments in one query, per comment oldest first,
+     * optionally limited to one author.
+     *
+     * @param int[] $commentIds
+     * @return Collection<int, CommentAnnotation>
+     */
+    public function getRootsForComments(array $commentIds, ?int $authorId = null): Collection
+    {
+        if ($commentIds === []) {
+            return new Collection();
+        }
+
+        return CommentAnnotation::query()
+            ->roots()
+            ->whereIn('comment_id', $commentIds)
+            ->when($authorId !== null, fn ($q) => $q->where('author_id', $authorId))
+            ->orderBy('comment_id')
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();

@@ -5,6 +5,7 @@ namespace App\Domains\Comment\Private\Services;
 
 use App\Domains\Comment\Private\Repositories\CommentRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use App\Domains\Comment\Private\Models\Comment;
 use App\Domains\Comment\Private\Support\CommentBodySanitizer;
 use App\Domains\Events\Public\Api\EventBus;
@@ -86,6 +87,16 @@ class CommentService
     public function getComment(int $commentId, bool $withChildren = false): Comment
     {
         return $this->repository->getById($commentId, $withChildren);
+    }
+
+    /**
+     * Live root comments of a target, oldest first, with only id and author_id loaded.
+     *
+     * @return Collection<int, Comment>
+     */
+    public function getRootCommentsFor(string $entityType, int $entityId): Collection
+    {
+        return $this->repository->getRootsByTarget($entityType, $entityId);
     }
 
     /**

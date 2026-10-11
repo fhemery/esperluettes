@@ -101,6 +101,35 @@ class E2eStorySeeder extends Seeder
         . 'pont de bois qui grince, puis revient vers le village par un sentier bordé de haies, '
         . 'sans que rien ne vienne interrompre ce flot de mots volontairement interminable et sage.';
 
+    /**
+     * Story 6, the in-chapter annotation world: written by `author`, co-written
+     * by `tech-admin`, beta-read by `moderator`. `E2eCommentsSeeder` puts the
+     * annotations on chapter 11 and 13; chapter 12 has none.
+     */
+    public const ANNOTATED_STORY_ID = 6;
+    public const ANNOTATED_STORY_SLUG = 'histoire-annotee-6';
+    public const ANNOTATED_STORY_TITLE = 'Histoire annotée E2E';
+    public const ANNOTATED_CHAPTER_ID = 11;
+    public const ANNOTATED_CHAPTER_SLUG = 'chapitre-annote-11';
+    public const UNANNOTATED_CHAPTER_ID = 12;
+    public const UNANNOTATED_CHAPTER_SLUG = 'chapitre-sans-annotation-12';
+    public const REVIEWED_CHAPTER_ID = 13;
+    public const REVIEWED_CHAPTER_SLUG = 'chapitre-a-reviser-13';
+
+    /**
+     * The annotated chapter: two short paragraphs (the first one carries three
+     * annotations on one line, so they share a gutter group), a raw image, then
+     * prose below it whose avatars must follow the image's late load.
+     */
+    private const ANNOTATED_BLOCKS_TEXT = [
+        '<p>Zêta un. Le renard roux traverse la clairière au matin.</p>'
+            . '<p>Zêta deux. Une chouette observe depuis la branche la plus haute du chêne.</p>',
+        '<p>Êta un. Le ruisseau chante sous le pont de pierre.</p>'
+            . '<p>Êta deux. Plus loin, le moulin tourne encore pour personne.</p>'
+            . '<p>Thêta un. Le village s\'éveille et les volets claquent un à un.</p>'
+            . '<p>Thêta deux. La boulangère ouvre sa boutique avec un sourire.</p>',
+    ];
+
     /** Fixture image of the illustrated chapter, copied from the repo on seed. */
     public const ILLUSTRATION_PATH = 'chapters/e2e/illustration.jpg';
 
@@ -206,6 +235,99 @@ class E2eStorySeeder extends Seeder
 
         $this->createCoauthoredStory($authorId);
         $this->createContestStories($authorId);
+        $this->createAnnotatedStory($authorId);
+    }
+
+    /** Story 6 and its three chapters, see ANNOTATED_STORY_ID. */
+    private function createAnnotatedStory(int $authorId): void
+    {
+        $collaborators = DB::table('users')
+            ->whereIn('email', [E2eAccountsSeeder::TECH_ADMIN_EMAIL, E2eAccountsSeeder::MODERATOR_EMAIL])
+            ->pluck('id', 'email');
+
+        $story = new Story([
+            'created_by_user_id' => $authorId,
+            'title' => self::ANNOTATED_STORY_TITLE,
+            'slug' => self::ANNOTATED_STORY_SLUG,
+            'description' => '<p>Une histoire pour les annotations dans le texte.</p>',
+            'visibility' => Story::VIS_PUBLIC,
+            'tw_disclosure' => Story::TW_NO_TW,
+            'story_ref_type_id' => StoryRefType::value('id'),
+            'story_ref_audience_id' => StoryRefAudience::value('id'),
+            'story_ref_copyright_id' => StoryRefCopyright::value('id'),
+        ]);
+        $story->id = self::ANNOTATED_STORY_ID;
+        $story->save();
+
+        DB::table('story_genres')->insert([
+            'story_id' => $story->id,
+            'story_ref_genre_id' => StoryRefGenre::value('id'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $members = [[$authorId, 'author']];
+        if (isset($collaborators[E2eAccountsSeeder::TECH_ADMIN_EMAIL])) {
+            $members[] = [(int) $collaborators[E2eAccountsSeeder::TECH_ADMIN_EMAIL], 'author'];
+        }
+        if (isset($collaborators[E2eAccountsSeeder::MODERATOR_EMAIL])) {
+            $members[] = [(int) $collaborators[E2eAccountsSeeder::MODERATOR_EMAIL], CollaboratorService::ROLE_BETA_READER];
+        }
+        foreach ($members as [$userId, $role]) {
+            DB::table('story_collaborators')->insert([
+                'story_id' => $story->id,
+                'user_id' => $userId,
+                'role' => $role,
+                'invited_by_user_id' => $authorId,
+                'invited_at' => now(),
+                'accepted_at' => now(),
+            ]);
+        }
+
+        Storage::disk('public')->put(
+            self::ILLUSTRATION_PATH,
+            (string) file_get_contents(public_path('images/story/policier.jpg'))
+        );
+
+        $blocks = [
+            ['type' => 'text', 'html' => self::ANNOTATED_BLOCKS_TEXT[0]],
+            [
+                'type' => 'image',
+                'path' => self::ILLUSTRATION_PATH,
+                'alt' => 'Illustration E2E',
+                'caption' => 'Légende de l\'illustration E2E',
+                'keep_original' => true,
+            ],
+            ['type' => 'text', 'html' => self::ANNOTATED_BLOCKS_TEXT[1]],
+        ];
+
+        $this->createChapter(self::ANNOTATED_CHAPTER_ID, 'Chapitre annoté', self::ANNOTATED_CHAPTER_SLUG, [
+            'content' => app(EditorPublicApi::class)->render($blocks, 'multiedit-narrative'),
+            'content_blocks' => $blocks,
+            'sort_order' => 1,
+            'status' => Chapter::STATUS_PUBLISHED,
+            'first_published_at' => now(),
+        ], $story->id);
+
+        $this->createChapter(self::UNANNOTATED_CHAPTER_ID, 'Chapitre sans annotation', self::UNANNOTATED_CHAPTER_SLUG, [
+            'content' => '<p>Iota un. Un chapitre que personne n\'a encore annoté, pour une sélection.</p>'
+                . '<p>Iota deux. Une seconde phrase pour annoter en brouillon.</p>',
+            'sort_order' => 2,
+            'status' => Chapter::STATUS_PUBLISHED,
+            'first_published_at' => now(),
+        ], $story->id);
+
+        $this->createChapter(self::REVIEWED_CHAPTER_ID, 'Chapitre à réviser', self::REVIEWED_CHAPTER_SLUG, [
+            'content' => '<p>Kappa un. La première remarque porte sur ce début de phrase.</p>'
+                . '<p>Kappa deux. La deuxième remarque vise ce passage précis du texte.</p>'
+                . '<p>Kappa trois. La troisième remarque sera supprimée bientôt.</p>'
+                . '<p>Kappa quatre. Une phrase libre pour une nouvelle annotation.</p>',
+            'sort_order' => 3,
+            'status' => Chapter::STATUS_PUBLISHED,
+            'first_published_at' => now(),
+        ], $story->id);
+
+        $story->update(['last_chapter_published_at' => now()]);
     }
 
     /**

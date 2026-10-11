@@ -94,6 +94,12 @@ return [
         'label' => 'Lectures',
         'tooltip' => "Nombre de lectures effectuées par des utilisateurs connectés.",
     ],
+    'view_mode' => [
+        'label' => 'Afficher dans le texte',
+        'text' => 'Texte seul',
+        'annotations' => 'Annotations',
+        'quotes' => 'Citations',
+    ],
     'words' => [
         'label' => 'Mots',
         'tooltip' => "Nombre de mots de ce chapitre (contenu uniquement).",

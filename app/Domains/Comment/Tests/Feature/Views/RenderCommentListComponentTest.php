@@ -286,6 +286,29 @@ describe('CommentListComponent', function () {
                 ->and($modal)->toContain(e(__('comment::annotations.server_modal.undo_edit')));
         });
 
+        it('renders « Vider le contenu » and the « Passage absent du chapitre » badge in the annotations modal', function () {
+            $this->actingAs(alice($this, roles: [Roles::USER_CONFIRMED]));
+
+            $html = Blade::render('<x-comment::comment-list-component entity-type="default" :entity-id="$id" :per-page="10" />', [
+                'id' => 123,
+            ]);
+
+            $modal = substr($html, strpos($html, 'x-data="annotationsModal()"'));
+            // Opening tag of the « Vider le contenu » button: solid danger, like « Supprimer »
+            // (the danger outline variant is unreadable).
+            $emptyButton = substr($modal, 0, strpos($modal, 'x-on:click="emptyContent(row)"'));
+            $emptyButton = substr($emptyButton, strrpos($emptyButton, '<button'));
+
+            expect($emptyButton)->toContain('surface-error')
+                ->and($emptyButton)->not->toContain('is-outline');
+
+            expect($modal)->toContain(e(__('comment::annotations.empty_content')))
+                ->and($modal)->toContain(e(__('comment::annotations.passage_missing')))
+                ->and($modal)->toContain('data-empty-content-confirm="' . e(__('comment::annotations.empty_content_confirm')) . '"')
+                ->and($modal)->toContain('x-if="canEmpty(row)"')
+                ->and($modal)->toContain('x-show="row.missing"');
+        });
+
         it('the annotations modal is rendered for a viewer who cannot create a root comment', function () {
             app(CommentPolicyRegistry::class)->register('default', new class extends DefaultCommentPolicy {
                 public function supportsAnnotations(): bool
@@ -332,7 +355,7 @@ describe('CommentListComponent', function () {
                 ->and($bannerAt)->toBeGreaterThan(strpos($html, '</form>'))
                 ->and($bannerAt)->toBeLessThan(strpos($html, 'x-data="annotationsModal()"'))
                 ->and($html)->toContain('x-show="count > 0"')
-                ->and($html)->toContain('sticky bottom-0 z-30')
+                ->and($html)->toContain('fixed inset-x-0 bottom-0 z-30')
                 ->and($html)->toContain('role="status"')
                 ->and($html)->toContain('aria-live="polite"')
                 ->and($html)->toContain('data-label-many="' . e(trans_choice('comment::annotations.changes_banner.text', 2, ['count' => '__COUNT__'])) . '"')

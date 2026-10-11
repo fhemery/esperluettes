@@ -190,6 +190,7 @@ Checks that a display name produces a unique profile slug. Accepts an optional `
 | `anchoring/extract-anchor.js` | `extractAnchor(range, rootEl, canonicalText)` | Builds a quote anchor (prefix / highlighted / suffix) from a selection, trimmed to the text it covers. |
 | `anchoring/text-range.js` | `coveredTextSlices(range)`, `trimRangeToText(range)` | The text a selection really covers: a boundary that touches a block without covering its text (triple-click ending at `(nextBlock, 0)`) is ignored. Anything deciding what was selected goes through here, so the toolbar's area check and anchor extraction agree. |
 | `anchoring/reanchor.js` | `findAnchor(canonicalText, anchor)` | Re-locates a stored anchor in edited text. |
+| `anchoring/canonical-range.js` | `rangeFromCanonical(canonical, start, end)` | Inverse of `buildCanonicalText`: maps canonical-text offsets (`end` exclusive) back to one DOM `Range`, using the `nodeMap`. Offsets landing on a block newline or emoji token snap to the nearest text-node edge inside the span; returns `null` for an empty span or one covering no text node. Does not touch the DOM. |
 | `anchoring/block-elements.js` | `isBlockElement(node)`, `closestBlock(node)` | Tells whether a selection crosses two blocks, so the caller can refuse it. Deliberately a *narrower* block definition than `canonical-text.js` — see note below. |
 
 The rich-text editor bundle lives in the **Editor** domain

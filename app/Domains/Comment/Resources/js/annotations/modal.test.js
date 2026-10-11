@@ -11,6 +11,7 @@ const DELETE_REPLY_CONFIRM = 'Supprimer cette réponse ?';
 const REPLY_EMPTY = 'Réponse vide.';
 const REPLY_TOO_LONG = 'Réponse trop longue.';
 const STALE = 'Cette annotation n’existe plus.';
+const EMPTY_CONFIRM = 'Vider le contenu de cette annotation ?';
 const CSRF = 'csrf-token-value';
 const USER_ID = 7;
 const CHAPTER_ID = 42;
@@ -68,6 +69,7 @@ function mount() {
     root.dataset.replyEmpty = REPLY_EMPTY;
     root.dataset.replyTooLong = REPLY_TOO_LONG;
     root.dataset.stale = STALE;
+    root.dataset.emptyContentConfirm = EMPTY_CONFIRM;
     root.dataset.userId = String(USER_ID);
     root.dataset.entityType = 'chapter';
     root.dataset.entityId = String(CHAPTER_ID);
@@ -531,6 +533,157 @@ describe('annotationsModal — replies', () => {
 
         expect(component.error).toBe(ACTION_ERROR);
         expect(component.rows[0].replies.map((r) => r.id)).toEqual([20]);
+    });
+});
+
+describe('annotationsModal — re-anchoring, « Vider le contenu », emptied rows', () => {
+    const anchored = (id, prefix, highlighted, suffix, overrides = {}) => item(id, {
+        prefix, highlighted_text: highlighted, suffix, replies: [], ...overrides,
+    });
+    // ok: exact triple; moved: highlighted gone but its context found once;
+    // missing: neither; title: present only outside the annotatable blocks.
+    const rows = () => [
+        anchored(1, 'une fois un', 'dragon rouge', 'qui dormait'),
+        anchored(2, 'au fond', 'de la cave', '.'),
+        anchored(3, 'la licorne', 'bleue', 'volait'),
+        anchored(4, '', 'Titre secret', ''),
+    ];
+
+    function addArticle() {
+        const article = document.createElement('article');
+        article.dataset.quoteArticle = '';
+        article.innerHTML = '<h1>Titre secret</h1>'
+            + '<div class="ce-block--text"><p>Il était une fois un dragon rouge qui dormait au fond de la grotte.</p></div>';
+        document.body.appendChild(article);
+    }
+
+    async function openAs(role, items) {
+        fetchMock.mockResolvedValueOnce(jsonResponse(listResponse(role, items)));
+        mount();
+        await component.open(10);
+    }
+
+    it.each(['commenter', 'author', 'moderator'])('marks a row missing when its triple is absent from the article (%s)', async (role) => {
+        addArticle();
+        await openAs(role, rows());
+
+        expect(rowById(1).missing).toBe(false);
+        expect(rowById(2).missing).toBe(false);
+        expect(rowById(3).missing).toBe(true);
+        expect(rowById(4).missing).toBe(true);
+    });
+
+    it('marks nothing when the page has no [data-quote-article]', async () => {
+        await openAs('author', rows());
+
+        for (const row of component.rows) expect(row.missing).toBeFalsy();
+    });
+
+    it('does not re-anchor pending adds', async () => {
+        addArticle();
+        await openAs('commenter', []);
+        addPending('absent du texte');
+
+        expect(component.rows).toHaveLength(1);
+        expect(component.rows[0].missing).toBeFalsy();
+    });
+
+    it('re-anchors the rows of an annotations:list-refreshed list', async () => {
+        addArticle();
+        await openAs('commenter', [rows()[0]]);
+
+        window.dispatchEvent(new CustomEvent('annotations:list-refreshed', {
+            detail: { commentId: 10, list: listResponse('commenter', [rows()[0], rows()[2]]) },
+        }));
+
+        expect(rowById(1).missing).toBe(false);
+        expect(rowById(3).missing).toBe(true);
+    });
+
+    it('offers « Vider le contenu » to a moderator only, on rows not yet emptied', async () => {
+        await openAs('moderator', [item(1, { can_delete: true }), item(2, { can_delete: true, is_emptied: true })]);
+        expect(component.canEmpty(rowById(1))).toBe(true);
+        expect(component.canEmpty(rowById(2))).toBe(false);
+
+        component.destroy();
+        await openAs('author', [item(1, { can_mark_as_processed: true })]);
+        expect(component.canEmpty(rowById(1))).toBe(false);
+
+        component.destroy();
+        await openAs('commenter', [item(1, { can_edit: true })]);
+        expect(component.canEmpty(rowById(1))).toBe(false);
+    });
+
+    it('emptyContent replaces the cached row with the server DTO', async () => {
+        const confirm = vi.fn().mockReturnValue(true);
+        vi.stubGlobal('confirm', confirm);
+        const reply = { id: 50, body: '<p>réponse</p>', can_delete: true };
+        const emptied = item(1, { body: '&lt;Annotation supprimée&gt;', is_emptied: true, can_delete: true, replies: [reply] });
+        fetchMock
+            .mockResolvedValueOnce(jsonResponse(listResponse('moderator', [
+                item(1, { can_delete: true, replies: [reply] }),
+                item(2, { can_delete: true }),
+            ])))
+            .mockResolvedValueOnce(jsonResponse({ annotation: emptied }));
+        mount();
+        await component.open(10);
+
+        await component.emptyContent(rowById(1));
+
+        expect(confirm).toHaveBeenCalledWith(EMPTY_CONFIRM);
+        const [url, init] = fetchMock.mock.calls[1];
+        expect(url).toBe('/comments/annotations/1/empty-content');
+        expect(init.method).toBe('POST');
+        expect(component.items.map((i) => i.id)).toEqual([1, 2]);
+        expect(rowById(1).body).toBe('&lt;Annotation supprimée&gt;');
+        expect(rowById(1).is_emptied).toBe(true);
+        expect(rowById(1).replies).toEqual([reply]);
+        expect(component.canEmpty(rowById(1))).toBe(false);
+
+        // The cache follows: reopening shows the emptied row without a fetch.
+        await component.open(10);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(rowById(1).is_emptied).toBe(true);
+    });
+
+    it('emptyContent does nothing when the moderator cancels, and shows the action error on failure', async () => {
+        const confirm = vi.fn().mockReturnValueOnce(false).mockReturnValueOnce(true);
+        vi.stubGlobal('confirm', confirm);
+        fetchMock
+            .mockResolvedValueOnce(jsonResponse(listResponse('moderator', [item(1, { can_delete: true })])))
+            .mockResolvedValueOnce(jsonResponse({ message: 'nope' }, 422));
+        mount();
+        await component.open(10);
+
+        await component.emptyContent(rowById(1));
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+
+        await component.emptyContent(rowById(1));
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(component.error).toBe(ACTION_ERROR);
+        expect(rowById(1).body).toBe('<p>Avis 1</p>');
+    });
+
+    it('hides Modifier on an emptied row, also with a pending edit, and keeps Supprimer', async () => {
+        drafts.setPendingEdit(USER_ID, 'chapter', CHAPTER_ID, 2, '<p>revu</p>');
+        await openAs('commenter', [
+            item(1, { can_edit: false, is_emptied: true, replies: [] }),
+            item(2, { can_edit: true, is_emptied: true, replies: [] }),
+            item(3, { can_edit: true, replies: [] }),
+        ]);
+
+        expect(component.canEdit(rowById(1))).toBe(false);
+        expect(component.canEdit(rowById(2))).toBe(false);
+        expect(component.canEdit(rowById(3))).toBe(true);
+        expect(component.canRemove(rowById(1))).toBe(true);
+
+        // No capture form opened for an emptied row.
+        const opened = vi.fn();
+        window.addEventListener('annotations:edit-saved-row', opened);
+        component.edit(rowById(1));
+        component.edit(rowById(2));
+        expect(opened).not.toHaveBeenCalled();
+        window.removeEventListener('annotations:edit-saved-row', opened);
     });
 });
 

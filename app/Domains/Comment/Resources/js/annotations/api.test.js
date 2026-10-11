@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { deleteReply, postReply, saveAnnotationChanges } from './api.js';
+import { deleteReply, emptyAnnotation, postReply, saveAnnotationChanges } from './api.js';
 
 const CSRF = 'csrf-token-value';
 
@@ -100,5 +100,20 @@ describe('annotations api', () => {
 
         fetchMock.mockResolvedValue(jsonResponse({ message: 'Forbidden' }, 403));
         await expect(deleteReply(30)).rejects.toThrow();
+    });
+
+    it('emptyAnnotation posts to /comments/annotations/{id}/empty-content and returns the annotation', async () => {
+        const annotation = { id: 12, body: '&lt;Annotation supprimée&gt;', is_emptied: true };
+        fetchMock.mockResolvedValue(jsonResponse({ annotation }));
+
+        await expect(emptyAnnotation(12)).resolves.toEqual(annotation);
+
+        const { url, init } = lastRequest();
+        expect(url).toBe('/comments/annotations/12/empty-content');
+        expect(init.method).toBe('POST');
+        expect(init.headers['X-CSRF-TOKEN']).toBe(CSRF);
+
+        fetchMock.mockResolvedValue(jsonResponse({ message: 'Unprocessable' }, 422));
+        await expect(emptyAnnotation(12)).rejects.toThrow();
     });
 });

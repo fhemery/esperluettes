@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Domains\Comment\Public\Api\CommentPolicyRegistry;
 use App\Domains\Comment\Public\Api\CommentMaintenancePublicApi;
 use App\Domains\Comment\Private\Repositories\CommentRepository;
+use App\Domains\Comment\Public\View\Components\AnnotationOverlayComponent;
 use App\Domains\Comment\Public\View\Components\CommentListComponent;
 use Illuminate\Support\Facades\Blade;
 use App\Domains\Events\Public\Api\EventBus;
@@ -46,6 +47,7 @@ class CommentServiceProvider extends ServiceProvider
 
         // Register Blade components (both namespaced and alias)
         Blade::componentNamespace('App\\Domains\\Comment\\Public\\View\\Components', 'comment');
+        Blade::component(AnnotationOverlayComponent::class, 'comment::annotation-overlay');
         Blade::anonymousComponentPath(app_path('Domains/Comment/Private/Resources/views/components'), 'comment');
 
         // Load domain routes

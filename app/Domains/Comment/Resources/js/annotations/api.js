@@ -80,6 +80,16 @@ export async function deleteReply(replyId) {
     if (!res.ok) throw new Error(await res.text());
 }
 
+/** Moderators only, root annotations only: replace the body by the placeholder; returns the refreshed row. */
+export async function emptyAnnotation(annotationId) {
+    const res = await fetch(`/comments/annotations/${annotationId}/empty-content`, {
+        method: 'POST',
+        headers: headers(),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return (await res.json()).annotation;
+}
+
 /** Moderators only. */
 export async function deleteAnnotation(annotationId) {
     const res = await fetch(`/comments/annotations/${annotationId}`, {

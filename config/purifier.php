@@ -16,6 +16,15 @@
  * @link http://htmlpurifier.org/live/configdoc/plain.html
  */
 
+// Custom emoji classes produced by the Quill emoji toolbar, shared by every
+// profile that accepts them. Plain array so the config stays cacheable.
+$customEmojiClasses = [
+    'ql-custom-emoji',
+    'ql-custom-emoji-esperamour', 'ql-custom-emoji-esperbravo', 'ql-custom-emoji-esperclindoeil',
+    'ql-custom-emoji-espercolere', 'ql-custom-emoji-esperfourire', 'ql-custom-emoji-esperlunettes',
+    'ql-custom-emoji-espersnob', 'ql-custom-emoji-espersourire', 'ql-custom-emoji-espertriste',
+];
+
 return [
     'encoding' => 'UTF-8',
     'finalize' => true,
@@ -38,10 +47,7 @@ return [
             'CSS.AllowedProperties' => 'text-align',
             'Attr.AllowedClasses' => [
                 'ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify',
-                'ql-custom-emoji',
-                'ql-custom-emoji-esperamour', 'ql-custom-emoji-esperbravo', 'ql-custom-emoji-esperclindoeil',
-                'ql-custom-emoji-espercolere', 'ql-custom-emoji-esperfourire', 'ql-custom-emoji-esperlunettes',
-                'ql-custom-emoji-espersnob', 'ql-custom-emoji-espersourire', 'ql-custom-emoji-espertriste',
+                ...$customEmojiClasses,
             ],
             'AutoFormat.AutoParagraph' => true,
             'Attr.EnableID' => false,
@@ -57,10 +63,7 @@ return [
             'CSS.AllowedProperties' => 'text-align',
             'Attr.AllowedClasses' => [
                 'ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify', 'ql-spoiler',
-                'ql-custom-emoji',
-                'ql-custom-emoji-esperamour', 'ql-custom-emoji-esperbravo', 'ql-custom-emoji-esperclindoeil',
-                'ql-custom-emoji-espercolere', 'ql-custom-emoji-esperfourire', 'ql-custom-emoji-esperlunettes',
-                'ql-custom-emoji-espersnob', 'ql-custom-emoji-espersourire', 'ql-custom-emoji-espertriste',
+                ...$customEmojiClasses,
             ],
             'AutoFormat.AutoParagraph' => true,
             'Attr.EnableID' => false,
@@ -118,10 +121,7 @@ return [
             'CSS.AllowedProperties' => 'text-align',
             'Attr.AllowedClasses' => [
                 'ql-align-center', 'ql-align-left', 'ql-align-right', 'ql-align-justify', 'ql-spoiler',
-                'ql-custom-emoji',
-                'ql-custom-emoji-esperamour', 'ql-custom-emoji-esperbravo', 'ql-custom-emoji-esperclindoeil',
-                'ql-custom-emoji-espercolere', 'ql-custom-emoji-esperfourire', 'ql-custom-emoji-esperlunettes',
-                'ql-custom-emoji-espersnob', 'ql-custom-emoji-espersourire', 'ql-custom-emoji-espertriste',
+                ...$customEmojiClasses,
             ],
             'AutoFormat.AutoParagraph' => true,
             'Attr.EnableID' => false,
@@ -134,12 +134,7 @@ return [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             'HTML.AllowedElements' => 'strong,em,span',
             'HTML.AllowedAttributes' => 'span.class',
-            'Attr.AllowedClasses' => [
-                'ql-custom-emoji',
-                'ql-custom-emoji-esperamour', 'ql-custom-emoji-esperbravo', 'ql-custom-emoji-esperclindoeil',
-                'ql-custom-emoji-espercolere', 'ql-custom-emoji-esperfourire', 'ql-custom-emoji-esperlunettes',
-                'ql-custom-emoji-espersnob', 'ql-custom-emoji-espersourire', 'ql-custom-emoji-espertriste',
-            ],
+            'Attr.AllowedClasses' => $customEmojiClasses,
             'AutoFormat.AutoParagraph' => false,
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,
@@ -152,12 +147,7 @@ return [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             'HTML.AllowedElements' => 'p,br,strong,em,span',
             'HTML.AllowedAttributes' => 'span.class',
-            'Attr.AllowedClasses' => [
-                'ql-custom-emoji',
-                'ql-custom-emoji-esperamour', 'ql-custom-emoji-esperbravo', 'ql-custom-emoji-esperclindoeil',
-                'ql-custom-emoji-espercolere', 'ql-custom-emoji-esperfourire', 'ql-custom-emoji-esperlunettes',
-                'ql-custom-emoji-espersnob', 'ql-custom-emoji-espersourire', 'ql-custom-emoji-espertriste',
-            ],
+            'Attr.AllowedClasses' => $customEmojiClasses,
             'AutoFormat.AutoParagraph' => true,
             'Attr.EnableID' => false,
             'HTML.SafeIframe' => false,
