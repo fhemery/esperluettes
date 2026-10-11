@@ -16,11 +16,13 @@ const emptyChanges = () => ({ adds: [], edits: {}, deletes: [] });
  * replace the body, adds are appended, pending deletes are left out).
  *
  * `visibleRows` is what the chapter shows: rows minus filtered commenters and
- * processed rows (unless `showProcessed`); nothing while the author's heat map
- * is on (`heatOn`, mirrored from Quote by the entry script).
+ * processed rows (unless `showProcessed`); nothing until the viewer turns the
+ * display on (`enabled`), or while the author's heat map is on
+ * (`heatOn`, read live from Quote's store through `heatSource`).
  */
-export function createOverlayStore() {
+export function createOverlayStore({ heatSource = null } = {}) {
     let listeners = [];
+    let heatValue = false;
 
     return {
         role: null,
@@ -29,10 +31,23 @@ export function createOverlayStore() {
         serverLists: [],
         rows: [],
         filters: { hiddenCommenterIds: new Set(), showProcessed: false },
-        heatOn: false,
+        /** Quote's heat map is on: read from `heatSource` when given, else settable. */
+        get heatOn() {
+            return heatSource ? heatSource() : heatValue;
+        },
+        set heatOn(value) {
+            heatValue = value;
+        },
+        /** The viewer's choice (the page's view-mode control): off until asked for. */
+        enabled: false,
+
+        /** Whether annotations are drawn in the chapter at all. */
+        get shown() {
+            return this.enabled && !this.heatOn;
+        },
 
         get visibleRows() {
-            if (this.heatOn) return [];
+            if (!this.shown) return [];
             const hidden = this.filters.hiddenCommenterIds;
             const showProcessed = this.filters.showProcessed;
             return this.rows.filter((row) => !hidden.has(row.author_id)
@@ -52,8 +67,11 @@ export function createOverlayStore() {
                 listeners.push([name, handler]);
             };
             if (role === ROLE_COMMENTER) {
+                // Writing an annotation shows them: it must not vanish as it is saved locally.
                 DRAFT_EVENTS.forEach((name) => on(name, (event) => {
-                    if (sameEntity(event.detail)) this.compose();
+                    if (!sameEntity(event.detail)) return;
+                    this.enabled = true;
+                    this.compose();
                 }));
             }
             on('annotations:list-refreshed', (event) => {

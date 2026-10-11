@@ -388,7 +388,7 @@ unsupported type) it renders the slot only and loads no script.
   one Vite entry pushed once to `head-scripts`): passages are re-anchored in the
   article and tinted with the CSS Highlight API (nothing tinted where
   `CSS.highlights` is missing; `missing` passages are dropped), and one avatar per
-  group of nearby annotations sits in a right-hand gutter (md and up only, with a
+  group of nearby annotations sits in a right-hand gutter (with a
   « +N » counter). Processed groups are dimmed.
 - **Popover** — a click on a gutter avatar opens a popover (`annotationPopover`,
   teleported to `body`) paging through the group's annotations with their reply
@@ -397,11 +397,19 @@ unsupported type) it renders the slot only and loads no script.
   editor, `annotation-overlay-reply-editor`). An emptied row shows the placeholder
   and offers « Supprimer » only. Unsaved draft / pending rows of the commenter
   appear too, with the commenter's own avatar.
-- **Author filter** — `annotationFilterMenu`: md and up, authors only, shown when
-  at least one annotation exists; filters by commenter and toggles processed
+- **Author filter** — `annotationFilterMenu`: authors only, shown with the
+  annotations when at least one exists; filters by commenter and toggles processed
   annotations. State lasts for the visit.
+- **Display** — annotations are off on load. The host page's view-mode control
+  (text only / annotations / quotes) sets `Alpine.store('annotationOverlay').enabled`;
+  a commenter writing an annotation switches it on. Below `lg` there is no page
+  column for the gutter: while annotations are shown the overlay reserves 24px
+  (`pr-6`) and the avatars sit inside it; the popover is centered under `lg`.
+- **Header badge** — `<x-comment::annotation-badge>` shows the viewer's annotation
+  count and lists them (`annotationList`); choosing one shows the annotations,
+  scrolls to its avatar and opens its popover (`annotation-overlay:focus`).
 - **Heat map** — when Quote's heat map is on (`Alpine.store('quoteAggregate').visible`)
-  the overlay hides its tint and gutter.
+  the overlay hides its tint and gutter; the view-mode control keeps them exclusive.
 
 ### Lifecycle
 

@@ -32,9 +32,14 @@ export class ChapterPage {
     return this.content.locator('.ce-block--chapter-choice a');
   }
 
-  /** The author's heat toggle next to the quote badge (authors only). */
+  /** A segment of the view-mode control: what the chapter text shows. */
+  viewMode(mode: 'text' | 'annotations' | 'quotes'): Locator {
+    return this.page.locator(`[data-view-mode="${mode}"]`);
+  }
+
+  /** The « Citations » segment of the view-mode control (authors only): the heat map. */
   get heatToggle(): Locator {
-    return this.page.locator('[data-quote-author-badge] button[aria-pressed]');
+    return this.page.locator('[data-view-mode="quotes"]');
   }
 
   /** Author heat tints, present once the heat is on. */

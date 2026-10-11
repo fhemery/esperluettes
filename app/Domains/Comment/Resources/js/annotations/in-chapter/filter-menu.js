@@ -24,10 +24,10 @@ export function annotationFilterMenu() {
             return this.$store.annotationOverlay;
         },
 
-        /** Author only, with at least one annotation (processed or filtered out too), heat map off. */
+        /** Author only, with at least one annotation (processed or filtered out too), display on. */
         get shown() {
             const overlay = this.overlay;
-            return overlay.role === 'author' && !overlay.heatOn && overlay.rows.length > 0;
+            return overlay.role === 'author' && overlay.shown && overlay.rows.length > 0;
         },
 
         /** [{ id, name, avatar }] in row order, one per author_id. */

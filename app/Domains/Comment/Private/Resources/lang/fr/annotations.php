@@ -16,7 +16,11 @@ return [
     'emptied_body' => '<Annotation supprimée>',
     'empty_content' => 'Vider le contenu',
     'empty_content_confirm' => 'Vider le contenu de cette annotation ? Le passage et les réponses sont conservés.',
-    'passage_missing' => 'Passage absent du chapitre',
+    'badge' => [
+        'one' => '1 annotation sur ce chapitre',
+        'many' => ':count annotations sur ce chapitre',
+    ],
+    'passage_missing' =>'Passage absent du chapitre',
     'toolbar_button' => [
         'label' => 'Annoter',
         'title' => 'Annoter ce passage',

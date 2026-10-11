@@ -1,7 +1,7 @@
 // In-chapter annotation overlay: Alpine root wrapping the chapter article.
 // Loads the viewer's annotations into Alpine.store('annotationOverlay') and
-// tints their passages (renderer.js), with the annotators' avatars in the md+
-// gutter (gutter.js); an avatar opens the popover (popover.js); the author's
+// tints their passages (renderer.js), with the annotators' avatars in the
+// right gutter (gutter.js); an avatar opens the popover (popover.js); the author's
 // filter menu (filter-menu.js) writes the store's filters. Observes Quote's stores — `quotes.items` (its re-wraps
 // invalidate our ranges) and `quoteAggregate.visible` (heat map on → no
 // annotation display).
@@ -12,12 +12,22 @@ import { groupByPosition, gutterItems } from './gutter.js';
 import { annotationPopover } from './popover.js';
 import { annotationFilterMenu } from './filter-menu.js';
 import { annotatorName } from './annotator.js';
+import { annotationList, FOCUS_EVENT } from './list.js';
+
+/** Frames to wait for the display to render before giving up on a focus request. */
+const FOCUS_FRAMES = 20;
 
 document.addEventListener('alpine:init', () => {
     const Alpine = window.Alpine;
-    Alpine.store('annotationOverlay', createOverlayStore());
+    // Quote's store is read live, not mirrored through an effect: an effect writing
+    // `heatOn` can land after the render effect in one Alpine flush, whose re-run is
+    // then dropped, leaving the chapter untinted.
+    Alpine.store('annotationOverlay', createOverlayStore({
+        heatSource: () => Alpine.store('quoteAggregate')?.visible === true,
+    }));
     Alpine.data('annotationPopover', annotationPopover);
     Alpine.data('annotationFilterMenu', annotationFilterMenu);
+    Alpine.data('annotationList', annotationList);
 
     Alpine.data('annotationOverlay', () => {
         // Kept out of the reactive component: the render effect writes `frame`,
@@ -76,6 +86,9 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 const store = Alpine.store('annotationOverlay');
+                const onFocus = (event) => this.focusRow(event.detail?.key);
+                window.addEventListener(FOCUS_EVENT, onFocus);
+                cleanups.push(() => window.removeEventListener(FOCUS_EVENT, onFocus));
                 store.load({
                     role: this.role,
                     mode: this.mode,
@@ -87,9 +100,6 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 // Created here, after every alpine:init handler, so Quote's stores exist.
-                effects.push(Alpine.effect(() => {
-                    store.heatOn = Alpine.store('quoteAggregate')?.visible === true;
-                }));
                 effects.push(Alpine.effect(() => {
                     // Read to subscribe: Quote's re-wrap after a change collapses our ranges.
                     Alpine.store('quotes')?.items?.slice();
@@ -131,6 +141,34 @@ document.addEventListener('alpine:init', () => {
                         members: group.members.map((item) => item.key),
                     };
                 });
+            },
+
+            /**
+             * From the header list: show the annotations (Quote's heat map would
+             * hide them), then scroll to the row's avatar and open its popover.
+             * The gutter is rebuilt a frame or two after the display turns on.
+             */
+            focusRow(key) {
+                if (!key) return;
+                const store = Alpine.store('annotationOverlay');
+                const heat = Alpine.store('quoteAggregate');
+                if (heat?.visible) heat.visible = false;
+                store.enabled = true;
+
+                let frames = 0;
+                const attempt = () => {
+                    const group = this.groups.find((g) => g.members.includes(key));
+                    const button = group
+                        ? this.$el.querySelector(`[data-annotation-group="${group.key}"]`)
+                        : null;
+                    if (button) {
+                        button.scrollIntoView({ block: 'center' });
+                        button.click();
+                    } else if (++frames < FOCUS_FRAMES) {
+                        requestAnimationFrame(attempt);
+                    }
+                };
+                requestAnimationFrame(attempt);
             },
 
             /** Server rows carry their profile; the commenter's local rows are theirs. */

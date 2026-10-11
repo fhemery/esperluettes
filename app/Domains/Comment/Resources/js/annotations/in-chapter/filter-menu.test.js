@@ -52,6 +52,7 @@ const visibleIds = () => overlay.visibleRows.map((row) => row.id);
 
 beforeEach(() => {
     overlay = createOverlayStore();
+    overlay.enabled = true;
 });
 
 afterEach(() => {

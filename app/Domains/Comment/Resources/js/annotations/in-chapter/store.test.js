@@ -195,6 +195,38 @@ describe('annotation overlay store — visibleRows', () => {
             { comment_id: 11, viewer_role: 'author', items: [serverItem(3, { comment_id: 11, author_id: 4, is_processed: false })] },
         ]);
         await store.load(context({ role: 'author' }));
+        store.enabled = true;
+    });
+
+    it('is empty until the viewer turns the display on', () => {
+        store.enabled = false;
+        expect(store.visibleRows).toEqual([]);
+
+        store.enabled = true;
+        expect(store.visibleRows.map((r) => r.id)).toEqual([1, 3]);
+    });
+
+    it('is switched on by a local annotation change of a commenter', async () => {
+        const commenter = createOverlayStore();
+        await commenter.load(context());
+        expect(commenter.enabled).toBe(false);
+
+        window.dispatchEvent(new CustomEvent('comment-drafts:annotations-changed', {
+            detail: { entityType: 'chapter', entityId: CHAPTER_ID },
+        }));
+
+        expect(commenter.enabled).toBe(true);
+        commenter.destroy();
+    });
+
+    it('follows the heat source live', () => {
+        let heat = false;
+        const live = createOverlayStore({ heatSource: () => heat });
+        expect(live.heatOn).toBe(false);
+
+        heat = true;
+        expect(live.heatOn).toBe(true);
+        expect(live.shown).toBe(false);
     });
 
     it('hides processed rows unless showProcessed', () => {

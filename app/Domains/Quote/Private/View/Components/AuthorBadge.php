@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
 
 /**
- * Author-only « n citations » badge of a chapter, with the heat toggle beside it.
+ * Author-only « n citations » badge of a chapter. It flags the viewer as able to
+ * see the aggregate (`quoteAggregate.available`), which the page's view-mode
+ * control reads to offer the heat map.
  *
  * Gated on the very policy the aggregate endpoint uses, never on the page's
  * own $isAuthor flag: the badge and the endpoint can then never disagree about

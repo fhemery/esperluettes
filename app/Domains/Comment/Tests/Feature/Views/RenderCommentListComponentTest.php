@@ -355,7 +355,7 @@ describe('CommentListComponent', function () {
                 ->and($bannerAt)->toBeGreaterThan(strpos($html, '</form>'))
                 ->and($bannerAt)->toBeLessThan(strpos($html, 'x-data="annotationsModal()"'))
                 ->and($html)->toContain('x-show="count > 0"')
-                ->and($html)->toContain('sticky bottom-0 z-30')
+                ->and($html)->toContain('fixed inset-x-0 bottom-0 z-30')
                 ->and($html)->toContain('role="status"')
                 ->and($html)->toContain('aria-live="polite"')
                 ->and($html)->toContain('data-label-many="' . e(trans_choice('comment::annotations.changes_banner.text', 2, ['count' => '__COUNT__'])) . '"')

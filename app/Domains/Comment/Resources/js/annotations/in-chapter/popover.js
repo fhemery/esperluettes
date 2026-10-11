@@ -20,6 +20,11 @@ const PANEL_SELECTOR = '[data-annotation-popover-panel]';
 const AVATAR_SELECTOR = '[data-annotation-group]';
 const MARGIN = 8;
 const PANEL_MAX_WIDTH = 320;
+/**
+ * Tailwind's `lg`: below it the gutter sits inside the text (there is no page
+ * column for it), so the panel is centered instead of beside the avatar.
+ */
+const NARROW_VIEWPORT = 1024;
 
 const panelEl = () => document.querySelector(PANEL_SELECTOR);
 const replyTextarea = () => document.getElementById(`quill-editor-area-${REPLY_EDITOR_ID}`);
@@ -40,6 +45,11 @@ export function placePanel(trigger, width, height, viewportWidth, viewportHeight
         && p.top >= MARGIN && p.top + height + MARGIN <= viewportHeight;
     const order = ['right', 'left', 'bottom', 'top'];
     const pos = { ...(candidates[order.find((place) => fits(candidates[place]))] ?? candidates.top) };
+    // Below lg: centered, under the avatar (above it when that does not fit).
+    if (viewportWidth < NARROW_VIEWPORT) {
+        pos.left = (viewportWidth - width) / 2;
+        pos.top = candidates.bottom.top + height + MARGIN <= viewportHeight ? candidates.bottom.top : candidates.top.top;
+    }
     const clamp = (min, value, max) => Math.min(Math.max(min, value), max);
     pos.left = clamp(MARGIN, pos.left, viewportWidth - width - MARGIN);
     pos.top = clamp(MARGIN, pos.top, viewportHeight - height - MARGIN);
@@ -132,7 +142,9 @@ export function annotationPopover() {
                 if (target?.closest?.(AVATAR_SELECTOR)) return;
                 // Quill's link tooltip and the like may leave the DOM on the same click.
                 if (target?.isConnected === false) return;
-                this.close(true);
+                // No focus return: the click is the reader's next action (e.g. selecting
+                // text elsewhere), and focusing the avatar would scroll back to it.
+                this.close(false);
             });
             on(window, 'editor-valid', (event) => {
                 if (event.detail?.id === REPLY_EDITOR_ID) this.replyValid = !!event.detail.valid;
@@ -201,7 +213,7 @@ export function annotationPopover() {
             this.cancelReply();
             this.error = '';
             if (this.$store.popover.openId === this.id) this.$store.popover.openId = null;
-            if (returnFocus) this.avatar()?.focus();
+            if (returnFocus) this.avatar()?.focus({ preventScroll: true });
         },
 
         /** The avatar that opened us, or — re-rendered since — the current one of the group. */
@@ -234,7 +246,7 @@ export function annotationPopover() {
         sync() {
             if (!this.open) return;
             const members = this.members;
-            if (this.overlay.heatOn || members.length === 0) {
+            if (!this.overlay.shown || members.length === 0) {
                 this.close(false);
                 return;
             }

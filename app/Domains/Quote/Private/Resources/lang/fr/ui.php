@@ -19,7 +19,6 @@ return [
     'author_badge' => [
         'label' => '{0} :count citation|{1} :count citation|[2,*] :count citations',
         'tooltip' => 'Citations enregistrées par les lecteurices sur ce chapitre.',
-        'toggle' => 'Afficher les passages cités',
     ],
     'author_summary' => [
         'title' => 'Passages cités',

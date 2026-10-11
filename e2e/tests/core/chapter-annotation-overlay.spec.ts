@@ -29,6 +29,8 @@ async function visit(page: Page) {
   const chapter = new ChapterPage(page, ANNOTATED.storySlug, ANNOTATED.chapter.slug);
   await overlay.rewriteAssetHost();
   await chapter.goto();
+  await overlay.expectHighlighted([]);
+  await overlay.toggle.click();
   return { overlay, chapter };
 }
 
@@ -48,10 +50,25 @@ test('heat map: on hides tint, avatars, filter menu and popover; off restores th
   await expect(overlay.filterMenu).toBeHidden();
   await expect(overlay.avatars.first()).toBeHidden();
 
-  await chapter.heatToggle.click();
+  await overlay.toggle.click();
   await overlay.expectHighlighted(filtered);
   await expect(overlay.filterMenu).toBeVisible();
   await expect(overlay.avatars.first()).toBeVisible();
+});
+
+test('view mode: text only and quotes hide the annotations, and annotations can be chosen again', async ({ author }) => {
+  const { overlay, chapter } = await visit(author);
+  await overlay.expectHighlighted(AUTHOR_TINT);
+
+  await chapter.viewMode('text').click();
+  await overlay.expectHighlighted([]);
+  await chapter.viewMode('annotations').click();
+  await overlay.expectHighlighted(AUTHOR_TINT);
+
+  await chapter.viewMode('quotes').click();
+  await overlay.expectHighlighted([]);
+  await chapter.viewMode('annotations').click();
+  await overlay.expectHighlighted(AUTHOR_TINT);
 });
 
 test('quote overlap: yellow mark and underline on the same words; the mark opens the quote', async ({ confirmed }) => {

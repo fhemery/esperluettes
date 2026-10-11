@@ -6,6 +6,7 @@
     ))->all();
 @endphp
 <div class="relative"
+     :class="$store.annotationOverlay.shown && 'pr-6 lg:pr-0'"
      data-annotation-overlay
      x-data="annotationOverlay"
      data-role="{{ $inChapterRole }}"
@@ -23,14 +24,14 @@
      data-url="{{ $inEntityUrl }}">
 
     @if($inChapterRole === 'author')
-    {{-- Author's filter menu (annotationFilterMenu, filter-menu.js): md+ only, at least
-         one annotation, hidden while the heat map is on. State is per visit. --}}
+    {{-- Author's filter menu (annotationFilterMenu, filter-menu.js): shown with
+         the annotations, when there is at least one. State is per visit. --}}
     <div x-data="annotationFilterMenu"
          x-show="shown"
          style="display:none"
          data-unknown-name="{{ __('comment::comments.unknown_user') }}"
          data-default-avatar="{{ asset('images/default-avatar.svg') }}"
-         class="hidden md:flex justify-end mb-2 relative"
+         class="flex justify-end mb-2 relative"
          @click.outside="open = false"
          @keydown.escape="open = false">
         <button type="button"
@@ -73,11 +74,13 @@
 
     {{ $slot }}
 
-    {{-- Same geometry as Quote's heat gutter; below md it is display:none.
-         Hidden while the author's heat map is on (decision #2). --}}
+    {{-- From lg the gutter hangs in the page's right column (as Quote's heat gutter).
+         Below it there is no such column: the root reserves 24px (pr-6, above) while
+         annotations are shown and the gutter sits inside it. Hidden while the
+         author's heat map is on (decision #2). --}}
     <div x-ref="gutter"
          x-show="!$store.annotationOverlay.heatOn"
-         class="hidden md:block absolute inset-y-0 right-0 w-6 translate-x-full pointer-events-none">
+         class="absolute inset-y-0 right-0 w-6 lg:translate-x-full pointer-events-none">
         <template x-for="group in groups" :key="group.key">
             <button type="button"
                     class="absolute right-0 pointer-events-auto h-6 w-6 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"

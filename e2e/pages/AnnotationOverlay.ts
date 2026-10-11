@@ -82,6 +82,11 @@ export class AnnotationOverlay {
     return this.page.locator('[x-data="annotationFilterMenu"]');
   }
 
+  /** The « Annotations » segment of the view-mode control; the text is plain on load. */
+  get toggle(): Locator {
+    return this.page.locator('[data-view-mode="annotations"]');
+  }
+
   get filterButton(): Locator {
     return this.page.getByRole('button', { name: 'Filtrer les annotations' });
   }

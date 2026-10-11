@@ -143,7 +143,7 @@
                         @endif
                     </div>
 
-                    <div class="flex items-center gap-2 text-sm">
+                    <div class="flex flex-wrap items-center justify-center gap-2 text-sm">
 
                         <x-shared::metric-badge
                             icon="visibility"
@@ -157,6 +157,62 @@
                             :nb-characters="$vm->characterCount" />
 
                         <x-quote::author-badge :chapter-id="$vm->chapter->id" />
+                        <x-comment::annotation-badge />
+
+                        {{-- What the chapter text shows: nothing, the annotations (Comment) or the
+                             quotes' heat map (Quote, authors). One at a time: both use the right gutter.
+                             Each segment appears once its domain has registered for this viewer. --}}
+                        <div x-data="{
+                                get heat() { return this.$store.quoteAggregate; },
+                                get notes() { return this.$store.annotationOverlay; },
+                                get hasQuotes() { return this.heat?.available === true; },
+                                get hasNotes() { return !!this.notes?.role; },
+                                get mode() { return this.heat?.visible ? 'quotes' : (this.notes?.shown ? 'notes' : 'text'); },
+                                async set(mode) {
+                                    if (this.notes) this.notes.enabled = mode === 'notes';
+                                    if (this.heat && this.heat.visible !== (mode === 'quotes')) await this.heat.toggle({{ $vm->chapter->id }});
+                                },
+                             }"
+                             x-show="hasQuotes || hasNotes"
+                             x-cloak
+                             style="display:none"
+                             role="group"
+                             aria-label="{{ __('story::chapters.view_mode.label') }}"
+                             data-testid="chapter-view-mode"
+                             class="inline-flex items-center overflow-hidden rounded-md border border-accent/40 text-xs">
+                            @php
+                                $segment = 'inline-flex items-center gap-1 px-2 py-1 leading-none cursor-pointer';
+                            @endphp
+                            <button type="button" data-view-mode="text"
+                                    class="{{ $segment }}"
+                                    :class="mode === 'text' ? 'bg-accent text-white' : 'text-accent hover:bg-accent/10'"
+                                    :aria-pressed="mode === 'text' ? 'true' : 'false'"
+                                    @click="set('text')">
+                                <span class="material-symbols-outlined text-base" aria-hidden="true">article</span>
+                                <span class="hidden sm:inline">{{ __('story::chapters.view_mode.text') }}</span>
+                                <span class="sr-only sm:hidden">{{ __('story::chapters.view_mode.text') }}</span>
+                            </button>
+                            <button type="button" data-view-mode="annotations"
+                                    x-show="hasNotes" x-cloak style="display:none"
+                                    class="{{ $segment }} border-l border-accent/40"
+                                    :class="mode === 'notes' ? 'bg-accent text-white' : 'text-accent hover:bg-accent/10'"
+                                    :aria-pressed="mode === 'notes' ? 'true' : 'false'"
+                                    @click="set('notes')">
+                                <span class="material-symbols-outlined text-base" aria-hidden="true">edit_note</span>
+                                <span class="hidden sm:inline">{{ __('story::chapters.view_mode.annotations') }}</span>
+                                <span class="sr-only sm:hidden">{{ __('story::chapters.view_mode.annotations') }}</span>
+                            </button>
+                            <button type="button" data-view-mode="quotes"
+                                    x-show="hasQuotes" x-cloak style="display:none"
+                                    class="{{ $segment }} border-l border-accent/40"
+                                    :class="mode === 'quotes' ? 'bg-accent text-white' : 'text-accent hover:bg-accent/10'"
+                                    :aria-pressed="mode === 'quotes' ? 'true' : 'false'"
+                                    @click="set('quotes')">
+                                <span class="material-symbols-outlined text-base" aria-hidden="true">format_ink_highlighter</span>
+                                <span class="hidden sm:inline">{{ __('story::chapters.view_mode.quotes') }}</span>
+                                <span class="sr-only sm:hidden">{{ __('story::chapters.view_mode.quotes') }}</span>
+                            </button>
+                        </div>
                     </div>
                     @if($vm->isAuthor)
                     <div class="flex items-center gap-3">

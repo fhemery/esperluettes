@@ -1,7 +1,9 @@
 {{-- Save banner for pending changes to the annotations of an already-posted
      root comment (comment-draft `annotationChanges` slot). Outside the root
      form: its buttons never submit it. Hidden until the slot is non-empty and
-     the page's [data-annotable] carries data-root-comment-id. --}}
+     the page's [data-annotable] carries data-root-comment-id. Fixed to the
+     viewport: `sticky` only holds while its parent (the comment list) is on
+     screen, so the banner vanished once the reader was in the chapter text. --}}
 <div
     x-data="annotationChangesBanner"
     x-show="count > 0"
@@ -23,7 +25,7 @@
     data-item-delete="{{ __('comment::annotations.changes_banner.item_delete') }}"
     role="status"
     aria-live="polite"
-    class="sticky bottom-0 z-30 p-3 sm:px-4 rounded-t border border-primary/30 bg-bg shadow-md text-sm"
+    class="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-3xl p-3 sm:px-4 rounded-t border border-primary/30 bg-bg shadow-md text-sm"
 >
     <div class="flex flex-wrap items-center justify-between gap-2">
         <span class="flex items-center gap-2">

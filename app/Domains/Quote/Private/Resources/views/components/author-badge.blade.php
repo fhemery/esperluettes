@@ -2,7 +2,7 @@
 <div class="flex items-center gap-1"
      data-quote-author-badge="{{ $count }}"
      x-data
-     x-init="$store.quoteAggregate.totalCount = {{ $count }}">
+     x-init="$store.quoteAggregate.totalCount = {{ $count }}; $store.quoteAggregate.available = true">
 
     <x-shared::popover placement="top" maxWidth="20rem">
         <x-slot name="trigger">
@@ -61,15 +61,5 @@
             </ul>
         </div>
     </x-shared::popover>
-
-    <button type="button"
-            class="inline-flex items-center leading-none text-accent hover:text-accent/80 cursor-pointer"
-            :class="$store.quoteAggregate.visible || 'opacity-60'"
-            :aria-pressed="$store.quoteAggregate.visible ? 'true' : 'false'"
-            aria-label="{{ __('quote::ui.author_badge.toggle') }}"
-            title="{{ __('quote::ui.author_badge.toggle') }}"
-            @click="$store.quoteAggregate.toggle({{ $chapterId }})">
-        <span class="material-symbols-outlined text-base">format_ink_highlighter</span>
-    </button>
 </div>
 @endif

@@ -96,6 +96,7 @@ beforeEach(async () => {
     watchers = {};
     popoverStore = { openId: null };
     overlay = createOverlayStore();
+    overlay.enabled = true;
     await loadOverlay([
         { comment_id: ROOT_A, items: [item(1), item(2)] },
         { comment_id: ROOT_B, items: [item(3, { author_id: 4 })] },
@@ -156,7 +157,7 @@ describe('annotation popover — shell', () => {
         expect(popoverStore.openId).toBe(null);
     });
 
-    it('closes on a click outside, not on a click inside the panel', () => {
+    it('closes on a click outside without focusing the avatar (that would scroll back to it)', () => {
         openGroup(['id:1']);
         const panel = document.querySelector('[data-annotation-popover-panel]');
 
@@ -165,7 +166,7 @@ describe('annotation popover — shell', () => {
 
         document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         expect(component.open).toBe(false);
-        expect(document.activeElement).toBe(avatar);
+        expect(document.activeElement).not.toBe(avatar);
     });
 
     it('closes when another popover claims the open id', () => {
