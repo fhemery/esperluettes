@@ -98,6 +98,7 @@ return [
         'label' => 'Afficher dans le texte',
         'text' => 'Texte seul',
         'annotations' => 'Annotations',
+        'my_annotations' => 'Mes annotations',
         'quotes' => 'Citations',
     ],
     'words' => [

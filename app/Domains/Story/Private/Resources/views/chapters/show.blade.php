@@ -199,8 +199,9 @@
                                     :aria-pressed="mode === 'notes' ? 'true' : 'false'"
                                     @click="set('notes')">
                                 <span class="material-symbols-outlined text-base" aria-hidden="true">edit_note</span>
-                                <span class="hidden sm:inline">{{ __('story::chapters.view_mode.annotations') }}</span>
-                                <span class="sr-only sm:hidden">{{ __('story::chapters.view_mode.annotations') }}</span>
+                                @php($annotationsLabel = __($vm->isAuthor ? 'story::chapters.view_mode.annotations' : 'story::chapters.view_mode.my_annotations'))
+                                <span class="hidden sm:inline">{{ $annotationsLabel }}</span>
+                                <span class="sr-only sm:hidden">{{ $annotationsLabel }}</span>
                             </button>
                             <button type="button" data-view-mode="quotes"
                                     x-show="hasQuotes" x-cloak style="display:none"
