@@ -47,6 +47,8 @@ Because reported content can be edited or deleted after a report is filed, a dom
 3. Returns the content owner's user ID (`getReportedUserId(int $entityId): int`), used to attribute the `reported_user_id` column.
 4. Returns a URL to the content (`getContentUrl(int $entityId): string`).
 
+**Keeping files with a report.** `capture()` may return a reserved `_media` key (`string[]` of Media paths). Moderation copies each file into the private scope `moderation/{topicKey}` at report time (so the report survives the original's deletion), stores the copied paths in the snapshot, and registers them with the Media GC for as long as the report row exists. Moderators/admins stream a file at `admin/moderation/moderation-reports/{report}/media/{index}`; `render()` receives `_media_urls` (same order as `_media`) to print `<img>` / `<audio>`. Existing topics return no `_media` and are unaffected.
+
 Without a formatter, `reported_user_id` is `null` and no snapshot is stored — reports are still valid but lack attribution and history.
 
 ### Report button component

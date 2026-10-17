@@ -30,6 +30,8 @@ Route::middleware(['web', 'auth', 'compliant'])->group(function () {
 
         Route::post('moderation-reports/{moderationReport}/approve', [AdminModerationReportController::class, 'approve'])->name('moderation-reports.approve');
         Route::post('moderation-reports/{moderationReport}/dismiss', [AdminModerationReportController::class, 'dismiss'])->name('moderation-reports.dismiss');
+        Route::get('moderation-reports/{moderationReport}/media/{index}', [AdminModerationReportController::class, 'media'])
+            ->whereNumber('index')->name('moderation-reports.media');
         Route::put('moderation-reports/{moderationReport}/comment', [AdminModerationReportController::class, 'updateComment'])->name('moderation-reports.update-comment');
         Route::resource('moderation-reports', AdminModerationReportController::class)->only(['index', 'show', 'destroy']);
     });

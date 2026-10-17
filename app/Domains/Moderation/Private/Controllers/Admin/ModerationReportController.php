@@ -2,7 +2,9 @@
 
 namespace App\Domains\Moderation\Private\Controllers\Admin;
 
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Moderation\Private\Models\ModerationReport;
+use Symfony\Component\HttpFoundation\Response;
 use App\Domains\Moderation\Public\Api\ModerationPublicApi;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
@@ -17,6 +19,7 @@ class ModerationReportController extends Controller
         private readonly ModerationPublicApi $api,
         private readonly ModerationRegistry $registry,
         private readonly ProfilePublicApi $profileApi,
+        private readonly MediaPublicApi $mediaApi,
     ) {}
 
     public function index(Request $request): View
@@ -63,7 +66,14 @@ class ModerationReportController extends Controller
             && $this->registry->hasFormatter($moderationReport->topic_key)
         ) {
             $formatter = $this->registry->getFormatter($moderationReport->topic_key);
-            $rendered = (string) $formatter->render($moderationReport->content_snapshot);
+            $content = $moderationReport->content_snapshot;
+            if (isset($content['_media'])) {
+                $content['_media_urls'] = array_map(
+                    fn (int $i) => route('moderation.admin.moderation-reports.media', [$moderationReport, $i]),
+                    array_keys($content['_media'])
+                );
+            }
+            $rendered = (string) $formatter->render($content);
             $snapshot = trim($rendered) !== '' ? $rendered : null;
         }
 
@@ -74,6 +84,14 @@ class ModerationReportController extends Controller
         return view('moderation::pages.admin.moderation-reports.show', compact(
             'moderationReport', 'reporter', 'snapshot', 'topicLabel'
         ));
+    }
+
+    public function media(ModerationReport $moderationReport, int $index): Response
+    {
+        $path = $moderationReport->content_snapshot['_media'][$index] ?? null;
+        abort_if($path === null || ! $this->mediaApi->exists($path), 404);
+
+        return $this->mediaApi->stream($path, ['Cache-Control' => 'private, max-age=3600']);
     }
 
     public function approve(ModerationReport $moderationReport): RedirectResponse

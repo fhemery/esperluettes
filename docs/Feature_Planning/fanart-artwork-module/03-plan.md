@@ -21,7 +21,7 @@ green gate and enforces its own security rules.
 |---|-------|------|------------|--------|
 | 1 | Refactor — Media: private image variants, `streamVariant`, `copyPrivate`, `fanart` / `moderation` scope roots | M | — | DONE |
 | 1v | Checkpoint — Secret Gift images & sounds, media library picker, `media:gc --dry-run` | S | 1 | DONE |
-| 2 | Refactor — Moderation: `_media` snapshot capability (copy, GC claim, moderator stream, `_media_urls`) | M | 1 | TODO |
+| 2 | Refactor — Moderation: `_media` snapshot capability (copy, GC claim, moderator stream, `_media_urls`) | M | 1 | DONE |
 | 2v | Checkpoint — existing report topics (story, chapter, comment, profile) submit + admin report page | S | 2 | TODO |
 | 3 | Story public API additions (readability batch, read chapters, chapters list, atomic credit spend) | M | — | TODO |
 | 3b | Story: hide a co-authored story on deactivation only once all its authors are deactivated | S | — | TODO |

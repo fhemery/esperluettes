@@ -5,6 +5,8 @@ namespace App\Domains\Moderation\Public\Providers;
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Administration\Public\Contracts\AdminRegistryTarget;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
+use App\Domains\Moderation\Private\Support\ReportMediaUsageProvider;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Moderation\Public\Events\ReportSubmitted;
 use App\Domains\Moderation\Public\Events\ReportApproved;
@@ -50,6 +52,9 @@ class ModerationServiceProvider extends ServiceProvider
         $eventBus->registerEvent(ReportRejected::name(), ReportRejected::class);
 
         $this->registerAdminNavigation();
+
+        // Keep report snapshot files alive for the Media GC.
+        app(MediaUsageRegistry::class)->register(new ReportMediaUsageProvider());
 
         app(NotificationFactory::class)->register(
             type: ReportSubmittedNotification::type(),

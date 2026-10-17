@@ -494,6 +494,8 @@ deptrac:
       - AdministrationPublic
       # ModerationServiceProvider registers the report-submitted notification type
       - NotificationPublic
+      # ModerationServiceProvider registers the report media usage provider with the Media GC
+      - MediaPublic
 
     NewsPublic:
       - AuthPublic
@@ -682,6 +684,8 @@ deptrac:
       - EventsPublic
       # ModerationService notifies staff of new reports
       - NotificationPublic
+      # Snapshot files: copy, stream, GC claim
+      - MediaPublic
 
     NewsPrivate:
       - Shared
@@ -858,6 +862,7 @@ deptrac:
       - TestHelpers
       - ModerationPrivate
       - ModerationPublic
+      - MediaPublic
 
     NewsTests:
       - Shared
