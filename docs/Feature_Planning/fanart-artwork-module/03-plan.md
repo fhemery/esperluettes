@@ -20,7 +20,7 @@ green gate and enforces its own security rules.
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Refactor — Media: private image variants, `streamVariant`, `copyPrivate`, `fanart` / `moderation` scope roots | M | — | DONE |
-| 1v | Checkpoint — Secret Gift images & sounds, media library picker, `media:gc --dry-run` | S | 1 | TODO |
+| 1v | Checkpoint — Secret Gift images & sounds, media library picker, `media:gc --dry-run` | S | 1 | DONE |
 | 2 | Refactor — Moderation: `_media` snapshot capability (copy, GC claim, moderator stream, `_media_urls`) | M | 1 | TODO |
 | 2v | Checkpoint — existing report topics (story, chapter, comment, profile) submit + admin report page | S | 2 | TODO |
 | 3 | Story public API additions (readability batch, read chapters, chapters list, atomic credit spend) | M | — | TODO |
@@ -178,6 +178,13 @@ Existing consumers to look at after phase 1:
   / `SoundField`) and `e2e/tests/core/editor.spec.ts`.
 
 Screenshots → `shots/checkpoint-1v/`.
+
+**Result (2026-10-17, HEAD 2e8e5841) — PASS**
+- ✅ e2e `confirm-modal.spec.ts` + `editor.spec.ts`: 13/13 (incl. auth setup).
+- ✅ Giver (`confirmed`, active gift): image + sound upload saved, image decoded, `<audio>` duration 20 s, seek to 5 s OK, no HTTP >= 400.
+- ✅ Recipient after reveal (`confirmed`, ended gift): image decoded, player 0:20, seek OK (`recipient-reveal.png`).
+- ✅ Admin › News: library picker opens, 4 thumbnails decoded (`picker-open.png`). Pick-and-save not exercised (News save from the flow stayed on the form; not investigated, unrelated to Media changes).
+- ✅ `media:gc --dry-run`: no `-400w`/`-800w` variant and no claimed original listed on the dev DB; on the e2e DB only `secret-gift/2/2.jpg`, `6.jpg` (legacy dev files with no assignment in that DB).
 
 ---
 
