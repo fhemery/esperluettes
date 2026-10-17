@@ -39,6 +39,8 @@ a new row that supersedes it and note the number.
 | 29 | 2026-10-17 | DESIGN | Thumbnails for confirmed-only images | Private image variants in Media (gated variant streaming, GC-aware) | — |
 | 30 | 2026-10-17 | DESIGN | Keeping the reported file | Generic Moderation capability: snapshot `_media` paths copied via Media, kept while the report exists | — |
 | 31 | 2026-10-17 | DESIGN | Does approving a report delete the fanart | No — "the report should send to the fanart, and there should be a moderation menu enabling to delete it like we have for comments". Spec §4.11.5 amended | REFINE §4.11.5 wording |
+| 32 | 2026-10-17 | PLAN | Plan O1: Story soft-deletes a co-authored story as soon as any one author is deactivated | Change Story: a co-authored story is hidden only once all its authors are deactivated — "You can adjust deactivation to all co-authors" | — |
+| 33 | 2026-10-17 | PLAN | Plan O2: Story hard-deletes every story a deleted account co-authors | Keep Story's behaviour; the story and all its fanarts are wiped — "For account deletion that's ok. This will wipe all fanarts for the stories, you can adjust anything needed" | #12 |
 
 ## Assumptions made without asking
 

@@ -252,11 +252,10 @@ staff).
 | Chapter unpublished | Its fanarts hidden from readers, visible to authors. Restored on republish. | — |
 | Chapter deleted | Its fanarts deleted. | Each affected fanartist |
 | Story deleted | All its fanarts deleted, pending role requests removed. | Each affected fanartist |
-| Author account deleted, sole author | Story disappears → as story deleted. | Each affected fanartist |
-| Author account deleted, co-authored story survives | Story's fanarts kept; only that author's own artworks deleted. | — |
+| Author account deleted (sole author or co-author) | Every story the user authors or co-authors is deleted (Story's existing behaviour, decision 33) → as story deleted: all its fanarts wiped. That author's artworks on other stories are deleted too. | Each affected fanartist |
 | Fanartist account deleted | All their fanarts hard-deleted. | — |
 | Fanartist deactivated | Their fanarts hidden (soft-deleted); restored on reactivation. | — |
-| Author deactivated | Story's fanarts hidden; on a co-authored story only once **every** author is deactivated. Restored on reactivation. | — |
+| Author deactivated | Story (and so its fanarts) hidden; a co-authored story only once **every** author is deactivated — Story's own deactivation rule is changed to match (decision 32). Restored as soon as one author is reactivated. | — |
 | New audio replaces an existing one | Previous audio deleted. | Previous audio's fanartist |
 | Moderator deletion (from the fanart's moderation menu) | Fanart deleted (report copy kept). | Authors + fanartist |
 
@@ -293,7 +292,7 @@ staff).
 | 9 | Pending when right to submit disappears | Stays; author decides. |
 | 10 | Deactivation | Soft-delete, restore on reactivation; account deletion hard-deletes the fanartist's work; co-authored story hidden only when all authors deactivated. |
 | 11 | Chapter unpublished | Fanarts hidden, back on republish. |
-| 12 | Co-author deletes account, story survives | Fanarts kept; only their own artworks removed. |
+| 12 | Co-author deletes account, story survives | *Superseded by 33.* |
 | 13 | Author can report a pending fanart | Yes. |
 | 14 | Direct moderator delete | Yes, authors + fanartist notified. |
 | 15 | Audio auto-advance | In: mark read + play next chapter with audio. |
@@ -309,6 +308,8 @@ staff).
 | 25 | GIF | No. |
 | 26 | Attestation wording | Includes the AI clause (4.4.5). |
 | 27 | Button label | « Proposer un fanart » (authors: « Ajouter un artwork »). |
+| 32 | Co-authored story on author deactivation | Story changed: hidden only once all its authors are deactivated (was: as soon as any one is). |
+| 33 | Account deletion of a co-author | Story's behaviour kept: every story the user co-authors is hard-deleted with all its fanarts. Supersedes 12. |
 
 ## 8. Out of scope
 

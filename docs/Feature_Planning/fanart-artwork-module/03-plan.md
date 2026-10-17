@@ -7,7 +7,8 @@
 
 - Functional spec: [`01-functional.md`](./01-functional.md)
 - Architecture: [`02-architecture.md`](./02-architecture.md)
-- Decisions: [`DECISIONS.md`](./DECISIONS.md) — rows 1–31 and A1–A16 are settled.
+- Decisions: [`DECISIONS.md`](./DECISIONS.md) — rows 1–33 and A1–A16 are settled
+  (#32 / #33 resolved plan items O1 / O2; #33 supersedes #12).
 
 The whole epic is planned here (DECISIONS #1). There is **no feature toggle**
 (DECISIONS #17): the epic ships as one release at the end, so intermediate
@@ -23,6 +24,8 @@ green gate and enforces its own security rules.
 | 2 | Refactor — Moderation: `_media` snapshot capability (copy, GC claim, moderator stream, `_media_urls`) | M | 1 | TODO |
 | 2v | Checkpoint — existing report topics (story, chapter, comment, profile) submit + admin report page | S | 2 | TODO |
 | 3 | Story public API additions (readability batch, read chapters, chapters list, atomic credit spend) | M | — | TODO |
+| 3b | Story: hide a co-authored story on deactivation only once all its authors are deactivated | S | — | TODO |
+| 3bv | Checkpoint — co-authored story with one deactivated author: listings, story page, chapter page, collaborators page | S | 3b | TODO |
 | 4 | Fanart domain skeleton: provider, deptrac, migrations, models, enums, media usage provider, docs | M | 1 | TODO |
 | 5 | Settings registration + `ModeService` (most-restrictive mode) | S | 3, 4 | TODO |
 | 6 | `FanartPolicy` + fanartiste membership reads | M | 3, 5 | TODO |
@@ -32,7 +35,7 @@ green gate and enforces its own security rules.
 | 10 | Review: accept / decline + audio replacement | M | 9 | TODO |
 | 11 | Artwork (author): upload with credit spend, edit | M | 10 | TODO |
 | 12 | Deletion: owner / author delete, moderator delete + `Fanart.DeletedByModeration` | S | 9 | TODO |
-| 13 | Lifecycle listeners (user deleted / deactivated / reactivated, story deleted, chapter deleted) | M | 7, 9 | TODO |
+| 13 | Lifecycle listeners (user deleted / deactivated / reactivated, story deleted, chapter deleted) | M | 3b, 7, 9 | TODO |
 | 14 | Moderation topic: snapshot formatter, reasons seeder, author-reports-pending listener (A1) | S | 2, 12 | TODO |
 | 15 | Fanartiste grant / revoke + collaborators-page section | S | 6, 7 | TODO |
 | 16 | Fanartiste role requests (create, withdraw, accept, decline, 30-day cooldown) | M | 15 | TODO |
@@ -46,16 +49,21 @@ green gate and enforces its own security rules.
 | 22 | Discord feed: bot endpoints + signed image URL | S | 10, 11 | TODO |
 | 23 | Polish: i18n pass, a11y, mobile viewer, docs finalisation | S | all | TODO |
 
-**26 rows** (23 phases + 3 checkpoints).
+**28 rows** (24 phases + 4 checkpoints).
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
-it is what lets `WIP:BUILD (3/26)` resume correctly.
+it is what lets `WIP:BUILD (3/28)` resume correctly.
 Checkpoint rows are run by `visual-verifier` and change no code.
 
 Why no checkpoint after phase 3: it only **adds** public-API methods and one
 new `ChapterCreditService` method; no existing method or caller changes, so the
-existing Story suite is the whole regression net. Phases 15, 19 and 20 add
+existing Story suite is the whole regression net. Phase 3b, by contrast,
+**changes** existing Story behaviour (DECISIONS #32): a co-authored story now
+stays visible while one of its authors is deactivated, so existing pages
+(listings, story page, chapter page, collaborators page) meet a state they
+never rendered before — an author whose profile is soft-deleted. Hence
+checkpoint 3bv. Phases 15, 19 and 20 add
 component tags to Story views (collaborators page, chapter rows, chapter page);
 those surfaces are covered by checkpoints 18v / 20v and the visual QA list.
 
@@ -309,6 +317,114 @@ Architecture: §1.1 "Story". Current state: `StoryPolicy::view`
 - ✅ Existing Story suite green with no test modified.
 - ✅ `spendChapterCredit` never drives `credits_gained - credits_spent` below 0.
 - ✅ `pnpm run gate` green.
+
+---
+
+## Phase 3b — Story: co-authored story hidden only once all its authors are deactivated
+
+**Goal.** Change Story's deactivation rule (DECISIONS #32): deactivating a
+user soft-deletes a story they author only if **no** author of that story is
+still active; a co-authored story with at least one active author stays
+visible. Independent of Fanart; account deletion is **not** touched
+(DECISIONS #33 keeps the hard delete of every co-authored story).
+
+Architecture: §1.1 "Story" (deactivation rule change). Current state, read
+from the code:
+- `Auth` `UserService::deactivateUser()` sets the user inactive, then emits
+  `Auth.UserDeactivated` — so during the listener the user already reads as
+  inactive. `AuthPublicApi::getUsersById(int[] $ids)` returns
+  `[id => ['email', 'isActive']]` (a missing user → `isActive: false`), in one
+  query. `StoryService` already injects `AuthPublicApi`.
+- `Story/Private/Listeners/SoftDeleteStoriesOnUserDeactivated` →
+  `StoryService::softDeleteStoriesByAuthor($userId)` →
+  `StoryRepository::findByAuthor($userId)` (every story where the user is
+  among the authors, co-authored included) → private `softDeleteStory()`
+  (soft-deletes chapters, then the story).
+- `RestoreStoriesOnUserReactivated` → `restoreStoriesByAuthor($userId)`:
+  every story (withTrashed) the user authors is restored with its trashed
+  chapters. That already matches the new rule ("visible as soon as one author
+  is active") — **leave it unchanged**. Chapter deletion is a `forceDelete`,
+  so the only trashed chapters are deactivation ones.
+- Existing tests: `Story/Tests/Feature/UserDeactivatedSoftDeleteStoriesTest.php`
+  and `UserReactivatedRestoreStoriesTest.php` cover the sole-author case only;
+  no test asserts the old co-author behaviour (checked: Comment / Quote /
+  Profile deactivation tests do not deactivate a story co-author).
+- Test helpers: `addCollaborator($storyId, $userId, 'author')`,
+  `publicStory()`, `createPublishedChapter()` (`Story/Tests/helpers.php`);
+  deactivate / reactivate through
+  `AuthPublicApi::deactivateUserById()` / `activateUserById()` acting as
+  `admin($this)`, as the existing tests do.
+
+**Deliverables.**
+- `app/Domains/Story/Private/Services/StoryService.php` —
+  `softDeleteStoriesByAuthor(int $userId)`: load the user's stories with
+  `authors` eager-loaded, collect every author id across them, call
+  `AuthPublicApi::getUsersById()` **once**, and `softDeleteStory()` only the
+  stories where no author `isActive`. Update the docblock.
+- `app/Domains/Story/Private/Repositories/StoryRepository.php` — if needed, a
+  `findByAuthorWithAuthors(int $userId)` (or an `with('authors')` option on
+  `findByAuthor`); `deleteStoriesByAuthor` keeps using `findByAuthor`
+  unchanged.
+- `app/Domains/Story/README.md` (the "Soft delete on deactivation" paragraph
+  and the listener table) and `app/Domains/Story/AGENTS.md` (listener table
+  row "Soft-delete all stories by that author", and the soft/hard delete
+  note): a co-authored story is soft-deleted only once all its authors are
+  deactivated; reactivating any author restores it; account deletion still
+  hard-deletes every story the user co-authors.
+
+**Tests.** (extend `Story/Tests/Feature/UserDeactivatedSoftDeleteStoriesTest.php`
+and `UserReactivatedRestoreStoriesTest.php`; the existing sole-author cases
+stay unmodified and green)
+- `it('keeps a co-authored story and its chapters visible when only one of its authors is deactivated')`
+  — `countAuthoredStories` of the active co-author still 1; story and chapter
+  not trashed; a confirmed reader still gets 200 on the story page.
+- `it('soft-deletes a co-authored story once its last active author is deactivated')`
+- `it('soft-deletes the sole-authored story but keeps the co-authored one of the same user')`
+- `it('does not count a deleted co-author as active')` (author row whose user
+  no longer exists → `isActive` false)
+- `it('restores a co-authored story when one of its two deactivated authors is reactivated')`
+- `it('leaves a never-hidden co-authored story untouched when its deactivated co-author is reactivated')`
+- `it('looks up author activity in a single Auth call for many stories')` —
+  user co-authoring 3 stories; assert the restriction is right for all three
+  (no per-story Auth loop; a spy / query count is fine).
+- Account deletion regression (in `UserDeletedCleanupTest.php`):
+  `it('still hard-deletes a co-authored story when one of its authors deletes their account')`.
+
+**Acceptance.**
+- ✅ Deactivating one of two co-authors leaves the story, its chapters and its
+  story page untouched for readers.
+- ✅ Deactivating the last active author soft-deletes it; reactivating any one
+  author restores story and chapters.
+- ✅ Sole-author deactivation / reactivation tests pass unmodified.
+- ✅ Account deletion still hard-deletes every co-authored story.
+- ✅ Story README / AGENTS describe the new rule; no `docs/Feature_Planning`
+  reference added there.
+- ✅ `pnpm run gate` green.
+
+---
+
+## Checkpoint 3bv — Co-authored story with one deactivated author
+
+Phase 3b changed existing Story behaviour: a story can now be readable while
+one of its authors is deactivated (that author's profile is soft-deleted by
+Profile, so `getPublicProfiles()` returns `null` for them). Look at every
+existing page that lists story authors, with a co-authored public story whose
+co-author was deactivated in Admin › Utilisateurs:
+- Story listing (`/stories`) and home: the card renders, showing only the
+  active author, no blank/broken author chip.
+- Story page as guest, confirmed reader and the active author: page renders,
+  author line has no empty entry, chapters readable.
+- Chapter page (reader and active author): renders, comments work.
+- Collaborators page (active author): the deactivated co-author's row does not
+  crash the page (shown without profile or omitted — note which).
+- The active author's profile « Histoires » tab still lists the story; the
+  deactivated author's profile is unreachable as before.
+- Deactivate the second author: the story disappears from listings and 404s;
+  reactivate one: it is back.
+- e2e: `e2e/tests/core/chapter-annotation-overlay.spec.ts` (touches
+  deactivated users on a chapter).
+
+Screenshots → `shots/checkpoint-3bv/`.
 
 ---
 
@@ -750,6 +866,12 @@ Architecture: §2.3, §3.4 listeners. Precedent:
 Phases left: models (4), notifier `removedWithContent` (7). Chapter
 unpublish, story visibility and author deactivation need **no** listener:
 `canRead` (soft-deleted story) and the published-chapter filter cover them.
+Phase 3b made Story soft-delete a co-authored story only once **all** its
+authors are deactivated (DECISIONS #32). Account deletion (DECISIONS #33):
+Story's `RemoveStoriesOnUserDeleted` hard-deletes **every** story the user
+authors or co-authors and emits `Story.Deleted` for each, so those stories'
+fanarts go through `DeleteFanartsOnStoryDeleted`; no co-authored story ever
+survives an author's account deletion.
 
 **Deliverables.** (`app/Domains/Fanart/Private/Listeners/`)
 - `DeleteFanartDataOnUserDeleted` — `forceDelete` all fanarts with that
@@ -765,15 +887,17 @@ unpublish, story visibility and author deactivation need **no** listener:
 
 **Tests.** (`app/Domains/Fanart/Tests/Feature/FanartLifecycleTest.php`)
 - `it('hard-deletes every fanart and artwork of a deleted user, plus their fanartist rows and requests')`
+- `it('wipes a co-authored story and all its fanarts when one of its authors deletes their account, notifying each fanartist once')` (DECISIONS #33 — the other co-author's artworks go too)
 - `it('soft-deletes a deactivated fanartist\'s fanarts and restores them on reactivation')`
 - `it('hides a story\'s fanarts when its sole author is deactivated (story soft-deleted) and shows them back on reactivation')`
+- `it('keeps a co-authored story\'s fanarts visible while one of its two authors is deactivated, hides them once both are')` (DECISIONS #32, relies on phase 3b)
 - `it('deletes all fanarts, fanartists and requests of a deleted story and notifies each fanartist once')`
 - `it('deletes the fanarts of a deleted chapter and notifies their fanartists, not the authors')`
 - `it('hides fanarts of an unpublished chapter from readers and shows them again on republish')` (query-level, via the listing scope used by phase 17 — if that scope does not exist yet, assert through `FanartPolicy::view`)
 
 **Acceptance.**
-- ✅ Every row of spec §5 that Fanart owns has a passing test (see Open item
-  O1/O2 for the co-author rows).
+- ✅ Every row of spec §5 that Fanart owns has a passing test, co-author rows
+  included (DECISIONS #32 / #33).
 - ✅ `pnpm run gate` green.
 
 ---
@@ -1260,6 +1384,8 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 | Admin › Moderation report after fanart deleted | Copy still displayed | |
 | Deactivated fanartist | Their fanarts gone from tab / chapter / profile; back after reactivation | |
 | Deactivated sole author | Story and its fanarts unreachable | |
+| Deactivated co-author (one of two) | Story and its fanarts still visible; hidden once both authors are deactivated | |
+| Deleted co-author account | Co-authored story and all its fanarts gone; fanartists notified | |
 | Deleted chapter | Its fanarts gone; fanartist notified | |
 | Dark mode / theme | Tabs, thumbnails, viewer readable | |
 
@@ -1267,8 +1393,8 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 
 | # | Item | Needed by | Status |
 |---|------|-----------|--------|
-| O1 | **Contradiction (spec §5 / DECISIONS #10):** Story's `softDeleteStoriesByAuthor` uses `findByAuthor`, which matches **co-authored** stories too, so a co-authored story (and therefore its fanarts, via `canRead`) is hidden as soon as **any** author is deactivated — not "only once every author is deactivated". Fanart follows Story (A13); fixing it would change Story's existing behaviour, which is outside this epic. The plan tests Fanart against Story's current behaviour. User to decide whether a separate Story task is wanted. | 13 | Open — non-blocking |
-| O2 | **Contradiction (spec §5 / DECISIONS #12):** Story's `deleteStoriesByAuthor` (on `Auth.UserDeleted`) hard-deletes **every** story the user co-authors, so "co-author deletes account, story survives" never happens today; the story's fanarts are removed through `Story.Deleted` (fanartists notified). Fanart's own `UserDeleted` listener still deletes that user's artworks/fanarts elsewhere. Same resolution as O1. | 13 | Open — non-blocking |
+| O1 | **Contradiction (spec §5 / DECISIONS #10):** Story's `softDeleteStoriesByAuthor` uses `findByAuthor`, which matches **co-authored** stories too, so a co-authored story (and therefore its fanarts, via `canRead`) is hidden as soon as **any** author is deactivated — not "only once every author is deactivated". Fanart follows Story (A13). | 3b, 13 | Resolved — DECISIONS #32: Story is changed in phase 3b (hidden only once all authors are deactivated) |
+| O2 | **Contradiction (spec §5 / DECISIONS #12):** Story's `deleteStoriesByAuthor` (on `Auth.UserDeleted`) hard-deletes **every** story the user co-authors, so "co-author deletes account, story survives" never happens today; the story's fanarts are removed through `Story.Deleted` (fanartists notified). Fanart's own `UserDeleted` listener still deletes that user's artworks/fanarts elsewhere. | 13 | Resolved — DECISIONS #33: Story's behaviour kept, supersedes #12; phase 13 tests it |
 | O3 | Architecture §3.5 says middleware `web, auth, verified`; the codebase convention for confirmed-only routes is `['web','auth','compliant', 'role:…']` (Quote). The plan uses the convention. | 8 | Resolved in plan |
 | O4 | Moderation reasons: the only seeding precedent is `ModerationSeeder` (an « Other » reason per hard-coded topic, dev/e2e only); production reasons are admin-created. Phase 14 adds `'fanart'` to that list instead of the `FanartModerationReasonSeeder` named in architecture §8. Release note: an admin must create the fanart reasons before go-live. | 14 | Resolved in plan |
 | O5 | Resolving `{slug}` → story id: `SlugWithId::extractId()` lives in `app/Domains/Shared/Support/SlugWithId.php` (Shared, usable from Fanart); then `StoryPublicApi::getStory($id)` and compare its slug, 404 on mismatch / missing. | 9 | Resolved in plan |

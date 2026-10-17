@@ -43,6 +43,13 @@ do **not** gain read access to private stories.
     routes, create page, review/delete actions).
   - Both make author deactivation (Story soft-deletes the story) hide the
     story's fanarts with no listener in Fanart.
+- Deactivation rule change (DECISIONS #32): `StoryService::softDeleteStoriesByAuthor`
+  today soft-deletes **every** story the user co-authors; it changes to
+  soft-delete a story only once **all** its authors are inactive (activity
+  read through `AuthPublicApi::getUsersById`, already a Story dependency).
+  Restore on reactivation is unchanged (any reactivated author restores the
+  story). Account deletion stays as is: every co-authored story is
+  hard-deleted (DECISIONS #33).
   - `getReadChapterIds(int $userId, int $storyId): int[]` and
     `getReadChapterIdsByStoryIds(int $userId, int[] $storyIds): array<int,int[]>`
     — exposes `ReadingProgressService`, one query each, for spoiler collapsing
@@ -166,9 +173,9 @@ No cross-domain relations; `Fanartist` has a composite key
 | Mode → `non`, role revoked, story → private | Nothing stored changes; only the submit authorization reads them. |
 | Chapter unpublished / republished | Nothing stored; reader queries keep only fanarts whose chapter is published (null chapter always kept). Authors see all. |
 | Chapter deleted (`Chapter.Deleted`) | Hard-delete its fanarts (pending + published), notify each distinct fanartist (not the actor/authors). Files left to GC. |
-| Story deleted (`Story.Deleted`, also fired when a sole author's account is deleted) | Hard-delete all its fanarts, fanartist rows and role requests; notify each distinct non-author fanartist. |
-| User deleted (`Auth.UserDeleted`) | Hard-delete (bypassing SoftDeletes) all fanarts with that `user_id` — covers both their fanarts and, on a surviving co-authored story, their own artworks; delete their fanartist rows and role requests. No notification. |
-| User deactivated / reactivated | Soft-delete / restore their fanarts (Quote pattern). Author deactivation needs nothing: the story becomes unreadable through `canRead`. |
+| Story deleted (`Story.Deleted`, also fired for every story — sole-authored or co-authored — of a deleted account, DECISIONS #33) | Hard-delete all its fanarts, fanartist rows and role requests; notify each distinct non-author fanartist. |
+| User deleted (`Auth.UserDeleted`) | Hard-delete (bypassing SoftDeletes) all fanarts with that `user_id` — covers their fanarts on other users' stories (their own stories, co-authored included, are already gone via `Story.Deleted`); delete their fanartist rows and role requests. No notification. |
+| User deactivated / reactivated | Soft-delete / restore their fanarts (Quote pattern). Author deactivation needs nothing: once Story soft-deletes the story (all authors inactive, DECISIONS #32) it becomes unreadable through `canRead`. |
 | Audio replaced (accept or artwork upload) | Previous published audio hard-deleted in the same transaction; its submitter notified unless they are the actor. |
 | Author declines / deletes, fanartist withdraws, moderator deletes | Hard delete; notifications per §3.4. |
 | Author reports a pending fanart (A1) | On `Moderation.ReportSubmitted` with topic `fanart`, if the fanart is pending **and** the reporter is an author of its story: hard-delete it and send the decline notification without comment. The snapshot copy was already taken synchronously before the event. |
