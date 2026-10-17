@@ -50,6 +50,19 @@ describe('folderFor', function () {
         expect(fn () => app(MediaService::class)->folderFor('bogus'))
             ->toThrow(InvalidArgumentException::class);
     });
+
+    it('accepts fanart/{id} and moderation/{topic} scopes and rejects malformed ones', function () {
+        $svc = app(MediaService::class);
+        expect($svc->folderFor('fanart/12'))->toBe('fanart/12');
+        expect($svc->folderFor('moderation/fanart'))->toBe('moderation/fanart');
+        expect($svc->folderFor('moderation/story_chapter-2'))->toBe('moderation/story_chapter-2');
+        expect($svc->isPrivateScope('fanart/12'))->toBeTrue();
+        expect($svc->isPrivateScope('moderation/fanart'))->toBeTrue();
+
+        foreach (['fanart', 'fanart/abc', 'fanart/12/x', 'moderation', 'moderation/', 'moderation/Fanart', 'moderation/../news', 'moderation/a/b'] as $bad) {
+            expect(fn () => $svc->folderFor($bad))->toThrow(InvalidArgumentException::class);
+        }
+    });
 });
 
 describe('store', function () {
@@ -341,6 +354,32 @@ describe('gc', function () {
         expect($result['skipped'])->toContain('secret-gift');
         expect($result['deleted'])->toBeEmpty();
         Storage::disk('private')->assertExists('secret-gift/7/orphan.mp3');
+    });
+
+    it('keeps the private variants of a claimed private original', function () {
+        $path = app(MediaPublicApi::class)->storePrivate('fanart/12', UploadedFile::fake()->image('art.jpg', 1200, 800), [400, 800]);
+        app(MediaUsageRegistry::class)->register(fakeProvider([$path]));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toBeEmpty();
+        expect(Storage::disk('private')->files('fanart/12'))->toHaveCount(5);
+    });
+
+    it('deletes an unclaimed private original together with its variants', function () {
+        $api = app(MediaPublicApi::class);
+        $keep = $api->storePrivate('fanart/12', UploadedFile::fake()->image('keep.jpg', 1200, 800), [400, 800]);
+        $gone = $api->storePrivate('fanart/12', UploadedFile::fake()->image('gone.jpg', 1200, 800), [400, 800]);
+        app(MediaUsageRegistry::class)->register(fakeProvider([$keep]));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toBe([$gone]);
+        $goneName = pathinfo($gone, PATHINFO_FILENAME);
+        foreach (Storage::disk('private')->files('fanart/12') as $file) {
+            expect($file)->not->toContain($goneName);
+        }
+        expect(Storage::disk('private')->files('fanart/12'))->toHaveCount(5);
     });
 
     it('still ignores non-image files on the public disk', function () {

@@ -15,8 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
  * Media is addressed by storage path — no ids, no reference table.
  *
  * Two halves: public images have variants and URLs; private images
- * (storePrivate) and raw private files (storePrivateFile) have neither and are
- * only ever streamed back by the domain that owns their visibility rules.
+ * (storePrivate, optionally with variants) and raw private files
+ * (storePrivateFile) have no URL and are only ever streamed back by the domain
+ * that owns their visibility rules.
  */
 class MediaPublicApi
 {
@@ -37,11 +38,12 @@ class MediaPublicApi
     /**
      * Store an uploaded image on the private disk; returns its stored path.
      *
-     * A private image has **no URL and no variants**: nothing can link to it.
-     * The owning domain serves it by calling stream() from behind its own
-     * authorization check.
+     * A private image has **no URL**: nothing can link to it. The owning domain
+     * serves it by calling stream() (original) or streamVariant() (opt-in
+     * variants) from behind its own authorization check.
      *
-     * @param int[] $widths Empty by default — the original only.
+     * @param int[] $widths Empty by default — the original only. e.g. [400, 800]
+     *                      writes private -400w/-800w jpg + webp variants.
      */
     public function storePrivate(string $scope, UploadedFile $file, array $widths = []): string
     {
@@ -75,6 +77,33 @@ class MediaPublicApi
     public function stream(string $path, array $headers = []): Response
     {
         return $this->media->stream($path, $headers);
+    }
+
+    /**
+     * Stream a generated variant (`{name}-{width}w.{format}`) of a **private**
+     * original stored with widths via storePrivate().
+     *
+     * Performs **no** authorization — the caller gates it exactly as for
+     * stream(). Throws InvalidArgumentException for a public path (public
+     * variants have URLs: use variantUrl()) and for a variant that was not
+     * generated; the caller turns the latter into a 404.
+     */
+    public function streamVariant(string $path, int $width, string $format = 'webp', array $headers = []): Response
+    {
+        return $this->media->streamVariant($path, $width, $format, $headers);
+    }
+
+    /**
+     * Copy a stored original (public or private) into a **private** scope under
+     * a fresh random name keeping its extension; returns the new path. The
+     * source is untouched and variants are not copied.
+     *
+     * Performs **no** authorization. The copy is an ordinary private file: the
+     * caller must claim it through a MediaUsageProvider or GC collects it.
+     */
+    public function copyPrivate(string $path, string $targetScope): string
+    {
+        return $this->media->copyPrivate($path, $targetScope);
     }
 
     /**

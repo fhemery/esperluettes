@@ -9,6 +9,7 @@ use App\Domains\Media\Public\Contracts\Dto\MediaPathPageDto;
 use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,10 +28,14 @@ class MediaService
     private const FLAT_SCOPES = ['news', 'faq', 'static-pages', 'activities'];
 
     /**
-     * Scope roots living on the private disk: no public URL, no variants, and
-     * bytes reachable only by streaming through the owning domain's own gate.
+     * Scope roots living on the private disk: no public URL, and bytes (original
+     * or opt-in variants) reachable only by streaming through the owning
+     * domain's own gate.
      */
-    private const PRIVATE_SCOPE_ROOTS = ['secret-gift'];
+    private const PRIVATE_SCOPE_ROOTS = ['secret-gift', 'fanart', 'moderation'];
+
+    /** Generated variant file name: {name}-{width}w.{ext}. */
+    private const VARIANT_PATTERN = '/-\d+w\.(jpg|jpeg|png|webp)$/i';
 
     public function __construct(
         private readonly ImageService $imageService,
@@ -40,7 +45,8 @@ class MediaService
     /**
      * Resolve a scope string to its base folder on the disk.
      * Per-author chapter scopes ("chapters/{userId}") are already folder paths,
-     * as are per-activity private scopes ("secret-gift/{activityId}").
+     * as are the private scopes ("secret-gift/{activityId}", "fanart/{storyId}",
+     * "moderation/{topicKey}").
      */
     public function folderFor(string $scope): string
     {
@@ -50,7 +56,10 @@ class MediaService
         if (preg_match('#^chapters/\d+$#', $scope) === 1) {
             return $scope;
         }
-        if (preg_match('#^secret-gift/\d+$#', $scope) === 1) {
+        if (preg_match('#^(secret-gift|fanart)/\d+$#', $scope) === 1) {
+            return $scope;
+        }
+        if (preg_match('#^moderation/[a-z0-9_-]+$#', $scope) === 1) {
             return $scope;
         }
         throw new InvalidArgumentException("Unknown media scope: {$scope}");
@@ -89,8 +98,8 @@ class MediaService
 
     /**
      * Store an uploaded image on the private disk; returns its path.
-     * Defaults to the original only — private images have no variants because
-     * nothing can build a URL for them.
+     * Defaults to the original only; pass widths to opt into private variants,
+     * which are served by streamVariant() behind the caller's own gate.
      *
      * @param int[] $widths
      */
@@ -131,6 +140,62 @@ class MediaService
             return Storage::disk(self::DISK)->response($path, null, $headers);
         }
 
+        return $this->privateFileResponse($path, $headers);
+    }
+
+    /**
+     * Stream a generated variant of a **private** original, inline.
+     * Performs **no** authorization, like stream(). Throws for a public path
+     * (public variants have URLs) and for a variant that does not exist.
+     */
+    public function streamVariant(string $path, int $width, string $format = 'webp', array $headers = []): Response
+    {
+        if (!$this->isPrivatePath($path)) {
+            throw new InvalidArgumentException("Not a private media path: {$path}");
+        }
+        $variant = $this->variantPath($path, $width, $format);
+        if (!Storage::disk(self::PRIVATE_DISK)->exists($variant)) {
+            throw new InvalidArgumentException("Missing media variant: {$variant}");
+        }
+
+        return $this->privateFileResponse($variant, $headers);
+    }
+
+    /**
+     * Copy a stored original (public or private) into a private scope under a
+     * fresh random name, keeping its extension; returns the new path.
+     * Variants are not copied.
+     */
+    public function copyPrivate(string $path, string $targetScope): string
+    {
+        if (!$this->isPrivateScope($targetScope)) {
+            throw new InvalidArgumentException("Not a private media scope: {$targetScope}");
+        }
+        $folder = $this->folderFor($targetScope);
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $target = $folder . '/' . Str::random(40) . ($ext !== '' ? '.' . $ext : '');
+
+        $stream = Storage::disk($this->diskFor($path))->readStream($path);
+        if ($stream === null) {
+            throw new InvalidArgumentException("Media file not found: {$path}");
+        }
+        try {
+            Storage::disk(self::PRIVATE_DISK)->writeStream($target, $stream);
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }
+
+        return $target;
+    }
+
+    /**
+     * BinaryFileResponse for a private-disk file. Defaults are set here because
+     * prepare() is what would otherwise fill them, and a direct call skips it.
+     */
+    private function privateFileResponse(string $path, array $headers): Response
+    {
         $disk = Storage::disk(self::PRIVATE_DISK);
         $response = new BinaryFileResponse($disk->path($path), 200, [], false);
         $response->headers->set('Content-Type', $disk->mimeType($path) ?: 'application/octet-stream');
@@ -138,6 +203,14 @@ class MediaService
         $response->headers->add($headers);
 
         return $response;
+    }
+
+    /** Variant path by naming convention: {dir}/{name}-{width}w.{format}. */
+    private function variantPath(string $path, int $width, string $format): string
+    {
+        $dir = pathinfo($path, PATHINFO_DIRNAME);
+        $name = pathinfo($path, PATHINFO_FILENAME);
+        return ($dir === '' || $dir === '.') ? "{$name}-{$width}w.{$format}" : "{$dir}/{$name}-{$width}w.{$format}";
     }
 
     public function exists(string $path): bool
@@ -163,10 +236,7 @@ class MediaService
         if ($this->isPrivatePath($path)) {
             throw new InvalidArgumentException("Private media path has no public URL: {$path}");
         }
-        $dir = pathinfo($path, PATHINFO_DIRNAME);
-        $name = pathinfo($path, PATHINFO_FILENAME);
-        $rel = ($dir === '' || $dir === '.') ? "{$name}-{$width}w.{$format}" : "{$dir}/{$name}-{$width}w.{$format}";
-        return asset('storage/' . $rel);
+        return asset('storage/' . $this->variantPath($path, $width, $format));
     }
 
     /**
@@ -221,15 +291,13 @@ class MediaService
      */
     public function hasVariants(string $path): bool
     {
-        $dir = pathinfo($path, PATHINFO_DIRNAME);
-        $name = pathinfo($path, PATHINFO_FILENAME);
-        $rel = ($dir === '' || $dir === '.') ? "{$name}-800w.webp" : "{$dir}/{$name}-800w.webp";
-        return Storage::disk(self::DISK)->exists($rel);
+        return Storage::disk($this->diskFor($path))->exists($this->variantPath($path, 800, 'webp'));
     }
 
     /**
      * Garbage-collect originals no provider claims and older than $days.
-     * On the private disk every file under a root counts as an original.
+     * On the private disk every file under a root except -<width>w variants
+     * counts as an original; variants go with their original.
      *
      * Safety guard: a folder that holds originals but has zero claimed paths is
      * treated as an unclaimed scope (probable missing provider) and skipped, not
@@ -321,9 +389,10 @@ class MediaService
 
     /**
      * Originals under a folder. On the public disk: images only, variants
-     * excluded, non-recursive. On the private disk: every file, recursively —
-     * private files (images or not) have no variants by construction, and live
-     * one level down in per-scope subfolders.
+     * excluded, non-recursive. On the private disk: every file (images or not)
+     * except generated variants, recursively — private files live one level
+     * down in per-scope subfolders. Variants are removed with their original
+     * by deleteWithVariants().
      *
      * @return list<string>
      */
@@ -334,12 +403,15 @@ class MediaService
             return [];
         }
         if ($disk === self::PRIVATE_DISK) {
-            return array_values($fs->allFiles($folder));
+            return array_values(array_filter(
+                $fs->allFiles($folder),
+                fn (string $file) => preg_match(self::VARIANT_PATTERN, basename($file)) !== 1,
+            ));
         }
         $originals = [];
         foreach ($fs->files($folder) as $file) {
             $base = pathinfo($file, PATHINFO_BASENAME);
-            if (preg_match('/-\d+w\.(jpg|jpeg|png|webp)$/i', $base) === 1) {
+            if (preg_match(self::VARIANT_PATTERN, $base) === 1) {
                 continue; // a generated variant
             }
             if (preg_match('/\.(jpg|jpeg|png|webp)$/i', $base) !== 1) {
