@@ -22,6 +22,21 @@ describe('Collaborator management page', function () {
         $response->assertSee(__('story::collaborators.page_title', ['title' => $story->title]));
     });
 
+    it('renders the page when a co-author has been deactivated', function () {
+        $admin = admin($this);
+        $author1 = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $author2 = bob($this, roles: [Roles::USER_CONFIRMED]);
+        $story = publicStory('My Story', $author1->id);
+        addCollaborator($story->id, $author2->id, 'author');
+
+        $this->actingAs($admin);
+        app(\App\Domains\Auth\Public\Api\AuthPublicApi::class)->deactivateUserById($author2->id);
+
+        $response = $this->actingAs($author1)->get(route('stories.collaborators.index', ['slug' => $story->slug]));
+
+        $response->assertOk();
+    });
+
     it('denies non-authors from accessing the collaborator management page', function () {
         $author = alice($this, roles: [Roles::USER_CONFIRMED]);
         $reader = bob($this, roles: [Roles::USER_CONFIRMED]);

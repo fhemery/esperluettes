@@ -11,9 +11,13 @@
                         <div class="flex items-center gap-3">
                             <x-shared::avatar :src="$collab['avatar_url']" :alt="$collab['display_name']" class="h-10 w-10" />
                             <div>
-                                <a href="{{ route('profile.show', ['profile' => $collab['slug']]) }}" class="font-medium hover:text-accent">
-                                    {{ $collab['display_name'] }}
-                                </a>
+                                @if ($collab['slug'] !== '')
+                                    <a href="{{ route('profile.show', ['profile' => $collab['slug']]) }}" class="font-medium hover:text-accent">
+                                        {{ $collab['display_name'] }}
+                                    </a>
+                                @else
+                                    <span class="font-medium">{{ $collab['display_name'] }}</span>
+                                @endif
                                 <div class="text-sm text-gray-500">
                                     {{ __('story::collaborators.roles.' . str_replace('-', '_', $collab['role'])) }}
                                 </div>
