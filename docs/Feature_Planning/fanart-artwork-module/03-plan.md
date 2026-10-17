@@ -22,7 +22,7 @@ green gate and enforces its own security rules.
 | 1 | Refactor — Media: private image variants, `streamVariant`, `copyPrivate`, `fanart` / `moderation` scope roots | M | — | DONE |
 | 1v | Checkpoint — Secret Gift images & sounds, media library picker, `media:gc --dry-run` | S | 1 | DONE |
 | 2 | Refactor — Moderation: `_media` snapshot capability (copy, GC claim, moderator stream, `_media_urls`) | M | 1 | DONE |
-| 2v | Checkpoint — existing report topics (story, chapter, comment, profile) submit + admin report page | S | 2 | TODO |
+| 2v | Checkpoint — existing report topics (story, chapter, comment, profile) submit + admin report page | S | 2 | DONE |
 | 3 | Story public API additions (readability batch, read chapters, chapters list, atomic credit spend) | M | — | TODO |
 | 3b | Story: hide a co-authored story on deactivation only once all its authors are deactivated | S | — | TODO |
 | 3bv | Checkpoint — co-authored story with one deactivated author: listings, story page, chapter page, collaborators page | S | 3b | TODO |
@@ -261,6 +261,12 @@ comment). Approve one, dismiss one. e2e: `e2e/tests/core/comment-thread.spec.ts`
 and `e2e/tests/core/admin-menus.spec.ts`.
 
 Screenshots → `shots/checkpoint-2v/`.
+
+**Result (2026-10-17, HEAD 62cc44ff) — PASS**
+- e2e `comment-thread.spec.ts` and `admin-menus.spec.ts`: green.
+- Submit via the report modal (e2e instance): story and chapter as `confirmed`, profile as `confirmed`, comment as `author` (the seeded comment is `confirmed`'s own, so it shows no report button there). Each shows the success state.
+- Moderator: list shows the 4 reports; each show page renders (type, reporter, description, content snapshot, approve / reject / delete, moderation comment). Approved #4, dismissed #3; list filtered on pending then shows only #2 and #1.
+- No 4xx/5xx or page error logged by the driver.
 
 ---
 
