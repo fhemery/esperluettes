@@ -35,7 +35,7 @@ scoped to the task that actually changed.
 - **Secret Gift — reveal follow-ups (ARCHIVED access, ENDED tab, missing tests)** · `secret-gift-reveal-followups/` · interactive · TODO: leftover from `media-sound-upload/` VERIFY — 3 feature tests pushed back to BUILD and never written; activity page 404s once ARCHIVED while gift routes still serve; page opens on the prepare tab once ENDED
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
-- **New fanart / artwork module** · `fanart-artwork-module/` · interactive · WIP:BUILD (8/28)
+- **New fanart / artwork module** · `fanart-artwork-module/` · interactive · WIP:BUILD (9/28)
 
 ## Done
 

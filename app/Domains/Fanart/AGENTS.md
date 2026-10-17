@@ -18,6 +18,8 @@ None yet.
 
 - **Media**: `FanartServiceProvider::boot()` registers `FanartMediaUsageProvider` on `MediaUsageRegistry`.
 
+- **Settings**: `booted` callback adds section `fanart` (params `fanart-images-mode` default `yes`, `fanart-audio-mode` default `designated`) to Story's `stories` tab, and `hide-fanart-tab` (bool, default `true`) to the `profile` tab's `privacy` section; each guarded on its own key. `ModeService::effectiveMode` takes the most restrictive value across the story's authors.
+
 ## Invariants
 
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
