@@ -24,7 +24,7 @@ green gate and enforces its own security rules.
 | 2 | Refactor — Moderation: `_media` snapshot capability (copy, GC claim, moderator stream, `_media_urls`) | M | 1 | DONE |
 | 2v | Checkpoint — existing report topics (story, chapter, comment, profile) submit + admin report page | S | 2 | DONE |
 | 3 | Story public API additions (readability batch, read chapters, chapters list, atomic credit spend) | M | — | DONE |
-| 3b | Story: hide a co-authored story on deactivation only once all its authors are deactivated | S | — | TODO |
+| 3b | Story: hide a co-authored story on deactivation only once all its authors are deactivated | S | — | DONE |
 | 3bv | Checkpoint — co-authored story with one deactivated author: listings, story page, chapter page, collaborators page | S | 3b | TODO |
 | 4 | Fanart domain skeleton: provider, deptrac, migrations, models, enums, media usage provider, docs | M | 1 | TODO |
 | 5 | Settings registration + `ModeService` (most-restrictive mode) | S | 3, 4 | TODO |

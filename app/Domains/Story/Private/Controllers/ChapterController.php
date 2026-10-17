@@ -162,7 +162,10 @@ class ChapterController
         $authors = $this->profileApi->getPublicProfiles($story->authors->pluck('user_id')->toArray());
         $auth = [];
         foreach ($authors as $author) {
-            $auth[] = $author;
+            // A deactivated co-author has no public profile: skip them
+            if ($author !== null) {
+                $auth[] = $author;
+            }
         }
         $vm = ChapterViewModel::from($story, $chapter, $isAuthor, $isReadByMe, $auth, $feedbackVm, $this->coverService);
 

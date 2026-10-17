@@ -55,7 +55,7 @@
 | Event | Listener | Action |
 |-------|---------|--------|
 | `Auth::UserRegistered` | `GrantInitialCreditsOnUserRegistered` | Grant 5 initial chapter credits |
-| `Auth::UserDeactivated` | `SoftDeleteStoriesOnUserDeactivated` | Soft-delete all stories by that author |
+| `Auth::UserDeactivated` | `SoftDeleteStoriesOnUserDeactivated` | Soft-delete the stories by that author that have no active author left |
 | `Auth::UserReactivated` | `RestoreStoriesOnUserReactivated` | Restore soft-deleted stories and chapters |
 | `Auth::UserDeleted` | `RemoveStoriesOnUserDeleted` | Hard-delete all stories |
 | `Auth::UserDeleted` | `RemoveChapterCreditsOnUserDeleted` | Delete the `story_chapter_credits` row |
@@ -72,7 +72,7 @@
 
 **Chapter credits: check before, spend after.** The check `availableForUser <= 0` throws an `AuthorizationException` before the DB transaction starts. Credits are spent via `spendOne()` *after* a successful save. Do not reorder this sequence.
 
-**Soft delete vs. hard delete.** `SoftDeleteStoriesOnUserDeactivated` calls `softDeleteStoriesByAuthor`; `RemoveStoriesOnUserDeleted` hard-deletes. These are separate listeners for separate events — do not merge them.
+**Soft delete vs. hard delete.** `SoftDeleteStoriesOnUserDeactivated` calls `softDeleteStoriesByAuthor`; `RemoveStoriesOnUserDeleted` hard-deletes. A co-authored story is soft-deleted only once every author is deactivated (one `AuthPublicApi::getUsersById` call); reactivating any author restores it; account deletion still hard-deletes every co-authored story. These are separate listeners for separate events — do not merge them.
 
 **`story_chapter_credits` has no FK to `users`.** Cross-domain FK to `users` is prohibited by architecture. The credits row is cleaned up explicitly by the `RemoveChapterCreditsOnUserDeleted` listener on `UserDeleted`.
 

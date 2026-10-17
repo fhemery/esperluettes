@@ -51,3 +51,17 @@ it('deletes all stories (with chapters and comments) authored by a user when the
     $this->assertDatabaseMissing('story_chapters', ['id' => $c1->id]);
     $this->assertDatabaseMissing('story_chapters', ['id' => $c2->id]);
 });
+
+it('still hard-deletes a co-authored story when one of its authors deletes their account', function () {
+    $author = alice($this, roles: [Roles::USER_CONFIRMED]);
+    $coAuthor = bob($this, roles: [Roles::USER_CONFIRMED]);
+
+    $story = publicStory('Shared Wiped', $author->id);
+    addCollaborator($story->id, $coAuthor->id, 'author');
+    $chapter = createPublishedChapter($this, $story, $author);
+
+    deleteUser($this, $author);
+
+    $this->assertDatabaseMissing('stories', ['id' => $story->id]);
+    $this->assertDatabaseMissing('story_chapters', ['id' => $chapter->id]);
+});

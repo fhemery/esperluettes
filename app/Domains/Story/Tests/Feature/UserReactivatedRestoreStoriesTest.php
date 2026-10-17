@@ -51,3 +51,45 @@ describe('Restoring stories after user reactivation', function () {
         expect($c->trashed())->toBeFalse();
     });
 });
+
+describe('Restoring co-authored stories after user reactivation', function () {
+
+    it('restores a co-authored story when one of its two deactivated authors is reactivated', function () {
+        $admin = admin($this);
+        $alice = alice($this);
+        $bob = bob($this);
+
+        $story = publicStory('Shared Story', $alice->id);
+        addCollaborator($story->id, $bob->id, 'author');
+        $chapter = createPublishedChapter($this, $story, $alice);
+
+        $this->actingAs($admin);
+        $api = app(AuthPublicApi::class);
+        $api->deactivateUserById($alice->id);
+        $api->deactivateUserById($bob->id);
+        expect(Story::withTrashed()->find($story->id)->trashed())->toBeTrue();
+
+        $api->activateUserById($bob->id);
+
+        expect(Story::withTrashed()->find($story->id)->trashed())->toBeFalse();
+        expect(Chapter::withTrashed()->find($chapter->id)->trashed())->toBeFalse();
+    });
+
+    it('leaves a never-hidden co-authored story untouched when its deactivated co-author is reactivated', function () {
+        $admin = admin($this);
+        $alice = alice($this);
+        $bob = bob($this);
+
+        $story = publicStory('Shared Story', $alice->id);
+        addCollaborator($story->id, $bob->id, 'author');
+        $chapter = createPublishedChapter($this, $story, $alice);
+
+        $this->actingAs($admin);
+        $api = app(AuthPublicApi::class);
+        $api->deactivateUserById($bob->id);
+        $api->activateUserById($bob->id);
+
+        expect(Story::withTrashed()->find($story->id)->trashed())->toBeFalse();
+        expect(Chapter::withTrashed()->find($chapter->id)->trashed())->toBeFalse();
+    });
+});

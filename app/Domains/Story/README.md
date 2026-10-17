@@ -105,7 +105,7 @@ Advanced chapters may hold a `chapter-choice` block — a group of buttons linki
 
 **Sparse chapter sort ordering.** Chapters are ordered by `sort_order` in increments of 100 (100, 200, 300…). New chapters append at `max(sort_order) + 100`. Explicit reorders use `SparseReorder::computeChanges()` which re-spaces all chapters. Never insert at a fixed offset.
 
-**Soft delete on deactivation, hard delete on account deletion.** When a user is deactivated, their stories are soft-deleted (recoverable if the account is reactivated). When the account is permanently deleted, stories are hard-deleted. These are handled by two separate listeners — `SoftDeleteStoriesOnUserDeactivated` and `RemoveStoriesOnUserDeleted` — and must not be merged.
+**Soft delete on deactivation, hard delete on account deletion.** When a user is deactivated, the stories they author are soft-deleted (recoverable if the account is reactivated) — but a co-authored story is only soft-deleted once **all** its authors are deactivated, and reactivating any one author restores it. When the account is permanently deleted, every story the user authors or co-authors is hard-deleted. These are handled by two separate listeners — `SoftDeleteStoriesOnUserDeactivated` and `RemoveStoriesOnUserDeleted` — and must not be merged.
 
 **No foreign key from `story_chapter_credits` to `users`.** Per architecture rules, no cross-domain FK to the `users` table is allowed. The credit row is deleted explicitly by a `UserDeleted` listener.
 
@@ -173,7 +173,7 @@ Opt-in expensive fields: `includeAuthors`, `includeCollaborators`, `includeGenre
 | Source event | Listener | Action |
 |-------------|---------|--------|
 | `Auth::UserRegistered` | `GrantInitialCreditsOnUserRegistered` | Grant 5 initial chapter credits |
-| `Auth::UserDeactivated` | `SoftDeleteStoriesOnUserDeactivated` | Soft-delete all stories by that author |
+| `Auth::UserDeactivated` | `SoftDeleteStoriesOnUserDeactivated` | Soft-delete the stories by that author that have no active author left |
 | `Auth::UserReactivated` | `RestoreStoriesOnUserReactivated` | Restore soft-deleted stories and chapters |
 | `Auth::UserDeleted` | `RemoveStoriesOnUserDeleted` | Hard-delete all stories (+ chapter comments via `CommentMaintenancePublicApi`) |
 | `Auth::UserDeleted` | `RemoveChapterCreditsOnUserDeleted` | Delete the `story_chapter_credits` row |

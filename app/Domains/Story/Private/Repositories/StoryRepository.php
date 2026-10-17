@@ -284,6 +284,21 @@ final class StoryRepository
     }
 
     /**
+     * Stories where the user is among the authors, with all their authors loaded.
+     *
+     * @return Collection<int, Story>
+     */
+    public function findByAuthorWithAuthors(int $userId): Collection
+    {
+        return Story::query()
+            ->whereHas('authors', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->with('authors')
+            ->get();
+    }
+
+    /**
      * Fetch authored stories for a user, optionally excluding co-authored ones.
      * Ordered by updated_at DESC, then id DESC.
      *
