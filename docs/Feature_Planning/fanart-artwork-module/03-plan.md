@@ -1415,3 +1415,10 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 | O7 | Profile picker for granting the Fanartiste role: reuse whatever user search the collaborators page uses today (not read yet). | 15 | Open |
 | O8 | Production upload limits (WAF / nginx `client_max_body_size`, PHP `upload_max_filesize`) must allow ≥ 16 MB (architecture §9). Not checkable from the repo. | release | Open — ops |
 | O9 | Do moderators/admins also hold `user-confirmed`? The route middleware lists staff roles explicitly, so either way works; Moderation's report-form route only allows `user`/`user-confirmed` — staff reporting a fanart depends on that. | 14 | Open — non-blocking |
+
+**Result (2026-10-17, HEAD b8b99d49) — FAIL**
+- e2e `chapter-annotation-overlay.spec.ts`: 3/3 pass.
+- Setup: e2e DB, `confirmed@e2e.test` (co-author of `histoire-coecrite-2`) deactivated via `UserService::deactivateUser`.
+- OK: `/stories`, home/dashboard, story page and chapter page as guest, reader (admin) and active author (`author@e2e.test`) render 200, byline shows only « E2E Author », chapter listed. Shots in `shots/checkpoint-3bv/`.
+- **FAIL: collaborators page (`/stories/histoire-coecrite-2/collaborators`, active author) returns 500**: `Missing required parameter for [Route: profile.show] [Missing parameter: profile]` at `app/Domains/Story/Private/Resources/views/collaborators/index.blade.php:14`. `CollaboratorService::getCollaboratorsWithProfiles` falls back to `slug => ''` and display_name « Unknown » for the deactivated co-author, but the view always builds `route('profile.show', ['profile' => $collab['slug']])`. Fix: render the name as plain text (no link) when `slug` is empty; display « Unknown » should also be a translated, non-link label. Add a feature test (collaborators index with a deactivated co-author).
+- Not checked after the failure: profile « Histoires » tab, second-author deactivation 404.
