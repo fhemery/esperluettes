@@ -26,7 +26,7 @@ green gate and enforces its own security rules.
 | 3 | Story public API additions (readability batch, read chapters, chapters list, atomic credit spend) | M | — | DONE |
 | 3b | Story: hide a co-authored story on deactivation only once all its authors are deactivated | S | — | DONE |
 | 3bv | Checkpoint — co-authored story with one deactivated author: listings, story page, chapter page, collaborators page | S | 3b | DONE |
-| 4 | Fanart domain skeleton: provider, deptrac, migrations, models, enums, media usage provider, docs | M | 1 | TODO |
+| 4 | Fanart domain skeleton: provider, deptrac, migrations, models, enums, media usage provider, docs | M | 1 | DONE |
 | 5 | Settings registration + `ModeService` (most-restrictive mode) | S | 3, 4 | TODO |
 | 6 | `FanartPolicy` + fanartiste membership reads | M | 3, 5 | TODO |
 | 7 | Notifications: group, ten content types, `FanartNotifier` | M | 4 | TODO |
