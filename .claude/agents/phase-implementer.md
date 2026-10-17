@@ -2,7 +2,7 @@
 name: phase-implementer
 description: Use this agent at the BUILD step of the loop to implement exactly one phase of a feature's implementation plan, test-first, until `pnpm run gate` is green. Launch one agent per phase — never one agent for several phases.\n\n<example>\nContext: The plan for the author view has seven phases and phase 1 is next.\nuser: "Plan looks good, start building."\nassistant: "I'll launch a phase-implementer agent for phase 1 (schema + model)."\n<commentary>\nBUILD runs one subagent per phase so each gets a fresh context. Use the Agent tool.\n</commentary>\n</example>\n\n<example>\nContext: Phase 3 has just been reported green.\nuser: "keep going"\nassistant: "Launching a phase-implementer agent for phase 4 (backend endpoints)."\n<commentary>\nEach phase gets its own agent invocation. Use the Agent tool.\n</commentary>\n</example>
 tools: Bash, Glob, Grep, Read, Edit, Write, NotebookEdit
-model: opus
+model: sonnet
 color: green
 ---
 
