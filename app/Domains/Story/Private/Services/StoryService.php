@@ -223,6 +223,27 @@ class StoryService
         return Chapter::query()->whereIn('id', $chapterIds)->get()->keyBy('id')->all();
     }
 
+    /**
+     * Chapters (all statuses) of the given stories, ordered by sort_order.
+     * @return array<int, Chapter[]> storyId => chapters
+     */
+    public function getChaptersByStoryIds(array $storyIds): array
+    {
+        if (empty($storyIds)) {
+            return [];
+        }
+        $result = [];
+        Chapter::query()
+            ->whereIn('story_id', $storyIds)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->each(function (Chapter $c) use (&$result) {
+                $result[(int) $c->story_id][] = $c;
+            });
+        return $result;
+    }
+
     /** @return array<int, int[]> */
     public function getAuthorIdsByStoryIds(array $storyIds): array
     {

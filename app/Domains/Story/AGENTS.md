@@ -18,6 +18,14 @@
 | `searchStories(query, viewerUserId, limit)` | Full-text title search returning `StorySearchResultDto[]` (max 25); applies the viewer's `hide-stories-with-tw` preference when `viewerUserId` is non-null |
 | `filterUsersWithAccessToStory(userIds, storyId)` | Filter to users who can access the story under current visibility |
 | `diffAccessForUsers(userIds, storyId, previousVisibility)` | Returns `['gained' => int[], 'lost' => int[]]` after a visibility change |
+| `filterReadableStoryIds(userId, storyIds)` | Batch `StoryPolicy::view` rule (staff all; guest public; confirmed + community; collaborator + private); soft-deleted stories excluded; `int[]`, unordered, one stories query |
+| `canRead(userId, storyId)` | Single-story wrapper over `filterReadableStoryIds` |
+| `getReadChapterIds(userId, storyId)` | `int[]` of chapters the user marked read in the story |
+| `getReadChapterIdsByStoryIds(userId, storyIds)` | `array<storyId, int[]>` read chapter ids, one query |
+| `getChaptersForStory(storyId)` | `StoryChapterDto[]` by `sort_order`, all statuses (caller filters on `status`) |
+| `getChaptersForStories(storyIds)` | `array<storyId, StoryChapterDto[]>`, one query |
+| `getAvailableChapterCredits(userId)` | Credits gained minus spent |
+| `spendChapterCredit(userId)` | Atomic conditional spend of one credit; `false` (nothing spent) when none left or no credits row |
 
 ## Events emitted
 

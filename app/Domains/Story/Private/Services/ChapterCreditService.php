@@ -68,6 +68,18 @@ class ChapterCreditService
     }
 
     /**
+     * Atomically spend one credit only if one is available. Never creates a row
+     * and never drives available credits below zero.
+     */
+    public function trySpendOne(int $userId): bool
+    {
+        return DB::table('story_chapter_credits')
+            ->where('user_id', $userId)
+            ->whereRaw('credits_gained - credits_spent > 0')
+            ->update(['credits_spent' => DB::raw('credits_spent + 1')]) === 1;
+    }
+
+    /**
      * Revoke one earned credit (decrease credits_gained by 1).
      */
     public function revokeOne(int $userId): void
