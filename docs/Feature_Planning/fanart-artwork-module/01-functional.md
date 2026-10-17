@@ -208,9 +208,11 @@ staff).
    description, artist and story/chapter is kept with the report so
    moderators can review it even if the fanart is later deleted.
 4. Moderators have a direct « Supprimer » action on any fanart.
-5. When a report is **approved**, the fanart is deleted. Both on report
-   approval and on direct moderator deletion, the authors and the fanartist
-   are notified.
+5. Approving a report does **not** delete the fanart, as for every other
+   topic: the report links to the fanart, where moderators have a moderation
+   menu with « Supprimer » (as for comments). On moderator deletion, the
+   authors and the fanartist are notified. *(decision 31, supersedes the
+   REFINE wording)*
 
 ### 4.12 Discord relay
 
@@ -256,7 +258,7 @@ staff).
 | Fanartist deactivated | Their fanarts hidden (soft-deleted); restored on reactivation. | — |
 | Author deactivated | Story's fanarts hidden; on a co-authored story only once **every** author is deactivated. Restored on reactivation. | — |
 | New audio replaces an existing one | Previous audio deleted. | Previous audio's fanartist |
-| Report approved / moderator deletion | Fanart deleted (report copy kept). | Authors + fanartist |
+| Moderator deletion (from the fanart's moderation menu) | Fanart deleted (report copy kept). | Authors + fanartist |
 
 ## 6. Cross-cutting concerns
 
@@ -265,8 +267,8 @@ staff).
 | Roles | Confirmed users only; authors decide; staff override. See §3. |
 | Visibility / privacy | Fanarts visible to confirmed users + staff only; no new uploads on private stories; profile tab private by default; author's review comment only in notification. |
 | Settings | Two per-user settings in Paramètres › Histoires (images `oui`, audio `fanartistes désignés`), most-restrictive across co-authors; one Profile privacy setting for the profile tab (private by default). |
-| Notifications | Pending fanart → all authors; accepted/declined (with comment) → fanartist; deleted by author/moderator/report → fanartist (+ authors for moderation); audio replaced → previous fanartist; story/chapter deleted → fanartist; role request → all authors; request accepted (role given) / declined → requester. Actor never notified of own action. No batching. |
-| Domain events | Listen: user deactivated / reactivated / deleted, story deleted, chapter deleted, chapter unpublished/published, story visibility changed, report approved. Emission of own events: DESIGN decides. |
+| Notifications | Pending fanart → all authors; accepted/declined (with comment) → fanartist; deleted by author/moderator → fanartist (+ authors for moderation); audio replaced → previous fanartist; story/chapter deleted → fanartist; role request → all authors; request accepted (role given) / declined → requester. Actor never notified of own action. No batching. |
+| Domain events | Listen: user deactivated / reactivated / deleted, story deleted, chapter deleted, chapter unpublished/published, story visibility changed, report submitted (decision 31). Emission of own events: DESIGN decides. |
 | Statistics | N/A — none for now (decision 22). |
 | Moderation | New topic with own reasons; file copy kept with report; direct moderator delete; report approval deletes the fanart. |
 | Lifecycle / cascade | See §5. |

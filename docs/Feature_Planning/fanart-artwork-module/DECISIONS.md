@@ -35,6 +35,10 @@ a new row that supersedes it and note the number.
 | 25 | 2026-10-17 | REFINE | GIF images (wireframe hint) | No — jpg/png/webp | — |
 | 26 | 2026-10-17 | REFINE | Attestation wording | Wireframe wording + AI clause | — |
 | 27 | 2026-10-17 | REFINE | Button label | « Proposer un fanart » (authors: « Ajouter un artwork ») | — |
+| 28 | 2026-10-17 | DESIGN | Where the Fanartiste role lives | In the Fanart domain (`fanart_fanartists`), shown as a section on Story's collaborators page; not a `story_collaborators` role (no private-story access) | — |
+| 29 | 2026-10-17 | DESIGN | Thumbnails for confirmed-only images | Private image variants in Media (gated variant streaming, GC-aware) | — |
+| 30 | 2026-10-17 | DESIGN | Keeping the reported file | Generic Moderation capability: snapshot `_media` paths copied via Media, kept while the report exists | — |
+| 31 | 2026-10-17 | DESIGN | Does approving a report delete the fanart | No — "the report should send to the fanart, and there should be a moderation menu enabling to delete it like we have for comments". Spec §4.11.5 amended | REFINE §4.11.5 wording |
 
 ## Assumptions made without asking
 
@@ -55,3 +59,9 @@ Assumptions A1–A8 were read back to the user at REFINE and not vetoed.
 | A8 | Publishing a fanart notifies no followers/readers | REFINE | Yes |
 | A9 | Author artworks are Discord-eligible under the same rule (public story, author ticks « Partager sur Discord ») | REFINE | Yes |
 | A10 | One pending role request per user per story, withdrawable; removed if role granted directly or story deleted | REFINE | Yes |
+| A11 | Story pages get `<x-fanart::…>` component tags, no story-page registry | DESIGN | Yes |
+| A12 | Discord relay = Fanart's own pending/mark-sent endpoints behind `discord.api`, signed expiring image URLs | DESIGN | Yes |
+| A13 | Unpublished chapters / deactivated authors / visibility handled by read-time filtering, no listeners | DESIGN | Yes |
+| A14 | Moderation copy retained as long as the report exists (spec open Q1) | DESIGN | Yes |
+| A15 | Only `Fanart.DeletedByModeration` emitted as a domain event | DESIGN | Yes |
+| A16 | Author reporting a pending fanart handled by a `Moderation.ReportSubmitted` listener in Fanart | DESIGN | Yes |
