@@ -25,7 +25,7 @@ green gate and enforces its own security rules.
 | 2v | Checkpoint — existing report topics (story, chapter, comment, profile) submit + admin report page | S | 2 | DONE |
 | 3 | Story public API additions (readability batch, read chapters, chapters list, atomic credit spend) | M | — | DONE |
 | 3b | Story: hide a co-authored story on deactivation only once all its authors are deactivated | S | — | DONE |
-| 3bv | Checkpoint — co-authored story with one deactivated author: listings, story page, chapter page, collaborators page | S | 3b | TODO |
+| 3bv | Checkpoint — co-authored story with one deactivated author: listings, story page, chapter page, collaborators page | S | 3b | DONE |
 | 4 | Fanart domain skeleton: provider, deptrac, migrations, models, enums, media usage provider, docs | M | 1 | TODO |
 | 5 | Settings registration + `ModeService` (most-restrictive mode) | S | 3, 4 | TODO |
 | 6 | `FanartPolicy` + fanartiste membership reads | M | 3, 5 | TODO |
@@ -1422,3 +1422,9 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 - OK: `/stories`, home/dashboard, story page and chapter page as guest, reader (admin) and active author (`author@e2e.test`) render 200, byline shows only « E2E Author », chapter listed. Shots in `shots/checkpoint-3bv/`.
 - **FAIL: collaborators page (`/stories/histoire-coecrite-2/collaborators`, active author) returns 500**: `Missing required parameter for [Route: profile.show] [Missing parameter: profile]` at `app/Domains/Story/Private/Resources/views/collaborators/index.blade.php:14`. `CollaboratorService::getCollaboratorsWithProfiles` falls back to `slug => ''` and display_name « Unknown » for the deactivated co-author, but the view always builds `route('profile.show', ['profile' => $collab['slug']])`. Fix: render the name as plain text (no link) when `slug` is empty; display « Unknown » should also be a translated, non-link label. Add a feature test (collaborators index with a deactivated co-author).
 - Not checked after the failure: profile « Histoires » tab, second-author deactivation 404.
+
+**Result (2026-10-17, HEAD f0677397, rerun) — PASS**
+- Collaborators page (`author@e2e.test`): 200. Deactivated co-author shown as plain, non-link text « Unknown » with role « Auteurice », no remove button; other rows unchanged. Finding (non-blocking): « Unknown » is an English, untranslated label in a French UI — should become a translated key (e.g. « Compte désactivé »). Shot `shots/checkpoint-3bv/rerun-author-collab.png`.
+- Active author profile « Histoires » tab (`/profile/e2e-author/stories`): 200, lists « Histoire coécrite E2E ». Shot `rerun-author-profile-stories.png`.
+- Deactivated co-author's profile `/profile/e2e-confirmed/stories` returns 500 for a guest (not 404). Profile domain is untouched on this branch, so pre-existing; not caused by phase 3b.
+- Both authors deactivated: story page 404 for guest and reader (admin); absent from `/stories` and home. Shots `rerun-both-guest-story.png`, `rerun-both-reader-story.png`. Reactivating one author: story page 200 again.
