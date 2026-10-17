@@ -31,11 +31,18 @@ do **not** gain read access to private stories.
 
 **Story** — direct calls only, no new extension point.
 - `StoryPublicApi` gains (exact names are BUILD's):
-  - `canRead(?int $userId, int $storyId): bool` — the `StoryPolicy::view`
-    rule (staff bypass, public / community-confirmed / private-collaborator),
-    including "story soft-deleted ⇒ false". Fanart uses it for every
-    visibility check, so author deactivation (Story soft-deletes the story)
-    hides the story's fanarts with no listener in Fanart.
+  - `filterReadableStoryIds(?int $userId, int[] $storyIds): int[]` — the
+    `StoryPolicy::view` rule (staff bypass, public / community-confirmed /
+    private-collaborator), including "story soft-deleted ⇒ excluded", for any
+    number of stories in **one query**. This is the primary method: every
+    multi-story listing (profile tab, Discord feed) calls it once, never a
+    per-story check in a loop. `null` user = guest, so the Discord feed gets
+    exactly the public stories from it.
+  - `canRead(?int $userId, int $storyId): bool` — one-line wrapper over the
+    batch method, for single-story contexts only (Fanarts tab, viewer, file
+    routes, create page, review/delete actions).
+  - Both make author deactivation (Story soft-deletes the story) hide the
+    story's fanarts with no listener in Fanart.
   - `getReadChapterIds(int $userId, int $storyId): int[]` and
     `getReadChapterIdsByStoryIds(int $userId, int[] $storyIds): array<int,int[]>`
     — exposes `ReadingProgressService`, one query each, for spoiler collapsing
@@ -252,7 +259,7 @@ query scopes so nothing invisible is ever loaded.
 | manage fanartistes / requests | author of the story |
 | request role | confirmed, not author, not fanartiste, effective mode `designated` for ≥ 1 kind, no pending request, cooldown elapsed |
 | stream file / variant | same as "view" for that fanart |
-| profile tab | owner, staff, or (viewer confirmed and owner's `hide-fanart-tab` is false); content further filtered per story with `canRead` |
+| profile tab | owner, staff, or (viewer confirmed and owner's `hide-fanart-tab` is false); content filtered with one `filterReadableStoryIds` call over the owner's story ids |
 
 Guests and non-confirmed users get 403/404 on every route and no component
 renders.
@@ -297,7 +304,8 @@ File responses carry `Cache-Control: private` (SecretGift precedent).
 
 Bot API (`api/discord/fanarts`, middleware `api, discord.api`, throttled as
 the notifications feed): `GET /pending?perPage=&page=` → published images with
-`share_on_discord` on **public** stories, `discord_sent_at` null, oldest
+`share_on_discord` on **public** stories (one `filterReadableStoryIds(null, …)`
+call), `discord_sent_at` null, oldest
 first, each `{id, title, artistName, storyTitle, storyUrl, chapterTitle?,
 imageUrl}`; `POST /mark-sent {ids[]}`. `imageUrl` is a **signed, expiring**
 URL to the 800w variant (the bot has no user session). Deleted fanarts simply
@@ -455,6 +463,11 @@ app/Domains/Fanart/
 - **Settings ordering**: Fanart's provider must boot after Story's (tab
   `stories` must exist). Enforced by provider order + `booted`; a failing
   boot is loud (registry throws).
+- **Per-file access check**: every thumbnail, image and audio is its own
+  gated request, re-checking access (~2 small queries). A 20-thumbnail group
+  = 20 requests. Not an N+1 inside one request, and mitigated by
+  `Cache-Control: private, max-age=3600`. Accepted; if it hurts, move images
+  to the public disk (user's stated fallback) rather than add caching.
 - **Most-restrictive mode** costs one settings read per author per check —
   trivial for 1–3 authors; revisit if stories get many co-authors.
 - **Signed image URLs for the bot** expire; if the bot posts late the link
