@@ -2,6 +2,7 @@
 
 namespace App\Domains\Fanart\Public\Providers;
 
+use App\Domains\Fanart\Private\Policies\FanartPolicy;
 use App\Domains\Fanart\Private\Support\FanartMediaUsageProvider;
 use App\Domains\Fanart\Private\Support\FanartMode;
 use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
@@ -21,6 +22,11 @@ class FanartServiceProvider extends ServiceProvider
     public const KEY_IMAGES_MODE = 'fanart-images-mode';
     public const KEY_AUDIO_MODE = 'fanart-audio-mode';
     public const KEY_HIDE_FANART_TAB = 'hide-fanart-tab';
+
+    public function register(): void
+    {
+        $this->app->singleton(FanartPolicy::class);
+    }
 
     public function boot(): void
     {

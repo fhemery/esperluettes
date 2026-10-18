@@ -28,7 +28,7 @@ green gate and enforces its own security rules.
 | 3bv | Checkpoint — co-authored story with one deactivated author: listings, story page, chapter page, collaborators page | S | 3b | DONE |
 | 4 | Fanart domain skeleton: provider, deptrac, migrations, models, enums, media usage provider, docs | M | 1 | DONE |
 | 5 | Settings registration + `ModeService` (most-restrictive mode) | S | 3, 4 | DONE |
-| 6 | `FanartPolicy` + fanartiste membership reads | M | 3, 5 | TODO |
+| 6 | `FanartPolicy` + fanartiste membership reads | M | 3, 5 | DONE |
 | 7 | Notifications: group, ten content types, `FanartNotifier` | M | 4 | TODO |
 | 8 | Gated file / thumbnail streaming routes | S | 1, 6 | TODO |
 | 9 | Submit a fanart (non-author): create page + POST | M | 6, 7 | TODO |
