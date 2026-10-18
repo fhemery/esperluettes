@@ -30,7 +30,7 @@ green gate and enforces its own security rules.
 | 5 | Settings registration + `ModeService` (most-restrictive mode) | S | 3, 4 | DONE |
 | 6 | `FanartPolicy` + fanartiste membership reads | M | 3, 5 | DONE |
 | 7 | Notifications: group, ten content types, `FanartNotifier` | M | 4 | DONE |
-| 8 | Gated file / thumbnail streaming routes | S | 1, 6 | TODO |
+| 8 | Gated file / thumbnail streaming routes | S | 1, 6 | DONE |
 | 9 | Submit a fanart (non-author): create page + POST | M | 6, 7 | TODO |
 | 10 | Review: accept / decline + audio replacement | M | 9 | TODO |
 | 11 | Artwork (author): upload with credit spend, edit | M | 10 | TODO |
