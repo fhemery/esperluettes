@@ -77,7 +77,7 @@ and `AGENTS.md` — read those before changing anything.
 
 - **Non-goals (spec §8):** statistics, submission cap, artists editing published fanarts, follower notifications, global search, GIF / non-mp3, audio on Discord, cross-page persistent player, comments/likes, teaser for non-confirmed users.
 - **Cut mid-build:** nothing.
-- **E2E:** `e2e/tests/features/fanart-artwork-module.spec.ts` and `e2e/pages/FanartStoryPage.ts` deleted at WRAP (feature-local; PHP tests cover rules). `E2eFanartSeeder` and the `FANART` fixture kept as e2e data.
+- **E2E:** `e2e/tests/features/fanart-artwork-module.spec.ts` (5 browser-only cases) with page object `e2e/pages/FanartStoryPage.ts`, data from `E2eFanartSeeder` and the `FANART` fixture — kept in the suite at the user's request.
 - **Pushed to the backlog:**
   - [`fanart-fragment-redirects`](../fanart-fragment-redirects/00-request.md) — a user who has not accepted the CGU gets the CGU page injected into the tab / viewer modal.
   - [`shared-dark-heading-contrast`](../shared-dark-heading-contrast/00-request.md) — magenta `<x-shared::title>` headings dim in dark mode (site-wide).
