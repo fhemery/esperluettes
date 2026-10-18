@@ -7,7 +7,7 @@
 
         @if ($isArtwork)
             <div class="text-sm flex items-center gap-2" role="note">
-                <span class="material-symbols-outlined">warning</span>
+                <span class="material-symbols-outlined" aria-hidden="true">warning</span>
                 {{ trans_choice('fanart::ui.create.credit_warning', $credits, ['count' => $credits]) }}
             </div>
             <x-shared::input-error :messages="$errors->get('credit')" />
@@ -118,7 +118,7 @@
 
             @unless ($isArtwork)
                 <div class="text-sm flex items-center gap-2">
-                    <span class="material-symbols-outlined">info</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">info</span>
                     {{ __('fanart::ui.create.pending_notice') }}
                 </div>
             @endunless

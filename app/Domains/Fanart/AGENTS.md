@@ -4,7 +4,7 @@
 
 ## Public API
 
-None yet.
+No `FanartPublicApi`. Other domains consume the Blade components listed in the README (`<x-fanart::…>`), `FanartTabVisibility`, `FanartSnapshotFormatter` and the `Fanart.DeletedByModeration` event. Story views include only the component tags; they hold no Fanart logic.
 
 ## Events emitted
 
@@ -46,6 +46,8 @@ None yet.
 - **Chapter page**: `<x-fanart::chapter-audio>` (under the title, native player + report button) and `<x-fanart::chapter-images>` (view-only thumbnails + viewer modal, before the prev/next bar) sit in Story's `chapters/show.blade.php` **outside** `<article data-quote-article>`; both render nothing unless the viewer passes `seeFeature` and a published item exists.
 
 - **Profile tab `fanarts`** (order 55, registered in `boot()`, `FanartTabVisibility` → `FanartPolicy::seeProfileTab`, privacy `hide-fanart-tab`): `<x-fanart::profile-tab>` lists the owner's fanarts per kind (Images / Sons) by story; each story lazy-loads `GET /fanarts/profile/{userId}/groups/{storyId}?kind=image|audio` (403 unreadable story or hidden tab). Everything goes through `FanartService::profileStories / profileStoryGroups`: one `filterReadableStoryIds` call, pending items for the owner and staff only, delete form for the owner only.
+
+- **Accessibility contract (keep when editing views).** Story tabs use `tablist`/`tab`/`tabpanel` with roving `tabindex` and arrow/Home/End navigation; collapsibles set `aria-expanded`; thumbnails are `<button>`s with `alt` (images) or the title (sounds); every `<audio>` has an `aria-label`; decorative Material icons are `aria-hidden`. The viewer modal (`fanart-viewer.js`) focuses its close button, traps Tab, closes on Escape and restores focus to the opener. User-visible strings all live in `lang/fr/ui.php`; `FanartViewsI18nTest` fails on a missing key.
 
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
 - **The usage provider must read `withTrashed()`.** Soft-deleted rows (deactivated users) still own their files; dropping that makes GC delete files a reactivation would need.

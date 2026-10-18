@@ -11,7 +11,7 @@
         <button type="button" x-ref="closeButton" x-on:click="close()"
                 class="absolute top-2 right-2 z-10 p-1 rounded hover:text-accent"
                 aria-label="{{ __('fanart::ui.story_page.viewer_close') }}">
-            <span class="material-symbols-outlined">close</span>
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
         <div x-html="html"><p class="p-4">{{ __('fanart::ui.tab.loading') }}</p></div>
     </div>

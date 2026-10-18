@@ -19,8 +19,9 @@
                     <form action="{{ route('fanart.fanartists.destroy', ['slug' => $slug, 'userId' => $fanartist['user_id']]) }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="text-error hover:text-error/80" title="{{ __('fanart::ui.fanartists.revoke') }}">
-                            <span class="material-symbols-outlined">person_remove</span>
+                        <button type="submit" class="text-error hover:text-error/80" title="{{ __('fanart::ui.fanartists.revoke') }}"
+                                aria-label="{{ __('fanart::ui.fanartists.revoke') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">person_remove</span>
                         </button>
                     </form>
                 </div>

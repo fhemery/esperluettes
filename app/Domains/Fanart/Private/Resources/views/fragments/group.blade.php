@@ -12,7 +12,8 @@
             @if (isset($artists[$audio->user_id]))
                 <span class="text-sm">{{ __('fanart::ui.viewer.artist') }} {{ $artists[$audio->user_id] }}</span>
             @endif
-            <audio controls preload="none" src="{{ route('fanart.file', $audio->id) }}" class="w-full max-w-md"></audio>
+            <audio controls preload="none" src="{{ route('fanart.file', $audio->id) }}" class="w-full max-w-md"
+                   aria-label="{{ $audio->title }}"></audio>
         </div>
     @endforeach
 

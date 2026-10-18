@@ -2,10 +2,11 @@
     $isAudio = $fanart->kind === \App\Domains\Fanart\Private\Support\FanartKind::Audio;
     $artist = $details['artist'];
 @endphp
-<div class="flex flex-col md:flex-row gap-4 p-4" data-fanart-viewer="{{ $fanart->id }}">
+<div class="flex flex-col md:flex-row gap-4 p-4 pt-12 md:pt-4" data-fanart-viewer="{{ $fanart->id }}">
     <div class="md:w-3/5 flex items-center justify-center">
         @if ($isAudio)
-            <audio controls src="{{ route('fanart.file', $fanart->id) }}" class="w-full"></audio>
+            <audio controls src="{{ route('fanart.file', $fanart->id) }}" class="w-full"
+                   aria-label="{{ $fanart->title }}"></audio>
         @else
             <img src="{{ route('fanart.file', $fanart->id) }}" alt="{{ $fanart->title }}"
                  class="max-w-full max-h-[80vh] object-contain">

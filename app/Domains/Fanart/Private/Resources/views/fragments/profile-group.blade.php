@@ -22,7 +22,8 @@
                                     x-on:click="$dispatch('fanart-open', { url: '{{ route('fanart.show', $fanart->id) }}' })">
                                 {{ $fanart->title }}
                             </button>
-                            <audio controls preload="none" src="{{ route('fanart.file', $fanart->id) }}" class="w-full max-w-md"></audio>
+                            <audio controls preload="none" src="{{ route('fanart.file', $fanart->id) }}" class="w-full max-w-md"
+                                   aria-label="{{ $fanart->title }}"></audio>
                         @else
                             <x-fanart::thumbnail :fanart="$fanart" />
                         @endif

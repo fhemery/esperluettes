@@ -6,7 +6,7 @@
             x-on:click="$store.fanartPlayer.play({{ $chapterId }})"
             title="{{ __('fanart::ui.player.listen') }}"
             aria-label="{{ __('fanart::ui.player.listen') }}">
-        <span class="material-symbols-outlined text-[20px] leading-none"
+        <span class="material-symbols-outlined text-[20px] leading-none" aria-hidden="true"
               x-text="$store.fanartPlayer.currentId === {{ $chapterId }} ? 'volume_up' : 'play_circle'">play_circle</span>
     </button>
 @endif

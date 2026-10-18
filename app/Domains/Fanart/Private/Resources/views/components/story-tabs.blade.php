@@ -27,16 +27,22 @@
                  if (id > 0) $nextTick(() => $dispatch('fanart-open', { url: @js(url('/fanarts')) + '/' + id }));
              }
          ">
-        <div class="flex gap-2 mb-4 border-b border-border" role="tablist" aria-label="{{ __('fanart::ui.story_page.tabs_label') }}">
-            <button type="button" role="tab" id="fanart-tab-chapters"
+        <div class="flex gap-2 mb-4 border-b border-border" role="tablist" aria-label="{{ __('fanart::ui.story_page.tabs_label') }}"
+             x-on:keydown.arrow-right.prevent="select(tab === 'chapters' ? 'fanarts' : 'chapters'); $nextTick(() => $refs[tab].focus())"
+             x-on:keydown.arrow-left.prevent="select(tab === 'chapters' ? 'fanarts' : 'chapters'); $nextTick(() => $refs[tab].focus())"
+             x-on:keydown.home.prevent="select('chapters'); $nextTick(() => $refs.chapters.focus())"
+             x-on:keydown.end.prevent="select('fanarts'); $nextTick(() => $refs.fanarts.focus())">
+            <button type="button" role="tab" id="fanart-tab-chapters" x-ref="chapters"
                     class="px-4 py-2 font-medium border-b-2"
                     :class="tab === 'chapters' ? 'border-accent text-accent' : 'border-transparent hover:text-accent'"
-                    :aria-selected="tab === 'chapters'" aria-controls="fanart-panel-chapters"
+                    :aria-selected="(tab === 'chapters').toString()" :tabindex="tab === 'chapters' ? 0 : -1"
+                    aria-controls="fanart-panel-chapters"
                     x-on:click="select('chapters')">{{ __('fanart::ui.story_page.tab_chapters') }}</button>
-            <button type="button" role="tab" id="fanart-tab-fanarts"
+            <button type="button" role="tab" id="fanart-tab-fanarts" x-ref="fanarts"
                     class="px-4 py-2 font-medium border-b-2"
                     :class="tab === 'fanarts' ? 'border-accent text-accent' : 'border-transparent hover:text-accent'"
-                    :aria-selected="tab === 'fanarts'" aria-controls="fanart-panel-fanarts"
+                    :aria-selected="(tab === 'fanarts').toString()" :tabindex="tab === 'fanarts' ? 0 : -1"
+                    aria-controls="fanart-panel-fanarts"
                     x-on:click="select('fanarts')">{{ __('fanart::ui.story_page.tab_fanarts') }}</button>
         </div>
 
