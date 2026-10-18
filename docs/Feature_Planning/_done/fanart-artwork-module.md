@@ -1,8 +1,6 @@
 # New fanart / artwork module
 
-**Status:** DONE — 2026-10-18 · **Domain(s):** `Fanart` (new), `Story`, `Media`, `Moderation` · **Spec:**
-[functional](./01-functional.md) · [architecture](./02-architecture.md) ·
-[plan](./03-plan.md) · [decisions](./DECISIONS.md)
+**Status:** DONE — 2026-10-18 · **Domain(s):** `Fanart` (new), `Story`, `Media`, `Moderation`
 
 ## What it does
 
