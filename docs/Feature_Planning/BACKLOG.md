@@ -35,8 +35,11 @@ scoped to the task that actually changed.
 - **Secret Gift — reveal follow-ups (ARCHIVED access, ENDED tab, missing tests)** · `secret-gift-reveal-followups/` · interactive · TODO: leftover from `media-sound-upload/` VERIFY — 3 feature tests pushed back to BUILD and never written; activity page 404s once ARCHIVED while gift routes still serve; page opens on the prepare tab once ENDED
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
-- **New fanart / artwork module** · `fanart-artwork-module/` · interactive · WIP:VERIFY
+- **New fanart / artwork module** · `fanart-artwork-module/` · interactive · WIP:WRAP
 - **Fix 500 on 404 page when a model-bound route misses** · `fix-404-page-theme-500/` · auto · TODO
+- **Fanart — lazy fragments inject a full page on redirect** · `fanart-fragment-redirects/` · auto · TODO
+- **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
+- **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 
 ## Done
 

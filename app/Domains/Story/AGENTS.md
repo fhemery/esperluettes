@@ -92,6 +92,8 @@
 
 **The rendered chapter body must stay a single `[data-quote-article]` root.** In `chapters/show.blade.php`, the Quote domain's `<x-quote::author-heat>` component wraps `<article data-quote-article>{!! $vm->chapter->content !!}</article>`, and both that component and the reader-side quoting toolbar re-anchor saved passages by walking that single DOM subtree. If you split the chapter body across multiple containers, add another rich-text region inside it, or otherwise stop rendering it as one `[data-quote-article]` root, reader quotes and the author heat map silently lose their anchoring. This is not enforced by any test that fails loudly — check it by hand when touching this view.
 
+**`/stories/{slug}` matches everything below it.** The show routes use `->where('slug', '.*')`, so a route another domain declares under `/stories/{slug}/…` is swallowed by `stories.show` unless it is registered first. Fanart loads its web routes in its provider's `register()` (every `register()` runs before any `boot()`) for this reason; a new domain adding `/stories/{slug}/…` routes must do the same.
+
 ## Registry integrations
 
 - **CommentPolicyRegistry** (`Comment` domain) — registers `'chapter'` policy with `ChapterCommentPolicy`.

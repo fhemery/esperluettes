@@ -20,7 +20,7 @@ Confirmed readers (« fanartistes ») submit images (jpg/png/webp, 2 Mo) and sou
 | Story page | `<x-fanart::story-tabs>` (Chapitres / Fanarts, lazy-loaded), `<x-fanart::story-actions>` (« Proposer un fanart » / « Ajouter un artwork »), `<x-fanart::request-role-button>`, `<x-fanart::story-player>` + `<x-fanart::chapter-audio-icon>` |
 | Chapter page | `<x-fanart::chapter-audio>`, `<x-fanart::chapter-images>` |
 | Collaborators page | `<x-fanart::collaborators-section>` |
-| Profile | tab `fanarts` (`<x-fanart::profile-tab>`), hideable through the `hide-fanart-tab` privacy setting |
+| Profile | tab `fanarts` (`<x-fanart::profile-tab>`), hidden by default through the `hide-fanart-tab` privacy setting (Paramètres › Profil, « Masquer mes fanarts », checked by default: owner and staff only) |
 | Shared pieces | `<x-fanart::thumbnail>`, `<x-fanart::viewer-modal>` (focus-trapped dialog, Escape closes) |
 
 ## Data model
@@ -48,3 +48,13 @@ Fanart never deletes a file; it only clears rows. `FanartMediaUsageProvider` cla
 | Preferences (modes, profile-tab privacy) | Settings registry |
 | Lifecycle (user deactivated / deleted, story / chapter deleted) | Listeners on Auth and Story events |
 | Discord feed | `discord.api` guarded endpoints |
+
+## Deliberately not built
+
+No statistics, no submission cap, no editing of a published fanart by its artist (delete and resubmit), no follower notification on publication, no global search, no GIF or non-mp3 audio, no audio on Discord, no player that survives page navigation, no comments or likes on fanarts, nothing shown to guests or non-confirmed users (no teaser).
+
+## Known gaps
+
+- The lazy fragments (tab, chapter groups, profile groups, viewer) are fetched with `fetch()` behind `compliant`: a user who has not accepted the CGU gets the CGU page injected into the tab or the viewer modal instead of being redirected.
+- Fanart report reasons are admin-created; production needs them before go-live (`ModerationSeeder` only seeds an « Other » reason for dev/e2e).
+- Sounds go up to 15 Mo: the production front-end and PHP upload limits must allow ≥ 16 MB. Not checkable from the repo.
