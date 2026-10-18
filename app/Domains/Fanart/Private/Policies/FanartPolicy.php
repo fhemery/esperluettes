@@ -10,6 +10,8 @@ use App\Domains\Fanart\Private\Services\ModeService;
 use App\Domains\Fanart\Private\Support\FanartKind;
 use App\Domains\Fanart\Private\Support\FanartMode;
 use App\Domains\Fanart\Private\Support\FanartStatus;
+use App\Domains\Fanart\Public\Providers\FanartServiceProvider;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 
 /**
@@ -25,7 +27,31 @@ class FanartPolicy
         private readonly AuthPublicApi $auth,
         private readonly ModeService $modes,
         private readonly FanartistService $fanartists,
+        private readonly SettingsPublicApi $settings,
     ) {
+    }
+
+    /**
+     * Profile tab « Fanarts »: staff, or a confirmed viewer who is the owner or whom the owner let in
+     * (`hide-fanart-tab` false). Guests and non-confirmed users never.
+     */
+    public function seeProfileTab(?int $viewerId, int $ownerId): bool
+    {
+        if ($viewerId === null) {
+            return false;
+        }
+
+        $slugs = $this->slugs($viewerId);
+        if (array_intersect($slugs, self::STAFF_ROLES) !== []) {
+            return true;
+        }
+
+        if (!in_array(Roles::USER_CONFIRMED, $slugs, true)) {
+            return false;
+        }
+
+        return $viewerId === $ownerId
+            || $this->settings->getValue($ownerId, FanartServiceProvider::TAB_PROFILE, FanartServiceProvider::KEY_HIDE_FANART_TAB) === false;
     }
 
     public function seeFeature(?int $userId, int $storyId): bool
@@ -156,7 +182,7 @@ class FanartPolicy
         return array_map(fn ($r) => $r->slug, $this->auth->getRolesByUserIds([$userId])[$userId] ?? []);
     }
 
-    private function isStaff(int $userId): bool
+    public function isStaff(int $userId): bool
     {
         return array_intersect($this->slugs($userId), self::STAFF_ROLES) !== [];
     }

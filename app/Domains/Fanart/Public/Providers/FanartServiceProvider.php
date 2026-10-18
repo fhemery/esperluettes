@@ -13,6 +13,10 @@ use App\Domains\Fanart\Private\Listeners\RestoreFanartsOnUserReactivated;
 use App\Domains\Fanart\Private\Listeners\SoftDeleteFanartsOnUserDeactivated;
 use App\Domains\Fanart\Private\Listeners\RemovePendingFanartOnAuthorReport;
 use App\Domains\Fanart\Public\Moderation\FanartSnapshotFormatter;
+use App\Domains\Fanart\Public\Visibility\FanartTabVisibility;
+use App\Domains\Profile\Public\Api\ProfileTabRegistry;
+use App\Domains\Profile\Public\Contracts\ProfileTabDefinition;
+use App\Domains\Profile\Public\Contracts\ProfileTabPrivacy;
 use App\Domains\Moderation\Public\Events\ReportSubmitted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Story\Public\Events\ChapterDeleted;
@@ -74,6 +78,19 @@ class FanartServiceProvider extends ServiceProvider
         app(MediaUsageRegistry::class)->register(new FanartMediaUsageProvider());
 
         $this->registerNotifications();
+
+        app(ProfileTabRegistry::class)->register(new ProfileTabDefinition(
+            key: 'fanarts',
+            order: 55,
+            component: 'fanart::profile-tab',
+            labelKey: 'fanart::ui.profile.tab',
+            ownLabelKey: 'fanart::ui.profile.my_tab',
+            visibility: FanartTabVisibility::class,
+            privacy: new ProfileTabPrivacy(
+                settingsTabId: self::TAB_PROFILE,
+                settingsKey: self::KEY_HIDE_FANART_TAB,
+            ),
+        ));
 
         $eventBus = app(EventBus::class);
         $eventBus->registerEvent(FanartDeletedByModeration::name(), FanartDeletedByModeration::class);

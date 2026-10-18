@@ -360,6 +360,126 @@ class FanartService
     }
 
     /**
+     * Profile tab: the owner's fanarts the viewer may see, one entry per story (alphabetical) in
+     * each kind's section. The viewer's readable stories come from a single `filterReadableStoryIds` call.
+     *
+     * @return array<string, array<int, array{storyId: int, title: string, slug: string, count: int}>>
+     *     keyed by FanartKind value
+     */
+    public function profileStories(int $ownerId, int $viewerId): array
+    {
+        $fanarts = $this->profileFanarts($ownerId, $viewerId);
+        $stories = $fanarts->isEmpty() ? [] : $this->stories->getStoriesByIds($fanarts->pluck('story_id')->unique()->all());
+
+        $sections = [];
+        foreach (FanartKind::cases() as $kind) {
+            $entries = [];
+            foreach ($fanarts->where('kind', $kind)->countBy('story_id') as $storyId => $count) {
+                if (isset($stories[$storyId])) {
+                    $entries[] = [
+                        'storyId' => (int) $storyId,
+                        'title' => $stories[$storyId]->title,
+                        'slug' => $stories[$storyId]->slug,
+                        'count' => $count,
+                    ];
+                }
+            }
+            usort($entries, fn ($a, $b) => strcasecmp($a['title'], $b['title']));
+            $sections[$kind->value] = $entries;
+        }
+
+        return $sections;
+    }
+
+    /**
+     * Profile tab, one story and kind: « Toute l'œuvre » then chapters in story order, each with its
+     * fanarts. Null when the viewer may not read the story. A
+     * chapter the viewer has not read is collapsed (never for authors of the story).
+     *
+     * @return array{groups: array<int, array{key: string, title: ?string, collapsed: bool, fanarts: Collection<int, Fanart>}>}|null
+     */
+    public function profileStoryGroups(int $ownerId, int $viewerId, int $storyId, FanartKind $kind): ?array
+    {
+        $readable = $this->stories->filterReadableStoryIds($viewerId, [$storyId]);
+        if ($readable === []) {
+            return null;
+        }
+
+        $fanarts = $this->profileFanarts($ownerId, $viewerId, [$storyId], $readable)->where('kind', $kind);
+        $byChapter = $fanarts->groupBy('chapter_id');
+        $isAuthor = in_array($viewerId, $this->stories->getAuthorIdsByStoryIds([$storyId])[$storyId] ?? [], true);
+        $read = $isAuthor ? [] : ($this->stories->getReadChapterIdsByStoryIds($viewerId, [$storyId])[$storyId] ?? []);
+
+        $groups = [];
+        if ($byChapter->has('')) {
+            $groups[] = ['key' => 'work', 'title' => null, 'collapsed' => false, 'fanarts' => $byChapter->get('')];
+        }
+        foreach ($this->stories->getChaptersForStory($storyId) as $chapter) {
+            if ($byChapter->has($chapter->id)) {
+                $groups[] = [
+                    'key' => (string) $chapter->id,
+                    'title' => $chapter->title,
+                    'collapsed' => !$isAuthor && !in_array($chapter->id, $read, true),
+                    'fanarts' => $byChapter->get($chapter->id),
+                ];
+            }
+        }
+
+        return ['groups' => $groups];
+    }
+
+    /**
+     * The owner's fanarts of a kind that the viewer may see: only on stories the viewer can read
+     * (one readability call); pending ones for the owner and staff; published ones in published
+     * chapters, unless the viewer is staff or an author of the story.
+     *
+     * @param int[]|null $onlyStoryIds Restrict to these stories (their readability is then already known:
+     *     pass the readable subset as $readable).
+     * @param int[]|null $readable
+     * @return Collection<int, Fanart>
+     */
+    private function profileFanarts(int $ownerId, int $viewerId, ?array $onlyStoryIds = null, ?array $readable = null): Collection
+    {
+        $fanarts = Fanart::query()
+            ->where('user_id', $ownerId)
+            ->when($onlyStoryIds !== null, fn ($q) => $q->whereIn('story_id', $onlyStoryIds))
+            ->orderBy('id')
+            ->get();
+        if ($fanarts->isEmpty()) {
+            return $fanarts;
+        }
+
+        $readable ??= $this->stories->filterReadableStoryIds($viewerId, $fanarts->pluck('story_id')->unique()->values()->all());
+        $fanarts = $fanarts->whereIn('story_id', $readable);
+        if ($fanarts->isEmpty()) {
+            return $fanarts->values();
+        }
+
+        $isStaff = $this->policy->isStaff($viewerId);
+        $seesPending = $isStaff || $viewerId === $ownerId;
+        $authors = $isStaff ? [] : $this->stories->getAuthorIdsByStoryIds($readable);
+        $published = [];
+        foreach ($this->stories->getChaptersForStories($readable) as $chapters) {
+            foreach ($chapters as $chapter) {
+                if ($chapter->status === 'published') {
+                    $published[$chapter->id] = true;
+                }
+            }
+        }
+
+        return $fanarts->filter(function (Fanart $fanart) use ($seesPending, $isStaff, $authors, $published, $viewerId) {
+            if ($fanart->status === FanartStatus::Pending) {
+                return $seesPending;
+            }
+
+            return $isStaff
+                || in_array($viewerId, $authors[$fanart->story_id] ?? [], true)
+                || $fanart->chapter_id === null
+                || isset($published[$fanart->chapter_id]);
+        })->values();
+    }
+
+    /**
      * Everything the viewer fragment shows around the file itself.
      *
      * @return array{artist: ?ProfileDto, chapterTitle: ?string, description: ?string}

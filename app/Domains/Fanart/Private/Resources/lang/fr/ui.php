@@ -52,6 +52,16 @@ return [
         'mode_audio_no' => 'Sons : fermés.',
         'mode_coauthors' => 'Cette histoire a plusieurs auteur·ices : c\'est le réglage le plus restrictif choisi par l\'un d\'eux qui s\'applique.',
     ],
+    'profile' => [
+        'tab' => 'Fanarts',
+        'my_tab' => 'Mes fanarts',
+        'section_images' => 'Images',
+        'section_sounds' => 'Sons',
+        'empty' => 'Aucun fanart à afficher.',
+        'show_story' => 'Voir (:count)',
+        'pending_badge' => 'En attente de validation',
+        'delete_confirm' => 'Supprimer ce fanart ? Cette action est définitive.',
+    ],
     'story_page' => [
         'tab_chapters' => 'Chapitres',
         'tab_fanarts' => 'Fanarts',

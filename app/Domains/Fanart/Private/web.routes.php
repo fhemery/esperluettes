@@ -5,6 +5,7 @@ use App\Domains\Fanart\Private\Controllers\FanartController;
 use App\Domains\Fanart\Private\Controllers\FanartFileController;
 use App\Domains\Fanart\Private\Controllers\FanartFragmentController;
 use App\Domains\Fanart\Private\Controllers\FanartistController;
+use App\Domains\Fanart\Private\Controllers\FanartProfileFragmentController;
 use App\Domains\Fanart\Private\Controllers\FanartModerationController;
 use App\Domains\Fanart\Private\Controllers\FanartReviewController;
 use App\Domains\Fanart\Private\Controllers\RoleRequestController;
@@ -21,6 +22,9 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
         ->where('slug', '[^/]+')->name('fanart.tab');
     Route::get('/stories/{slug}/fanarts/groups/{group}', [FanartFragmentController::class, 'group'])
         ->where('slug', '[^/]+')->where('group', 'work|\d+')->name('fanart.group');
+    // Profile tab « Fanarts »: 403 through FanartPolicy::seeProfileTab; `?kind=image|audio`.
+    Route::get('/fanarts/profile/{userId}/groups/{storyId}', [FanartProfileFragmentController::class, 'group'])
+        ->whereNumber('userId')->whereNumber('storyId')->name('fanart.profile.group');
     Route::get('/fanarts/{fanart}', [FanartFragmentController::class, 'show'])
         ->whereNumber('fanart')->name('fanart.show');
     Route::get('/stories/{slug}/fanarts/create', [FanartController::class, 'create'])

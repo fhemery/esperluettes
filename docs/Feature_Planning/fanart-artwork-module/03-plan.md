@@ -45,7 +45,7 @@ green gate and enforces its own security rules.
 | 19 | Story-page audio: speaker icons + `fanartPlayer` store with auto-advance | M | 18 | DONE |
 | 20 | Chapter page widgets: audio under title, image block at bottom | S | 17 | DONE |
 | 20v | Checkpoint — chapter page (quotes, annotations, comments) and story chapter list | S | 19, 20 | DONE |
-| 21 | Profile tab « Fanarts » (Images / Sons, pending badge, privacy) | M | 17 | TODO |
+| 21 | Profile tab « Fanarts » (Images / Sons, pending badge, privacy) | M | 17 | DONE |
 | 22 | Discord feed: bot endpoints + signed image URL | S | 10, 11 | TODO |
 | 23 | Polish: i18n pass, a11y, mobile viewer, docs finalisation | S | all | TODO |
 

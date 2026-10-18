@@ -45,6 +45,8 @@ None yet.
 
 - **Chapter page**: `<x-fanart::chapter-audio>` (under the title, native player + report button) and `<x-fanart::chapter-images>` (view-only thumbnails + viewer modal, before the prev/next bar) sit in Story's `chapters/show.blade.php` **outside** `<article data-quote-article>`; both render nothing unless the viewer passes `seeFeature` and a published item exists.
 
+- **Profile tab `fanarts`** (order 55, registered in `boot()`, `FanartTabVisibility` → `FanartPolicy::seeProfileTab`, privacy `hide-fanart-tab`): `<x-fanart::profile-tab>` lists the owner's fanarts per kind (Images / Sons) by story; each story lazy-loads `GET /fanarts/profile/{userId}/groups/{storyId}?kind=image|audio` (403 unreadable story or hidden tab). Everything goes through `FanartService::profileStories / profileStoryGroups`: one `filterReadableStoryIds` call, pending items for the owner and staff only, delete form for the owner only.
+
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
 - **The usage provider must read `withTrashed()`.** Soft-deleted rows (deactivated users) still own their files; dropping that makes GC delete files a reactivation would need.
 - **No FK to `users`, `stories` or `chapters`** — cross-domain by rule. Resolve references through `StoryPublicApi`.
