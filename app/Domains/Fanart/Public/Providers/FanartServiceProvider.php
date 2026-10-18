@@ -11,6 +11,10 @@ use App\Domains\Fanart\Private\Listeners\DeleteFanartsOnChapterDeleted;
 use App\Domains\Fanart\Private\Listeners\DeleteFanartsOnStoryDeleted;
 use App\Domains\Fanart\Private\Listeners\RestoreFanartsOnUserReactivated;
 use App\Domains\Fanart\Private\Listeners\SoftDeleteFanartsOnUserDeactivated;
+use App\Domains\Fanart\Private\Listeners\RemovePendingFanartOnAuthorReport;
+use App\Domains\Fanart\Public\Moderation\FanartSnapshotFormatter;
+use App\Domains\Moderation\Public\Events\ReportSubmitted;
+use App\Domains\Moderation\Public\Services\ModerationRegistry;
 use App\Domains\Story\Public\Events\ChapterDeleted;
 use App\Domains\Story\Public\Events\StoryDeleted;
 use App\Domains\Fanart\Private\Policies\FanartPolicy;
@@ -78,6 +82,14 @@ class FanartServiceProvider extends ServiceProvider
         $eventBus->subscribe(UserReactivated::class, [app(RestoreFanartsOnUserReactivated::class), 'handle']);
         $eventBus->subscribe(StoryDeleted::class, [app(DeleteFanartsOnStoryDeleted::class), 'handle']);
         $eventBus->subscribe(ChapterDeleted::class, [app(DeleteFanartsOnChapterDeleted::class), 'handle']);
+
+        $eventBus->subscribe(ReportSubmitted::class, [app(RemovePendingFanartOnAuthorReport::class), 'handle']);
+
+        app(ModerationRegistry::class)->register(
+            key: 'fanart',
+            displayName: __('fanart::moderation.topic_fanart'),
+            formatterClass: FanartSnapshotFormatter::class,
+        );
 
         $this->app->booted(fn () => $this->registerSettings());
     }
