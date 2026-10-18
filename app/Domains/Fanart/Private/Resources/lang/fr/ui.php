@@ -21,7 +21,18 @@ return [
         'pending_notice' => 'Votre fanart sera visible après validation par les auteur·ices de l\'histoire.',
         'cancel' => 'Annuler',
         'submit' => 'Proposer',
-        'submitted' => 'Votre fanart a été envoyé. Il sera visible après validation par les auteur·ices.',
+        'artwork_heading' => 'Ajouter un artwork pour « :story »',
+        'artwork_submit' => 'Ajouter',
+        'artwork_published' => 'Votre artwork a été publié.',
+        'credit_warning' => '{0} Un nouvel artwork coûte un crédit de chapitre, et vous n\'en avez plus.|{1} Un nouvel artwork coûte un crédit de chapitre. Il vous en reste :count.|[2,*] Un nouvel artwork coûte un crédit de chapitre. Il vous en reste :count.',
+        'submitted' =>'Votre fanart a été envoyé. Il sera visible après validation par les auteur·ices.',
+    ],
+    'edit' => [
+        'heading' => 'Modifier l\'artwork « :title »',
+        'replace_image_help' => 'Laissez vide pour conserver l\'image actuelle. JPG, PNG ou WebP, 2 Mo maximum.',
+        'replace_sound_help' => 'Laissez vide pour conserver le son actuel. MP3, 15 Mo maximum.',
+        'submit' => 'Enregistrer',
+        'updated' => 'Votre artwork a été modifié.',
     ],
     'review' => [
         'accepted' => 'Le fanart a été accepté.',
@@ -29,6 +40,7 @@ return [
         'already_decided' => 'Ce fanart a déjà fait l\'objet d\'une décision.',
     ],
     'validation' => [
+        'no_credit' => 'Vous n\'avez plus de crédit de chapitre : un artwork en coûte un. Publiez un chapitre pour en gagner un nouveau.',
         'comment_required' => 'Le commentaire est obligatoire.',
         'comment_max' => 'Le commentaire ne doit pas dépasser 500 caractères.',
         'title_required' => 'Le titre est obligatoire.',

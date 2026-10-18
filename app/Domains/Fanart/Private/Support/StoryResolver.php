@@ -15,7 +15,11 @@ class StoryResolver
 
     public function resolve(string $slug): StorySummaryDto
     {
-        $id = SlugWithId::extractId($slug);
+        return $this->byId(SlugWithId::extractId($slug));
+    }
+
+    public function byId(?int $id): StorySummaryDto
+    {
         $story = $id !== null ? $this->stories->getStory($id) : null;
 
         if ($story === null) {

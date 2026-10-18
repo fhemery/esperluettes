@@ -35,7 +35,10 @@ class StoreFanartRequest extends FormRequest
             return true;
         }
 
-        return app(FanartPolicy::class)->submit($this->user()?->id, $storyId, $kind);
+        $policy = app(FanartPolicy::class);
+        $userId = $this->user()?->id;
+
+        return $policy->uploadArtwork($userId, $storyId) || $policy->submit($userId, $storyId, $kind);
     }
 
     public function rules(): array

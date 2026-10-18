@@ -9,7 +9,10 @@ use App\Domains\Fanart\Private\Support\FanartStatus;
 use App\Domains\Fanart\Private\Support\SubmitFanartData;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Story\Public\Api\StoryPublicApi;
+use App\Domains\Fanart\Private\Support\UpdateArtworkData;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /** The only writer of `fanarts`. */
 class FanartService
@@ -47,6 +50,72 @@ class FanartService
         $this->notifier->fanartSubmitted($fanart, $userId);
 
         return $fanart;
+    }
+
+    /**
+     * Publish an author's artwork at the cost of one chapter credit of the
+     * uploader. Spend and row creation are one transaction; no notification.
+     */
+    public function uploadArtwork(int $userId, int $storyId, SubmitFanartData $data): Fanart
+    {
+        return DB::transaction(function () use ($userId, $storyId, $data) {
+            if (!$this->stories->spendChapterCredit($userId)) {
+                throw ValidationException::withMessages(['credit' => __('fanart::ui.validation.no_credit')]);
+            }
+
+            $fanart = Fanart::create([
+                'story_id' => $storyId,
+                'chapter_id' => $data->chapterId,
+                'user_id' => $userId,
+                'kind' => $data->kind,
+                'status' => FanartStatus::Published,
+                'is_artwork' => true,
+                'title' => $data->title,
+                'description' => $this->cleanDescription($data->description),
+                'file_path' => $this->storeFile($storyId, $data->kind, $data->file),
+                'share_on_discord' => $data->kind === FanartKind::Image && $data->shareOnDiscord,
+                'published_at' => now(),
+            ]);
+
+            if ($fanart->kind === FanartKind::Audio && $fanart->chapter_id !== null) {
+                $this->replacePublishedAudio($fanart->chapter_id, $userId, $fanart->id);
+            }
+
+            return $fanart;
+        });
+    }
+
+    /** Free edit of an artwork. The previous file is left for `media:gc`. */
+    public function updateArtwork(Fanart $fanart, int $actorId, UpdateArtworkData $data): Fanart
+    {
+        return DB::transaction(function () use ($fanart, $actorId, $data) {
+            $attributes = [
+                'title' => $data->title,
+                'description' => $this->cleanDescription($data->description),
+                'chapter_id' => $data->chapterId,
+            ];
+
+            if ($data->file !== null) {
+                $attributes['file_path'] = $this->storeFile($fanart->story_id, $fanart->kind, $data->file);
+            }
+
+            $fanart->update($attributes);
+
+            if ($fanart->kind === FanartKind::Audio && $fanart->chapter_id !== null) {
+                $this->replacePublishedAudio($fanart->chapter_id, $actorId, $fanart->id);
+            }
+
+            return $fanart;
+        });
+    }
+
+    private function storeFile(int $storyId, FanartKind $kind, UploadedFile $file): string
+    {
+        $scope = 'fanart/' . $storyId;
+
+        return $kind === FanartKind::Image
+            ? $this->media->storePrivate($scope, $file, [400, 800])
+            : $this->media->storePrivateFile($scope, $file);
     }
 
     public function find(int $id): ?Fanart

@@ -71,6 +71,7 @@ class FanartPolicy
             && $this->modes->canSubmit($userId, $storyId, $kind);
     }
 
+    /** Author-only; the uploader edits their own artwork, see {@see editArtwork()}. */
     public function uploadArtwork(?int $userId, int $storyId): bool
     {
         return $userId !== null
@@ -81,7 +82,9 @@ class FanartPolicy
 
     public function editArtwork(?int $userId, Fanart $fanart): bool
     {
-        return $fanart->is_artwork && $this->uploadArtwork($userId, $fanart->story_id);
+        return $fanart->is_artwork
+            && $fanart->user_id === $userId
+            && $this->uploadArtwork($userId, $fanart->story_id);
     }
 
     public function review(?int $userId, Fanart $fanart): bool

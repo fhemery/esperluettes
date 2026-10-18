@@ -28,6 +28,8 @@ None yet.
 
 - **Review routes (`/fanarts/{fanartId}/accept|decline`) take a raw id, not a model binding**, so a fanart declined by a co-author answers « already decided » (redirect back with `error` flash) instead of 404. `FanartService::replacePublishedAudio` is the single place that enforces one published audio per chapter.
 
+- **One store route, two paths.** `POST /stories/{slug}/fanarts` calls `uploadArtwork` (published at once, one chapter credit, same transaction) for an author, `submit` (pending) for anyone else. `editArtwork` is the uploader only; an edit is free and leaves the old file to `media:gc`.
+
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
 - **The usage provider must read `withTrashed()`.** Soft-deleted rows (deactivated users) still own their files; dropping that makes GC delete files a reactivation would need.
 - **No FK to `users`, `stories` or `chapters`** — cross-domain by rule. Resolve references through `StoryPublicApi`.

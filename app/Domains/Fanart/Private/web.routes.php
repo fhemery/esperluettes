@@ -16,6 +16,10 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
         ->where('slug', '[^/]+')->name('fanart.create');
     Route::post('/stories/{slug}/fanarts', [FanartController::class, 'store'])
         ->where('slug', '[^/]+')->name('fanart.store');
+    Route::get('/fanarts/{fanart}/edit', [FanartController::class, 'edit'])
+        ->whereNumber('fanart')->name('fanart.edit');
+    Route::put('/fanarts/{fanart}', [FanartController::class, 'update'])
+        ->whereNumber('fanart')->name('fanart.update');
     // `fanartId` is not a model binding: a declined fanart is gone and must answer "already decided", not 404.
     Route::post('/fanarts/{fanartId}/accept', [FanartReviewController::class, 'accept'])
         ->whereNumber('fanartId')->name('fanart.accept');

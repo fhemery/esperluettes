@@ -260,12 +260,9 @@ it('returns 403 on a private story', function () {
     $this->post(route('fanart.store', $story->slug), imagePayload())->assertForbidden();
 });
 
-it('returns 403 to an author, 404 for an unknown story', function () {
-    $author = alice($this);
-    $story = publicStory('Histoire', $author->id);
-    $this->actingAs($author);
+it('returns 404 for an unknown story', function () {
+    $this->actingAs(alice($this));
 
-    $this->post(route('fanart.store', $story->slug), imagePayload())->assertForbidden();
     $this->get('/stories/inconnue-999999/fanarts/create')->assertNotFound();
     $this->get('/stories/sans-id/fanarts/create')->assertNotFound();
 });

@@ -1,7 +1,17 @@
 <x-app-layout size="md">
     <div class="w-full flex-1 flex flex-col gap-4 surface-read text-on-surface p-2 sm:p-4"
          data-allowed-kinds="{{ implode(',', $allowedKinds) }}">
-        <x-shared::title>{{ __('fanart::ui.create.heading', ['story' => $story->title]) }}</x-shared::title>
+        <x-shared::title>
+            {{ __($isArtwork ? 'fanart::ui.create.artwork_heading' : 'fanart::ui.create.heading', ['story' => $story->title]) }}
+        </x-shared::title>
+
+        @if ($isArtwork)
+            <div class="text-sm flex items-center gap-2" role="note">
+                <span class="material-symbols-outlined">warning</span>
+                {{ trans_choice('fanart::ui.create.credit_warning', $credits, ['count' => $credits]) }}
+            </div>
+            <x-shared::input-error :messages="$errors->get('credit')" />
+        @endif
 
         <form action="{{ route('fanart.store', $story->slug) }}" method="POST" enctype="multipart/form-data" novalidate
               class="flex flex-col gap-4"
@@ -106,17 +116,19 @@
                 </label>
             @endif
 
-            <div class="text-sm flex items-center gap-2">
-                <span class="material-symbols-outlined">info</span>
-                {{ __('fanart::ui.create.pending_notice') }}
-            </div>
+            @unless ($isArtwork)
+                <div class="text-sm flex items-center gap-2">
+                    <span class="material-symbols-outlined">info</span>
+                    {{ __('fanart::ui.create.pending_notice') }}
+                </div>
+            @endunless
 
             <div class="flex justify-end gap-4">
                 <x-shared::button color="neutral" :outline="true" type="button" onclick="history.back()">
                     {{ __('fanart::ui.create.cancel') }}
                 </x-shared::button>
                 <x-shared::button color="accent" type="submit">
-                    {{ __('fanart::ui.create.submit') }}
+                    {{ __($isArtwork ? 'fanart::ui.create.artwork_submit' : 'fanart::ui.create.submit') }}
                 </x-shared::button>
             </div>
         </form>
