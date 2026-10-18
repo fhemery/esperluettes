@@ -52,6 +52,17 @@ return [
         'mode_audio_no' => 'Sons : fermés.',
         'mode_coauthors' => 'Cette histoire a plusieurs auteur·ices : c\'est le réglage le plus restrictif choisi par l\'un d\'eux qui s\'applique.',
     ],
+    'story_page' => [
+        'tab_chapters' => 'Chapitres',
+        'tab_fanarts' => 'Fanarts',
+        'tabs_label' => 'Contenu de l\'histoire',
+        'viewer_close' => 'Fermer',
+        'viewer_label' => 'Fanart',
+    ],
+    'actions' => [
+        'submit' => 'Proposer un fanart',
+        'artwork' => 'Ajouter un artwork',
+    ],
     'viewer' => [
         'artist' => 'Par',
         'chapter' => 'Chapitre : :title',
