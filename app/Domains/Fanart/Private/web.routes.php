@@ -3,6 +3,7 @@
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Fanart\Private\Controllers\FanartController;
 use App\Domains\Fanart\Private\Controllers\FanartFileController;
+use App\Domains\Fanart\Private\Controllers\FanartModerationController;
 use App\Domains\Fanart\Private\Controllers\FanartReviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,8 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
         ->whereNumber('fanart')->name('fanart.edit');
     Route::put('/fanarts/{fanart}', [FanartController::class, 'update'])
         ->whereNumber('fanart')->name('fanart.update');
+    Route::delete('/fanarts/{fanart}', [FanartController::class, 'destroy'])
+        ->whereNumber('fanart')->name('fanart.destroy');
     // `fanartId` is not a model binding: a declined fanart is gone and must answer "already decided", not 404.
     Route::post('/fanarts/{fanartId}/accept', [FanartReviewController::class, 'accept'])
         ->whereNumber('fanartId')->name('fanart.accept');
@@ -29,4 +32,7 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
         ->whereNumber('fanart')->name('fanart.file');
     Route::get('/fanarts/{fanart}/thumb/{width}', [FanartFileController::class, 'thumb'])
         ->whereNumber('fanart')->whereNumber('width')->name('fanart.thumb');
+    // Staff-only through FanartPolicy::moderate (403); the `role` middleware would redirect instead.
+    Route::delete('/moderation/fanarts/{fanart}', [FanartModerationController::class, 'destroy'])
+        ->whereNumber('fanart')->name('fanart.moderation.destroy');
 });

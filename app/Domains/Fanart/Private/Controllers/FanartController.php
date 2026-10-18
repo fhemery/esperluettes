@@ -80,6 +80,20 @@ class FanartController
         ]);
     }
 
+    public function destroy(Fanart $fanart): RedirectResponse
+    {
+        $userId = Auth::id();
+        abort_unless($this->policy->delete($userId, $fanart), 403);
+
+        if ($fanart->user_id === $userId) {
+            $this->service->deleteByOwner($fanart);
+        } else {
+            $this->service->deleteByAuthor($fanart, $userId);
+        }
+
+        return back()->with('success', __('fanart::ui.delete.deleted'));
+    }
+
     /** `$fanart` is declared so the route binding is resolved before the request authorizes. */
     public function update(UpdateArtworkRequest $request, Fanart $fanart): RedirectResponse
     {

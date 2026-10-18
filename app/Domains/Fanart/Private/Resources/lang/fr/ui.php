@@ -39,6 +39,10 @@ return [
         'declined' => 'Le fanart a été refusé.',
         'already_decided' => 'Ce fanart a déjà fait l\'objet d\'une décision.',
     ],
+    'delete' => [
+        'deleted' => 'Le fanart a été supprimé.',
+        'moderated' => 'Le fanart a été supprimé par la modération.',
+    ],
     'validation' => [
         'no_credit' => 'Vous n\'avez plus de crédit de chapitre : un artwork en coûte un. Publiez un chapitre pour en gagner un nouveau.',
         'comment_required' => 'Le commentaire est obligatoire.',

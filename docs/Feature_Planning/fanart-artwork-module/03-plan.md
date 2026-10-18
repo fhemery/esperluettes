@@ -34,7 +34,7 @@ green gate and enforces its own security rules.
 | 9 | Submit a fanart (non-author): create page + POST | M | 6, 7 | DONE |
 | 10 | Review: accept / decline + audio replacement | M | 9 | DONE |
 | 11 | Artwork (author): upload with credit spend, edit | M | 10 | DONE |
-| 12 | Deletion: owner / author delete, moderator delete + `Fanart.DeletedByModeration` | S | 9 | TODO |
+| 12 | Deletion: owner / author delete, moderator delete + `Fanart.DeletedByModeration` | S | 9 | DONE |
 | 13 | Lifecycle listeners (user deleted / deactivated / reactivated, story deleted, chapter deleted) | M | 3b, 7, 9 | TODO |
 | 14 | Moderation topic: snapshot formatter, reasons seeder, author-reports-pending listener (A1) | S | 2, 12 | TODO |
 | 15 | Fanartiste grant / revoke + collaborators-page section | S | 6, 7 | TODO |

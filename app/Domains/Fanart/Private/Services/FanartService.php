@@ -3,7 +3,9 @@
 namespace App\Domains\Fanart\Private\Services;
 
 use App\Domains\Editor\Public\Api\EditorPublicApi;
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Fanart\Private\Models\Fanart;
+use App\Domains\Fanart\Public\Events\FanartDeletedByModeration;
 use App\Domains\Fanart\Private\Support\FanartKind;
 use App\Domains\Fanart\Private\Support\FanartStatus;
 use App\Domains\Fanart\Private\Support\SubmitFanartData;
@@ -22,6 +24,7 @@ class FanartService
         private readonly EditorPublicApi $editor,
         private readonly StoryPublicApi $stories,
         private readonly FanartNotifier $notifier,
+        private readonly EventBus $eventBus,
     ) {
     }
 
@@ -145,6 +148,33 @@ class FanartService
         $fanart->forceDelete();
 
         $this->notifier->fanartDeclined($fanart, $actorId, $comment);
+    }
+
+    /** The submitter withdraws or deletes their own fanart: nobody is told. */
+    public function deleteByOwner(Fanart $fanart): void
+    {
+        $fanart->forceDelete();
+    }
+
+    public function deleteByAuthor(Fanart $fanart, int $actorId): void
+    {
+        $fanart->forceDelete();
+
+        $this->notifier->fanartDeleted($fanart, $actorId);
+    }
+
+    public function deleteByModerator(Fanart $fanart, int $moderatorId): void
+    {
+        $fanart->forceDelete();
+
+        $this->notifier->fanartDeletedByModeration($fanart, $moderatorId);
+
+        $this->eventBus->emit(new FanartDeletedByModeration(
+            fanartId: $fanart->id,
+            storyId: $fanart->story_id,
+            userId: $fanart->user_id,
+            moderatorId: $moderatorId,
+        ));
     }
 
     /**

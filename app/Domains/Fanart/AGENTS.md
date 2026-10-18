@@ -8,7 +8,7 @@ None yet.
 
 ## Events emitted
 
-None yet.
+- `Fanart.DeletedByModeration` (`FanartDeletedByModeration`, auditable): `fanartId`, `storyId`, `userId`, `moderatorId`. Emitted by `FanartService::deleteByModerator`.
 
 ## Listens to
 

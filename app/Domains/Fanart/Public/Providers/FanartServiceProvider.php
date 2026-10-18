@@ -2,7 +2,9 @@
 
 namespace App\Domains\Fanart\Public\Providers;
 
+use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Fanart\Private\Policies\FanartPolicy;
+use App\Domains\Fanart\Public\Events\FanartDeletedByModeration;
 use App\Domains\Fanart\Private\Support\FanartMediaUsageProvider;
 use App\Domains\Fanart\Private\Support\FanartMode;
 use App\Domains\Fanart\Public\Notifications\FanartAcceptedNotification;
@@ -58,6 +60,8 @@ class FanartServiceProvider extends ServiceProvider
         app(MediaUsageRegistry::class)->register(new FanartMediaUsageProvider());
 
         $this->registerNotifications();
+
+        app(EventBus::class)->registerEvent(FanartDeletedByModeration::name(), FanartDeletedByModeration::class);
 
         $this->app->booted(fn () => $this->registerSettings());
     }
