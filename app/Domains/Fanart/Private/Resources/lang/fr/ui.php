@@ -39,6 +39,17 @@ return [
         'declined' => 'Le fanart a été refusé.',
         'already_decided' => 'Ce fanart a déjà fait l\'objet d\'une décision.',
     ],
+    'fanartists' => [
+        'title' => 'Fanartistes',
+        'description' => 'Les fanartistes peuvent proposer des fanarts sur cette histoire. Ce rôle ne donne aucun accès supplémentaire à l\'histoire.',
+        'empty' => 'Aucun fanartiste pour le moment.',
+        'add_label' => 'Accorder le rôle de fanartiste',
+        'add_button' => 'Accorder',
+        'revoke' => 'Retirer le rôle de fanartiste',
+        'granted' => 'Le rôle de fanartiste a été accordé.',
+        'revoked' => 'Le rôle de fanartiste a été retiré.',
+        'not_confirmed' => 'Seuls les membres confirmés peuvent devenir fanartistes.',
+    ],
     'delete' => [
         'deleted' => 'Le fanart a été supprimé.',
         'moderated' => 'Le fanart a été supprimé par la modération.',

@@ -37,7 +37,7 @@ green gate and enforces its own security rules.
 | 12 | Deletion: owner / author delete, moderator delete + `Fanart.DeletedByModeration` | S | 9 | DONE |
 | 13 | Lifecycle listeners (user deleted / deactivated / reactivated, story deleted, chapter deleted) | M | 3b, 7, 9 | DONE |
 | 14 | Moderation topic: snapshot formatter, reasons seeder, author-reports-pending listener (A1) | S | 2, 12 | DONE |
-| 15 | Fanartiste grant / revoke + collaborators-page section | S | 6, 7 | TODO |
+| 15 | Fanartiste grant / revoke + collaborators-page section | S | 6, 7 | DONE |
 | 16 | Fanartiste role requests (create, withdraw, accept, decline, 30-day cooldown) | M | 15 | TODO |
 | 17 | Lazy fragments: Fanarts tab, chapter groups, viewer / review viewer | M | 8, 10, 12 | TODO |
 | 18 | Story page integration: tab shell, action buttons, viewer modal | M | 16, 17 | TODO |

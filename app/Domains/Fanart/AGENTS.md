@@ -35,6 +35,8 @@ None yet.
 
 - **One store route, two paths.** `POST /stories/{slug}/fanarts` calls `uploadArtwork` (published at once, one chapter credit, same transaction) for an author, `submit` (pending) for anyone else. `editArtwork` is the uploader only; an edit is free and leaves the old file to `media:gc`.
 
+- **Fanartiste grant / revoke** (`POST /stories/{slug}/fanartistes`, `DELETE …/{userId}`) is authorised by `ManageFanartistsRequest` → `FanartPolicy::manageFanartists` (403). `FanartistService::grant` requires a confirmed target, is idempotent, deletes the pair's pending role request and notifies only on a new grant. The UI is `<x-fanart::collaborators-section>`, used by Story's collaborators page; it renders nothing unless the viewer may manage fanartistes.
+
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
 - **The usage provider must read `withTrashed()`.** Soft-deleted rows (deactivated users) still own their files; dropping that makes GC delete files a reactivation would need.
 - **No FK to `users`, `stories` or `chapters`** — cross-domain by rule. Resolve references through `StoryPublicApi`.

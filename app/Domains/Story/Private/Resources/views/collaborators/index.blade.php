@@ -116,7 +116,9 @@
                 </div>
             </form>
         </div>
-        
+
+        <x-fanart::collaborators-section :story-id="$story->id" />
+
         <div class="flex justify-center">
             <a href="{{ route('stories.show', ['slug' => $story->slug]) }}">
                 <x-shared::button color="neutral" :outline="true">

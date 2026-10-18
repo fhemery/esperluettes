@@ -3,6 +3,7 @@
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Fanart\Private\Controllers\FanartController;
 use App\Domains\Fanart\Private\Controllers\FanartFileController;
+use App\Domains\Fanart\Private\Controllers\FanartistController;
 use App\Domains\Fanart\Private\Controllers\FanartModerationController;
 use App\Domains\Fanart\Private\Controllers\FanartReviewController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,11 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
         ->whereNumber('fanartId')->name('fanart.accept');
     Route::post('/fanarts/{fanartId}/decline', [FanartReviewController::class, 'decline'])
         ->whereNumber('fanartId')->name('fanart.decline');
+    // Authors only through ManageFanartistsRequest (403); the `role` middleware would redirect instead.
+    Route::post('/stories/{slug}/fanartistes', [FanartistController::class, 'store'])
+        ->where('slug', '[^/]+')->name('fanart.fanartists.store');
+    Route::delete('/stories/{slug}/fanartistes/{userId}', [FanartistController::class, 'destroy'])
+        ->where('slug', '[^/]+')->whereNumber('userId')->name('fanart.fanartists.destroy');
     Route::get('/fanarts/{fanart}/file', [FanartFileController::class, 'original'])
         ->whereNumber('fanart')->name('fanart.file');
     Route::get('/fanarts/{fanart}/thumb/{width}', [FanartFileController::class, 'thumb'])
