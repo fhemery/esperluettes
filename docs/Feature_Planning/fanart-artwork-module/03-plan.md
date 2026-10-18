@@ -1418,9 +1418,9 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 | Deactivated co-author (one of two) | Story and its fanarts still visible; hidden once both authors are deactivated | n/a moved to `FanartLifecycleTest` (+ checkpoint 3bv) |
 | Deleted co-author account | Co-authored story and all its fanarts gone; fanartists notified | n/a moved to `FanartLifecycleTest` |
 | Deleted chapter | Its fanarts gone; fanartist notified | n/a moved to `FanartLifecycleTest` |
-| Dark mode / theme | Tabs, thumbnails, viewer readable | ✅ shots `shots/verify/dark-*.png`; to eyeball: magenta headings on near-black are dim |
+| Dark mode / theme | Tabs, thumbnails, viewer readable | ✅ checked by eye; to eyeball: magenta headings on near-black are dim |
 
-**VERIFY result (2026-10-18)** — 1 FAIL (« Montrer tout / Cacher tout »). Spec `e2e/tests/features/fanart-artwork-module.spec.ts` (40 tests incl. the failing one; full run 68 pass / 1 fail), seeder `E2eFanartSeeder`, page objects `e2e/pages/FanartStoryPage.ts`, evidence in `shots/verify/`. Side findings: (a) `compliant` redirect: a user who has not accepted the CGU gets the whole CGU page injected into the viewer modal (fetch follows the redirect); (b) 404 pages answer 500 (known backlog `fix-404-page-theme-500`), so the specs assert « not ok » on gone files.
+**VERIFY result (2026-10-18)** — one bug found and fixed (« Montrer tout / Cacher tout »). The e2e spec keeps only browser-only cases (show/hide all, viewer desktop + mobile, create happy path, story-page player); the rest is covered by PHP tests. Side findings: (a) `compliant` redirect: a user who has not accepted the CGU gets the whole CGU page injected into the viewer modal; (b) 404 pages answer 500 (backlog `fix-404-page-theme-500`).
 
 ## Open items
 
