@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Fanart\Private\Controllers\DiscordFeedController;
 use App\Domains\Fanart\Private\Controllers\FanartController;
 use App\Domains\Fanart\Private\Controllers\FanartFileController;
 use App\Domains\Fanart\Private\Controllers\FanartFragmentController;
@@ -10,6 +11,11 @@ use App\Domains\Fanart\Private\Controllers\FanartModerationController;
 use App\Domains\Fanart\Private\Controllers\FanartReviewController;
 use App\Domains\Fanart\Private\Controllers\RoleRequestController;
 use Illuminate\Support\Facades\Route;
+
+// Signature only, no session: the Discord bot embeds this URL (see DiscordFeedController::image).
+Route::get('/fanarts/{fanartId}/discord-image', [DiscordFeedController::class, 'image'])
+    ->middleware('signed')
+    ->whereNumber('fanartId')->name('fanart.discord-image');
 
 Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
     Roles::USER_CONFIRMED,

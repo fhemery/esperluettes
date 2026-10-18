@@ -14,7 +14,10 @@ use App\Domains\Fanart\Private\Support\FanartViewer;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\ProfileDto;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\URL;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use App\Domains\Fanart\Private\Support\UpdateArtworkData;
 use Illuminate\Http\UploadedFile;
@@ -132,6 +135,93 @@ class FanartService
     public function find(int $id): ?Fanart
     {
         return Fanart::find($id);
+    }
+
+    /**
+     * Published, opted-in images of public stories (and published chapters) that the Discord bot
+     * may relay. Readability is the guest's, so community and private stories never qualify.
+     */
+    private function discordEligible(?int $onlyFanartId = null): Builder
+    {
+        $query = Fanart::query()
+            ->published()
+            ->where('kind', FanartKind::Image)
+            ->where('share_on_discord', true);
+        if ($onlyFanartId !== null) {
+            $query->whereKey($onlyFanartId);
+        }
+
+        $storyIds = (clone $query)->distinct()->pluck('story_id')->all();
+        if ($storyIds === []) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $readable = $this->stories->filterReadableStoryIds(null, $storyIds);
+        $publishedChapterIds = [];
+        foreach ($this->stories->getChaptersForStories($readable) as $chapters) {
+            array_push($publishedChapterIds, ...$this->publishedChapterIds($chapters));
+        }
+
+        return $query->whereIn('story_id', $readable)
+            ->where(fn (Builder $chapter) => $chapter->whereNull('chapter_id')
+                ->orWhereIn('chapter_id', $publishedChapterIds));
+    }
+
+    public function isDiscordEligible(int $fanartId): bool
+    {
+        return $this->discordEligible($fanartId)->exists();
+    }
+
+    /**
+     * One page of fanarts waiting for the bot, oldest first.
+     *
+     * @return array{paginator: LengthAwarePaginator, items: array<int, array<string, mixed>>}
+     */
+    public function discordPending(int $perPage, int $page): array
+    {
+        $paginator = $this->discordEligible()
+            ->whereNull('discord_sent_at')
+            ->orderBy('published_at')
+            ->orderBy('id')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $fanarts = $paginator->items();
+        $storyIds = array_values(array_unique(array_map(fn (Fanart $f) => $f->story_id, $fanarts)));
+        $chapterIds = array_values(array_filter(array_map(fn (Fanart $f) => $f->chapter_id, $fanarts)));
+        $stories = $storyIds === [] ? [] : $this->stories->getStoriesByIds($storyIds);
+        $chapters = $chapterIds === [] ? [] : $this->stories->getChaptersByIds($chapterIds);
+        $artists = $this->artistNames(array_values(array_unique(array_map(fn (Fanart $f) => $f->user_id, $fanarts))));
+
+        $items = [];
+        foreach ($fanarts as $fanart) {
+            $story = $stories[$fanart->story_id] ?? null;
+            if ($story === null) {
+                continue;
+            }
+            $item = [
+                'id' => $fanart->id,
+                'title' => $fanart->title,
+                'artistName' => $artists[$fanart->user_id] ?? '',
+                'storyTitle' => $story->title,
+                'storyUrl' => route('stories.show', $story->slug),
+                'imageUrl' => URL::temporarySignedRoute('fanart.discord-image', now()->addDay(), ['fanartId' => $fanart->id]),
+            ];
+            if ($fanart->chapter_id !== null && isset($chapters[$fanart->chapter_id])) {
+                $item['chapterTitle'] = $chapters[$fanart->chapter_id]->title;
+            }
+            $items[] = $item;
+        }
+
+        return ['paginator' => $paginator, 'items' => $items];
+    }
+
+    /** @param int[] $ids @return int number of fanarts newly marked */
+    public function markDiscordSent(array $ids): int
+    {
+        return Fanart::query()
+            ->whereIn('id', $ids)
+            ->whereNull('discord_sent_at')
+            ->update(['discord_sent_at' => now()]);
     }
 
     /**
