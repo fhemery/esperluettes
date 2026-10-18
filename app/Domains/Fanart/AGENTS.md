@@ -39,6 +39,8 @@ None yet.
 
 - **Role requests** (`POST /stories/{slug}/fanartiste-requests`, `DELETE …/{request}`, `POST …/{request}/accept|decline`) are authorised by `RoleRequestRequest` (403): `FanartPolicy::requestRole` (adds no-pending + 30-day cooldown from the latest decline), the requester, or an author. Accept = `grant` (row deleted); decline keeps the row (`declined`) for the cooldown. `<x-fanart::request-role-button>` is for the story page.
 
+- **Lazy fragments** (`FanartFragmentController`: `fanart.tab`, `fanart.group` with `{group}` = chapter id or `work`, `fanart.show` = viewer / review viewer) return HTML, never JSON. Every listing goes through `Fanart::visibleTo(FanartViewer)` (built by `FanartService::viewerFor`), so readers never load pending items or fanarts of unpublished chapters; authors and staff see everything. The pending block is shown to those who see everything only; `includeOwnPending` is for the owner's own profile tab. Thumbnails click-dispatch a `fanart-open` event carrying the viewer URL.
+
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
 - **The usage provider must read `withTrashed()`.** Soft-deleted rows (deactivated users) still own their files; dropping that makes GC delete files a reactivation would need.
 - **No FK to `users`, `stories` or `chapters`** — cross-domain by rule. Resolve references through `StoryPublicApi`.

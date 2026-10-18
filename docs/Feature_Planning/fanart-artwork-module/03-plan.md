@@ -39,7 +39,7 @@ green gate and enforces its own security rules.
 | 14 | Moderation topic: snapshot formatter, reasons seeder, author-reports-pending listener (A1) | S | 2, 12 | DONE |
 | 15 | Fanartiste grant / revoke + collaborators-page section | S | 6, 7 | DONE |
 | 16 | Fanartiste role requests (create, withdraw, accept, decline, 30-day cooldown) | M | 15 | DONE |
-| 17 | Lazy fragments: Fanarts tab, chapter groups, viewer / review viewer | M | 8, 10, 12 | TODO |
+| 17 | Lazy fragments: Fanarts tab, chapter groups, viewer / review viewer | M | 8, 10, 12 | DONE |
 | 18 | Story page integration: tab shell, action buttons, viewer modal | M | 16, 17 | TODO |
 | 18v | Checkpoint — story page for guest / `user` / confirmed reader / author / moderator | S | 18 | TODO |
 | 19 | Story-page audio: speaker icons + `fanartPlayer` store with auto-advance | M | 18 | TODO |

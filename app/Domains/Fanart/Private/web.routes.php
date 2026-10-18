@@ -3,6 +3,7 @@
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Fanart\Private\Controllers\FanartController;
 use App\Domains\Fanart\Private\Controllers\FanartFileController;
+use App\Domains\Fanart\Private\Controllers\FanartFragmentController;
 use App\Domains\Fanart\Private\Controllers\FanartistController;
 use App\Domains\Fanart\Private\Controllers\FanartModerationController;
 use App\Domains\Fanart\Private\Controllers\FanartReviewController;
@@ -15,6 +16,13 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
     Roles::ADMIN,
     Roles::TECH_ADMIN,
 ])])->group(function () {
+    // Lazy HTML fragments: 403 through FanartPolicy (seeFeature / view), never a redirect for a reader of a hidden story.
+    Route::get('/stories/{slug}/fanarts', [FanartFragmentController::class, 'tab'])
+        ->where('slug', '[^/]+')->name('fanart.tab');
+    Route::get('/stories/{slug}/fanarts/groups/{group}', [FanartFragmentController::class, 'group'])
+        ->where('slug', '[^/]+')->where('group', 'work|\d+')->name('fanart.group');
+    Route::get('/fanarts/{fanart}', [FanartFragmentController::class, 'show'])
+        ->whereNumber('fanart')->name('fanart.show');
     Route::get('/stories/{slug}/fanarts/create', [FanartController::class, 'create'])
         ->where('slug', '[^/]+')->name('fanart.create');
     Route::post('/stories/{slug}/fanarts', [FanartController::class, 'store'])

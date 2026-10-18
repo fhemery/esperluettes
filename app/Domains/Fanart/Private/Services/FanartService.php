@@ -9,7 +9,12 @@ use App\Domains\Fanart\Public\Events\FanartDeletedByModeration;
 use App\Domains\Fanart\Private\Support\FanartKind;
 use App\Domains\Fanart\Private\Support\FanartStatus;
 use App\Domains\Fanart\Private\Support\SubmitFanartData;
+use App\Domains\Fanart\Private\Policies\FanartPolicy;
+use App\Domains\Fanart\Private\Support\FanartViewer;
 use App\Domains\Media\Public\Api\MediaPublicApi;
+use App\Domains\Shared\Contracts\ProfilePublicApi;
+use App\Domains\Shared\Dto\ProfileDto;
+use Illuminate\Database\Eloquent\Collection;
 use App\Domains\Story\Public\Api\StoryPublicApi;
 use App\Domains\Fanart\Private\Support\UpdateArtworkData;
 use Illuminate\Http\UploadedFile;
@@ -25,6 +30,9 @@ class FanartService
         private readonly StoryPublicApi $stories,
         private readonly FanartNotifier $notifier,
         private readonly EventBus $eventBus,
+        private readonly FanartPolicy $policy,
+        private readonly ModeService $modes,
+        private readonly ProfilePublicApi $profiles,
     ) {
     }
 
@@ -206,6 +214,156 @@ class FanartService
         );
 
         return array_values(array_map(fn ($c) => ['id' => $c->id, 'name' => $c->title], $chapters));
+    }
+
+    /** What the viewer may list on this story, resolved once (callers pass it to Fanart::visibleTo). */
+    public function viewerFor(int $userId, int $storyId, ?array $chapters = null): FanartViewer
+    {
+        $seesAll = $this->policy->seesEverything($userId, $storyId);
+        $published = [];
+        if (!$seesAll) {
+            $chapters ??= $this->stories->getChaptersForStory($storyId);
+            $published = $this->publishedChapterIds($chapters);
+        }
+
+        return new FanartViewer($userId, $seesAll, $published);
+    }
+
+    /**
+     * Header data of the Fanarts tab: one group per chapter holding something the viewer may see
+     * (story order) plus « Toute l'œuvre », the pending queue for authors / staff, and for authors
+     * the effective reception modes.
+     *
+     * @return array{groups: array<int, array{key: string, title: ?string, count: int, collapsed: bool}>,
+     *     pending: Collection<int, Fanart>, isAuthor: bool, modes: ?array}
+     */
+    public function tabSummary(int $storyId, int $userId): array
+    {
+        $chapters = $this->stories->getChaptersForStory($storyId);
+        $viewer = $this->viewerFor($userId, $storyId, $chapters);
+        $isAuthor = $this->stories->isAuthor($userId, $storyId);
+
+        $counts = Fanart::query()
+            ->visibleTo($viewer)
+            ->published()
+            ->where('story_id', $storyId)
+            ->selectRaw('chapter_id, count(*) as total')
+            ->groupBy('chapter_id')
+            ->pluck('total', 'chapter_id')
+            ->all();
+
+        $read = $isAuthor ? [] : $this->stories->getReadChapterIds($userId, $storyId);
+
+        $groups = [];
+        if (($counts[''] ?? 0) > 0) {
+            $groups[] = ['key' => 'work', 'title' => null, 'count' => (int) $counts[''], 'collapsed' => false];
+        }
+        foreach ($chapters as $chapter) {
+            $count = (int) ($counts[$chapter->id] ?? 0);
+            if ($count > 0) {
+                $groups[] = [
+                    'key' => (string) $chapter->id,
+                    'title' => $chapter->title,
+                    'count' => $count,
+                    'collapsed' => !$isAuthor && !in_array($chapter->id, $read, true),
+                ];
+            }
+        }
+
+        return [
+            'groups' => $groups,
+            'pending' => $viewer->seesAll ? $this->pendingFor($storyId) : new Collection(),
+            'isAuthor' => $isAuthor,
+            'modes' => $isAuthor ? [
+                'images' => $this->modes->effectiveMode($storyId, FanartKind::Image)->value,
+                'audio' => $this->modes->effectiveMode($storyId, FanartKind::Audio)->value,
+                'coauthors' => count($this->stories->getAuthorIds($storyId)) > 1,
+            ] : null,
+        ];
+    }
+
+    /** The story's pending fanarts, oldest first. Callers must already know the viewer sees everything. */
+    public function pendingFor(int $storyId): Collection
+    {
+        return Fanart::query()
+            ->where('story_id', $storyId)
+            ->where('status', FanartStatus::Pending)
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * Published fanarts of one group, or null when the viewer may not see the group at all
+     * (chapter of another story, or unpublished and the viewer is a reader).
+     *
+     * @return array{fanarts: Collection<int, Fanart>, artists: array<int, string>}|null
+     */
+    public function group(int $storyId, ?int $chapterId, int $userId): ?array
+    {
+        $chapters = $this->stories->getChaptersForStory($storyId);
+        $viewer = $this->viewerFor($userId, $storyId, $chapters);
+
+        if ($chapterId !== null) {
+            $chapter = collect($chapters)->firstWhere('id', $chapterId);
+            if ($chapter === null || (!$viewer->seesAll && $chapter->status !== 'published')) {
+                return null;
+            }
+        }
+
+        $fanarts = Fanart::query()
+            ->visibleTo($viewer)
+            ->published()
+            ->where('story_id', $storyId)
+            ->where('chapter_id', $chapterId)
+            ->orderBy('kind')
+            ->orderBy('id')
+            ->get();
+
+        $audioUserIds = $fanarts->where('kind', FanartKind::Audio)->pluck('user_id')->unique()->all();
+
+        return ['fanarts' => $fanarts, 'artists' => $this->artistNames($audioUserIds)];
+    }
+
+    /**
+     * Everything the viewer fragment shows around the file itself.
+     *
+     * @return array{artist: ?ProfileDto, chapterTitle: ?string, description: ?string}
+     */
+    public function viewerDetails(Fanart $fanart): array
+    {
+        $chapter = $fanart->chapter_id !== null
+            ? ($this->stories->getChaptersByIds([$fanart->chapter_id])[$fanart->chapter_id] ?? null)
+            : null;
+
+        return [
+            'artist' => $this->profiles->getPublicProfiles([$fanart->user_id])[$fanart->user_id] ?? null,
+            'chapterTitle' => $chapter?->title,
+            'description' => $fanart->description === null
+                ? null
+                : $this->cleanDescription($fanart->description),
+        ];
+    }
+
+    /** @param array<int, \App\Domains\Story\Public\Contracts\StoryChapterDto> $chapters @return int[] */
+    private function publishedChapterIds(array $chapters): array
+    {
+        return array_values(array_map(
+            fn ($c) => $c->id,
+            array_filter($chapters, fn ($c) => $c->status === 'published'),
+        ));
+    }
+
+    /** @param int[] $userIds @return array<int, string> */
+    private function artistNames(array $userIds): array
+    {
+        if ($userIds === []) {
+            return [];
+        }
+
+        return array_map(
+            fn ($profile) => $profile->display_name,
+            $this->profiles->getPublicProfiles($userIds),
+        );
     }
 
     private function cleanDescription(?string $html): ?string

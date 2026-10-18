@@ -42,6 +42,12 @@ class FanartPolicy
         return $this->stories->canRead($userId, $storyId);
     }
 
+    /** Authors of the story and staff: listings include pending items and unpublished chapters. */
+    public function seesEverything(int $userId, int $storyId): bool
+    {
+        return $this->isStaff($userId) || $this->stories->isAuthor($userId, $storyId);
+    }
+
     public function view(?int $userId, Fanart $fanart): bool
     {
         if ($userId === null || !$this->seeFeature($userId, $fanart->story_id)) {
