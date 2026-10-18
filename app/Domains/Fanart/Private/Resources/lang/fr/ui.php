@@ -50,6 +50,17 @@ return [
         'revoked' => 'Le rôle de fanartiste a été retiré.',
         'not_confirmed' => 'Seuls les membres confirmés peuvent devenir fanartistes.',
     ],
+    'role_request' => [
+        'request' => 'Demander le rôle de fanartiste',
+        'pending' => 'Demande envoyée — retirer',
+        'sent' => 'Votre demande a été envoyée aux auteurs.',
+        'withdrawn' => 'Votre demande a été retirée.',
+        'accepted' => 'La demande a été acceptée.',
+        'declined' => 'La demande a été refusée.',
+        'accept' => 'Accepter',
+        'decline' => 'Décliner',
+        'pending_title' => 'Demandes en attente',
+    ],
     'delete' => [
         'deleted' => 'Le fanart a été supprimé.',
         'moderated' => 'Le fanart a été supprimé par la modération.',

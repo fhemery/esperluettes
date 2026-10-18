@@ -18,6 +18,9 @@ class CollaboratorsSection extends Component
     /** @var array<int, array{user_id:int, display_name:string, slug:string, avatar_url:string}> */
     public array $fanartists = [];
 
+    /** @var array<int, array{id:int, display_name:string, slug:string, avatar_url:string}> */
+    public array $pendingRequests = [];
+
     public bool $visible = false;
 
     public function __construct(public int $storyId)
@@ -29,17 +32,28 @@ class CollaboratorsSection extends Component
 
         $this->slug = app(StoryPublicApi::class)->getStory($storyId)?->slug ?? '';
 
-        $ids = app(FanartistService::class)->listFanartistIds($storyId);
-        $profiles = app(ProfilePublicApi::class)->getPublicProfiles($ids);
+        $service = app(FanartistService::class);
+        $ids = $service->listFanartistIds($storyId);
+        $requests = $service->pendingRequests($storyId);
+        $profiles = app(ProfilePublicApi::class)->getPublicProfiles(
+            array_values(array_unique(array_merge($ids, $requests->pluck('user_id')->all())))
+        );
         foreach ($ids as $id) {
-            $profile = $profiles[$id] ?? null;
-            $this->fanartists[] = [
-                'user_id' => $id,
-                'display_name' => (string) ($profile?->display_name ?? ''),
-                'slug' => (string) ($profile?->slug ?? ''),
-                'avatar_url' => (string) ($profile?->avatar_url ?? ''),
-            ];
+            $this->fanartists[] = ['user_id' => $id] + $this->card($profiles[$id] ?? null);
         }
+        foreach ($requests as $request) {
+            $this->pendingRequests[] = ['id' => $request->id] + $this->card($profiles[$request->user_id] ?? null);
+        }
+    }
+
+    /** @return array{display_name:string, slug:string, avatar_url:string} */
+    private function card(?object $profile): array
+    {
+        return [
+            'display_name' => (string) ($profile?->display_name ?? ''),
+            'slug' => (string) ($profile?->slug ?? ''),
+            'avatar_url' => (string) ($profile?->avatar_url ?? ''),
+        ];
     }
 
     public function render(): View

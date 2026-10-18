@@ -123,14 +123,15 @@ class FanartPolicy
             && $this->stories->isAuthor($userId, $storyId);
     }
 
-    /** Cooldown and pending-request rules are added with the request flow. */
     public function requestRole(?int $userId, int $storyId): bool
     {
         if ($userId === null
             || !in_array(Roles::USER_CONFIRMED, $this->slugs($userId), true)
             || !$this->stories->canRead($userId, $storyId)
             || $this->stories->isAuthor($userId, $storyId)
-            || $this->fanartists->isFanartist($userId, $storyId)) {
+            || $this->fanartists->isFanartist($userId, $storyId)
+            || $this->fanartists->hasPendingRequest($userId, $storyId)
+            || $this->fanartists->isInCooldown($userId, $storyId)) {
             return false;
         }
 

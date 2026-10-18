@@ -6,6 +6,7 @@ use App\Domains\Fanart\Private\Controllers\FanartFileController;
 use App\Domains\Fanart\Private\Controllers\FanartistController;
 use App\Domains\Fanart\Private\Controllers\FanartModerationController;
 use App\Domains\Fanart\Private\Controllers\FanartReviewController;
+use App\Domains\Fanart\Private\Controllers\RoleRequestController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
@@ -34,6 +35,15 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
         ->where('slug', '[^/]+')->name('fanart.fanartists.store');
     Route::delete('/stories/{slug}/fanartistes/{userId}', [FanartistController::class, 'destroy'])
         ->where('slug', '[^/]+')->whereNumber('userId')->name('fanart.fanartists.destroy');
+    // Authorised by RoleRequestRequest (403): `requestRole`, the requester, or an author.
+    Route::post('/stories/{slug}/fanartiste-requests', [RoleRequestController::class, 'store'])
+        ->where('slug', '[^/]+')->name('fanart.role-requests.store');
+    Route::delete('/stories/{slug}/fanartiste-requests/{request}', [RoleRequestController::class, 'destroy'])
+        ->where('slug', '[^/]+')->whereNumber('request')->name('fanart.role-requests.destroy');
+    Route::post('/stories/{slug}/fanartiste-requests/{request}/accept', [RoleRequestController::class, 'accept'])
+        ->where('slug', '[^/]+')->whereNumber('request')->name('fanart.role-requests.accept');
+    Route::post('/stories/{slug}/fanartiste-requests/{request}/decline', [RoleRequestController::class, 'decline'])
+        ->where('slug', '[^/]+')->whereNumber('request')->name('fanart.role-requests.decline');
     Route::get('/fanarts/{fanart}/file', [FanartFileController::class, 'original'])
         ->whereNumber('fanart')->name('fanart.file');
     Route::get('/fanarts/{fanart}/thumb/{width}', [FanartFileController::class, 'thumb'])

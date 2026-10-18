@@ -37,6 +37,8 @@ None yet.
 
 - **Fanartiste grant / revoke** (`POST /stories/{slug}/fanartistes`, `DELETE …/{userId}`) is authorised by `ManageFanartistsRequest` → `FanartPolicy::manageFanartists` (403). `FanartistService::grant` requires a confirmed target, is idempotent, deletes the pair's pending role request and notifies only on a new grant. The UI is `<x-fanart::collaborators-section>`, used by Story's collaborators page; it renders nothing unless the viewer may manage fanartistes.
 
+- **Role requests** (`POST /stories/{slug}/fanartiste-requests`, `DELETE …/{request}`, `POST …/{request}/accept|decline`) are authorised by `RoleRequestRequest` (403): `FanartPolicy::requestRole` (adds no-pending + 30-day cooldown from the latest decline), the requester, or an author. Accept = `grant` (row deleted); decline keeps the row (`declined`) for the cooldown. `<x-fanart::request-role-button>` is for the story page.
+
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
 - **The usage provider must read `withTrashed()`.** Soft-deleted rows (deactivated users) still own their files; dropping that makes GC delete files a reactivation would need.
 - **No FK to `users`, `stories` or `chapters`** — cross-domain by rule. Resolve references through `StoryPublicApi`.

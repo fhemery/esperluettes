@@ -41,6 +41,38 @@
             <x-shared::button color="accent" type="submit">{{ __('fanart::ui.fanartists.add_button') }}</x-shared::button>
         </form>
 
+        @if ($pendingRequests !== [])
+            <div class="mt-6">
+                <h3 class="font-semibold mb-2">{{ __('fanart::ui.role_request.pending_title') }}</h3>
+                <div class="flex flex-col gap-2">
+                    @foreach ($pendingRequests as $pending)
+                        <div class="flex items-center justify-between p-3 bg-bg rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <x-shared::avatar :src="$pending['avatar_url']" :alt="$pending['display_name']" class="h-10 w-10" />
+                                @if ($pending['slug'] !== '')
+                                    <a href="{{ route('profile.show', ['profile' => $pending['slug']]) }}" class="font-medium hover:text-accent">
+                                        {{ $pending['display_name'] }}
+                                    </a>
+                                @else
+                                    <span class="font-medium">{{ $pending['display_name'] }}</span>
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <form action="{{ route('fanart.role-requests.accept', ['slug' => $slug, 'request' => $pending['id']]) }}" method="POST">
+                                    @csrf
+                                    <x-shared::button color="accent" type="submit">{{ __('fanart::ui.role_request.accept') }}</x-shared::button>
+                                </form>
+                                <form action="{{ route('fanart.role-requests.decline', ['slug' => $slug, 'request' => $pending['id']]) }}" method="POST">
+                                    @csrf
+                                    <x-shared::button color="neutral" type="submit">{{ __('fanart::ui.role_request.decline') }}</x-shared::button>
+                                </form>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         {{ $slot }}
     </div>
 @endif
