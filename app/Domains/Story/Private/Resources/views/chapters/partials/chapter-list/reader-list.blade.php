@@ -25,6 +25,7 @@
         <a href="{{ $ch->url }}" class="truncate text-fg hover:text-fg/80 font-semibold py-2">
             {{ $ch->title }}
         </a>
+        <x-fanart::chapter-audio-icon :story-id="$story->id" :chapter-id="$ch->id" />
 
         <div class="sm:hidden flex flex-start gap-3" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
             <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>

@@ -42,7 +42,7 @@ green gate and enforces its own security rules.
 | 17 | Lazy fragments: Fanarts tab, chapter groups, viewer / review viewer | M | 8, 10, 12 | DONE |
 | 18 | Story page integration: tab shell, action buttons, viewer modal | M | 16, 17 | DONE |
 | 18v | Checkpoint — story page for guest / `user` / confirmed reader / author / moderator | S | 18 | DONE |
-| 19 | Story-page audio: speaker icons + `fanartPlayer` store with auto-advance | M | 18 | TODO |
+| 19 | Story-page audio: speaker icons + `fanartPlayer` store with auto-advance | M | 18 | DONE |
 | 20 | Chapter page widgets: audio under title, image block at bottom | S | 17 | TODO |
 | 20v | Checkpoint — chapter page (quotes, annotations, comments) and story chapter list | S | 19, 20 | TODO |
 | 21 | Profile tab « Fanarts » (Images / Sons, pending badge, privacy) | M | 17 | TODO |

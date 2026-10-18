@@ -59,6 +59,10 @@ return [
         'viewer_close' => 'Fermer',
         'viewer_label' => 'Fanart',
     ],
+    'player' => [
+        'listen' => 'Écouter la lecture audio de ce chapitre',
+        'label' => 'Lecture audio du chapitre',
+    ],
     'actions' => [
         'submit' => 'Proposer un fanart',
         'artwork' => 'Ajouter un artwork',

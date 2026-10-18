@@ -5,6 +5,7 @@
         <div class="flex items-center gap-2">
             <a href="{{ route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $ch->slug]) }}" 
                 class="flex-1 truncate text-fg hover:text-fg/80 font-semibold">{{ $ch->title }}</a>
+            <x-fanart::chapter-audio-icon :story-id="$story->id" :chapter-id="$ch->id" />
             @if(!$ch->isPublished)
             <x-shared::popover placement="top">
                 <x-slot name="trigger">

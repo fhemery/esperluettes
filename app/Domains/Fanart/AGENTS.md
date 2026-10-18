@@ -41,6 +41,8 @@ None yet.
 
 - **Lazy fragments** (`FanartFragmentController`: `fanart.tab`, `fanart.group` with `{group}` = chapter id or `work`, `fanart.show` = viewer / review viewer) return HTML, never JSON. Every listing goes through `Fanart::visibleTo(FanartViewer)` (built by `FanartService::viewerFor`), so readers never load pending items or fanarts of unpublished chapters; authors and staff see everything. The pending block is shown to those who see everything only; `includeOwnPending` is for the owner's own profile tab. Thumbnails click-dispatch a `fanart-open` event carrying the viewer URL.
 
+- **Story-page audio**: `<x-fanart::story-player>` (one `<audio>`, queue in `data-entries`) seeds `Alpine.store('fanartPlayer')` (`fanart-player.js`); `<x-fanart::chapter-audio-icon>` on each Story chapter row calls `play(id)`. Both read `FanartService::audioPlaylist` (memoised per request, visibility via `visibleTo`). On `ended` the store POSTs Story's `chapters.read.mark` (failure ignored) then plays the next entry.
+
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
 - **The usage provider must read `withTrashed()`.** Soft-deleted rows (deactivated users) still own their files; dropping that makes GC delete files a reactivation would need.
 - **No FK to `users`, `stories` or `chapters`** — cross-domain by rule. Resolve references through `StoryPublicApi`.

@@ -291,6 +291,7 @@
     <div class="w-full mb-4">
         <x-fanart::story-actions :story-id="$viewModel->getId()" :story-slug="$viewModel->getSlug()" />
         <x-fanart::story-tabs :story-id="$viewModel->getId()" :story-slug="$viewModel->getSlug()">
+        <x-fanart::story-player :story-id="$viewModel->getId()" :story-slug="$viewModel->getSlug()" />
         @if ($viewModel->isAuthor())
             @include('story::chapters.partials.chapter-list.author-view', [
                 'story' => $viewModel->story,

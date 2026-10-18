@@ -216,6 +216,41 @@ class FanartService
         return array_values(array_map(fn ($c) => ['id' => $c->id, 'name' => $c->title], $chapters));
     }
 
+    /**
+     * Story-page playlist: the published audio the viewer may hear, in chapter order
+     * (readers: published chapters only). Computed once per request and story.
+     *
+     * @return array<int, array{chapterId: int, chapterSlug: string, fanartId: int}>
+     */
+    public function audioPlaylist(int $storyId, int $userId): array
+    {
+        $key = "fanart.audio.{$storyId}.{$userId}";
+        $attributes = request()->attributes;
+        if ($attributes->has($key)) {
+            return $attributes->get($key);
+        }
+
+        $chapters = $this->stories->getChaptersForStory($storyId);
+        $audios = Fanart::query()
+            ->visibleTo($this->viewerFor($userId, $storyId, $chapters))
+            ->published()
+            ->where('story_id', $storyId)
+            ->where('kind', FanartKind::Audio)
+            ->whereNotNull('chapter_id')
+            ->get()
+            ->keyBy('chapter_id');
+
+        $playlist = [];
+        foreach ($chapters as $chapter) {
+            if ($audio = $audios->get($chapter->id)) {
+                $playlist[] = ['chapterId' => $chapter->id, 'chapterSlug' => $chapter->slug, 'fanartId' => $audio->id];
+            }
+        }
+        $attributes->set($key, $playlist);
+
+        return $playlist;
+    }
+
     /** What the viewer may list on this story, resolved once (callers pass it to Fanart::visibleTo). */
     public function viewerFor(int $userId, int $storyId, ?array $chapters = null): FanartViewer
     {
