@@ -9,6 +9,7 @@ use App\Domains\Fanart\Private\Support\FanartStatus;
 use App\Domains\Fanart\Private\Support\SubmitFanartData;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Story\Public\Api\StoryPublicApi;
+use Illuminate\Support\Facades\DB;
 
 /** The only writer of `fanarts`. */
 class FanartService
@@ -46,6 +47,55 @@ class FanartService
         $this->notifier->fanartSubmitted($fanart, $userId);
 
         return $fanart;
+    }
+
+    public function find(int $id): ?Fanart
+    {
+        return Fanart::find($id);
+    }
+
+    /**
+     * Publish a pending fanart. The comment lives only in the notification.
+     * An accepted audio replaces the chapter's previous published one.
+     */
+    public function accept(Fanart $fanart, int $actorId, string $comment): void
+    {
+        DB::transaction(function () use ($fanart, $actorId) {
+            $fanart->update(['status' => FanartStatus::Published, 'published_at' => now()]);
+
+            if ($fanart->kind === FanartKind::Audio && $fanart->chapter_id !== null) {
+                $this->replacePublishedAudio($fanart->chapter_id, $actorId, $fanart->id);
+            }
+        });
+
+        $this->notifier->fanartAccepted($fanart, $actorId, $comment);
+    }
+
+    public function decline(Fanart $fanart, int $actorId, ?string $comment): void
+    {
+        $fanart->forceDelete();
+
+        $this->notifier->fanartDeclined($fanart, $actorId, $comment);
+    }
+
+    /**
+     * Hard-delete the chapter's published audio (other than $exceptId) and tell
+     * its submitter. Locks the row so concurrent accepts cannot both survive.
+     */
+    public function replacePublishedAudio(int $chapterId, int $actorId, int $exceptId): void
+    {
+        $previous = Fanart::query()
+            ->where('chapter_id', $chapterId)
+            ->where('kind', FanartKind::Audio)
+            ->where('status', FanartStatus::Published)
+            ->where('id', '!=', $exceptId)
+            ->lockForUpdate()
+            ->get();
+
+        foreach ($previous as $audio) {
+            $audio->forceDelete();
+            $this->notifier->fanartAudioReplaced($audio, $actorId);
+        }
     }
 
     /** Chapter ids of the story's published chapters. */

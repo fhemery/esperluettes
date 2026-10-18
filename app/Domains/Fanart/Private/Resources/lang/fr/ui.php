@@ -23,7 +23,14 @@ return [
         'submit' => 'Proposer',
         'submitted' => 'Votre fanart a été envoyé. Il sera visible après validation par les auteur·ices.',
     ],
+    'review' => [
+        'accepted' => 'Le fanart a été accepté.',
+        'declined' => 'Le fanart a été refusé.',
+        'already_decided' => 'Ce fanart a déjà fait l\'objet d\'une décision.',
+    ],
     'validation' => [
+        'comment_required' => 'Le commentaire est obligatoire.',
+        'comment_max' => 'Le commentaire ne doit pas dépasser 500 caractères.',
         'title_required' => 'Le titre est obligatoire.',
         'title_max' => 'Le titre ne doit pas dépasser 100 caractères.',
         'description_max' => 'La description ne doit pas dépasser 1000 caractères.',

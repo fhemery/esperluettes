@@ -32,7 +32,7 @@ green gate and enforces its own security rules.
 | 7 | Notifications: group, ten content types, `FanartNotifier` | M | 4 | DONE |
 | 8 | Gated file / thumbnail streaming routes | S | 1, 6 | DONE |
 | 9 | Submit a fanart (non-author): create page + POST | M | 6, 7 | DONE |
-| 10 | Review: accept / decline + audio replacement | M | 9 | TODO |
+| 10 | Review: accept / decline + audio replacement | M | 9 | DONE |
 | 11 | Artwork (author): upload with credit spend, edit | M | 10 | TODO |
 | 12 | Deletion: owner / author delete, moderator delete + `Fanart.DeletedByModeration` | S | 9 | TODO |
 | 13 | Lifecycle listeners (user deleted / deactivated / reactivated, story deleted, chapter deleted) | M | 3b, 7, 9 | TODO |
