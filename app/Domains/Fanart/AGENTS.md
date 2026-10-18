@@ -12,7 +12,8 @@ None yet.
 
 ## Listens to
 
-None yet.
+- `Auth.UserDeleted` (hard-delete the user's fanarts, fanartist rows, role requests), `Auth.UserDeactivated` / `Auth.UserReactivated` (soft-delete / restore their fanarts).
+- `Story.Deleted` (wipe the story's fanarts, fanartists, requests; notify each non-author fanartist) and `Chapter.Deleted` (delete the chapter's fanarts; notify their submitters except the authors). Both notify `fanart.removed_with_content`.
 
 ## Registrations
 

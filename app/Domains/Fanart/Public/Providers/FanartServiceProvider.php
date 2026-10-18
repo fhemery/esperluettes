@@ -2,7 +2,17 @@
 
 namespace App\Domains\Fanart\Public\Providers;
 
+use App\Domains\Auth\Public\Events\UserDeactivated;
+use App\Domains\Auth\Public\Events\UserDeleted;
+use App\Domains\Auth\Public\Events\UserReactivated;
 use App\Domains\Events\Public\Api\EventBus;
+use App\Domains\Fanart\Private\Listeners\DeleteFanartDataOnUserDeleted;
+use App\Domains\Fanart\Private\Listeners\DeleteFanartsOnChapterDeleted;
+use App\Domains\Fanart\Private\Listeners\DeleteFanartsOnStoryDeleted;
+use App\Domains\Fanart\Private\Listeners\RestoreFanartsOnUserReactivated;
+use App\Domains\Fanart\Private\Listeners\SoftDeleteFanartsOnUserDeactivated;
+use App\Domains\Story\Public\Events\ChapterDeleted;
+use App\Domains\Story\Public\Events\StoryDeleted;
 use App\Domains\Fanart\Private\Policies\FanartPolicy;
 use App\Domains\Fanart\Public\Events\FanartDeletedByModeration;
 use App\Domains\Fanart\Private\Support\FanartMediaUsageProvider;
@@ -61,7 +71,13 @@ class FanartServiceProvider extends ServiceProvider
 
         $this->registerNotifications();
 
-        app(EventBus::class)->registerEvent(FanartDeletedByModeration::name(), FanartDeletedByModeration::class);
+        $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(FanartDeletedByModeration::name(), FanartDeletedByModeration::class);
+        $eventBus->subscribe(UserDeleted::class, [app(DeleteFanartDataOnUserDeleted::class), 'handle']);
+        $eventBus->subscribe(UserDeactivated::class, [app(SoftDeleteFanartsOnUserDeactivated::class), 'handle']);
+        $eventBus->subscribe(UserReactivated::class, [app(RestoreFanartsOnUserReactivated::class), 'handle']);
+        $eventBus->subscribe(StoryDeleted::class, [app(DeleteFanartsOnStoryDeleted::class), 'handle']);
+        $eventBus->subscribe(ChapterDeleted::class, [app(DeleteFanartsOnChapterDeleted::class), 'handle']);
 
         $this->app->booted(fn () => $this->registerSettings());
     }
