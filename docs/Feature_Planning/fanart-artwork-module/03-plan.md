@@ -41,7 +41,7 @@ green gate and enforces its own security rules.
 | 16 | Fanartiste role requests (create, withdraw, accept, decline, 30-day cooldown) | M | 15 | DONE |
 | 17 | Lazy fragments: Fanarts tab, chapter groups, viewer / review viewer | M | 8, 10, 12 | DONE |
 | 18 | Story page integration: tab shell, action buttons, viewer modal | M | 16, 17 | DONE |
-| 18v | Checkpoint — story page for guest / `user` / confirmed reader / author / moderator | S | 18 | TODO |
+| 18v | Checkpoint — story page for guest / `user` / confirmed reader / author / moderator | S | 18 | DONE |
 | 19 | Story-page audio: speaker icons + `fanartPlayer` store with auto-advance | M | 18 | TODO |
 | 20 | Chapter page widgets: audio under title, image block at bottom | S | 17 | TODO |
 | 20v | Checkpoint — chapter page (quotes, annotations, comments) and story chapter list | S | 19, 20 | TODO |
@@ -1154,6 +1154,14 @@ Fanarts tab opens. Mobile width (375 px) for reader and author. e2e:
 `e2e/tests/core/chapter-comments.spec.ts`, `e2e/tests/core/confirm-modal.spec.ts`.
 
 Screenshots → `shots/checkpoint-18v/`.
+
+**Result (2026-10-18, HEAD 3703e5f4) — PASS**
+- e2e `chapter-comments` + `confirm-modal` green (10/10 incl. auth setup).
+- Guest: story page HTML byte-identical to the pre-phase `show.blade.php` (HEAD~1); `user`: no tab bar, no action buttons, no viewer markup, chapter list intact.
+- Confirmed / moderator: tab bar, « Proposer un fanart » + « Demander le rôle de fanartiste »; author: « Ajouter un artwork » only, Chapitres tab keeps Ordre / + Chapitre / edit-delete rows. Reader view keeps read toggles.
+- Tab switching Chapitres <-> Fanarts works (lazy fragment loaded on first open); thumbnail click and `?tab=fanarts&fanart=1` open the viewer modal; Escape and close button close it.
+- 375 px (confirmed, author): page and viewer stack correctly.
+- Not covered: fanartiste role, community story (e2e seed has none); flaky only in my first probe (read computed style mid x-show transition), not a defect.
 
 ---
 
