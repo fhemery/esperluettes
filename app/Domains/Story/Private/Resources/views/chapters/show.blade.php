@@ -215,6 +215,7 @@
                             </button>
                         </div>
                     </div>
+                    <x-fanart::chapter-audio :story-id="$vm->story->id" :chapter-id="$vm->chapter->id" />
                     @if($vm->isAuthor)
                     <div class="flex items-center gap-3">
                         <a href="{{ route('chapters.edit', ['storySlug' => $vm->story->slug, 'chapterSlug' => $vm->chapter->slug]) }}"
@@ -300,6 +301,8 @@
                 </div>
                 <x-quote::chapter-panel />
             </div>
+
+            <x-fanart::chapter-images :story-id="$vm->story->id" :chapter-id="$vm->chapter->id" />
 
             <div class="mt-8 pt-4 border-t border-accent">
                 <div class="flex items-center justify-between gap-4">

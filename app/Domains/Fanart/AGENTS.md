@@ -43,6 +43,8 @@ None yet.
 
 - **Story-page audio**: `<x-fanart::story-player>` (one `<audio>`, queue in `data-entries`) seeds `Alpine.store('fanartPlayer')` (`fanart-player.js`); `<x-fanart::chapter-audio-icon>` on each Story chapter row calls `play(id)`. Both read `FanartService::audioPlaylist` (memoised per request, visibility via `visibleTo`). On `ended` the store POSTs Story's `chapters.read.mark` (failure ignored) then plays the next entry.
 
+- **Chapter page**: `<x-fanart::chapter-audio>` (under the title, native player + report button) and `<x-fanart::chapter-images>` (view-only thumbnails + viewer modal, before the prev/next bar) sit in Story's `chapters/show.blade.php` **outside** `<article data-quote-article>`; both render nothing unless the viewer passes `seeFeature` and a published item exists.
+
 - **Never delete a fanart file from this domain.** Clear rows; `media:gc` collects files.
 - **The usage provider must read `withTrashed()`.** Soft-deleted rows (deactivated users) still own their files; dropping that makes GC delete files a reactivation would need.
 - **No FK to `users`, `stories` or `chapters`** — cross-domain by rule. Resolve references through `StoryPublicApi`.

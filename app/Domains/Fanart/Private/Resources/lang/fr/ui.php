@@ -59,6 +59,9 @@ return [
         'viewer_close' => 'Fermer',
         'viewer_label' => 'Fanart',
     ],
+    'chapter' => [
+        'images' => 'Fanarts du chapitre',
+    ],
     'player' => [
         'listen' => 'Écouter la lecture audio de ce chapitre',
         'label' => 'Lecture audio du chapitre',
