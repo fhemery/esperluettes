@@ -1,5 +1,40 @@
 <?php
 
 return [
-    // Strings are added by the phases that render them.
+    'create' => [
+        'page_title' => 'Proposer un fanart',
+        'heading' => 'Proposer un fanart pour « :story »',
+        'kind_label' => 'Type de fanart',
+        'kind_image' => 'Image',
+        'kind_audio' => 'Son',
+        'image_label' => 'Image',
+        'image_help' => 'JPG, PNG ou WebP, 2 Mo maximum.',
+        'sound_label' => 'Fichier son',
+        'sound_help' => 'MP3, 15 Mo maximum.',
+        'title_label' => 'Titre',
+        'description_label' => 'Description (facultatif)',
+        'chapter_label' => 'Chapitre',
+        'chapter_whole_work' => 'Toute l\'œuvre',
+        'chapter_choose' => 'Choisir un chapitre',
+        'attestation' => 'J\'atteste être l\'auteur·ice de ce fanart, qu\'il n\'a pas été généré par une IA, que j\'en détiens tous les droits et qu\'il respecte le règlement du site.',
+        'share_on_discord' => 'Partager sur Discord',
+        'pending_notice' => 'Votre fanart sera visible après validation par les auteur·ices de l\'histoire.',
+        'cancel' => 'Annuler',
+        'submit' => 'Proposer',
+        'submitted' => 'Votre fanart a été envoyé. Il sera visible après validation par les auteur·ices.',
+    ],
+    'validation' => [
+        'title_required' => 'Le titre est obligatoire.',
+        'title_max' => 'Le titre ne doit pas dépasser 100 caractères.',
+        'description_max' => 'La description ne doit pas dépasser 1000 caractères.',
+        'chapter_required' => 'Choisissez le chapitre concerné.',
+        'chapter_invalid' => 'Ce chapitre n\'est pas disponible pour cette histoire.',
+        'attestation_required' => 'Vous devez cocher cette attestation.',
+        'image_required' => 'Choisissez une image.',
+        'image_mimes' => 'L\'image doit être au format JPG, PNG ou WebP.',
+        'image_max' => 'L\'image ne doit pas dépasser 2 Mo.',
+        'sound_required' => 'Choisissez un fichier son.',
+        'sound_mimes' => 'Le son doit être au format MP3.',
+        'sound_max' => 'Le son ne doit pas dépasser 15 Mo.',
+    ],
 ];

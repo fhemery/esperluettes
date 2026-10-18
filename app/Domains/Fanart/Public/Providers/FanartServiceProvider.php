@@ -37,12 +37,17 @@ class FanartServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(FanartPolicy::class);
+
+        // Loaded here, not in boot(): every register() runs before any boot(), so these routes are
+        // matched before Story's `/stories/{slug}` catch-all (`.*`), which would swallow
+        // `/stories/{slug}/fanarts/…`. Boot order cannot be changed: Fanart's settings
+        // registration (in `booted`) must run after Story's.
+        $this->loadRoutesFrom(app_path('Domains/Fanart/Private/web.routes.php'));
     }
 
     public function boot(): void
     {
         $this->loadMigrationsFrom(app_path('Domains/Fanart/Database/Migrations'));
-        $this->loadRoutesFrom(app_path('Domains/Fanart/Private/web.routes.php'));
         $this->loadRoutesFrom(app_path('Domains/Fanart/Private/api.routes.php'));
         $this->loadTranslationsFrom(app_path('Domains/Fanart/Private/Resources/lang'), 'fanart');
         $this->loadViewsFrom(app_path('Domains/Fanart/Private/Resources/views'), 'fanart');
