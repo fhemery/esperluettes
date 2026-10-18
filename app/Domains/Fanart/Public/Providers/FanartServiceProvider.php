@@ -5,6 +5,17 @@ namespace App\Domains\Fanart\Public\Providers;
 use App\Domains\Fanart\Private\Policies\FanartPolicy;
 use App\Domains\Fanart\Private\Support\FanartMediaUsageProvider;
 use App\Domains\Fanart\Private\Support\FanartMode;
+use App\Domains\Fanart\Public\Notifications\FanartAcceptedNotification;
+use App\Domains\Fanart\Public\Notifications\FanartAudioReplacedNotification;
+use App\Domains\Fanart\Public\Notifications\FanartDeclinedNotification;
+use App\Domains\Fanart\Public\Notifications\FanartDeletedByModerationNotification;
+use App\Domains\Fanart\Public\Notifications\FanartDeletedNotification;
+use App\Domains\Fanart\Public\Notifications\FanartRemovedWithContentNotification;
+use App\Domains\Fanart\Public\Notifications\FanartRoleDeclinedNotification;
+use App\Domains\Fanart\Public\Notifications\FanartRoleGivenNotification;
+use App\Domains\Fanart\Public\Notifications\FanartRoleRequestedNotification;
+use App\Domains\Fanart\Public\Notifications\FanartSubmittedNotification;
+use App\Domains\Notification\Public\Services\NotificationFactory;
 use App\Domains\Media\Public\Contracts\MediaUsageRegistry;
 use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
@@ -41,7 +52,40 @@ class FanartServiceProvider extends ServiceProvider
         // Media skips the whole private `fanart/` root unless a provider claims files under it.
         app(MediaUsageRegistry::class)->register(new FanartMediaUsageProvider());
 
+        $this->registerNotifications();
+
         $this->app->booted(fn () => $this->registerSettings());
+    }
+
+    private function registerNotifications(): void
+    {
+        $factory = app(NotificationFactory::class);
+
+        $factory->registerGroup(
+            id: 'fanart',
+            sortOrder: 65,
+            translationKey: 'fanart::notification.groups.fanart',
+        );
+
+        foreach ([
+            FanartSubmittedNotification::class => 'submitted',
+            FanartAcceptedNotification::class => 'accepted',
+            FanartDeclinedNotification::class => 'declined',
+            FanartDeletedNotification::class => 'deleted',
+            FanartDeletedByModerationNotification::class => 'deleted_by_moderation',
+            FanartAudioReplacedNotification::class => 'audio_replaced',
+            FanartRemovedWithContentNotification::class => 'removed_with_content',
+            FanartRoleRequestedNotification::class => 'role_requested',
+            FanartRoleGivenNotification::class => 'role_given',
+            FanartRoleDeclinedNotification::class => 'role_declined',
+        ] as $class => $name) {
+            $factory->register(
+                type: $class::type(),
+                class: $class,
+                groupId: 'fanart',
+                nameKey: "fanart::notification.settings.type_{$name}",
+            );
+        }
     }
 
     private function registerSettings(): void
