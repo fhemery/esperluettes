@@ -44,7 +44,7 @@ green gate and enforces its own security rules.
 | 18v | Checkpoint — story page for guest / `user` / confirmed reader / author / moderator | S | 18 | DONE |
 | 19 | Story-page audio: speaker icons + `fanartPlayer` store with auto-advance | M | 18 | DONE |
 | 20 | Chapter page widgets: audio under title, image block at bottom | S | 17 | DONE |
-| 20v | Checkpoint — chapter page (quotes, annotations, comments) and story chapter list | S | 19, 20 | TODO |
+| 20v | Checkpoint — chapter page (quotes, annotations, comments) and story chapter list | S | 19, 20 | DONE |
 | 21 | Profile tab « Fanarts » (Images / Sons, pending badge, privacy) | M | 17 | TODO |
 | 22 | Discord feed: bot endpoints + signed image URL | S | 10, 11 | TODO |
 | 23 | Polish: i18n pass, a11y, mobile viewer, docs finalisation | S | all | TODO |
@@ -1253,6 +1253,16 @@ audio/images appear only where expected. On the story page, the chapter list
 `chapter-comments.spec.ts`, `comment-draft-consume.spec.ts`.
 
 Screenshots → `shots/checkpoint-20v/`.
+
+**Result (2026-10-18, HEAD b79be9f6) — PASS**
+- e2e `chapter-annotations`, `chapter-annotation-overlay`, `chapter-annotation-round-trip`, `chapter-comments`, `comment-draft-consume` green (17/17 incl. auth setup).
+- Fanart data (audios on ch 1/2(draft)/3/11, images on ch 1/11, published, by `confirmed`) injected into the e2e DB by hand (no e2e fanart seeder), driven through `browser:drive` on :8080.
+- Story chapter list: confirmed sees speaker icons on ch 1 and 3 only (draft ch 2 audio hidden, chapters without audio have none); author also sees the draft's icon; reorder / + Chapitre controls intact.
+- Story player: click ch 1 plays `/fanarts/1/file`; at real end POST `…/chapitre-publie-1/read` fires, store auto-advances to ch 3 (playing), POSTs mark-read for ch 3, then stops (`currentId` null).
+- Chapter page: audio under the title (before « Par »), image block before prev/next bar, single `[data-quote-article]` with both widgets outside; thumbnail opens the viewer modal (dialog shown, close with Escape). Ch 3 audio only; ch 4 nothing.
+- Existing features on ch 11 unchanged: selection shows the « Citer / Annoter / reactions » toolbar, own quote tint present; author heat map (`mark.quote-heat`, count badge) renders; no console errors / 4xx-5xx for confirmed or author.
+- Guest and `user`: no icon, player, audio, image block or `<audio>` on story, ch 1 or ch 11.
+- Not re-done: comment posting beyond the e2e specs (covered green). Black thumbnails are the stock test image, not a defect.
 
 ---
 
