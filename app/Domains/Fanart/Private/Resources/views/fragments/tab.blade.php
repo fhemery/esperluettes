@@ -46,7 +46,7 @@
                          if (this.open) await this.load();
                      },
                  }"
-                 x-init="if (open) load()">
+                 x-init="$nextTick(() => { if (open) load() })">
             <div class="flex items-center justify-between gap-2">
                 <x-shared::title tag="h3">{{ $group['title'] ?? __('fanart::ui.tab.whole_work') }}</x-shared::title>
                 <button type="button" class="text-sm font-medium hover:text-accent" x-on:click="toggle()" :aria-expanded="open">

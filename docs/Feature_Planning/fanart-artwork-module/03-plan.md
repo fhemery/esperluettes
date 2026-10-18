@@ -1382,43 +1382,45 @@ Filled by VERIFY. One row per surface worth looking at with real eyes.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Story page — guest | No tab bar, no fanart button, no speaker icon; page identical to before | |
-| Story page — `user` (non-confirmed) | Same as guest | |
-| Story page — confirmed reader, public story | Tabs Chapitres / Fanarts; « Proposer un fanart » next to chapter list; speaker icons on chapters with audio | |
-| Story page — confirmed reader, mode `designated`, no role | « Demander le rôle de fanartiste »; after request, withdraw option | |
-| Story page — author | « Ajouter un artwork », no « Proposer »; Fanarts tab shows « En attente de confirmation » + effective-mode explanation (co-authored: most-restrictive note) | |
-| Story page — private story, author | No submission button; existing fanarts visible | |
-| Fanarts tab — reader | Groups in chapter order + « Toute l'œuvre »; unread chapters collapsed with spoiler notice; « Montrer tout » / « Cacher tout »; lazy thumbnails | |
-| Fanarts tab — empty | Empty-state message | |
-| Fanarts tab — unpublished chapter | Group hidden for reader, visible for author | |
-| Viewer — desktop | Image fits width/height; title, artist link, description, Signaler; Supprimer for author / owner | |
-| Viewer — mobile (375 px) | Image stacked above text, scrollable, closable | |
-| Viewer — moderator | Moderation menu with « Supprimer » | |
-| Review viewer — author, pending image | Comment required; Accepter publishes; Décliner removes; Signaler removes from queue | |
-| Review viewer — pending audio | Player plays; accept replaces previous chapter audio | |
-| Create page — reader | Image / Audio switch only shows allowed kinds; attestation wording incl. AI clause; Discord box only on Image; validation errors keep fields | |
-| Create page — author | Title « Ajouter un artwork »; credit warning with count; no-credit refusal message | |
-| Artwork edit page | Pre-filled; file replace works; no credit spent | |
-| Story-page player | Click speaker → plays; at end chapter marked read (check icon in list) and next chapter with audio starts; stops after last | |
-| Chapter page — confirmed reader | Audio player under title with report flag; images block at bottom, view-only | |
-| Chapter page — guest | Nothing of the feature | |
-| Chapter page — quotes / annotations | Quote toolbar and author heat map still anchor correctly | |
-| Collaborators page — author | Fanartistes section: grant, revoke, pending requests accept / decline | |
-| Profile tab — owner | Images / Sons sections; pending badge; delete | |
-| Profile tab — other confirmed, tab private | Tab absent | |
-| Profile tab — other confirmed, tab opened | Only readable stories; spoiler collapse for unread chapters | |
-| Profile tab — moderator | Visible even when private, pending visible | |
-| Settings › Histoires | Fanart section with two selects next to reading prefs; defaults images=oui, audio=fanartistes désignés | |
-| Settings › Profil | « Masquer l'onglet Fanarts » checked by default | |
-| Notifications | Each of the ten types renders (submitted, accepted w/ comment, declined w/ and w/o comment, deleted, deleted by moderation, audio replaced, removed with content, role requested/given/declined) | |
-| Admin › Moderation report (fanart) | Snapshot shows copied image / audio player + title, artist, story, chapter; link opens the viewer on the story page | |
-| Admin › Moderation report after fanart deleted | Copy still displayed | |
-| Deactivated fanartist | Their fanarts gone from tab / chapter / profile; back after reactivation | |
-| Deactivated sole author | Story and its fanarts unreachable | |
-| Deactivated co-author (one of two) | Story and its fanarts still visible; hidden once both authors are deactivated | |
-| Deleted co-author account | Co-authored story and all its fanarts gone; fanartists notified | |
-| Deleted chapter | Its fanarts gone; fanartist notified | |
-| Dark mode / theme | Tabs, thumbnails, viewer readable | |
+| Story page — guest | No tab bar, no fanart button, no speaker icon; page identical to before | ✅ (spec) |
+| Story page — `user` (non-confirmed) | Same as guest | ✅ (spec) |
+| Story page — confirmed reader, public story | Tabs Chapitres / Fanarts; « Proposer un fanart » next to chapter list; speaker icons on chapters with audio | ✅ icons on ch 1 and 3 only, none on draft / no-audio chapters |
+| Story page — confirmed reader, mode `designated`, no role | « Demander le rôle de fanartiste »; after request, withdraw option | ✅ request then « Demande envoyée — retirer » then withdraw |
+| Story page — author | « Ajouter un artwork », no « Proposer »; Fanarts tab shows « En attente de confirmation » + effective-mode explanation (co-authored: most-restrictive note) | ✅ (co-authored note not driven in browser: covered by `FanartFragmentsTest` / `ModeServiceTest`) |
+| Story page — private story, author | No submission button; existing fanarts visible | ✅ |
+| Fanarts tab — reader | Groups in chapter order + « Toute l'œuvre »; unread chapters collapsed with spoiler notice; « Montrer tout » / « Cacher tout »; lazy thumbnails | ✅ fixed: group load deferred with `$nextTick` so it is no longer tracked by the outer `x-html` effect; e2e green |
+| Fanarts tab — empty | Empty-state message | ✅ |
+| Fanarts tab — unpublished chapter | Group hidden for reader, visible for author | ✅ |
+| Viewer — desktop | Image fits width/height; title, artist link, description, Signaler; Supprimer for author / owner | ✅ (Signaler on others' fanart, Supprimer on own / as author) |
+| Viewer — mobile (375 px) | Image stacked above text, scrollable, closable | ✅ |
+| Viewer — moderator | Moderation menu with « Supprimer » | ✅ |
+| Review viewer — author, pending image | Comment required; Accepter publishes; Décliner removes; Signaler removes from queue | ✅ (note: Décliner redirects back to `?tab=fanarts&fanart=<id>` of the now-deleted fanart, so the viewer silently fails to open; cosmetic) |
+| Review viewer — pending audio | Player plays; accept replaces previous chapter audio | ✅ |
+| Create page — reader | Image / Audio switch only shows allowed kinds; attestation wording incl. AI clause; Discord box only on Image; validation errors keep fields | ✅ (no switch without role; switch + Discord box toggling checked as granted fanartiste) |
+| Create page — author | Title « Ajouter un artwork »; credit warning with count; no-credit refusal message | ✅ title + count; no-credit refusal moved to `ArtworkTest` (PHP) |
+| Artwork edit page | Pre-filled; file replace works; no credit spent | ✅ |
+| Story-page player | Click speaker → plays; at end chapter marked read (check icon in list) and next chapter with audio starts; stops after last | ✅ (mark-read POST + read state asserted, not the check icon itself) |
+| Chapter page — confirmed reader | Audio player under title with report flag; images block at bottom, view-only | ✅ |
+| Chapter page — guest | Nothing of the feature | ✅ |
+| Chapter page — quotes / annotations | Quote toolbar and author heat map still anchor correctly | ✅ core annotation / quote specs green in the full run (68 pass) |
+| Collaborators page — author | Fanartistes section: grant, revoke, pending requests accept / decline | ✅ accept / decline; grant via profile picker and revoke not driven (`FanartistManagementTest`) |
+| Profile tab — owner | Images / Sons sections; pending badge; delete | ✅ |
+| Profile tab — other confirmed, tab private | Tab absent | ✅ |
+| Profile tab — other confirmed, tab opened | Only readable stories; spoiler collapse for unread chapters | n/a moved to `FanartProfileTabTest` (PHP); not driven |
+| Profile tab — moderator | Visible even when private, pending visible | ✅ |
+| Settings › Histoires | Fanart section with two selects next to reading prefs; defaults images=oui, audio=fanartistes désignés | ✅ |
+| Settings › Profil | « Masquer l'onglet Fanarts » checked by default | ✅ (label is actually « Masquer mes fanarts ») |
+| Notifications | Each of the ten types renders (submitted, accepted w/ comment, declined w/ and w/o comment, deleted, deleted by moderation, audio replaced, removed with content, role requested/given/declined) | ✅ ten types in `FanartNotificationsTest` (PHP); browser: accepted / declined with comment, moderation delete seen on `/notifications` |
+| Admin › Moderation report (fanart) | Snapshot shows copied image / audio player + title, artist, story, chapter; link opens the viewer on the story page | ✅ |
+| Admin › Moderation report after fanart deleted | Copy still displayed | ✅ |
+| Deactivated fanartist | Their fanarts gone from tab / chapter / profile; back after reactivation | n/a moved to `FanartLifecycleTest` |
+| Deactivated sole author | Story and its fanarts unreachable | n/a moved to `FanartLifecycleTest` |
+| Deactivated co-author (one of two) | Story and its fanarts still visible; hidden once both authors are deactivated | n/a moved to `FanartLifecycleTest` (+ checkpoint 3bv) |
+| Deleted co-author account | Co-authored story and all its fanarts gone; fanartists notified | n/a moved to `FanartLifecycleTest` |
+| Deleted chapter | Its fanarts gone; fanartist notified | n/a moved to `FanartLifecycleTest` |
+| Dark mode / theme | Tabs, thumbnails, viewer readable | ✅ shots `shots/verify/dark-*.png`; to eyeball: magenta headings on near-black are dim |
+
+**VERIFY result (2026-10-18)** — 1 FAIL (« Montrer tout / Cacher tout »). Spec `e2e/tests/features/fanart-artwork-module.spec.ts` (40 tests incl. the failing one; full run 68 pass / 1 fail), seeder `E2eFanartSeeder`, page objects `e2e/pages/FanartStoryPage.ts`, evidence in `shots/verify/`. Side findings: (a) `compliant` redirect: a user who has not accepted the CGU gets the whole CGU page injected into the viewer modal (fetch follows the redirect); (b) 404 pages answer 500 (known backlog `fix-404-page-theme-500`), so the specs assert « not ok » on gone files.
 
 ## Open items
 

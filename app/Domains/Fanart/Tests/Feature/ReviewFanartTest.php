@@ -77,6 +77,17 @@ it('deletes a pending fanart on decline and notifies the submitter with the comm
         ->and(latestHtml('fanart.declined'))->toContain('Pas pour cette histoire');
 });
 
+it('redirects a decline back without the deleted fanart id', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $fanart = pendingImage(['story_id' => $story->id, 'user_id' => bob($this)->id]);
+
+    $this->actingAs($author)
+        ->from('/stories/histoire?tab=fanarts&fanart=' . $fanart->id)
+        ->post(route('fanart.decline', $fanart->id), ['comment' => 'Non'])
+        ->assertRedirect('/stories/histoire?tab=fanarts');
+});
+
 it('requires a comment of at most 500 chars', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);

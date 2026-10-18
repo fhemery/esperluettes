@@ -35,7 +35,12 @@ class FanartReviewController
 
         $this->service->decline($fanart, Auth::id(), (string) $request->validated('comment'));
 
-        return back()->with('success', __('fanart::ui.review.declined'));
+        // The previous URL may carry `fanart=<id>` of the fanart just deleted: drop it.
+        $previous = url()->previous();
+        $target = preg_replace('/([?&])fanart=[^&#]*&?/', '$1', $previous);
+        $target = rtrim((string) $target, '?&');
+
+        return redirect()->to($target)->with('success', __('fanart::ui.review.declined'));
     }
 
     private function alreadyDecided(): RedirectResponse
