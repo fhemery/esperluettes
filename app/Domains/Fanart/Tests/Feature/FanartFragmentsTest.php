@@ -176,7 +176,7 @@ it('renders the empty state when nothing is published', function () {
         ->assertSee(__('fanart::ui.tab.empty'));
 });
 
-it('renders a group with thumbnails and audio, without a spoiler for the group endpoint itself', function () {
+it('renders a group with thumbnails only, without a spoiler for the group endpoint itself', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
     $chapter = createPublishedChapter($this, $story, $author);
@@ -194,7 +194,7 @@ it('renders a group with thumbnails and audio, without a spoiler for the group e
         ->assertSee(route('fanart.thumb', [$image->id, 800]), false)
         ->assertSee('loading="lazy"', false)
         ->assertSee('alt="Portrait"', false)
-        ->assertSee(route('fanart.file', $audio->id), false);
+        ->assertDontSee(route('fanart.file', $audio->id), false);
 });
 
 it('renders the viewer with title, linked artist, sanitised description, report and delete for the submitter', function () {
@@ -336,4 +336,15 @@ it('loads a group without N+1 (query count bound)', function () {
     $large = $count();
 
     expect($large)->toBe($small);
+});
+
+it('leaves published sounds out of the tab summary, keeping them pending-only', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    createFanart(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => $chapter->id, 'kind' => FanartKind::Audio]);
+
+    $this->actingAs(bob($this))->get(tabUrl($story))->assertOk()
+        ->assertDontSee('data-group-key', false)
+        ->assertSee(__('fanart::ui.tab.empty'));
 });

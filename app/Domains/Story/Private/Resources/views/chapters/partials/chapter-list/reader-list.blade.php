@@ -22,10 +22,12 @@
     <!-- Chapter title -->
     <!-- On mobile, also add updated at, words count, and reads count -->
     <div class="flex flex-col justify-center col-span-1 surface-read text-on-surface p-2 min-w-0">
-        <a href="{{ $ch->url }}" class="truncate text-fg hover:text-fg/80 font-semibold py-2">
-            {{ $ch->title }}
-        </a>
-        <x-fanart::chapter-audio-icon :story-id="$story->id" :chapter-id="$ch->id" />
+        <div class="flex items-center gap-2 min-w-0">
+            <a href="{{ $ch->url }}" class="truncate text-fg hover:text-fg/80 font-semibold py-2">
+                {{ $ch->title }}
+            </a>
+            <x-fanart::chapter-audio-icon :story-id="$story->id" :chapter-id="$ch->id" />
+        </div>
 
         <div class="sm:hidden flex flex-start gap-3" x-data="{ updated: new Date('{{ $ch->updatedAt }}') }">
             <span class="text-sm" x-text="DateUtils.formatDate(updated)"></span>

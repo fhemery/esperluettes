@@ -371,6 +371,7 @@ class FanartService
         $counts = Fanart::query()
             ->visibleTo($viewer)
             ->published()
+            ->where('kind', FanartKind::Image)
             ->where('story_id', $storyId)
             ->selectRaw('chapter_id, count(*) as total')
             ->groupBy('chapter_id')
@@ -418,10 +419,10 @@ class FanartService
     }
 
     /**
-     * Published fanarts of one group, or null when the viewer may not see the group at all
+     * Published images of one group (sounds are played from the chapter list), or null when the viewer may not see the group at all
      * (chapter of another story, or unpublished and the viewer is a reader).
      *
-     * @return array{fanarts: Collection<int, Fanart>, artists: array<int, string>}|null
+     * @return array{fanarts: Collection<int, Fanart>}|null
      */
     public function group(int $storyId, ?int $chapterId, int $userId): ?array
     {
@@ -438,15 +439,13 @@ class FanartService
         $fanarts = Fanart::query()
             ->visibleTo($viewer)
             ->published()
+            ->where('kind', FanartKind::Image)
             ->where('story_id', $storyId)
             ->where('chapter_id', $chapterId)
-            ->orderBy('kind')
             ->orderBy('id')
             ->get();
 
-        $audioUserIds = $fanarts->where('kind', FanartKind::Audio)->pluck('user_id')->unique()->all();
-
-        return ['fanarts' => $fanarts, 'artists' => $this->artistNames($audioUserIds)];
+        return ['fanarts' => $fanarts];
     }
 
     /**
