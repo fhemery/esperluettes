@@ -7,6 +7,6 @@
 @elseif ($canRequest)
     <form action="{{ route('fanart.role-requests.store', ['slug' => $slug]) }}" method="POST">
         @csrf
-        <x-shared::button color="accent" type="submit">{{ __('fanart::ui.role_request.request') }}</x-shared::button>
+        <x-shared::button color="accent" type="submit">{{ __('fanart::ui.role_request.' . ($label ?? 'request')) }}</x-shared::button>
     </form>
 @endif

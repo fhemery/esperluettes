@@ -23,7 +23,7 @@ it('renders the story tab, viewer and create page without missing translation ke
     $pages = [
         route('fanart.tab', $story->slug),
         route('fanart.show', $pending->id),
-        route('fanart.create', $story->slug),
+        route('fanart.create', [$story->slug, 'image']),
         route('stories.show', $story->slug),
     ];
 
@@ -35,7 +35,7 @@ it('renders the story tab, viewer and create page without missing translation ke
     $this->actingAs($author)->get(route('stories.show', $story->slug))
         ->assertSee('role="tablist"', false)
         ->assertSee('role="tabpanel"', false)
-        ->assertSee(__('fanart::ui.actions.artwork'));
+        ->assertSee(__('fanart::ui.actions.artwork_image'));
     $this->actingAs(bob($this))->get(route('stories.show', $story->slug))
-        ->assertSee(__('fanart::ui.actions.submit'));
+        ->assertSee(__('fanart::ui.actions.submit_image'));
 });

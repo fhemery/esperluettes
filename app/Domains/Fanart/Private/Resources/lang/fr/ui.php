@@ -4,9 +4,6 @@ return [
     'create' => [
         'page_title' => 'Proposer un fanart',
         'heading' => 'Proposer un fanart pour « :story »',
-        'kind_label' => 'Type de fanart',
-        'kind_image' => 'Image',
-        'kind_audio' => 'Son',
         'image_label' => 'Image',
         'image_help' => 'JPG, PNG ou WebP, 2 Mo maximum.',
         'sound_label' => 'Fichier son',
@@ -77,8 +74,10 @@ return [
         'label' => 'Lecture audio du chapitre',
     ],
     'actions' => [
-        'submit' => 'Proposer un fanart',
-        'artwork' => 'Ajouter un artwork',
+        'submit_image' => 'Proposer une image',
+        'submit_audio' => 'Proposer un son',
+        'artwork_image' => 'Ajouter un artwork (image)',
+        'artwork_audio' => 'Ajouter un artwork (son)',
     ],
     'viewer' => [
         'artist' => 'Par',
@@ -108,6 +107,8 @@ return [
     ],
     'role_request' => [
         'request' => 'Demander le rôle de fanartiste',
+        'request_image' => 'Demander le rôle de fanartiste pour proposer une image',
+        'request_audio' => 'Demander le rôle de fanartiste pour proposer un son',
         'pending' => 'Demande envoyée — retirer',
         'sent' => 'Votre demande a été envoyée aux auteurs.',
         'withdrawn' => 'Votre demande a été retirée.',

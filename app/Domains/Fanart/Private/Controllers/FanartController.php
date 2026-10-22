@@ -24,27 +24,19 @@ class FanartController
     ) {
     }
 
-    public function create(string $slug): View
+    public function create(string $slug, string $kind): View
     {
         $story = $this->stories->resolve($slug);
         $userId = Auth::id();
+        $kind = FanartKind::tryFrom($kind) ?? abort(404);
 
         $isArtwork = $this->policy->uploadArtwork($userId, $story->id);
 
-        $allowedKinds = $isArtwork
-            ? FanartKind::cases()
-            : array_values(array_filter(
-                FanartKind::cases(),
-                fn (FanartKind $kind) => $this->policy->submit($userId, $story->id, $kind),
-            ));
-
-        if ($allowedKinds === []) {
-            abort(403);
-        }
+        abort_unless($isArtwork || $this->policy->submit($userId, $story->id, $kind), 403);
 
         return view('fanart::pages.create', [
             'story' => $story,
-            'allowedKinds' => array_map(fn (FanartKind $k) => $k->value, $allowedKinds),
+            'kind' => $kind->value,
             'chapters' => $this->service->publishedChapterOptions($story->id),
             'isArtwork' => $isArtwork,
             'credits' => $isArtwork ? max(0, $this->storyApi->getAvailableChapterCredits($userId)) : null,

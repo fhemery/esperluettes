@@ -33,8 +33,8 @@ Route::middleware(['web', 'auth', 'compliant', 'role:' . implode(',', [
         ->whereNumber('userId')->whereNumber('storyId')->name('fanart.profile.group');
     Route::get('/fanarts/{fanart}', [FanartFragmentController::class, 'show'])
         ->whereNumber('fanart')->name('fanart.show');
-    Route::get('/stories/{slug}/fanarts/create', [FanartController::class, 'create'])
-        ->where('slug', '[^/]+')->name('fanart.create');
+    Route::get('/stories/{slug}/fanarts/create/{kind}', [FanartController::class, 'create'])
+        ->where('slug', '[^/]+')->where('kind', '[^/]+')->name('fanart.create');
     Route::post('/stories/{slug}/fanarts', [FanartController::class, 'store'])
         ->where('slug', '[^/]+')->name('fanart.store');
     Route::get('/fanarts/{fanart}/edit', [FanartController::class, 'edit'])

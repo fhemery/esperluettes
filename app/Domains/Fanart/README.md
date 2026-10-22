@@ -17,7 +17,7 @@ Confirmed readers (« fanartistes ») submit images (jpg/png/webp, 2 Mo) and sou
 
 | Surface | Component / route |
 |---|---|
-| Story page | `<x-fanart::story-tabs>` (Chapitres / Fanarts, lazy-loaded), `<x-fanart::story-actions>` (« Proposer un fanart » / « Ajouter un artwork »), `<x-fanart::request-role-button>`, `<x-fanart::story-player>` + `<x-fanart::chapter-audio-icon>` |
+| Story page | `<x-fanart::story-tabs>` (Chapitres / Fanarts, lazy-loaded), `<x-fanart::story-actions>` (inside the Fanarts tab: one button per kind, « Proposer une image / un son » or « Ajouter un artwork (image / son) », routes `fanart.create` per kind), `<x-fanart::request-role-button>`, `<x-fanart::story-player>` + `<x-fanart::chapter-audio-icon>` |
 | Chapter page | `<x-fanart::chapter-audio>`, `<x-fanart::chapter-images>` |
 | Collaborators page | `<x-fanart::collaborators-section>` |
 | Profile | tab `fanarts` (`<x-fanart::profile-tab>`), hidden by default through the `hide-fanart-tab` privacy setting (Paramètres › Profil, « Masquer mes fanarts », checked by default: owner and staff only) |

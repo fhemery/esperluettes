@@ -65,11 +65,11 @@ it('shows the artwork create page with the credit warning to an author', functio
     $story = publicStory('Histoire', $author->id);
 
     $this->actingAs($author)
-        ->get(route('fanart.create', $story->slug))
+        ->get(route('fanart.create', [$story->slug, 'image']))
         ->assertOk()
         ->assertSee(__('fanart::ui.create.artwork_heading', ['story' => 'Histoire']), false)
         ->assertSee(trans_choice('fanart::ui.create.credit_warning', 5, ['count' => 5]), false)
-        ->assertSee('data-allowed-kinds="image,audio"', false);
+        ->assertSee('data-kind="image"', false);
 });
 
 it('refuses the upload with the no-credit message and stores nothing at zero credits', function () {
@@ -217,7 +217,7 @@ it('returns 403 on upload to an author of a private story', function () {
     $story = privateStory('Secrete', $author->id);
 
     $this->actingAs($author);
-    $this->get(route('fanart.create', $story->slug))->assertForbidden();
+    $this->get(route('fanart.create', [$story->slug, 'image']))->assertForbidden();
     $this->post(route('fanart.store', $story->slug), artworkImagePayload())->assertForbidden();
 
     expect(Fanart::count())->toBe(0);

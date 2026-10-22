@@ -87,7 +87,7 @@ export class FanartCreatePage {
   ) {}
 
   async goto(): Promise<void> {
-    await this.page.goto(`/stories/${this.storySlug}/fanarts/create`);
+    await this.page.goto(`/stories/${this.storySlug}/fanarts/create/image`);
   }
 
   get title(): Locator {

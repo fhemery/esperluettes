@@ -45,21 +45,29 @@ function grantAudioRole(int $storyId, int $userId): void
     Fanartist::create(['story_id' => $storyId, 'user_id' => $userId, 'granted_by_user_id' => $userId]);
 }
 
-it('shows the create page with only the kinds the mode allows', function () {
+it('shows each create page only for the kinds the mode allows', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
     $reader = bob($this);
 
     // Defaults: images = yes, audio = designated (the reader is not a fanartiste).
     $this->actingAs($reader);
-    $this->get(route('fanart.create', $story->slug))
+    $this->get(route('fanart.create', [$story->slug, 'image']))
         ->assertOk()
-        ->assertSee('data-allowed-kinds="image"', false);
+        ->assertSee('data-kind="image"', false);
+    $this->get(route('fanart.create', [$story->slug, 'audio']))->assertForbidden();
 
     grantAudioRole($story->id, $reader->id);
-    $this->get(route('fanart.create', $story->slug))
+    $this->get(route('fanart.create', [$story->slug, 'audio']))
         ->assertOk()
-        ->assertSee('data-allowed-kinds="image,audio"', false);
+        ->assertSee('data-kind="audio"', false);
+});
+
+it('answers 404 for an unknown kind', function () {
+    $story = publicStory('Histoire', alice($this)->id);
+    $this->actingAs(bob($this));
+
+    $this->get('/stories/' . $story->slug . '/fanarts/create/video')->assertNotFound();
 });
 
 it('stores a pending image with 400/800 variants and notifies every author', function () {
@@ -161,9 +169,9 @@ it('requires title and the attestation; caps description at 1000 visible chars',
     $story = publicStory('Histoire', $author->id);
     $this->actingAs(bob($this));
 
-    $this->from(route('fanart.create', $story->slug))
+    $this->from(route('fanart.create', [$story->slug, 'image']))
         ->post(route('fanart.store', $story->slug), imagePayload(['title' => '', 'attestation' => null]))
-        ->assertRedirect(route('fanart.create', $story->slug))
+        ->assertRedirect(route('fanart.create', [$story->slug, 'image']))
         ->assertSessionHasErrors(['title', 'attestation'])
         ->assertSessionHasInput('description');
 
@@ -246,7 +254,7 @@ it('returns 403 when both modes are no, even for a fanartiste', function () {
 
     $this->post(route('fanart.store', $story->slug), imagePayload())->assertForbidden();
     $this->post(route('fanart.store', $story->slug), audioPayload($chapter->id))->assertForbidden();
-    $this->get(route('fanart.create', $story->slug))->assertForbidden();
+    $this->get(route('fanart.create', [$story->slug, 'image']))->assertForbidden();
 
     expect(Fanart::count())->toBe(0);
 });
@@ -256,15 +264,15 @@ it('returns 403 on a private story', function () {
     $story = privateStory('Secrète', $author->id);
     $this->actingAs(bob($this));
 
-    $this->get(route('fanart.create', $story->slug))->assertForbidden();
+    $this->get(route('fanart.create', [$story->slug, 'image']))->assertForbidden();
     $this->post(route('fanart.store', $story->slug), imagePayload())->assertForbidden();
 });
 
 it('returns 404 for an unknown story', function () {
     $this->actingAs(alice($this));
 
-    $this->get('/stories/inconnue-999999/fanarts/create')->assertNotFound();
-    $this->get('/stories/sans-id/fanarts/create')->assertNotFound();
+    $this->get('/stories/inconnue-999999/fanarts/create/image')->assertNotFound();
+    $this->get('/stories/sans-id/fanarts/create/image')->assertNotFound();
 });
 
 it('turns away a non-confirmed user and redirects a guest', function () {
@@ -276,7 +284,7 @@ it('turns away a non-confirmed user and redirects a guest', function () {
     // The convention `role` middleware answers a non-confirmed user with a redirect, never a body.
     $this->actingAs(bob($this, roles: [Roles::USER]));
     $this->post(route('fanart.store', $story->slug), imagePayload())->assertRedirect();
-    $this->get(route('fanart.create', $story->slug))->assertRedirect();
+    $this->get(route('fanart.create', [$story->slug, 'image']))->assertRedirect();
 
     expect(Fanart::count())->toBe(0);
 });

@@ -18,7 +18,8 @@ class RequestRoleButton extends Component
 
     public bool $canRequest = false;
 
-    public function __construct(public int $storyId)
+    /** @param string|null $label Key under `fanart::ui.role_request`; defaults to the generic `request`. */
+    public function __construct(public int $storyId, public ?string $label = null)
     {
         $userId = Auth::id();
         if ($userId === null) {

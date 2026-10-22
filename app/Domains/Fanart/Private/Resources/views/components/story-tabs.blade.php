@@ -1,4 +1,5 @@
 @if (! $visible)
+    {{ $title ?? '' }}
     {{ $slot }}
 @else
     @php($tabUrl = route('fanart.tab', $storySlug))
@@ -50,6 +51,7 @@
             {{ $slot }}
         </div>
         <div id="fanart-panel-fanarts" role="tabpanel" aria-labelledby="fanart-tab-fanarts" x-show="tab === 'fanarts'" x-cloak>
+            <x-fanart::story-actions :story-id="$storyId" :story-slug="$storySlug" />
             <div x-html="html">{{ __('fanart::ui.tab.loading') }}</div>
         </div>
     </div>

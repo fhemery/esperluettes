@@ -1,6 +1,6 @@
 <x-app-layout size="md">
     <div class="w-full flex-1 flex flex-col gap-4 surface-read text-on-surface p-2 sm:p-4"
-         data-allowed-kinds="{{ implode(',', $allowedKinds) }}">
+         data-kind="{{ $kind }}">
         <x-shared::title>
             {{ __($isArtwork ? 'fanart::ui.create.artwork_heading' : 'fanart::ui.create.heading', ['story' => $story->title]) }}
         </x-shared::title>
@@ -15,27 +15,14 @@
 
         <form action="{{ route('fanart.store', $story->slug) }}" method="POST" enctype="multipart/form-data" novalidate
               class="flex flex-col gap-4"
-              x-data="{ kind: @js(old('kind', $allowedKinds[0])) }">
+              x-data="{ kind: @js($kind) }">
             @csrf
-            <input type="hidden" name="kind" :value="kind">
+            <input type="hidden" name="kind" value="{{ $kind }}">
 
-            @if (count($allowedKinds) > 1)
-                <div class="flex gap-2" role="group" aria-label="{{ __('fanart::ui.create.kind_label') }}">
-                    @foreach ($allowedKinds as $allowed)
-                        <button type="button"
-                                class="px-4 py-2 border border-accent rounded"
-                                :class="kind === '{{ $allowed }}' ? 'bg-accent text-on-accent' : ''"
-                                :aria-pressed="kind === '{{ $allowed }}'"
-                                @click="kind = '{{ $allowed }}'">
-                            {{ __('fanart::ui.create.kind_' . $allowed) }}
-                        </button>
-                    @endforeach
-                </div>
-            @endif
             <x-shared::input-error :messages="$errors->get('kind')" />
 
-            @if (in_array('image', $allowedKinds, true))
-                <div x-show="kind === 'image'" x-cloak>
+            @if ($kind === 'image')
+                <div>
                     <x-media::image-field
                         name="image"
                         :scope="'fanart/' . $story->id"
@@ -52,8 +39,8 @@
                 </div>
             @endif
 
-            @if (in_array('audio', $allowedKinds, true))
-                <div x-show="kind === 'audio'" x-cloak>
+            @if ($kind === 'audio')
+                <div>
                     <x-media::sound-field
                         name="sound"
                         :label="__('fanart::ui.create.sound_label')"
@@ -109,8 +96,8 @@
                 <x-shared::input-error :messages="$errors->get('attestation')" />
             </div>
 
-            @if (in_array('image', $allowedKinds, true))
-                <label class="flex items-center gap-2" x-show="kind === 'image'">
+            @if ($kind === 'image')
+                <label class="flex items-center gap-2">
                     <input type="checkbox" name="share_on_discord" value="1" @checked(old('share_on_discord'))>
                     <span>{{ __('fanart::ui.create.share_on_discord') }}</span>
                 </label>
