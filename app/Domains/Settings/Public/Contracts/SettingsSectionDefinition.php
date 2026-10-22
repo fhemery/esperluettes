@@ -10,5 +10,6 @@ final class SettingsSectionDefinition
         public readonly int $order,               // Display order within tab
         public readonly string $nameKey,          // Full translation key for section name
         public readonly ?string $descriptionKey = null, // Full translation key for description
+        public readonly bool $openByDefault = false,  // Rendered expanded even when not the tab's first section
     ) {}
 }

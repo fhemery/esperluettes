@@ -21,6 +21,15 @@ it('shows the Fanart section in Paramètres › Histoires next to Story reading 
         ->assertSee('fanart::settings.params.fanart-audio-mode.name');
 });
 
+it('renders the Fanart section expanded, not only the first section of the tab', function () {
+    $html = $this->actingAs(alice($this))
+        ->get(route('settings.tab', ['tab' => 'stories']))
+        ->assertOk()
+        ->getContent();
+
+    expect(substr_count($html, 'x-data="{ open: true }"'))->toBe(2);
+});
+
 it('saves fanart-images-mode and rejects an unknown value', function () {
     $user = alice($this);
 

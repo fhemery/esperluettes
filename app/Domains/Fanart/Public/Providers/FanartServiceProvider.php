@@ -153,6 +153,7 @@ class FanartServiceProvider extends ServiceProvider
                 order: 20,
                 nameKey: 'fanart::settings.sections.fanart.name',
                 descriptionKey: 'fanart::settings.sections.fanart.description',
+                openByDefault: true,
             ));
 
             foreach ([

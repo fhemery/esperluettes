@@ -8,7 +8,7 @@
             <x-settings::section
                 :section="$sectionData['section']"
                 :parameters="$sectionData['parameters']"
-                :open="$index === 0"
+                :open="$index === 0 || $sectionData['section']->openByDefault"
             />
         @endforeach
     </div>
