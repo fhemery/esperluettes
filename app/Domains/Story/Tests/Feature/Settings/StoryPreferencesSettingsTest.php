@@ -35,9 +35,11 @@ describe('Story preferences settings registration', function () {
         $sections = app(SettingsPublicApi::class)
             ->getSectionsForTab(StoryServiceProvider::TAB_STORIES);
 
-        expect($sections)->toHaveCount(1);
-        expect($sections[0]->id)->toBe('reading');
-        expect($sections[0]->nameKey)->toBe('story::settings.sections.reading.name');
+        // Other domains (Fanart) add their own sections to this tab.
+        $reading = collect($sections)->firstWhere('id', 'reading');
+
+        expect($reading)->not->toBeNull();
+        expect($reading->nameKey)->toBe('story::settings.sections.reading.name');
     });
 
     it('registers both preferences as booleans defaulting to false', function () {

@@ -223,6 +223,27 @@ class StoryService
         return Chapter::query()->whereIn('id', $chapterIds)->get()->keyBy('id')->all();
     }
 
+    /**
+     * Chapters (all statuses) of the given stories, ordered by sort_order.
+     * @return array<int, Chapter[]> storyId => chapters
+     */
+    public function getChaptersByStoryIds(array $storyIds): array
+    {
+        if (empty($storyIds)) {
+            return [];
+        }
+        $result = [];
+        Chapter::query()
+            ->whereIn('story_id', $storyIds)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->each(function (Chapter $c) use (&$result) {
+                $result[(int) $c->story_id][] = $c;
+            });
+        return $result;
+    }
+
     /** @return array<int, int[]> */
     public function getAuthorIdsByStoryIds(array $storyIds): array
     {
@@ -599,15 +620,32 @@ class StoryService
     }
 
     /**
-     * Soft delete all stories authored by the given user, including their chapters.
-     * Intended to be used on user deactivation.
+     * Soft delete the stories authored by the given user, including their chapters,
+     * but only those left with no active author (a co-authored story stays visible
+     * while at least one of its authors is active). Intended for user deactivation:
+     * the user is already inactive when this runs.
      */
     public function softDeleteStoriesByAuthor(int $userId): void
     {
-        $stories = $this->storiesRepository->findByAuthor($userId);
+        $stories = $this->storiesRepository->findByAuthorWithAuthors($userId);
+        if ($stories->isEmpty()) {
+            return;
+        }
+
+        $authorIds = $stories->flatMap(fn (Story $s) => $s->authors->pluck('user_id'))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+        $users = $this->authPublicApi->getUsersById($authorIds);
 
         foreach ($stories as $story) {
-            $this->softDeleteStory($story);
+            $hasActiveAuthor = $story->authors->contains(
+                fn ($a) => (bool) ($users[(int) $a->user_id]['isActive'] ?? false)
+            );
+            if (!$hasActiveAuthor) {
+                $this->softDeleteStory($story);
+            }
         }
     }
 

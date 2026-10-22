@@ -101,6 +101,27 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     three ❌ rows and the spec passes 36/36; WRAP had to reconcile them from
     the commit message. Fix: `verify-visually` rewrites its result paragraph
     (counts, HEAD) whenever a fix lands before the step closes.
+16. **A third Alpine trap: state-touching `x-init` inside `x-html`.**
+    *(fanart-artwork-module, VERIFY)* A lazy group fragment injected by an outer
+    `x-html` called `load()` synchronously in `x-init`; the outer effect tracked
+    the group's state and « Montrer tout » / « Cacher tout » did nothing. PHP
+    tests and checkpoint 18v missed it; VERIFY's e2e found it (fix `b943dcce`,
+    `$nextTick`). Fix: add to item 4's Shared front-end rule — "in a fragment
+    injected by `x-html`, defer state-touching work in `x-init` with
+    `$nextTick`".
+17. **Fetched HTML fragments follow middleware redirects.**
+    *(fanart-artwork-module, VERIFY)* Fragment routes behind `compliant` answer
+    a 302 to the CGU page; `fetch` follows it and the whole page is injected
+    into a modal. Nothing in DESIGN or PLAN prompted for it. Fix: a Shared
+    front-end rule ("a `fetch` of an HTML fragment checks `response.redirected`
+    and navigates instead of injecting"), and a line in `design-architecture`
+    asking how lazy fragments handle auth / `compliant` redirects. The Fanart
+    instance is backlog `fanart-fragment-redirects/`.
+18. **The confirmed-only route middleware is not written down.**
+    *(fanart-artwork-module, plan O3)* Architecture specified
+    `web, auth, verified`; PLAN found by reading Quote that the convention is
+    `['web','auth','compliant','role:user-confirmed,moderator,admin,tech-admin']`.
+    Fix: one line in `AGENTS.md` § Controllers (or Security) stating it.
 
 ## Why
 

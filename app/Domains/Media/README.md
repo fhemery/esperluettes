@@ -26,19 +26,21 @@ A **scope** is a logical bucket that maps to a folder on a disk:
 | `activities` | `public` | `activities/` | shared among Calendar admins |
 | `chapters/{userId}` | `public` | `chapters/{userId}/` | per author |
 | `secret-gift/{activityId}` | `private` | `secret-gift/{activityId}/` | per activity, not reusable |
+| `fanart/{storyId}` | `private` | `fanart/{storyId}/` | per story, not reusable |
+| `moderation/{topicKey}` | `private` | `moderation/{topicKey}/` | report snapshots (`[a-z0-9_-]+`), not reusable |
 
 The caller builds the scope string; `folderFor()` resolves the folder and rejects unknown scopes. The disk is implied by the scope's first segment — no caller passes a disk. The reuse picker (`listByScope`) lists originals **directly under** the scope folder — it is **non-recursive**, so it never descends into dated subfolders left by pre-migration uploads.
 
 ### Private images and files
 
-Some files must not be web-reachable at all — a Secret Gift picture or sound is confidential until the activity ends. Those live on the `private` disk (`storage/app/private`, `serve => false`), reached through a separate half of the API:
+Some files must not be web-reachable at all — a Secret Gift picture or sound is confidential until the activity ends; a fanart is visible to confirmed readers only; a report keeps its own copy of reported files. Those live on the `private` disk (`storage/app/private`, `serve => false`), reached through a separate half of the API:
 
 | | Public images | Private images | Private files (any type) |
 |---|---|---|---|
-| Stored by | `store($scope, $file)` | `storePrivate($scope, $file)` | `storePrivateFile($scope, $file)` |
-| Processing | `ImageService` | `ImageService`, original only | **none** — raw bytes; the caller validates the upload |
-| Variants | `-400w` / `-800w`, jpg + webp | **none** — the original only | **none** |
-| Displayed by | `originalUrl()` / `variantUrl()` → `/storage/…` | **no URL exists**; the consumer streams it | **no URL exists**; the consumer streams it |
+| Stored by | `store($scope, $file)` | `storePrivate($scope, $file, $widths = [])` | `storePrivateFile($scope, $file)` |
+| Processing | `ImageService` | `ImageService` | **none** — raw bytes; the caller validates the upload |
+| Variants | `-400w` / `-800w`, jpg + webp | **opt-in** — none by default; `storePrivate($scope, $file, [400, 800])` writes them on the private disk | **none** |
+| Displayed by | `originalUrl()` / `variantUrl()` → `/storage/…` | **no URL exists**; the consumer streams it (`stream()` / `streamVariant()`) | **no URL exists**; the consumer streams it |
 | In the reuse picker | yes | no | no |
 | Collected by `media:gc` | yes | yes | yes |
 
@@ -49,6 +51,10 @@ Some files must not be web-reachable at all — a Secret Gift picture or sound i
 A private file is served by the domain that owns its visibility rules: it checks its own rule, then calls `MediaPublicApi::stream($path, $headers)`, which returns a `BinaryFileResponse` with the right `Content-Type`, an inline `Content-Disposition` under the stored basename (caller headers win), and **performs no authorization of its own**. Media never learns a consumer's rules; the consumer never touches a disk. `exists($path)` resolves the same disk, so a 404 for a missing file is the consumer's own check.
 
 That response honours HTTP `Range` once the router prepares it — `206` with `Content-Range`, and `Accept-Ranges: bytes` on a plain request — so audio seeking needs no consumer code. It relies on the `private` disk being `local` (it needs an absolute file path); moving that disk to object storage would lose Range and needs revisiting.
+
+Private **thumbnails** work the same way: `streamVariant($path, $width, $format = 'webp', $headers)` streams the `{name}-{width}w.{format}` variant of a private original, again with **no authorization** — the consumer's gated route decides first. It throws on a public path (those have URLs) and on a variant that was never generated (the consumer answers 404). `hasVariants()` checks the disk the path resolves to, so it is true for a private original stored with widths.
+
+`copyPrivate($path, $targetScope)` copies an original — public or private — into a **private** scope under a fresh random name (extension kept) and returns the new path; the source is untouched and variants are not copied. It is how a report keeps its own copy of reported content (`moderation/{topicKey}`). The copy is an ordinary private file: the consumer must claim it with a usage provider, or GC collects it.
 
 ### Responsive variants vs. "keep original"
 
@@ -62,7 +68,7 @@ Media never learns which files are in use by scanning other domains' tables. Ins
 
 Deletion is therefore always **deferred and swept**, never synchronous: removing an image from a document merely stops the content from referencing its path; the file is reclaimed later, if still unused. A guard makes this safe against a forgotten provider — a whole scope folder that holds files but has *zero* claimed paths is treated as an unclaimed scope and **skipped**, not emptied.
 
-The sweep covers both disks. On `public` it walks each scope folder non-recursively and considers only image originals (variants and non-image files are ignored). On `private` it walks each scope **root** (`secret-gift/`) recursively and treats **every** file as an original — private files have no variants by construction, so no extension list is needed (an image and an mp3 are collected alike). It applies the zero-claim guard at that root rather than per `secret-gift/{activityId}` subfolder — otherwise an activity whose gifts were all removed would have no claimed path, be skipped forever, and leak its orphans permanently.
+The sweep covers both disks. On `public` it walks each scope folder non-recursively and considers only image originals (variants and non-image files are ignored). On `private` it walks each scope **root** (`secret-gift/`, `fanart/`, `moderation/`) recursively and treats every file as an original **except** `-<width>w.{jpg,jpeg,png,webp}` variants — no extension list otherwise (an image and an mp3 are collected alike). A variant is never claimed or collected on its own: it is kept while its original is claimed and deleted together with it. It applies the zero-claim guard at that root rather than per `secret-gift/{activityId}` subfolder — otherwise an activity whose gifts were all removed would have no claimed path, be skipped forever, and leak its orphans permanently.
 
 ### Components
 

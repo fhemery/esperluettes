@@ -79,4 +79,26 @@ class ReadingProgressService
             ->map(fn($v) => (int)$v)
             ->all();
     }
+
+    /**
+     * Read chapter IDs for a user across several stories, in one query.
+     *
+     * @param array<int,int> $storyIds
+     * @return array<int, int[]> storyId => chapterIds
+     */
+    public function getReadChapterIdsForUserInStories(int $userId, array $storyIds): array
+    {
+        if (empty($storyIds)) {
+            return [];
+        }
+        $result = [];
+        ReadingProgress::query()
+            ->where('user_id', $userId)
+            ->whereIn('story_id', $storyIds)
+            ->get(['story_id', 'chapter_id'])
+            ->each(function ($row) use (&$result) {
+                $result[(int) $row->story_id][] = (int) $row->chapter_id;
+            });
+        return $result;
+    }
 }

@@ -247,7 +247,8 @@ class StoryController
         
         $authors = empty($authorUserIds)
             ? []
-            : array_values($this->profileApi->getPublicProfiles($authorUserIds));
+            // A deactivated co-author has no public profile: skip them
+            : array_values(array_filter($this->profileApi->getPublicProfiles($authorUserIds)));
 
         // Resolve type name for display
         $typesById = $this->storyRefs->getAllTypes()->keyBy('id');

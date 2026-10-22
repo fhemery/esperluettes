@@ -384,6 +384,22 @@ deptrac:
         - type: directory
           value: 'app/Domains/Quote/Tests/'
 
+    # Fanart Domain
+    - name: FanartPublic
+      collectors:
+        - type: directory
+          value: 'app/Domains/Fanart/Public/'
+
+    - name: FanartPrivate
+      collectors:
+        - type: directory
+          value: 'app/Domains/Fanart/Private/'
+
+    - name: FanartTests
+      collectors:
+        - type: directory
+          value: 'app/Domains/Fanart/Tests/'
+
     # Media Domain
     - name: MediaPublic
       collectors:
@@ -494,6 +510,8 @@ deptrac:
       - AdministrationPublic
       # ModerationServiceProvider registers the report-submitted notification type
       - NotificationPublic
+      # ModerationServiceProvider registers the report media usage provider with the Media GC
+      - MediaPublic
 
     NewsPublic:
       - AuthPublic
@@ -682,6 +700,8 @@ deptrac:
       - EventsPublic
       # ModerationService notifies staff of new reports
       - NotificationPublic
+      # Snapshot files: copy, stream, GC claim
+      - MediaPublic
 
     NewsPrivate:
       - Shared
@@ -858,6 +878,7 @@ deptrac:
       - TestHelpers
       - ModerationPrivate
       - ModerationPublic
+      - MediaPublic
 
     NewsTests:
       - Shared
@@ -935,6 +956,42 @@ deptrac:
       - StoryPublic
 
     # Media Domain
+    FanartPublic:
+      - Shared
+      - FanartPrivate
+      - AuthPublic
+      - EventsPublic
+      - NotificationPublic
+      - SettingsPublic
+      - StoryPublic
+      - ProfilePublic
+      - ModerationPublic
+      - MediaPublic
+
+    FanartPrivate:
+      - Shared
+      - FanartPublic
+      - AuthPublic
+      - EventsPublic
+      - NotificationPublic
+      - SettingsPublic
+      - StoryPublic
+      - MediaPublic
+      - ModerationPublic
+      - EditorPublic
+
+    FanartTests:
+      - Shared
+      - TestHelpers
+      - FanartPrivate
+      - FanartPublic
+      - AuthPublic
+      - StoryPublic
+      - NotificationPublic
+      - ModerationPublic
+      - MediaPublic
+      - SettingsPublic
+
     MediaPublic:
       - Shared
       - MediaPrivate

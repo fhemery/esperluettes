@@ -35,6 +35,10 @@ scoped to the task that actually changed.
 - **Secret Gift — reveal follow-ups (ARCHIVED access, ENDED tab, missing tests)** · `secret-gift-reveal-followups/` · interactive · TODO: leftover from `media-sound-upload/` VERIFY — 3 feature tests pushed back to BUILD and never written; activity page 404s once ARCHIVED while gift routes still serve; page opens on the prepare tab once ENDED
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
+- **Fix 500 on 404 page when a model-bound route misses** · `fix-404-page-theme-500/` · auto · TODO
+- **Fanart — lazy fragments inject a full page on redirect** · `fanart-fragment-redirects/` · auto · TODO
+- **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
+- **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 
 ## Done
 
@@ -43,6 +47,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`fanart-artwork-module`](_done/fanart-artwork-module.md) · New Fanart domain: confirmed readers submit images and chapter readings that authors review, author artworks for one chapter credit, Fanarts story tab, chapter audio player with auto-advance, profile tab, reports that keep a copy of the file, Discord feed.
 - [`annotations-v3`](_done/annotations-v3.md) · Annotated passages are underlined in the chapter, with gutter avatars opening a popover, an author filter menu and moderator « Vider le contenu »
 - [`media-sound-upload`](_done/media-sound-upload.md) · Secret Gift sound stored, served (Range) and garbage-collected through Media's private half; `<x-shared::sound-upload>` replaced by `<x-media::sound-field>`
 - [`annotations-v2`](_done/annotations-v2.md) · chapter annotations writer side: ❤️ 🔥 👍 reactions, post-publish add/edit/delete as browser-side pending changes saved in one atomic `PUT` from a sticky banner, one-level author ↔ commenter replies in the pop-up

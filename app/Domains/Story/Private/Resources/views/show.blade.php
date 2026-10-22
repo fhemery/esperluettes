@@ -288,7 +288,13 @@
         </div>
     </div>
     {{-- Chapters section --}}
-    <div class="w-full mb-4">
+    <div class="w-full mt-10 mb-4">
+        <x-fanart::story-tabs :story-id="$viewModel->getId()" :story-slug="$viewModel->getSlug()">
+        {{-- Shown only when there is no tab bar to name the section. --}}
+        <x-slot:title>
+            <x-shared::title tag="h2">{{ __('story::chapters.sections.chapters') }}</x-shared::title>
+        </x-slot:title>
+        <x-fanart::story-player :story-id="$viewModel->getId()" :story-slug="$viewModel->getSlug()" />
         @if ($viewModel->isAuthor())
             @include('story::chapters.partials.chapter-list.author-view', [
                 'story' => $viewModel->story,
@@ -301,6 +307,7 @@
                 'chapters' => $viewModel->chapters,
             ])
         @endif
+        </x-fanart::story-tabs>
     </div>
 
     @if ($viewModel->isAuthor())

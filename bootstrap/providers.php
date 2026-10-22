@@ -39,6 +39,7 @@ return [
     App\Domains\ReadList\Public\Providers\ReadListServiceProvider::class,
     App\Domains\Statistics\Public\Providers\StatisticsServiceProvider::class,
     App\Domains\Quote\Public\Providers\QuoteServiceProvider::class,
+    App\Domains\Fanart\Public\Providers\FanartServiceProvider::class,
 
     // Add other domain providers here as they are created
 

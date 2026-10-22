@@ -33,5 +33,15 @@ From the `chore/feature-flag-cleanup` branch, to do after its deploy:
 - Drop the `messages` and `message_deliveries` tables by hand: the Message
   domain was deleted, and no migration drops them.
 
+From the `feat/fanart-artwork-module` branch (Fanart domain):
+
+- Before go-live, create the report reasons of the new `fanart` moderation
+  topic in the admin UI (only dev/e2e seed an « Other » reason).
+- Check that the production front-end (WAF / nginx `client_max_body_size`) and
+  PHP (`upload_max_filesize`, `post_max_size`) accept uploads of at least
+  16 MB: fanart sounds go up to 15 Mo.
+- Tell the Discord bot maintainer about the new fanart feed
+  (`docs/Discord_Api_Usage.md`).
+
 ## Explicitly out of scope
 

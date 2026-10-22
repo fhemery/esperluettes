@@ -71,3 +71,57 @@ function createReportForUser(Authenticatable $user, string $status = 'pending'):
         'content_url' => '/',
     ])->id;
 }
+
+/**
+ * Test topic whose formatter attaches media files to the snapshot.
+ * Set MediaSnapshotTestFormatter::$media to the paths to capture.
+ */
+class MediaSnapshotTestFormatter implements \App\Domains\Moderation\Public\Contracts\SnapshotFormatterInterface
+{
+    /** @var string[] */
+    public static array $media = [];
+
+    /** @var array|null Last snapshot given to render() */
+    public static ?array $rendered = null;
+
+    public function capture(int $entityId): array
+    {
+        return ['title' => 'Reported', '_media' => self::$media];
+    }
+
+    public function render(array $snapshot): string
+    {
+        self::$rendered = $snapshot;
+
+        return '<p>' . e($snapshot['title'] ?? '') . '</p>';
+    }
+
+    public function getReportedUserId(int $entityId): int
+    {
+        return (int) \Illuminate\Support\Facades\Auth::id();
+    }
+
+    public function getContentUrl(int $entityId): string
+    {
+        return '/';
+    }
+}
+
+/**
+ * Register the 'mediatest' topic (once per app instance) with a reason, and
+ * create a report on it as $reporter. Returns the report model.
+ */
+function createMediaReport(Authenticatable $reporter, array $media): ModerationReport
+{
+    $registry = app(\App\Domains\Moderation\Public\Services\ModerationRegistry::class);
+    if (! $registry->hasTopic('mediatest')) {
+        $registry->register('mediatest', 'Media test', MediaSnapshotTestFormatter::class);
+    }
+    MediaSnapshotTestFormatter::$media = $media;
+    $reason = createReason('mediatest', 'Because');
+
+    test()->actingAs($reporter);
+
+    return app(\App\Domains\Moderation\Private\Services\ModerationService::class)
+        ->createReport('mediatest', 1, $reason->id);
+}

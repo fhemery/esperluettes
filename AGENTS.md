@@ -62,6 +62,7 @@ code docs / ADRs, never the reverse. Use the `write-adr` skill for new ADRs.
 | **Discord** | `app/Domains/Discord` | Discord bot integration; user connection via code exchange |
 | **Editor** | `app/Domains/Editor` | Rich-text and block-based content authoring: the `<x-editor::rich-text>` / `<x-editor::multi>` components with their self-loaded Quill assets and toolbar presets, and block-document rendering to sanitized HTML via `EditorPublicApi`; owns no table | *(none)* |
 | **Events** | `app/Domains/Events` | Domain event bus and audit log infrastructure; cross-domain communication backbone |
+| **Fanart** | `app/Domains/Fanart` | Reader fanart (images and sounds) and author artworks per story, reviewed by the authors, stored privately and shown to confirmed users only; fanartiste role and role requests | `fanarts`, `fanart_fanartists`, `fanart_role_requests` |
 | **FAQ** | `app/Domains/FAQ` | FAQ categories and questions with admin panel |
 | **Follow** | `app/Domains/Follow` | User follow relationships, follow button on profiles, Following profile tab, new-follower and new-story notifications for followers | `follow_follows` |
 | **Home** | `app/Domains/Home` | Home page, aggregates data from multiple domains |

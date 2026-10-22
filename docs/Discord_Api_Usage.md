@@ -526,6 +526,42 @@ curl -X DELETE "https://esperluettes.com/api/discord/users/123456789012345678" \
   -H "Accept: application/json"
 ```
 
+---
+
+## Fanarts feed
+
+Images that their uploader chose to share on Discord (« Partager sur Discord »), published, on **public** stories (and published chapters), not yet reported as sent. Audio, pending, community and private-story items never appear; a deleted fanart simply drops out. Author artworks are included when they ticked the box.
+
+### GET /api/discord/fanarts/pending
+
+**Authentication**: Required (API key). **Query**: `perPage` (max 100, default 100), `page` (default 1). Oldest first.
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": 12,
+      "title": "Portrait de Mara",
+      "artistName": "Alice",
+      "storyTitle": "La Rivière",
+      "storyUrl": "https://esperluettes.com/stories/la-riviere-3",
+      "chapterTitle": "Chapitre 2",
+      "imageUrl": "https://esperluettes.com/fanarts/12/discord-image?expires=...&signature=..."
+    }
+  ],
+  "pagination": {"currentPage": 1, "perPage": 100, "total": 1, "lastPage": 1, "hasMore": false}
+}
+```
+
+`chapterTitle` is omitted when the fanart is not attached to a chapter. `imageUrl` is a signed URL (valid 24 hours, no API key or session needed) to the 800px-wide WebP variant; it answers 403 when altered or expired and 404 when the fanart is no longer eligible.
+
+### POST /api/discord/fanarts/mark-sent
+
+Body: `{"ids": [12, 13]}`. Marks those fanarts as sent so they leave `pending`. Response: `{"success": true, "markedCount": 2}`.
+
+**Rate limit**: 60 requests per minute each.
+
 ## Error Handling
 
 ### HTTP Status Codes

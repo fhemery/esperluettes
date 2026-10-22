@@ -18,6 +18,14 @@
 | `searchStories(query, viewerUserId, limit)` | Full-text title search returning `StorySearchResultDto[]` (max 25); applies the viewer's `hide-stories-with-tw` preference when `viewerUserId` is non-null |
 | `filterUsersWithAccessToStory(userIds, storyId)` | Filter to users who can access the story under current visibility |
 | `diffAccessForUsers(userIds, storyId, previousVisibility)` | Returns `['gained' => int[], 'lost' => int[]]` after a visibility change |
+| `filterReadableStoryIds(userId, storyIds)` | Batch `StoryPolicy::view` rule (staff all; guest public; confirmed + community; collaborator + private); soft-deleted stories excluded; `int[]`, unordered, one stories query |
+| `canRead(userId, storyId)` | Single-story wrapper over `filterReadableStoryIds` |
+| `getReadChapterIds(userId, storyId)` | `int[]` of chapters the user marked read in the story |
+| `getReadChapterIdsByStoryIds(userId, storyIds)` | `array<storyId, int[]>` read chapter ids, one query |
+| `getChaptersForStory(storyId)` | `StoryChapterDto[]` by `sort_order`, all statuses (caller filters on `status`) |
+| `getChaptersForStories(storyIds)` | `array<storyId, StoryChapterDto[]>`, one query |
+| `getAvailableChapterCredits(userId)` | Credits gained minus spent |
+| `spendChapterCredit(userId)` | Atomic conditional spend of one credit; `false` (nothing spent) when none left or no credits row |
 
 ## Events emitted
 
@@ -47,7 +55,7 @@
 | Event | Listener | Action |
 |-------|---------|--------|
 | `Auth::UserRegistered` | `GrantInitialCreditsOnUserRegistered` | Grant 5 initial chapter credits |
-| `Auth::UserDeactivated` | `SoftDeleteStoriesOnUserDeactivated` | Soft-delete all stories by that author |
+| `Auth::UserDeactivated` | `SoftDeleteStoriesOnUserDeactivated` | Soft-delete the stories by that author that have no active author left |
 | `Auth::UserReactivated` | `RestoreStoriesOnUserReactivated` | Restore soft-deleted stories and chapters |
 | `Auth::UserDeleted` | `RemoveStoriesOnUserDeleted` | Hard-delete all stories |
 | `Auth::UserDeleted` | `RemoveChapterCreditsOnUserDeleted` | Delete the `story_chapter_credits` row |
@@ -64,7 +72,7 @@
 
 **Chapter credits: check before, spend after.** The check `availableForUser <= 0` throws an `AuthorizationException` before the DB transaction starts. Credits are spent via `spendOne()` *after* a successful save. Do not reorder this sequence.
 
-**Soft delete vs. hard delete.** `SoftDeleteStoriesOnUserDeactivated` calls `softDeleteStoriesByAuthor`; `RemoveStoriesOnUserDeleted` hard-deletes. These are separate listeners for separate events — do not merge them.
+**Soft delete vs. hard delete.** `SoftDeleteStoriesOnUserDeactivated` calls `softDeleteStoriesByAuthor`; `RemoveStoriesOnUserDeleted` hard-deletes. A co-authored story is soft-deleted only once every author is deactivated (one `AuthPublicApi::getUsersById` call); reactivating any author restores it; account deletion still hard-deletes every co-authored story. These are separate listeners for separate events — do not merge them.
 
 **`story_chapter_credits` has no FK to `users`.** Cross-domain FK to `users` is prohibited by architecture. The credits row is cleaned up explicitly by the `RemoveChapterCreditsOnUserDeleted` listener on `UserDeleted`.
 
@@ -83,6 +91,8 @@
 **`StoryPreferenceService` is a container singleton and memoizes for the whole request.** It is bound in `StoryServiceProvider::register()`; that binding is what makes the memo useful, since Blade resolves it with `app(...)` once per card. The consequence for tests: the container is not rebuilt between two HTTP calls inside one test, so a test that flips one of the two preferences *between* two requests must call `app()->forgetInstance(StoryPreferenceService::class)` afterwards, or split into two test cases. Setting the preference before the first request needs nothing.
 
 **The rendered chapter body must stay a single `[data-quote-article]` root.** In `chapters/show.blade.php`, the Quote domain's `<x-quote::author-heat>` component wraps `<article data-quote-article>{!! $vm->chapter->content !!}</article>`, and both that component and the reader-side quoting toolbar re-anchor saved passages by walking that single DOM subtree. If you split the chapter body across multiple containers, add another rich-text region inside it, or otherwise stop rendering it as one `[data-quote-article]` root, reader quotes and the author heat map silently lose their anchoring. This is not enforced by any test that fails loudly — check it by hand when touching this view.
+
+**`/stories/{slug}` matches everything below it.** The show routes use `->where('slug', '.*')`, so a route another domain declares under `/stories/{slug}/…` is swallowed by `stories.show` unless it is registered first. Fanart loads its web routes in its provider's `register()` (every `register()` runs before any `boot()`) for this reason; a new domain adding `/stories/{slug}/…` routes must do the same.
 
 ## Registry integrations
 

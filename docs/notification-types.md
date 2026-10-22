@@ -2,7 +2,7 @@
 
 > **Auto-generated** by `php artisan notifications:export-types-doc`. Do not edit by hand.
 
-Generated at: 2026-09-25T19:15:02+00:00 (`locale`: `fr`)
+Generated at: 2026-10-18T11:58:08+00:00 (`locale`: `fr`)
 
 ## Group: Commentaires (`comments`)
 
@@ -75,6 +75,21 @@ Generated at: 2026-09-25T19:15:02+00:00 (`locale`: `fr`)
 | --- | --- | --- | --- | --- | --- | --- |
 | `quote.chapter_quoted` | `App\Domains\Quote\Public\Notifications\ChapterQuotedNotification` | Quelqu'un a cité un passage de votre chapitre | `quoter_id`, `quoter_name`, `quoter_slug`, `chapter_id`, `chapter_title`, `chapter_slug`, `story_id`, `story_title`, `story_slug` | no | no | all authenticated users |
 
+## Group: Fanarts (`fanart`)
+
+| Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
+| --- | --- | --- | --- | --- | --- | --- |
+| `fanart.submitted` | `App\Domains\Fanart\Public\Notifications\FanartSubmittedNotification` | Quelqu'un a proposé un fanart sur l'une de mes histoires | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.accepted` | `App\Domains\Fanart\Public\Notifications\FanartAcceptedNotification` | Un de mes fanarts a été accepté | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.declined` | `App\Domains\Fanart\Public\Notifications\FanartDeclinedNotification` | Un de mes fanarts a été refusé | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.deleted` | `App\Domains\Fanart\Public\Notifications\FanartDeletedNotification` | Un de mes fanarts a été supprimé par l'auteurice | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.deleted_by_moderation` | `App\Domains\Fanart\Public\Notifications\FanartDeletedByModerationNotification` | Un fanart a été supprimé par la modération | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.audio_replaced` | `App\Domains\Fanart\Public\Notifications\FanartAudioReplacedNotification` | Mon fanart audio a été remplacé par l'auteurice | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.removed_with_content` | `App\Domains\Fanart\Public\Notifications\FanartRemovedWithContentNotification` | Mon fanart a disparu avec son chapitre ou son histoire | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.role_requested` | `App\Domains\Fanart\Public\Notifications\FanartRoleRequestedNotification` | Quelqu'un demande à devenir fanartiste sur l'une de mes histoires | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.role_given` | `App\Domains\Fanart\Public\Notifications\FanartRoleGivenNotification` | Le rôle de fanartiste m'a été accordé sur une histoire | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.role_declined` | `App\Domains\Fanart\Public\Notifications\FanartRoleDeclinedNotification` | Ma demande pour devenir fanartiste a été refusée | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+
 ## Group: Calendrier (`calendar`)
 
 | Type key | PHP class | User-facing label | Payload fields | Forced on website | Hidden in preferences UI | Visible to roles |
@@ -91,7 +106,7 @@ The built-in `website` channel is always available and is not part of the channe
 
 | Channel id | User-facing label | Default for new users | Feature-gated |
 | --- | --- | --- | --- |
-| `discord` | Discord | off | yes |
+| `discord` | Discord | off | no |
 
 ## Stored payload
 

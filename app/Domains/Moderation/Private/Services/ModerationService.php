@@ -2,6 +2,7 @@
 
 namespace App\Domains\Moderation\Private\Services;
 
+use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Moderation\Private\Models\ModerationReason;
 use App\Domains\Moderation\Private\Models\ModerationReport;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
@@ -22,6 +23,7 @@ class ModerationService
         private ModerationRegistry $registry,
         private ProfilePublicApi $profileApi,
         private NotificationPublicApi $notificationApi,
+        private MediaPublicApi $mediaApi,
     ) {
     }
 
@@ -108,6 +110,10 @@ class ModerationService
             $formatter = $this->registry->getFormatter($topicKey);
             $reportedUserId = $formatter->getReportedUserId($entityId);
             $snapshot = $formatter->capture($entityId);
+
+            if (isset($snapshot['_media'])) {
+                $snapshot['_media'] = $this->copyMedia($snapshot['_media'], $topicKey);
+            }
         }
 
         // Build content URL (basic implementation for now)
@@ -144,6 +150,26 @@ class ModerationService
         $this->notifyStaffOfNewReport((int) Auth::id());
 
         return $created;
+    }
+
+    /**
+     * Copy snapshot files into the report's own storage so they outlive the
+     * source. A path that no longer exists is dropped.
+     *
+     * @param string[] $paths
+     * @return string[]
+     */
+    private function copyMedia(array $paths, string $topicKey): array
+    {
+        $copies = [];
+        foreach ($paths as $path) {
+            if (! $this->mediaApi->exists($path)) {
+                continue;
+            }
+            $copies[] = $this->mediaApi->copyPrivate($path, "moderation/{$topicKey}");
+        }
+
+        return $copies;
     }
 
     /**

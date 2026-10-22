@@ -317,3 +317,15 @@ export const STATISTICS = {
 export function storageStatePath(role: RoleName): string {
   return `e2e/.auth/${role}.json`;
 }
+
+/**
+ * Fanarts, written by `app/Domains/Fanart/Database/Seeders/E2eFanartSeeder.php`.
+ * Ids follow the seeding order. All sit on the public story 1 and are published;
+ * `confirmed` and `tech_admin` are the artists.
+ */
+export const FANART = {
+  storySlug: STORY.slug,
+  chapterIds: { published: 1, simple: 3 },
+  ids: { work: 1, chapterThree: 2, soundOne: 3, soundThree: 4 },
+  titles: { work: 'Fanart oeuvre E2E' },
+} as const;

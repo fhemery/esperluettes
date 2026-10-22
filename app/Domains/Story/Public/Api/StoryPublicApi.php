@@ -4,7 +4,9 @@ namespace App\Domains\Story\Public\Api;
 
 use App\Domains\Shared\Contracts\ProfilePublicApi;
 use App\Domains\Shared\Dto\StorySearchResultDto;
+use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Story\Private\Services\ChapterService;
+use App\Domains\Story\Private\Services\ReadingProgressService;
 use App\Domains\Story\Private\Services\CoverService;
 use App\Domains\Story\Private\Services\StoryPreferenceService;
 use App\Domains\Story\Private\Services\StorySearchService;
@@ -51,7 +53,77 @@ class StoryPublicApi
         private readonly StoryRefPublicApi $storyRefs,
         private readonly CoverService $coverService,
         private readonly StoryPreferenceService $preferences,
+        private readonly ReadingProgressService $readingProgress,
+        private readonly ChapterCreditService $credits,
     ) {
+    }
+
+    /**
+     * Subset of the given story ids the user may read (StoryPolicy::view rule,
+     * soft-deleted stories excluded). Order is not guaranteed.
+     *
+     * @param array<int,int> $storyIds
+     * @return int[]
+     */
+    public function filterReadableStoryIds(?int $userId, array $storyIds): array
+    {
+        return $this->accessService->filterReadableStoryIds($userId, $storyIds);
+    }
+
+    public function canRead(?int $userId, int $storyId): bool
+    {
+        return $this->filterReadableStoryIds($userId, [$storyId]) !== [];
+    }
+
+    /** @return int[] */
+    public function getReadChapterIds(int $userId, int $storyId): array
+    {
+        return $this->readingProgress->getReadChapterIdsForUserInStory($userId, $storyId);
+    }
+
+    /**
+     * @param array<int,int> $storyIds
+     * @return array<int, int[]> storyId => read chapter ids
+     */
+    public function getReadChapterIdsByStoryIds(int $userId, array $storyIds): array
+    {
+        return $this->readingProgress->getReadChapterIdsForUserInStories($userId, $storyIds);
+    }
+
+    /**
+     * Chapters of a story, all statuses, ordered by sort_order (caller filters on status).
+     *
+     * @return StoryChapterDto[]
+     */
+    public function getChaptersForStory(int $storyId): array
+    {
+        return $this->getChaptersForStories([$storyId])[$storyId] ?? [];
+    }
+
+    /**
+     * @param array<int,int> $storyIds
+     * @return array<int, StoryChapterDto[]> storyId => chapters
+     */
+    public function getChaptersForStories(array $storyIds): array
+    {
+        $result = [];
+        foreach ($this->storyService->getChaptersByStoryIds($storyIds) as $storyId => $chapters) {
+            $result[(int) $storyId] = array_map(fn ($c) => StoryChapterDto::fromModel($c), $chapters);
+        }
+        return $result;
+    }
+
+    public function getAvailableChapterCredits(int $userId): int
+    {
+        return $this->credits->availableForUser($userId);
+    }
+
+    /**
+     * Atomically spend one chapter credit. False (nothing spent) when none is available.
+     */
+    public function spendChapterCredit(int $userId): bool
+    {
+        return $this->credits->trySpendOne($userId);
     }
 
     /**

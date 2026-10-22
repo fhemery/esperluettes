@@ -52,6 +52,8 @@ export default defineConfig(({ mode }) => {
                     'app/Domains/Comment/Resources/js/annotations/index.js',
                     'app/Domains/Comment/Resources/js/annotations/in-chapter/index.js',
                     'app/Domains/Quote/Resources/js/quote/index.js',
+                    'app/Domains/Fanart/Private/Resources/js/fanart-viewer.js',
+                    'app/Domains/Fanart/Private/Resources/js/fanart-player.js',
                     'app/Domains/Statistics/Private/Resources/js/charts.js',
                 ],
                 refresh: true,
