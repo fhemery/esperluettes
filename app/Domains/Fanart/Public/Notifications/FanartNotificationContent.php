@@ -71,6 +71,9 @@ abstract class FanartNotificationContent implements NotificationContent
         $storyUrl = $this->storySlug !== ''
             ? route('stories.show', ['slug' => $this->storySlug]) . '?tab=fanarts'
             : '';
+        $collaboratorsUrl = $this->storySlug !== ''
+            ? route('stories.collaborators.index', ['slug' => $this->storySlug])
+            : '';
         $comment = ($this->comment !== null && $this->comment !== '')
             ? ' — « ' . e($this->comment) . ' »'
             : '';
@@ -80,6 +83,7 @@ abstract class FanartNotificationContent implements NotificationContent
             'actor_url' => $actorUrl,
             'story_title' => e($this->storyTitle),
             'story_url' => $storyUrl,
+            'collaborators_url' => $collaboratorsUrl,
             'chapter_title' => e($this->chapterTitle),
             'fanart_title' => e($this->fanartTitle),
             'kind' => $this->kind !== '' ? __('fanart::notification.kind.' . $this->kind) : '',

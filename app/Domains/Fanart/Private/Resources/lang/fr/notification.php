@@ -47,7 +47,8 @@ return [
     ],
     'role_requested' => [
         'display' => '<a href=":actor_url">:actor_name</a> demande à devenir fanartiste sur'
-            . ' <a href=":story_url">:story_title</a>',
+            . ' <a href=":story_url">:story_title</a>.'
+            . ' Vous pouvez accepter la demande via <a href=":collaborators_url">l\'écran des contributeurs</a>.',
     ],
     'role_given' => [
         'display' => 'Vous êtes désormais fanartiste sur <a href=":story_url">:story_title</a>',

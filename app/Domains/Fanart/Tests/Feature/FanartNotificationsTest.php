@@ -81,6 +81,15 @@ it('renders deleted_by_moderation with its denormalised payload', function () {
     expect(renderLatest('fanart.deleted_by_moderation'))->toContain('Portrait')->toContain('modération');
 });
 
+it('links the role request to the collaborators screen', function () {
+    [, $artist, $story] = fanartScene($this);
+
+    app(FanartNotifier::class)->fanartRoleRequested($story->id, $artist->id);
+
+    expect(renderLatest('fanart.role_requested'))
+        ->toContain(route('stories.collaborators.index', ['slug' => $story->slug]));
+});
+
 it('escapes the author comment', function () {
     [$author, , , , $fanart] = fanartScene($this);
 
