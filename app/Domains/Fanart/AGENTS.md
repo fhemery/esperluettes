@@ -23,7 +23,7 @@ No `FanartPublicApi`. Other domains consume the Blade components listed in the R
 
 - **Media**: `FanartServiceProvider::boot()` registers `FanartMediaUsageProvider` on `MediaUsageRegistry`.
 
-- **Settings**: `booted` callback adds section `fanart` (params `fanart-images-mode` default `yes`, `fanart-audio-mode` default `designated`) to Story's `stories` tab, and `hide-fanart-tab` (bool, default `true`) to the `profile` tab's `privacy` section; each guarded on its own key. `ModeService::effectiveMode` takes the most restrictive value across the story's authors.
+- **Settings**: `booted` callback adds section `fanart` (params `fanart-images-mode` default `yes`, `fanart-audio-mode` default `designated`) to Story's `stories` tab, and `hide-fanart-tab` (bool, default `false`) to the `profile` tab's `privacy` section; each guarded on its own key. `ModeService::effectiveMode` takes the most restrictive value across the story's authors.
 
 - **Notification**: group `fanart` + ten `fanart.*` types (`Public/Notifications`, shared payload in `FanartNotificationContent`). Sent only through `FanartNotifier`, which drops the actor and skips empty recipient sets.
 

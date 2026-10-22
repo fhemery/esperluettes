@@ -34,15 +34,16 @@ function profileGroupUrl($owner, $story, string $kind = 'image'): string
     return route('fanart.profile.group', [$owner->id, $story->id]) . '?kind=' . $kind;
 }
 
-function openFanartTab($owner): void
+function hideFanartTab($owner): void
 {
-    app(SettingsPublicApi::class)->setValue($owner->id, 'profile', 'hide-fanart-tab', false);
+    app(SettingsPublicApi::class)->setValue($owner->id, 'profile', 'hide-fanart-tab', true);
 }
 
-it('hides the tab from everyone but owner and staff by default', function () {
+it('hides the tab from everyone but owner and staff once the owner hides it', function () {
     $owner = bob($this);
     $story = publicStory('Histoire', alice($this)->id);
     createFanart(['story_id' => $story->id, 'user_id' => $owner->id]);
+    hideFanartTab($owner);
 
     $this->actingAs($owner)->get(profileTabUrl($owner))->assertOk()->assertSee(PROFILE_TAB_MARKER, false);
     $this->actingAs(moderator($this))->get(profileTabUrl($owner))->assertOk()->assertSee(PROFILE_TAB_MARKER, false);
@@ -52,11 +53,10 @@ it('hides the tab from everyone but owner and staff by default', function () {
     $this->get(profileGroupUrl($owner, $story))->assertForbidden();
 });
 
-it('shows the tab to confirmed viewers once the owner opens it, never to guests or non-confirmed', function () {
+it('shows the tab to confirmed viewers by default, never to guests or non-confirmed', function () {
     $owner = bob($this);
     $story = publicStory('Histoire', alice($this)->id);
     createFanart(['story_id' => $story->id, 'user_id' => $owner->id]);
-    openFanartTab($owner);
 
     $this->actingAs(carol($this))->get(profileTabUrl($owner))->assertOk()->assertSee(PROFILE_TAB_MARKER, false);
     $this->get(profileGroupUrl($owner, $story))->assertOk();
@@ -77,7 +77,6 @@ it('lists only fanarts on stories the viewer can read', function () {
     $private = privateStory('Histoire secrète', $author->id);
     createFanart(['story_id' => $public->id, 'user_id' => $owner->id, 'title' => 'Visible']);
     createFanart(['story_id' => $private->id, 'user_id' => $owner->id, 'title' => 'Cachée']);
-    openFanartTab($owner);
 
     $viewer = carol($this);
     $this->actingAs($viewer)->get(profileTabUrl($owner))->assertOk()
@@ -99,7 +98,6 @@ it('splits images and sounds and hides chapters that are not published from read
     createFanart(['story_id' => $story->id, 'user_id' => $owner->id, 'chapter_id' => $published->id, 'title' => 'Image du chapitre']);
     createFanart(['story_id' => $story->id, 'user_id' => $owner->id, 'chapter_id' => $draft->id, 'title' => 'Image du brouillon']);
     createFanart(['story_id' => $story->id, 'user_id' => $owner->id, 'kind' => FanartKind::Audio, 'chapter_id' => $published->id, 'title' => 'Lecture du chapitre']);
-    openFanartTab($owner);
 
     $this->actingAs(carol($this))->get(profileGroupUrl($owner, $story, 'image'))->assertOk()
         ->assertSee('Image du chapitre', false)
@@ -118,7 +116,6 @@ it('shows pending items with a badge to the owner only', function () {
         'story_id' => $story->id, 'user_id' => $owner->id, 'title' => 'En cours',
         'status' => FanartStatus::Pending, 'published_at' => null,
     ]);
-    openFanartTab($owner);
 
     $this->actingAs($owner)->get(profileGroupUrl($owner, $story))->assertOk()
         ->assertSee('En cours', false)
@@ -144,7 +141,6 @@ it('collapses groups of chapters the viewer has not read', function () {
     foreach ([$read, $unread, null] as $chapter) {
         createFanart(['story_id' => $story->id, 'user_id' => $owner->id, 'chapter_id' => $chapter?->id]);
     }
-    openFanartTab($owner);
 
     $this->actingAs(carol($this));
     markAsRead($this, $read);
@@ -165,7 +161,6 @@ it('lets the owner delete from the tab', function () {
     $owner = bob($this);
     $story = publicStory('Histoire', alice($this)->id);
     $fanart = createFanart(['story_id' => $story->id, 'user_id' => $owner->id]);
-    openFanartTab($owner);
     $deleteAction = route('fanart.destroy', $fanart->id);
 
     // The viewer URL shares the delete path (other verb): the form itself is what must be absent.
@@ -190,7 +185,6 @@ it('uses a single readability query for many stories', function () {
         $story = publicStory("Histoire $i", $author->id);
         createFanart(['story_id' => $story->id, 'user_id' => $owner->id]);
     }
-    openFanartTab($owner);
 
     // A proxied partial: calls fall through to the real API, but are counted.
     $real = app(StoryPublicApi::class);

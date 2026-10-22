@@ -35,7 +35,7 @@ it('saves fanart-images-mode and rejects an unknown value', function () {
     expect(app(SettingsPublicApi::class)->getValue($user->id, 'stories', 'fanart-images-mode'))->toBe('designated');
 });
 
-it('shows hide-fanart-tab in Paramètres › Profil, default checked', function () {
+it('shows hide-fanart-tab in Paramètres › Profil, default unchecked', function () {
     $user = alice($this);
 
     $this->actingAs($user)
@@ -43,5 +43,5 @@ it('shows hide-fanart-tab in Paramètres › Profil, default checked', function 
         ->assertOk()
         ->assertSee('fanart::settings.params.hide-fanart-tab.name');
 
-    expect(app(SettingsPublicApi::class)->getValue($user->id, 'profile', 'hide-fanart-tab'))->toBeTrue();
+    expect(app(SettingsPublicApi::class)->getValue($user->id, 'profile', 'hide-fanart-tab'))->toBeFalse();
 });

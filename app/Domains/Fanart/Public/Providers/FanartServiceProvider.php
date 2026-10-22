@@ -185,7 +185,7 @@ class FanartServiceProvider extends ServiceProvider
                 sectionId: self::SECTION_PRIVACY,
                 key: self::KEY_HIDE_FANART_TAB,
                 type: ParameterType::BOOL,
-                default: true,
+                default: false,
                 order: 40,
                 nameKey: 'fanart::settings.params.hide-fanart-tab.name',
                 descriptionKey: 'fanart::settings.params.hide-fanart-tab.description',

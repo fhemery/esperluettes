@@ -20,7 +20,7 @@ Confirmed readers (« fanartistes ») submit images (jpg/png/webp, 2 Mo) and sou
 | Story page | `<x-fanart::story-tabs>` (Chapitres / Fanarts, lazy-loaded), `<x-fanart::story-actions>` (inside the Fanarts tab: one button per kind, « Proposer une image / un son » or « Ajouter un artwork (image / son) », routes `fanart.create` per kind), `<x-fanart::request-role-button>`, `<x-fanart::story-player>` + `<x-fanart::chapter-audio-icon>` |
 | Chapter page | `<x-fanart::chapter-audio>`, `<x-fanart::chapter-images>` |
 | Collaborators page | `<x-fanart::collaborators-section>` |
-| Profile | tab `fanarts` (`<x-fanart::profile-tab>`), hidden by default through the `hide-fanart-tab` privacy setting (Paramètres › Profil, « Masquer mes fanarts », checked by default: owner and staff only) |
+| Profile | tab `fanarts` (`<x-fanart::profile-tab>`), visible by default; the `hide-fanart-tab` privacy setting (Paramètres › Profil, « Masquer mes fanarts », unchecked by default) restricts it to the owner and staff |
 | Shared pieces | `<x-fanart::thumbnail>`, `<x-fanart::viewer-modal>` (focus-trapped dialog, Escape closes) |
 
 ## Data model

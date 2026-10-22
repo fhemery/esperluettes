@@ -55,7 +55,7 @@ return [
         'section_images' => 'Images',
         'section_sounds' => 'Sons',
         'empty' => 'Aucun fanart à afficher.',
-        'show_story' => 'Voir (:count)',
+        'count' => '{0} aucun fanart|{1} :count fanart|[2,*] :count fanarts',
         'pending_badge' => 'En attente de validation',
         'delete_confirm' => 'Supprimer ce fanart ? Cette action est définitive.',
     ],

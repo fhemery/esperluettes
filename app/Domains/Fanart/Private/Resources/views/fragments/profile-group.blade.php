@@ -1,20 +1,19 @@
 @php($pending = \App\Domains\Fanart\Private\Support\FanartStatus::Pending)
 <div class="flex flex-col gap-3">
     @foreach ($groups as $group)
-        <section class="flex flex-col gap-2"
+        <section class="border border-secondary bg-white"
                  data-group-key="{{ $group['key'] }}" data-collapsed="{{ $group['collapsed'] ? 'true' : 'false' }}"
                  x-data="{ open: {{ $group['collapsed'] ? 'false' : 'true' }} }">
-            <div class="flex items-center justify-between gap-2">
-                <x-shared::title tag="h3">{{ $group['title'] ?? __('fanart::ui.tab.whole_work') }}</x-shared::title>
-                <button type="button" class="text-sm font-medium hover:text-accent" x-on:click="open = !open" :aria-expanded="open">
-                    <span x-show="!open">{{ __('fanart::ui.tab.show_all') }}</span>
-                    <span x-show="open" x-cloak>{{ __('fanart::ui.tab.hide_all') }}</span>
-                </button>
-            </div>
+            <button type="button" class="w-full flex items-center justify-between gap-3 px-4 py-2 text-left"
+                    x-on:click="open = !open" :aria-expanded="open">
+                <span class="font-semibold text-accent">{{ $group['title'] ?? __('fanart::ui.tab.whole_work') }}</span>
+                <span class="material-symbols-outlined text-secondary transition-transform duration-200"
+                      :class="open ? 'rotate-180' : ''" aria-hidden="true">expand_less</span>
+            </button>
             @if ($group['collapsed'])
-                <p class="text-sm italic" x-show="!open">{{ __('fanart::ui.tab.spoiler') }}</p>
+                <p class="text-sm italic px-4 pb-2" x-show="!open">{{ __('fanart::ui.tab.spoiler') }}</p>
             @endif
-            <div x-show="open" x-cloak class="flex flex-wrap gap-4">
+            <div x-show="open" x-cloak class="border-t border-secondary p-4 flex flex-wrap gap-4">
                 @foreach ($group['fanarts'] as $fanart)
                     <div class="flex flex-col gap-1 items-start">
                         @if ($kind === \App\Domains\Fanart\Private\Support\FanartKind::Audio)
