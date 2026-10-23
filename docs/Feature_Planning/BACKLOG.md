@@ -40,7 +40,7 @@ scoped to the task that actually changed.
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
-- **Fanart submission: private message to the author** · `fanart-message-to-author/` · interactive · WIP:DESIGN
+- **Fanart submission: private message to the author** · `fanart-message-to-author/` · interactive · WIP:PLAN
 
 ## Done
 

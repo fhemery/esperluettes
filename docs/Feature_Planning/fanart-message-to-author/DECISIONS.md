@@ -22,3 +22,5 @@ the user may want to reverse — surface these in the WRAP summary.
 | 1 | All co-authors receive the message (as they receive the notification) — vetoable replay, user raised no objection | REFINE | Yes |
 | 2 | No moderation/report path for the message | REFINE | Yes |
 | 3 | The notification stays after decline or withdrawal | REFINE | Yes |
+| 4 | Message shown as the inline `:comment` suffix, like the accept/decline reply (no separate block) | DESIGN | Yes |
+| 5 | Blank or whitespace-only message is treated as no message | DESIGN | Yes |
