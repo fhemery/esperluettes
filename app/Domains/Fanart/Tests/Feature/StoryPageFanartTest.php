@@ -50,6 +50,7 @@ it('shows the Chapitres heading only when there is no tab bar to name it', funct
 it('renders the tab bar and Proposer un fanart for a confirmed reader when allowed', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
 
     $this->actingAs(bob($this));
     storyPage($story)->assertOk()
@@ -62,7 +63,9 @@ it('renders the tab bar and Proposer un fanart for a confirmed reader when allow
 });
 
 it('renders one button per kind: image open, audio reserved to a reader without the role', function () {
-    $story = publicStory('Histoire', alice($this)->id);
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
 
     $this->actingAs(bob($this));
     storyPage($story)->assertOk()

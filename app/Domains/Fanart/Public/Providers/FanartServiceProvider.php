@@ -157,7 +157,7 @@ class FanartServiceProvider extends ServiceProvider
             ));
 
             foreach ([
-                [self::KEY_IMAGES_MODE, FanartMode::Yes, 10, 'fanart-images-mode'],
+                [self::KEY_IMAGES_MODE, FanartMode::Designated, 10, 'fanart-images-mode'],
                 [self::KEY_AUDIO_MODE, FanartMode::Designated, 20, 'fanart-audio-mode'],
             ] as [$key, $default, $order, $name]) {
                 $settingsApi->registerParameter(new SettingsParameterDefinition(

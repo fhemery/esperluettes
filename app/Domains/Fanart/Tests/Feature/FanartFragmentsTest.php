@@ -95,6 +95,7 @@ it('expands every group for an author and shows the pending block', function () 
 it('explains the effective mode to authors, including the co-author rule', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
 
     $this->actingAs($author)->get(tabUrl($story))->assertOk()
         ->assertSee(__('fanart::ui.tab.mode_images_yes'))

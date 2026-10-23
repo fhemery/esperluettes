@@ -264,11 +264,12 @@ describe('artwork and author abilities', function () {
         $fan = carol($this);
         makeFanartist($story->id, $fan->id);
 
-        // defaults: images yes, audio designated
+        // defaults: images and audio designated
         expect(fanartPolicy()->requestRole($reader->id, $story->id))->toBeTrue()
             ->and(fanartPolicy()->requestRole($author->id, $story->id))->toBeFalse()
             ->and(fanartPolicy()->requestRole($fan->id, $story->id))->toBeFalse();
 
+        setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
         setSettingsValue($author->id, 'stories', 'fanart-audio-mode', 'yes');
         expect(fanartPolicy()->requestRole($reader->id, $story->id))->toBeFalse();
     });
