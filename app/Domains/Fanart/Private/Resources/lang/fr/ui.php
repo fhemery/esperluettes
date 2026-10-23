@@ -18,18 +18,18 @@ return [
         'pending_notice' => 'Votre fanart sera visible après validation par les auteur·ices de l\'histoire.',
         'cancel' => 'Annuler',
         'submit' => 'Proposer',
-        'artwork_heading' => 'Ajouter un artwork pour « :story »',
+        'artwork_heading' => 'Déposer pour « :story »',
         'artwork_submit' => 'Ajouter',
-        'artwork_published' => 'Votre artwork a été publié.',
-        'credit_warning' => '{0} Un nouvel artwork coûte un crédit de chapitre, et vous n\'en avez plus.|{1} Un nouvel artwork coûte un crédit de chapitre. Il vous en reste :count.|[2,*] Un nouvel artwork coûte un crédit de chapitre. Il vous en reste :count.',
+        'artwork_published' => 'Votre dépôt a été publié.',
+        'credit_warning' => '{0} Un nouveau dépôt coûte un crédit de chapitre, et vous n\'en avez plus.|{1} Un nouveau dépôt coûte un crédit de chapitre. Il vous en reste :count.|[2,*] Un nouveau dépôt coûte un crédit de chapitre. Il vous en reste :count.',
         'submitted' =>'Votre fanart a été envoyé. Il sera visible après validation par les auteur·ices.',
     ],
     'edit' => [
-        'heading' => 'Modifier l\'artwork « :title »',
+        'heading' => 'Modifier « :title »',
         'replace_image_help' => 'Laissez vide pour conserver l\'image actuelle. JPG, PNG ou WebP, 2 Mo maximum.',
         'replace_sound_help' => 'Laissez vide pour conserver le son actuel. MP3, 15 Mo maximum.',
         'submit' => 'Enregistrer',
-        'updated' => 'Votre artwork a été modifié.',
+        'updated' => 'Votre dépôt a été modifié.',
     ],
     'tab' => [
         'whole_work' => 'Toute l\'œuvre',
@@ -76,8 +76,8 @@ return [
     'actions' => [
         'submit_image' => 'Proposer une image',
         'submit_audio' => 'Proposer un son',
-        'artwork_image' => 'Ajouter un artwork (image)',
-        'artwork_audio' => 'Ajouter un artwork (son)',
+        'artwork_image' => 'Déposer une image',
+        'artwork_audio' => 'Déposer un son',
     ],
     'viewer' => [
         'artist' => 'Par',
@@ -123,7 +123,7 @@ return [
         'moderated' => 'Le fanart a été supprimé par la modération.',
     ],
     'validation' => [
-        'no_credit' => 'Vous n\'avez plus de crédit de chapitre : un artwork en coûte un. Publiez un chapitre pour en gagner un nouveau.',
+        'no_credit' => 'Vous n\'avez plus de crédit de chapitre : un dépôt en coûte un. Publiez un chapitre pour en gagner un nouveau.',
         'comment_required' => 'Le commentaire est obligatoire.',
         'comment_max' => 'Le commentaire ne doit pas dépasser 500 caractères.',
         'title_required' => 'Le titre est obligatoire.',
