@@ -88,6 +88,17 @@
                 <x-shared::input-error :messages="$errors->get('chapter_id')" />
             </div>
 
+            @unless ($isArtwork)
+                <div>
+                    <x-shared::input-label for="fanart-message" :value="__('fanart::ui.create.message_label')" />
+                    <textarea id="fanart-message" name="message" maxlength="500" rows="3"
+                              aria-describedby="fanart-message-help"
+                              class="w-full border border-accent rounded p-2 surface-read text-on-surface">{{ old('message') }}</textarea>
+                    <p id="fanart-message-help" class="text-sm">{{ __('fanart::ui.create.message_help') }}</p>
+                    <x-shared::input-error :messages="$errors->get('message')" />
+                </div>
+            @endunless
+
             <div>
                 <label class="flex items-start gap-2">
                     <input type="checkbox" name="attestation" value="1" class="mt-1" @checked(old('attestation')) required>

@@ -41,6 +41,15 @@ function renderLatest(string $type): string
     return app(NotificationPublicApi::class)->getNotificationsByIds([$notification->id])[$notification->id]->htmlDisplay;
 }
 
+it('appends the escaped submitter message to the submitted notification', function () {
+    [, $artist, , , $fanart] = fanartScene($this);
+
+    app(FanartNotifier::class)->fanartSubmitted($fanart, $artist->id, '<script>x</script>');
+
+    $html = renderLatest('fanart.submitted');
+    expect($html)->toContain('&lt;script&gt;')->not->toContain('<script>');
+});
+
 it('registers the fanart group and ten types in the notification settings', function () {
     $factory = app(NotificationFactory::class);
 

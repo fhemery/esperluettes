@@ -52,6 +52,7 @@ class StoreFanartRequest extends FormRequest
             'description' => ['nullable', 'string', 'maxstripped:1000'],
             'chapter_id' => [$isAudio ? 'required' : 'nullable', 'integer', Rule::in($chapterIds)],
             'attestation' => ['accepted'],
+            'message' => ['nullable', 'string', 'max:500'],
             'share_on_discord' => ['nullable', 'boolean'],
             'image' => ['array'],
             'image.file' => [
@@ -74,6 +75,7 @@ class StoreFanartRequest extends FormRequest
             'chapter_id.required' => __('fanart::ui.validation.chapter_required'),
             'chapter_id.in' => __('fanart::ui.validation.chapter_invalid'),
             'attestation.accepted' => __('fanart::ui.validation.attestation_required'),
+            'message.max' => __('fanart::ui.validation.message_max'),
             'image.file.required' => __('fanart::ui.validation.image_required'),
             'image.file.mimes' => __('fanart::ui.validation.image_mimes'),
             'image.file.max' => __('fanart::ui.validation.image_max'),
@@ -95,6 +97,7 @@ class StoreFanartRequest extends FormRequest
             description: $this->input('description'),
             chapterId: $this->input('chapter_id') !== null ? (int) $this->input('chapter_id') : null,
             shareOnDiscord: $this->boolean('share_on_discord'),
+            message: trim((string) $this->input('message')) ?: null,
         );
     }
 }

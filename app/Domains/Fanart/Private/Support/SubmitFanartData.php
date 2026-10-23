@@ -13,6 +13,7 @@ class SubmitFanartData
         public readonly ?string $description,
         public readonly ?int $chapterId,
         public readonly bool $shareOnDiscord,
+        public readonly ?string $message = null,
     ) {
     }
 }

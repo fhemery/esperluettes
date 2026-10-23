@@ -258,3 +258,19 @@ it('leaves the credit unspent when storing the file fails (transaction rollback)
 
     expect(credits($author->id))->toBe($before)->and(Fanart::count())->toBe(0);
 });
+
+it('ignores a message sent with an author artwork upload', function () {
+    $author = alice($this);
+    $coAuthor = carol($this);
+    $story = publicStory('Histoire', $author->id);
+    addCollaborator($story->id, $coAuthor->id);
+
+    $this->actingAs($author)
+        ->post(route('fanart.store', $story->slug), artworkImagePayload(['message' => 'Note secrète']))
+        ->assertRedirect();
+
+    expect(Fanart::count())->toBe(1)
+        ->and(Fanart::first()->status)->toBe(FanartStatus::Published)
+        ->and(DB::table('notifications')->count())->toBe(0)
+        ->and(json_encode(DB::table('fanarts')->first()))->not->toContain('Note secrète');
+});

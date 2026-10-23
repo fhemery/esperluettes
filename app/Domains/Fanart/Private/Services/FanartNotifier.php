@@ -32,12 +32,12 @@ class FanartNotifier
     ) {
     }
 
-    public function fanartSubmitted(Fanart $fanart, int $actorId): void
+    public function fanartSubmitted(Fanart $fanart, int $actorId, ?string $message = null): void
     {
         $this->send(
             $this->storyApi->getAuthorIds($fanart->story_id),
             $actorId,
-            fn () => $this->forFanart(FanartSubmittedNotification::class, $fanart, $actorId),
+            fn () => $this->forFanart(FanartSubmittedNotification::class, $fanart, $actorId, $message),
         );
     }
 

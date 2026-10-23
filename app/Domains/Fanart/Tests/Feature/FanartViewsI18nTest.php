@@ -39,4 +39,8 @@ it('renders the story tab, viewer and create page without missing translation ke
         ->assertSee(__('fanart::ui.actions.artwork_image'));
     $this->actingAs(bob($this))->get(route('stories.show', $story->slug))
         ->assertSee(__('fanart::ui.actions.submit_image'));
+
+    $html = $this->actingAs(bob($this))->get(route('fanart.create', [$story->slug, 'image']))->assertOk()->getContent();
+    expect($html)->not->toContain('fanart::')
+        ->and(__('fanart::ui.validation.message_max'))->not->toBe('fanart::ui.validation.message_max');
 });

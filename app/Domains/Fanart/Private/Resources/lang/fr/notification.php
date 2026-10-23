@@ -22,7 +22,7 @@ return [
     ],
     'submitted' => [
         'display' => '<a href=":actor_url">:actor_name</a> a proposé :kind (« :fanart_title ») sur'
-            . ' <a href=":story_url">:story_title</a>',
+            . ' <a href=":story_url">:story_title</a>:comment',
     ],
     'accepted' => [
         'display' => 'Votre fanart « :fanart_title » a été accepté sur <a href=":story_url">:story_title</a>:comment',

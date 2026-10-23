@@ -61,7 +61,7 @@ class FanartService
             'share_on_discord' => $isImage && $data->shareOnDiscord,
         ]);
 
-        $this->notifier->fanartSubmitted($fanart, $userId);
+        $this->notifier->fanartSubmitted($fanart, $userId, $data->message);
 
         return $fanart;
     }

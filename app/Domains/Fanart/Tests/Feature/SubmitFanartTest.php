@@ -7,6 +7,8 @@ use App\Domains\Fanart\Private\Support\FanartKind;
 use App\Domains\Fanart\Private\Support\FanartStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -310,4 +312,133 @@ it('ignores share_on_discord for audio', function () {
 
     $this->post(route('fanart.store', $story->slug), imagePayload(['share_on_discord' => '1']))->assertRedirect();
     expect(Fanart::where('kind', FanartKind::Image)->first()->share_on_discord)->toBeTrue();
+});
+
+function renderSubmitted(): string
+{
+    app()->setLocale('fr'); // the testing env uses a raw-key locale
+    $notification = getLatestNotificationByKey('fanart.submitted');
+    expect($notification)->not->toBeNull();
+
+    return app(\App\Domains\Notification\Public\Api\NotificationPublicApi::class)
+        ->getNotificationsByIds([$notification->id])[$notification->id]->htmlDisplay;
+}
+
+it('delivers the submitter message to every author in the submitted notification', function () {
+    $author = alice($this);
+    $coAuthor = carol($this);
+    $story = publicStory('Histoire', $author->id);
+    addCollaborator($story->id, $coAuthor->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
+    setSettingsValue($coAuthor->id, 'stories', 'fanart-images-mode', 'yes');
+    $reader = bob($this);
+
+    $this->actingAs($reader)
+        ->post(route('fanart.store', $story->slug), imagePayload(['message' => 'Merci pour cette histoire']))
+        ->assertRedirect();
+
+    expect(renderSubmitted())->toContain(' — « Merci pour cette histoire »')
+        ->and(getNotificationTargetUserIds(getLatestNotificationByKey('fanart.submitted')->id))
+        ->toEqualCanonicalizing([$author->id, $coAuthor->id]);
+});
+
+it('carries the message on an audio submission too', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    $reader = bob($this);
+    grantAudioRole($story->id, $reader->id);
+
+    $this->actingAs($reader)
+        ->post(route('fanart.store', $story->slug), audioPayload($chapter->id, ['message' => 'Ma voix pour vous']))
+        ->assertRedirect();
+
+    expect(renderSubmitted())->toContain('Ma voix pour vous');
+});
+
+it('leaves the submitted notification unchanged without a message, or with a blank one', function (array $extra) {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
+
+    $this->actingAs(bob($this))
+        ->post(route('fanart.store', $story->slug), imagePayload($extra))
+        ->assertRedirect();
+
+    $payload = json_decode(
+        (string) DB::table('notifications')->where('content_key', 'fanart.submitted')->value('content_data'),
+        true
+    );
+    expect($payload['comment'] ?? null)->toBeNull()
+        ->and(renderSubmitted())->not->toContain(' — « ');
+})->with([
+    'absent' => [[]],
+    'empty' => [['message' => '']],
+    'blank' => [['message' => '   ']],
+]);
+
+it('rejects a message over 500 characters and creates nothing', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
+    $this->actingAs(bob($this));
+
+    $this->post(route('fanart.store', $story->slug), imagePayload(['message' => str_repeat('a', 501)]))
+        ->assertSessionHasErrors(['message' => __('fanart::ui.validation.message_max')]);
+    app()->setLocale('fr');
+    expect(__('fanart::ui.validation.message_max'))->toBe('Le message ne doit pas dépasser 500 caractères.');
+    expect(Fanart::count())->toBe(0)
+        ->and(countNotificationsByKey('fanart.submitted'))->toBe(0);
+
+    $this->post(route('fanart.store', $story->slug), imagePayload(['message' => str_repeat('a', 500)]))
+        ->assertSessionHasNoErrors();
+    expect(Fanart::count())->toBe(1);
+});
+
+it('does not store the message on the fanart', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
+
+    $this->actingAs(bob($this))
+        ->post(route('fanart.store', $story->slug), imagePayload(['message' => 'Secret pour auteurs']))
+        ->assertRedirect();
+
+    expect(json_encode(DB::table('fanarts')->first()))->not->toContain('Secret pour auteurs')
+        ->and(Schema::hasColumn('fanarts', 'message'))->toBeFalse();
+});
+
+it('shows the message field on the submission form only', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
+    $reader = bob($this);
+    grantAudioRole($story->id, $reader->id);
+    app()->setLocale('fr');
+
+    $this->actingAs($reader);
+    foreach (['image', 'audio'] as $kind) {
+        $this->get(route('fanart.create', [$story->slug, $kind]))
+            ->assertOk()
+            ->assertSee('name="message"', false)
+            ->assertSee(__('fanart::ui.create.message_label'));
+    }
+
+    $this->actingAs($author)->get(route('fanart.create', [$story->slug, 'image']))
+        ->assertOk()
+        ->assertDontSee('name="message"', false);
+});
+
+it('keeps the typed message when validation fails', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
+
+    $this->actingAs(bob($this))
+        ->from(route('fanart.create', [$story->slug, 'image']))
+        ->post(route('fanart.store', $story->slug), imagePayload(['title' => '', 'message' => 'Mon mot gardé']))
+        ->assertRedirect(route('fanart.create', [$story->slug, 'image']))
+        ->assertSessionHasErrors('title');
+
+    $this->get(route('fanart.create', [$story->slug, 'image']))->assertSee('Mon mot gardé');
 });
