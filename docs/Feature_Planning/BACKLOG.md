@@ -40,7 +40,6 @@ scoped to the task that actually changed.
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
-- **Fanart submission: private message to the author** · `fanart-message-to-author/` · interactive · WIP:WRAP
 
 ## Done
 
@@ -49,6 +48,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`fanart-message-to-author`](_done/fanart-message-to-author.md) · optional 500-char plain-text message from the submitter to the story's authors, carried only in the `fanart.submitted` notification (not stored)
 - [`fanart-artwork-module`](_done/fanart-artwork-module.md) · New Fanart domain: confirmed readers submit images and chapter readings that authors review, author artworks for one chapter credit, Fanarts story tab, chapter audio player with auto-advance, profile tab, reports that keep a copy of the file, Discord feed.
 - [`annotations-v3`](_done/annotations-v3.md) · Annotated passages are underlined in the chapter, with gutter avatars opening a popover, an author filter menu and moderator « Vider le contenu »
 - [`media-sound-upload`](_done/media-sound-upload.md) · Secret Gift sound stored, served (Range) and garbage-collected through Media's private half; `<x-shared::sound-upload>` replaced by `<x-media::sound-field>`

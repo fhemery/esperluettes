@@ -1,8 +1,6 @@
 # Fanart submission: private message to the author
 
-**Status:** DONE — 2026-10-23 · **Domain(s):** `Fanart` · **Spec:**
-[functional](./01-functional.md) · [architecture](./02-architecture.md) ·
-[plan](./03-plan.md) · [decisions](./DECISIONS.md)
+**Status:** DONE — 2026-10-23 · **Domain(s):** `Fanart`
 
 ## What it does
 
