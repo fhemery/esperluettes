@@ -2,7 +2,7 @@
 
 {{-- Clicking asks the story page's viewer modal to load the viewer fragment. --}}
 <button type="button"
-        class="block w-40 h-40 overflow-hidden rounded surface-neutral"
+        class="block cursor-pointer w-40 h-40 overflow-hidden rounded surface-neutral"
         data-fanart-id="{{ $fanart->id }}"
         aria-haspopup="dialog"
         x-on:click="$dispatch('fanart-open', { url: '{{ route('fanart.show', $fanart->id) }}' })">

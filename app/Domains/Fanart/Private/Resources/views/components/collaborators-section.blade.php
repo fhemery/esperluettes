@@ -16,10 +16,10 @@
                             <span class="font-medium">{{ $fanartist['display_name'] }}</span>
                         @endif
                     </div>
-                    <form action="{{ route('fanart.fanartists.destroy', ['slug' => $slug, 'userId' => $fanartist['user_id']]) }}" method="POST">
+                    <form action="{{ route('fanart.fanartists.destroy', ['slug' => $slug, 'userId' => $fanartist['user_id']]) }}" method="POST" class="flex items-center">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="text-error hover:text-error/80" title="{{ __('fanart::ui.fanartists.revoke') }}"
+                        <button type="submit" class="flex items-center cursor-pointer text-error hover:text-error/80"title="{{ __('fanart::ui.fanartists.revoke') }}"
                                 aria-label="{{ __('fanart::ui.fanartists.revoke') }}">
                             <span class="material-symbols-outlined" aria-hidden="true">person_remove</span>
                         </button>
