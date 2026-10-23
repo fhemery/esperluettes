@@ -39,6 +39,7 @@ it('refuses a request when no media type is in designated mode', function () {
     $author = alice($this);
     $reader = bob($this);
     $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
     setSettingsValue($author->id, 'stories', 'fanart-audio-mode', 'yes');
 
     $this->actingAs($reader)->post(requestUrl($story->slug))->assertForbidden();

@@ -16,6 +16,7 @@ beforeEach(function () {
 it('renders the story tab, viewer and create page without missing translation keys', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
     $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Premier']);
     $pending = createPendingAudio(['story_id' => $story->id, 'user_id' => bob($this)->id, 'chapter_id' => $chapter->id]);
     createPublishedImage(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => null]);

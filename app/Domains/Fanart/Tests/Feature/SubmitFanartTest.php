@@ -50,12 +50,13 @@ it('shows each create page only for the kinds the mode allows', function () {
     $story = publicStory('Histoire', $author->id);
     $reader = bob($this);
 
-    // Defaults: images = yes, audio = designated (the reader is not a fanartiste).
+    // Images opened to all; audio stays designated (the reader is not a fanartiste).
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
     $this->actingAs($reader);
+    $this->get(route('fanart.create', [$story->slug, 'audio']))->assertForbidden();
     $this->get(route('fanart.create', [$story->slug, 'image']))
         ->assertOk()
         ->assertSee('data-kind="image"', false);
-    $this->get(route('fanart.create', [$story->slug, 'audio']))->assertForbidden();
 
     grantAudioRole($story->id, $reader->id);
     $this->get(route('fanart.create', [$story->slug, 'audio']))
@@ -75,6 +76,8 @@ it('stores a pending image with 400/800 variants and notifies every author', fun
     $coAuthor = carol($this);
     $story = publicStory('Histoire', $author->id);
     addCollaborator($story->id, $coAuthor->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
+    setSettingsValue($coAuthor->id, 'stories', 'fanart-images-mode', 'yes');
     $reader = bob($this);
 
     $this->actingAs($reader)
@@ -126,6 +129,7 @@ it('stores a pending audio and requires a chapter', function () {
 it('accepts an image without chapter (Toute l\'oeuvre)', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
 
     $this->actingAs(bob($this))
         ->post(route('fanart.store', $story->slug), imagePayload(['chapter_id' => '']))
@@ -167,6 +171,7 @@ it('rejects gif, oversize image, non-mp3 audio, oversize audio', function () {
 it('requires title and the attestation; caps description at 1000 visible chars', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
     $this->actingAs(bob($this));
 
     $this->from(route('fanart.create', [$story->slug, 'image']))
@@ -189,6 +194,7 @@ it('requires title and the attestation; caps description at 1000 visible chars',
 it('sanitises the description HTML', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
 
     $this->actingAs(bob($this))
         ->post(route('fanart.store', $story->slug), imagePayload([
@@ -223,6 +229,7 @@ it('rejects an unpublished chapter of the story', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
     $draft = createUnpublishedChapter($this, $story, $author);
+    setSettingsValue($author->id, 'stories', 'fanart-images-mode', 'yes');
 
     $this->actingAs(bob($this))
         ->post(route('fanart.store', $story->slug), imagePayload(['chapter_id' => $draft->id]))

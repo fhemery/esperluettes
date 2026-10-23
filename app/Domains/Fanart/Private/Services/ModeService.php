@@ -55,7 +55,7 @@ class ModeService
                 $authorId,
                 FanartServiceProvider::TAB_STORIES,
                 $key,
-            )) ?? ($kind === FanartKind::Image ? FanartMode::Yes : FanartMode::Designated),
+            )) ?? FanartMode::Designated,
             $this->stories->getAuthorIds($storyId),
         );
 

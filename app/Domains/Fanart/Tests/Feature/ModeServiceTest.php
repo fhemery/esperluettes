@@ -8,13 +8,13 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-it('returns the defaults images=yes, audio=designated for an author who never set them', function () {
+it('returns the defaults images=designated, audio=designated for an author who never set them', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
 
     $service = app(ModeService::class);
 
-    expect($service->effectiveMode($story->id, FanartKind::Image))->toBe(FanartMode::Yes)
+    expect($service->effectiveMode($story->id, FanartKind::Image))->toBe(FanartMode::Designated)
         ->and($service->effectiveMode($story->id, FanartKind::Audio))->toBe(FanartMode::Designated);
 });
 
