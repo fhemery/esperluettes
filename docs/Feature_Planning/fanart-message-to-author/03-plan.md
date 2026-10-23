@@ -198,3 +198,23 @@ hence the plain `<textarea>` styled like the review viewer's.
 
 - Phase 1: the French strings above are proposals; the user may reword them at
   VERIFY.
+
+## VERIFY result (2026-10-23)
+
+Spec: `e2e/tests/features/fanart-message-to-author.spec.ts` (14 passed with the existing fanart spec; shots in `shots/`, taken with `E2E_SHOTS_DIR`). Fixture fix: `E2eFanartSeeder` now sets `author` and `confirmed` fanart modes to `yes` (default `designated` made every e2e reader get a 403 on the create page; the existing « reader proposes an image » spec was failing for the same reason).
+
+| Row | OK? |
+|-----|-----|
+| Image form, desktop | ✅ field between chapter and attestation, label + hint, full width, theme consistent |
+| Sound form | ✅ same placement (asserted by position) |
+| Mobile 375 px | ✅ no overflow, hint wraps |
+| Author artwork forms | ✅ no field (image and audio) |
+| 501-char error | ✅ French error under field; title and message kept |
+| Author notification with message | ✅ ` — « message »`, story link intact |
+| Without message | ✅ no ` — « » ` suffix |
+| Co-author | ✅ (story 2, moderator submits; author and confirmed receive, moderator not) |
+| Submitter | ✅ nothing |
+| 500-char message, desktop + mobile | ✅ wraps, no horizontal overflow |
+| `<b>html</b>` | ✅ literal, no `<b>` element |
+| Stale data (declined / withdrawn / story deleted) | n/a for the browser: snapshot payload rendering, a feature-test matter (render path identical to accept/decline `comment`) |
+| Deactivated submitter | n/a, same reason |
