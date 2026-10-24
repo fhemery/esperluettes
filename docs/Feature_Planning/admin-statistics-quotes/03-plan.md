@@ -9,14 +9,24 @@
 - Architecture: [`02-architecture.md`](./02-architecture.md)
 - Decisions: [`DECISIONS.md`](./DECISIONS.md)
 
+## Prerequisite — `quote-hard-delete/` lands first
+
+BUILD starts only once the backlog task `quote-hard-delete/` is done: a reader
+deleting their own quote becomes a **hard** delete, and reactivation restores
+only the quotes hidden by the deactivation (DECISIONS #7). This plan assumes
+that behaviour throughout — a reader-deleted quote is gone for good and is
+never restored. Phases 2 and 4 rely on it directly; phases 1 and 3 do not, but
+the task is built in one go after the prerequisite. Architecture §3.2 ("after
+the soft delete") and §9 risk 2 predate that decision and are superseded by it.
+
 ## Phase index
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Quote — event classes and bus registration | S | — | TODO |
-| 2 | Quote — emit deletion / removal / restoration events | S | 1 | TODO |
+| 2 | Quote — emit deletion / removal / restoration events | S | 1, `quote-hard-delete/` | TODO |
 | 3 | Quote — daily net-change history in `QuotePublicApi` | S | — | TODO |
-| 4 | Statistics — `global.total_quotes` definition (live deltas + table recompute) | M | 2, 3 | TODO |
+| 4 | Statistics — `global.total_quotes` definition (live deltas + table recompute) | M | 2, 3, `quote-hard-delete/` | TODO |
 | 5 | Statistics — admin tile, « Citations » tab, E2E seed | S | 4 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
@@ -48,7 +58,8 @@ touches a page.
 - Stored events are rehydrated through the factory that `registerEvent()` fills;
   `latestEventOf()` (Events test helper) returns `null` for an unregistered event.
 - `QuotePolicy::canEditOrDelete()` is owner-only: the deleter is always the quoter.
-- `/admin/statistics` is restricted to `admin` and `tech-admin` (not moderator).
+- `/admin/statistics` is restricted to `admin` and `tech-admin` (not moderator),
+  and stays so (DECISIONS #6).
 - `QUEUE_CONNECTION=sync` in `phpunit.xml` and `.env.e2e`, so the queued
   `UpdateStatisticsOnEvent` runs inline in tests and E2E.
 - Quote's lifecycle tests trigger the cascade with
@@ -110,11 +121,16 @@ the affected count taken by Quote before it changes the rows.
 Architecture: §2.3 (lifecycle table), §3.2, §3.4. Builds on phase 1: the
 classes `ChapterPassageQuoteDeleted`, `UserQuotesRemoved(userId, count)` and
 `UserQuotesRestored(userId, count)` exist in `Quote/Public/Events/` and are
-registered with the bus.
+registered with the bus. Also builds on the prerequisite task
+`quote-hard-delete/`: `QuoteService::delete()` already **hard**-deletes the
+row, and a soft-deleted quote can only come from a user deactivation.
 
 **Deliverables.**
-- `app/Domains/Quote/Private/Services/QuoteService.php` — `delete()`: after
-  `$quote->delete()`, `$this->eventBus->emit(new ChapterPassageQuoteDeleted(quoterId: $quote->user_id, chapterId: $quote->chapter_id, storyId: $quote->story_id))`.
+- `app/Domains/Quote/Private/Services/QuoteService.php` — `delete()`: after the
+  existing hard delete of the row, `$this->eventBus->emit(new ChapterPassageQuoteDeleted(quoterId: $quote->user_id, chapterId: $quote->chapter_id, storyId: $quote->story_id))`.
+  The event therefore fires on a hard delete: the quote is gone for good and no
+  later event brings it back. Read the ids before the delete if the
+  prerequisite left them unavailable afterwards.
   (`$this->eventBus` is already injected — used by `create()`.)
 - `app/Domains/Quote/Private/Listeners/SoftDeleteOnUserDeactivated.php` —
   inject `EventBus`; `$count = Quote::where('user_id', …)->count()` (visible
@@ -129,7 +145,8 @@ registered with the bus.
   existing `withTrashed()->restore()`; emit `UserQuotesRestored` only if `> 0`.
   Count explicitly rather than trusting `restore()`'s return value (affected-row
   semantics differ between SQLite and MySQL, and `withTrashed()` matches live
-  rows too). Do **not** change which rows are restored (architecture §9, risk 2).
+  rows too). Do **not** change which rows are restored — after the
+  prerequisite, the trashed rows are exactly the ones the deactivation hid.
 - `app/Domains/Quote/AGENTS.md` — "Events emitted": replace "Note edits and
   deletions emit nothing" with the three new events, their emitters and the
   "count > 0 only" rule. `app/Domains/Quote/README.md` — same, if it lists events.
@@ -139,7 +156,10 @@ registered with the bus.
   DELETE `/quotes/{id}` as the owner; event payload = owner id, chapter, story.
 - `it('emits nothing when a non-owner fails to delete a quote')` — 403, `countEvents('Quote.ChapterPassageQuoteDeleted')` = 0.
 - `it('emits UserQuotesRemoved with the visible count on deactivation')` — 2
-  live quotes + 1 already soft-deleted → `count` = 2.
+  live quotes + 1 row soft-deleted directly in setup (`createQuote()` with
+  `deleted_at`; reader deletion no longer soft-deletes) → `count` = 2.
+- `it('emits UserQuotesRestored without counting a quote the reader deleted')` —
+  3 quotes, owner DELETEs 1, deactivate, reactivate → `UserQuotesRestored.count` = 2.
 - `it('emits no UserQuotesRemoved when a deactivated user has no quote')`.
 - `it('emits UserQuotesRestored with the number of restored rows on reactivation')`
   — deactivate a user with 2 quotes, reactivate → `count` = 2.
@@ -172,7 +192,9 @@ Architecture: §3.1 (first paragraph), §7 #2, §9 risk 1. Independent of phases
   SQLite and MySQL. Days whose net is 0 are kept out of the result.
 - `app/Domains/Quote/Public/Api/QuotePublicApi.php` —
   `getDailyNetChanges(): array` delegating to the service, with a docblock
-  stating the shape and that hard-deleted rows (deleted users) do not appear.
+  stating the shape and that hard-deleted rows (quotes deleted by their reader,
+  quotes of deleted users) do not appear — neither their creation nor their
+  removal. Soft-deleted rows are those of currently deactivated users.
 
 **Tests.** New `app/Domains/Quote/Tests/Feature/QuotePublicApiDailyNetChangesTest.php`
 (rows via `createQuote()` with explicit `created_at` / `deleted_at`):
@@ -200,6 +222,8 @@ Architecture: §1, §2, §2.3, §3.2 (Statistics bullet), §5, §7 #2. Builds on
 Quote emits `Quote.ChapterPassageQuoted` (on create), `Quote.ChapterPassageQuoteDeleted`,
 `Quote.UserQuotesRemoved(userId, count)` and `Quote.UserQuotesRestored(userId, count)`
 (phases 1–2), and `QuotePublicApi::getDailyNetChanges(): array<Y-m-d, int>` (phase 3).
+Also builds on the prerequisite task `quote-hard-delete/`: a reader's own
+deletion is a hard delete, and reactivation never restores it.
 
 **Deliverables.**
 - `app/Domains/Statistics/Private/Definitions/Global/TotalQuotesStatistic.php`
@@ -246,12 +270,17 @@ deleted via DELETE `/quotes/{id}`, lifecycle via `event(new UserDeactivated(...)
     delete it today → today's series value −1.0.
 - `describe('recompute from the quotes table')`:
   - `it('rebuilds the same snapshot and daily series as live events')` — quotes
-    created on 3 different days (`travelTo`), one deleted on a 4th day, one
-    user deactivated; capture snapshot + per-day values, `resetStatistics()`,
-    `recomputeStatistic('global.total_quotes')`, compare.
-  - `it('counts restored rows again after reactivation')` — reader deletes 1 of
-    2, deactivate, reactivate → live snapshot 2 and recomputed snapshot 2
-    (pins architecture §9 risk 2).
+    by two readers created on 3 different days (`travelTo`), one reader
+    deactivated on a 4th day; capture snapshot + per-day values,
+    `resetStatistics()`, `recomputeStatistic('global.total_quotes')`, compare.
+    No reader deletion here: a hard-deleted row leaves no trace in the table.
+  - `it('keeps the snapshot right when a reader-deleted quote vanishes from history')`
+    — 2 quotes on day A, one deleted by its owner on day B; live snapshot 1,
+    recomputed snapshot 1, and the rebuilt series has no point on day B
+    (accepted divergence, same as deleted users — architecture §9 risk 1).
+  - `it('does not count a reader-deleted quote again after reactivation')` —
+    reader deletes 1 of 2, deactivate, reactivate → live snapshot 1 and
+    recomputed snapshot 1 (the deleted quote is gone for good).
   - `it('runs through statistics:compute')` —
     `$this->artisan('statistics:compute', ['key' => 'global.total_quotes'])->assertExitCode(0)`.
   - `it('leaves no snapshot when there is no quote')`.
@@ -259,7 +288,9 @@ deleted via DELETE `/quotes/{id}`, lifecycle via `event(new UserDeactivated(...)
 **Acceptance.**
 - ✅ Each row of architecture §2.3 moves `global.total_quotes` by the stated delta.
 - ✅ `statistics:compute global.total_quotes` yields the same snapshot as live
-  events for a table with live, soft-deleted and restored rows.
+  events for a table with live, soft-deleted and restored rows, and after
+  reader (hard) deletions.
+- ✅ A quote its reader deleted is never counted again, reactivation included.
 - ✅ Statistics imports no Auth event and no Quote private class (deptrac green).
 - ✅ `pnpm run gate` green.
 
@@ -329,9 +360,9 @@ during PLAN while the flows are fresh.
 | `/admin/statistics`, mobile (375px) | Tiles wrap 2 per row (3 rows), tab bar with four tabs does not overflow or clip, chart fits width | |
 | Empty state | With no `global.total_quotes` data (fresh DB, no quotes): tile shows the same placeholder as other empty metrics, chart shows its empty state | |
 | Role: tech-admin | Same page and tab as admin | |
-| Role: moderator / `user-confirmed` | `/admin/statistics` refused (403 / redirect) as today; no nav entry | |
+| Role: moderator / `user-confirmed` | `/admin/statistics` refused (403 / redirect) as today; no nav entry (moderators excluded, DECISIONS #6) | |
 | Live: reader deletes a quote | Tile total decreases by 1 after reload; today's weekly bar drops by 1 | |
-| Live: user deactivated / reactivated | Total drops by the user's visible quote count, comes back after reactivation | |
+| Live: user deactivated / reactivated | Total drops by the user's visible quote count, comes back after reactivation; a quote the reader deleted before deactivation does not come back | |
 | Live: user deleted | Total drops by their visible quotes, not again if they were already deactivated | |
 | Deleted chapter | Deleting a quoted chapter leaves the total unchanged | |
 | Audit log `/admin/events/domain-events` | `Quote.ChapterPassageQuoted`, `Quote.ChapterPassageQuoteDeleted`, `Quote.UserQuotesRemoved`, `Quote.UserQuotesRestored` listed with readable summaries, no quote text in the new ones | |
@@ -339,14 +370,15 @@ during PLAN while the flows are fresh.
 
 ## Open items
 
-- **For WRAP** — architecture §9 risk 2: `RestoreOnUserReactivated` restores
-  quotes the reader deleted themselves. Phase 4 pins the statistic's behaviour
-  (they are counted again) in a test; a backlog entry to fix the cascade itself
-  should be added at WRAP. Not a blocker for any phase.
+- **Before BUILD** — prerequisite `quote-hard-delete/` must be DONE (see the
+  top of this plan, DECISIONS #7); it resolves architecture §9 risk 2. Phases 2
+  and 4 check its behaviour. If it is not done when BUILD starts, stop and
+  report rather than building against soft deletes. Rows already soft-deleted
+  by readers in production before it lands are its concern (cleanup or not);
+  whatever it leaves behind is what `getDailyNetChanges()` will count.
 - **Resolved during PLAN** — architecture §9 risk 3 (`NotifyAuthorsOnQuoteCreated`
   possibly dormant): it is wired (FQCN subscription); registering the event does
   not change notifications. Phase 1 keeps the existing notification test as proof.
-- **Phase 5** — functional spec §3 lists moderators as viewers; the existing
-  route allows `admin` and `tech-admin` only. Per DECISIONS assumption #2 the
-  existing rule stands; VERIFY checks it as-is. Flag in WRAP if the user meant
-  otherwise.
+- **Resolved during PLAN** — moderator access: the user confirmed moderators do
+  not see `/admin/statistics` (DECISIONS #6); spec §3 corrected. VERIFY checks
+  the existing `admin` / `tech-admin` rule as-is.

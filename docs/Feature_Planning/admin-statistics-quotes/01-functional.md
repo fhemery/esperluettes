@@ -20,11 +20,12 @@ whether the quote book is adopted.
 
 | Role | Can see | Can do |
 |------|---------|--------|
-| Guest / `user` / `user-confirmed` / author | nothing (page not accessible) | — |
-| Moderator / Admin | Same access as the rest of `/admin/statistics` | read only |
+| Guest / `user` / `user-confirmed` / author / moderator | nothing (page not accessible) | — |
+| Admin / tech-admin | Same access as the rest of `/admin/statistics` | read only |
 
-The access rule is whatever the existing statistics page already enforces; this
-feature does not change it.
+The access rule is whatever the existing statistics page already enforces
+(`admin` and `tech-admin` only); this feature does not change it. Moderators do
+not get access (decision #6).
 
 ## 4. Functional requirements
 
@@ -44,7 +45,8 @@ feature does not change it.
 The total is net: it rises when a reader saves a quote and falls when a quote
 stops existing or being visible:
 
-- a reader deletes one of their quotes → −1;
+- a reader deletes one of their quotes → −1, for good (the quote is
+  hard-deleted, see `quote-hard-delete/`; reactivation never brings it back);
 - a user is deleted → their quotes are subtracted;
 - a user is deactivated → their quotes are subtracted; reactivated → added back.
 
@@ -60,7 +62,7 @@ well as it can for history that predates this feature (see §9).
 
 | Concern | Decision |
 |---------|----------|
-| Roles | Staff only, as the existing page |
+| Roles | `admin` and `tech-admin` only, as the existing page (not moderators) |
 | Visibility / privacy | Aggregate count only; no quote text, note or author is shown |
 | Settings | N/A — no preference |
 | Notifications | N/A — nothing notifies anyone |
@@ -81,6 +83,7 @@ well as it can for history that predates this feature (see §9).
 | 1 | How are deletions counted? | Net total: the curve falls on deletions |
 | 2 | Placement | New « Citations » tab, plus a summary tile |
 | 3 | Deactivated users' quotes | Excluded while deactivated, restored on reactivation |
+| 6 | Do moderators see the page? | No — `admin` and `tech-admin` only, as today |
 
 ## 8. Out of scope
 

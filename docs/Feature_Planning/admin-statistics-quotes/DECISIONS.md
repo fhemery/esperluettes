@@ -13,6 +13,8 @@ a new row that supersedes it and note the number.
 | 3 | 2026-10-24 | REFINE | Quotes of deactivated users? | Excluded while deactivated, restored on reactivation | — |
 | 4 | 2026-10-24 | DESIGN | How does the total learn of deactivation / reactivation / user deletion? | Quote emits count-carrying events (`UserQuotesRemoved`, `UserQuotesRestored`) plus `ChapterPassageQuoteDeleted`; Statistics listens only to Quote | — |
 | 5 | 2026-10-24 | DESIGN | Where does the curve's history come from? | `recompute` rebuilds from the `quotes` table through a new `QuotePublicApi` method, not from stored events | — |
+| 6 | 2026-10-24 | PLAN | Do moderators get access to `/admin/statistics`? | No — keep the current `admin` / `tech-admin` rule; spec §3 wording implying moderators is corrected | — |
+| 7 | 2026-10-24 | PLAN | Reactivation restores quotes the reader deleted themselves (architecture §9 risk 2) — what does the statistic do? | It is a bug: reader deletion becomes a hard delete in the separate task `quote-hard-delete/`, which lands before this BUILD. The plan assumes a reader-deleted quote is gone for good | — |
 
 ## Assumptions made without asking
 
