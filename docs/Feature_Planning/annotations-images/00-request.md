@@ -1,6 +1,6 @@
 # Chapter annotations — image annotation — request
 
-Split out of [`annotations-v4`](../annotations-v4/01-functional.md) at its
+Split out of [`annotations-v4`](../_done/annotations-v4.md) at its
 REFINE (2026-10-24, decision #1). Theme H of that task's request.
 
 ## What I want
@@ -11,7 +11,7 @@ annotations today.
 
 ## Constraints or ideas I already have
 
-- Original vision: `annotations-v4/vision-spec.md` §10 (moves here when v4 wraps).
+- Original vision: [`vision-spec.md`](./vision-spec.md) §10.
 - Needs a **stable block anchor**, which does not exist today (found at v4 REFINE):
   - `story_chapters.content_blocks` is a position-only array, rebuilt on every
     save by `ChapterContentResolver`; editor uids (`b<i>`, `n<seq>`) are transient;

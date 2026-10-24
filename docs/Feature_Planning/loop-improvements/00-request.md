@@ -130,6 +130,21 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     next fanart VERIFY ran it. Fix: `wrap-task` §4 allows no third state — keep
     means promote to `core/` (with the reason), and WRAP runs the promoted spec
     once before committing.
+20. **Alpine `x-data` arguments are frozen at init.** *(annotations-v4,
+    phase 5)* In the in-chapter popover, `<template x-if="current.can_report">`
+    around `x-data="reportButton('annotation', current.id)"` would keep the
+    first annotation's id when paging between members: `current` stays truthy,
+    so the component is never re-created. Fixed with `x-for` over
+    `[current.id]` keyed on the id. Fix: add to item 4's Shared front-end rule —
+    "a nested `x-data` whose arguments depend on a changing object must be
+    re-keyed (`x-for … :key`), not wrapped in `x-if`".
+21. **The outline error button is illegible.** *(annotations-v4, VERIFY
+    finding 1)* PLAN prescribed `<x-shared::button color="error" :outline="true">`;
+    `.surface-error.is-outline` (`Shared/Resources/css/app.css`) uses the pale
+    `--color-error-bg` as text/border on white, so « Signaler » was near
+    invisible on four sites, caught only by screenshots. Fix: correct the
+    variant's foreground in Shared CSS, or a line in `app/Domains/Shared/AGENTS.md`
+    saying which button colours support `:outline`.
 
 ## Why
 
