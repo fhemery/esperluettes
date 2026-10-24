@@ -1,4 +1,4 @@
-# <Task title> — decisions log
+# Calendar: dedicated time field for activity dates — decisions log
 
 Append-only. Every question the user arbitrated, with the answer as given.
 BUILD reads this before asking anything already settled.
@@ -8,7 +8,10 @@ a new row that supersedes it and note the number.
 
 | # | Date | Step | Question | Decision | Supersedes |
 |---|------|------|----------|----------|------------|
-| 1 | YYYY-MM-DD | REFINE | | | — |
+| 1 | 2026-10-24 | REFINE | How is the time entered? | Date + time native inputs side by side | — |
+| 2 | 2026-10-24 | REFINE | Where does the split apply? | Change the shared component everywhere (Calendar, Story chapters, Auth codes, Events log) | — |
+| 3 | 2026-10-24 | REFINE | Date chosen, time empty? | Prefill 00:00 | — |
+| 4 | 2026-10-24 | REFINE | Assumptions (clear date clears time; Quote Contest mirrors split too; no server/storage change; free minutes) | Confirmed in replay | — |
 
 ## Assumptions made without asking
 
