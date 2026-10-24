@@ -69,6 +69,19 @@ class QuotePublicApi
         return $this->service->getOwnedQuote($quoteId, $userId);
     }
 
+    /**
+     * Net change of the quote population per day, derived from the table:
+     * +1 on each row's creation day, -1 on the deletion day of each soft-deleted
+     * row (quotes of currently deactivated users). Hard-deleted rows (quotes
+     * deleted by their reader, quotes of deleted users) do not appear at all.
+     *
+     * @return array<string, int> Y-m-d => net change, ascending, zero days omitted
+     */
+    public function getDailyNetChanges(): array
+    {
+        return $this->service->getDailyNetChanges();
+    }
+
     public function canViewQuoteBook(int $profileUserId, ?int $viewerId): bool
     {
         return $this->policy->canViewQuoteBook($profileUserId, $viewerId);

@@ -93,6 +93,35 @@ class QuoteService
         ));
     }
 
+    /**
+     * @return array<string, int> Y-m-d => net change, ascending, zero days omitted
+     */
+    public function getDailyNetChanges(): array
+    {
+        $changes = [];
+
+        $created = Quote::withTrashed()
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+        foreach ($created as $day => $total) {
+            $changes[$day] = ($changes[$day] ?? 0) + (int) $total;
+        }
+
+        $deleted = Quote::onlyTrashed()
+            ->selectRaw('DATE(deleted_at) as day, COUNT(*) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+        foreach ($deleted as $day => $total) {
+            $changes[$day] = ($changes[$day] ?? 0) - (int) $total;
+        }
+
+        $changes = array_filter($changes, fn(int $net) => $net !== 0);
+        ksort($changes);
+
+        return $changes;
+    }
+
     public function getForChapter(int $chapterId, int $storyId, int $userId): QuoteListDto
     {
         $quotes = Quote::query()
