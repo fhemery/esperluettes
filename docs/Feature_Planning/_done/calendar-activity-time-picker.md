@@ -1,9 +1,6 @@
 # Calendar: dedicated time field for activity dates
 
-**Status:** DONE — 2026-10-24 · **Domain(s):** `Shared` (owner), `Calendar`, `Story` · **Spec:**
-[functional](./01-functional.md) · [architecture](./02-architecture.md) ·
-[plan](./03-plan.md) · [decisions](./DECISIONS.md)
-
+**Status:** DONE — 2026-10-24 · **Domain(s):** `Shared` (owner), `Calendar`, `Story`
 ## What it does
 
 `<x-shared::datetime-local-input>` no longer renders one native

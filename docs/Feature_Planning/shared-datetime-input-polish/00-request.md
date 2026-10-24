@@ -1,6 +1,6 @@
 # Shared — datetime input polish — request
 
-*Leftover pushed back by [`calendar-activity-time-picker`](../calendar-activity-time-picker/README.md)
+*Leftover pushed back by [`calendar-activity-time-picker`](../_done/calendar-activity-time-picker.md)
 WRAP (seen at VERIFY, accepted there as minor).*
 
 ## What I want

@@ -32,7 +32,6 @@ scoped to the task that actually changed.
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
-- **Calendar: dedicated time field for activity dates** · `calendar-activity-time-picker/` · interactive · WIP:WRAP
 - **Secret Gift: admin feedback after shuffle** · `secret-gift-shuffle-feedback/` · interactive · TODO
 - **Secret Gift — reveal follow-ups (ARCHIVED access, ENDED tab, missing tests)** · `secret-gift-reveal-followups/` · interactive · TODO: leftover from `media-sound-upload/` VERIFY — 3 feature tests pushed back to BUILD and never written; activity page 404s once ARCHIVED while gift routes still serve; page opens on the prepare tab once ENDED
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
@@ -51,6 +50,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`calendar-activity-time-picker`](_done/calendar-activity-time-picker.md) · date fields split into date + time inputs over a hidden UTC value (Calendar, Story chapters)
 - [`admin-statistics-quotes`](_done/admin-statistics-quotes.md) · « Citations » tile and tab on /admin/statistics: net `global.total_quotes` from new Quote deletion/removal/restoration events, rebuilt from the quotes table (run `statistics:compute global.total_quotes` once after deploy)
 - [`quote-hard-delete`](_done/quote-hard-delete.md) · a reader's own quote deletion is now a hard delete, so reactivation no longer resurrects it; one-off migration purges legacy soft-deleted quotes (deploy only while no user is deactivated)
 - [`annotations-v4`](_done/annotations-v4.md) · per-annotation « Signaler » on roots and replies (pop-up and popover), `annotation` moderation topic with a report guard refusing people who cannot see the annotation or wrote it
