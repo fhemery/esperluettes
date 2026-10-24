@@ -12,6 +12,11 @@ use App\Domains\Statistics\Private\Console\ComputeStatisticCommand;
 use App\Domains\Comment\Public\Events\CommentPosted;
 use App\Domains\Statistics\Private\Definitions\Global\TotalChaptersStatistic;
 use App\Domains\Statistics\Private\Definitions\Global\TotalCommentsStatistic;
+use App\Domains\Quote\Public\Events\ChapterPassageQuoted;
+use App\Domains\Quote\Public\Events\ChapterPassageQuoteDeleted;
+use App\Domains\Quote\Public\Events\UserQuotesRemoved;
+use App\Domains\Quote\Public\Events\UserQuotesRestored;
+use App\Domains\Statistics\Private\Definitions\Global\TotalQuotesStatistic;
 use App\Domains\Statistics\Private\Definitions\Global\TotalRootCommentsStatistic;
 use App\Domains\Statistics\Private\Definitions\Global\TotalStoriesStatistic;
 use App\Domains\Statistics\Private\Definitions\Global\TotalUsersStatistic;
@@ -94,6 +99,7 @@ class StatisticsServiceProvider extends ServiceProvider
         $registry->register(TotalWordsStatistic::class);
         $registry->register(TotalCommentsStatistic::class);
         $registry->register(TotalRootCommentsStatistic::class);
+        $registry->register(TotalQuotesStatistic::class);
         $registry->register(UserTotalStoriesStatistic::class);
         $registry->register(UserTotalChaptersStatistic::class);
         $registry->register(UserTotalWordsStatistic::class);
@@ -112,6 +118,10 @@ class StatisticsServiceProvider extends ServiceProvider
             ChapterDeleted::class,
             ChapterUpdated::class,
             CommentPosted::class,
+            ChapterPassageQuoted::class,
+            ChapterPassageQuoteDeleted::class,
+            UserQuotesRemoved::class,
+            UserQuotesRestored::class,
         ] as $eventClass) {
             $eventBus->subscribe($eventClass, [UpdateStatisticsOnEvent::class, 'handle']);
         }

@@ -94,6 +94,7 @@ Chapter and word counts for user-scoped statistics attribute deltas to **all aut
 | `global.total_words` | `Story.ChapterCreated`, `Story.ChapterDeleted`, `Story.ChapterUpdated`, `Story.StoryDeleted` | Planned |
 | `global.total_comments` | `Comment.Posted` | Planned |
 | `global.total_root_comments` | `Comment.Posted` (root only) | Planned |
+| `global.total_quotes` | `Quote.ChapterPassageQuoted`, `Quote.ChapterPassageQuoteDeleted`, `Quote.UserQuotesRemoved`, `Quote.UserQuotesRestored` | Implemented |
 
 ### Per-user statistics
 
@@ -125,7 +126,7 @@ Admin page: `/admin/statistics` (roles: `admin`, `tech-admin`), registered in `A
 1. Create a class implementing `StatisticDefinition` in `Private/Definitions/{Global|User}/`.
 2. Declare `listensTo()` using event **name strings** (e.g. `UserRegistered::name()`).
 3. Implement `computeDelta()` returning `[scopeId => delta]` or `null` when the event is irrelevant.
-4. Implement `recompute()` — use the `RecomputesStatisticFromEvents` trait when replay-from-events is sufficient; delegate delta logic to a support class (see `StoryContentDeltaCalculator`, `CommentDeltaCalculator`) when multiple statistics share event parsing rules.
+4. Implement `recompute()` — use the `RecomputesStatisticFromEvents` trait when replay-from-events is sufficient; delegate delta logic to a support class (see `StoryContentDeltaCalculator`, `CommentDeltaCalculator`) when multiple statistics share event parsing rules. A statistic may instead rebuild from its owner's public API when stored events are incomplete (see `TotalQuotesStatistic`).
 5. Register the class in `StatisticsServiceProvider::registerStatistics()`.
 6. If the statistic listens to new event types, add them to `registerEventListeners()` in the same provider.
 7. Backfill: `./vendor/bin/sail artisan statistics:compute {key}` (add `--scope-id=` for user-scoped stats).
