@@ -32,6 +32,6 @@ export function artisan(args: string[]): { ok: boolean; output: string } {
 export function stopContainerServer(): void {
   if (runner() !== 'sail') return;
   spawnSync(path.join('vendor', 'bin', 'sail'),
-    ['exec', '-T', 'laravel.test', 'pkill', '-f', 'artisan serve'],
+    ['exec', '-T', 'laravel.test', 'pkill', '-f', 'artisan serve --env=e2e'],
     { cwd: ROOT, stdio: 'ignore' });
 }

@@ -31,7 +31,10 @@ research agents:
   A domain's ServiceProvider sits in `Public/Providers`, so registering into
   another domain's registry is a `<Domain>Public → XPublic` edge, not a
   `Private` one — check that list before claiming "no new edge";
-- `docs/Domain_Structure.md` and `docs/Architecture.md`.
+- `docs/Domain_Structure.md` and `docs/Architecture.md`;
+- for any lazily fetched HTML fragment: what happens when its route answers a
+  redirect (`auth`, `compliant`)? The client must navigate, not inject the
+  redirected page.
 
 Verify signatures rather than remembering them. A design built on a method that
 does not exist costs a whole BUILD phase.

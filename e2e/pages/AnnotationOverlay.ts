@@ -12,16 +12,6 @@ const GROUP_PX = 20;
 export class AnnotationOverlay {
   constructor(private readonly page: Page) {}
 
-  /**
-   * `.env.e2e` sets `APP_URL` to :8081 while the suite serves :8080, so
-   * `asset()` URLs (stored avatars) point nowhere. Cosmetic only — rewrite them
-   * so avatars load. Call before `goto()`.
-   */
-  async rewriteAssetHost(): Promise<void> {
-    await this.page.context().route('http://localhost:8081/**', (route) =>
-      route.continue({ url: route.request().url().replace('localhost:8081', 'localhost:8080') }));
-  }
-
   /** Text of every range in the named highlight, in no particular order. */
   async highlighted(name: 'annotation' | 'annotation-processed' = 'annotation'): Promise<string[]> {
     return this.page.evaluate((key) => {

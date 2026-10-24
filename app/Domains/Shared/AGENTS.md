@@ -60,6 +60,16 @@
 
 **`segmented-control.js` writes to `$root`, not `$el`.** `select()` and `onKeydown()` are invoked from a button's `@click`/`@keydown`, so inside those handlers `$el` is that button, not the control's root — writing the mirrored `data-value` to `$el` would stamp it on the wrong element. Always use `this.$root.dataset.value = this.value`. Covered by `Resources/js/segmented-control.test.js`.
 
+## Alpine / front-end traps
+
+- Read component config once in `init()` (closure or `x-ref`); in methods `$el` is the clicked element and `$root` may not be your component. Test by clicking the button in vitest, not by calling methods.
+- Bundles that register `Alpine.data`/stores go to `head-scripts`: `scripts` is emitted after `Alpine.start()`.
+- A class component whose name differs from its tag (`<x-a::foo-bar>`) needs an explicit `Blade::component` alias.
+- `x-show` changes land a frame late: measure layout from a `ResizeObserver` on the toggled element.
+- In a fragment injected by `x-html`, defer state-touching `x-init` work with `$nextTick`.
+- `fetch` of an HTML fragment: check `response.redirected` and navigate instead of injecting.
+- `x-data` arguments are frozen at init: re-key a nested component whose arguments change (`x-for … :key`), never wrap it in `x-if`.
+
 **Confirm-modal always moves focus on open.** It forwards `focusable` to `modal.blade.php` (no opt-out). Covered by `Tests/Feature/View/Components/ConfirmModalA11yTest.php`.
 
 **No upload widget lives here.** The `image-upload` and `sound-upload` components and their lang files are gone — Media's `<x-media::image-field>` and `<x-media::sound-field>` cover every case, and Story's cover tab owns its own dropzone copy under `story::shared.cover.custom_*`. Do not reintroduce an upload widget here — file handling belongs to Media.
