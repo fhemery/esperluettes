@@ -11,6 +11,8 @@ a new row that supersedes it and note the number.
 | 1 | 2026-10-24 | REFINE | How are quote deletions counted in the evolution curve? | Net total: the curve falls on deletions (needs new events) | — |
 | 2 | 2026-10-24 | REFINE | Where does the quotes section go? | New « Citations » tab, plus a summary tile | — |
 | 3 | 2026-10-24 | REFINE | Quotes of deactivated users? | Excluded while deactivated, restored on reactivation | — |
+| 4 | 2026-10-24 | DESIGN | How does the total learn of deactivation / reactivation / user deletion? | Quote emits count-carrying events (`UserQuotesRemoved`, `UserQuotesRestored`) plus `ChapterPassageQuoteDeleted`; Statistics listens only to Quote | — |
+| 5 | 2026-10-24 | DESIGN | Where does the curve's history come from? | `recompute` rebuilds from the `quotes` table through a new `QuotePublicApi` method, not from stored events | — |
 
 ## Assumptions made without asking
 
