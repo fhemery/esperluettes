@@ -4,6 +4,7 @@ namespace App\Domains\Moderation\Private\Controllers;
 
 use App\Domains\Moderation\Private\Requests\StoreReportRequest;
 use App\Domains\Moderation\Private\Services\ModerationService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -60,6 +61,11 @@ class ModerationReportController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 400);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('moderation::report.error'),
+            ], 403);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

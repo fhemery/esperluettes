@@ -12,7 +12,7 @@
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Moderation — optional report guard contract (403 on refusal) | S | — | TODO |
+| 1 | Moderation — optional report guard contract (403 on refusal) | S | — | DONE |
 | 2 | Comment — `annotation` moderation topic: access rule, guarded formatter, snapshot, seeded reason | M | 1 | TODO |
 | 3 | Comment — `can_report` display hint on `AnnotationDto` | S | 2 | TODO |
 | 4 | UI — « Signaler » in the « N annotations » pop-up | S | 3 | TODO |

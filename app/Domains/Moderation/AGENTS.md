@@ -41,6 +41,8 @@ All three are `AuditableEvent` and are persisted to the `domain_events` table vi
 
 - **`SnapshotFormatterInterface` must implement all four methods.** `capture`, `render`, `getReportedUserId`, `getContentUrl`. The registry validates the interface at registration time but does not validate method return types. A formatter that returns an incorrect type will fail silently at report time.
 
+- **`ReportGuardInterface` is optional.** A formatter may also implement `canReport(int $entityId, int $reporterId): bool`. `createReport` calls it first, before `getReportedUserId` / `capture`; `false` throws `AuthorizationException`, which `ModerationReportController::store` maps to a 403 JSON (`success: false`) with no report row. Formatters without it are unaffected. The guard sees only the entity id and the authenticated reporter id.
+
 - **`_media` snapshot key is reserved.** A formatter's `capture()` may return `_media` (`string[]` of Media paths). `createReport` copies each via `MediaPublicApi::copyPrivate($path, "moderation/{topicKey}")` (a missing source is dropped) and stores the copies. They are kept as long as the report row exists: `ReportMediaUsageProvider` claims them for the Media GC, so deleting the report frees them at the next sweep. Topic keys must match `[a-z0-9_-]+` (Media scope rule). Staff stream them via `moderation.admin.moderation-reports.media`; `render()` receives `_media_urls` (same order). Never expose these URLs outside the staff routes.
 
 ---
