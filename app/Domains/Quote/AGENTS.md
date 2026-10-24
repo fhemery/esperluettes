@@ -8,7 +8,10 @@
 
 ## Events emitted
 
-- `ChapterPassageQuoted` (event name `Quote.ChapterPassageQuoted`) — emitted by `QuoteService::create()` **only**, after the DB transaction commits. Note edits and deletions emit nothing. Payload carries `quoterId`, `chapterId`, `storyId`, `highlightedText` — never the note.
+- `ChapterPassageQuoted` (event name `Quote.ChapterPassageQuoted`) — emitted by `QuoteService::create()` **only**, after the DB transaction commits. Note edits emit nothing. Payload carries `quoterId`, `chapterId`, `storyId`, `highlightedText` — never the note.
+- `ChapterPassageQuoteDeleted` (`Quote.ChapterPassageQuoteDeleted`) — emitted by `QuoteService::delete()` after the hard delete. Payload `quoterId`, `chapterId`, `storyId`.
+- `UserQuotesRemoved` (`Quote.UserQuotesRemoved`) — emitted by the deactivation and user-deleted listeners with the count of visible (non-soft-deleted) rows, **only if count > 0**.
+- `UserQuotesRestored` (`Quote.UserQuotesRestored`) — emitted by the reactivation listener with the number of restored rows, **only if count > 0**.
 
 ## Listens to (wired in QuoteServiceProvider)
 

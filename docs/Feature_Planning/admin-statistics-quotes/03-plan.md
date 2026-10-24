@@ -24,7 +24,7 @@ the soft delete") and §9 risk 2 predate that decision and are superseded by it.
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Quote — event classes and bus registration | S | — | DONE |
-| 2 | Quote — emit deletion / removal / restoration events | S | 1, `quote-hard-delete/` | TODO |
+| 2 | Quote — emit deletion / removal / restoration events | S | 1, `quote-hard-delete/` | DONE |
 | 3 | Quote — daily net-change history in `QuotePublicApi` | S | — | TODO |
 | 4 | Statistics — `global.total_quotes` definition (live deltas + table recompute) | M | 2, 3, `quote-hard-delete/` | TODO |
 | 5 | Statistics — admin tile, « Citations » tab, E2E seed | S | 4 | TODO |

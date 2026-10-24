@@ -4,6 +4,7 @@ namespace App\Domains\Quote\Private\Services;
 
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Quote\Public\Events\ChapterPassageQuoted;
+use App\Domains\Quote\Public\Events\ChapterPassageQuoteDeleted;
 use App\Domains\Quote\Private\Models\Quote;
 use App\Domains\Quote\Private\Support\QuoteNoteSanitizer;
 use App\Domains\Quote\Public\Api\Contracts\AggregateQuoteDto;
@@ -84,6 +85,12 @@ class QuoteService
         }
 
         $quote->forceDelete();
+
+        $this->eventBus->emit(new ChapterPassageQuoteDeleted(
+            quoterId: $quote->user_id,
+            chapterId: $quote->chapter_id,
+            storyId: $quote->story_id,
+        ));
     }
 
     public function getForChapter(int $chapterId, int $storyId, int $userId): QuoteListDto
