@@ -115,8 +115,7 @@ New specs go in `tests/features/`. Rules that keep this cheap to own:
   `PHP_CLI_SERVER_WORKERS` is set to 4 so asset requests do not serialise.
 - Playwright kills only the local `sail` wrapper; `global-teardown.ts` stops
   the PHP process inside the container so `:8080` is actually released. Its
-  `pkill -f 'artisan serve'` also stops the dev app on `:80`: run
-  `./vendor/bin/sail restart laravel.test` before using `http://localhost`.
+  `pkill` matches `artisan serve --env=e2e`, so the dev app on `:80` survives.
 - The SQLite database outlives the run. To look at the post-run data, serve it
   again with `./vendor/bin/sail artisan serve --env=e2e --host=0.0.0.0 --port=8080`
   and log in as any `<role>@e2e.test` / `password` (`E2eAccountsSeeder`).

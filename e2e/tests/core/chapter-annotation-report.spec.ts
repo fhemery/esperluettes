@@ -27,7 +27,6 @@ const SUBMITTED = 'Votre signalement a été envoyé avec succès';
 async function visit(page: Page) {
   const overlay = new AnnotationOverlay(page);
   const chapter = new ChapterPage(page, ANNOTATED.storySlug, ANNOTATED.chapter.slug);
-  await overlay.rewriteAssetHost();
   await chapter.goto();
   return { overlay, chapter, thread: new CommentThread(page), annotations: new ChapterAnnotations(page) };
 }

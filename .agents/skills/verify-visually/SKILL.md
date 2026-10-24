@@ -85,10 +85,6 @@ filter and runs everything.
 The database is rebuilt before every run, so specs may write freely and must
 not clean up.
 
-**A run stops the dev app too.** The teardown kills every `artisan serve` in
-the container, `:80` included. Before driving `http://localhost` again:
-`./vendor/bin/sail restart laravel.test`.
-
 **Looking at the post-run e2e data** — for a row that needs eyes rather than an
 assertion. The SQLite database survives the run; only the server stops. Serve it
 again and point the `run-app` driver at it, as any seeded `<role>@e2e.test`

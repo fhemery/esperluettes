@@ -82,6 +82,9 @@ Any spec this task left in `e2e/tests/features/` is now due. For each one,
 from anywhere, writing the reason into the spec's header comment. Record the
 decision in the README's "Not done" section.
 
+In the same commit, delete every page-object member and fixture the retired
+spec leaves without a caller (grep each before deleting).
+
 `e2e/tests/core/` is the net that runs after every future feature, so it stays
 small on purpose. A feature spec left behind is a bug in the process.
 

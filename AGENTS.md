@@ -116,6 +116,8 @@ Rules:
 - Follow RESTful naming conventions
 - Do not use `Route::patch()` / HTTP PATCH — the production VPS's front-end (WAF/proxy) blocks the PATCH verb and resets the connection, while GET/POST/PUT/DELETE work fine. Use PUT for update endpoints instead.
 
+- Confirmed-only routes use middleware `['web', 'auth', 'compliant', 'role:user-confirmed']` (admins count as confirmed).
+
 ## Migrations
 - Format: YYYY_MM_DD_HHiiss_<descriptive_migration_name>
 - Always add `down()` methods
@@ -137,6 +139,7 @@ Rules:
 ## Testing Considerations
 - Write integration tests for most flows
 - Write failing tests before implementing
+- Shared Pest helpers live in the domain's `Tests/helpers.php`, never in a test file (file-local helpers collide under `test:parallel`)
 
 ## Security
 - Always validate and sanitize user input

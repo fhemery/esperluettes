@@ -71,6 +71,9 @@ through it for something you could have written in a line.
   POST /quotes", not "✅ permissions work". Always include "✅ `pnpm run gate`
   green".
 
+A new e2e spec goes in `e2e/tests/features/`; name `core/` only with the
+promotion reason (see `e2e/README.md`).
+
 Write the **test that proves the security rule** into the phase that introduces
 the rule, not into a later "hardening" phase.
 

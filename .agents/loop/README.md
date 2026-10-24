@@ -71,6 +71,15 @@ is the single most expensive thing this loop can do — see "Context discipline"
 The orchestrator proposes a mode when the task is created; the user overrides
 it by editing the entry.
 
+## Light path
+
+For a task that changes only tooling, scripts, skills or docs — no app code, no
+UI — once REFINE has settled the spec, DESIGN, PLAN and VERIFY add nothing.
+Run: REFINE → direct edits (the orchestrator may edit; rule 1 of "Context
+discipline" targets app code) → green gate → light WRAP (README, backlog,
+retro). Propose it when creating the task; the user confirms. Any app code or
+UI change puts the task back on the six steps.
+
 ## Context discipline
 
 Cost is `requests × context size`, and context only ever grows within a thread.

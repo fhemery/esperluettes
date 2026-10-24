@@ -27,7 +27,6 @@ const CONFIRMED_TINT = [C.fox, C.morning, C.processed, C.movedTo, C.emptied, C.u
 async function visit(page: Page) {
   const overlay = new AnnotationOverlay(page);
   const chapter = new ChapterPage(page, ANNOTATED.storySlug, ANNOTATED.chapter.slug);
-  await overlay.rewriteAssetHost();
   await chapter.goto();
   await overlay.expectHighlighted([]);
   await overlay.toggle.click();
