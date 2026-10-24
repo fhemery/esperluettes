@@ -60,6 +60,8 @@
 
 **`segmented-control.js` writes to `$root`, not `$el`.** `select()` and `onKeydown()` are invoked from a button's `@click`/`@keydown`, so inside those handlers `$el` is that button, not the control's root — writing the mirrored `data-value` to `$el` would stamp it on the wrong element. Always use `this.$root.dataset.value = this.value`. Covered by `Resources/js/segmented-control.test.js`.
 
+**`datetime-local-input` expects UTC in `value`, always — even with `submit="local"`.** Init converts the hidden value UTC→local in both modes; only the submit step differs. A caller re-feeding `old()` (which holds the *local* value the user typed) must convert it back to UTC first, or it shifts by the UTC offset on every validation error (Story's chapter form does this with `old('timezone')`). The server contract is the hidden input: same `name`, `Y-m-d\TH:i`, so request validation and `old()` keys are unchanged. `mirror-of` reads `#{source id}_value`, so a source must keep that id. Covered by `Tests/Feature/View/Components/DatetimeLocalInputTest.php` and `Resources/js/date-utils.test.js`; the Alpine behaviour itself is browser-only.
+
 ## Alpine / front-end traps
 
 - Read component config once in `init()` (closure or `x-ref`); in methods `$el` is the clicked element and `$root` may not be your component. Test by clicking the button in vitest, not by calling methods.

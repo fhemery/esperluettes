@@ -122,10 +122,6 @@ are edited in place.
 
 ## 9. Risks acknowledged
 
-- Story re-feeds `old('publish_at')` (the *local* value submitted) through the
-  UTC→local conversion on a validation error, so the displayed time can shift.
-  This is pre-existing; the new component preserves it rather than fixing it
-  silently. Revisit if reported.
 - Native `<input type="time">` rendering (12h/24h, picker or typed segments)
   follows the browser's locale; the spec accepts this.
 - Auth codes and Events log keep a single `datetime-local`; the app will have

@@ -184,7 +184,7 @@ Checks that a display name produces a unique profile slug. Accepts an optional `
 | `tooltip.js` | `registerTooltip(Alpine)` | Alpine `popover` data component: hover + click-to-pin, viewport-aware positioning (right/left/top/bottom with fallback), exclusive single-open via Alpine store. |
 | `countdown-timer.js` | `window.countdownTimer` | Alpine-compatible countdown timer. Reads `data-end-time`, `data-show-seconds`, and translation keys from element dataset. |
 | `badge-overflow.js` | `window.BadgeOverflow` | Detects overflowing badge lists and shows a `+N` overflow indicator. |
-| `date-utils.js` | `window.DateUtils` | Date formatting utilities. |
+| `date-utils.js` | `window.DateUtils` | Date formatting utilities; `utcToLocalInput` / `localToUtcInput`; `splitLocalInput` / `joinLocalInput` (pure string split/join of `YYYY-MM-DDTHH:mm`, empty time joins as `00:00`, empty date joins as `''`). |
 | `bootstrap.js` | — | Axios setup, CSRF header. |
 | `anchoring/canonical-text.js` | `buildCanonicalText(rootEl, { within? })` | Normalised text extraction from rendered content. `within` (a CSS selector) restricts the text to matching areas; consumers own the selector. |
 | `anchoring/extract-anchor.js` | `extractAnchor(range, rootEl, canonicalText)` | Builds a quote anchor (prefix / highlighted / suffix) from a selection, trimmed to the text it covers. |
@@ -226,6 +226,7 @@ Located in `Resources/views/components/`. Referenced as `<x-shared::component-na
 
 **Form inputs**
 - `text-input`, `input-label`, `input-error` — standard text field, label, error display
+- `datetime-local-input` — one moment as a native date input + time input (unnamed, inside a `role="group"`) over a hidden input carrying `name` (id `{id}_value`). The date input carries `id`, so `<label for>` still works; the time input is labelled « Heure ». Server value is UTC; shown in browser local time; picking a date with an empty time sets `00:00`, clearing the date clears the time. Props: `name`, `id`, `value`, `disabled`, `submit` (`utc` default: converted back to UTC on form submit; `local`: sent as typed, for forms that post their own `timezone`), `min` (date input only), `mirror-of` (id of another component: read-only, disabled copy following it live, no hidden input). Used by Calendar (activity form, Secret Gift, Quote Contest incl. its two mirrors) and Story (chapter `publish_at`, `submit="local"`). Auth activation codes and the Events log filters still use a raw `datetime-local` (server-time semantics). Known gap: the group has no accessible name.
 - `select`, `select-with-tooltips` — select boxes
 - `searchable-multi-select` — Alpine-powered multi-select with search
 - `toggle` — boolean toggle switch. The checkbox overlays the visible track (`relative` + absolute inset, opacity 0) so focus does not scroll a clipped `sr-only` node inside Administration’s `overflow-y-auto` main pane. Keep `peer` / `peer-checked` / `peer-focus` on the track; do not reintroduce `sr-only` on the input.
