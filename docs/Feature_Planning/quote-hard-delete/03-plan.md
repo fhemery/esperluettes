@@ -119,11 +119,15 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter page, reader quote panel (`user-confirmed`) | Delete a quote: it disappears from the panel and the highlight goes; reload — still gone. | |
-| Profile « Citations » tab, owner | Delete a quote from the list: it disappears, total decrements; reload — still gone. | |
-| Profile « Citations » tab, empty state | Delete the last quote: empty state shows. | |
-| Chapter page, author heat / badge | After a reader deletes their quote, the author's count and heat no longer include it. | |
-| Mobile (≈375 px), chapter panel | Delete flow still usable, no layout change. | |
+| Chapter page, reader quote panel (`user-confirmed`) | Delete a quote: it disappears from the panel and the highlight goes; reload — still gone. | ✅ confirmed@e2e deleted « à comparer… »; highlight and dialog gone, still gone after reload (`shots/qhd-panel-open.png`, `qhd-after-delete.png`) |
+| Profile « Citations » tab, owner | Delete a quote from the list: it disappears, total decrements; reload — still gone. | ✅ list 20 → 19 items, « numéro 1 » absent after reload (`qhd-profile-*.png`). The list shows no visible total, so only the item count was checked |
+| Profile « Citations » tab, empty state | Delete the last quote: empty state shows. | ✅ moderator@e2e deleted both, empty message shown, no delete buttons after reload (`qhd-empty-after.png`) |
+| Chapter page, author heat / badge | After a reader deletes their quote, the author's count and heat no longer include it. | ✅ author badge 5 → 4 after the reader's deletion (`qhd-author-after.png`). Heat not inspected beyond the count |
+| Mobile (≈375 px), chapter panel | Delete flow still usable, no layout change. | ✅ bottom-sheet dialog within 375 px, delete removes the highlight (`qhd-mobile-panel.png`) |
+
+Run 2026-10-24 on the e2e instance (`:8080`) through the `run-app` driver with a
+throwaway flow; no spec added (the change has no new client-side behaviour; the
+rows only confirm the unchanged UI against hard-deleted rows).
 
 Deactivated-user state is covered by feature tests only (no UI surface: a
 deactivated user cannot log in, and their quotes are already hidden from others).
