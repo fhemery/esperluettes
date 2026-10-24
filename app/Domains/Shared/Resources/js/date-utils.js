@@ -6,6 +6,9 @@
 //   // Low-level helpers kept for flexibility:
 //   // DateUtils.format(value, opts, lang)
 //   // DateUtils.formatIso(isoString, opts, lang)
+//   // Local datetime value <-> date/time parts of two native inputs:
+//   DateUtils.splitLocalInput('2026-06-21T15:07')  // { date: '2026-06-21', time: '15:07' }
+//   DateUtils.joinLocalInput('2026-06-21', '')     // '2026-06-21T00:00'
 
 const getLang = () => (document?.documentElement?.lang || 'en');
 
@@ -76,4 +79,27 @@ export function localToUtcInput(localString) {
   if (isNaN(d)) return '';
   const pad = n => String(n).padStart(2, '0');
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
+
+/**
+ * Split a local datetime value into the date and time parts of two native inputs.
+ * Pure string work (no Date parsing), so DST-adjacent values come back untouched.
+ * @param {string|null|undefined} value - e.g. "2026-06-21T15:07" or "2026-06-21 15:07:00"
+ * @returns {{date: string, time: string}} both empty when unparseable
+ */
+export function splitLocalInput(value) {
+  const m = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/.exec(value ?? '');
+  return m ? { date: m[1], time: m[2] } : { date: '', time: '' };
+}
+
+/**
+ * Join date and time inputs back into a "YYYY-MM-DDTHH:mm" local value.
+ * @param {string} date - "YYYY-MM-DD"
+ * @param {string} time - "HH:mm" (or "HH:mm:ss"); empty defaults to 00:00
+ * @returns {string} "" when the date is empty
+ */
+export function joinLocalInput(date, time) {
+  if (!date) return '';
+  return `${date}T${time ? time.slice(0, 5) : '00:00'}`;
 }
