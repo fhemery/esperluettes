@@ -4,7 +4,7 @@
 
 ## Public API
 
-- [QuotePublicApi](Public/Api/QuotePublicApi.php) — the only entry point other domains may call (Profile uses it for the tab + `canViewQuoteBook`; Story hosts the author-view components, which call it for `countForChapter` / `getChapterAggregate` / `canViewChapterAggregate`; Calendar's Quote Contest activity calls `getAllForOwner` / `getOwnedQuote` to build its submission picker and validate entries). Do not reach into `Private/`. DTOs are under `Public/Api/Contracts/`.
+- [QuotePublicApi](Public/Api/QuotePublicApi.php) — the only entry point other domains may call (Profile uses it for the tab + `canViewQuoteBook`; Story hosts the author-view components, which call it for `countForChapter` / `getChapterAggregate` / `canViewChapterAggregate`; Calendar's Quote Contest activity calls `getAllForOwner` / `getOwnedQuote` to build its submission picker and validate entries; Statistics' `TotalQuotesStatistic` calls `getDailyNetChanges` to rebuild `global.total_quotes` from the table). Do not reach into `Private/`. DTOs are under `Public/Api/Contracts/`.
 
 ## Events emitted
 
@@ -12,6 +12,8 @@
 - `ChapterPassageQuoteDeleted` (`Quote.ChapterPassageQuoteDeleted`) — emitted by `QuoteService::delete()` after the hard delete. Payload `quoterId`, `chapterId`, `storyId`.
 - `UserQuotesRemoved` (`Quote.UserQuotesRemoved`) — emitted by the deactivation and user-deleted listeners with the count of visible (non-soft-deleted) rows, **only if count > 0**.
 - `UserQuotesRestored` (`Quote.UserQuotesRestored`) — emitted by the reactivation listener with the number of restored rows, **only if count > 0**.
+
+All four are `registerEvent()`-ed in `QuoteServiceProvider::boot()` so stored copies rehydrate. The listeners take the count **before** changing rows (restore counts `onlyTrashed()` rather than trusting `restore()`'s return, which differs between SQLite and MySQL). Statistics' `global.total_quotes` depends on these counts being exact: a new way for quotes to appear or disappear must emit an event too.
 
 ## Listens to (wired in QuoteServiceProvider)
 

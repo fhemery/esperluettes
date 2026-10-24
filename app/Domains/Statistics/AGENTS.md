@@ -41,6 +41,8 @@ All subscriptions are registered in `StatisticsServiceProvider::registerEventLis
 | `Story::ChapterDeleted` | Chapter and word stats |
 | `Story::ChapterUpdated` | Word stats (delta from word count change) |
 | `Comment::Posted` | Comment global stats (planned); user comment stats (planned) |
+| `Quote::ChapterPassageQuoted` / `ChapterPassageQuoteDeleted` | `global.total_quotes` (+1 / −1) |
+| `Quote::UserQuotesRemoved` / `UserQuotesRestored` | `global.total_quotes` (−count / +count; deactivation, user deletion, reactivation) |
 
 The listener resolves affected statistics through `StatisticRegistry::getListenersForEvent()` — keyed by event **name string** as declared in each definition's `listensTo()`.
 
@@ -67,6 +69,8 @@ The listener resolves affected statistics through `StatisticRegistry::getListene
 **`UpdateStatisticsOnEvent` is queued.** Implements `ShouldQueue`. Tests that assert immediate stat updates after `dispatchEvent()` depend on the sync queue driver or must call the listener/handler directly. Feature tests use `dispatchEvent()` which triggers the sync event pipeline.
 
 **Event replay ordering matters for recompute.** `RecomputesStatisticFromEvents` calls `EventPublicApi::getEventsByNames()` which returns events sorted chronologically across all listened event types. Custom `recompute()` implementations must preserve this ordering when replaying (see `TotalUsersStatistic` for the inline pattern).
+
+**`TotalQuotesStatistic` recomputes from Quote's table, not from events.** It uses `RecomputesStatisticFromEvents` only for `clearData()`, then applies `QuotePublicApi::getDailyNetChanges()` and `recomputeCumulativeValues()`. Do not "fix" it back to replay: quote deletions before the deletion events existed were never stored.
 
 **Statistic keys are permanent once data exists.** Changing a key orphanates existing snapshot and time-series rows. Add new keys rather than renaming.
 
