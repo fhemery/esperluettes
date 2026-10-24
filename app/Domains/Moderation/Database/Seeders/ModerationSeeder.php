@@ -9,7 +9,7 @@ class ModerationSeeder extends Seeder
 {
     public function run(): void
     {
-        $topics = ['profile', 'story', 'chapter', 'comment', 'fanart'];
+        $topics = ['profile', 'story', 'chapter', 'comment', 'annotation', 'fanart'];
         $label = 'Other';
 
         foreach ($topics as $topic) {

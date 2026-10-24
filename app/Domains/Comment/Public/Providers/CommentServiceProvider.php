@@ -21,6 +21,7 @@ use App\Domains\Auth\Public\Events\UserReactivated;
 use App\Domains\Comment\Private\Listeners\RestoreCommentsOnUserReactivated;
 use App\Domains\Comment\Private\Listeners\RemoveAuthorOnUserDeleted;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use App\Domains\Comment\Private\Support\Moderation\AnnotationSnapshotFormatter;
 use App\Domains\Comment\Private\Support\Moderation\CommentSnapshotFormatter;
 
 class CommentServiceProvider extends ServiceProvider
@@ -70,6 +71,11 @@ class CommentServiceProvider extends ServiceProvider
             key: 'comment',
             displayName: __('comment::moderation.topic_name'),
             formatterClass: CommentSnapshotFormatter::class
+        );
+        app(ModerationRegistry::class)->register(
+            key: 'annotation',
+            displayName: __('comment::moderation.annotation_topic_name'),
+            formatterClass: AnnotationSnapshotFormatter::class
         );
     }
 }

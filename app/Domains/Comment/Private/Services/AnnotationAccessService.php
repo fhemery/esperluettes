@@ -112,6 +112,65 @@ class AnnotationAccessService
     }
 
     /**
+     * An anonymised annotation has no writer, so it stays reportable.
+     */
+    private function isWriter(CommentAnnotation $annotation, int $viewerId): bool
+    {
+        return $annotation->author_id !== null && (int) $annotation->author_id === $viewerId;
+    }
+
+    /**
+     * UI hint for rows the read path already filtered: not the viewer's own, not emptied.
+     * The server guard is canReportById; emptied rows are not refused there.
+     */
+    public function canReport(string $viewerRole, CommentAnnotation $annotation, int $viewerId): bool
+    {
+        return !$this->isWriter($annotation, $viewerId) && !$annotation->isEmptied();
+    }
+
+    /**
+     * Server guard for the `annotation` moderation topic: the viewer can see the row
+     * (same rules as the read path) and did not write it.
+     */
+    public function canReportById(int $annotationId, int $viewerId): bool
+    {
+        $annotation = CommentAnnotation::find($annotationId);
+        if ($annotation === null) {
+            return false;
+        }
+
+        $root = $annotation;
+        if ($annotation->parent_annotation_id !== null) {
+            $root = CommentAnnotation::find($annotation->parent_annotation_id);
+            if ($root === null) {
+                return false;
+            }
+        }
+
+        $comment = Comment::find($annotation->comment_id);
+        if ($comment === null) {
+            return false;
+        }
+
+        $role = $this->resolveViewerRole($comment, $viewerId);
+        if ($role === null) {
+            return false;
+        }
+
+        $restrictTo = $this->restrictToAuthorId($role, $viewerId);
+        if ($restrictTo !== null && (int) $root->author_id !== $restrictTo) {
+            return false;
+        }
+
+        if ($annotation->parent_annotation_id !== null
+            && $this->filterActiveReplyWriters(collect([$annotation]))->isEmpty()) {
+            return false;
+        }
+
+        return !$this->isWriter($annotation, $viewerId);
+    }
+
+    /**
      * Drop replies whose writer is deactivated; rows are left untouched. Anonymised replies
      * (author_id null) are kept. One Auth call for the distinct writer ids.
      *

@@ -504,3 +504,5 @@ The highlighted passage (and `prefix` / `suffix`) is **not** sanitized: it is st
 ## Moderation integration
 
 The domain registers a `comment` topic with the `ModerationRegistry`. When a comment is reported, moderators see a formatted snapshot rendered by `CommentSnapshotFormatter` and can act via the moderation admin panel (empty content or delete).
+
+It also registers an `annotation` topic (`AnnotationSnapshotFormatter`) for reports on a single annotation or annotation reply. The snapshot freezes the highlighted passage and body (plus the parent's for a reply), and the report links to the root comment. The formatter implements Moderation's optional `ReportGuardInterface`: reporting is refused with a 403 when the annotation does not exist or is deleted, its root comment is trashed, the reporter is neither the commenter (own root only), an author/co-author nor a moderator, a reply's writer is deactivated, or the reporter wrote the annotation. Emptied annotations remain reportable through the API.
