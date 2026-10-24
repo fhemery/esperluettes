@@ -177,14 +177,28 @@ export class AdminStatisticsPage {
   /** Hover the middle of the i-th of `slots` equal category slots of a bar chart. */
   async hoverSlot(canvas: Locator, index: number, slots: number): Promise<void> {
     await canvas.scrollIntoViewIfNeeded();
-    const drawing = await this.drawing(canvas);
-    const xs = [...new Set(drawing.bars.map((b) => Math.round(b.x + b.w / 2)))].sort((a, b) => a - b);
+    // A chart inside a just-opened tab is first drawn at a stale, narrow size;
+    // wait until the bars span the canvas before measuring them.
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas not visible');
-    // Bars of a slot share their centre; a zero-height bar may be missing, so
-    // fall back to an even split of the chart width.
-    const evenSplit = box.width * ((index + 0.5) / slots);
-    const x = xs.length === slots ? (xs[index] ?? evenSplit) : evenSplit;
+    let drawing = await this.drawing(canvas);
+    const spans = (d: Drawing): boolean => d.bars.length > 0 && Math.max(...d.bars.map((b) => b.x + b.w)) > box.width * 0.8;
+    for (let i = 0; i < 50 && !spans(drawing); i++) {
+      await this.page.waitForTimeout(100);
+      drawing = await this.drawing(canvas);
+    }
+    const xs = [...new Set(drawing.bars.map((b) => Math.round(b.x + b.w / 2)))].sort((a, b) => a - b);
+    // Bars of a slot share their centre; a zero-height bar may be missing. Then
+    // count back from the last bar (the current week is never zero in the seed)
+    // using the smallest spacing between two bars as the slot pitch — the chart
+    // width includes the axis gutter, so an even split of it lands a slot off.
+    let x: number;
+    if (xs.length === slots) {
+      x = xs[index]!;
+    } else {
+      const pitch = Math.min(...xs.slice(1).map((v, i) => v - xs[i]!));
+      x = xs[xs.length - 1]! - pitch * (slots - 1 - index);
+    }
     await this.page.mouse.move(box.x + x, box.y + box.height / 2);
   }
 

@@ -353,20 +353,20 @@ during PLAN while the flows are fresh.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| `/admin/statistics`, admin, desktop (≥1024px) | Six tiles fit on one row, « Citations » last, numbers aligned with the other tiles | |
-| « Citations » tab, Cumulé | Tab label legible, panel shows one widget titled « Évolution : Citations », curve drawn, no console error | |
-| « Citations » tab, Par semaine | Bars per week, the seeded negative week drawn below the axis, current week lighter, tooltip « Semaine du … : -1 » | |
-| Mode switch persistence | Choose « Par semaine », reload, open « Citations » → still bars | |
-| `/admin/statistics`, mobile (375px) | Tiles wrap 2 per row (3 rows), tab bar with four tabs does not overflow or clip, chart fits width | |
-| Empty state | With no `global.total_quotes` data (fresh DB, no quotes): tile shows the same placeholder as other empty metrics, chart shows its empty state | |
-| Role: tech-admin | Same page and tab as admin | |
-| Role: moderator / `user-confirmed` | `/admin/statistics` refused (403 / redirect) as today; no nav entry (moderators excluded, DECISIONS #6) | |
-| Live: reader deletes a quote | Tile total decreases by 1 after reload; today's weekly bar drops by 1 | |
-| Live: user deactivated / reactivated | Total drops by the user's visible quote count, comes back after reactivation; a quote the reader deleted before deactivation does not come back | |
-| Live: user deleted | Total drops by their visible quotes, not again if they were already deactivated | |
-| Deleted chapter | Deleting a quoted chapter leaves the total unchanged | |
-| Audit log `/admin/events/domain-events` | `Quote.ChapterPassageQuoted`, `Quote.ChapterPassageQuoteDeleted`, `Quote.UserQuotesRemoved`, `Quote.UserQuotesRestored` listed with readable summaries, no quote text in the new ones | |
-| Recompute | `sail artisan statistics:compute global.total_quotes` → tile and curve end at the same total as before | |
+| `/admin/statistics`, admin, desktop (≥1024px) | Six tiles fit on one row, « Citations » last, numbers aligned with the other tiles | ✅ shots/desktop-tiles.png (same top for all six) |
+| « Citations » tab, Cumulé | Tab label legible, panel shows one widget titled « Évolution : Citations », curve drawn, no console error | ✅ shots/quotes-cumulative.png |
+| « Citations » tab, Par semaine | Bars per week, the seeded negative week drawn below the axis, current week lighter, tooltip « Semaine du … : -1 » | ✅ shots/quotes-weekly.png; tooltip asserted by the core spec |
+| Mode switch persistence | Choose « Par semaine », reload, open « Citations » → still bars | ✅ shots/quotes-weekly-after-reload.png |
+| `/admin/statistics`, mobile (375px) | Tiles wrap 2 per row (3 rows), tab bar with four tabs does not overflow or clip, chart fits width | ❌ tiles 2x3 and chart fine (shots/mobile-tiles.png), but the 4th tab « Citations » is clipped off-screen (x 283-365 of 375) and clicking it scrolls `<main>` horizontally by 70px, shifting the whole page left (shots/mobile-quotes.png; users tab then leaves 16px). Cause: `<x-shared::tabs>` in `pages/admin/index.blade.php` is not `scrollable`, so four `whitespace-nowrap` tabs overflow. Fix: add `scrollable` (or shorten labels / allow wrap) |
+| Empty state | With no `global.total_quotes` data (fresh DB, no quotes): tile shows the same placeholder as other empty metrics, chart shows its empty state | n/a in browser: moved to PHP (TotalQuotesStatisticTest « leaves no snapshot when there is no quote », StatisticsControllerTest) |
+| Role: tech-admin | Same page and tab as admin | ✅ shots/tech-admin.png |
+| Role: moderator / `user-confirmed` | `/admin/statistics` refused (403 / redirect) as today; no nav entry (moderators excluded, DECISIONS #6) | ✅ moderator and confirmed are redirected to /dashboard, no statistics nav entry |
+| Live: reader deletes a quote | Tile total decreases by 1 after reload; today's weekly bar drops by 1 | ✅ real DELETE /quotes/{id} as the reader: 212 → 211 → 210 on the tile (weekly bar not eyeballed; delta covered by TotalQuotesStatisticTest) |
+| Live: user deactivated / reactivated | Total drops by the user's visible quote count, comes back after reactivation; a quote the reader deleted before deactivation does not come back | ✅ user #4 (3 quotes, deleted one first): admin POST deactivate 210 → 209, reactivate → 210 (not 211) |
+| Live: user deleted | Total drops by their visible quotes, not again if they were already deactivated | n/a in browser: moved to PHP (TotalQuotesStatisticTest « subtracts a deleted user's… », « does not subtract twice… ») — passing |
+| Deleted chapter | Deleting a quoted chapter leaves the total unchanged | n/a in browser: moved to PHP (TotalQuotesStatisticTest « keeps quotes counted when their chapter is deleted ») — passing |
+| Audit log `/admin/events/domain-events` | `Quote.ChapterPassageQuoted`, `Quote.ChapterPassageQuoteDeleted`, `Quote.UserQuotesRemoved`, `Quote.UserQuotesRestored` listed with readable summaries, no quote text in the new ones | ✅ Deleted (« Quoter #4 deleted a quote on chapter #3 »), Removed, Restored (« 1 quote(s) of user #4 restored ») seen live in shots/audit-restored.png; ChapterPassageQuoted only via seed (no event in e2e data), covered by QuoteEventsTest |
+| Recompute | `sail artisan statistics:compute global.total_quotes` → tile and curve end at the same total as before | ✅ on e2e data: snapshot 212 = last cumulative point 212 (the seeded synthetic series is replaced by the real rows, as expected) |
 
 ## Open items
 
