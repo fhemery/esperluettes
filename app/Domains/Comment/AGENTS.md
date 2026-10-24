@@ -72,7 +72,7 @@
 
 **Moderation actions emit distinct events.** `emptyContentByModeration` emits `CommentContentModerated`; `deleteByModeration` emits `CommentDeletedByModeration`. Story domain listens to `CommentDeletedByModeration` to revoke chapter credits.
 
-**Tests.** PHP under `Tests/`; Vitest next to the JS (`annotations/*.test.js`, `comment-draft/index.test.js`); overlay tests: `Tests/Feature/Annotations/AnnotationOverlayComponentTest.php`, `AnnotationsInEntityTest.php`, `EmptyAnnotationContentTest.php`, and Vitest `annotations/in-chapter/*.test.js`; browser: `e2e/tests/core/chapter-annotations.spec.ts` and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions, pending changes, save banner, replies), `e2e/tests/core/chapter-annotation-overlay.spec.ts` (heat-map suppression, quote/annotation tint overlap).
+**Tests.** PHP under `Tests/`; Vitest next to the JS (`annotations/*.test.js`, `comment-draft/index.test.js`); overlay tests: `Tests/Feature/Annotations/AnnotationOverlayComponentTest.php`, `AnnotationsInEntityTest.php`, `EmptyAnnotationContentTest.php`, and Vitest `annotations/in-chapter/*.test.js`; browser: `e2e/tests/core/chapter-annotations.spec.ts` and `e2e/tests/core/chapter-annotation-round-trip.spec.ts` (reactions, pending changes, save banner, replies), `e2e/tests/core/chapter-annotation-overlay.spec.ts` (heat-map suppression, quote/annotation tint overlap), `e2e/tests/core/chapter-annotation-report.spec.ts` (« Signaler » from the pop-up and the popover).
 
 ## Registry integrations
 

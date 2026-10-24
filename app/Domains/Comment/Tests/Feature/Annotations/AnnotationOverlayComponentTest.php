@@ -78,6 +78,20 @@ describe('<x-comment::annotation-overlay>', function () {
             ->assertSee('data-reply-max-length="1000"', false);
     });
 
+    it('renders the compact report button bound to current and reply can_report', function () {
+        $this->actingAs(bob($this));
+
+        renderAnnotationOverlay($this, 'chapter', $this->chapter->id)
+            ->assertSee('current.can_report ? [current.id] : []', false)
+            ->assertSee("reportButton('annotation', reportId)", false)
+            ->assertSee('x-if="reply.can_report"', false)
+            ->assertSee("reportButton('annotation', reply.id)", false)
+            ->assertSee('data-testid="annotation-popover-report"', false)
+            ->assertSee('|| current.can_report', false)
+            ->assertSee('aria-label="moderation::report.button"', false)
+            ->assertSee('title="moderation::report.button"', false);
+    });
+
     it('renders the filter menu for the author, at md+ above the article', function () {
         $this->actingAs($this->author);
 
