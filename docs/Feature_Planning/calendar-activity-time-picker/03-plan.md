@@ -14,7 +14,7 @@
 |---|-------|------|------------|--------|
 | 1 | Shared — `splitLocalInput` / `joinLocalInput` helpers | S | — | DONE |
 | 2 | Shared — split `<x-shared::datetime-local-input>` (UTC mode + mirror mode), Calendar consumers | M | 1 | DONE |
-| 2v | Checkpoint — Calendar admin activity form (core, Secret Gift, Quote Contest) | S | 2 | TODO |
+| 2v | Checkpoint — Calendar admin activity form (core, Secret Gift, Quote Contest) | S | 2 | DONE |
 | 3 | Story — chapter `publish_at` on the component (`submit=local`, `min`) | S | 2 | TODO |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
@@ -234,6 +234,22 @@ of the component, which phase 2 reshaped, before Story builds on it.
 - **Output:** screenshots under `shots/checkpoint-2v/`, then append a
   `**Result (<date>, HEAD <sha>) — PASS|FAIL**` block here. FAIL sends phase 2
   back to a `phase-implementer`.
+
+**Result (2026-10-24, HEAD 95e89f81) — PASS**
+
+Driven on the e2e instance (seeded activities), browser Europe/Paris, fr-FR.
+Shots in `shots/checkpoint-2v/`.
+- `pnpm run build` OK; `pnpm run e2e confirm-modal`: 8 passed. (Needed
+  `E2E_PORT=8080 E2E_BASE_URL=http://localhost:8081` in this worktree, whose
+  e2e port is published as 8081; plain run times out on the web server.)
+- Create form (admin, moderator): every date field is an empty date + time pair; the type is fixed per page, all config panels render.
+- Pick date on empty field prefills `00:00`; time editable to `13:37`; clearing the date clears time and hidden value; label click focuses the date input; Tab reaches the time input labelled « Heure » (after the date's day/month/year segments).
+- Edit SG (stored UTC 20:10 shown 22:10 in CEST, 21:10 after the DST switch): untouched save then reopen identical; changing only the start time to 09:45, saved, reopens at 09:45.
+- Validation error (SG deadline after start): error shown, entered 2026-12-30 11:11 and 10:20 redisplayed unshifted.
+- Quote Contest edit: both mirrors disabled, show activity start/end, follow live edits of date and time; untouched save round-trips identically.
+- 375 px: no horizontal overflow on SG and QC edit, pairs stay side by side.
+- Moderator: create form renders the same pairs. Moderator edit/save not driven separately.
+- Not checked: dark theme (outside this checkpoint).
 
 ---
 
