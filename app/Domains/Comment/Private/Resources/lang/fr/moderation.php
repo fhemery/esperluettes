@@ -14,5 +14,9 @@ return [
     'comment_body' => 'Contenu du commentaire',
     'see_more' => 'Voir plus',
     'see_less' => 'Voir moins',
+    'annotation_topic_name' => 'Annotation',
+    'annotation_passage' => 'Passage annoté :',
+    'annotation_body' => 'Annotation : ',
+    'annotation_parent' => 'En réponse à :',
 ];
 

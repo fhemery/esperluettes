@@ -96,7 +96,7 @@
                                 {{ __('comment::annotations.server_modal.remove_stale') }}
                             </x-shared::button>
                         </div>
-                        <div x-show="canToggle(row) || canEmpty(row) || canRemove(row) || canEdit(row) || (canUndo(row) && !rowError(row))" class="mt-2 flex flex-wrap justify-end gap-2">
+                        <div x-show="canToggle(row) || canEmpty(row) || canRemove(row) || canEdit(row) || row.can_report || (canUndo(row) && !rowError(row))" class="mt-2 flex flex-wrap justify-end gap-2">
                             <template x-if="canUndo(row) && !rowError(row)">
                                 <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="undo(row)">
                                     <span x-show="row.state === 'edited'">{{ __('comment::annotations.server_modal.undo_edit') }}</span>
@@ -124,6 +124,15 @@
                                     {{ __('comment::annotations.server_modal.delete') }}
                                 </x-shared::button>
                             </template>
+                            <template x-if="row.can_report">
+                                <div x-data="reportButton('annotation', row.id)">
+                                    <x-shared::button type="button" size="sm" color="error" data-testid="annotation-report" x-on:click="loadForm()" x-bind:disabled="loading">
+                                        <span class="material-symbols-outlined" aria-hidden="true">flag</span>
+                                        {{ __('moderation::report.button') }}
+                                    </x-shared::button>
+                                    <div x-ref="modalContainer"></div>
+                                </div>
+                            </template>
                         </div>
 
                         <div class="mt-3 pl-4 sm:pl-6 space-y-3">
@@ -145,6 +154,17 @@
                                                 <x-shared::button type="button" size="sm" color="danger" x-on:click="removeReply(reply)" x-bind:disabled="busyId !== null">
                                                     {{ __('comment::annotations.replies.delete') }}
                                                 </x-shared::button>
+                                            </div>
+                                        </template>
+                                        <template x-if="reply.can_report">
+                                            <div class="mt-1 flex justify-end">
+                                                <div x-data="reportButton('annotation', reply.id)">
+                                                    <x-shared::button type="button" size="sm" color="error" data-testid="annotation-report" x-on:click="loadForm()" x-bind:disabled="loading">
+                                                        <span class="material-symbols-outlined" aria-hidden="true">flag</span>
+                                                        {{ __('moderation::report.button') }}
+                                                    </x-shared::button>
+                                                    <div x-ref="modalContainer"></div>
+                                                </div>
                                             </div>
                                         </template>
                                     </li>

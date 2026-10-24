@@ -162,6 +162,16 @@
                                         <time :datetime="reply.created_at" x-text="replyDate(reply)"></time>
                                     </div>
                                     <div class="comment-body rich-content mt-1" x-html="reply.body"></div>
+                                    <template x-if="reply.can_report">
+                                        <div class="mt-1 flex justify-end">
+                                            <div x-data="reportButton('annotation', reply.id)">
+                                                <x-shared::button type="button" size="sm" color="error" data-testid="annotation-popover-report" title="{{ __('moderation::report.button') }}" aria-label="{{ __('moderation::report.button') }}" x-on:click="loadForm()" x-bind:disabled="loading">
+                                                    <span class="material-symbols-outlined" aria-hidden="true">flag</span>
+                                                </x-shared::button>
+                                                <div x-ref="modalContainer"></div>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </li>
                             </template>
                         </ul>
@@ -170,7 +180,7 @@
                             {{ __('comment::annotations.replies.author_hint') }}
                         </p>
 
-                        <div x-show="(canReply(current) && !replying) || canToggle(current) || canDelete(current)" class="mt-3 flex flex-wrap justify-end gap-2">
+                        <div x-show="(canReply(current) && !replying) || canToggle(current) || canDelete(current) || current.can_report" class="mt-3 flex flex-wrap justify-end gap-2">
                             <template x-if="canEdit(current)">
                                 <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="edit()">
                                     {{ __('comment::annotations.server_modal.edit') }}
@@ -191,6 +201,16 @@
                                 <x-shared::button type="button" size="sm" color="neutral" :outline="true" x-on:click="startReply()">
                                     {{ __('comment::annotations.replies.reply') }}
                                 </x-shared::button>
+                            </template>
+                            {{-- x-for keyed on the id, not x-if: paging between members keeps `current`
+                                 truthy, and reportButton() reads its id once, at init. --}}
+                            <template x-for="reportId in (current.can_report ? [current.id] : [])" :key="reportId">
+                                <div x-data="reportButton('annotation', reportId)">
+                                    <x-shared::button type="button" size="sm" color="error" data-testid="annotation-popover-report" title="{{ __('moderation::report.button') }}" aria-label="{{ __('moderation::report.button') }}" x-on:click="loadForm()" x-bind:disabled="loading">
+                                        <span class="material-symbols-outlined" aria-hidden="true">flag</span>
+                                    </x-shared::button>
+                                    <div x-ref="modalContainer"></div>
+                                </div>
                             </template>
                         </div>
                     </div>

@@ -233,7 +233,7 @@ class AnnotationPublicApi
             avatar_url: '',
         );
 
-        return $this->toReplyDto($reply, $profile, true);
+        return $this->toReplyDto($reply, $profile, true, false);
     }
 
     /**
@@ -366,18 +366,20 @@ class AnnotationPublicApi
                     $r,
                     $profileOf($r),
                     $canDelete || ($r->author_id !== null && (int) $r->author_id === $viewerId),
+                    $this->access->canReport($role, $r, $viewerId),
                 ))->values()->all(),
                 canMarkAsProcessed: $canMark,
                 canDelete: $canDelete,
                 canEdit: $isCommenter && $a->author_id !== null && (int) $a->author_id === $viewerId && !$a->isEmptied(),
                 canReply: $this->access->canReply($role, $a, $rootReplies, $viewerId),
                 isEmptied: $a->isEmptied(),
+                canReport: $this->access->canReport($role, $a, $viewerId),
             );
         })->all();
     }
 
     /** A reply has no anchor, no processed flag, no children and is never edited nor replied to. */
-    private function toReplyDto(CommentAnnotation $reply, ProfileDto $profile, bool $canDelete): AnnotationDto
+    private function toReplyDto(CommentAnnotation $reply, ProfileDto $profile, bool $canDelete, bool $canReport): AnnotationDto
     {
         return new AnnotationDto(
             id: (int) $reply->id,
@@ -396,6 +398,7 @@ class AnnotationPublicApi
             canDelete: $canDelete,
             canEdit: false,
             canReply: false,
+            canReport: $canReport,
         );
     }
 }

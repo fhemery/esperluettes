@@ -23,7 +23,10 @@ scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO: leftover from `role-gated-notification-settings/` REFINE — Quote Contest already broadcasts lifecycle to all active `user-confirmed`, ignoring each activity’s `role_restrictions`. Recipients must be the users authorized to *that* activity, not a type-level role list and not every confirmed user.
-- **Chapter annotations — v4 (report + images)** · `annotations-v4/` · interactive · TODO: split from `annotations-v2/` REFINE — per-annotation Report (`chapter-annotation` topic, reopens v1 #3) and image annotation. Starts after v3.
+- **Chapter annotations — seed the « Autre » reason for the annotation report topic in production** · `annotation-report-prod-reason/` · interactive · TODO
+- **Moderation — report refusals: 403 handling and moderator-only accounts** · `moderation-report-refusals/` · interactive · TODO
+- **Chapter annotations — e2e fixtures for reaction and co-author reply reports** · `annotation-report-e2e-fixtures/` · interactive · TODO
+- **Chapter annotations — image annotation** · `annotations-images/` · interactive · TODO: split from `annotations-v4/` REFINE; needs a stable block id persisted through Editor + Story first.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
 - **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
@@ -48,6 +51,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`annotations-v4`](_done/annotations-v4.md) · per-annotation « Signaler » on roots and replies (pop-up and popover), `annotation` moderation topic with a report guard refusing people who cannot see the annotation or wrote it
 - [`fanart-message-to-author`](_done/fanart-message-to-author.md) · optional 500-char plain-text message from the submitter to the story's authors, carried only in the `fanart.submitted` notification (not stored)
 - [`fanart-artwork-module`](_done/fanart-artwork-module.md) · New Fanart domain: confirmed readers submit images and chapter readings that authors review, author artworks for one chapter credit, Fanarts story tab, chapter audio player with auto-advance, profile tab, reports that keep a copy of the file, Discord feed.
 - [`annotations-v3`](_done/annotations-v3.md) · Annotated passages are underlined in the chapter, with gutter avatars opening a popover, an author filter menu and moderator « Vider le contenu »

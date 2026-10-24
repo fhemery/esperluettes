@@ -101,8 +101,8 @@ answer once an author has. No migration: v1's `parent_annotation_id`, `is_proces
 - **Non-goals (spec §8):** editing replies, deeper threads, moderator replies, notifications/events, cross-device
   sync of pending changes, re-anchoring an annotation (delete + re-create), reactions beyond ❤️ 🔥 👍.
 - **Backlog:** in-chapter display, filter menu, moderator « Vider le contenu » on one annotation, purifier
-  emoji-list de-dup → [`annotations-v3`](./annotations-v3.md) (the original `vision-spec.md` now lives in `annotations-v4/`);
-  per-annotation Report, image annotation → [`annotations-v4/`](../annotations-v4/00-request.md).
+  emoji-list de-dup → [`annotations-v3`](./annotations-v3.md) (the original `vision-spec.md` now lives in `annotations-images/`);
+  per-annotation Report → [`annotations-v4`](./annotations-v4.md), image annotation → `annotations-images/`.
 - **Known limits:** pending changes are browser-local (a cleared browser loses them silently); the deactivation
   filter costs one Auth call per pop-up open; chapter edits can orphan anchors until v3.
 - **E2E (user's call at WRAP):** only the commenter ↔ author round trip was promoted, to

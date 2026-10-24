@@ -5,7 +5,9 @@ namespace App\Domains\Moderation\Private\Services;
 use App\Domains\Media\Public\Api\MediaPublicApi;
 use App\Domains\Moderation\Private\Models\ModerationReason;
 use App\Domains\Moderation\Private\Models\ModerationReport;
+use App\Domains\Moderation\Public\Contracts\ReportGuardInterface;
 use App\Domains\Moderation\Public\Services\ModerationRegistry;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Domains\Moderation\Public\Events\ReportSubmitted;
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Moderation\Public\Events\ReportApproved;
@@ -81,6 +83,7 @@ class ModerationService
      * Create a new moderation report.
      *
      * @throws \InvalidArgumentException If topic not registered or reason not found
+     * @throws AuthorizationException If the topic's report guard refuses the reporter
      */
     public function createReport(
         string $topicKey,
@@ -108,6 +111,12 @@ class ModerationService
 
         if ($this->registry->hasFormatter($topicKey)) {
             $formatter = $this->registry->getFormatter($topicKey);
+
+            if ($formatter instanceof ReportGuardInterface
+                && ! $formatter->canReport($entityId, (int) Auth::id())) {
+                throw new AuthorizationException();
+            }
+
             $reportedUserId = $formatter->getReportedUserId($entityId);
             $snapshot = $formatter->capture($entityId);
 

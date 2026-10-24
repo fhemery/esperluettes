@@ -14,6 +14,7 @@ class AnnotationDto
      * @param bool $canReply Display hint: the viewer may reply under this root
      * @param bool $canDelete Display hint: moderator, or the writer of this reply
      * @param bool $isEmptied A moderator replaced this root's body; it can no longer be edited
+     * @param bool $canReport Display hint: the viewer may report this row; re-checked server-side
      */
     public function __construct(
         public readonly int $id,
@@ -33,6 +34,7 @@ class AnnotationDto
         public readonly bool $canEdit,
         public readonly bool $canReply,
         public readonly bool $isEmptied = false,
+        public readonly bool $canReport = false,
     ) {}
 
     public function toArray(): array
@@ -60,6 +62,7 @@ class AnnotationDto
             'can_delete' => $this->canDelete,
             'can_edit' => $this->canEdit,
             'can_reply' => $this->canReply,
+            'can_report' => $this->canReport,
         ];
     }
 }
