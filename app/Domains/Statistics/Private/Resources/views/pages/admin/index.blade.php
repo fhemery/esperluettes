@@ -52,6 +52,7 @@
             ]"
             initial="users"
             color="primary"
+            scrollable
         >
             <div x-show="tab === 'users'" x-cloak class="flex flex-col gap-6 pt-6 max-w-4xl" role="tabpanel" id="tabs-panel-users" aria-labelledby="tabs-tab-users">
                 <x-statistics::stat-widget
