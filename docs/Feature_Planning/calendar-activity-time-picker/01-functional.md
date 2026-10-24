@@ -39,10 +39,11 @@ admins in activation codes and the domain events log).
 
 ### 4.2 Scope of the split
 
-All usages of the shared field: Calendar core form (visibility start/end, start,
+Every usage of the shared field: Calendar core form (visibility start/end, start,
 end), Secret Gift (end of registrations), Quote Contest (end of submissions, start
-of votes, plus its two read-only mirror fields), Story chapter form, Auth
-activation codes, Events log filters.
+of votes, plus its read-only mirror of the activity end), plus the Story chapter
+form's scheduled publication. Auth activation codes and the Events log filters use
+raw inputs with server-time semantics and stay as they are (DESIGN decision 5).
 
 ## 5. Lifecycle
 
