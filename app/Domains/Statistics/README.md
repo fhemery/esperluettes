@@ -56,7 +56,7 @@ New statistics are registered in `StatisticsServiceProvider::registerStatistics(
 
 **Incremental (normal path):** When a domain emits an event, `UpdateStatisticsOnEvent` (queued) calls `StatisticComputeService::applyDelta()`. Each affected definition returns `[scopeId => delta]` pairs; snapshots and daily time-series rows are incremented, then cumulative values are recalculated.
 
-**Full recompute:** `php artisan statistics:compute {key}` calls `recompute()` on the definition. The typical flow clears existing snapshot and time-series rows for the scope, replays stored events from the Events domain in chronological order, and rebuilds both tables. This is the same mechanism used for initial backfill after deployment.
+**Full recompute:** `php artisan statistics:compute {key}` calls `recompute()` on the definition. The typical flow clears existing snapshot and time-series rows for the scope, replays stored events from the Events domain in chronological order, and rebuilds both tables. This is the same mechanism used for initial backfill after deployment. Exception: `global.total_quotes` does not replay events (past quote deletions were never recorded, and stored events may be pruned); it applies `QuotePublicApi::getDailyNetChanges()` day by day. After such a rebuild, hard-deleted quotes (deleted by their reader, or with their user) are missing from history — creation and removal both — while the snapshot stays right. A new deployment must run `statistics:compute global.total_quotes` once, or the key holds only post-deploy deltas.
 
 ### Chart display and resampling
 
@@ -94,6 +94,7 @@ Chapter and word counts for user-scoped statistics attribute deltas to **all aut
 | `global.total_words` | `Story.ChapterCreated`, `Story.ChapterDeleted`, `Story.ChapterUpdated`, `Story.StoryDeleted` | Planned |
 | `global.total_comments` | `Comment.Posted` | Planned |
 | `global.total_root_comments` | `Comment.Posted` (root only) | Planned |
+| `global.total_quotes` | `Quote.ChapterPassageQuoted`, `Quote.ChapterPassageQuoteDeleted`, `Quote.UserQuotesRemoved`, `Quote.UserQuotesRestored` | Implemented |
 
 ### Per-user statistics
 
@@ -125,7 +126,7 @@ Admin page: `/admin/statistics` (roles: `admin`, `tech-admin`), registered in `A
 1. Create a class implementing `StatisticDefinition` in `Private/Definitions/{Global|User}/`.
 2. Declare `listensTo()` using event **name strings** (e.g. `UserRegistered::name()`).
 3. Implement `computeDelta()` returning `[scopeId => delta]` or `null` when the event is irrelevant.
-4. Implement `recompute()` — use the `RecomputesStatisticFromEvents` trait when replay-from-events is sufficient; delegate delta logic to a support class (see `StoryContentDeltaCalculator`, `CommentDeltaCalculator`) when multiple statistics share event parsing rules.
+4. Implement `recompute()` — use the `RecomputesStatisticFromEvents` trait when replay-from-events is sufficient; delegate delta logic to a support class (see `StoryContentDeltaCalculator`, `CommentDeltaCalculator`) when multiple statistics share event parsing rules. A statistic may instead rebuild from its owner's public API when stored events are incomplete (see `TotalQuotesStatistic`).
 5. Register the class in `StatisticsServiceProvider::registerStatistics()`.
 6. If the statistic listens to new event types, add them to `registerEventListeners()` in the same provider.
 7. Backfill: `./vendor/bin/sail artisan statistics:compute {key}` (add `--scope-id=` for user-scoped stats).
@@ -138,6 +139,7 @@ Admin page: `/admin/statistics` (roles: `admin`, `tech-admin`), registered in `A
 | Author resolution for story metrics | **Story** (`StoryPublicApi::getAuthorIds()`) | Statistics must not query Story tables directly |
 | Comment counting rules | **Comment** events (`CommentPosted`) | Delta logic uses event payload, not Comment models |
 | User lifecycle counts | **Auth** events (`UserRegistered`, `UserDeleted`) | User table is owned by Auth |
+| Quote counts | **Quote** events (incl. count-carrying `UserQuotesRemoved` / `UserQuotesRestored`) and `QuotePublicApi::getDailyNetChanges()` for recompute | Quote counts affected rows inside its own lifecycle listeners, so Statistics never listens to Auth for quotes nor races Quote's cascade |
 | Admin navigation | **Administration** (`AdminNavigationRegistry`) | Consistent admin panel structure |
 
 Statistics tables have **no foreign keys** to `users`, stories, or other cross-domain tables. Scope IDs are plain integers; orphaned rows after entity deletion are acceptable and corrected on the next recompute.

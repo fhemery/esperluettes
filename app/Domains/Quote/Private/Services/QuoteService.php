@@ -4,6 +4,7 @@ namespace App\Domains\Quote\Private\Services;
 
 use App\Domains\Events\Public\Api\EventBus;
 use App\Domains\Quote\Public\Events\ChapterPassageQuoted;
+use App\Domains\Quote\Public\Events\ChapterPassageQuoteDeleted;
 use App\Domains\Quote\Private\Models\Quote;
 use App\Domains\Quote\Private\Support\QuoteNoteSanitizer;
 use App\Domains\Quote\Public\Api\Contracts\AggregateQuoteDto;
@@ -84,6 +85,41 @@ class QuoteService
         }
 
         $quote->forceDelete();
+
+        $this->eventBus->emit(new ChapterPassageQuoteDeleted(
+            quoterId: $quote->user_id,
+            chapterId: $quote->chapter_id,
+            storyId: $quote->story_id,
+        ));
+    }
+
+    /**
+     * @return array<string, int> Y-m-d => net change, ascending, zero days omitted
+     */
+    public function getDailyNetChanges(): array
+    {
+        $changes = [];
+
+        $created = Quote::withTrashed()
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+        foreach ($created as $day => $total) {
+            $changes[$day] = ($changes[$day] ?? 0) + (int) $total;
+        }
+
+        $deleted = Quote::onlyTrashed()
+            ->selectRaw('DATE(deleted_at) as day, COUNT(*) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+        foreach ($deleted as $day => $total) {
+            $changes[$day] = ($changes[$day] ?? 0) - (int) $total;
+        }
+
+        $changes = array_filter($changes, fn(int $net) => $net !== 0);
+        ksort($changes);
+
+        return $changes;
     }
 
     public function getForChapter(int $chapterId, int $storyId, int $userId): QuoteListDto

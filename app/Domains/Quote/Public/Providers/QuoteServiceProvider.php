@@ -16,6 +16,9 @@ use App\Domains\Quote\Private\Listeners\DeleteQuotesOnUserDeleted;
 use App\Domains\Quote\Private\Listeners\RestoreOnUserReactivated;
 use App\Domains\Quote\Private\Listeners\SoftDeleteOnUserDeactivated;
 use App\Domains\Quote\Public\Events\ChapterPassageQuoted;
+use App\Domains\Quote\Public\Events\ChapterPassageQuoteDeleted;
+use App\Domains\Quote\Public\Events\UserQuotesRemoved;
+use App\Domains\Quote\Public\Events\UserQuotesRestored;
 use App\Domains\Quote\Public\Notifications\ChapterQuotedNotification;
 use App\Domains\Quote\Private\Services\QuotePolicy;
 use App\Domains\Quote\Private\Services\QuoteService;
@@ -66,6 +69,10 @@ class QuoteServiceProvider extends ServiceProvider
         ));
 
         $eventBus = app(EventBus::class);
+        $eventBus->registerEvent(ChapterPassageQuoted::name(), ChapterPassageQuoted::class);
+        $eventBus->registerEvent(ChapterPassageQuoteDeleted::name(), ChapterPassageQuoteDeleted::class);
+        $eventBus->registerEvent(UserQuotesRemoved::name(), UserQuotesRemoved::class);
+        $eventBus->registerEvent(UserQuotesRestored::name(), UserQuotesRestored::class);
         $this->registerNotifications();
         $eventBus->subscribe(UserDeleted::class, [app(DeleteQuotesOnUserDeleted::class), 'handle']);
         $eventBus->subscribe(UserDeactivated::class, [app(SoftDeleteOnUserDeactivated::class), 'handle']);

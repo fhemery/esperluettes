@@ -2,6 +2,7 @@
 
 use App\Domains\Administration\Public\Contracts\AdminNavigationRegistry;
 use App\Domains\Auth\Public\Api\Roles;
+use App\Domains\Statistics\Private\Models\StatisticSnapshot;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -54,6 +55,36 @@ describe('Statistics Admin Controller', function () {
             ->and(strpos($html, 'stat-summary', $switchAt))->toBeFalse()
             ->and(strpos($html, 'comment-summary', $switchAt))->toBeFalse()
             ->and($switchAt)->toBeLessThan($tabsAt);
+    });
+
+    it('shows the quotes tile and the Citations tab', function () {
+        $this->actingAs(admin($this))
+            ->get(route('statistics.admin.index'))
+            ->assertOk()
+            ->assertSee(__('statistics::admin.tab_quotes'))
+            ->assertSee('id="tabs-panel-quotes"', false)
+            ->assertSee(__('statistics::admin.evolution', ['metric' => __('statistics::admin.quotes')]));
+    });
+
+    it('shows the current quote total in the summary tile', function () {
+        StatisticSnapshot::create([
+            'statistic_key' => 'global.total_quotes',
+            'scope_type' => 'global',
+            'scope_id' => null,
+            'value' => 7,
+            'computed_at' => now(),
+        ]);
+
+        $html = $this->actingAs(admin($this))
+            ->get(route('statistics.admin.index'))
+            ->assertOk()
+            ->getContent();
+
+        $summaryEnd = strpos($html, 'data-name="statistics-graph-mode"');
+        $labelAt = strpos($html, __('statistics::admin.quotes'));
+        expect($labelAt)->not->toBeFalse()
+            ->and(substr($html, max(0, $labelAt - 400), min(800, $summaryEnd - max(0, $labelAt - 400))))
+            ->toMatch('/>\s*7\s*</');
     });
 
     it('denies access to non-admins', function () {

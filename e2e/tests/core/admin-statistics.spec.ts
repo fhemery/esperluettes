@@ -49,5 +49,15 @@ test('admin sees the tiles and the charts of the statistics page, with seeded va
     .poll(async () => (await stats.drawing(users)).texts)
     .toContainEqual(expect.stringMatching(new RegExp(`^Semaine du .+ : ${STATISTICS.users[week]}$`)));
 
+  // Citations tab: a drawn chart, with a negative week in weekly mode.
+  await stats.openTab('quotes');
+  const quotes = stats.charts('quotes').first();
+  await expect(quotes).toBeVisible();
+  await expect.poll(async () => (await stats.drawing(quotes)).bars.length).toBeGreaterThan(0);
+  await stats.hoverSlot(quotes, week, STATISTICS.weeks);
+  await expect
+    .poll(async () => (await stats.drawing(quotes)).texts)
+    .toContainEqual(expect.stringMatching(new RegExp(`^Semaine du .+ : ${STATISTICS.quotes[week]}$`)));
+
   expect(errors).toEqual([]);
 });

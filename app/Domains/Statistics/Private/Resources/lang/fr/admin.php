@@ -12,6 +12,8 @@ return [
     'chapters' => 'Chapitres',
     'words' => 'Mots',
     'comments' => 'Commentaires',
+    'quotes' => 'Citations',
+    'tab_quotes' => 'Citations',
     'root_comments' => 'Commentaires racines',
     'reply_comments' => 'Réponses',
     'comments_breakdown' => ':root racines, :reply réponses',

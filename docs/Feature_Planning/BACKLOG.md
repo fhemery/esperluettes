@@ -28,7 +28,6 @@ scoped to the task that actually changed.
 - **Chapter annotations — e2e fixtures for reaction and co-author reply reports** · `annotation-report-e2e-fixtures/` · interactive · TODO
 - **Chapter annotations — image annotation** · `annotations-images/` · interactive · TODO: split from `annotations-v4/` REFINE; needs a stable block id persisted through Editor + Story first.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
-- **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · WIP:PLAN: BUILD only after [`quote-hard-delete`](_done/quote-hard-delete.md) is merged (built on branch `fix/quote-hard-delete`, pending merge)
 - **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
@@ -51,6 +50,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`admin-statistics-quotes`](_done/admin-statistics-quotes.md) · « Citations » tile and tab on /admin/statistics: net `global.total_quotes` from new Quote deletion/removal/restoration events, rebuilt from the quotes table (run `statistics:compute global.total_quotes` once after deploy)
 - [`quote-hard-delete`](_done/quote-hard-delete.md) · a reader's own quote deletion is now a hard delete, so reactivation no longer resurrects it; one-off migration purges legacy soft-deleted quotes (deploy only while no user is deactivated)
 - [`annotations-v4`](_done/annotations-v4.md) · per-annotation « Signaler » on roots and replies (pop-up and popover), `annotation` moderation topic with a report guard refusing people who cannot see the annotation or wrote it
 - [`fanart-message-to-author`](_done/fanart-message-to-author.md) · optional 500-char plain-text message from the submitter to the story's authors, carried only in the `fanart.submitted` notification (not stored)

@@ -621,6 +621,7 @@ deptrac:
       - CommentPublic
       - EventsPublic
       - StoryPublic
+      - QuotePublic
 
     # ###################################################
     # Private domains - can access Shared + other domain Public APIs + events
@@ -804,6 +805,7 @@ deptrac:
       - CommentPublic
       - EventsPublic
       - StoryPublic
+      - QuotePublic
 
     # ###################################################
     # Domain tests - can access their own domain + Public APIs + ALL test modules for data creation
@@ -954,6 +956,7 @@ deptrac:
       - AdministrationPublic
       - EventsPublic
       - StoryPublic
+      - QuotePublic
 
     # Media Domain
     FanartPublic:
