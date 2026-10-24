@@ -163,7 +163,7 @@ describe('Chapter display', function () {
             $this->actingAs($author)
                 ->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
                 ->assertOk()
-                ->assertDontSee(__('moderation::report.button'));
+                ->assertDontSee("reportButton('chapter'", false);
         });
 
         it('shows the report button when viewing someone else\'s chapter', function () {
