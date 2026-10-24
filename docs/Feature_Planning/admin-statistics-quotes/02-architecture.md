@@ -45,7 +45,9 @@ Mapped from spec §4.2 to the events of §3.4:
 | User reactivated | +(number of rows actually restored) |
 | Chapter / story deleted | 0 — rows remain, they still count |
 
-"Visible" = not soft-deleted. The count is taken by Quote, inside its own
+"Visible" = not soft-deleted. Reader deletion is a hard delete (task
+`quote-hard-delete`, lands first), so soft-deleted rows only come from
+deactivated users. The count is taken by Quote, inside its own
 listener, before it changes the rows — so there is no ordering race with
 Statistics.
 
@@ -56,7 +58,8 @@ Statistics.
 `QuotePublicApi` gains one method returning the net change of the quote
 population per day, derived from the table: `+1` on `created_at`, `−1` on
 `deleted_at` for soft-deleted rows. Shape: `array<string /* Y-m-d */, int>`.
-Rows hard-deleted with their user are gone and cannot appear (see §9).
+Rows hard-deleted (by their reader or with their user) are gone and cannot
+appear (see §9).
 
 New public events in `Quote/Public/Events/`, same conventions as
 `ChapterPassageQuoted` (name `Quote.<Class>`, version 1, payload round-trip):
@@ -69,7 +72,7 @@ New public events in `Quote/Public/Events/`, same conventions as
 
 ### 3.2 Services
 
-- `QuoteService::delete` emits `ChapterPassageQuoteDeleted` after the soft delete.
+- `QuoteService::delete` emits `ChapterPassageQuoteDeleted` after the hard delete.
 - The three Quote user-lifecycle listeners count the affected rows first and
   emit `UserQuotesRemoved` / `UserQuotesRestored` only when the count is > 0.
 - Statistics: `TotalQuotesStatistic` implements `StatisticDefinition`:
@@ -153,15 +156,15 @@ Anything else is an edit to an existing file (see §1.1, §3.2, §4).
 
 ## 9. Risks acknowledged
 
-- **Hard-deleted users' quotes are missing from rebuilt history**: after a
-  `statistics:compute`, their creations and removal both vanish, so the curve
-  differs slightly from the live-event curve for those periods. Accepted; the
-  total stays right.
-- **`RestoreOnUserReactivated` restores every soft-deleted quote of the user,
-  including ones the reader deleted themselves** (`withTrashed()->restore()`).
-  Pre-existing behaviour, out of scope; the statistic follows the rows, so it
-  counts them again. Worth a backlog entry — it also resurrects quotes readers
-  meant to delete.
+- **Hard-deleted quotes (reader-deleted, or deleted with their user) are
+  missing from rebuilt history**: after a `statistics:compute`, their creations
+  and removal both vanish, so the curve differs slightly from the live-event
+  curve for those periods. Accepted; the total stays right.
+- **`RestoreOnUserReactivated` restores every soft-deleted quote of the user**
+  (`withTrashed()->restore()`). Since reader deletion became a hard delete
+  (`quote-hard-delete`), soft-deleted rows only come from deactivation, so
+  reader-deleted quotes no longer come back on reactivation and the statistic
+  counts exactly the restored rows.
 - **`NotifyAuthorsOnQuoteCreated` may never have been wired** (it subscribes by
   class to an event that was not registered). PLAN verifies it when registering
   the event; if it was dormant, registering could start sending notifications.
