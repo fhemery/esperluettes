@@ -72,7 +72,20 @@
     <!-- Published toggle + scheduled publication -->
     @php
         $checked = old('published', isset($chapter) ? ($chapter->status === \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED ? '1' : '') : '1');
-        $existingPublishAt = old('publish_at', isset($chapter) && $chapter->publish_at ? $chapter->publish_at->format('Y-m-d\TH:i') : '');
+        // The component expects UTC and shows local time. The DB value is UTC, but
+        // old() holds what the user typed (local, in old('timezone')): put it back
+        // into UTC so the component does not shift it a second time.
+        $existingPublishAt = isset($chapter) && $chapter->publish_at ? $chapter->publish_at->format('Y-m-d\TH:i') : '';
+        if (old('publish_at') !== null) {
+            $existingPublishAt = old('publish_at');
+            $oldTimezone = old('timezone');
+            if ($existingPublishAt !== '' && is_string($oldTimezone) && in_array($oldTimezone, \DateTimeZone::listIdentifiers(), true)) {
+                try {
+                    $existingPublishAt = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $existingPublishAt, $oldTimezone)->utc()->format('Y-m-d\TH:i');
+                } catch (\Throwable) {
+                }
+            }
+        }
     @endphp
     <div
         x-data="{

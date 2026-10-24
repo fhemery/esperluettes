@@ -349,6 +349,28 @@ describe('Editing a chapter', function () {
 
             $resp->assertSessionHasErrors(['publish_at']);
         });
+
+        it('redisplays the typed publish_at unshifted after a validation error', function () {
+            $author = alice($this);
+            $story = publicStory('Flash Sched Story', $author->id);
+            $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Flash Edit Ch']);
+
+            $this->actingAs($author);
+            $resp = $this->from(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+                ->put(route('chapters.update', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]), [
+                    'title' => 'Flash Edit Ch',
+                    'content' => '<p>Content</p>',
+                    'published' => '0',
+                    'publish_at' => '2020-01-01T00:01',
+                    'timezone' => 'Europe/Paris',
+                ]);
+
+            $resp->assertSessionHasErrors(['publish_at']);
+            $page = $this->get(route('chapters.edit', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]));
+            // The datetime component converts its UTC value to the browser's local
+            // time, so 00:01 Paris must be rendered as the UTC string 2019-12-31T23:01.
+            expect($page->getContent())->toMatch('/<input[^>]*type="hidden"[^>]*name="publish_at"[^>]*value="2019-12-31T23:01"/');
+        });
     });
 
     describe('Link handling', function () {

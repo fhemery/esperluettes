@@ -14,6 +14,7 @@ a new row that supersedes it and note the number.
 | 4 | 2026-10-24 | REFINE | Assumptions (clear date clears time; Quote Contest mirrors split too; no server/storage change; free minutes) | Confirmed in replay | — |
 | 5 | 2026-10-24 | DESIGN | Only Calendar uses the shared component; Story/Auth/Events use raw inputs. How far does the split go? | Calendar + Quote Contest + Story chapter `publish_at`; Auth codes and Events log stay as they are | 2 (partly) |
 | 6 | 2026-10-24 | DESIGN | How does the split component submit its value? | Hidden combined input under the original name, two unnamed visible inputs | — |
+| 7 | 2026-10-24 | BUILD | VERIFY found `old(publish_at)` redisplayed +2 h on a chapter validation error (pre-existing, architecture §9). Fix it in this task? | Yes, fix it here (plan phase 4) | — |
 
 ## Assumptions made without asking
 

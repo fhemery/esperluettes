@@ -16,6 +16,7 @@
 | 2 | Shared — split `<x-shared::datetime-local-input>` (UTC mode + mirror mode), Calendar consumers | M | 1 | DONE |
 | 2v | Checkpoint — Calendar admin activity form (core, Secret Gift, Quote Contest) | S | 2 | DONE |
 | 3 | Story — chapter `publish_at` on the component (`submit=local`, `min`) | S | 2 | DONE |
+| 4 | Story — chapter form: redisplay the typed `publish_at` unshifted after a validation error (VERIFY defect, decision 7) | S | 3 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
@@ -322,23 +323,23 @@ Filled by VERIFY. Browser in `Europe/Paris`, locale `fr-FR`.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Activity create (admin), core dates | Four fields each show date + time; empty on create; label click focuses the date input | |
-| Activity create, empty state | Picking a date with empty time prefills `00:00`; time stays editable to any minute (no step) | |
-| Activity create, clearing | Clearing the date clears the time; saving sends no value for that field (nullable fields stay null) | |
-| Activity edit (admin) | Stored UTC values show in local time; saving untouched reopens with identical values | |
-| Activity edit, change time | Change only the time, save, reopen: the new local time shows | |
-| Activity edit (moderator) | Same form, same behaviour | |
-| Validation error | Secret Gift deadline after activity start: error shown, entered date/time redisplayed unshifted | |
-| Secret Gift config | Registration deadline pair behaves as the core fields | |
-| Quote Contest config | Submissions end / votes start pairs behave as the core fields | |
-| Quote Contest mirrors | Greyed, non-editable pairs mirror activity start/end and update live as those change | |
-| Chapter create (author) | Toggle "publié" off: publication pair appears; date picker refuses past days (`min`) | |
-| Chapter schedule round trip | Schedule a time, save, reopen edit: the same local time shows (no UTC shift); chapter published at that local moment | |
-| Chapter validation error | Known pre-existing shift of `old('publish_at')` on error (architecture §9) — record what is seen, not a blocker | |
-| Mobile 375 px | Calendar form and chapter form: date + time fit or wrap, no horizontal overflow, both tappable | |
-| Keyboard / a11y | Tab reaches date then time; time input announces « Heure »; mirrors are not focusable as editable | |
-| Dark theme | Both inputs legible (picker icons visible) on Calendar and chapter forms | |
-| Out of scope surfaces | Auth activation codes and Events log filters still single `datetime-local`, behaving as before | |
+| Activity create (admin), core dates | Four fields each show date + time; empty on create; label click focuses the date input | ✅ spec (create-core-dates.png) |
+| Activity create, empty state | Picking a date with empty time prefills `00:00`; time stays editable to any minute (no step) | ✅ spec (13:47 accepted, no `step` attr) |
+| Activity create, clearing | Clearing the date clears the time; saving sends no value for that field (nullable fields stay null) | ✅ spec (hidden empty; saved `archived_at` NULL; Paris 08:15 stored 07:15Z) |
+| Activity edit (admin) | Stored UTC values show in local time; saving untouched reopens with identical values | ✅ spec, compared to the minute against the DB (seeded rows carry seconds the field drops, as before) |
+| Activity edit, change time | Change only the time, save, reopen: the new local time shows | ✅ spec |
+| Activity edit (moderator) | Same form, same behaviour | ✅ spec (same test, moderator role) |
+| Validation error | Secret Gift deadline after activity start: error shown, entered date/time redisplayed unshifted | ✅ spec (17:43 stays 17:43; error shown) |
+| Secret Gift config | Registration deadline pair behaves as the core fields | ✅ spec |
+| Quote Contest config | Submissions end / votes start pairs behave as the core fields | ✅ spec (quote-contest-config.png) |
+| Quote Contest mirrors | Greyed, non-editable pairs mirror activity start/end and update live as those change | ✅ spec (disabled, no hidden input, follow edits and clearing) |
+| Chapter create (author) | Toggle "publié" off: publication pair appears; date picker refuses past days (`min`) | ✅ spec (`min` set; a day before it gives `rangeUnderflow`) |
+| Chapter schedule round trip | Schedule a time, save, reopen edit: the same local time shows (no UTC shift); chapter published at that local moment | ✅ spec (21:37 Paris reopens 21:37; `publish_at` stored 20:37Z). Scheduled via the edit form of the draft chapter, not create. |
+| Chapter validation error | Entered value redisplayed unshifted after an error (was the pre-existing shift of architecture §9) | ✅ fixed in phase 4, spec asserts today 00:01 comes back as 00:01. Found: redisplayed 02:01 (+2 h). Real cause: `old('publish_at')` is the local value as typed (the request flashes the original input), but the form fed it to the component, which expects UTC and converts it to local again. The form now converts `old('publish_at')` back to UTC with `old('timezone')`; the DB value was already UTC. |
+| Mobile 375 px | Calendar form and chapter form: date + time fit or wrap, no horizontal overflow, both tappable | ✅ spec, no overflow, pairs side by side inside 375 px. Tight: on the calendar form the date text touches the picker icon (mobile-admin.png) — eyeball. |
+| Keyboard / a11y | Tab reaches date then time; time input announces « Heure »; mirrors are not focusable as editable | ✅ spec: Tab from date reaches time (after the date's segments); time named « Heure »; mirrors disabled. Group has no accessible name (known, open item): date input is named by its `<label for>`. |
+| Dark theme | Both inputs legible (picker icons visible) on Calendar and chapter forms | ✅ spec asserts text colour differs from background and `color-scheme: dark`; dark-admin.png / dark-author.png opened, legible, icons visible. Dark applied by setting `data-appearance` on `<html>`. |
+| Out of scope surfaces | Auth activation codes and Events log filters still single `datetime-local`, behaving as before | ✅ spec (single `datetime-local`, no `type=time` on either page) |
 
 ## Open items
 

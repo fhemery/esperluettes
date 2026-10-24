@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { ConfirmModal } from './ConfirmModal';
+import { DateTimeField } from './DateTimeField';
 
 /**
  * The calendar activity admin form, create and edit.
@@ -99,6 +100,33 @@ export class AdminActivityFormPage {
    */
   get registrationEndsAtError(): Locator {
     return this.giftConfigPanel.locator('ul.text-red-600');
+  }
+
+  // --- component objects for each moment, and the Quote Contest panel -------
+
+  field(id: string): DateTimeField {
+    return new DateTimeField(this.page, id);
+  }
+
+  get archivedAt(): DateTimeField {
+    return this.field('archived_at');
+  }
+
+  /** Quote Contest: the two mirrors are read-only copies of the activity dates. */
+  get contestSubmissionsStartMirror(): DateTimeField {
+    return this.field('qc_submissions_start_at');
+  }
+
+  get contestSubmissionsEnd(): DateTimeField {
+    return this.field('qc_submissions_end_at');
+  }
+
+  get contestVotesStart(): DateTimeField {
+    return this.field('qc_votes_start_at');
+  }
+
+  get contestVotesEndMirror(): DateTimeField {
+    return this.field('qc_votes_end_at');
   }
 
   get shufflePanel(): Locator {

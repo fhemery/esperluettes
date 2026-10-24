@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page, type Response } from '@playwright/test';
 import { STORY } from '../support/fixtures';
+import { DateTimeField } from './DateTimeField';
 import { MultiEditor } from './MultiEditor';
 import { RichTextEditor } from './RichTextEditor';
 
@@ -37,6 +38,11 @@ export class ChapterEditPage {
 
   get publishedToggle(): Locator {
     return this.page.locator('#published');
+  }
+
+  /** Scheduled publication; only visible while the toggle is off. */
+  get publishAt(): DateTimeField {
+    return new DateTimeField(this.page, 'publish_at');
   }
 
   get saveButton(): Locator {

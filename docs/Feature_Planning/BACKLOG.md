@@ -32,7 +32,7 @@ scoped to the task that actually changed.
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
-- **Calendar: dedicated time field for activity dates** · `calendar-activity-time-picker/` · interactive · WIP:PLAN
+- **Calendar: dedicated time field for activity dates** · `calendar-activity-time-picker/` · interactive · WIP:BUILD
 - **Secret Gift: admin feedback after shuffle** · `secret-gift-shuffle-feedback/` · interactive · TODO
 - **Secret Gift — reveal follow-ups (ARCHIVED access, ENDED tab, missing tests)** · `secret-gift-reveal-followups/` · interactive · TODO: leftover from `media-sound-upload/` VERIFY — 3 feature tests pushed back to BUILD and never written; activity page 404s once ARCHIVED while gift routes still serve; page opens on the prepare tab once ENDED
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`

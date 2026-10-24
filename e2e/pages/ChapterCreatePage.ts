@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { STORY } from '../support/fixtures';
+import { DateTimeField } from './DateTimeField';
 import { MultiEditor } from './MultiEditor';
 
 /** The chapter create form — same `<x-editor::multi>` as the edit form. */
@@ -19,6 +20,15 @@ export class ChapterCreatePage {
 
   get title(): Locator {
     return this.page.locator('#title');
+  }
+
+  get publishedToggle(): Locator {
+    return this.page.locator('#published');
+  }
+
+  /** Scheduled publication; only visible while the toggle is off. */
+  get publishAt(): DateTimeField {
+    return new DateTimeField(this.page, 'publish_at');
   }
 
   async goto(): Promise<void> {
