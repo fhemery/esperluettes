@@ -14,7 +14,7 @@
 
 - `Auth::UserDeleted` → hard-delete the user's quote rows (raw DELETE, bypassing the soft-delete scope so rows soft-deleted by a prior deactivation go too).
 - `Auth::UserDeactivated` → soft-delete the user's quotes.
-- `Auth::UserReactivated` → restore the soft-deleted quotes.
+- `Auth::UserReactivated` → restore the quotes hidden by the deactivation (every soft-deleted row, see the `deleted_at` invariant).
 - `Quote::ChapterPassageQuoted` → `NotifyAuthorsOnQuoteCreated`, which notifies each chapter author/co-author (excluding the quoter) via `NotificationPublicApi`.
 
 These are four separate listeners, not one handler — deactivation and deletion are intentionally different (recoverable soft-delete vs. permanent hard delete).
@@ -25,6 +25,8 @@ These are four separate listeners, not one handler — deactivation and deletion
 - **Settings**: registers the `hide-quotes-tab` boolean parameter (default `false`, i.e. the book is visible), but **inside `app->booted()`** — it must run after Profile has registered its tab/section, because it attaches to the Profile tab (`TAB_PROFILE`) / Privacy section. Read/write it with `SettingsPublicApi` using `QuoteServiceProvider::TAB_PROFILE` + `::KEY_HIDE_QUOTES_TAB`, never a hardcoded string. Note the polarity: **true means hidden**, matching `follow.hide-following-tab` and `profile.hide-comments-section`. It replaced an earlier opt-in `book_public` key (default hidden); the migration kept only the deliberate "keep it hidden" choices.
 
 ## Invariants (span multiple files — easy to break)
+
+- **A reader's deletion of their own quote is a hard delete** (`QuoteService::delete()` uses `forceDelete()`). `deleted_at` set ⇔ owner currently deactivated. Never soft-delete a quote for any other reason, or reactivation will restore it.
 
 - **Note is owner-only.** `QuoteDto.note` must be `null` for every viewer except the quote owner. This is enforced in `QuoteService` when building DTOs (`getForProfile` / `buildProfileItems` pass `note` only when `isOwner`; `getForChapter` queries the owner's rows only). Any new read path must preserve this — the note must never appear in a non-owner response body.
 - **`AggregateQuoteDto` has no `note` property at all** — a structural guarantee rather than a filtering one. If you extend the author-view payload (DTO, `ChapterAggregateController::serializeItem`, or the JS grouping), do not thread the note through; the omission is the point.

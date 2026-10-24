@@ -269,7 +269,7 @@ describe('DELETE /quotes/{quoteId}', function () {
             ->deleteJson('/quotes/' . $quote->id)
             ->assertNoContent();
 
-        $this->assertSoftDeleted('quotes', ['id' => $quote->id]);
+        $this->assertDatabaseMissing('quotes', ['id' => $quote->id]);
     });
 
     it('non-owner cannot delete a quote', function () {

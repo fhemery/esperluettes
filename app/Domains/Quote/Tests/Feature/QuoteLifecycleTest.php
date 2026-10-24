@@ -88,6 +88,25 @@ describe('user lifecycle cascades', function () {
         $this->assertDatabaseHas('quotes', ['id' => $quote->id, 'deleted_at' => null]);
     });
 
+    it('does not restore a quote the reader deleted when the owner is reactivated', function () {
+        $author = alice($this);
+        $reader = bob($this);
+        $story = publicStory('Story', $author->id);
+        $chapter = createPublishedChapter($this, $story, $author);
+        $quoteA = createQuote($reader->id, $chapter->id, $story->id);
+        $quoteB = createQuote($reader->id, $chapter->id, $story->id);
+
+        $this->actingAs($reader)
+            ->deleteJson('/quotes/' . $quoteA->id)
+            ->assertNoContent();
+
+        event(new UserDeactivated($reader->id));
+        event(new UserReactivated($reader->id));
+
+        $this->assertDatabaseMissing('quotes', ['id' => $quoteA->id]);
+        $this->assertDatabaseHas('quotes', ['id' => $quoteB->id, 'deleted_at' => null]);
+    });
+
     it('deletes the quotes when the owner is deleted', function () {
         $author = alice($this);
         $reader = bob($this);
