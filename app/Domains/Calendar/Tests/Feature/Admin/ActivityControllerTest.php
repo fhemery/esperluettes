@@ -150,6 +150,33 @@ describe('Activity Admin Controller', function () {
                 ->assertSee('Existante modération');
         });
 
+        it('renders each activity date as a hidden input under its original name with the stored value', function () {
+            $admin = admin($this);
+            $this->actingAs($admin);
+            $activityId = createActivity($this, [
+                'preview_starts_at' => \Carbon\Carbon::parse('2026-08-01 08:00:00'),
+                'active_starts_at' => \Carbon\Carbon::parse('2026-09-01 10:00:00'),
+                'active_ends_at' => \Carbon\Carbon::parse('2026-10-01 18:30:00'),
+                'archived_at' => \Carbon\Carbon::parse('2026-11-01 07:15:00'),
+            ], $admin->id);
+            $activity = Activity::findOrFail($activityId);
+
+            $html = (string) $this->get(route('calendar.admin.activities.edit', $activity))
+                ->assertOk()
+                ->getContent();
+
+            foreach ([
+                'preview_starts_at' => '2026-08-01T08:00',
+                'active_starts_at' => '2026-09-01T10:00',
+                'active_ends_at' => '2026-10-01T18:30',
+                'archived_at' => '2026-11-01T07:15',
+            ] as $name => $value) {
+                expect($html)
+                    ->toMatch('/<input[^>]*type="hidden"[^>]*name="' . $name . '"[^>]*value="' . $value . '"|<input[^>]*name="' . $name . '"[^>]*type="hidden"[^>]*value="' . $value . '"/')
+                    ->toMatch('/<input[^>]*type="date"[^>]*id="' . $name . '"|<input[^>]*id="' . $name . '"[^>]*type="date"/');
+            }
+        });
+
         it('denies access to non-admins', function () {
             $activityId = createActivity($this);
             $activity = Activity::findOrFail($activityId);

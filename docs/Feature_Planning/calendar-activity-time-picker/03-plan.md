@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Shared — `splitLocalInput` / `joinLocalInput` helpers | S | — | DONE |
-| 2 | Shared — split `<x-shared::datetime-local-input>` (UTC mode + mirror mode), Calendar consumers | M | 1 | TODO |
+| 2 | Shared — split `<x-shared::datetime-local-input>` (UTC mode + mirror mode), Calendar consumers | M | 1 | DONE |
 | 2v | Checkpoint — Calendar admin activity form (core, Secret Gift, Quote Contest) | S | 2 | TODO |
 | 3 | Story — chapter `publish_at` on the component (`submit=local`, `min`) | S | 2 | TODO |
 

@@ -18,16 +18,12 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {{-- Greyed mirrors of the activity's own dates, live-bound because the
              admin is editing those very fields a section above. --}}
-        <div x-data="{ mirrored: '' }"
-             x-init="const source = document.getElementById('active_starts_at');
-                     mirrored = source?.value ?? '';
-                     source?.addEventListener('input', () => mirrored = source.value)">
+        <div>
             <x-shared::input-label for="qc_submissions_start_at">
                 {{ __('quote-contest::quote-contest.config.submissions_start_at') }}
             </x-shared::input-label>
-            <x-shared::text-input id="qc_submissions_start_at" type="datetime-local"
-                class="mt-1 block w-full opacity-60 cursor-not-allowed"
-                x-bind:value="mirrored" disabled aria-disabled="true" />
+            <x-shared::datetime-local-input id="qc_submissions_start_at" mirror-of="active_starts_at"
+                class="mt-1 block w-full opacity-60 cursor-not-allowed" />
             <p class="text-xs text-fg/60 mt-1">{{ __('quote-contest::quote-contest.config.mirrored_hint') }}</p>
         </div>
 
@@ -49,16 +45,12 @@
             <x-shared::input-error :messages="$errors->get('quote_contest.votes_start_at')" class="mt-1" />
         </div>
 
-        <div x-data="{ mirrored: '' }"
-             x-init="const source = document.getElementById('active_ends_at');
-                     mirrored = source?.value ?? '';
-                     source?.addEventListener('input', () => mirrored = source.value)">
+        <div>
             <x-shared::input-label for="qc_votes_end_at">
                 {{ __('quote-contest::quote-contest.config.votes_end_at') }}
             </x-shared::input-label>
-            <x-shared::text-input id="qc_votes_end_at" type="datetime-local"
-                class="mt-1 block w-full opacity-60 cursor-not-allowed"
-                x-bind:value="mirrored" disabled aria-disabled="true" />
+            <x-shared::datetime-local-input id="qc_votes_end_at" mirror-of="active_ends_at"
+                class="mt-1 block w-full opacity-60 cursor-not-allowed" />
             <p class="text-xs text-fg/60 mt-1">{{ __('quote-contest::quote-contest.config.mirrored_hint') }}</p>
         </div>
     </div>

@@ -9,6 +9,10 @@ import { ConfirmModal } from './ConfirmModal';
  * on edit only the activity's own is rendered. The shuffle block lives outside
  * the `<form>` (nested forms are illegal), pushed to a stack the page prints
  * after it — so it is reached from the page, not from the form.
+ *
+ * A moment (`previewStartsAt`, `activeStartsAt`, `activeEndsAt`,
+ * `registrationEndsAt`) is two inputs: the getters point at the date input
+ * (it carries the field id); use `timeOf` / `fillDateTime` for the time.
  */
 export class AdminActivityFormPage {
   readonly modal: ConfirmModal;
@@ -65,6 +69,17 @@ export class AdminActivityFormPage {
 
   get activeEndsAt(): Locator {
     return this.page.locator('input#active_ends_at');
+  }
+
+  /** The time input paired with a date input, in the same `[role="group"]`. */
+  timeOf(dateInput: Locator): Locator {
+    return dateInput.locator('xpath=..').locator('input[type="time"]');
+  }
+
+  /** Fill both halves of a moment. */
+  async fillDateTime(dateInput: Locator, date: string, time: string): Promise<void> {
+    await dateInput.fill(date);
+    await this.timeOf(dateInput).fill(time);
   }
 
   // --- Secret Gift's own panel -------------------------------------------
