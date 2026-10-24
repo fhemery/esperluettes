@@ -28,7 +28,7 @@ scoped to the task that actually changed.
 - **Chapter annotations — e2e fixtures for reaction and co-author reply reports** · `annotation-report-e2e-fixtures/` · interactive · TODO
 - **Chapter annotations — image annotation** · `annotations-images/` · interactive · TODO: split from `annotations-v4/` REFINE; needs a stable block id persisted through Editor + Story first.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
-- **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · WIP:PLAN: BUILD only after `quote-hard-delete/` is done
+- **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · WIP:PLAN: BUILD only after [`quote-hard-delete`](_done/quote-hard-delete.md) is merged (built on branch `fix/quote-hard-delete`, pending merge)
 - **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
@@ -43,7 +43,6 @@ scoped to the task that actually changed.
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
-- **Quote — reader quote deletion must be a hard delete** · `quote-hard-delete/` · auto · WIP:PLAN
 
 ## Done
 
@@ -52,6 +51,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`quote-hard-delete`](_done/quote-hard-delete.md) · a reader's own quote deletion is now a hard delete, so reactivation no longer resurrects it; one-off migration purges legacy soft-deleted quotes (deploy only while no user is deactivated)
 - [`annotations-v4`](_done/annotations-v4.md) · per-annotation « Signaler » on roots and replies (pop-up and popover), `annotation` moderation topic with a report guard refusing people who cannot see the annotation or wrote it
 - [`fanart-message-to-author`](_done/fanart-message-to-author.md) · optional 500-char plain-text message from the submitter to the story's authors, carried only in the `fanart.submitted` notification (not stored)
 - [`fanart-artwork-module`](_done/fanart-artwork-module.md) · New Fanart domain: confirmed readers submit images and chapter readings that authors review, author artworks for one chapter credit, Fanarts story tab, chapter audio player with auto-advance, profile tab, reports that keep a copy of the file, Discord feed.
