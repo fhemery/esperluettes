@@ -23,7 +23,7 @@ scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO: leftover from `role-gated-notification-settings/` REFINE — Quote Contest already broadcasts lifecycle to all active `user-confirmed`, ignoring each activity’s `role_restrictions`. Recipients must be the users authorized to *that* activity, not a type-level role list and not every confirmed user.
-- **Chapter annotations — v4 (per-annotation report)** · `annotations-v4/` · interactive · WIP:BUILD (2/5): per-annotation Report on roots and replies (`annotation` topic, reopens v1 #3). Image annotation split out to `annotations-images/`.
+- **Chapter annotations — v4 (per-annotation report)** · `annotations-v4/` · interactive · WIP:BUILD (3/5): per-annotation Report on roots and replies (`annotation` topic, reopens v1 #3). Image annotation split out to `annotations-images/`.
 - **Chapter annotations — image annotation** · `annotations-images/` · interactive · TODO: split from `annotations-v4/` REFINE; needs a stable block id persisted through Editor + Story first.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
 - **Admin statistics — quotes section** · `admin-statistics-quotes/` · interactive · TODO
