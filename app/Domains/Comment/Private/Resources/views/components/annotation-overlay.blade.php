@@ -165,7 +165,7 @@
                                     <template x-if="reply.can_report">
                                         <div class="mt-1 flex justify-end">
                                             <div x-data="reportButton('annotation', reply.id)">
-                                                <x-shared::button type="button" size="sm" color="error" :outline="true" data-testid="annotation-popover-report" title="{{ __('moderation::report.button') }}" aria-label="{{ __('moderation::report.button') }}" x-on:click="loadForm()" x-bind:disabled="loading">
+                                                <x-shared::button type="button" size="sm" color="error" data-testid="annotation-popover-report" title="{{ __('moderation::report.button') }}" aria-label="{{ __('moderation::report.button') }}" x-on:click="loadForm()" x-bind:disabled="loading">
                                                     <span class="material-symbols-outlined" aria-hidden="true">flag</span>
                                                 </x-shared::button>
                                                 <div x-ref="modalContainer"></div>
@@ -206,7 +206,7 @@
                                  truthy, and reportButton() reads its id once, at init. --}}
                             <template x-for="reportId in (current.can_report ? [current.id] : [])" :key="reportId">
                                 <div x-data="reportButton('annotation', reportId)">
-                                    <x-shared::button type="button" size="sm" color="error" :outline="true" data-testid="annotation-popover-report" title="{{ __('moderation::report.button') }}" aria-label="{{ __('moderation::report.button') }}" x-on:click="loadForm()" x-bind:disabled="loading">
+                                    <x-shared::button type="button" size="sm" color="error" data-testid="annotation-popover-report" title="{{ __('moderation::report.button') }}" aria-label="{{ __('moderation::report.button') }}" x-on:click="loadForm()" x-bind:disabled="loading">
                                         <span class="material-symbols-outlined" aria-hidden="true">flag</span>
                                     </x-shared::button>
                                     <div x-ref="modalContainer"></div>

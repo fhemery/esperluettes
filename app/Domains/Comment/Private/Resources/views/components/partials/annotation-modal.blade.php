@@ -126,7 +126,7 @@
                             </template>
                             <template x-if="row.can_report">
                                 <div x-data="reportButton('annotation', row.id)">
-                                    <x-shared::button type="button" size="sm" color="error" :outline="true" data-testid="annotation-report" x-on:click="loadForm()" x-bind:disabled="loading">
+                                    <x-shared::button type="button" size="sm" color="error" data-testid="annotation-report" x-on:click="loadForm()" x-bind:disabled="loading">
                                         <span class="material-symbols-outlined" aria-hidden="true">flag</span>
                                         {{ __('moderation::report.button') }}
                                     </x-shared::button>
@@ -159,7 +159,7 @@
                                         <template x-if="reply.can_report">
                                             <div class="mt-1 flex justify-end">
                                                 <div x-data="reportButton('annotation', reply.id)">
-                                                    <x-shared::button type="button" size="sm" color="error" :outline="true" data-testid="annotation-report" x-on:click="loadForm()" x-bind:disabled="loading">
+                                                    <x-shared::button type="button" size="sm" color="error" data-testid="annotation-report" x-on:click="loadForm()" x-bind:disabled="loading">
                                                         <span class="material-symbols-outlined" aria-hidden="true">flag</span>
                                                         {{ __('moderation::report.button') }}
                                                     </x-shared::button>

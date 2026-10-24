@@ -446,3 +446,34 @@ during PLAN while the flows are fresh.
   `report-modal-annotation-<id>`; if the same annotation's report form is opened
   from both the pop-up and the popover on one page, two modals share a name.
   Check during the phase 5 e2e run; harmless if only the last injected opens.
+
+## VERIFY report (2026-10-24, branch feat/annotations-v4)
+
+Specs: `e2e/tests/features/annotations-v4.spec.ts` (temporary, delete at WRAP; evidence shots with
+`E2E_SHOTS_DIR`) and the existing `e2e/tests/core/chapter-annotation-report.spec.ts`. Full `pnpm run e2e`: 51 passed.
+Shots: `docs/Feature_Planning/annotations-v4/shots/`.
+
+| Surface | Result |
+|---------|--------|
+| Pop-up, author | PASS. Buttons on the 6 non-emptied reader roots, none on author's own reply, none on the emptied row. Not covered: reaction row and co-author reply (no fixture; PHP tests cover rules). |
+| Pop-up, commenter (confirmed) | PASS. Exactly 1 button (author reply); none on own roots. Pending (unsaved) rows not exercised in this spec. |
+| Pop-up, moderator | PASS. Button on every row except the emptied one (reply row too); « Vider le contenu » / « Supprimer » present. |
+| Pop-up, `user` commenter | PASS. Chapter 13 root 105: 1 button on author reply, report submitted OK. Chapter 11 root 102: none (no replies). |
+| Pop-up, mobile (Pixel 7) | PASS functionally (wraps in action row, modal fits 412px, submit confirms). |
+| Report modal from pop-up | PASS. Opens above, submits, confirmation shown, pop-up still open after close. |
+| Popover (md+) author/commenter | PASS. 1 button on reportable reply, accessible name « Signaler », none on own row. |
+| Report modal from popover | PASS. Popover stays open under and after the modal. |
+| Popover on mobile | PASS. No visible gutter avatars below md. |
+| Admin list/detail | PASS. Topic « Annotation »; passage + body; reply shows « En réponse à » with parent; « Voir le contenu signalé » href is the chapter `?comment=<root id>`. |
+| Admin, annotation deleted after report | PASS. Report #6 still shown with frozen snapshot after a moderator deleted annotation 3. (Link not clicked; the root comment still exists.) |
+| Admin, emptied annotation via API | PASS. Author POST accepted (200); snapshot body « <Annotation supprimée> ». Own emptied annotation by the commenter is 403 (self-report guard). |
+| Admin reasons | PASS. « Annotation » topic filterable, its « Other » reason listed. |
+
+### Defects / findings
+1. **FIXED (dropped `:outline`, matches the comment-list report button; 4 sites) — was FAIL (visual): « Signaler » is almost invisible in the pop-up and popover.** `<x-shared::button color="error" :outline="true">` renders `.surface-error.is-outline` (`Shared/Resources/css/app.css:517`): text/border = `--color-error-bg`, a pale pink, on a white/`read-bg` background. Not disabled (opacity 1, verified). See `shots/author-popup.png`, `moderator-popup.png`, `popover-commenter.png`. The comment-list report button (non-outline) is legible. Fix: drop `:outline="true"` or use a darker foreground, in `Comment/Private/Resources/views/components/partials/annotation-modal.blade.php` (lines ~129, ~162) and the popover's button.
+2. Moderator's « Signaler » shows on the reply too, as spec §3 implies; but `POST /moderation/report` route is gated to `user`/`user-confirmed`; the e2e moderator holds both roles so it works. A moderator-only account would get the button but a refused submit (not tested).
+3. Open items from the plan still stand: production reason seeding (phase 2), 403 in the report modal redirects to `/login` (not exercised: could not provoke a hint/guard disagreement).
+
+### Rows not automated
+Eyeball: contrast fix above, mobile button wrapping aesthetics (`mobile-popup.png`), popover flag tooltip text.
+Rows that PHP tests already own (who may report what) were not duplicated.
