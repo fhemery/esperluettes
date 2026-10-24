@@ -145,6 +145,13 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     invisible on four sites, caught only by screenshots. Fix: correct the
     variant's foreground in Shared CSS, or a line in `app/Domains/Shared/AGENTS.md`
     saying which button colours support `:outline`.
+22. **Deploy-time preconditions have no home.** *(quote-hard-delete, arch §9)*
+    The purge migration is safe only if production has no deactivated user
+    when it runs. That check lives only in the plan's "Open items" and the
+    archived README, and nothing makes the person deploying see it. Fix: a
+    "Deployment notes" section in the loop README template that WRAP fills in,
+    plus a backlog-line convention (e.g. `⚠ deploy:`), until `release-notes/`
+    provides a proper place for it.
 
 ## Why
 

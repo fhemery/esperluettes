@@ -83,7 +83,7 @@ class QuoteService
             abort(403);
         }
 
-        $quote->delete();
+        $quote->forceDelete();
     }
 
     public function getForChapter(int $chapterId, int $storyId, int $userId): QuoteListDto
