@@ -29,6 +29,26 @@ describe('Editing a chapter', function () {
         $resp->assertSee('name="content"', false);
     });
 
+    it('renders the scheduled publication as a date/time pair over a hidden publish_at', function () {
+        $author = alice($this);
+        $story = publicStory('Sched Form Story', $author->id);
+        $chapter = createUnpublishedChapter($this, $story, $author, ['title' => 'Draft Ch']);
+        $chapter->publish_at = now()->addDays(3)->setTime(14, 30)->utc();
+        $chapter->save();
+
+        $this->actingAs($author);
+        $resp = $this->get('/stories/' . $story->slug . '/chapters/' . $chapter->slug . '/edit');
+        $resp->assertOk();
+        $html = $resp->getContent();
+
+        expect($html)
+            ->toMatch('/<input[^>]*type="hidden"[^>]*name="publish_at"[^>]*value="' . preg_quote($chapter->fresh()->publish_at->format('Y-m-d\TH:i'), '/') . '"/')
+            ->toMatch('/<input[^>]*type="date"[^>]*id="publish_at"|<input[^>]*id="publish_at"[^>]*type="date"/')
+            ->toContain('type="time"')
+            ->toContain('name="timezone"')
+            ->not->toContain('type="datetime-local"');
+    });
+
     it('returns 404 for non-author accessing edit form', function () {
         $author = alice($this);
         $other = bob($this);

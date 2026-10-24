@@ -48,6 +48,21 @@ describe('Shared datetime-local-input', function () {
         expect(preg_match_all('/<input[^>]*\bdisabled\b/', $html))->toBe(3);
     });
 
+    it('sets min on the date input only', function () {
+        $html = (string) $this->blade('<x-shared::datetime-local-input id="starts" name="starts" min="2026-10-24" />');
+
+        expect(preg_match_all('/<input[^>]*\bmin="2026-10-24"/', $html))->toBe(1);
+        expect($html)->toMatch('/<input[^>]*type="date"[^>]*\bmin="2026-10-24"|<input[^>]*\bmin="2026-10-24"[^>]*type="date"/');
+    });
+
+    it('skips the UTC conversion at submit in local mode', function () {
+        $local = (string) $this->blade('<x-shared::datetime-local-input id="starts" name="starts" submit="local" />');
+        $utc = (string) $this->blade('<x-shared::datetime-local-input id="starts" name="starts" />');
+
+        expect($local)->toContain("submit: 'local'");
+        expect($utc)->toContain("submit: 'utc'");
+    });
+
     it('renders no named input in mirror mode and disables both visible inputs', function () {
         $html = (string) $this->blade('<x-shared::datetime-local-input id="mirror" mirror-of="source" />');
 

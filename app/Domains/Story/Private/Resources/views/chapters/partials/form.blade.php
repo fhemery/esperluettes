@@ -78,7 +78,6 @@
         x-data="{
             published: {{ $checked ? 'true' : 'false' }},
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            publishAtLocal: '{{ $existingPublishAt }}' ? DateUtils.utcToLocalInput('{{ $existingPublishAt }}') : '',
         }"
         x-on:change="if ($event.target.name === 'published') published = $event.target.checked"
     >
@@ -102,13 +101,13 @@
             <!-- Inline date picker — appears when toggle is OFF -->
             <div x-show="!published" x-cloak class="flex items-center gap-2 sm:flex-1">
                 <span class="material-symbols-outlined text-secondary text-[18px] leading-none shrink-0">schedule</span>
-                <input
-                    type="datetime-local"
+                <x-shared::datetime-local-input
                     id="publish_at"
                     name="publish_at"
-                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-accent focus:ring-accent text-sm"
-                    x-model="publishAtLocal"
-                    :min="new Date(Date.now() + 60000).toISOString().slice(0, 16)"
+                    submit="local"
+                    :min="now()->toDateString()"
+                    :value="$existingPublishAt"
+                    class="block w-full rounded-md shadow-sm text-sm"
                 />
                 <input type="hidden" name="timezone" :value="timezone" />
             </div>
