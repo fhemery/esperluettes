@@ -3,6 +3,9 @@
 namespace App\Domains\Fanart\Database\Seeders;
 
 use App\Domains\Fanart\Private\Models\Fanart;
+use App\Domains\Fanart\Private\Support\FanartMode;
+use App\Domains\Fanart\Public\Providers\FanartServiceProvider;
+use App\Domains\Settings\Public\Api\SettingsPublicApi;
 use App\Domains\Fanart\Private\Support\FanartKind;
 use App\Domains\Fanart\Private\Support\FanartStatus;
 use App\Domains\Media\Public\Api\MediaPublicApi;
@@ -36,6 +39,16 @@ class E2eFanartSeeder extends Seeder
         $ids = DB::table('users')->pluck('id', 'email');
         foreach (['confirmed', 'tech-admin'] as $name) {
             $this->users[$name] = (int) $ids[$name . '@e2e.test'];
+        }
+
+        // Open submissions to every reader: the default mode is « designated ».
+        // `author` writes stories 1 and 2, `confirmed` is the co-author of 2.
+        $settings = app(SettingsPublicApi::class);
+        foreach (['author', 'confirmed'] as $name) {
+            $userId = (int) $ids[$name . '@e2e.test'];
+            foreach ([FanartServiceProvider::KEY_IMAGES_MODE, FanartServiceProvider::KEY_AUDIO_MODE] as $key) {
+                $settings->setValue($userId, FanartServiceProvider::TAB_STORIES, $key, FanartMode::Yes->value);
+            }
         }
 
         $story = E2eStorySeeder::STORY_ID;

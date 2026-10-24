@@ -122,6 +122,14 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     `web, auth, verified`; PLAN found by reading Quote that the convention is
     `['web','auth','compliant','role:user-confirmed,moderator,admin,tech-admin']`.
     Fix: one line in `AGENTS.md` § Controllers (or Security) stating it.
+19. **A spec "kept" in `features/` rots unseen.** *(fanart-message-to-author,
+    VERIFY)* `fanart-artwork-module`'s WRAP kept its spec in `features/` at the
+    user's request — neither deleted nor promoted to `core/`. Nothing runs it,
+    and its « reader proposes an image » case was already failing (seeder left
+    the default `designated` mode, so readers got 403); found only because the
+    next fanart VERIFY ran it. Fix: `wrap-task` §4 allows no third state — keep
+    means promote to `core/` (with the reason), and WRAP runs the promoted spec
+    once before committing.
 
 ## Why
 

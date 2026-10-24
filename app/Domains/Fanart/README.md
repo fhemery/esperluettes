@@ -11,6 +11,7 @@ Confirmed readers (« fanartistes ») submit images (jpg/png/webp, 2 Mo) and sou
 - **Submission modes**: each author sets, in Paramètres › Histoires, whether images and sounds are open to everyone (`yes`), reserved to designated fanartistes (`designated`) or closed (`no`). On a co-authored story the most restrictive value applies (`ModeService`).
 - **Fanartiste role**: lives here (`fanart_fanartists`), not in Story's collaborators; it grants no access to private stories. Readers may request it; an author accepts or declines (30-day cooldown after a decline).
 - **Visibility**: readers see published fanarts of published chapters on readable stories; authors and staff also see pending ones and unpublished chapters' fanarts. Chapters not yet read are collapsed behind a spoiler notice.
+- **Message to the authors**: a submitter may add an optional plain-text message (500 chars, not offered on author artworks). It is not stored on `fanarts`; it lives only in the authors' `fanart.submitted` notification, so deleting that notification loses it.
 - **Discord relay**: published images of public stories, opt-in at submission, exposed to the bot through signed, expiring image URLs.
 
 ## Where it shows up
