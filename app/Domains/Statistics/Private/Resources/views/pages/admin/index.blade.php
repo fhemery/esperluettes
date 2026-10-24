@@ -4,7 +4,7 @@
     <div class="flex flex-col gap-8">
         <h1 class="text-2xl font-bold">{{ __('statistics::admin.title') }}</h1>
 
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
             <x-statistics::stat-summary
                 statistic-key="global.total_users"
                 :label="__('statistics::admin.users')"
@@ -25,6 +25,10 @@
             <x-statistics::comment-summary
                 :label="__('statistics::admin.comments')"
             />
+            <x-statistics::stat-summary
+                statistic-key="global.total_quotes"
+                :label="__('statistics::admin.quotes')"
+            />
         </div>
 
         <x-shared::segmented-control
@@ -44,6 +48,7 @@
                 ['key' => 'users', 'label' => __('statistics::admin.tab_users')],
                 ['key' => 'content', 'label' => __('statistics::admin.tab_content')],
                 ['key' => 'comments', 'label' => __('statistics::admin.tab_comments')],
+                ['key' => 'quotes', 'label' => __('statistics::admin.tab_quotes')],
             ]"
             initial="users"
             color="primary"
@@ -78,6 +83,13 @@
                 <x-statistics::comment-breakdown-chart
                     :root-label="__('statistics::admin.root_comments')"
                     :reply-label="__('statistics::admin.reply_comments')"
+                />
+            </div>
+
+            <div x-show="tab === 'quotes'" x-cloak class="flex flex-col gap-6 pt-6 max-w-4xl" role="tabpanel" id="tabs-panel-quotes" aria-labelledby="tabs-tab-quotes">
+                <x-statistics::stat-widget
+                    statistic-key="global.total_quotes"
+                    :label="__('statistics::admin.quotes')"
                 />
             </div>
         </x-shared::tabs>

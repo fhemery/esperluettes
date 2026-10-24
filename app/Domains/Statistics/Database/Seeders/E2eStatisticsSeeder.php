@@ -29,6 +29,7 @@ class E2eStatisticsSeeder extends Seeder
         'global.total_words' => [1200, 800, 0, -300, 500, 150],
         'global.total_comments' => [4, 3, 0, 5, 2, 1],
         'global.total_root_comments' => [2, 1, 0, 3, 1, 1],
+        'global.total_quotes' => [2, 1, 0, -1, 3, 1],
     ];
 
     public function run(): void

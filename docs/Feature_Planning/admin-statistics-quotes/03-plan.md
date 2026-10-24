@@ -27,7 +27,7 @@ the soft delete") and §9 risk 2 predate that decision and are superseded by it.
 | 2 | Quote — emit deletion / removal / restoration events | S | 1, `quote-hard-delete/` | DONE |
 | 3 | Quote — daily net-change history in `QuotePublicApi` | S | — | DONE |
 | 4 | Statistics — `global.total_quotes` definition (live deltas + table recompute) | M | 2, 3, `quote-hard-delete/` | DONE |
-| 5 | Statistics — admin tile, « Citations » tab, E2E seed | S | 4 | TODO |
+| 5 | Statistics — admin tile, « Citations » tab, E2E seed | S | 4 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

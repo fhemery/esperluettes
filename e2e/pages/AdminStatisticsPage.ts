@@ -21,7 +21,7 @@ export type Bar = { x: number; y: number; w: number; h: number; fill: string };
 export type Drawing = { bars: Bar[]; texts: string[]; kinds: ('bar' | 'line')[] };
 
 export type GraphMode = 'cumulative' | 'weekly';
-export type StatisticsTab = 'users' | 'content' | 'comments';
+export type StatisticsTab = 'users' | 'content' | 'comments' | 'quotes';
 
 const MODE_LABELS: Record<GraphMode, string> = { cumulative: 'Cumulé', weekly: 'Par semaine' };
 

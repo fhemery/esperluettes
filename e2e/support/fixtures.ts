@@ -311,6 +311,7 @@ export const STATISTICS = {
   words: [1200, 800, 0, -300, 500, 150],
   comments: [4, 3, 0, 5, 2, 1],
   rootComments: [2, 1, 0, 3, 1, 1],
+  quotes: [2, 1, 0, -1, 3, 1],
 } as const;
 
 /** Where auth.setup.ts parks each role's cookies. */
