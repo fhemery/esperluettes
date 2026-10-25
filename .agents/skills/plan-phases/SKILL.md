@@ -1,15 +1,19 @@
 ---
 name: plan-phases
-description: Break an architecture document into shippable, independently testable phases. Use at the PLAN step of the loop, or when asked to phase a feature that already has a technical design. Produces docs/Feature_Planning/<slug>/03-plan.md with a phase index, per-phase deliverables/tests/acceptance, and the visual QA checklist.
+description: Break an architecture (CONTEXT.md §2) into shippable, independently testable phases. Use as the second half of the DESIGN+PLAN step of the loop, or when asked to phase a feature that already has a technical design. Produces CONTEXT.md §3 with a phase index, per-phase deliverables/tests/acceptance, and the visual QA checklist.
 ---
 
 # Phase the development
 
-Turn `02-architecture.md` into `03-plan.md`: an ordered list of phases, each one
-independently shippable, testable, and revertable.
+Turn §2 of `CONTEXT.md` (the architecture) into §3: an ordered list of phases,
+each one independently shippable, testable, and revertable.
 
-Output:
-[`templates/03-plan.md`](../../loop/templates/03-plan.md).
+This is the second half of the `architect-planner` agent (see
+[`design-and-plan`](../design-and-plan/SKILL.md)). Text below that says
+`01-functional.md`, `02-architecture.md`, `03-plan.md` or `DECISIONS.md` means
+§1, §2, §3 and §4 of `CONTEXT.md`; "checkpoint results" go to §5.
+
+Output: §3 of [`CONTEXT.md`](../../loop/templates/CONTEXT.md).
 
 ## Asking the user
 
@@ -118,6 +122,6 @@ rather than leaving it to BUILD.
 
 ## Output
 
-Run `pnpm run gate` and commit `03-plan.md` (follow the `commit` skill), then
-return the phase index table and the total phase count (checkpoints included).
-Flag any phase you were unsure how to cut.
+`design-and-plan` runs the gate and commits `CONTEXT.md`, then returns the phase
+index table and the total phase count (checkpoints included). Flag any phase
+you were unsure how to cut.

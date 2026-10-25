@@ -44,7 +44,11 @@ Never `git rebase`. The only pull is the one on `main` in §2.
 - If `00-request.md` is missing, ask the user for the request before doing
   anything else — the loop has no input otherwise. Offer
   [`templates/00-request.md`](../../loop/templates/00-request.md).
-- Create `DECISIONS.md` from its template.
+- Ensure `CONTEXT.md` exists (`add-task` creates it); if not, copy
+  [`templates/CONTEXT.md`](../../loop/templates/CONTEXT.md). It is the task's
+  single working file — see the loop README. A folder from before this layout
+  (`01-functional.md`, …, `DECISIONS.md`) is finished in its own layout; do not
+  migrate it.
 - Set the backlog status to `WIP:REFINE`.
 
 ## 3. Confirm the mode
@@ -71,19 +75,27 @@ most expensive rule to break.
 
 | Step | How to run it |
 |------|---------------|
-| REFINE | spawn the `feature-refiner` agent (asks the user only if a point is blocking) |
-| DESIGN | spawn the `architecture-designer` agent (asks the user only if a tradeoff is blocking) |
-| PLAN | spawn the `feature-planner` agent |
-| BUILD | spawn one `phase-implementer` agent **per phase** of `03-plan.md`; a checkpoint row (`2v`) goes to `visual-verifier` instead — see below |
+| REFINE | spawn the `feature-refiner` agent (asks the user only if a point is blocking). It rates the task's complexity /5; on **1–2 it also writes the design and plan itself**, so skip the next row |
+| DESIGN+PLAN | spawn the `architect-planner` agent (complexity 3–5; asks the user only about a blocking tradeoff; on **5** it splits the task and files the remaining slices in the backlog) |
+| BUILD | spawn one `phase-implementer` agent **per phase** of the plan (`CONTEXT.md` §3); a checkpoint row (`2v`) goes to `visual-verifier` instead — see below |
 | VERIFY | spawn the `visual-verifier` agent |
 | WRAP | spawn the `task-wrapper` agent |
 
-Never run any step in this thread: REFINE, DESIGN and PLAN subagents ask the
-user themselves when a point is blocking, and the others need no user input, so
-there is nothing to gain and a whole context to lose. If a subagent reports a
+Never run any step in this thread, **including the small ones**. Measured on
+this project's transcripts, a request in an orchestrator thread re-reads
+~80k tokens of context (never under ~60k), while a subagent request re-reads
+~50k on average and starts at ~11k; running a 30-request design+plan inline
+costs roughly 2.5M tokens against ~1.5M in a subagent. A small task saves
+tokens by having **fewer agents** (the refiner's fast path), not by borrowing
+this thread.
+
+REFINE and DESIGN+PLAN subagents ask the user themselves when a point is
+blocking, and the others need no user input. If a subagent reports a
 blocking point instead of asking (its host cannot ask), you ask the user — one
 question at a time, with the subagent's recommended default first — append the
-answer to `DECISIONS.md`, and re-dispatch the same step. Only if the host genuinely cannot spawn agents (the
+answer to `CONTEXT.md` §4, and re-dispatch the same step. Read `CONTEXT.md`
+only for its header, §0 Handoff and the phase index (§3.1) — never whole.
+Only if the host genuinely cannot spawn agents (the
 spawn/Task capability is missing) do you run them here via their skills, and
 then you say so explicitly. A model refusal, rate limit, or premium-credit
 exhaustion is not that case — pick another available model and keep spawning.
@@ -104,23 +116,24 @@ will then carry for the rest of the session.
 Dispatch each step in order. After each one, update the backlog status — your
 own entry only, never another session's — then:
 
-- `interactive` — **REFINE → DESIGN → PLAN chain without stopping**: after each,
-  give a two-line progress report (artifact written, assumptions made) and
+- `interactive` — **REFINE → DESIGN+PLAN chain without stopping**: after each,
+  give a two-line progress report (complexity rating, assumptions made) and
   dispatch the next. The step's own subagent already asked the user whatever was
-  blocking. Stop after PLAN, summarise the assumptions (the ones the user is
-  likeliest to reverse first) and the phase index, and wait for the go before
+  blocking. Stop once the plan exists, summarise the assumptions (the ones the
+  user is likeliest to reverse first), the phase index and any tasks the split
+  sent to the backlog, and wait for the go before
   BUILD; if the user wants a fresh chat, `/clear` then `/continue-task`.
   **BUILD chains its phases in one chat.** Each phase runs in
   its own `phase-implementer`, so the orchestrator only ever carries a two-line
   report per phase — clearing between them buys nothing and costs a re-read of
-  the backlog, the plan and `DECISIONS.md` every time. Stop between phases only
+  the backlog, the plan and `CONTEXT.md` every time. Stop between phases only
   when a §5 condition fires, or when a phase contradicted the plan in a way the
   user should arbitrate before the next one builds on it. Stop again once all
   phases are `DONE`, before VERIFY.
 - `auto` — **keep dispatching the remaining steps without stopping for
   approval.** Do not ask the user to open a new chat unless a stop condition in
-  §5 fires. Record every judgement call in the "Assumptions" table of
-  `DECISIONS.md`. A short progress line per step/phase is enough.
+  §5 fires. Every judgement call lands in the "Assumptions" table of
+  `CONTEXT.md` §4 (the agents write it). A short progress line per step/phase is enough.
 
 `auto` changes when you stop for the *user*, never how you dispatch. One
 subagent per step and per phase either way — the whole point is that your own
@@ -141,15 +154,13 @@ Stop and ask the user when:
 - the gate (`pnpm run gate`) fails twice on the same phase for the same reason;
 - reality contradicts the plan (a needed API does not exist, a decision turns
   out to be unimplementable);
-- you are about to touch a domain that neither `01-functional.md` nor
-  `02-architecture.md` mentions;
+- you are about to touch a domain that neither `CONTEXT.md` §1 nor §2
+  mentions;
 - in `auto` mode, a tradeoff is genuinely expensive to reverse (see
   `design-architecture` auto section) — then stop for that decision only, then
   resume chaining.
 
-In `auto` mode, when WRAP finishes with no open questions, archive the backlog
-entry to `## Done` (see `wrap-task` §6) and report the outcome. Do **not**
-start the next backlog `TODO` unless the user asks (`/next-task`).
-
-Never archive a task's backlog entry yourself in `interactive` mode — WRAP
-proposes it, the user confirms.
+WRAP archives the task itself, in both modes, without asking (`wrap-task` §6):
+the folder becomes `_done/<slug>.md` and the entry moves to `## Done`. Report
+the outcome, including the archive path. Do **not** start the next backlog
+`TODO` unless the user asks (`/next-task`).

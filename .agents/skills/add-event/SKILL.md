@@ -11,7 +11,7 @@ knowing who cares. Reference: `app/Domains/Events`.
 ## 1. Define it
 
 If the event comes from a feature's design, start from §3.4 of its
-`docs/Feature_Planning/<slug>/02-architecture.md`. Otherwise settle, and write
+`docs/Feature_Planning/<slug>/CONTEXT.md` (§2.3). Otherwise settle, and write
 down:
 
 - the **emitting domain** — the one that owns the fact;

@@ -17,9 +17,9 @@ REFINE → DESIGN → PLAN → BUILD → VERIFY → WRAP
 
 | Step | Produces | Talks to you? |
 |------|----------|---------------|
-| REFINE | `01-functional.md` | only on blocking points |
-| DESIGN | `02-architecture.md` | only on tradeoffs that are costly to reverse |
-| PLAN | `03-plan.md` | almost never |
+| REFINE | `CONTEXT.md` §1 + a complexity rating /5 | only on blocking points |
+| DESIGN | `CONTEXT.md` §2 | only on tradeoffs that are costly to reverse |
+| PLAN | `CONTEXT.md` §3 | almost never |
 | BUILD | code + tests, one subagent per phase | no |
 | VERIFY | `shots/`, filled QA checklist | no |
 | WRAP | `README.md`, backlog update | no |
@@ -37,11 +37,16 @@ at those folders is
 | `/next-task` | start the first `TODO` row — single-session only, see below |
 | `/continue-task` | resume the `WIP` task at whatever step its files say it reached |
 
-REFINE, DESIGN and PLAN each run in their own subagent and chain on their own:
+Each task has one working file, `CONTEXT.md`: every agent leaves a short
+handoff note in it for the next one, and WRAP compacts it into the archived
+record (archiving happens by default, no confirmation).
+
+REFINE and DESIGN+PLAN each run in their own subagent and chain on their own:
 they ask you only when a point is blocking, otherwise they record their
-judgement calls as assumptions in `DECISIONS.md` and the loop moves on. Each
-step reads the artifact on disk, not the conversation that produced it — that is
-the whole reason the artifacts exist.
+judgement calls as assumptions in `CONTEXT.md` and the loop moves on. REFINE
+rates the task's complexity out of 5: on 1–2 the same agent also writes the
+design and plan (fewer agents, fewer tokens); on 5 the task is split and the
+remaining slices land in the backlog.
 
 The `Mode` column in the backlog controls how often the loop stops:
 `interactive` stops once after PLAN so you can review the assumptions before

@@ -1,23 +1,26 @@
 ---
 name: implement-phase
-description: Implement one phase of a feature's implementation plan, test-first, until the gate is green. Use at the BUILD step of the loop — one invocation per phase of docs/Feature_Planning/<slug>/03-plan.md. Writes failing integration tests first, implements the minimum that passes, runs pnpm run gate, and updates the phase status.
+description: Implement one phase of a feature's implementation plan, test-first, until the gate is green. Use at the BUILD step of the loop — one invocation per phase of the plan in docs/Feature_Planning/<slug>/CONTEXT.md. Writes failing integration tests first, implements the minimum that passes, runs pnpm run gate, and updates the phase status.
 ---
 
 # Implement one phase
 
-You implement **exactly one phase** of `03-plan.md`. Not the next one, not a bit
-of the next one.
+You implement **exactly one phase** of the plan in `CONTEXT.md` (§3). Not the
+next one, not a bit of the next one.
 
 ## Read first, in this order
 
-1. `03-plan.md` — **your phase and the phase index only.** Your phase is
-   self-contained by design; do not read the other phases' bodies.
-2. `DECISIONS.md` — every settled question. Never re-decide one of these.
-3. `02-architecture.md` — only the sections your phase names.
-4. `01-functional.md` — only when a behaviour is ambiguous.
-5. The nearest existing implementation in the codebase. Match it.
+`CONTEXT.md` is one file but you do not read it whole — read these parts only:
 
-Read the section you need, not the whole file. Your context is finite and you
+1. **§0 Handoff** — what the previous agents want you to know.
+2. **§3 — your phase and the phase index only.** Your phase is self-contained
+   by design; do not read the other phases' bodies.
+3. **§4 Decisions** — every settled question. Never re-decide one of these.
+4. **§2 Architecture** — only the subsections your phase names.
+5. **§1 Functional spec** — only when a behaviour is ambiguous.
+6. The nearest existing implementation in the codebase. Match it.
+
+Use offset/limit or grep on the `## ` headings; your context is finite and you
 carry everything you open until the phase ends.
 
 You cannot ask the user anything. If the phase is genuinely underspecified, do
@@ -72,6 +75,8 @@ the `fix-deptrac` skill — and remember that adding an edge to `deptrac.yaml` i
 an architecture decision: if `02-architecture.md` did not anticipate it, report
 it rather than deciding alone.
 
+(Throughout, "`02-architecture.md`" means §2 of `CONTEXT.md`.)
+
 If the gate fails twice for the same reason, stop and report. Do not disable a
 test, loosen an assertion, or add a deptrac exception to get green.
 
@@ -101,10 +106,13 @@ Use them rather than reconstructing the procedure:
 
 ## Finish
 
-1. Tick the phase to `DONE` in the phase index of `03-plan.md`.
-2. Append to `DECISIONS.md` anything you had to decide.
-3. Commit the phase — one phase, one commit. Follow the `commit` skill.
-4. Report: what you built, the tests that prove it, the gate result, anything
+1. Tick the phase to `DONE` in the phase index (§3.1) and add its line to §5.
+2. Append to §4 anything you had to decide.
+3. Add a §0 Handoff entry (`BUILD phase N → next`): only what the next phase
+   or WRAP cannot learn from the code and the plan — a trap, a deviation from
+   the plan, something deliberately left out.
+4. Commit the phase — one phase, one commit. Follow the `commit` skill.
+5. Report: what you built, the tests that prove it, the gate result, anything
    that contradicted the plan, and anything you deliberately left out.
 
 Report failure plainly if the phase is not finished. A phase reported `DONE`

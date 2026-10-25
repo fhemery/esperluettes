@@ -1,14 +1,12 @@
 # <Task title>
 
-> WRAP output — the compact record of the finished feature. **This is the only
-> file in the folder an agent should load by default.** The phase documents
-> (`01`–`03`) remain as history; link to them from here when detail is needed.
+> WRAP output — `CONTEXT.md` compacted into an index of the finished feature.
+> It becomes `_done/<slug>.md`; the working files are deleted, so link to
+> nothing in the task folder. Git keeps the rest.
 >
 > Target: under ~120 lines. If it grows past that, cut prose, not facts.
 
-**Status:** DONE — <date> · **Domain(s):** `<Domain>` · **Spec:**
-[functional](./01-functional.md) · [architecture](./02-architecture.md) ·
-[plan](./03-plan.md) · [decisions](./DECISIONS.md)
+**Status:** DONE — <date> · **Domain(s):** `<Domain>`
 
 ## What it does
 
@@ -41,8 +39,8 @@ moderation, statistics, media usage), one line each.
 
 ## Decisions worth remembering
 
-The three to five decisions that would otherwise be re-litigated. Full list in
-`DECISIONS.md`.
+The three to five decisions that would otherwise be re-litigated, from
+`CONTEXT.md` §4 and §2.7.
 
 ## Not done
 

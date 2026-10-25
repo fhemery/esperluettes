@@ -114,6 +114,8 @@ happened here before.
   `pnpm run e2e:report`. Do not add success screenshots; they cost tokens and
   prove nothing an assertion does not.
 - Run `pnpm run gate` one last time.
+- Write the result into `CONTEXT.md` §5 and add a §0 Handoff entry
+  (VERIFY → WRAP): what to fold into the record, flaky or manual rows.
 - Report: rows covered by new specs, rows pushed back to BUILD as feature
   tests, rows that failed, rows you could not automate and why.
 
@@ -139,7 +141,7 @@ Write no spec and change no code.
    `git clean -fd <paths>`. Identical screenshots or DOM is strong evidence.
 3. Screenshots go in `docs/Feature_Planning/<slug>/shots/checkpoint-<id>/`.
 4. Append `**Result (<date>, HEAD <sha>) — PASS|FAIL**` and a line per check
-   to the checkpoint's section of `03-plan.md`. On FAIL, name the regression
+   to the checkpoint's section of `CONTEXT.md` (§3). On FAIL, name the regression
    precisely enough for a `phase-implementer` to fix it without re-deriving it.
 
 ## Browser tricks

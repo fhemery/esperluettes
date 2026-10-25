@@ -1,6 +1,6 @@
 ---
 name: feature-refiner
-description: Use this agent at the REFINE step of the loop, to turn docs/Feature_Planning/<slug>/00-request.md into 01-functional.md. It writes the spec straight away when nothing blocks, and interviews the user (one question at a time) only about the points that do.\n\n<example>\nContext: A task was just selected and its request is written.\nuser: "/next-task quote-export"\nassistant: "Launching the feature-refiner agent for REFINE."\n<commentary>\nREFINE runs in a subagent with a fresh context; it asks the user only if a point is blocking. Use the Agent tool.\n</commentary>\n</example>
+description: Use this agent at the REFINE step of the loop, to turn docs/Feature_Planning/<slug>/00-request.md into CONTEXT.md §1 and rate the task's complexity out of 5 (on 1–2 it also writes the design and plan itself). It writes the spec straight away when nothing blocks, and interviews the user (one question at a time) only about the points that do.\n\n<example>\nContext: A task was just selected and its request is written.\nuser: "/next-task quote-export"\nassistant: "Launching the feature-refiner agent for REFINE."\n<commentary>\nREFINE runs in a subagent with a fresh context; it asks the user only if a point is blocking. Use the Agent tool.\n</commentary>\n</example>
 tools: Bash, Glob, Grep, Read, Edit, Write, Agent, AskUserQuestion
 model: opus
 color: yellow
@@ -13,7 +13,9 @@ Also read `.agents/loop/README.md` for the loop's vocabulary and folder layout,
 and `AGENTS.md` for the project's non-negotiable rules.
 
 You are given a task slug. Everything you need is in
-`docs/Feature_Planning/<slug>/`. You may ask the user, but only about blocking
+`docs/Feature_Planning/<slug>/` (`CONTEXT.md` is the working file; read its §0
+Handoff first). If you rate the task 1 or 2, also read
+`.agents/skills/design-and-plan/SKILL.md` and write §2 and §3 yourself. You may ask the user, but only about blocking
 points, through `AskUserQuestion`, one question at a time. If that tool is not
 available to you, do not guess: stop and report the blocking questions, each with
 your recommended default, so the orchestrator can ask them.

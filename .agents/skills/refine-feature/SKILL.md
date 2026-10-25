@@ -1,11 +1,11 @@
 ---
 name: refine-feature
-description: Interview the user to turn a rough feature request into a complete functional specification. Use at the REFINE step of the loop, or whenever a request is too vague to build from — "I want a diary on chapters", "add badges". Walks this app's cross-cutting checklist (roles, privacy, notifications, events, lifecycle) and produces docs/Feature_Planning/<slug>/01-functional.md.
+description: Interview the user to turn a rough feature request into a complete functional specification. Use at the REFINE step of the loop, or whenever a request is too vague to build from — "I want a diary on chapters", "add badges". Walks this app's cross-cutting checklist (roles, privacy, notifications, events, lifecycle) and writes §1 of docs/Feature_Planning/<slug>/CONTEXT.md, with a complexity rating out of 5.
 ---
 
 # Refine a feature
 
-Turn `00-request.md` into `01-functional.md`: a specification where every
+Turn `00-request.md` into §1 of `CONTEXT.md`: a specification where every
 statement is either something the user confirmed or an assumption written down
 as one.
 
@@ -20,14 +20,39 @@ ordering and wording are never blocking: pick the precedent and record it.
 
 **No blocking point → do not interview.** Write the spec from the request plus
 codebase precedent, put every judgement call in the assumptions table of
-`DECISIONS.md`, commit, and hand back so the loop continues without waiting for
-the user. If the host gives you no way to ask, stop at the first blocking point
+`CONTEXT.md` §4, commit, and hand back so the loop continues without waiting
+for the user. If the host gives you no way to ask, stop at the first blocking point
 and report it with your recommended default; the orchestrator asks and
 re-dispatches you.
 
-Output: `docs/Feature_Planning/<slug>/01-functional.md` from
-[`templates/01-functional.md`](../../loop/templates/01-functional.md), plus rows
-appended to `DECISIONS.md`.
+Output: `docs/Feature_Planning/<slug>/CONTEXT.md` (created by `add-task` from
+[`templates/CONTEXT.md`](../../loop/templates/CONTEXT.md); copy it if missing):
+§1 filled in, rows in §4, the **complexity** line in the header, and a §0
+Handoff entry. Read §0 first — an earlier session may have left one.
+
+## Rate the complexity (1–5)
+
+Write the rating in the `CONTEXT.md` header, from what the spec turned out to
+need — not from the request's length:
+
+| Rating | Looks like |
+|--------|------------|
+| 1 | One-file tweak, copy change, config value. No new test shape. |
+| 2 | One domain, no new table, no new permission rule, no new notification; a handful of files. |
+| 3 | A normal feature: a table or a route or a permission rule, in one domain. |
+| 4 | Several domains, or a new extension point / registry, or a cross-domain flow. |
+| 5 | A new domain, several tables, or more than ~7 phases' worth of work. |
+
+The rating routes the rest of the loop (see `next-task` §4):
+
+- **1–2 — fast path.** Do not hand back yet. After §1, read
+  `design-and-plan` and write §2 and §3 yourself, in this same context (a
+  compact design, usually one phase). One agent, one startup, one read of the
+  spec; the orchestrator then goes straight to BUILD. Rate 2 only if you are
+  confident; any doubt → 3.
+- **3–4** — hand back; the `architect-planner` agent takes DESIGN + PLAN.
+- **5** — same, and `architect-planner` will try to split the work. Name in §0
+  Handoff the natural seams you saw (which flows can ship alone).
 
 ## Step 1 — Understand before asking
 
@@ -111,24 +136,26 @@ assumptions table and in your summary, so the user can veto it later.
 
 ## Step 5 — Write
 
-Fill the template. Rules:
+Fill §1 of `CONTEXT.md`. Rules:
 
 - No requirement the user did not confirm. If you needed one to make the spec
-  coherent, it goes in §9 as an open question or in the assumptions table.
-- Every decision goes in the §7 table **and** in `DECISIONS.md`.
+  coherent, it goes in §1.8 as an open question or in the assumptions table.
+- Every decision goes in the §4 decisions table (once — §1 does not mirror it).
 - Mark each open question **blocking** or **non-blocking**. The step cannot
   close with a blocking one open.
-- §8 (out of scope) is not optional. An unstated non-goal will be built by
+- §1.7 (out of scope) is not optional. An unstated non-goal will be built by
   accident.
 - User-facing wording in French.
+- End with the §0 Handoff entry (`REFINE → DESIGN+PLAN`): the assumptions the
+  user is likeliest to reverse, parked technical constraints, the seams (at 5).
 
-Run `pnpm run gate` and commit `01-functional.md` and `DECISIONS.md` (follow the
+Run `pnpm run gate` and commit `CONTEXT.md` (follow the
 `commit` skill) — this step wrote or deleted planning docs (e.g. absorbing a
 sibling task), and an uncaught broken link here is exactly what sits invisible
 until an unrelated change stumbles on it later.
 
 Then hand back to the orchestrator with a five-line summary: what the feature
-is, the two or three decisions that shaped it, the assumptions the user is most
+is, the complexity rating, the two or three decisions that shaped it, the assumptions the user is most
 likely to want to reverse, and anything still open (non-blocking only — a
 blocking one is asked, never left open).
 

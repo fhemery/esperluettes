@@ -13,7 +13,9 @@ that was dropped gets forgotten.
 Before the record, look back on *how* the task went, while the folder still
 holds the evidence. Look for friction the next task will hit again:
 
-- `DECISIONS.md` rows that supersede others, and assumptions the user reversed;
+- `CONTEXT.md` §4 rows that supersede others, and assumptions the user
+  reversed; the §0 Handoff entries — they are the agents' own account of what
+  was hard;
 - phases that contradicted the plan, were re-cut, or needed a fix phase;
 - checkpoint or VERIFY results that FAILed, and why;
 - gate failures unrelated to the change (stale build, environment);
@@ -37,8 +39,9 @@ usual, not here.
 Do not summarise the plan — summarise the code. Read:
 
 - `git log` and the full diff since the task started;
-- the phase index of `03-plan.md`, including phases not marked `DONE`;
-- `DECISIONS.md`, including the assumptions table;
+- `CONTEXT.md` in full — it is the one file; read §0 first, then the phase
+  index (§3.1) including phases not marked `DONE`, and §4 with its
+  assumptions table;
 - the VERIFY report and the filled checklist.
 
 Where the plan and the code disagree, the code is the truth. Say so explicitly:
@@ -50,8 +53,8 @@ Where the plan and the code disagree, the code is the truth. Say so explicitly:
 [`templates/README.md`](../../loop/templates/README.md).
 
 This file exists so a finished feature costs ~120 lines of context instead of
-~1000. It is what agents load by default; `01`–`03` stay as history behind
-links. Optimise for the reader who is about to *change* this feature:
+~1000: it is `CONTEXT.md` compacted into an index of what the code now does,
+and what agents load by default. Optimise for the reader who is about to *change* this feature:
 
 - the visibility and role rules, in one line each;
 - the lifecycle rules;
@@ -122,20 +125,23 @@ domain that owns the core of it, not in a shared dumping ground.
   table in `AGENTS.md` (root `CLAUDE.md` just includes it via `@AGENTS.md` —
   edit `AGENTS.md`).
 - New notification type → `docs/notification-types.md`.
-- New deptrac edge → make sure `02-architecture.md` §5 explains it.
+- New deptrac edge → make sure `CONTEXT.md` §2.5 explained it, and that the
+  domain's README says why the edge exists (the file is deleted in step 6).
 
 ## 6. Archive the folder and close the backlog entry
 
 A finished task's folder does not stay where it was worked on — everything in
 it except the README you just wrote in step 2 is now redundant with what step 5
 folded into the domain docs, or with `BACKLOG.md` for leftovers. Keeping
-`00-request.md`/`01`–`03`/`DECISIONS.md` around forever, one live folder per
-task, is what made `docs/Feature_Planning/` unreadable.
+`00-request.md`/`CONTEXT.md` around forever, one live folder per task, is what
+made `docs/Feature_Planning/` unreadable. Archiving is **the default, in both
+modes**: do it without asking. Git keeps the deleted files, and the only
+irreversible loss is nothing a revert cannot restore.
 
 - Move `README.md` to `docs/Feature_Planning/_done/<slug>.md` (flat file, no
   subfolder) and delete the rest of the folder.
-- Fix the README's own links: drop the `Spec:` line (it pointed at files that
-  no longer exist) and any other link into a file you just deleted. A link to
+- Fix the README's own links: drop any link into a file you just deleted
+  (`CONTEXT.md`, `00-request.md`). A link to
   another task's README that also lives in `_done/` becomes `./other-slug.md`;
   a link to a folder that is still active in `BACKLOG.md` is untouched.
 - Grep the rest of the repo for markdown links into the old folder path
@@ -147,10 +153,11 @@ task, is what made `docs/Feature_Planning/` unreadable.
   `` - [`<slug>`](_done/<slug>.md) · <one-sentence summary of what it shipped> ``.
   Succinct on purpose — the README is where the detail lives.
 - Remove the entry from the active list above `## Done`.
-- Set it to `BLOCKED:<reason>` instead of any of the above if the task is
-  genuinely not finished.
-- In `interactive` mode, **propose** this and let the user confirm; do not
-  archive a task on your own authority.
+- The one exception: if the task is genuinely not finished (a phase not
+  `DONE`, VERIFY failed), do none of the above — set the entry to
+  `BLOCKED:<reason>` and say why in the report.
+- Mention the archive in the report (path of `_done/<slug>.md`) rather than
+  asking beforehand.
 
 ## 7. Commit the paperwork
 
