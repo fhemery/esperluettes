@@ -13,3 +13,4 @@
 | 3 | Shared helper `fetchFragment` on `window`; only the four Fanart sites adopt it, other domains reported | DESIGN | yes |
 | 4 | The middleware's « intended = fragment URL » defect is out of scope and reported to the user | REFINE | yes |
 | 5 | Branch: stay on `fix/misc-small-fixes` (user instruction) | REFINE | yes |
+| 6 | A 401 / 419 answer reloads the current page (expired session); no loop because Fanart tabs/viewer/profile tab render for authenticated users only (`seeFeature` / `seeProfileTab` return false for guests) | VERIFY fix | yes |

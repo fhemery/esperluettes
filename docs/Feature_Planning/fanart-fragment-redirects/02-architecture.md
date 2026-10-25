@@ -19,6 +19,7 @@ None.
 `fetchFragment(url, options)` in `Shared/Resources/js/fragment-fetch.js`, exposed as `window.fetchFragment`:
 - sends the `X-Requested-With: XMLHttpRequest` header;
 - if `response.redirected`, sets `window.location` to `response.url` and returns `null`;
+- if the status is 401 or 419 (expired session / CSRF), reloads the page (injectable `deps.reload`) and returns `null`;
 - if `!response.ok`, returns `null`;
 - otherwise returns the response text.
 Network errors are caught and return `null`.

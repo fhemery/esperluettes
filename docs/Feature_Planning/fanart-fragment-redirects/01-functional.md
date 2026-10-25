@@ -20,6 +20,7 @@ Concerns any user whose request to a Fanart fragment route is redirected by `aut
 1. A fragment request in the four Fanart places is answered with a redirect.
 2. The browser window navigates to the redirect's destination (CGU / login page). Nothing is injected.
 3. No half-loaded state is left behind in the tab / group / modal.
+4. Expired session: the server answers an XHR-flagged request with 401 / 419 rather than a redirect; the page is reloaded so the server answers the full request (login page). The Fanart surfaces are only rendered for logged-in users, so the reload cannot loop.
 
 ### 4.2 Other failures
 - A non-successful answer (403, 404, 5xx) or a network error injects nothing: tab and profile groups stay empty as today, the viewer modal closes as today. The chapter group, which currently injects any body, is aligned on the same rule.

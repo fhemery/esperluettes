@@ -43,3 +43,14 @@ describe('fetchFragment', () => {
         expect(navigate).not.toHaveBeenCalled();
     });
 });
+
+describe('fetchFragment session expiry', () => {
+    it.each([401, 419])('reloads the page and returns null on a %i response', async (status) => {
+        const fetch = vi.fn().mockResolvedValue(res({ ok: false, status }));
+        const reload = vi.fn();
+        const navigate = vi.fn();
+        expect(await fetchFragment('/x', {}, { fetch, navigate, reload })).toBeNull();
+        expect(reload).toHaveBeenCalledTimes(1);
+        expect(navigate).not.toHaveBeenCalled();
+    });
+});

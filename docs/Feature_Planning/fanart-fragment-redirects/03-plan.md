@@ -14,6 +14,7 @@
 |---|-------|------|------------|--------|
 | 1 | Shared `fetchFragment` helper (shared infrastructure) | S | — | DONE |
 | 2 | Adopt `fetchFragment` in the four Fanart call sites | S | 1 | DONE |
+| 3 | `fetchFragment` reloads the page on 401 / 419 (VERIFY finding) | S | 1 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;
@@ -173,3 +174,7 @@ Temporary Playwright spec (deleted), e2e instance, assets rebuilt. Redirect prov
 | Mobile (Pixel 7) normal + viewer | ✅ |
 
 **Finding (not fixed, for the orchestrator).** The logged-out / expired-session case does NOT navigate. `fetchFragment` sends `X-Requested-With: XMLHttpRequest`; Laravel's auth middleware then answers a guest with `401` instead of a `302 /login` (confirmed with curl: with header 401, without header 302). The helper returns `null`, so the tab stays empty and the user is left on the page with no feedback. Only the CGU/compliance redirect (unconditional `redirect()`) navigates. Decide: handle 401 in `fetchFragment` (navigate to login) or accept.
+
+## VERIFY re-check after phase 3 (2026-10-25)
+
+Temporary Playwright spec (deleted), session cookies cleared after the story page loaded, then Fanarts tab clicked: the page reloaded, landed on the story page as a guest (story is public), Fanart tabs no longer rendered, no reload loop. ✅
