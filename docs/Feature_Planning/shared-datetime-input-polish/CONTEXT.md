@@ -12,6 +12,9 @@ visual checklist). Likeliest to be reversed: min-widths (10rem / 7rem) — tune 
 375 px. Trap: label ids are `{for}_label`; a caller whose label lacks `for`, or a
 datetime input without `id`, gets no group name (dangling reference is skipped).
 
+### VERIFY → WRAP (2026-10-25)
+All visual rows pass, min widths unchanged (160px/117px at 375 still fit one row). Nothing in e2e/features. For the record: chapter form publish_at lacks a label (follow-up candidate); the required `*` is part of the accessible name.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -58,7 +61,7 @@ Shared only, no new deptrac edge.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Label id + group/time naming + min widths | S | — | DONE (code+test; gate pending BUILD confirmation) |
+| 1 | Label id + group/time naming + min widths | S | — | DONE |
 
 ### Phase 1
 **Deliverables.** `input-label.blade.php`, `datetime-local-input.blade.php`, `DatetimeLocalInputTest.php`.
@@ -67,11 +70,11 @@ Shared only, no new deptrac edge.
 ### 3.2 Visual QA checklist
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Calendar admin activity form, 375 px | Date text clear of the picker icon; no horizontal overflow; time wraps below if tight | |
-| Same, desktop | Date and time side by side | |
-| Accessibility tree (devtools) | Group name = « Début de l'activité »; time input name = « Début de l'activité Heure »; « Fin » distinct | |
-| Story chapter form, Secret Gift, Quote Contest config | Same naming; mirror fields still read-only | |
-| Other labels with `for` | Rendering unchanged | |
+| Calendar admin activity form, 375 px | Date text clear of the picker icon; no horizontal overflow; time wraps below if tight | ✅ date 160px + time 117px fit one row at 375 (no wrap needed), icon gap visible, no overflow |
+| Same, desktop | Date and time side by side | ✅ 1280px, all groups on one row |
+| Accessibility tree (devtools) | Group name = « Début de l'activité »; time input name = « Début de l'activité Heure »; « Fin » distinct | ✅ aria snapshot: group "Début de visibilité" > textbox "Début de visibilité" + textbox "Début de visibilité Heure"; every group/time pair distinct |
+| Story chapter form, Secret Gift, Quote Contest config | Same naming; mirror fields still read-only | ✅ SG/QC: named, side by side, no overflow at 1280/375. Chapter form: side by side, no overflow, but group unnamed and time reads only « Heure » (form has no label for publish_at: the dangling-id trap, not a regression) |
+| Other labels with `for` | Rendering unchanged | ✅ admin forms render normally |
 
 ### 3.3 Open items
 None.
@@ -91,4 +94,5 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+### VERIFY (2026-10-25)
+run-app driver (throwaway flow), dev DB as admin and e2e DB as author. No tuning: 10rem/7rem kept. All rows pass; no spec written (layout/AT, one-off). Finding: chapter form `publish_at` has no label, so its group is unnamed (pre-existing, out of scope). The required `*` is part of the accessible name.
