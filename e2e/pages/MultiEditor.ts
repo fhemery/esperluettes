@@ -2,7 +2,7 @@ import { expect, type Locator, type Page } from '@playwright/test';
 import { ChapterChoiceBlock } from './ChapterChoiceBlock';
 import { RichTextEditor } from './RichTextEditor';
 
-export type BlockType = 'text' | 'image' | 'audio' | 'chapter-choice';
+export type BlockType = 'text' | 'image' | 'chapter-choice';
 
 /**
  * Component object for `<x-editor::multi>` — the Simple/Avancé block editor.
