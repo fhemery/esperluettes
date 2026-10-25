@@ -124,3 +124,17 @@ with at least a few paragraphs.
 - **VERIFY** — whether the mobile native selection menu's "Copy" fires a `copy`
   event on the article in every browser is not guaranteed; record the observed
   behaviour rather than fixing it (functional §8: deterrent only).
+
+## VERIFY result (2026-10-25) — PASS
+
+Run against the e2e instance with a temporary feature spec (deleted afterwards; no spec kept).
+Cancelable synthetic `copy` / `cut` / `dragstart` dispatched on the chapter body:
+
+- ✅ confirmed reader, guest, moderator: all three default-prevented.
+- ✅ author and co-author: none prevented.
+- ✅ confirmed reader: selection works, selection toolbar appears.
+- ✅ Existing `chapter-annotation*` core specs (14 tests: annotate, quote overlap, heat map, round trip) still pass.
+- n/a (not automatable, deterrent only): real clipboard contents after Ctrl+C, right-click Copy, drag into a field,
+  mobile native selection menu Copy, keyboard Shift+arrow selection, Advanced-mode `.ce-block` (the handler sits on the
+  enclosing `data-quote-article`, covered by the PHP test), title / author note / comment copy (outside the article).
+  Real mobile behaviour not observed; left as an eyeball item.
