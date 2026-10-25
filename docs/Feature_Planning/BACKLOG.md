@@ -38,10 +38,11 @@ scoped to the task that actually changed.
 - **Shared — datetime input polish (group name, 375 px spacing)** · `shared-datetime-input-polish/` · interactive · TODO
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
 - **Fix 500 on 404 page when a model-bound route misses** · `fix-404-page-theme-500/` · auto · TODO
-- **Fanart — lazy fragments inject a full page on redirect** · `fanart-fragment-redirects/` · auto · WIP:WRAP
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Sound upload for news and static pages** · `news-static-page-sound-upload/` · interactive · TODO
+- **Auth — compliant middleware stores XHR fragment URLs as intended** · `auth-compliant-xhr-intended/` · interactive · TODO
+- **Shared — adopt fetchFragment in other domains' fragment loaders** · `shared-fetch-fragment-adoption/` · interactive · TODO
 
 ## Done
 
@@ -50,6 +51,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`fanart-fragment-redirects`](_done/fanart-fragment-redirects.md) · Shared `window.fetchFragment` (navigates on redirect, reloads on 401/419) used by the four lazy Fanart fragments, so the CGU page is no longer injected into the tab / viewer
 - [`story-deactivated-coauthor-label`](_done/story-deactivated-coauthor-label.md) · collaborators page shows « Compte désactivé » instead of English `Unknown` for a deactivated co-author
 - [`fanart-discord-endpoint-fields`](_done/fanart-discord-endpoint-fields.md) · Discord fanart feed items gain `artist`, `authors`, `chapterSlug` and plain-text `description` (bot must be updated to use them)
 - [`promotion-requested-user-slug`](_done/promotion-requested-user-slug.md) · `auth.promotion.requested` payload gains the requester's `user_slug` (new rows only), exposed as-is by the Discord endpoint

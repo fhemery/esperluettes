@@ -56,6 +56,6 @@ No statistics, no submission cap, no editing of a published fanart by its artist
 
 ## Known gaps
 
-- The lazy fragments (tab, chapter groups, profile groups, viewer) are fetched with `fetch()` behind `compliant`: a user who has not accepted the CGU gets the CGU page injected into the tab or the viewer modal instead of being redirected.
+- The lazy fragments (tab, chapter groups, profile groups, viewer) load through Shared's `fetchFragment`, so a CGU redirect navigates the window and an expired session reloads the page. But `compliant` stores the fragment URL as the post-CGU intended destination: after accepting, the user lands on raw fragment HTML (Auth middleware, not fixed here).
 - Fanart report reasons are admin-created; production needs them before go-live (`ModerationSeeder` only seeds an « Other » reason for dev/e2e).
 - Sounds go up to 15 Mo: the production front-end and PHP upload limits must allow ≥ 16 MB. Not checkable from the repo.

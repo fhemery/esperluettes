@@ -77,7 +77,7 @@ and `AGENTS.md` — read those before changing anything.
 - **Cut mid-build:** nothing.
 - **E2E:** `e2e/tests/features/fanart-artwork-module.spec.ts` (5 browser-only cases) with page object `e2e/pages/FanartStoryPage.ts`, data from `E2eFanartSeeder` and the `FANART` fixture — kept in the suite at the user's request.
 - **Pushed to the backlog:**
-  - [`fanart-fragment-redirects`](../fanart-fragment-redirects/00-request.md) — a user who has not accepted the CGU gets the CGU page injected into the tab / viewer modal.
+  - [`fanart-fragment-redirects`](./fanart-fragment-redirects.md) — a user who has not accepted the CGU gets the CGU page injected into the tab / viewer modal.
   - [`shared-dark-heading-contrast`](../shared-dark-heading-contrast/00-request.md) — magenta `<x-shared::title>` headings dim in dark mode (site-wide).
   - [`story-deactivated-coauthor-label`](./story-deactivated-coauthor-label.md) — English « Unknown » for a deactivated co-author on the collaborators page.
   - Already tracked: [`fix-404-page-theme-500`](../fix-404-page-theme-500/00-request.md) (404 pages answer 500).
