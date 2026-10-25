@@ -3,6 +3,7 @@
 use App\Domains\Story\Private\Models\Chapter;
 use App\Domains\Story\Private\Models\Story;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -236,4 +237,40 @@ function deleteStory(int $storyId): void
     DB::table('stories')
         ->where('id', $storyId)
         ->delete();
+}
+
+function copyGuardAttributes(): array
+{
+    return ['x-on:copy.prevent', 'x-on:cut.prevent', 'x-on:dragstart.prevent'];
+}
+
+function viewChapterAs(TestCase $t, $viewer, ?callable $setup = null)
+{
+    $author = alice($t);
+    $story = publicStory('Guarded Story', $author->id);
+    $chapter = createPublishedChapter($t, $story, $author);
+    if ($setup) {
+        $setup($story, $viewer);
+    }
+    if ($viewer === null) {
+        Auth::logout();
+    } else {
+        $t->actingAs($viewer);
+    }
+
+    return $t->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))->assertOk();
+}
+
+function assertCopyGuarded($resp): void
+{
+    foreach (copyGuardAttributes() as $attr) {
+        $resp->assertSee($attr, false);
+    }
+}
+
+function assertNotCopyGuarded($resp): void
+{
+    foreach (copyGuardAttributes() as $attr) {
+        $resp->assertDontSee($attr, false);
+    }
 }
