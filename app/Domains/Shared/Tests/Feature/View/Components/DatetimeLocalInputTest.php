@@ -29,6 +29,18 @@ describe('Shared datetime-local-input', function () {
             ->assertSee('aria-label="shared::components.datetime_input.time"', false);
     });
 
+    it('names the group and the time input after the caller label', function () {
+        $html = (string) $this->blade('<x-shared::input-label for="starts">Début</x-shared::input-label>'
+            . '<x-shared::datetime-local-input id="starts" name="starts" />');
+
+        expect($html)
+            ->toContain('id="starts_label"')
+            ->toContain('role="group"')
+            ->toContain('aria-labelledby="starts_label"')
+            ->toContain('id="starts_time"')
+            ->toContain('aria-labelledby="starts_label starts_time"');
+    });
+
     it('sets no step on the time input', function () {
         $html = (string) $this->blade('<x-shared::datetime-local-input id="starts" name="starts" />');
 

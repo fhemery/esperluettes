@@ -16,13 +16,14 @@
     input only.
 --}}
 @php
-    $inputClass = 'min-w-0 flex-1 border-accent focus:border-accent/80 focus:ring-accent surface-read text-on-surface '
+    $inputClass = 'flex-1 border-accent focus:border-accent/80 focus:ring-accent surface-read text-on-surface '
         . $attributes->get('class');
     $isMirror = $mirrorOf !== null;
     $hiddenId = $id ? $id . '_value' : null;
 @endphp
 
 <div role="group" class="flex flex-wrap gap-2"
+    @if ($id) aria-labelledby="{{ $id }}_label" @endif
     x-data="{
         submit: '{{ $submit === 'local' ? 'local' : 'utc' }}',
         date: '',
@@ -64,12 +65,13 @@
     <input type="date" @if ($id) id="{{ $id }}" @endif @if ($min) min="{{ $min }}" @endif
         x-model="date" @if (! $isMirror) x-on:input="edit()" @endif
         @disabled($disabled || $isMirror) @if ($isMirror) aria-disabled="true" @endif
-        class="{{ $inputClass }}">
+        class="min-w-[10rem] {{ $inputClass }}">
     <input type="time"
+        @if ($id) id="{{ $id }}_time" aria-labelledby="{{ $id }}_label {{ $id }}_time" @endif
         aria-label="{{ __('shared::components.datetime_input.time') }}"
         x-model="time" @if (! $isMirror) x-on:input="edit()" @endif
         @disabled($disabled || $isMirror) @if ($isMirror) aria-disabled="true" @endif
-        class="{{ $inputClass }}">
+        class="min-w-[7rem] {{ $inputClass }}">
     @unless ($isMirror)
         <input type="hidden" x-ref="hidden" name="{{ $name }}"
             @if ($hiddenId) id="{{ $hiddenId }}" @endif

@@ -36,7 +36,7 @@ scoped to the task that actually changed.
 - **Secret Gift: admin feedback after shuffle** · `secret-gift-shuffle-feedback/` · interactive · TODO
 - **Secret Gift — reveal follow-ups (ARCHIVED access, ENDED tab, missing tests)** · `secret-gift-reveal-followups/` · interactive · TODO: leftover from `media-sound-upload/` VERIFY — 3 feature tests pushed back to BUILD and never written; activity page 404s once ARCHIVED while gift routes still serve; page opens on the prepare tab once ENDED
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
-- **Shared — datetime input polish (group name, 375 px spacing)** · `shared-datetime-input-polish/` · interactive · TODO
+- **Shared — datetime input polish (group name, 375 px spacing)** · `shared-datetime-input-polish/` · auto · WIP:REFINE
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
