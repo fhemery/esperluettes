@@ -185,6 +185,7 @@ Checks that a display name produces a unique profile slug. Accepts an optional `
 | `countdown-timer.js` | `window.countdownTimer` | Alpine-compatible countdown timer. Reads `data-end-time`, `data-show-seconds`, and translation keys from element dataset. |
 | `badge-overflow.js` | `window.BadgeOverflow` | Detects overflowing badge lists and shows a `+N` overflow indicator. |
 | `date-utils.js` | `window.DateUtils` | Date formatting utilities; `utcToLocalInput` / `localToUtcInput`; `splitLocalInput` / `joinLocalInput` (pure string split/join of `YYYY-MM-DDTHH:mm`, empty time joins as `00:00`, empty date joins as `''`). |
+| `fragment-fetch.js` | `window.fetchFragment` | Fetches an HTML fragment (sends `X-Requested-With`); on a redirect navigates the window to the destination and returns `null`; returns `null` on non-OK or network error, else the HTML. |
 | `bootstrap.js` | — | Axios setup, CSRF header. |
 | `anchoring/canonical-text.js` | `buildCanonicalText(rootEl, { within? })` | Normalised text extraction from rendered content. `within` (a CSS selector) restricts the text to matching areas; consumers own the selector. |
 | `anchoring/extract-anchor.js` | `extractAnchor(range, rootEl, canonicalText)` | Builds a quote anchor (prefix / highlighted / suffix) from a selection, trimmed to the text it covers. |

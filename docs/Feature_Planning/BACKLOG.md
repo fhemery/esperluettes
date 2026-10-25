@@ -38,7 +38,7 @@ scoped to the task that actually changed.
 - **Shared — datetime input polish (group name, 375 px spacing)** · `shared-datetime-input-polish/` · interactive · TODO
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
 - **Fix 500 on 404 page when a model-bound route misses** · `fix-404-page-theme-500/` · auto · TODO
-- **Fanart — lazy fragments inject a full page on redirect** · `fanart-fragment-redirects/` · auto · WIP:BUILD (0/2)
+- **Fanart — lazy fragments inject a full page on redirect** · `fanart-fragment-redirects/` · auto · WIP:BUILD (1/2)
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Sound upload for news and static pages** · `news-static-page-sound-upload/` · interactive · TODO
