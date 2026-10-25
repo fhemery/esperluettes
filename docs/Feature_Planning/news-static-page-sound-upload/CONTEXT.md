@@ -203,7 +203,7 @@ No new edge. `EditorPrivate → MediaPublic` exists (image block); `NewsPrivate/
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Media — public file storage, GC of public `.mp3`, sound-field `removeName` — **risky** | M | — | DONE |
-| 1v | Checkpoint — Secret Gift and Fanart sound fields, image picker | S | 1 | TODO |
+| 1v | Checkpoint — Secret Gift and Fanart sound fields, image picker | S | 1 | DONE |
 | 2 | Editor — built-in opt-in `audio` block type (+ Story guard test) | M | 1 | TODO |
 | 3 | News — enable sound blocks | M | 2 | TODO |
 | 4 | StaticPage — enable sound blocks | S | 3 | TODO |
@@ -234,6 +234,14 @@ No new edge. `EditorPrivate → MediaPublic` exists (image block); `NewsPrivate/
 ### Checkpoint 1v — Secret Gift and Fanart sound fields, image picker
 
 Existing consumers of what phase 1 reshaped. In the running app: Fanart create and edit (`fanartiste` user) — pick, preview, cancel, delete an existing sound, submit; Secret Gift gift preparation (participant of a running activity) — upload and remove a sound; News admin edit — image reuse picker shows images only, nothing blank. Run `pnpm run e2e` specs touching fanart / secret gift if any exist. Screenshots under `shots/checkpoint-1v/`; append `**Result (<date>, HEAD <sha>) — PASS|FAIL**`.
+
+**Result (2026-10-25, HEAD ea414359) — PASS**
+- e2e `fanart-artwork-module` + `confirm-modal` specs: 13/13 green (no existing spec drives the sound field itself).
+- Fanart create (reader, audio, as `confirmed`): drop zone, pick shows player + file, cancel resets input, submit with chapter shows "Votre fanart a été envoyé." Shots 01-04.
+- Fanart edit (own audio artwork, as `author`; edit exists only for artworks): pick, cancel, replace and submit OK, no error banner. Shots 20-24. There is no preview URL on edit, so "delete an existing sound" is exercised on the gift field.
+- Secret Gift (`cadeau-surprise-actif`, as `confirmed`, Son tab): pick shows 0:20 player, cancel resets, save shows saved sound + bin, bin sets `gift_sound_remove=true`, saving removes it and the flag is back to false. Shots 10-14.
+- News admin create: image picker lists the image only; with a temp `news/zz-temp-1v.mp3` (removed afterwards) the `/media/library?scope=news` JSON has no mp3 and the modal has no blank tile. Shot 30.
+- Note: the two fanart/gift uploads write into the e2e database only.
 
 ### Phase 2 — Editor: built-in opt-in `audio` block type (+ Story guard test)
 
