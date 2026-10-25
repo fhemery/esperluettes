@@ -40,7 +40,8 @@ change in `CollaboratorService::getCollaboratorsWithProfiles`; no view change.
 ## Not done
 
 - The 500 on a deactivated user's profile page is out of scope here and stays
-  with the active backlog task `fix-404-page-theme-500/`.
+  with the active backlog task `fix-404-page-theme-500/` (wrapped without
+  re-checking it; now `profile-deactivated-user-500/`).
 - Optional test assertion that no profile link is rendered for the deactivated
   co-author was skipped (the label assertion is the load-bearing one).
 - No e2e spec was written; nothing to retire. No new backlog rows.
