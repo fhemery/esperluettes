@@ -36,12 +36,12 @@ scoped to the task that actually changed.
 - **Secret Gift: admin feedback after shuffle** · `secret-gift-shuffle-feedback/` · interactive · TODO
 - **Secret Gift — reveal follow-ups (ARCHIVED access, ENDED tab, missing tests)** · `secret-gift-reveal-followups/` · interactive · TODO: leftover from `media-sound-upload/` VERIFY — 3 feature tests pushed back to BUILD and never written; activity page 404s once ARCHIVED while gift routes still serve; page opens on the prepare tab once ENDED
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
-- **Shared — datetime input polish (group name, 375 px spacing)** · `shared-datetime-input-polish/` · auto · WIP:REFINE
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
+- **Story — label the chapter form publish_at field** · `story-chapter-publish-at-label/` · auto · complexity:1 · TODO
 
 ## Done
 
@@ -50,6 +50,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`shared-datetime-input-polish`](_done/shared-datetime-input-polish.md) · datetime-local-input group and time input are named after the caller label (input-label now stamps `{for}_label`); min widths wrap the pair earlier on phones
 - [`shared-fetch-fragment-adoption`](_done/shared-fetch-fragment-adoption.md) · Settings tabs, Story admin chapters, Moderation user search and Profile user search load HTML through `window.fetchFragment` (redirect navigates, 401/419 reloads, failure injects nothing)
 - [`auth-compliant-xhr-intended`](_done/auth-compliant-xhr-intended.md) · `EnsureUserCompliance` no longer stores XHR fragment URLs as the post-compliance destination; a same-host Referer is used instead
 - [`profile-deactivated-user-500`](_done/profile-deactivated-user-500.md) · deactivated user's profile page answers the standard 404 (soft-deleted profile), never 500; regression test added, no production change
