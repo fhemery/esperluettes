@@ -70,7 +70,7 @@ None. No PHP, no route, no deptrac edge, no i18n string.
 
 - After accepting the CGU, `compliant` sends the user to the stored intended
   URL, which is the **fragment URL** (raw HTML) →
-  [`auth-compliant-xhr-intended`](../auth-compliant-xhr-intended/00-request.md)
+  [`auth-compliant-xhr-intended`](./auth-compliant-xhr-intended.md)
   (proposal: do not set `url.intended` for XHR requests).
 - Other domains with the same raw fetch+inject pattern (Comment lazy list,
   Search dropdown, Settings tabs, Moderation, Story admin moderation, Profile

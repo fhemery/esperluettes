@@ -51,19 +51,13 @@ class EnsureUserCompliance
         if (!session()->has($sessionKey)) {
             // First check: terms acceptance
             if (!$user->hasAcceptedTerms()) {
-                // Store intended URL for redirect after compliance
-                if (!$request->routeIs('compliance.*')) {
-                    session()->put('url.intended', $request->fullUrl());
-                }
+                $this->rememberIntended($request);
                 return redirect()->route('compliance.terms.show');
             }
 
             // Second check: parental authorization for underage users
             if ($user->needsParentalAuthorization()) {
-                // Store intended URL for redirect after compliance
-                if (!$request->routeIs('compliance.*')) {
-                    session()->put('url.intended', $request->fullUrl());
-                }
+                $this->rememberIntended($request);
                 return redirect()->route('compliance.parental.show');
             }
 
@@ -72,6 +66,27 @@ class EnsureUserCompliance
         }
 
         return $next($request);
+    }
+
+    /**
+     * Store the URL to return to after compliance. An XHR fragment URL is never
+     * stored (it would render as raw HTML); only a same-host Referer is trusted.
+     */
+    private function rememberIntended(Request $request): void
+    {
+        if ($request->routeIs('compliance.*')) {
+            return;
+        }
+
+        if (!$request->ajax()) {
+            session()->put('url.intended', $request->fullUrl());
+            return;
+        }
+
+        $referer = $request->headers->get('referer');
+        if ($referer && parse_url($referer, PHP_URL_HOST) === $request->getHost()) {
+            session()->put('url.intended', $referer);
+        }
     }
 
     /**

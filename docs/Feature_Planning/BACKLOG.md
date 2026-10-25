@@ -40,7 +40,6 @@ scoped to the task that actually changed.
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
-- **Auth — compliant middleware stores XHR fragment URLs as intended** · `auth-compliant-xhr-intended/` · interactive · TODO
 - **Shared — adopt fetchFragment in other domains' fragment loaders** · `shared-fetch-fragment-adoption/` · interactive · TODO
 - **Profile — re-check the deactivated user's profile page for a 500** · `profile-deactivated-user-500/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
@@ -52,6 +51,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`auth-compliant-xhr-intended`](_done/auth-compliant-xhr-intended.md) · `EnsureUserCompliance` no longer stores XHR fragment URLs as the post-compliance destination; a same-host Referer is used instead
 - [`news-static-page-sound-upload`](_done/news-static-page-sound-upload.md) · admins and news moderators can add MP3 "Son" blocks (public native player, optional caption) in advanced mode of news and static pages; Media gains `storePublicFile` and GC of public mp3
 - [`discord-fanart-approval-timestamp`](_done/discord-fanart-approval-timestamp.md) · Discord pending fanart feed items gain `approvedAt` (approval time, or upload time for author artworks)
 - [`fix-404-page-theme-500`](_done/fix-404-page-theme-500.md) · model-binding 404s, 419 and 500 pages no longer crash on an undefined `$theme`: a per-view fallback composer supplies the user's or seasonal theme
