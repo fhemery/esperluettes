@@ -50,6 +50,13 @@
 
 - Shipped as planned, mirroring News. Deviation: a moderator hitting the static-page admin store route is redirected to the dashboard (role middleware), not 403 as the plan's acceptance says; the test asserts the redirect. A static page created through the service is not in the slug-map cache until `publish()`, so guest-view tests must call `publish()`.
 
+### VERIFY → WRAP (2026-10-25)
+
+- Spec `e2e/tests/features/news-static-page-sound-upload.spec.ts` (10 tests, green) + `e2e/pages/SoundBlocksFormPage.ts`, `BlockType` gains `audio`. Delete the spec at WRAP; the page object may go with it.
+- One defect (cosmetic, routed to BUILD): static page public player not full width (~220px, container shrink-wraps). News page is fine.
+- Caveats: the e2e run uploads real mp3s into `storage/app/public/{news,static-pages}` (shared with dev); VERIFY deleted them. Range requests are unsupported by the PHP dev server, so seeking is not asserted on public pages.
+- Not driven: Secret Gift / Fanart (checkpoint 1v covers), production 413 on large posts (not reproducible here). Picker-no-mp3 asserted for `news` scope only after upload.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -339,18 +346,18 @@ Filled by VERIFY.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| News edit (admin), advanced mode | "Son" in palette and "+" insert menu; adding one shows the dropzone; picking an mp3 previews and plays | |
-| News edit, new sound block cloned twice | Both blocks' sound fields work independently (Alpine init on clones) | |
-| News save → public page (guest, logged out) | Native player full width, plays, caption under it | |
-| News edit, existing sound | Preview of stored sound plays; delete → dropzone; pick another → save replaces | |
-| News edit, delete current sound and save | French error "un bloc son doit contenir un fichier"; other blocks kept | |
-| News edit, upload a .wav / > 10 MB | French validation error, form re-rendered with blocks | |
-| News edit (moderator) | Can add a sound | |
-| Static page edit (admin) | Same add / save / public player flow | |
-| Chapter editor (author) | No "Son" in palette or insert menu | |
-| Mode switch | "Simple" disabled while a sound block exists | |
-| Mobile (375px) | Editor sound block and public player fit, no overflow | |
-| Fanart create/edit, Secret Gift gift | Sound field unchanged (also covered by checkpoint 1v) | |
+| News edit (admin), advanced mode | "Son" in palette and "+" insert menu; adding one shows the dropzone; picking an mp3 previews and plays | ✅ (shots news-01, 02) |
+| News edit, new sound block cloned twice | Both blocks' sound fields work independently (Alpine init on clones) | ✅ one via "+" menu, one via palette; independent, distinct durations 0:20 / 0:08 |
+| News save → public page (guest, logged out) | Native player full width, plays, caption under it | ✅ news-04 (full width, plays from 0). Seeking on the dev/e2e server resets to 0: PHP built-in server sends no Range support (env artefact, nginx in prod) |
+| News edit, existing sound | Preview of stored sound plays; delete → dropzone; pick another → save replaces | ✅ news-05; src changes after replace |
+| News edit, delete current sound and save | French error "un bloc son doit contenir un fichier"; other blocks kept | ✅ news-06 (blocks, caption, text kept). Note: no disabled-state hint; error shown only in the top banner |
+| News edit, upload a .wav / > 10 MB | French validation error, form re-rendered with blocks | ✅ news-07, 08 ("Le son doit être un fichier MP3." / "ne doit pas dépasser 10 Mo.") |
+| News edit (moderator) | Can add a sound | ✅ news-09, guest sees player |
+| Static page edit (admin) | Same add / save / public player flow | ✅ functionally; ❌ cosmetic: public player is ~220px wide, not full width (static-02) |
+| Chapter editor (author) | No "Son" in palette or insert menu | ✅ chapter-01, no audio template either |
+| Mode switch | "Simple" disabled while a sound block exists | ✅ disabled with sound blocks; enabled once only text left. The server-side refusal is a feature test |
+| Mobile (375px) | Editor sound block and public player fit, no overflow | ✅ mobile-01, 02 (no horizontal overflow). Editor: the sound-field cancel/bin icon sits tight against the block's delete icon column (cosmetic) |
+| Fanart create/edit, Secret Gift gift | Sound field unchanged (also covered by checkpoint 1v) | ✅ via checkpoint 1v (not re-driven); image picker `/media/library?scope=news` has no mp3 (spec) |
 
 ### 3.3 Open items
 
