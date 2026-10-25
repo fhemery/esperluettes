@@ -42,6 +42,10 @@ scoped to the task that actually changed.
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
+- **Prevent copying chapter text** · `prevent-chapter-copy/` · auto · TODO
+- **Sound upload for news and static pages** · `news-static-page-sound-upload/` · interactive · TODO
+- **Add requester slug to auth.promotion.requested notification** · `promotion-requested-user-slug/` · auto · TODO
+- **Extend fanart Discord endpoint payload** · `fanart-discord-endpoint-fields/` · auto · TODO
 
 ## Done
 
