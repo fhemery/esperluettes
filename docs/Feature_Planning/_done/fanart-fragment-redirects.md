@@ -75,4 +75,4 @@ None. No PHP, no route, no deptrac edge, no i18n string.
 - Other domains with the same raw fetch+inject pattern (Comment lazy list,
   Search dropdown, Settings tabs, Moderation, Story admin moderation, Profile
   user search) →
-  [`shared-fetch-fragment-adoption`](../shared-fetch-fragment-adoption/00-request.md).
+  [`shared-fetch-fragment-adoption`](./shared-fetch-fragment-adoption.md).
