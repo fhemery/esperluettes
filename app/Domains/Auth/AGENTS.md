@@ -42,7 +42,7 @@ This domain registers no event listeners. It is a pure emitter; cross-domain rea
 ## Notifications sent
 
 - `auth.promotion.accepted` / `auth.promotion.rejected` — sent to the requester by `PromotionRequestService` when a request is decided.
-- `auth.promotion.requested` (`PromotionRequestedNotification`) — sent by `PromotionRequestService::requestPromotion` to every active moderator / admin / tech-admin except the requester, via `createNotificationForTypeAudience`. The type is role-gated (`visibleToRoles`), so its preference row is hidden from non-staff. Payload is the requester display name only. The send is wrapped in `try/catch` + `report()` so a notification failure cannot undo the request.
+- `auth.promotion.requested` (`PromotionRequestedNotification`) — sent by `PromotionRequestService::requestPromotion` to every active moderator / admin / tech-admin except the requester, via `createNotificationForTypeAudience`. The type is role-gated (`visibleToRoles`), so its preference row is hidden from non-staff. Payload is the requester display name and profile slug (`user_slug`, empty on legacy rows or when no profile). The send is wrapped in `try/catch` + `report()` so a notification failure cannot undo the request.
 
 ## Non-obvious invariants
 

@@ -41,12 +41,49 @@ describe('promotion requested staff notification', function () {
             ->toEqualCanonicalizing([$moderator->id, $admin->id, $techAdmin->id]);
 
         $content = PromotionRequestedNotification::fromData($notification->content_data);
-        expect($content->toData())->toBe(['user_name' => 'Alice']);
+        $slug = app(\App\Domains\Shared\Contracts\ProfilePublicApi::class)->getPublicProfile($requester->id)->slug;
+        expect($slug)->not->toBe('');
+        expect($content->toData())->toBe(['user_name' => 'Alice', 'user_slug' => $slug]);
 
         app()->setLocale('fr');
         expect($content->display())
             ->toContain('Alice')
             ->toContain(route('auth.admin.promotion-requests.index'));
+    });
+
+    it('rebuilds legacy content without user_slug as an empty slug', function () {
+        $content = PromotionRequestedNotification::fromData(['user_name' => 'Alice']);
+
+        expect($content->userSlug)->toBe('');
+        expect($content->toData())->toBe(['user_name' => 'Alice', 'user_slug' => '']);
+
+        app()->setLocale('fr');
+        expect($content->display())
+            ->toContain('Alice')
+            ->toContain(route('auth.admin.promotion-requests.index'));
+    });
+
+    it('still dispatches the staff notification with an empty slug when the profile is not found', function () {
+        $requester = alice($this, roles: [Roles::USER]);
+        bob($this, roles: [Roles::MODERATOR, Roles::USER_CONFIRMED]);
+
+        $profileApi = Mockery::mock(\App\Domains\Shared\Contracts\ProfilePublicApi::class);
+        $profileApi->shouldReceive('getPublicProfile')->andReturn(null);
+        app()->instance(\App\Domains\Shared\Contracts\ProfilePublicApi::class, $profileApi);
+
+        $sent = null;
+        $notificationApi = Mockery::mock(NotificationPublicApi::class);
+        $notificationApi->shouldReceive('createNotificationForTypeAudience')
+            ->once()
+            ->andReturnUsing(function ($content) use (&$sent) {
+                $sent = $content;
+            });
+        app()->instance(NotificationPublicApi::class, $notificationApi);
+
+        submitPromotionRequestFor($requester);
+
+        expect($sent)->toBeInstanceOf(PromotionRequestedNotification::class);
+        expect($sent->toData())->toBe(['user_name' => '', 'user_slug' => '']);
     });
 
     it('excludes the requester from staff notification recipients', function () {

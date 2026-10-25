@@ -16,3 +16,4 @@ BUILD reads this before asking anything already settled.
 | 2 | In-app display text is unchanged (no profile link) | REFINE | yes |
 | 3 | Branch: stay on `fix/misc-small-fixes`, commit there (user instruction) | REFINE | yes |
 | 4 | Defaulted trailing constructor arg `userSlug = ''` | DESIGN | yes |
+| 5 | 2026-10-25 | BUILD | No-profile test: Notification rejects a source user without a profile (invalid_source_user), so the end-to-end case cannot notify; test asserts the dispatched content via mocks instead | mocked service-level test | — |

@@ -8,6 +8,7 @@ final class PromotionRequestedNotification implements NotificationContent
 {
     public function __construct(
         public readonly string $userName,
+        public readonly string $userSlug = '',
     ) {}
 
     public static function type(): string
@@ -19,6 +20,7 @@ final class PromotionRequestedNotification implements NotificationContent
     {
         return [
             'user_name' => $this->userName,
+            'user_slug' => $this->userSlug,
         ];
     }
 
@@ -26,6 +28,7 @@ final class PromotionRequestedNotification implements NotificationContent
     {
         return new static(
             userName: (string) ($data['user_name'] ?? ''),
+            userSlug: (string) ($data['user_slug'] ?? ''),
         );
     }
 
