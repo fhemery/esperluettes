@@ -13,7 +13,7 @@
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Shared `fetchFragment` helper (shared infrastructure) | S | — | DONE |
-| 2 | Adopt `fetchFragment` in the four Fanart call sites | S | 1 | TODO |
+| 2 | Adopt `fetchFragment` in the four Fanart call sites | S | 1 | DONE |
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L → split it.
 Status per phase: `TODO` · `WIP` · `DONE`. BUILD updates this table as it goes;

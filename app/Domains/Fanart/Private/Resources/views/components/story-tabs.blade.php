@@ -12,8 +12,7 @@
              async loadFanarts() {
                  if (this.loaded) return;
                  this.loaded = true;
-                 const response = await fetch(@js($tabUrl), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                 this.html = response.ok ? await response.text() : '';
+                 this.html = (await window.fetchFragment(@js($tabUrl))) ?? '';
              },
              select(name) {
                  this.tab = name;

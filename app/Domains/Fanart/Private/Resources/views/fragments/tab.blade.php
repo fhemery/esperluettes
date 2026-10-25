@@ -38,8 +38,7 @@
                      async load() {
                          if (this.loaded) return;
                          this.loaded = true;
-                         const response = await fetch(this.$root.dataset.groupUrl,{ headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                         this.html = await response.text();
+                         this.html = (await window.fetchFragment(this.$root.dataset.groupUrl)) ?? '';
                      },
                      async toggle() {
                          this.open = !this.open;

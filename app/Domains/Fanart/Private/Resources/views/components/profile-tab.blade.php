@@ -23,8 +23,7 @@
                                      this.open = !this.open;
                                      if (!this.open || this.loaded) return;
                                      this.loaded = true;
-                                     const response = await fetch(this.$root.dataset.groupUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                                     this.html = response.ok ? await response.text() : '';
+                                     this.html = (await window.fetchFragment(this.$root.dataset.groupUrl)) ?? '';
                                  },
                              }">
                             <button type="button" class="w-full flex items-center justify-between gap-3 px-4 py-2 text-left bg-read"
