@@ -24,10 +24,9 @@
             },
             onSearchInput() {
                 this.resultsHtml = '';
-                fetch(`{{ route('moderation.admin.search') }}?q=${this.searchQuery}`)
-                    .then(response => response.text())
+                window.fetchFragment(`{{ route('moderation.admin.search') }}?q=${this.searchQuery}`)
                     .then(html => {
-                        this.resultsHtml = html;
+                        this.resultsHtml = html ?? '';
                     })
                     .catch(error => {
                         console.error('Error fetching search results:', error);

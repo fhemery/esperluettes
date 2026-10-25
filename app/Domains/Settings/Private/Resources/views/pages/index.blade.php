@@ -57,16 +57,12 @@
                     this.activeTab = tabId;
 
                     try {
-                        const response = await fetch(`/settings/${tabId}`, {
-                            headers: {
-                                'Accept': 'text/html',
-                                'X-Requested-With': 'XMLHttpRequest',
-                            },
+                        const html = await window.fetchFragment(`/settings/${tabId}`, {
+                            headers: { 'Accept': 'text/html' },
                         });
 
-                        if (!response.ok) throw new Error('Failed to load tab');
+                        if (html === null) return;
 
-                        const html = await response.text();
                         document.getElementById('settings-content').innerHTML = html;
 
                         // Update URL without reload
