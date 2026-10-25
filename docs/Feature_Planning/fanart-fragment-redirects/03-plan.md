@@ -156,3 +156,20 @@ back to the first tab without reloading.
 - The same raw-`fetch` injection pattern exists in other domains (Comment,
   Search, Settings, Moderation…); they can adopt `window.fetchFragment` later.
   Out of scope; to report at WRAP.
+
+## VERIFY result (2026-10-25)
+
+Temporary Playwright spec (deleted), e2e instance, assets rebuilt. Redirect provoked by clearing `terms_accepted_at` and the session's compliance cache (CGU path).
+
+| Row | OK? |
+|-----|-----|
+| Fanarts tab redirected (CGU) | ✅ navigates to /compliance/terms |
+| Collapsed chapter group redirected | ✅ |
+| Viewer redirected | ✅ |
+| Profile story group redirected | ✅ |
+| Story tab normal / profile group normal | ✅ |
+| Viewer deep link | ✅ |
+| Viewer 404 (`fanart=99999`) | ✅ modal closed, no page injected |
+| Mobile (Pixel 7) normal + viewer | ✅ |
+
+**Finding (not fixed, for the orchestrator).** The logged-out / expired-session case does NOT navigate. `fetchFragment` sends `X-Requested-With: XMLHttpRequest`; Laravel's auth middleware then answers a guest with `401` instead of a `302 /login` (confirmed with curl: with header 401, without header 302). The helper returns `null`, so the tab stays empty and the user is left on the page with no feedback. Only the CGU/compliance redirect (unconditional `redirect()`) navigates. Decide: handle 401 in `fetchFragment` (navigate to login) or accept.
