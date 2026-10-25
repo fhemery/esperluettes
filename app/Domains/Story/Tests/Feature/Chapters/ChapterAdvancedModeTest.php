@@ -169,6 +169,29 @@ describe('Chapter advanced mode', function () {
         expect(Chapter::query()->count())->toBe(0);
     });
 
+    it('rejects an audio block in a chapter and stores nothing', function () {
+        $this->post(route('chapters.store', ['storySlug' => $this->story->slug]), advancedChapterPayload([
+            'blocks_order' => 'b0,b1',
+            'blocks' => [
+                'b0' => ['type' => 'text', 'html' => '<p>Du texte</p>'],
+                'b1' => ['type' => 'audio', 'path' => 'news/a.mp3', 'caption' => 'x'],
+            ],
+        ]))->assertSessionHasErrors();
+
+        expect(Chapter::query()->count())->toBe(0);
+
+        $chapter = createUnpublishedChapter($this, $this->story, $this->author);
+        $this->put(route('chapters.update', [
+            'storySlug' => $this->story->slug,
+            'chapterSlug' => $chapter->slug,
+        ]), advancedChapterPayload([
+            'blocks_order' => 'b0',
+            'blocks' => ['b0' => ['type' => 'audio', 'path' => 'news/a.mp3']],
+        ]))->assertSessionHasErrors();
+
+        expect($chapter->fresh()->content_blocks)->toBeNull();
+    });
+
     it('still requires content in simple mode', function () {
         $this->post(route('chapters.store', ['storySlug' => $this->story->slug]), [
             'title' => 'No Content',

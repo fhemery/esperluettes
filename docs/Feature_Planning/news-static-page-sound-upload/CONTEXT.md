@@ -35,6 +35,12 @@
 - The Editor `_audio-block` partial (phase 2) must pass `remove-name="{name}[{uid}][sound_remove]"` to `<x-media::sound-field>`; without it the remove flag clobbers the file field.
 - The planning docs were committed separately just before the phase commit.
 
+### BUILD phase 2 → next (2026-10-25)
+
+- No deviation from the plan. The Story guard needed no code: the chapter POST/PUT with an `audio` block already fails `Rule::in`.
+- Trap for tests: `$this->blade()` renders have no `$errors`; `<x-media::sound-field>` reads `$errors->get($name)`, so a test rendering an audio block must `view()->share('errors', new ViewErrorBag())` (real pages share it).
+- Chapter/News/StaticPage forms offer no `audio` yet (`blockTypes` default unchanged).
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -204,7 +210,7 @@ No new edge. `EditorPrivate → MediaPublic` exists (image block); `NewsPrivate/
 |---|-------|------|------------|--------|
 | 1 | Media — public file storage, GC of public `.mp3`, sound-field `removeName` — **risky** | M | — | DONE |
 | 1v | Checkpoint — Secret Gift and Fanart sound fields, image picker | S | 1 | DONE |
-| 2 | Editor — built-in opt-in `audio` block type (+ Story guard test) | M | 1 | TODO |
+| 2 | Editor — built-in opt-in `audio` block type (+ Story guard test) | M | 1 | DONE |
 | 3 | News — enable sound blocks | M | 2 | TODO |
 | 4 | StaticPage — enable sound blocks | S | 3 | TODO |
 
@@ -377,3 +383,4 @@ supersedes it.
 ## 5. Build & verify log
 
 - **Phase 1 — DONE (2026-10-25).** `storePublicFile` on service + API; `originalsIn()` now takes its public filter explicitly (`PUBLIC_IMAGE_PATTERN` for `listByScope`, `PUBLIC_GC_PATTERN` = images + mp3 for `gc`); sound-field `removeName`. Tests: `MediaServiceTest` (storePublicFile ×3, gc public mp3 ×3, listByScope never lists an mp3 while gc deletes it), `MediaLibraryEndpointTest` (GET `/media/library` never lists an mp3), `MediaSoundFieldComponentTest` (default / custom remove name). Gate green.
+- **Phase 2 — DONE (2026-10-25).** `AudioBlockType` built-in registered third, `_audio-block` partial (sound-field with `remove-name`), French labels, Editor README/AGENTS. Tests: renderer ×3, multi component ×3, registry, Story `ChapterAdvancedModeTest` guard. Gate green.

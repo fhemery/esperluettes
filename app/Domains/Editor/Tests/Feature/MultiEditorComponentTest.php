@@ -5,6 +5,7 @@ use App\Domains\Editor\Private\Blocks\TextBlockType;
 use App\Domains\Editor\Public\Blocks\EditorBlockRegistry;
 use App\Domains\Editor\Public\Blocks\EditorBlockType;
 use Illuminate\Support\Str;
+use Illuminate\Support\ViewErrorBag;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -64,6 +65,49 @@ describe('<x-editor::multi> block types', function () {
             ->and($html)->toContain("insertAfter(\$el, 'image')")
             ->and($html)->not->toContain("appendBlock('fake')")
             ->and($html)->not->toContain("insertAfter(\$el, 'fake')");
+    });
+
+    it('does not offer the audio block by default', function () {
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" />',
+            ['blocks' => [['type' => 'text', 'html' => '<p>x</p>']]]
+        );
+
+        expect($html)->not->toContain("appendBlock('audio')")
+            ->and($html)->not->toContain("insertAfter(\$el, 'audio')")
+            ->and($html)->not->toContain('data-block-template="audio"');
+    });
+
+    it('offers the audio block when enabled', function () {
+        view()->share('errors', new ViewErrorBag());
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" :blockTypes="[\'text\', \'audio\']" />',
+            ['blocks' => [['type' => 'text', 'html' => '<p>x</p>']]]
+        );
+        $tpl = Str::between($html, '<template data-block-template="audio">', '</template>');
+
+        expect($html)->toContain("appendBlock('audio')")
+            ->and($html)->toContain("insertAfter(\$el, 'audio')")
+            ->and($tpl)->toContain('name="blocks[__UID__][sound]"')
+            ->and($tpl)->toContain('name="blocks[__UID__][sound_remove]"')
+            ->and($tpl)->toContain('name="blocks[__UID__][caption]"');
+    });
+
+    it('renders a stored audio block with its path and preview', function () {
+        view()->share('errors', new ViewErrorBag());
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" :blockTypes="[\'text\', \'audio\']" />',
+            ['blocks' => [
+                ['type' => 'text', 'html' => '<p>x</p>'],
+                ['type' => 'audio', 'path' => 'news/a.mp3', 'caption' => 'Ma légende'],
+            ]]
+        );
+        $stored = Str::between($html, 'data-uid="b1"', 'data-block-template');
+
+        expect($stored)->toContain('name="blocks[b1][type]" value="audio"')
+            ->and($stored)->toContain('name="blocks[b1][path]" value="news/a.mp3"')
+            ->and($stored)->toContain('storage\/news\/a.mp3') // previewUrl, JSON-encoded for Alpine
+            ->and($stored)->toContain('Ma légende');
     });
 
     it('hides the image entry from the insert menu when blockTypes is [\'text\']', function () {

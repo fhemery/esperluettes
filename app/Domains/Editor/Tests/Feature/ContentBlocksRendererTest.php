@@ -64,6 +64,33 @@ describe('ContentBlocksRenderer::render', function () {
         expect($html)->not->toContain('<picture');
     });
 
+    it('renders an audio block as a native player with the public URL', function () {
+        $html = renderer()->render([
+            ['type' => 'audio', 'path' => 'news/a.mp3', 'caption' => 'Ma piste'],
+        ]);
+
+        expect($html)->toContain('<audio controls')
+            ->and($html)->toContain('/storage/news/a.mp3')
+            ->and($html)->toContain('Ma piste');
+    });
+
+    it('escapes the audio caption', function () {
+        $html = renderer()->render([
+            ['type' => 'audio', 'path' => 'news/a.mp3', 'caption' => '<b>x</b>'],
+        ]);
+
+        expect($html)->toContain('&lt;b&gt;x&lt;/b&gt;')
+            ->and($html)->not->toContain('<b>x</b>');
+    });
+
+    it('skips an audio block without a path', function () {
+        $html = renderer()->render([
+            ['type' => 'audio', 'path' => '', 'caption' => 'x'],
+        ]);
+
+        expect($html)->not->toContain('<audio');
+    });
+
     it('renders blocks in order', function () {
         $html = renderer()->render([
             ['type' => 'text', 'html' => '<p>One</p>'],

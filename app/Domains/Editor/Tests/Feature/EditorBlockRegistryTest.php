@@ -48,6 +48,12 @@ describe('EditorBlockRegistry', function () {
         expect($types[1]->icon())->toBe('image');
     });
 
+    it('registers audio as the third built-in', function () {
+        $types = app(EditorBlockRegistry::class)->all();
+
+        expect($types[2]->key())->toBe('audio');
+    });
+
     it('is a singleton, so plugin registrations are visible to every consumer', function () {
         app(EditorBlockRegistry::class)->register(registryFakeType('fake'));
 

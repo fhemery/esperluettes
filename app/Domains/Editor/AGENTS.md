@@ -20,6 +20,8 @@ None.
 
 **Blocks stay plain arrays.** The block schema (README) is Editor's data contract; it is deliberately not typed. DTOs would not remove the per-type dispatch; the seam is the block-type registry (`Public/Blocks/EditorBlockRegistry`, contract `EditorBlockType`, README "Block-type registry"). `text` and `image` are built-in registrations; `ContentBlocksRenderer` renders every block through the registry and drops unregistered types. A plugin type's HTML is not re-sanitized by Editor, and `profile` is a reserved render-context key.
 
+**`audio` is a built-in, opt-in block that emits its own `<audio>` HTML.** No Purifier profile allows `<audio>`, so `Private/Blocks/AudioBlockType` escapes its own output. The renderer renders every registered type regardless of `blockTypes`: the guard against a forged `audio` block is each consumer's write-side whitelist (Story's `ChapterRequest` rejects it, pinned in `ChapterAdvancedModeTest`). Its editor partial must pass `remove-name` to `<x-media::sound-field>` (bracketed name).
+
 **`ContentBlocksRenderer` is Editor-private and `EditorPublicApi` is its only caller outside.** Other domains inject the public API, never the renderer. Deptrac enforces it.
 
 **The built-in image type (`Private/Blocks/ImageBlockType`) emits `<x-media::image>` through `Blade::render()` at runtime.** That is why `EditorPrivate` depends on `MediaPublic`, and why a change to the `<x-media::image>` component's props can break rendering with no PHP-level signal. The renderer's image cases in `Tests/Feature/ContentBlocksRendererTest.php` are the only guard.
