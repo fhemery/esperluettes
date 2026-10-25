@@ -39,3 +39,22 @@ describe('Soft deleting a profile after user deactivation', function () {
         expect($p->trashed())->toBeTrue();
     });
 });
+
+describe('Opening the profile page of a deactivated user', function () {
+
+    it('answers 404, never 500, to guests and logged-in users, on the default and a named tab', function () {
+        $admin = admin($this);
+        $user = alice($this, roles: [Roles::USER_CONFIRMED]);
+        $viewer = bob($this, roles: [Roles::USER_CONFIRMED]);
+        $slug = Profile::where('user_id', $user->id)->firstOrFail()->slug;
+
+        $this->actingAs($admin);
+        app(AuthPublicApi::class)->deactivateUserById($user->id);
+        auth()->logout();
+
+        $this->get("/profile/{$slug}")->assertNotFound();
+        $this->get("/profile/{$slug}/stories")->assertNotFound();
+        $this->actingAs($viewer)->get("/profile/{$slug}")->assertNotFound();
+        $this->actingAs($admin)->get("/profile/{$slug}")->assertNotFound();
+    });
+});
