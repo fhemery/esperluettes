@@ -4,9 +4,9 @@
 
 ## Public API
 
-- [MediaPublicApi](Public/Api/MediaPublicApi.php) — the **only** entry point other domains use for images and private files: `store`, `storePrivate`, `storePrivateFile`, `stream`, `streamVariant`, `copyPrivate`, `exists`, `listByScope`, `variantUrl`, `originalUrl`, `folderFor`, `countUsages`, `hasVariants`. Images are addressed by **storage path** (string) — there are no ids.
+- [MediaPublicApi](Public/Api/MediaPublicApi.php) — the **only** entry point other domains use for images and private files: `store`, `storePublicFile`, `storePrivate`, `storePrivateFile`, `stream`, `streamVariant`, `copyPrivate`, `exists`, `listByScope`, `variantUrl`, `originalUrl`, `folderFor`, `countUsages`, `hasVariants`. Images are addressed by **storage path** (string) — there are no ids.
 - [MediaUsageRegistry](Public/Contracts/MediaUsageRegistry.php) + [MediaUsageProvider](Public/Contracts/MediaUsageProvider.php) — a consuming domain registers a provider so GC knows which files it still uses.
-- Blade components (owned here): `<x-media::image>` (read-only), `<x-media::image-field>` (editable), `<x-media::sound-field>` (sound upload; form contract `{name}` + `{name}_remove`). Reuse picker endpoint: `GET /media/library` (`media.library`, auth-gated).
+- Blade components (owned here): `<x-media::image>` (read-only), `<x-media::image-field>` (editable), `<x-media::sound-field>` (sound upload; form contract `{name}` + `{name}_remove`, or `removeName` when `name` ends with `]`). Reuse picker endpoint: `GET /media/library` (`media.library`, auth-gated).
 
 ## Events emitted
 
@@ -27,6 +27,8 @@ None. Integration is registry-based, not event-based: consumers push a `MediaUsa
 **Private variants are opt-in and stream-only.** `storePrivate($scope, $file, [400, 800])` writes `-400w`/`-800w` jpg + webp next to the original on the private disk (the default `[]` writes none — Secret Gift relies on that). Serve them with `streamVariant($path, $width, $format)` from the same gated route logic as `stream` — it performs no authorization either, and throws on a public path or a missing variant (map that to 404). `copyPrivate($path, $targetScope)` copies an original only (never its variants) into a private scope; the copy must be claimed by a usage provider like any file.
 
 **Private variants are never GC originals.** On the private disk `media:gc` skips files named `*-<width>w.{jpg,jpeg,png,webp}`: they are kept while their original is claimed and removed with it by `deleteWithVariants`. Consequence: never give a private original a name matching that pattern (Media's own random names cannot), or GC will never see it.
+
+**Public raw files: only `.mp3` is GC-managed, and the picker never sees it.** `storePublicFile` writes raw bytes (no variants) into a public scope folder; `originalUrl` gives the URL. On the public disk `media:gc` sweeps images **and `.mp3`**, nothing else — so a consumer storing a public sound must claim it in its `MediaUsageProvider` or GC deletes it after the grace window, and a public file of any other extension is never collected. `listByScope` (the reuse picker) walks the same folders with an **images-only** filter: `originalsIn()` takes the pattern explicitly (`PUBLIC_IMAGE_PATTERN` vs `PUBLIC_GC_PATTERN`). Never widen the picker's pattern to match GC's — the picker would offer sounds as images.
 
 **The private GC guard is applied at the scope root, not per subfolder.** `media:gc` treats each private root (`secret-gift/`, `fanart/`, `moderation/`) as one managed folder and sweeps it recursively, so a private root still needs a registered `MediaUsageProvider` — with none, *nothing* under it is ever collected, across every activity. Do not "improve" this by guarding each `secret-gift/{activityId}` folder: an activity whose gifts were all removed would then have zero claimed paths, be skipped forever, and its orphans would leak permanently.
 

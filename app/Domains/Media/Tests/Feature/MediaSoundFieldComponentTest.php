@@ -14,6 +14,22 @@ describe('<x-media::sound-field>', function () {
         $html->assertSee('name="gift_sound_remove"', false);
     });
 
+    it('posts the remove flag as {name}_remove by default', function () {
+        $this->withViewErrors([])
+            ->blade('<x-media::sound-field name="gift_sound" />')
+            ->assertSee('name="gift_sound_remove"', false);
+    });
+
+    it('posts the remove flag under removeName when given', function () {
+        $html = $this->withViewErrors([])->blade(
+            '<x-media::sound-field name="blocks[b0][sound]" remove-name="blocks[b0][sound_remove]" />'
+        );
+
+        $html->assertSee('name="blocks[b0][sound]"', false);
+        $html->assertSee('name="blocks[b0][sound_remove]"', false);
+        $html->assertDontSee('name="blocks[b0][sound]_remove"', false);
+    });
+
     it('uses the consumer supplied preview url as the current sound', function () {
         $this->withViewErrors([])
             ->blade('<x-media::sound-field name="gift_sound" preview-url="/x/sound/1" />')

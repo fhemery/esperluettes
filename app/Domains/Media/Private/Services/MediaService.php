@@ -37,6 +37,12 @@ class MediaService
     /** Generated variant file name: {name}-{width}w.{ext}. */
     private const VARIANT_PATTERN = '/-\d+w\.(jpg|jpeg|png|webp)$/i';
 
+    /** Public-disk originals the reuse picker lists: images only. */
+    private const PUBLIC_IMAGE_PATTERN = '/\.(jpg|jpeg|png|webp)$/i';
+
+    /** Public-disk originals GC sweeps: images plus raw sounds from storePublicFile(). */
+    private const PUBLIC_GC_PATTERN = '/\.(jpg|jpeg|png|webp|mp3)$/i';
+
     public function __construct(
         private readonly ImageService $imageService,
         private readonly MediaUsageRegistry $registry,
@@ -122,6 +128,20 @@ class MediaService
             throw new InvalidArgumentException("Not a private media scope: {$scope}");
         }
         return Storage::disk(self::PRIVATE_DISK)->putFileAs($this->folderFor($scope), $file, $file->hashName());
+    }
+
+    /**
+     * Store an uploaded file's raw bytes on the public disk; returns its path.
+     * The public twin of storePrivateFile(): no processing, no variants and no
+     * content validation. The extension comes from the guessed MIME type.
+     * GC only sweeps image and .mp3 originals on the public disk.
+     */
+    public function storePublicFile(string $scope, UploadedFile $file): string
+    {
+        if ($this->isPrivateScope($scope)) {
+            throw new InvalidArgumentException("Private scope must go through storePrivateFile(): {$scope}");
+        }
+        return Storage::disk(self::DISK)->putFileAs($this->folderFor($scope), $file, $file->hashName());
     }
 
     /**
@@ -251,7 +271,7 @@ class MediaService
         }
 
         $page = max(1, $page);
-        $originals = $this->originalsIn(self::DISK, $this->folderFor($scope));
+        $originals = $this->originalsIn(self::DISK, $this->folderFor($scope), self::PUBLIC_IMAGE_PATTERN);
 
         // Newest first by mtime.
         usort($originals, fn (string $a, string $b) => $this->mtime(self::DISK, $b) <=> $this->mtime(self::DISK, $a));
@@ -315,7 +335,7 @@ class MediaService
 
         foreach ([self::DISK, self::PRIVATE_DISK] as $disk) {
             foreach ($this->managedFolders($disk) as $folder) {
-                $originals = $this->originalsIn($disk, $folder);
+                $originals = $this->originalsIn($disk, $folder, self::PUBLIC_GC_PATTERN);
                 if ($originals === []) {
                     continue;
                 }
@@ -388,15 +408,18 @@ class MediaService
     }
 
     /**
-     * Originals under a folder. On the public disk: images only, variants
-     * excluded, non-recursive. On the private disk: every file (images or not)
-     * except generated variants, recursively — private files live one level
-     * down in per-scope subfolders. Variants are removed with their original
-     * by deleteWithVariants().
+     * Originals under a folder. On the public disk: files matching
+     * $publicPattern, variants excluded, non-recursive — callers pick the
+     * pattern explicitly, PUBLIC_IMAGE_PATTERN for the reuse picker (which must
+     * never offer a sound) and PUBLIC_GC_PATTERN for gc(). On the private disk
+     * the pattern is ignored: every file (images or not) except generated
+     * variants, recursively — private files live one level down in per-scope
+     * subfolders. Variants are removed with their original by
+     * deleteWithVariants().
      *
      * @return list<string>
      */
-    private function originalsIn(string $disk, string $folder): array
+    private function originalsIn(string $disk, string $folder, string $publicPattern): array
     {
         $fs = Storage::disk($disk);
         if (!$fs->exists($folder)) {
@@ -414,8 +437,8 @@ class MediaService
             if (preg_match(self::VARIANT_PATTERN, $base) === 1) {
                 continue; // a generated variant
             }
-            if (preg_match('/\.(jpg|jpeg|png|webp)$/i', $base) !== 1) {
-                continue; // not an image
+            if (preg_match($publicPattern, $base) !== 1) {
+                continue; // not a managed type for this caller
             }
             $originals[] = $file;
         }

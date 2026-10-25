@@ -29,6 +29,12 @@
 - Trap: `<x-media::sound-field>` posts `{name}_remove`; with a bracketed name PHP folds it onto `{name}` and the string `"false"` breaks `file` validation — hence the `removeName` prop (A14). Use the separate `sound` key for audio uploads; `blocks.*.file` stays the image rule.
 - Likeliest reversals: A10/A11 (built-in type, same scope folder), A15 strictness, A9 moderator access.
 
+### BUILD phase 1 → next (2026-10-25)
+
+- No deviation from the plan. `originalsIn()` has no default for its pattern argument on purpose: every caller must choose images-only (picker) or images+mp3 (GC); do not add a default.
+- The Editor `_audio-block` partial (phase 2) must pass `remove-name="{name}[{uid}][sound_remove]"` to `<x-media::sound-field>`; without it the remove flag clobbers the file field.
+- The planning docs were committed separately just before the phase commit.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -196,7 +202,7 @@ No new edge. `EditorPrivate → MediaPublic` exists (image block); `NewsPrivate/
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Media — public file storage, GC of public `.mp3`, sound-field `removeName` — **risky** | M | — | TODO |
+| 1 | Media — public file storage, GC of public `.mp3`, sound-field `removeName` — **risky** | M | — | DONE |
 | 1v | Checkpoint — Secret Gift and Fanart sound fields, image picker | S | 1 | TODO |
 | 2 | Editor — built-in opt-in `audio` block type (+ Story guard test) | M | 1 | TODO |
 | 3 | News — enable sound blocks | M | 2 | TODO |
@@ -362,4 +368,4 @@ supersedes it.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- **Phase 1 — DONE (2026-10-25).** `storePublicFile` on service + API; `originalsIn()` now takes its public filter explicitly (`PUBLIC_IMAGE_PATTERN` for `listByScope`, `PUBLIC_GC_PATTERN` = images + mp3 for `gc`); sound-field `removeName`. Tests: `MediaServiceTest` (storePublicFile ×3, gc public mp3 ×3, listByScope never lists an mp3 while gc deletes it), `MediaLibraryEndpointTest` (GET `/media/library` never lists an mp3), `MediaSoundFieldComponentTest` (default / custom remove name). Gate green.

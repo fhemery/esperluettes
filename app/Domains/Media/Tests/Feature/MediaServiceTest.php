@@ -79,6 +79,39 @@ describe('store', function () {
     });
 });
 
+describe('storePublicFile', function () {
+    it('stores an mp3 on the public disk under the scope folder', function () {
+        $file = UploadedFile::fake()->create('song.mp3', 100, 'audio/mpeg');
+
+        $path = app(MediaPublicApi::class)->storePublicFile('news', $file);
+
+        expect($path)->toMatch('#^news/[A-Za-z0-9]{40}\.mp3$#');
+        Storage::disk('public')->assertExists($path);
+        expect(Storage::disk('public')->get($path))->toBe(file_get_contents($file->getRealPath()));
+        expect(Storage::disk('public')->files('news'))->toBe([$path]);
+        expect(Storage::disk('private')->allFiles())->toBe([]);
+    });
+
+    it('names the file from its MIME type, not the client name', function () {
+        $path = app(MediaPublicApi::class)->storePublicFile(
+            'static-pages',
+            UploadedFile::fake()->create('evil.php', 10, 'audio/mpeg'),
+        );
+
+        expect($path)->toStartWith('static-pages/')->toEndWith('.mp3');
+    });
+
+    it('rejects a private scope', function () {
+        expect(fn () => app(MediaPublicApi::class)->storePublicFile(
+            'fanart/1',
+            UploadedFile::fake()->create('song.mp3', 10, 'audio/mpeg'),
+        ))->toThrow(InvalidArgumentException::class);
+
+        expect(Storage::disk('public')->allFiles())->toBe([]);
+        expect(Storage::disk('private')->allFiles())->toBe([]);
+    });
+});
+
 describe('saveSquareJpg', function () {
     it('writes at the given path on the managed disk as a square JPEG, with no variants', function () {
         $path = app(MediaPublicApi::class)->saveSquareJpg(
@@ -143,6 +176,19 @@ describe('listByScope', function () {
         expect($paths)->toHaveCount(2);
         expect($paths)->toContain('news/a.jpg');
         expect($paths)->toContain('news/b.png');
+    });
+
+    it('never lists an mp3, even one gc() manages in the same folder', function () {
+        Storage::disk('public')->put('news/pic.jpg', 'x');
+        Storage::disk('public')->put('news/song.mp3', 'x');
+
+        $page = app(MediaPublicApi::class)->listByScope('news');
+
+        expect(collect($page->items)->pluck('path')->all())->toBe(['news/pic.jpg']);
+
+        // Same folder, same file: gc() does consider the mp3 an original.
+        app(MediaUsageRegistry::class)->register(fakeProvider(['news/pic.jpg']));
+        expect(app(MediaService::class)->gc(-1)['deleted'])->toBe(['news/song.mp3']);
     });
 
     it('returns a 400w variant URL when variants exist', function () {
@@ -380,6 +426,41 @@ describe('gc', function () {
             expect($file)->not->toContain($goneName);
         }
         expect(Storage::disk('private')->files('fanart/12'))->toHaveCount(5);
+    });
+
+    it('deletes an unclaimed public mp3 older than the grace window', function () {
+        Storage::disk('public')->put('news/keep.jpg', 'x');
+        Storage::disk('public')->put('news/gone.mp3', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['news/keep.jpg']));
+        $this->travel(8)->days();
+
+        $result = app(MediaService::class)->gc(7);
+
+        expect($result['deleted'])->toBe(['news/gone.mp3']);
+        Storage::disk('public')->assertMissing('news/gone.mp3');
+        Storage::disk('public')->assertExists('news/keep.jpg');
+    });
+
+    it('keeps a claimed public mp3', function () {
+        Storage::disk('public')->put('news/keep.mp3', 'x');
+        Storage::disk('public')->put('news/gone.mp3', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['news/keep.mp3']));
+
+        $result = app(MediaService::class)->gc(-1);
+
+        expect($result['deleted'])->toBe(['news/gone.mp3']);
+        Storage::disk('public')->assertExists('news/keep.mp3');
+    });
+
+    it('keeps an unclaimed public mp3 inside the grace window', function () {
+        Storage::disk('public')->put('news/keep.jpg', 'x');
+        Storage::disk('public')->put('news/fresh.mp3', 'x');
+        app(MediaUsageRegistry::class)->register(fakeProvider(['news/keep.jpg']));
+
+        $result = app(MediaService::class)->gc(7);
+
+        expect($result['deleted'])->toBeEmpty();
+        Storage::disk('public')->assertExists('news/fresh.mp3');
     });
 
     it('still ignores non-image files on the public disk', function () {

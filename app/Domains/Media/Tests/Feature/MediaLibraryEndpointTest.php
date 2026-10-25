@@ -29,6 +29,18 @@ describe('GET /media/library', function () {
             ->assertJsonPath('items.0.url', asset('storage/news/a-400w.webp'));
     });
 
+    it('never lists a public mp3 stored in the scope folder', function () {
+        Storage::disk('public')->put('news/a.jpg', 'x');
+        Storage::disk('public')->put('news/song.mp3', 'x');
+
+        $this->actingAs(alice($this))
+            ->getJson('/media/library?scope=news')
+            ->assertOk()
+            ->assertJsonCount(1, 'items')
+            ->assertJsonPath('items.0.path', 'news/a.jpg')
+            ->assertDontSee('song.mp3');
+    });
+
     it('returns the original URL when an image has no variants', function () {
         Storage::disk('public')->put('chapters/7/keep.jpg', 'x');
 

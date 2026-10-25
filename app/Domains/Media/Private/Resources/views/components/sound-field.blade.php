@@ -5,7 +5,10 @@
     The component never builds a URL: the consumer passes `previewUrl`.
 
     Props:
-    - name: Input name for the file upload; the remove flag is posted as `{name}_remove`
+    - name: Input name for the file upload
+    - removeName: Input name of the remove flag (default: `{name}_remove`). Pass it
+      when `name` ends with a bracket: PHP drops what follows `]`, so
+      `blocks[x][sound]_remove` would overwrite `blocks[x][sound]`.
     - id: Unique identifier
     - previewUrl: URL of the current sound (nullable)
     - maxSize: Max file size in KB (default: 10240 = 10MB)
@@ -16,6 +19,7 @@
 --}}
 @props([
     'name',
+    'removeName' => null,
     'id' => null,
     'previewUrl' => null,
     'maxSize' => 10240,
@@ -132,7 +136,7 @@
         {{-- Hidden delete marker --}}
         <input
             type="hidden"
-            name="{{ $name }}_remove"
+            name="{{ $removeName ?? $name . '_remove' }}"
             x-model="markedForRemoval"
         />
     </div>
