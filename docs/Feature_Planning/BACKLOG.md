@@ -40,7 +40,7 @@ scoped to the task that actually changed.
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
-- **Auth — compliant middleware stores XHR fragment URLs as intended** · `auth-compliant-xhr-intended/` · interactive · TODO
+- **Auth — compliant middleware stores XHR fragment URLs as intended** · `auth-compliant-xhr-intended/` · auto · WIP:REFINE
 - **Shared — adopt fetchFragment in other domains' fragment loaders** · `shared-fetch-fragment-adoption/` · interactive · TODO
 - **Profile — re-check the deactivated user's profile page for a 500** · `profile-deactivated-user-500/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
