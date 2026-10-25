@@ -1,19 +1,31 @@
 ---
 name: design-architecture
-description: Turn a functional specification into a technical design, letting the user arbitrate the real tradeoffs. Use at the DESIGN step of the loop, or when asked "how should we build X" for a spec that already exists. Produces docs/Feature_Planning/<slug>/02-architecture.md with domain placement, data model, public API, deptrac impact and locked tradeoffs.
+description: Turn a functional specification into a technical design, letting the user arbitrate the real tradeoffs. Use at the DESIGN step of the loop, or when asked "how should we build X" for a spec that already exists. Produces CONTEXT.md §2 (docs/Feature_Planning/<slug>/) with domain placement, data model, public API, deptrac impact and locked tradeoffs.
 ---
 
 # Design the architecture
 
-Turn `01-functional.md` into `02-architecture.md`: how the feature is built, with
-every real fork in the road arbitrated by the user rather than by you.
+Turn §1 of `CONTEXT.md` (the functional spec) into §2: how the feature is
+built, with every real fork in the road arbitrated by the user rather than by
+you.
 
-**Run this in the main thread** — the user picks the tradeoffs. Delegate
-research to read-only agents.
+**This is the first half of the `architect-planner` agent** (see
+[`design-and-plan`](../design-and-plan/SKILL.md)): a subagent with a fresh
+context that can ask the user directly (Claude Code: `AskUserQuestion`), but
+only about a **blocking** tradeoff. Delegate research to read-only agents.
+Older text below that says `01-functional.md`, `02-architecture.md` or
+`DECISIONS.md` means §1, §2 and §4 of `CONTEXT.md`.
 
-Output:
-[`templates/02-architecture.md`](../../loop/templates/02-architecture.md), plus
-rows in `DECISIONS.md`.
+A tradeoff is **blocking** when both sides are reasonable *and* the choice is
+expensive to reverse (see Step 2). If every tradeoff has a clearly better option,
+or is cheap to reverse, do not ask: pick the recommended option, record it as an
+assumption in `DECISIONS.md` (with the rejected options and what would flip it),
+and hand back so the loop continues without waiting for the user. If the host
+gives you no way to ask, stop at the first blocking tradeoff and report it with
+your recommendation; the orchestrator asks and re-dispatches you.
+
+Output: §2 of
+[`CONTEXT.md`](../../loop/templates/CONTEXT.md), plus rows in §4.
 
 ## Step 1 — Ground yourself in the existing code
 
@@ -58,9 +70,10 @@ the choice is expensive to reverse. Typically:
 Anything that is not one of these, decide yourself and state it. Do not make the
 user arbitrate naming or folder layout.
 
-## Step 3 — Present each tradeoff
+## Step 3 — Present each blocking tradeoff
 
-One at a time, in this shape:
+Only the blocking ones; the others are decided and recorded, not presented. One
+at a time, in this shape:
 
 > **<the question>**
 > - **A (recommended)** — <option>. <one-line consequence>
@@ -106,18 +119,15 @@ yours. Yours is "activity image storage moves behind `MediaPublicApi`;
 deletion is deferred to the sweep."
 
 The test: if a line would be copied verbatim into a phase's Deliverables, it
-belongs in `03-plan.md` only. Duplicating it does not help BUILD — BUILD reads
+belongs in §3 only. Duplicating it does not help BUILD — BUILD reads
 the plan — and guarantees the two drift.
 
-Run `pnpm run gate` and commit `02-architecture.md` and `DECISIONS.md` (follow
-the `commit` skill) before handing back.
-
-Hand back a five-line summary: placement, data model in one line, the tradeoffs
-locked, and any new deptrac edge.
+You do not commit or hand back here: `design-and-plan` goes on to the size
+check and §3, and commits once at the end.
 
 ## In `auto` mode
 
 Pick the recommended option everywhere, record each as an assumption in
 `DECISIONS.md`, and keep the design as small as the fix allows. If a tradeoff
-turns out to be genuinely expensive to reverse, stop and ask anyway — `auto` is
-about speed on small things, not about taking large decisions alone.
+turns out to be genuinely expensive to reverse, ask anyway — `auto` is about
+speed on small things, not about taking large decisions alone.

@@ -280,7 +280,7 @@
 
                         <x-quote::author-heat :chapter-id="$vm->chapter->id">
                             <x-comment::annotation-overlay entity-type="chapter" :entity-id="$vm->chapter->id" :root-comment-id="$rootCommentId" :annotation-mode="$annotationMode">
-                            <article data-quote-article class="prose rich-content max-w-none [text-indent:2rem] text-xl">
+                            <article data-quote-article @unless($vm->isAuthor) x-on:copy.prevent x-on:cut.prevent x-on:dragstart.prevent @endunless class="prose rich-content max-w-none [text-indent:2rem] text-xl">
                                 {{-- The quote system treats `.ce-block--text` as the only quotable area:
                                      Advanced content already comes as `.ce-block` wrappers, so Simple
                                      content is wrapped in one text block to obey the same rule. --}}

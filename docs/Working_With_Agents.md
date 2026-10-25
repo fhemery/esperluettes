@@ -17,9 +17,9 @@ REFINE → DESIGN → PLAN → BUILD → VERIFY → WRAP
 
 | Step | Produces | Talks to you? |
 |------|----------|---------------|
-| REFINE | `01-functional.md` | yes — it interviews you |
-| DESIGN | `02-architecture.md` | yes — you arbitrate tradeoffs |
-| PLAN | `03-plan.md` | no |
+| REFINE | `CONTEXT.md` §1 + a complexity rating /5 | only on blocking points |
+| DESIGN | `CONTEXT.md` §2 | only on tradeoffs that are costly to reverse |
+| PLAN | `CONTEXT.md` §3 | almost never |
 | BUILD | code + tests, one subagent per phase | no |
 | VERIFY | `shots/`, filled QA checklist | no |
 | WRAP | `README.md`, backlog update | no |
@@ -37,15 +37,21 @@ at those folders is
 | `/next-task` | start the first `TODO` row — single-session only, see below |
 | `/continue-task` | resume the `WIP` task at whatever step its files say it reached |
 
-**One step per chat.** After each step, `/clear` and run `/continue-task`. The
-next step reads the artifact on disk, not the conversation that produced it —
-that is the whole reason the artifacts exist. A REFINE interview transcript is
-usually the largest thing in the window and carries nothing `01-functional.md`
-does not.
+Each task has one working file, `CONTEXT.md`: every agent leaves a short
+handoff note in it for the next one, and WRAP compacts it into the archived
+record (archiving happens by default, no confirmation).
+
+REFINE and DESIGN+PLAN each run in their own subagent and chain on their own:
+they ask you only when a point is blocking, otherwise they record their
+judgement calls as assumptions in `CONTEXT.md` and the loop moves on. REFINE
+rates the task's complexity out of 5: on 1–2 the same agent also writes the
+design and plan (fewer agents, fewer tokens); on 5 the task is split and the
+remaining slices land in the backlog.
 
 The `Mode` column in the backlog controls how often the loop stops:
-`interactive` stops at every step for approval, `auto` runs to the end and
-reports once. Use `auto` for bugfixes and chores.
+`interactive` stops once after PLAN so you can review the assumptions before
+BUILD, `auto` runs to the end and reports once (and never interviews). Use
+`auto` for bugfixes and chores.
 
 ## Definition of done
 

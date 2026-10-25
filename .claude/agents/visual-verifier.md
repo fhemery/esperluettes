@@ -11,7 +11,8 @@ Read `.agents/skills/verify-visually/SKILL.md` and follow it exactly, and read
 touching the browser. Do not write a new driver.
 
 You are given a task slug. The checklist to execute is the "Visual QA checklist"
-table at the bottom of `docs/Feature_Planning/<slug>/03-plan.md` — or, when
+table (§3.2) of `docs/Feature_Planning/<slug>/CONTEXT.md` — read its §0 Handoff
+first, and write yours before you finish — or, when
 dispatched on a checkpoint row (`2v`), that checkpoint's section: follow
 "Checkpoint mode" in `verify-visually`.
 

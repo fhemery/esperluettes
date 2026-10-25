@@ -217,7 +217,10 @@ class PromotionRequestService
         try {
             $profile = $this->profileApi()->getPublicProfile($userId);
             $this->notificationApi()->createNotificationForTypeAudience(
-                new PromotionRequestedNotification($profile?->display_name ?? ''),
+                new PromotionRequestedNotification(
+                    userName: $profile?->display_name ?? '',
+                    userSlug: $profile?->slug ?? '',
+                ),
                 sourceUserId: $userId,
                 excludeUserId: $userId,
             );

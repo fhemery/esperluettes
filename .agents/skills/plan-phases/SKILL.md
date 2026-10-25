@@ -1,15 +1,27 @@
 ---
 name: plan-phases
-description: Break an architecture document into shippable, independently testable phases. Use at the PLAN step of the loop, or when asked to phase a feature that already has a technical design. Produces docs/Feature_Planning/<slug>/03-plan.md with a phase index, per-phase deliverables/tests/acceptance, and the visual QA checklist.
+description: Break an architecture (CONTEXT.md §2) into shippable, independently testable phases. Use as the second half of the DESIGN+PLAN step of the loop, or when asked to phase a feature that already has a technical design. Produces CONTEXT.md §3 with a phase index, per-phase deliverables/tests/acceptance, and the visual QA checklist.
 ---
 
 # Phase the development
 
-Turn `02-architecture.md` into `03-plan.md`: an ordered list of phases, each one
-independently shippable, testable, and revertable.
+Turn §2 of `CONTEXT.md` (the architecture) into §3: an ordered list of phases,
+each one independently shippable, testable, and revertable.
 
-Output:
-[`templates/03-plan.md`](../../loop/templates/03-plan.md).
+This is the second half of the `architect-planner` agent (see
+[`design-and-plan`](../design-and-plan/SKILL.md)). Text below that says
+`01-functional.md`, `02-architecture.md`, `03-plan.md` or `DECISIONS.md` means
+§1, §2, §3 and §4 of `CONTEXT.md`; "checkpoint results" go to §5.
+
+Output: §3 of [`CONTEXT.md`](../../loop/templates/CONTEXT.md).
+
+## Asking the user
+
+Rarely needed. Ask (Claude Code: `AskUserQuestion`) only when a point blocks the
+cut itself — e.g. the architecture admits two incompatible phasings and neither
+is clearly better. Everything else goes in "Open items" and in your report, and
+the loop keeps going. If you cannot ask, report the blocking point instead of
+guessing.
 
 ## Read first
 
@@ -44,6 +56,15 @@ rather than quietly changing it.
 8. **Order by dependency, not by excitement.** If the user wants to see
    something on screen early, insert a thin vertical slice as an explicit
    phase — do not reorder the safety phases away.
+
+## Mark risky phases
+
+BUILD runs on a lighter model by default. Write **risky** after a phase's name
+in the phase index when it is hard to get right and costly to get wrong: a
+security or privacy rule, a data migration touching existing rows, a concurrency
+or ordering subtlety, a reshape of code with many consumers. The orchestrator
+runs those phases on the stronger model. Most phases are not risky; marking
+everything defeats the point.
 
 ## Each phase is read alone
 
@@ -110,6 +131,6 @@ rather than leaving it to BUILD.
 
 ## Output
 
-Run `pnpm run gate` and commit `03-plan.md` (follow the `commit` skill), then
-return the phase index table and the total phase count (checkpoints included).
-Flag any phase you were unsure how to cut.
+`design-and-plan` runs the gate and commits `CONTEXT.md`, then returns the phase
+index table and the total phase count (checkpoints included). Flag any phase
+you were unsure how to cut.

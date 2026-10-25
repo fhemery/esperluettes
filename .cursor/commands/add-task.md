@@ -9,7 +9,7 @@ Add a task to `docs/Feature_Planning/BACKLOG.md`. Do **not** start working on it
    entry's slug and pass `after:<slug>` or `before:<slug>`.
 3. Run `pnpm run add-task --slug=<slug> --title="<title>" --mode=<mode> [--position=after:<slug>|before:<slug>]`
    (position defaults to `bottom`). It creates the task folder, copies
-   `DECISIONS.md`, and inserts the backlog line.
+   `CONTEXT.md` (from the template), and inserts the backlog line.
 4. Write `docs/Feature_Planning/<slug>/00-request.md`, filled with my own
    words in this shape — do not embellish, do not invent requirements. Ask at
    most two clarifying questions first if the request is unusable as written.

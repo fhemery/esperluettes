@@ -35,6 +35,8 @@ describe('Collaborator management page', function () {
         $response = $this->actingAs($author1)->get(route('stories.collaborators.index', ['slug' => $story->slug]));
 
         $response->assertOk();
+        $response->assertSee(__('story::collaborators.deactivated_account'));
+        $response->assertDontSee('Unknown');
     });
 
     it('denies non-authors from accessing the collaborator management page', function () {

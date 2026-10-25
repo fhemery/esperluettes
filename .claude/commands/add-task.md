@@ -10,9 +10,11 @@ Add a task to `docs/Feature_Planning/BACKLOG.md`. Do **not** start working on it
    TODO list — only look at `BACKLOG.md` if the request explicitly says this
    task blocks or is blocked by another one, in which case grep for that
    entry's slug and pass `after:<slug>` or `before:<slug>`.
-3. Run `pnpm run add-task --slug=<slug> --title="<title>" --mode=<mode> [--position=after:<slug>|before:<slug>]`
-   (position defaults to `bottom`). It creates the task folder, copies
-   `DECISIONS.md`, and inserts the backlog line.
+3. Run `pnpm run add-task --slug=<slug> --title="<title>" --mode=<mode> [--complexity=<1-5>] [--position=after:<slug>|before:<slug>]`
+   (position defaults to `bottom`). Pass `--complexity` only when the request
+   makes it obvious (1 for a one-file tweak, 4–5 for a new domain or
+   cross-domain flow); otherwise omit it — it just picks the REFINE model. It creates the task folder, copies
+   `CONTEXT.md` (from the template), and inserts the backlog line.
 4. Write `docs/Feature_Planning/<slug>/00-request.md`, filled with the user's
    own words in this shape — do not embellish, do not invent requirements.
    Ask at most two clarifying questions first if the request is unusable as

@@ -544,9 +544,16 @@ Images that their uploader chose to share on Discord (« Partager sur Discord »
       "id": 12,
       "title": "Portrait de Mara",
       "artistName": "Alice",
+      "artist": {"id": 4, "slug": "alice", "avatarUrl": "https://esperluettes.com/storage/profile_pictures/4.webp"},
+      "authors": [
+        {"id": 7, "name": "Bob", "slug": "bob"},
+        {"id": 9, "name": "Carole", "slug": "carole"}
+      ],
       "storyTitle": "La Rivière",
       "storyUrl": "https://esperluettes.com/stories/la-riviere-3",
       "chapterTitle": "Chapitre 2",
+      "chapterSlug": "chapitre-2-15",
+      "description": "Mara au bord de l'eau.\nMerci de votre lecture !",
       "imageUrl": "https://esperluettes.com/fanarts/12/discord-image?expires=...&signature=..."
     }
   ],
@@ -554,7 +561,7 @@ Images that their uploader chose to share on Discord (« Partager sur Discord »
 }
 ```
 
-`chapterTitle` is omitted when the fanart is not attached to a chapter. `imageUrl` is a signed URL (valid 24 hours, no API key or session needed) to the 800px-wide WebP variant; it answers 403 when altered or expired and 404 when the fanart is no longer eligible.
+`artist.id` is the user id of the fanartist; `artist` is `null` when the profile is unavailable. `authors` lists all authors and co-authors of the story. `chapterTitle` and `chapterSlug` are omitted when the fanart is not attached to a chapter. `description` is plain text (paragraphs separated by newlines) and omitted when empty. `imageUrl` is a signed URL (valid 24 hours, no API key or session needed) to the 800px-wide WebP variant; it answers 403 when altered or expired and 404 when the fanart is no longer eligible.
 
 ### POST /api/discord/fanarts/mark-sent
 

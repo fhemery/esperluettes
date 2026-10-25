@@ -44,6 +44,8 @@
 
 **`Theme::seasonal()` uses the system clock.** It can be frozen in tests via `Carbon::setTestNow()`.
 
+**`$theme` is not guaranteed by the middleware.** `ResolveThemeMiddleware` runs after model binding and CSRF, so error pages rely on the fallback composer in `SharedServiceProvider::boot()` (per-view `$view->with`, not `View::share`). A new view reading `$theme` outside the layouts/error views needs adding to that composer's list. In tests, reset `View::share('theme', null)` before a request if fixtures already made one.
+
 **The layout applies two extra Blade attributes.** `AppLayout` passes `seasonal-background` and `display-ribbon` as boolean attributes to `layouts.app`; they must be passed via `PageViewModel` flags (`withSeasonalBackground`, `withSeasonalRibbon`).
 
 **Custom validator registration.** `CustomValidators::register()` must be called from a service provider `boot()` method. It is not auto-registered.
@@ -69,7 +71,7 @@
 - A class component whose name differs from its tag (`<x-a::foo-bar>`) needs an explicit `Blade::component` alias.
 - `x-show` changes land a frame late: measure layout from a `ResizeObserver` on the toggled element.
 - In a fragment injected by `x-html`, defer state-touching `x-init` work with `$nextTick`.
-- `fetch` of an HTML fragment: check `response.redirected` and navigate instead of injecting.
+- Load an HTML fragment with `window.fetchFragment` (or import `fragment-fetch.js`), not raw `fetch`: it navigates on a redirect and reloads on 401 / 419 instead of injecting a whole page; inject nothing on `null`. Many older call sites in other domains still use raw `fetch`.
 - `x-data` arguments are frozen at init: re-key a nested component whose arguments change (`x-for … :key`), never wrap it in `x-if`.
 
 **Confirm-modal always moves focus on open.** It forwards `focusable` to `modal.blade.php` (no opt-out). Covered by `Tests/Feature/View/Components/ConfirmModalA11yTest.php`.

@@ -29,12 +29,15 @@ should be.
 
 | Evidence | Real state |
 |----------|------------|
-| no `01-functional.md` | REFINE not finished |
-| `01-functional.md` exists, no `02-architecture.md` | DESIGN pending |
-| `02-architecture.md` exists, no `03-plan.md` | PLAN pending |
-| `03-plan.md` exists | BUILD — the phase index table says which phase |
+| `CONTEXT.md` §1 still `_Not written yet._` | REFINE not finished |
+| §1 written, §2 or §3 not | DESIGN+PLAN pending (a rated 1–2 task skips this: the refiner wrote both) |
+| §3 written | BUILD — the phase index (§3.1) says which phase |
 | all phases `DONE`, no shots outside `shots/checkpoint-*/` | VERIFY pending |
 | VERIFY done, no `README.md` | WRAP pending |
+| folder gone, entry in `## Done` | finished — nothing to continue |
+
+A folder that still has `01-functional.md`/`DECISIONS.md` and no `CONTEXT.md`
+predates the single-file layout: reconcile it from those files as before.
 
 Also check reality, not just files:
 
@@ -62,9 +65,12 @@ instead.
 Before doing anything, read in this order:
 
 1. `README.md` if it exists (finished tasks are already compacted)
-2. `DECISIONS.md` — never re-ask a settled question
-3. the artifact of the current step
-4. the current phase of `03-plan.md`
+2. `CONTEXT.md` header (complexity, mode) and §0 Handoff — the agents'
+   own notes on where things stand
+3. the phase index (§3.1) when in BUILD
+
+Read no more of `CONTEXT.md` yourself; the subagent you dispatch reads what it
+needs. Never re-ask a question already in §4.
 
 Then tell the user, in three lines: where the task stands, what you believe the
 next action is, and anything that looks inconsistent.
@@ -75,8 +81,9 @@ Continue exactly as `next-task` §4 — including its orchestrator rule: you
 dispatch PLAN / BUILD / VERIFY / WRAP to subagents and do not edit code
 yourself. Start at the reconciled step and honour the entry's mode:
 
-- `interactive` — one step, then stop and ask the user to `/clear` and run
-  `/continue-task` in a new chat. **BUILD is the exception**: chain its remaining
+- `interactive` — REFINE and DESIGN+PLAN chain without stopping (each subagent
+  asks the user only about blocking points); stop after PLAN for the go before
+  BUILD, as in `next-task` §4. **BUILD chains** its remaining
   phases in this chat, one `phase-implementer` each (`visual-verifier` for a
   checkpoint row), two lines of report per phase, and stop once they are all `DONE` (or when a §5 condition fires).
 - `auto` — keep dispatching the remaining steps until the task is `DONE` or a

@@ -1,3 +1,5 @@
+import { fetchFragment } from '../../../../Shared/Resources/js/fragment-fetch.js';
+
 const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input:not([type="hidden"]), select, [tabindex]:not([tabindex="-1"])';
 
 // Modal that shows the viewer fragment (image/audio, details, report, review form).
@@ -16,17 +18,13 @@ export function fanartViewer() {
             const requestId = ++this.requestId;
             this.$nextTick(() => this.$refs.closeButton?.focus());
 
-            try {
-                const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                if (requestId !== this.requestId) return;
-                if (!response.ok) {
-                    this.close();
-                    return;
-                }
-                this.html = await response.text();
-            } catch (e) {
-                if (requestId === this.requestId) this.close();
+            const html = await fetchFragment(url);
+            if (requestId !== this.requestId) return;
+            if (html === null) {
+                this.close();
+                return;
             }
+            this.html = html;
         },
 
         close() {

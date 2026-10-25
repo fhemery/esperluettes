@@ -190,7 +190,12 @@ class FanartService
         $chapterIds = array_values(array_filter(array_map(fn (Fanart $f) => $f->chapter_id, $fanarts)));
         $stories = $storyIds === [] ? [] : $this->stories->getStoriesByIds($storyIds);
         $chapters = $chapterIds === [] ? [] : $this->stories->getChaptersByIds($chapterIds);
-        $artists = $this->artistNames(array_values(array_unique(array_map(fn (Fanart $f) => $f->user_id, $fanarts))));
+        $authorIds = $storyIds === [] ? [] : $this->stories->getAuthorIdsByStoryIds($storyIds);
+        $userIds = array_values(array_unique(array_merge(
+            array_map(fn (Fanart $f) => $f->user_id, $fanarts),
+            ...array_values($authorIds),
+        )));
+        $profiles = $userIds === [] ? [] : $this->profiles->getPublicProfiles($userIds);
 
         $items = [];
         foreach ($fanarts as $fanart) {
@@ -201,13 +206,22 @@ class FanartService
             $item = [
                 'id' => $fanart->id,
                 'title' => $fanart->title,
-                'artistName' => $artists[$fanart->user_id] ?? '',
+                'artistName' => ($profiles[$fanart->user_id] ?? null)?->display_name ?? '',
+                'artist' => isset($profiles[$fanart->user_id])
+                    ? ['id' => $profiles[$fanart->user_id]->user_id, 'slug' => $profiles[$fanart->user_id]->slug, 'avatarUrl' => $profiles[$fanart->user_id]->avatar_url]
+                    : null,
+                'authors' => $this->discordAuthors($authorIds[$fanart->story_id] ?? [], $profiles),
                 'storyTitle' => $story->title,
                 'storyUrl' => route('stories.show', $story->slug),
                 'imageUrl' => URL::temporarySignedRoute('fanart.discord-image', now()->addDay(), ['fanartId' => $fanart->id]),
             ];
             if ($fanart->chapter_id !== null && isset($chapters[$fanart->chapter_id])) {
                 $item['chapterTitle'] = $chapters[$fanart->chapter_id]->title;
+                $item['chapterSlug'] = $chapters[$fanart->chapter_id]->slug;
+            }
+            $description = $this->plainText($fanart->description);
+            if ($description !== '') {
+                $item['description'] = $description;
             }
             $items[] = $item;
         }
@@ -597,17 +611,29 @@ class FanartService
         ));
     }
 
-    /** @param int[] $userIds @return array<int, string> */
-    private function artistNames(array $userIds): array
+    /**
+     * @param int[] $userIds
+     * @param array<int, ProfileDto> $profiles
+     * @return array<int, array{id: int, name: string, slug: string}>
+     */
+    private function discordAuthors(array $userIds, array $profiles): array
     {
-        if ($userIds === []) {
-            return [];
+        $authors = [];
+        foreach ($userIds as $userId) {
+            if (isset($profiles[$userId])) {
+                $authors[] = ['id' => $userId, 'name' => $profiles[$userId]->display_name, 'slug' => $profiles[$userId]->slug];
+            }
         }
 
-        return array_map(
-            fn ($profile) => $profile->display_name,
-            $this->profiles->getPublicProfiles($userIds),
-        );
+        return $authors;
+    }
+
+    /** Sanitized HTML reduced to plain text, paragraphs separated by newlines. */
+    private function plainText(?string $html): string
+    {
+        $text = preg_replace('#</p>|<br\s*/?>#i', "\n", (string) $html);
+
+        return trim(html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     private function cleanDescription(?string $html): ?string

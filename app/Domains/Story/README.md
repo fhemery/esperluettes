@@ -80,6 +80,10 @@ The same page also wires [Comment](../Comment/README.md) annotations (a reader's
 
 `ChapterCommentPolicy::supportsAnnotations` returns true, which makes the chapter comment list render the drafts banner, the « N annotations » pop-up and the annotations script. `ChapterCommentPolicy::canMarkAsProcessed` answers "is an author or co-author of the chapter" (beta readers are not); Comment uses it to let authors see every annotation and mark them processed. Annotation limits: 1000 characters of body, 500 of highlighted passage.
 
+### Copy guard on the chapter body
+
+When the viewer is not an author or co-author (`ChapterViewModel::$isAuthor`), the `<article data-quote-article>` carries `x-on:copy.prevent x-on:cut.prevent x-on:dragstart.prevent`. Guests, readers, beta readers, moderators and admins are all guarded; no message is shown. `user-select` and `contextmenu` are deliberately left alone: quotes, annotations and mobile long-press selection rely on selecting text. It is a deterrent only (dev tools, view-source, print and screenshots are untouched), and it is absent until Alpine initialises. Title, author note and comments sit outside the article and stay copyable. Covered by `ChapterCopyGuardTest`, which only asserts the attributes are rendered.
+
 ### Chapter choice block
 
 Advanced chapters may hold a `chapter-choice` block — a group of buttons linking to other chapters of the same story. Story registers it with Editor's block-type registry (`ChapterChoiceBlockType`); News and static pages do not accept it.

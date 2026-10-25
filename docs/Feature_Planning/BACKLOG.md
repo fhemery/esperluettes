@@ -11,6 +11,7 @@ Statuses: `TODO` · `WIP:<STEP>` · `BLOCKED:<reason>` — WRAP moves the entry 
 `## Done` once it is finished.
 Steps: `REFINE DESIGN PLAN BUILD VERIFY WRAP`
 Modes: `interactive` (stop at each step) · `auto` (run through, report at the end)
+Optional hint after the mode: `complexity:1`–`complexity:5` — a guess made when the task was filed; it only picks the REFINE model.
 
 Order matters: the top-most `TODO` is the next task. Entries are unnumbered on
 purpose — move or insert one anywhere without touching the others.
@@ -37,11 +38,12 @@ scoped to the task that actually changed.
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
 - **Shared — datetime input polish (group name, 375 px spacing)** · `shared-datetime-input-polish/` · interactive · TODO
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
-- **Fix 500 on 404 page when a model-bound route misses** · `fix-404-page-theme-500/` · auto · TODO
-- **Fanart — lazy fragments inject a full page on redirect** · `fanart-fragment-redirects/` · auto · TODO
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
-- **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
+- **Sound upload for news and static pages** · `news-static-page-sound-upload/` · interactive · TODO
+- **Auth — compliant middleware stores XHR fragment URLs as intended** · `auth-compliant-xhr-intended/` · interactive · TODO
+- **Shared — adopt fetchFragment in other domains' fragment loaders** · `shared-fetch-fragment-adoption/` · interactive · TODO
+- **Profile — re-check the deactivated user's profile page for a 500** · `profile-deactivated-user-500/` · interactive · TODO
 
 ## Done
 
@@ -50,6 +52,12 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`fix-404-page-theme-500`](_done/fix-404-page-theme-500.md) · model-binding 404s, 419 and 500 pages no longer crash on an undefined `$theme`: a per-view fallback composer supplies the user's or seasonal theme
+- [`fanart-fragment-redirects`](_done/fanart-fragment-redirects.md) · Shared `window.fetchFragment` (navigates on redirect, reloads on 401/419) used by the four lazy Fanart fragments, so the CGU page is no longer injected into the tab / viewer
+- [`story-deactivated-coauthor-label`](_done/story-deactivated-coauthor-label.md) · collaborators page shows « Compte désactivé » instead of English `Unknown` for a deactivated co-author
+- [`fanart-discord-endpoint-fields`](_done/fanart-discord-endpoint-fields.md) · Discord fanart feed items gain `artist`, `authors`, `chapterSlug` and plain-text `description` (bot must be updated to use them)
+- [`promotion-requested-user-slug`](_done/promotion-requested-user-slug.md) · `auth.promotion.requested` payload gains the requester's `user_slug` (new rows only), exposed as-is by the Discord endpoint
+- [`prevent-chapter-copy`](_done/prevent-chapter-copy.md) · chapter body blocks copy / cut / drag-out for everyone but authors and co-authors; selection, quotes and annotations unaffected (deterrent only)
 - [`calendar-activity-time-picker`](_done/calendar-activity-time-picker.md) · date fields split into date + time inputs over a hidden UTC value (Calendar, Story chapters)
 - [`admin-statistics-quotes`](_done/admin-statistics-quotes.md) · « Citations » tile and tab on /admin/statistics: net `global.total_quotes` from new Quote deletion/removal/restoration events, rebuilt from the quotes table (run `statistics:compute global.total_quotes` once after deploy)
 - [`quote-hard-delete`](_done/quote-hard-delete.md) · a reader's own quote deletion is now a hard delete, so reactivation no longer resurrects it; one-off migration purges legacy soft-deleted quotes (deploy only while no user is deactivated)

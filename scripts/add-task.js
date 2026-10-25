@@ -6,10 +6,14 @@
   point, and still writes 00-request.md itself — that's the part worth an
   LLM. This script just does the file plumbing so the agent doesn't have to
   Read the backlog and both templates on every call: create the task folder,
-  copy DECISIONS.md verbatim, and insert one line in BACKLOG.md.
+  copy the CONTEXT.md template verbatim, and insert one line in BACKLOG.md.
 
   Usage:
-    node scripts/add-task.js --slug=<slug> --title="<title>" --mode=auto|interactive [--position=bottom|top|after:<slug>|before:<slug>]
+    node scripts/add-task.js --slug=<slug> --title="<title>" --mode=auto|interactive [--complexity=1..5] [--position=bottom|top|after:<slug>|before:<slug>]
+
+  --complexity is an optional hint, written into the backlog line as
+  "complexity:N". It only picks the REFINE agent's model (see next-task);
+  REFINE's own rating is the authority for everything after.
 
   --position defaults to "bottom". 00-request.md is NOT written by this
   script — write it yourself (with the Write tool) before or after calling
@@ -24,7 +28,7 @@ const log = makeLog('add-task');
 
 const PLANNING_DIR = path.resolve('docs/Feature_Planning');
 const BACKLOG_PATH = path.join(PLANNING_DIR, 'BACKLOG.md');
-const DECISIONS_TEMPLATE = path.resolve('.agents/loop/templates/DECISIONS.md');
+const CONTEXT_TEMPLATE = path.resolve('.agents/loop/templates/CONTEXT.md');
 
 function parseArgs(argv) {
   const args = { position: 'bottom' };
@@ -77,21 +81,23 @@ function main() {
   if (!slug || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) fail('--slug is required and must be kebab-case.');
   if (!title) fail('--title is required.');
   if (!['auto', 'interactive'].includes(mode)) fail('--mode must be "auto" or "interactive".');
+  if (args.complexity && !/^[1-5]$/.test(args.complexity)) fail('--complexity must be 1 to 5.');
 
   const taskDir = path.join(PLANNING_DIR, slug);
   if (fs.existsSync(taskDir)) fail(`${taskDir} already exists.`);
   if (!fs.existsSync(BACKLOG_PATH)) fail(`${BACKLOG_PATH} not found.`);
-  if (!fs.existsSync(DECISIONS_TEMPLATE)) fail(`${DECISIONS_TEMPLATE} not found.`);
+  if (!fs.existsSync(CONTEXT_TEMPLATE)) fail(`${CONTEXT_TEMPLATE} not found.`);
 
   fs.mkdirSync(taskDir, { recursive: true });
-  fs.copyFileSync(DECISIONS_TEMPLATE, path.join(taskDir, 'DECISIONS.md'));
+  fs.copyFileSync(CONTEXT_TEMPLATE, path.join(taskDir, 'CONTEXT.md'));
 
-  const line = `- **${title}** · \`${slug}/\` · ${mode} · TODO`;
+  const hint = args.complexity ? ` · complexity:${args.complexity}` : '';
+  const line = `- **${title}** · \`${slug}/\` · ${mode}${hint} · TODO`;
   const backlog = fs.readFileSync(BACKLOG_PATH, 'utf8');
   const { lines, landed } = insertLine(backlog, line, args.position);
   fs.writeFileSync(BACKLOG_PATH, lines.join('\n'));
 
-  log.ok(`Created docs/Feature_Planning/${slug}/ (DECISIONS.md copied; 00-request.md is yours to write).`);
+  log.ok(`Created docs/Feature_Planning/${slug}/ (CONTEXT.md copied; 00-request.md is yours to write).`);
   log.ok(`Backlog entry added at ${landed}:`);
   log.raw(`  ${line}`);
 }

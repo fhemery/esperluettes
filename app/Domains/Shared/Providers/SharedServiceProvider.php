@@ -5,6 +5,7 @@ namespace App\Domains\Shared\Providers;
 use App\Domains\Config\Public\Api\ConfigPublicApi;
 use App\Domains\Config\Public\Contracts\FeatureToggleDefinition;
 use App\Domains\Settings\Public\Api\SettingsPublicApi;
+use App\Domains\Shared\Services\ThemeService;
 use App\Domains\Shared\Support\FeatureToggles;
 use App\Domains\Settings\Public\Contracts\SettingsParameterDefinition;
 use App\Domains\Settings\Public\Contracts\SettingsSectionDefinition;
@@ -97,6 +98,18 @@ class SharedServiceProvider extends ServiceProvider
             }
             $view->with('currentProfile', $dto);
         });
+
+        // Error pages can render before ResolveThemeMiddleware ran (model-binding miss,
+        // CSRF failure, 500): give each themed view a fallback so the layouts don't crash.
+        // Per-view (not View::share) so a guest-resolved theme never leaks into later renders.
+        View::composer(
+            ['shared::errors.*', 'errors.*', 'shared::layouts.*', 'shared::components.themed-logo'],
+            function ($view) {
+                if (View::shared('theme') === null && ! array_key_exists('theme', $view->getData())) {
+                    $view->with('theme', app(ThemeService::class)->current());
+                }
+            }
+        );
 
         // Safety guard: never run tests against a non-SQLite database
         if (app()->environment('testing') && config('database.default') !== 'sqlite') {
