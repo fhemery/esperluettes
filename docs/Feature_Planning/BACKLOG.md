@@ -11,6 +11,7 @@ Statuses: `TODO` · `WIP:<STEP>` · `BLOCKED:<reason>` — WRAP moves the entry 
 `## Done` once it is finished.
 Steps: `REFINE DESIGN PLAN BUILD VERIFY WRAP`
 Modes: `interactive` (stop at each step) · `auto` (run through, report at the end)
+Optional hint after the mode: `complexity:1`–`complexity:5` — a guess made when the task was filed; it only picks the REFINE model.
 
 Order matters: the top-most `TODO` is the next task. Entries are unnumbered on
 purpose — move or insert one anywhere without touching the others.

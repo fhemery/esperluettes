@@ -146,8 +146,8 @@ Fill §1 of `CONTEXT.md`. Rules:
 - §1.7 (out of scope) is not optional. An unstated non-goal will be built by
   accident.
 - User-facing wording in French.
-- End with the §0 Handoff entry (`REFINE → DESIGN+PLAN`): the assumptions the
-  user is likeliest to reverse, parked technical constraints, the seams (at 5).
+- End with the §0 Handoff entry (`REFINE → DESIGN+PLAN`): how many blocking
+  questions you asked, the assumptions the user is likeliest to reverse, parked technical constraints, the seams (at 5).
 
 Run `pnpm run gate` and commit `CONTEXT.md` (follow the
 `commit` skill) — this step wrote or deleted planning docs (e.g. absorbing a

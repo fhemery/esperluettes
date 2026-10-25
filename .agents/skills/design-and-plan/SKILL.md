@@ -11,6 +11,12 @@ the design never has to be re-read, so the two documents stop drifting.
 
 Read `CONTEXT.md` §0 (Handoff), §1 and §4, then follow in order:
 
+0. **Review §1 first when it was cheap to write** — the refiner runs on a
+   lighter model. If the complexity is 4–5, or the refiner's Handoff says it
+   asked two or more blocking questions, check §1 against `00-request.md` and
+   the code before designing on it: roles and visibility, lifecycle, the
+   cross-cutting checklist, anything contradicted by precedent. Fix gaps in
+   place (log them in §4); ask only if a gap is blocking. Skip this on 3.
 1. [`design-architecture`](../design-architecture/SKILL.md) → writes **§2**.
    Its tradeoff rule applies unchanged: ask the user only about a **blocking**
    tradeoff; decide and record the rest in §4.

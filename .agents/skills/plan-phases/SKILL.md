@@ -57,6 +57,15 @@ rather than quietly changing it.
    something on screen early, insert a thin vertical slice as an explicit
    phase — do not reorder the safety phases away.
 
+## Mark risky phases
+
+BUILD runs on a lighter model by default. Write **risky** after a phase's name
+in the phase index when it is hard to get right and costly to get wrong: a
+security or privacy rule, a data migration touching existing rows, a concurrency
+or ordering subtlety, a reshape of code with many consumers. The orchestrator
+runs those phases on the stronger model. Most phases are not risky; marking
+everything defeats the point.
+
 ## Each phase is read alone
 
 A `phase-implementer` subagent reads **its phase and nothing else** of this

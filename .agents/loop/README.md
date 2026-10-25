@@ -44,6 +44,15 @@ through two documents that then drifted).
   `add-task` (each request self-contained, because this folder is deleted at
   WRAP). No honest first slice → no split.
 
+**Complexity also picks the model**, per spawn (table in `next-task` §4).
+Defaults are the light model; the strong one is used for `architect-planner`
+(only runs at 3–5), for a refiner whose backlog entry carries a
+`complexity:4`/`5` hint (an optional guess written by `add-task` when the task
+is filed), and for BUILD phases the plan marks **risky**. The orchestrator never
+guesses a rating from the request itself: it only has three lines to go on, and
+under-rating costs more than over-rating — REFINE's rating, made on a real spec,
+decides everything after REFINE.
+
 The fast path is deliberately *not* "run it in the orchestrator's thread":
 an orchestrator request re-reads ~80k tokens (≥60k at minimum) against ~50k on
 average in a subagent, so inline work costs more per request, not less.

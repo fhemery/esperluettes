@@ -89,6 +89,21 @@ costs roughly 2.5M tokens against ~1.5M in a subagent. A small task saves
 tokens by having **fewer agents** (the refiner's fast path), not by borrowing
 this thread.
 
+**Models.** Pass `model:` on each spawn; the agent files default to `sonnet`
+(except `architect-planner`, `opus`), so only the exceptions need an override.
+Do not guess a rating from the request: REFINE's own rating, written in the
+`CONTEXT.md` header, is the authority once it exists.
+
+| Spawn | Model |
+|-------|-------|
+| `feature-refiner` | `sonnet`; `opus` only if the backlog entry carries a `complexity:4` or `complexity:5` hint (set by `add-task`) |
+| `architect-planner` | `opus` (it only runs at 3–5) |
+| `phase-implementer` | `sonnet`; `opus` for a phase whose index row in `CONTEXT.md` §3.1 is marked **risky** |
+| `visual-verifier`, `task-wrapper` | `sonnet` |
+
+Rated 4–5 or refined with two or more blocking questions, `architect-planner`
+starts by reviewing §1 (`design-and-plan`), because a Sonnet refiner wrote it.
+
 REFINE and DESIGN+PLAN subagents ask the user themselves when a point is
 blocking, and the others need no user input. If a subagent reports a
 blocking point instead of asking (its host cannot ask), you ask the user — one
