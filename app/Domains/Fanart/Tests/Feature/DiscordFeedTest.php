@@ -21,16 +21,6 @@ beforeEach(function () {
     $_SERVER['DISCORD_BOT_API_KEY'] = $key;
 });
 
-function botGetPending(TestCase $t, array $query = [])
-{
-    return $t->getJson('/api/discord/fanarts/pending?' . http_build_query($query), ['Authorization' => 'Bearer __test_api_key__']);
-}
-
-function sharedImage(array $overrides = []): Fanart
-{
-    return createPublishedImage(array_merge(['share_on_discord' => true], $overrides));
-}
-
 it('rejects a request without the bot token', function () {
     $this->getJson('/api/discord/fanarts/pending')->assertStatus(401);
     $this->getJson('/api/discord/fanarts/pending', ['Authorization' => 'Bearer wrong'])->assertStatus(401);

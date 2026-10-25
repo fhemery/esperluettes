@@ -64,3 +64,15 @@ function createPendingAudio(array $overrides = []): Fanart
         'published_at' => null,
     ], $overrides));
 }
+
+/** GET the Discord bot's pending-fanarts feed with the test API key. */
+function botGetPending(Tests\TestCase $t, array $query = [])
+{
+    return $t->getJson('/api/discord/fanarts/pending?' . http_build_query($query), ['Authorization' => 'Bearer __test_api_key__']);
+}
+
+/** A published image fanart ticked "share on Discord". */
+function sharedImage(array $overrides = []): Fanart
+{
+    return createPublishedImage(array_merge(['share_on_discord' => true], $overrides));
+}
