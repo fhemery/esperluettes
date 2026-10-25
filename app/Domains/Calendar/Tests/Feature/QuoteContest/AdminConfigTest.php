@@ -217,4 +217,17 @@ describe('Quote contest admin configuration', function () {
             ->assertSee('2026-09-11T12:00', false)
             ->assertSee('2026-09-14T12:00', false);
     });
+
+    it('renders the activity date mirrors read-only, without a name', function () {
+        $contest = createQuoteContest($this);
+
+        $this->actingAs(admin($this))
+            ->get(route('calendar.admin.activities.edit', Activity::findOrFail($contest->id)))
+            ->assertOk()
+            ->assertSee('id="qc_votes_end_at"', false)
+            ->assertSee('id="qc_submissions_start_at"', false)
+            ->assertDontSee('name="qc_votes_end_at"', false)
+            ->assertDontSee('name="quote_contest[votes_end_at]"', false)
+            ->assertDontSee("getElementById('active_ends_at')", false);
+    });
 });

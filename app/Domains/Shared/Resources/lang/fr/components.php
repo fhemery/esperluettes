@@ -11,6 +11,10 @@ return [
         'mark_as_read' => 'Marquer comme lu',
     ],
 
+    'datetime_input' => [
+        'time' => 'Heure',
+    ],
+
     'scrollable_tabs' => [
         'previous' => 'Précédent',
         'next' => 'Suivant',

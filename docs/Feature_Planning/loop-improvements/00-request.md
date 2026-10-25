@@ -33,6 +33,14 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
    about this, and it still slipped through. Fix: a gate check (or an Events
    test) that every class implementing `DomainEvent` resolves through
    `EventBus::resolveDomainEventClass(X::name())`.
+4. **Worktree e2e ports are undocumented and clash with the annotation rewrite.**
+   *(calendar-activity-time-picker, checkpoint 2v)* In a worktree whose e2e
+   port is published as 8081, a plain `pnpm run e2e` timed out on the web
+   server; it took `E2E_PORT=8080 E2E_BASE_URL=http://localhost:8081` to run.
+   With that base URL, `AnnotationOverlay.rewriteAssetHost()` (which reroutes
+   `localhost:8081/**` to `:8080`) would reroute the app's own requests. Fix:
+   document the worktree port pair in `e2e/README.md`, and derive both the
+   rewrite's source and target from `BASE_URL` / `APP_URL` instead of literals.
 
 ## Why
 

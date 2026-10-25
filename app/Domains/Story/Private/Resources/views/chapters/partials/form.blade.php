@@ -72,13 +72,25 @@
     <!-- Published toggle + scheduled publication -->
     @php
         $checked = old('published', isset($chapter) ? ($chapter->status === \App\Domains\Story\Private\Models\Chapter::STATUS_PUBLISHED ? '1' : '') : '1');
-        $existingPublishAt = old('publish_at', isset($chapter) && $chapter->publish_at ? $chapter->publish_at->format('Y-m-d\TH:i') : '');
+        // The component expects UTC and shows local time. The DB value is UTC, but
+        // old() holds what the user typed (local, in old('timezone')): put it back
+        // into UTC so the component does not shift it a second time.
+        $existingPublishAt = isset($chapter) && $chapter->publish_at ? $chapter->publish_at->format('Y-m-d\TH:i') : '';
+        if (old('publish_at') !== null) {
+            $existingPublishAt = old('publish_at');
+            $oldTimezone = old('timezone');
+            if ($existingPublishAt !== '' && is_string($oldTimezone) && in_array($oldTimezone, \DateTimeZone::listIdentifiers(), true)) {
+                try {
+                    $existingPublishAt = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $existingPublishAt, $oldTimezone)->utc()->format('Y-m-d\TH:i');
+                } catch (\Throwable) {
+                }
+            }
+        }
     @endphp
     <div
         x-data="{
             published: {{ $checked ? 'true' : 'false' }},
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            publishAtLocal: '{{ $existingPublishAt }}' ? DateUtils.utcToLocalInput('{{ $existingPublishAt }}') : '',
         }"
         x-on:change="if ($event.target.name === 'published') published = $event.target.checked"
     >
@@ -102,13 +114,13 @@
             <!-- Inline date picker — appears when toggle is OFF -->
             <div x-show="!published" x-cloak class="flex items-center gap-2 sm:flex-1">
                 <span class="material-symbols-outlined text-secondary text-[18px] leading-none shrink-0">schedule</span>
-                <input
-                    type="datetime-local"
+                <x-shared::datetime-local-input
                     id="publish_at"
                     name="publish_at"
-                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-accent focus:ring-accent text-sm"
-                    x-model="publishAtLocal"
-                    :min="new Date(Date.now() + 60000).toISOString().slice(0, 16)"
+                    submit="local"
+                    :min="now()->toDateString()"
+                    :value="$existingPublishAt"
+                    class="block w-full rounded-md shadow-sm text-sm"
                 />
                 <input type="hidden" name="timezone" :value="timezone" />
             </div>

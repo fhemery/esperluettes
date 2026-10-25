@@ -44,6 +44,18 @@ describe('Creating a chapter', function () {
         $resp->assertSee(trans('story::chapters.create.title'));
     });
 
+    it('renders the scheduled publication field empty on create', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Sched Create']);
+
+        $html = $this->get('/stories/' . $story->slug . '/chapters/create')->getContent();
+
+        expect($html)
+            ->toMatch('/<input[^>]*type="hidden"[^>]*name="publish_at"[^>]*value=""/')
+            ->not->toContain('type="datetime-local"');
+    });
+
     it('creates a published chapter and redirects to its show page', function () {
         $user = alice($this);
         $this->actingAs($user);

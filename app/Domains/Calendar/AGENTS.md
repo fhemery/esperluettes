@@ -41,6 +41,8 @@
 
 **A quote-contest phase comes from `QuoteContestPhaseService::phaseFor()` and nowhere else.** Every screen and every write guard asks that one method, so a read-only view and the write it hides can never disagree. It reads four datetimes (the activity's two, the settings' two) and puts a boundary instant in the *later* phase. Recomputing a phase from raw dates anywhere else is the bug this centralisation exists to prevent.
 
+**Activity dates are `<x-shared::datetime-local-input>` pairs, and Quote Contest mirrors them by id.** The config panel's greyed « début des soumissions » / « fin des votes » are `mirror-of="active_starts_at"` / `mirror-of="active_ends_at"`: they follow the core form's hidden inputs `#active_starts_at_value` / `#active_ends_at_value` live and submit nothing. Renaming a core field's `id` silently empties its mirror. Each field posts under its original name in `Y-m-d\TH:i` UTC, so the controllers and requests know nothing of the split.
+
 **A quote-contest activity is only gated by its `role_restrictions`.** Nothing in the code restricts the contest page to confirmed users — decision #1 is enforced by the admin setting `user-confirmed` + `moderator` + `admin` on the activity itself. The reader write routes re-check phase and ownership in their services, since a forged POST never went past a rendered page.
 
 ## Events Emitted
