@@ -96,7 +96,8 @@ The `Mode` column controls how often the loop stops for the user:
   long as none hits a blocking point (when one does, that subagent asks the
   user, then the chain resumes). The loop then stops once, after PLAN, so the
   user can review the accumulated assumptions before BUILD; BUILD phases chain
-  as before and stop before VERIFY.
+  straight into VERIFY, and the loop stops again after VERIFY, before WRAP, so
+  the user reviews the finished work before it is archived.
 - `auto` — run all remaining steps without stopping for approval; report at the
   end only. For bugfixes and small chores. REFINE and DESIGN never interview:
   they write down the assumptions and continue. Only pause if a blocking
