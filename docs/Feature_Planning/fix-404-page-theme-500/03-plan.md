@@ -133,6 +133,19 @@ Filled by VERIFY. Run in the real app (`run-app`).
 | any normal page (home, a story), confirmed user with a theme preference | theme unchanged (regression check: the composer must not override the middleware's theme) | |
 | `/profile/nobody-xx`, mobile 375 px | 404 page layout intact | |
 
+**VERIFY result (2026-10-25, HEAD 9bab1448) — PASS.** Driven with the `run-app`
+driver against the e2e instance (`localhost:8081`), temporary flow (deleted), assets rebuilt.
+Confirmed user's theme preference set to `winter` (seasonal today = autumn).
+
+- ✅ `/profile/nobody-xx` guest: HTTP 404, error page, autumn images, all loaded.
+- ✅ `/profile/nobody-xx` confirmed: HTTP 404, winter logo/illustration, Back + Dashboard buttons.
+- ✅ `/fanarts/9999` guest: redirected to `/login`, no 500.
+- ✅ `/fanarts/9999` confirmed: HTTP 404, winter theme, Back + Dashboard buttons.
+- ✅ `/totally-unknown-page` guest (autumn) and confirmed (winter): 404 unchanged.
+- ✅ Normal page (CGU gate, first page after login) still winter for the confirmed user.
+- ✅ `/profile/nobody-xx` at 375 px, guest and confirmed: no horizontal overflow.
+- Not tested: favicon (not inspected), dark appearance/font on error pages (known open item), deactivated-user profile.
+
 ## Open items
 
 - **Phase 1** — `/fanarts/9999` for a guest: the route group carries `auth`, so

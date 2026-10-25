@@ -37,7 +37,7 @@ scoped to the task that actually changed.
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
 - **Shared — datetime input polish (group name, 375 px spacing)** · `shared-datetime-input-polish/` · interactive · TODO
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
-- **Fix 500 on 404 page when a model-bound route misses** · `fix-404-page-theme-500/` · auto · WIP:VERIFY
+- **Fix 500 on 404 page when a model-bound route misses** · `fix-404-page-theme-500/` · auto · WIP:WRAP
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Sound upload for news and static pages** · `news-static-page-sound-upload/` · interactive · TODO
