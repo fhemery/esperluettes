@@ -5,8 +5,8 @@
 <div class="flex-1 flex flex-col md:flex-row md:items-center gap-4 p-4 pt-12 md:pt-4" data-fanart-viewer="{{ $fanart->id }}">
     <div class="md:w-3/5 flex items-center justify-center">
         @if ($isAudio)
-            <audio controls src="{{ route('fanart.file', $fanart->id) }}" class="w-full"
-                   aria-label="{{ $fanart->title }}"></audio>
+            <x-fanart::protected-audio src="{{ route('fanart.file', $fanart->id) }}" class="w-full"
+                   aria-label="{{ $fanart->title }}" />
         @else
             <img src="{{ route('fanart.file', $fanart->id) }}" alt="{{ $fanart->title }}"
                  class="max-w-full max-h-[calc(100vh-6rem)] object-contain">

@@ -228,6 +228,16 @@ it('renders the viewer with title, linked artist, sanitised description, report 
         ->assertSee($deleteForm, false);
 });
 
+it('renders the sound viewer with a download-protected player', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $audio = createFanart(['story_id' => $story->id, 'user_id' => bob($this)->id, 'kind' => FanartKind::Audio, 'file_path' => 'fanart/1/a.mp3']);
+
+    $this->actingAs(carol($this))->get(route('fanart.show', $audio->id))->assertOk()
+        ->assertSee('controlsList="nodownload', false)
+        ->assertSee('oncontextmenu', false);
+});
+
 it('renders the review viewer with comment + Accepter/Décliner for an author on a pending fanart', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);

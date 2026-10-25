@@ -57,6 +57,52 @@ it('sets Cache-Control private', function () {
         ->toContain('private');
 });
 
+function publishedAudioForProtection($test)
+{
+    $author = alice($test);
+    $story = publicStory('Histoire', $author->id);
+    $fanart = createPendingAudio([
+        'story_id' => $story->id,
+        'user_id' => $author->id,
+        'status' => FanartStatus::Published,
+        'chapter_id' => createPublishedChapter($test, $story, $author)->id,
+    ]);
+    file_put_contents(Storage::disk('private')->path($fanart->file_path), random_bytes(2048));
+
+    return [$author, $fanart];
+}
+
+it('refuses a sound opened by navigation, even for the artist', function () {
+    [$author, $fanart] = publishedAudioForProtection($this);
+
+    $this->actingAs(bob($this))->withHeaders(['Sec-Fetch-Dest' => 'document'])
+        ->get(route('fanart.file', $fanart->id))->assertForbidden();
+    $this->actingAs($author)->withHeaders(['Sec-Fetch-Dest' => 'document'])
+        ->get(route('fanart.file', $fanart->id))->assertForbidden();
+});
+
+it('streams a sound to an audio element with no-store, and without the header', function () {
+    [, $fanart] = publishedAudioForProtection($this);
+    $this->actingAs(bob($this));
+
+    $response = $this->withHeaders(['Sec-Fetch-Dest' => 'audio'])->get(route('fanart.file', $fanart->id));
+    $response->assertOk();
+    expect($response->headers->get('Cache-Control'))->toContain('no-store');
+
+    $this->get(route('fanart.file', $fanart->id))->assertOk();
+    $this->withHeaders(['Sec-Fetch-Dest' => 'audio', 'Range' => 'bytes=0-9'])
+        ->get(route('fanart.file', $fanart->id))->assertStatus(206);
+});
+
+it('does not check Sec-Fetch-Dest on images', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $fanart = createPublishedImage(['story_id' => $story->id, 'user_id' => $author->id]);
+
+    $this->actingAs(bob($this))->withHeaders(['Sec-Fetch-Dest' => 'document'])
+        ->get(route('fanart.file', $fanart->id))->assertOk();
+});
+
 it('returns 403 to a non-confirmed user and redirects a guest to login', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);

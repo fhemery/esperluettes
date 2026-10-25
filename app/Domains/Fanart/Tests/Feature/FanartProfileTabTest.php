@@ -105,6 +105,8 @@ it('splits images and sounds and hides chapters that are not published from read
         ->assertDontSee('Lecture du chapitre', false);
     $this->get(profileGroupUrl($owner, $story, 'audio'))->assertOk()
         ->assertSee('Lecture du chapitre', false)
+        ->assertSee('controlsList="nodownload', false)
+        ->assertSee('oncontextmenu', false)
         ->assertDontSee('Image du chapitre', false);
     $this->get(profileGroupUrl($owner, $story, 'bogus'))->assertNotFound();
 });

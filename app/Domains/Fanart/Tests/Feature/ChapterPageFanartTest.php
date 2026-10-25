@@ -33,6 +33,7 @@ it('shows the audio player under the title for a confirmed reader', function () 
     $html = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
         ->assertOk()->getContent();
 
+    expect($html)->toContain('controlsList="nodownload')->toContain('oncontextmenu');
     expect($html)->toContain('data-chapter-audio')
         ->toContain(route('fanart.file', $audio->id));
     expect(strpos($html, 'data-chapter-audio'))->toBeGreaterThan(strpos($html, 'Chapitre un'))
