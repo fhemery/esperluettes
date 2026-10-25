@@ -79,7 +79,7 @@ and `AGENTS.md` — read those before changing anything.
 - **Pushed to the backlog:**
   - [`fanart-fragment-redirects`](../fanart-fragment-redirects/00-request.md) — a user who has not accepted the CGU gets the CGU page injected into the tab / viewer modal.
   - [`shared-dark-heading-contrast`](../shared-dark-heading-contrast/00-request.md) — magenta `<x-shared::title>` headings dim in dark mode (site-wide).
-  - [`story-deactivated-coauthor-label`](../story-deactivated-coauthor-label/00-request.md) — English « Unknown » for a deactivated co-author on the collaborators page.
+  - [`story-deactivated-coauthor-label`](./story-deactivated-coauthor-label.md) — English « Unknown » for a deactivated co-author on the collaborators page.
   - Already tracked: [`fix-404-page-theme-500`](../fix-404-page-theme-500/00-request.md) (404 pages answer 500).
   - Production steps (fanart report reasons, ≥ 16 MB upload limits, bot maintainer) added to [`release-notes`](../release-notes/00-request.md).
 - **Open:** plan O9 — staff reporting a fanart depends on Moderation's report-form route, which only allows `user` / `user-confirmed`; not verified.
