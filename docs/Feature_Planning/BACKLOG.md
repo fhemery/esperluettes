@@ -52,6 +52,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`discord-fanart-approval-timestamp`](_done/discord-fanart-approval-timestamp.md) · Discord pending fanart feed items gain `approvedAt` (approval time, or upload time for author artworks)
 - [`fix-404-page-theme-500`](_done/fix-404-page-theme-500.md) · model-binding 404s, 419 and 500 pages no longer crash on an undefined `$theme`: a per-view fallback composer supplies the user's or seasonal theme
 - [`fanart-fragment-redirects`](_done/fanart-fragment-redirects.md) · Shared `window.fetchFragment` (navigates on redirect, reloads on 401/419) used by the four lazy Fanart fragments, so the CGU page is no longer injected into the tab / viewer
 - [`story-deactivated-coauthor-label`](_done/story-deactivated-coauthor-label.md) · collaborators page shows « Compte désactivé » instead of English `Unknown` for a deactivated co-author
