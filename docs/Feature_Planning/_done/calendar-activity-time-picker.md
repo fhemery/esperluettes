@@ -86,7 +86,7 @@ depend on Shared).
 - Non-goals (spec §8): third-party pickers; time-zone, validation or storage
   changes; minute steps or custom time dropdowns; activity form layout rework.
 - Not converted: Auth activation codes, Events log filters (decision 5).
-- Pushed to backlog: [`shared-datetime-input-polish`](../shared-datetime-input-polish/00-request.md)
+- Pushed to backlog: [`shared-datetime-input-polish`](./shared-datetime-input-polish.md)
   — group accessible name; at 375 px on the Calendar form the date text
   touches the picker icon (no overflow).
 - e2e: `e2e/tests/features/calendar-activity-time-picker.spec.ts` (17 VERIFY

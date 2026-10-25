@@ -81,6 +81,16 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     `continue-task` / `next-task` skills and the backlog status wording all say
     the same thing.
 
+11. **The CONTEXT template ships a broken relative link in every new task.**
+    *(shared-datetime-input-polish, WRAP gate)* `add-task` copies
+    `.agents/loop/templates/CONTEXT.md` into `docs/Feature_Planning/<slug>/`, but
+    its link `../references/cross-cutting-checklist.md` only resolves from
+    `templates/`; the real file is `.agents/loop/references/`. `pnpm run gate`
+    (check-docs) then fails on the freshly filed `story-chapter-publish-at-label`
+    folder. Fix: make the template link a path that resolves from the copy
+    (`../../../.agents/loop/references/cross-cutting-checklist.md`) or drop the
+    link and name the file in backticks.
+
 ## Why
 
 So that what one task learns the hard way is fixed for the next, instead of
