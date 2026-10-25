@@ -46,6 +46,10 @@
 - Shipped as planned; StaticPage should mirror `NewsService::resolveContent()` audio branch. Additions beyond the plan: path check also rejects `..`; mode-switch refusal lives in `NewsService::update()` (ValidationException on `mode`, key `audio_mode_switch`) since the plan named no place.
 - The form prop is `:block-types` (kebab) on `<x-editor::multi>`. A plain `user` hitting the admin store route is redirected to the dashboard (route middleware), not 403 — tests assert the redirect. Tests helpers: `alice($this, [], true, [Roles::USER])` for a non-confirmed user; there is no `user()` helper.
 
+### BUILD phase 4 → next (2026-10-25)
+
+- Shipped as planned, mirroring News. Deviation: a moderator hitting the static-page admin store route is redirected to the dashboard (role middleware), not 403 as the plan's acceptance says; the test asserts the redirect. A static page created through the service is not in the slug-map cache until `publish()`, so guest-view tests must call `publish()`.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -217,7 +221,7 @@ No new edge. `EditorPrivate → MediaPublic` exists (image block); `NewsPrivate/
 | 1v | Checkpoint — Secret Gift and Fanart sound fields, image picker | S | 1 | DONE |
 | 2 | Editor — built-in opt-in `audio` block type (+ Story guard test) | M | 1 | DONE |
 | 3 | News — enable sound blocks | M | 2 | DONE |
-| 4 | StaticPage — enable sound blocks | S | 3 | TODO |
+| 4 | StaticPage — enable sound blocks | S | 3 | DONE |
 
 5 rows, 4 BUILD phases + 1 checkpoint. Working agreement: one phase = one commit; failing test first; no phase N+1 before N's acceptance holds; re-ordering is surfaced, not taken silently.
 
@@ -389,3 +393,4 @@ supersedes it.
 
 - **Phase 1 — DONE (2026-10-25).** `storePublicFile` on service + API; `originalsIn()` now takes its public filter explicitly (`PUBLIC_IMAGE_PATTERN` for `listByScope`, `PUBLIC_GC_PATTERN` = images + mp3 for `gc`); sound-field `removeName`. Tests: `MediaServiceTest` (storePublicFile ×3, gc public mp3 ×3, listByScope never lists an mp3 while gc deletes it), `MediaLibraryEndpointTest` (GET `/media/library` never lists an mp3), `MediaSoundFieldComponentTest` (default / custom remove name). Gate green.
 - **Phase 2 — DONE (2026-10-25).** `AudioBlockType` built-in registered third, `_audio-block` partial (sound-field with `remove-name`), French labels, Editor README/AGENTS. Tests: renderer ×3, multi component ×3, registry, Story `ChapterAdvancedModeTest` guard. Gate green.
+- **Phase 4 — DONE (2026-10-25).** StaticPage mirrors News: `audio` branch + mode-switch refusal in `StaticPageService`, request rules/messages, `:block-types`, usage provider, French keys, README. Tests: `StaticPageAdvancedModeTest` (sound blocks ×6), `StaticPageImageTest` provider, form render, moderator redirect. Gate: see commit.

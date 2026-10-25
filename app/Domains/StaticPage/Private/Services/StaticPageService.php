@@ -89,6 +89,31 @@ class StaticPageService
                     $block['caption'] = (string) $b['caption'];
                 }
                 $blocks[] = $block;
+            } elseif ($type === 'audio') {
+                $sound = $b['sound'] ?? null;
+                if ($sound instanceof UploadedFile) {
+                    $path = $this->media->storePublicFile(self::SCOPE, $sound);
+                } elseif (!filter_var($b['sound_remove'] ?? false, FILTER_VALIDATE_BOOLEAN) && !empty($b['path'])) {
+                    $path = (string) $b['path'];
+                    // Only a sound this scope owns: a crafted path must not reach another scope or file type.
+                    if (!str_starts_with($path, $this->media->folderFor(self::SCOPE) . '/')
+                        || !str_ends_with($path, '.mp3')
+                        || str_contains($path, '..')) {
+                        throw ValidationException::withMessages([
+                            'blocks' => __('static::admin.validation.audio_path_invalid'),
+                        ]);
+                    }
+                } else {
+                    throw ValidationException::withMessages([
+                        'blocks' => __('static::admin.validation.audio_required'),
+                    ]);
+                }
+                $block = ['type' => 'audio', 'path' => $path];
+                $caption = mb_substr(trim((string) ($b['caption'] ?? '')), 0, 255);
+                if ($caption !== '') {
+                    $block['caption'] = $caption;
+                }
+                $blocks[] = $block;
             }
         }
 
@@ -125,6 +150,14 @@ class StaticPageService
 
     public function update(StaticPage $page, array $data): StaticPage
     {
+        // Simple mode cannot hold a sound: refuse rather than silently drop it.
+        if (($data['mode'] ?? 'simple') !== 'advanced'
+            && collect((array) $page->content_blocks)->contains(fn ($b) => ($b['type'] ?? null) === 'audio')) {
+            throw ValidationException::withMessages([
+                'mode' => __('static::admin.validation.audio_mode_switch'),
+            ]);
+        }
+
         $resolved = $this->resolveContent($data);
         $data['content'] = $resolved['content'];
         $data['content_blocks'] = $resolved['content_blocks'];

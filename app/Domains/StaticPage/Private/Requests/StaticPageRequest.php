@@ -42,13 +42,16 @@ class StaticPageRequest extends FormRequest
             $rules['content'] = ['nullable', 'string'];
             $rules['blocks_order'] = ['nullable', 'string'];
             $rules['blocks'] = ['required', 'array', 'min:1'];
-            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image'])];
+            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image', 'audio'])];
             $rules['blocks.*.html'] = ['nullable', 'string'];
             $rules['blocks.*.path'] = ['nullable', 'string', 'max:1024'];
             $rules['blocks.*.alt'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.caption'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.keep_original'] = ['nullable'];
             $rules['blocks.*.file'] = ['nullable', 'image', 'max:2048'];
+            // Sound blocks use their own key so they never collide with the image rule above.
+            $rules['blocks.*.sound'] = ['nullable', 'file', 'mimes:mp3', 'max:10240'];
+            $rules['blocks.*.sound_remove'] = ['nullable'];
         } else {
             $rules['content'] = ['required', 'string'];
         }
@@ -64,6 +67,8 @@ class StaticPageRequest extends FormRequest
             'slug.regex' => __('static::admin.validation.slug_format'),
             'slug.unique' => __('static::admin.validation.slug_unique'),
             'content.required' => __('static::admin.validation.content_required'),
+            'blocks.*.sound.mimes' => __('static::admin.validation.audio_type'),
+            'blocks.*.sound.max' => __('static::admin.validation.audio_max'),
         ];
     }
 }

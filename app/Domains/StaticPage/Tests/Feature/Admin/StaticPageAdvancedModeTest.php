@@ -201,3 +201,91 @@ describe('Static page advanced mode — round trip', function () {
         expect($page->content)->toContain('Now simple');
     });
 });
+
+function staticSoundPayload(array $block): array
+{
+    return staticPageData([
+        'mode' => 'advanced',
+        'blocks_order' => 'b0',
+        'blocks' => ['b0' => array_merge(['type' => 'audio'], $block)],
+    ]);
+}
+
+function staticMp3(int $kb = 100): UploadedFile
+{
+    return UploadedFile::fake()->create('song.mp3', $kb, 'audio/mpeg');
+}
+
+describe('Static page advanced mode — sound blocks', function () {
+    it('stores an uploaded sound on the public disk and renders a player', function () {
+        $this->actingAs(admin($this))
+            ->post(route('static.admin.store'), staticSoundPayload(['sound' => staticMp3()]))
+            ->assertSessionHasNoErrors();
+
+        $page = StaticPage::query()->latest('id')->firstOrFail();
+        $block = $page->content_blocks[0];
+        expect($block['type'])->toBe('audio');
+        expect($block['path'])->toStartWith('static-pages/')->toEndWith('.mp3');
+        Storage::disk('public')->assertExists($block['path']);
+        expect($page->content)->toContain('<audio');
+    });
+
+    it('rejects a non-mp3 sound', function () {
+        app()->setLocale('fr');
+        $this->actingAs(admin($this))
+            ->post(route('static.admin.store'), staticSoundPayload(['sound' => UploadedFile::fake()->create('a.wav', 10, 'audio/wav')]))
+            ->assertSessionHasErrors(['blocks.b0.sound' => __('static::admin.validation.audio_type')]);
+
+        expect(StaticPage::query()->count())->toBe(0);
+    });
+
+    it('rejects a sound block without a file', function () {
+        app()->setLocale('fr');
+        $this->actingAs(admin($this))
+            ->post(route('static.admin.store'), staticSoundPayload(['caption' => 'x']))
+            ->assertSessionHasErrors(['blocks' => __('static::admin.validation.audio_required')]);
+
+        expect(StaticPage::query()->count())->toBe(0);
+    });
+
+    it('keeps the stored sound on a round trip without re-upload', function () {
+        $page = staticPageSvc()->create(staticSoundPayload(['sound' => staticMp3()]));
+        $path = $page->content_blocks[0]['path'];
+
+        $this->actingAs(admin($this))
+            ->put(route('static.admin.update', $page), staticSoundPayload(['path' => $path, 'caption' => 'c']) + ['slug' => $page->slug])
+            ->assertSessionHasNoErrors();
+
+        expect($page->refresh()->content_blocks[0]['path'])->toBe($path);
+    });
+
+    it('rejects a sound path outside the static-pages folder', function () {
+        foreach (['fanart/1/x.mp3', 'static-pages/x.jpg', 'static-pages/../fanart/x.mp3'] as $path) {
+            $this->actingAs(admin($this))
+                ->post(route('static.admin.store'), staticSoundPayload(['path' => $path]))
+                ->assertSessionHasErrors('blocks');
+        }
+
+        expect(StaticPage::query()->count())->toBe(0);
+    });
+
+    it('refuses switching to simple mode while a sound block exists', function () {
+        $page = staticPageSvc()->create(staticSoundPayload(['sound' => staticMp3()]));
+
+        $this->actingAs(admin($this))
+            ->put(route('static.admin.update', $page), staticPageData(['slug' => $page->slug, 'mode' => 'simple', 'content' => '<p>x</p>']))
+            ->assertSessionHasErrors('mode');
+
+        expect($page->refresh()->content_blocks[0]['type'])->toBe('audio');
+    });
+
+    it('shows the sound player to a guest on a published page', function () {
+        $page = staticPageSvc()->create(staticSoundPayload(['sound' => staticMp3()]));
+        staticPageSvc()->publish($page);
+
+        auth()->logout();
+        $this->get('/' . $page->slug)
+            ->assertOk()
+            ->assertSee('<audio controls', false);
+    });
+});

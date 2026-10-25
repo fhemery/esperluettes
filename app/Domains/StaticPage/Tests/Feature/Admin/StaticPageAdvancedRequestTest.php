@@ -138,3 +138,16 @@ describe('Static page advanced mode — block types', function () {
         expect(StaticPage::count())->toBe($before);
     });
 });
+
+describe('Static page advanced mode — sound access', function () {
+    it('forbids a moderator from saving a page with a sound', function () {
+        $this->actingAs(moderator($this))
+            ->post(route('static.admin.store'), advancedStaticPagePayload([
+                'blocks' => ['b0' => ['type' => 'audio', 'sound' => UploadedFile::fake()->create('s.mp3', 10, 'audio/mpeg')]],
+                'blocks_order' => 'b0',
+            ]))
+            ->assertRedirect(route('dashboard'));
+
+        expect(StaticPage::query()->count())->toBe(0);
+    });
+});

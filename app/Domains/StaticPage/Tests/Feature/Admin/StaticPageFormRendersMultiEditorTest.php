@@ -81,3 +81,13 @@ describe('StaticPage admin form renders the multi-editor', function () {
             ->assertDontSee('static::admin.form.media_section');
     });
 });
+
+describe('StaticPage admin form sound block', function () {
+    it('offers the sound block in advanced mode', function () {
+        $this->actingAs(admin($this))
+            ->get(route('static.admin.create'))
+            ->assertOk()
+            ->assertSee("appendBlock('audio')", false)
+            ->assertSee('data-block-template="audio"', false);
+    });
+});

@@ -25,7 +25,7 @@ final class StaticPageMediaUsageProvider implements MediaUsageProvider
 
         foreach (StaticPage::query()->whereNotNull('content_blocks')->get(['content_blocks']) as $page) {
             foreach ((array) $page->content_blocks as $block) {
-                if (($block['type'] ?? null) === 'image' && !empty($block['path'])) {
+                if (in_array($block['type'] ?? null, ['image', 'audio'], true) && !empty($block['path'])) {
                     yield $block['path'];
                 }
             }
