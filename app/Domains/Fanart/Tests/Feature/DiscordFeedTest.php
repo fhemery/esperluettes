@@ -206,3 +206,35 @@ it('sends the description as plain text and omits it when empty', function () {
     expect($data->firstWhere('id', $with->id)['description'])->toBe("Un beau dessin & plus\nFin")
         ->and(array_key_exists('description', $data->firstWhere('id', $without->id)))->toBeFalse();
 });
+
+it('exposes the approval date of a reader fanart', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $approvedAt = now()->subDays(2)->startOfSecond();
+    sharedImage(['story_id' => $story->id, 'user_id' => bob($this)->id, 'published_at' => $approvedAt]);
+
+    $item = botGetPending($this)->assertOk()->json('data.0');
+
+    expect(\Illuminate\Support\Carbon::parse($item['approvedAt'])->equalTo($approvedAt))->toBeTrue();
+});
+
+it('uses the submission date as approval date for an author artwork', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $this->travelTo(now()->subDay()->startOfSecond());
+    $submittedAt = now();
+
+    $this->actingAs($author)
+        ->post(route('fanart.store', $story->slug), [
+            'kind' => 'image',
+            'title' => 'Mon artwork',
+            'attestation' => '1',
+            'share_on_discord' => '1',
+            'image' => ['file' => \Illuminate\Http\UploadedFile::fake()->image('art.jpg', 1200, 800)],
+        ])->assertRedirect();
+    $this->travelBack();
+
+    $item = botGetPending($this)->assertOk()->json('data.0');
+
+    expect(\Illuminate\Support\Carbon::parse($item['approvedAt'])->equalTo($submittedAt))->toBeTrue();
+});

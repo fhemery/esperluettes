@@ -214,6 +214,7 @@ class FanartService
                 'storyTitle' => $story->title,
                 'storyUrl' => route('stories.show', $story->slug),
                 'imageUrl' => URL::temporarySignedRoute('fanart.discord-image', now()->addDay(), ['fanartId' => $fanart->id]),
+                'approvedAt' => $fanart->published_at->toISOString(),
             ];
             if ($fanart->chapter_id !== null && isset($chapters[$fanart->chapter_id])) {
                 $item['chapterTitle'] = $chapters[$fanart->chapter_id]->title;

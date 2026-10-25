@@ -44,6 +44,7 @@ scoped to the task that actually changed.
 - **Auth — compliant middleware stores XHR fragment URLs as intended** · `auth-compliant-xhr-intended/` · interactive · TODO
 - **Shared — adopt fetchFragment in other domains' fragment loaders** · `shared-fetch-fragment-adoption/` · interactive · TODO
 - **Profile — re-check the deactivated user's profile page for a 500** · `profile-deactivated-user-500/` · interactive · TODO
+- **Discord fanart API: approval timestamp is the submission date** · `discord-fanart-approval-timestamp/` · auto · WIP:BUILD
 
 ## Done
 

@@ -554,14 +554,15 @@ Images that their uploader chose to share on Discord (« Partager sur Discord »
       "chapterTitle": "Chapitre 2",
       "chapterSlug": "chapitre-2-15",
       "description": "Mara au bord de l'eau.\nMerci de votre lecture !",
-      "imageUrl": "https://esperluettes.com/fanarts/12/discord-image?expires=...&signature=..."
+      "imageUrl": "https://esperluettes.com/fanarts/12/discord-image?expires=...&signature=...",
+      "approvedAt": "2026-10-20T14:32:10.000000Z"
     }
   ],
   "pagination": {"currentPage": 1, "perPage": 100, "total": 1, "lastPage": 1, "hasMore": false}
 }
 ```
 
-`artist.id` is the user id of the fanartist; `artist` is `null` when the profile is unavailable. `authors` lists all authors and co-authors of the story. `chapterTitle` and `chapterSlug` are omitted when the fanart is not attached to a chapter. `description` is plain text (paragraphs separated by newlines) and omitted when empty. `imageUrl` is a signed URL (valid 24 hours, no API key or session needed) to the 800px-wide WebP variant; it answers 403 when altered or expired and 404 when the fanart is no longer eligible.
+`approvedAt` is the ISO 8601 UTC time the fanart was approved by an author, or uploaded for an author artwork (published without review). `artist.id` is the user id of the fanartist; `artist` is `null` when the profile is unavailable. `authors` lists all authors and co-authors of the story. `chapterTitle` and `chapterSlug` are omitted when the fanart is not attached to a chapter. `description` is plain text (paragraphs separated by newlines) and omitted when empty. `imageUrl` is a signed URL (valid 24 hours, no API key or session needed) to the 800px-wide WebP variant; it answers 403 when altered or expired and 404 when the fanart is no longer eligible.
 
 ### POST /api/discord/fanarts/mark-sent
 
