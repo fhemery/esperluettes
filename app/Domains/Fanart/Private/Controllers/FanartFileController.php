@@ -15,6 +15,8 @@ class FanartFileController
     private const THUMB_WIDTHS = [400, 800];
     private const CACHE_HEADERS = ['Cache-Control' => 'private, max-age=3600'];
 
+    private const AUDIO_HEADERS = ['Cache-Control' => 'private, no-store'];
+
     public function __construct(
         private readonly FanartPolicy $policy,
         private readonly MediaPublicApi $media,
@@ -27,6 +29,16 @@ class FanartFileController
 
         if (!$this->media->exists($fanart->file_path)) {
             abort(404);
+        }
+
+        if ($fanart->kind === FanartKind::Audio) {
+            // Friction only: refuse navigation (address bar, new tab); an absent header passes.
+            $dest = request()->header('Sec-Fetch-Dest');
+            if ($dest !== null && !in_array($dest, ['audio', 'video'], true)) {
+                abort(403);
+            }
+
+            return $this->media->stream($fanart->file_path, self::AUDIO_HEADERS);
         }
 
         return $this->media->stream($fanart->file_path, self::CACHE_HEADERS);

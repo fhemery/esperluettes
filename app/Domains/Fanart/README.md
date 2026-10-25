@@ -54,6 +54,8 @@ Fanart never deletes a file; it only clears rows. `FanartMediaUsageProvider` cla
 
 No statistics, no submission cap, no editing of a published fanart by its artist (delete and resubmit), no follower notification on publication, no global search, no GIF or non-mp3 audio, no audio on Discord, no player that survives page navigation, no comments or likes on fanarts, nothing shown to guests or non-confirmed users (no teaser).
 
+Sound download protection is friction only: players hide the native download entry and context menu, and opening a sound URL by navigation answers 403. It does not stop a determined user (devtools, curl with a session cookie, screen capture); there is no DRM, watermark or signed URL.
+
 ## Known gaps
 
 - The lazy fragments (tab, chapter groups, profile groups, viewer) load through Shared's `fetchFragment`, so a CGU redirect navigates the window and an expired session reloads the page. But `compliant` stores the fragment URL as the post-CGU intended destination: after accepting, the user lands on raw fragment HTML (Auth middleware, not fixed here).

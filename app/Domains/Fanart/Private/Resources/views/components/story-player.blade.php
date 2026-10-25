@@ -5,9 +5,9 @@
      x-init="$store.fanartPlayer.attach({ audio: $refs.audio, csrf: @js(csrf_token()), entries: JSON.parse($el.dataset.entries) })"
      x-show="$store.fanartPlayer.currentId !== null"
      class="mb-2">
-    <audio x-ref="audio" controls preload="none" class="w-full"
+    <x-fanart::protected-audio x-ref="audio" preload="none" class="w-full"
            x-on:ended="$store.fanartPlayer.onEnded()"
-           aria-label="{{ __('fanart::ui.player.label') }}"></audio>
+           aria-label="{{ __('fanart::ui.player.label') }}" />
 </div>
 
 @once

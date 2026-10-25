@@ -42,6 +42,7 @@ scoped to the task that actually changed.
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
 - **Story — label the chapter form publish_at field** · `story-chapter-publish-at-label/` · auto · complexity:1 · TODO
+- **Discourage downloading of fanart sounds** · `fanart-sound-download-protection/` · interactive · complexity:2 · WIP:BUILD
 
 ## Done
 

@@ -28,6 +28,7 @@ it('renders a speaker icon only on chapters with a published audio, for confirme
     $html = $this->get(route('stories.show', ['slug' => $story->slug]))->assertOk()->getContent();
 
     expect($html)->toContain('data-fanart-player');
+    expect($html)->toContain('controlsList="nodownload')->toContain('oncontextmenu');
     expect($html)->toContain(route('fanart.file', $audio->id));
     expect($html)->toContain(route('chapters.read.mark', ['storySlug' => $story->slug, 'chapterSlug' => $withAudio->slug]));
     expect(substr_count($html, 'data-chapter-audio-icon'))->toBe(1);

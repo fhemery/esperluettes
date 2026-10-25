@@ -17,6 +17,10 @@ Zero blocking questions asked. Design and plan are written in this same pass (ra
 - Four `<audio>` surfaces exist (story-player, chapter-audio, viewer fragment, profile-group); all must go through the one new component, otherwise one of them stays leaky.
 - Precedent for text: `x-on:copy.prevent x-on:cut.prevent x-on:dragstart.prevent` on `<article data-quote-article>` in Story `chapters/show.blade.php` (authors exempt). Fragments are fetched lazily, so use inline `oncontextmenu`, not Alpine, on the audio.
 
+### BUILD phase 1 → VERIFY/WRAP (2026-10-25)
+
+As planned. Left alone on purpose: the raw `<audio>` in `moderation/snapshot.blade.php` (moderator-only copy via `_media`, not one of the four surfaces). Browser-only checks (§3.2) remain for VERIFY.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -115,7 +119,7 @@ A logged-in user can still replay the request with curl and their session cookie
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Server check + protected-audio component + tests | S | — | TODO |
+| 1 | Server check + protected-audio component + tests | S | — | DONE |
 
 ### Phase 1 — Protect sound playback
 
@@ -163,4 +167,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE (2026-10-25): `Sec-Fetch-Dest` check + `no-store` on sounds in `FanartFileController`, `<x-fanart::protected-audio>` replacing the four `<audio>` tags, Pest tests on file route and the four surfaces, Fanart AGENTS/README updated.
