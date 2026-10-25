@@ -149,3 +149,60 @@ it('drops a deleted fanart from pending', function () {
     botGetPending($this)->assertOk()->assertJsonCount(0, 'data');
     $this->get($url)->assertNotFound();
 });
+
+it('exposes the fanartist id, slug and avatar url', function () {
+    $author = alice($this);
+    $bob = bob($this);
+    $story = publicStory('Histoire', $author->id);
+    sharedImage(['story_id' => $story->id, 'user_id' => $bob->id]);
+
+    $artist = botGetPending($this)->assertOk()->json('data.0.artist');
+
+    expect($artist['id'])->toBe($bob->id)
+        ->and($artist['slug'])->toBe(app(\App\Domains\Shared\Contracts\ProfilePublicApi::class)->getPublicProfile($bob->id)->slug)
+        ->and($artist['avatarUrl'])->toBeString()->not->toBe('');
+});
+
+it('lists every author of the story, co-authors included', function () {
+    $author = alice($this);
+    $coAuthor = carol($this);
+    $story = publicStory('Histoire', $author->id);
+    addCollaborator($story->id, $coAuthor->id, 'author');
+    sharedImage(['story_id' => $story->id, 'user_id' => bob($this)->id]);
+
+    $authors = collect(botGetPending($this)->assertOk()->json('data.0.authors'));
+
+    $profiles = app(\App\Domains\Shared\Contracts\ProfilePublicApi::class)->getPublicProfiles([$author->id, $coAuthor->id]);
+    expect($authors)->toHaveCount(2);
+    foreach ([$author, $coAuthor] as $user) {
+        $entry = $authors->firstWhere('id', $user->id);
+        expect($entry)->not->toBeNull()
+            ->and($entry['name'])->toBe($profiles[$user->id]->display_name)
+            ->and($entry['slug'])->toBe($profiles[$user->id]->slug);
+    }
+});
+
+it('sends the chapter slug only for a chapter fanart', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    $withChapter = sharedImage(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => $chapter->id]);
+    $storyLevel = sharedImage(['story_id' => $story->id, 'user_id' => $author->id, 'published_at' => now()->addMinute()]);
+
+    $data = collect(botGetPending($this)->assertOk()->json('data'));
+
+    expect($data->firstWhere('id', $withChapter->id)['chapterSlug'])->toBe($chapter->slug)
+        ->and(array_key_exists('chapterSlug', $data->firstWhere('id', $storyLevel->id)))->toBeFalse();
+});
+
+it('sends the description as plain text and omits it when empty', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $with = sharedImage(['story_id' => $story->id, 'user_id' => $author->id, 'description' => '<p>Un <strong>beau</strong> dessin &amp; plus</p><p>Fin</p>']);
+    $without = sharedImage(['story_id' => $story->id, 'user_id' => $author->id, 'description' => null, 'published_at' => now()->addMinute()]);
+
+    $data = collect(botGetPending($this)->assertOk()->json('data'));
+
+    expect($data->firstWhere('id', $with->id)['description'])->toBe("Un beau dessin & plus\nFin")
+        ->and(array_key_exists('description', $data->firstWhere('id', $without->id)))->toBeFalse();
+});

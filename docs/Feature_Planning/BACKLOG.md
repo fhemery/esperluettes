@@ -43,7 +43,7 @@ scoped to the task that actually changed.
 - **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Sound upload for news and static pages** · `news-static-page-sound-upload/` · interactive · TODO
-- **Extend fanart Discord endpoint payload** · `fanart-discord-endpoint-fields/` · auto · WIP:BUILD (0/1)
+- **Extend fanart Discord endpoint payload** · `fanart-discord-endpoint-fields/` · auto · WIP:VERIFY
 
 ## Done
 
