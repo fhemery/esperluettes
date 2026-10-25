@@ -4,6 +4,7 @@ return [
     'breadcrumb' => 'Collaborateurs',
     'page_title' => 'Collaborateurs de :title',
     'manage' => 'Gérer les collaborateurs',
+    'deactivated_account' => 'Compte désactivé',
 
     'roles' => [
         'author' => 'Auteurice',

@@ -43,7 +43,7 @@ class CollaboratorService
             $result[] = [
                 'user_id' => (int) $collab->user_id,
                 'role' => $collab->role,
-                'display_name' => $profile?->display_name ?? 'Unknown',
+                'display_name' => $profile?->display_name ?? __('story::collaborators.deactivated_account'),
                 'avatar_url' => $profile?->avatar_url ?? '',
                 'slug' => $profile?->slug ?? '',
             ];
