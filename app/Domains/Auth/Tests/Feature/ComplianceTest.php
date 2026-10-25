@@ -270,3 +270,47 @@ describe('Compliance at login', function () {
 
     });
 });
+
+describe('Intended URL after compliance', function () {
+    beforeEach(function () {
+        $this->user = alice($this);
+        $this->user->update(['terms_accepted_at' => null]);
+    });
+
+    test('non-XHR request stores its own URL and accept redirects there', function () {
+        $this->actingAs($this->user)->get('/dashboard?x=1')
+            ->assertRedirect(route('compliance.terms.show'));
+
+        $this->post(route('compliance.terms.accept'), ['accept_terms' => '1'])
+            ->assertRedirect(url('/dashboard?x=1'));
+    });
+
+    test('XHR without referer redirects but stores nothing', function () {
+        $this->actingAs($this->user)
+            ->get('/dashboard?fragment=1', ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertRedirect(route('compliance.terms.show'));
+
+        expect(session()->has('url.intended'))->toBeFalse();
+        $this->post(route('compliance.terms.accept'), ['accept_terms' => '1'])
+            ->assertRedirect(route('dashboard'));
+    });
+
+    test('XHR with same-host referer stores the referer', function () {
+        $referer = url('/stories/some-story');
+        $this->actingAs($this->user)
+            ->get('/dashboard?fragment=1', ['X-Requested-With' => 'XMLHttpRequest', 'Referer' => $referer])
+            ->assertRedirect(route('compliance.terms.show'));
+
+        expect(session('url.intended'))->toBe($referer);
+        $this->post(route('compliance.terms.accept'), ['accept_terms' => '1'])
+            ->assertRedirect($referer);
+    });
+
+    test('XHR with foreign referer is ignored', function () {
+        $this->actingAs($this->user)
+            ->get('/dashboard?fragment=1', ['X-Requested-With' => 'XMLHttpRequest', 'Referer' => 'https://evil.example/x'])
+            ->assertRedirect(route('compliance.terms.show'));
+
+        expect(session()->has('url.intended'))->toBeFalse();
+    });
+});

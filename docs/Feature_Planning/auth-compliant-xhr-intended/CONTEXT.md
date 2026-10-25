@@ -4,6 +4,10 @@
 
 ## 0. Handoff
 
+### BUILD phase 1 → WRAP (2026-10-25)
+
+As planned, no deviation. XHR with a missing/foreign Referer leaves any earlier `url.intended` untouched (A3).
+
 ### REFINE → BUILD (2026-10-25)
 
 Fast path: §1–§3 written by the refiner, no question asked. Likeliest reversal:
@@ -115,7 +119,7 @@ Referer may be stripped by policy: falls back to dashboard, harmless.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Middleware fix + tests | S | — | TODO |
+| 1 | Middleware fix + tests | S | — | DONE |
 
 ### Phase 1 — Middleware fix + tests
 
@@ -156,4 +160,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE: `rememberIntended` in EnsureUserCompliance + 4 Pest tests in ComplianceTest (gate green).
