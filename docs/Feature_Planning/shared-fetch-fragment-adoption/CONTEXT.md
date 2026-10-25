@@ -24,6 +24,10 @@
 
 - Shipped as planned, no deviation. No automated test covers the inline Alpine; browser check (§3.2) not done.
 
+### VERIFY → WRAP (2026-10-25)
+
+- All four sites PASS in a real browser (see §5). Feature spec `e2e/tests/features/shared-fetch-fragment-adoption.spec.ts` + `e2e/pages/FragmentLoaders.ts`: delete at WRAP (default). Failure paths simulated via `page.route`, not a real CGU-reset user.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -183,10 +187,10 @@ An inline script on a page without the Shared layout would lack
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Settings | Switching tabs loads content and updates URL | |
-| Story admin moderation | Chapters expand/collapse | |
-| Moderation user management | Search returns results | |
-| Activation-code create page | Sponsor search shows results | |
+| Settings | Switching tabs loads content and updates URL | ✅ |
+| Story admin moderation | Chapters expand/collapse | ✅ |
+| Moderation user management | Search returns results | ✅ |
+| Activation-code create page | Sponsor search shows results | ✅ |
 
 ### 3.3 Open items
 
@@ -212,3 +216,17 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE: four loaders adopt `window.fetchFragment`; Shared AGENTS.md line reworded; gate green.
+- VERIFY PASS (all four sites, happy + CGU + 419) via the feature spec; at WRAP delete the spec and `FragmentLoaders.ts` (default), or promote.
+
+### VERIFY (2026-10-25)
+
+Spec `e2e/tests/features/shared-fetch-fragment-adoption.spec.ts` (+ page object `e2e/pages/FragmentLoaders.ts`), 18 passed in the full run. Per site: happy path injects (no `<html>`/`<body>` nested), CGU redirect (fragment request answered 302 -> /terms in the browser) navigates the window (document replaced), 419 reloads the page. Mutation check: with the old raw-fetch Moderation search restored, the CGU and 419 specs fail (the happy path still passes), so they assert something.
+
+| Surface | Check | OK? |
+|---|---|---|
+| Settings | Tab switch loads content, URL becomes `?tab=...`; CGU -> navigates; 419 -> reloads | PASS |
+| Story admin moderation | Chapters expand/collapse; CGU; 419 | PASS |
+| Moderation user management | Search returns results; CGU; 419 | PASS |
+| Activation-code create | Sponsor search shows results; CGU; 419 | PASS |
+
+Caveat: the CGU and 419 responses are simulated with `page.route`, not produced by a real unaccepted-CGU user or expired session (the shared SQLite roles are not mutated). Settings URL form is `/settings?tab=<id>`.
