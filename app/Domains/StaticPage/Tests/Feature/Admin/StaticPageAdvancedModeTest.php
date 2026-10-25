@@ -286,6 +286,7 @@ describe('Static page advanced mode — sound blocks', function () {
         auth()->logout();
         $this->get('/' . $page->slug)
             ->assertOk()
-            ->assertSee('<audio controls', false);
+            ->assertSee('<audio controls', false)
+            ->assertSee('<article class="w-full max-w-[800px] mx-auto">', false);
     });
 });

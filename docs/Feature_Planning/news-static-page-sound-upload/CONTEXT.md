@@ -57,6 +57,10 @@
 - Caveats: the e2e run uploads real mp3s into `storage/app/public/{news,static-pages}` (shared with dev); VERIFY deleted them. Range requests are unsupported by the PHP dev server, so seeking is not asserted on public pages.
 - Not driven: Secret Gift / Fanart (checkpoint 1v covers), production 413 on large posts (not reproducible here). Picker-no-mp3 asserted for `news` scope only after upload.
 
+### BUILD fix: static page player width (2026-10-25)
+
+- Fixed the §3.2 defect: `StaticPage/.../pages/show.blade.php` `<article>` had `max-w-[800px] mx-auto` without `w-full` (News has it), so it shrink-wrapped. Added `w-full`; the audio block markup was already `w-full`. Verified at 1280px (800px) and 375px (full, no overflow): `shots/static-03-guest-public-fixed.png`. Markup assertion added to the guest-player test.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -353,7 +357,7 @@ Filled by VERIFY.
 | News edit, delete current sound and save | French error "un bloc son doit contenir un fichier"; other blocks kept | ✅ news-06 (blocks, caption, text kept). Note: no disabled-state hint; error shown only in the top banner |
 | News edit, upload a .wav / > 10 MB | French validation error, form re-rendered with blocks | ✅ news-07, 08 ("Le son doit être un fichier MP3." / "ne doit pas dépasser 10 Mo.") |
 | News edit (moderator) | Can add a sound | ✅ news-09, guest sees player |
-| Static page edit (admin) | Same add / save / public player flow | ✅ functionally; ❌ cosmetic: public player is ~220px wide, not full width (static-02) |
+| Static page edit (admin) | Same add / save / public player flow | ✅ functionally; public player was ~220px (static-02), fixed: article lacked `w-full` (static-03, 800px desktop, full width at 375px) |
 | Chapter editor (author) | No "Son" in palette or insert menu | ✅ chapter-01, no audio template either |
 | Mode switch | "Simple" disabled while a sound block exists | ✅ disabled with sound blocks; enabled once only text left. The server-side refusal is a feature test |
 | Mobile (375px) | Editor sound block and public player fit, no overflow | ✅ mobile-01, 02 (no horizontal overflow). Editor: the sound-field cancel/bin icon sits tight against the block's delete icon column (cosmetic) |
