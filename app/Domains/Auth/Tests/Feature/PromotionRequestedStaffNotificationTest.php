@@ -1,6 +1,5 @@
 <?php
 
-use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Public\Api\Roles;
 use App\Domains\Auth\Public\Notifications\PromotionRequestedNotification;
 use App\Domains\Auth\Public\Support\AuthConfigKeys;
@@ -18,12 +17,6 @@ beforeEach(function () {
     setParameterValue(AuthConfigKeys::NON_CONFIRMED_COMMENT_THRESHOLD, AuthConfigKeys::DOMAIN, 0);
     setParameterValue(AuthConfigKeys::NON_CONFIRMED_TIMESPAN, AuthConfigKeys::DOMAIN, 0);
 });
-
-function submitPromotionRequestFor($user): void
-{
-    $result = app(AuthPublicApi::class)->requestPromotion($user->id, commentCount: 5);
-    expect($result->success)->toBeTrue();
-}
 
 describe('promotion requested staff notification', function () {
     it('notifies other active staff when a promotion request is submitted', function () {

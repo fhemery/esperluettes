@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Auth\Public\Api\AuthPublicApi;
 use App\Domains\Auth\Private\Models\ActivationCode;
 use App\Domains\Auth\Private\Models\PromotionRequest;
 use App\Domains\Auth\Private\Models\User;
@@ -75,6 +76,15 @@ function acceptPromotionRequest(PromotionRequest $request, User $decidedBy): boo
 function rejectPromotionRequest(PromotionRequest $request, User $decidedBy, string $reason = 'Rejected'): bool
 {
     return app(PromotionRequestService::class)->rejectRequest($request->id, $decidedBy->id, $reason);
+}
+
+/**
+ * Submit a promotion request through the public API and assert it succeeded.
+ */
+function submitPromotionRequestFor(User $user): void
+{
+    $result = app(AuthPublicApi::class)->requestPromotion($user->id, commentCount: 5);
+    expect($result->success)->toBeTrue();
 }
 
 function alice(TestCase $t, array $overrides = [], bool $isVerified = true, array $roles = [Roles::USER_CONFIRMED]): User
