@@ -66,6 +66,8 @@ The promotion workflow:
 
 A PDF upload is accepted via `ComplianceService`, stored on the `private` disk under `parental_authorizations/`. Once the file is stored, the user's `parental_authorization_verified_at` is set, and role assignment proceeds.
 
+The post-compliance destination is `url.intended`, set by the middleware's private `rememberIntended()`: the full URL for normal requests; for XHR requests (`X-Requested-With`, e.g. `fetchFragment`) the request URL is never stored (it is an HTML fragment) — only a same-host `Referer` is, otherwise nothing (dashboard fallback). The same-host check prevents an open redirect.
+
 The compliance check result is cached in the session under `user_compliance_checked_{userId}` to avoid repeated DB queries on every request.
 
 ---
