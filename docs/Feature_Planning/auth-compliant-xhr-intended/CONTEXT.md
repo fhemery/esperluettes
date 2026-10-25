@@ -4,6 +4,12 @@
 
 ## 0. Handoff
 
+### VERIFY → WRAP (2026-10-25)
+
+Single checklist row PASS in a real browser (see §5). No spec kept: a one-off
+driver flow was used, nothing to delete or promote. Nothing flaky, nothing
+manual.
+
 ### BUILD phase 1 → WRAP (2026-10-25)
 
 As planned, no deviation. XHR with a missing/foreign Referer leaves any earlier `url.intended` untouched (A3).
@@ -138,7 +144,7 @@ Referer may be stripped by policy: falls back to dashboard, harmless.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Fanart tab as non-compliant user | After accepting CGU, back on the story page, not raw HTML | |
+| Fanart tab as non-compliant user | After accepting CGU, back on the story page, not raw HTML | ✅ |
 
 ### 3.3 Open items
 
@@ -161,3 +167,10 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE: `rememberIntended` in EnsureUserCompliance + 4 Pest tests in ComplianceTest (gate green).
+- VERIFY (2026-10-25) — PASS. e2e instance (:8080, freshly seeded), `confirmed@e2e.test`
+  (CGU not accepted), run-app driver flow: login lands on `/compliance/terms`; opening
+  `/stories/histoire-e2e-1` (no compliance middleware) works; clicking the Fanarts tab
+  (`fetchFragment` XHR) redirects to `/compliance/terms`; accepting lands on
+  `/stories/histoire-e2e-1` with the Chapitres/Fanarts tabs rendered, not raw HTML.
+  Both screenshots opened and checked. Redirect/storage rules (foreign or missing
+  Referer, non-XHR) are covered by the Pest tests, not repeated in the browser.
