@@ -86,6 +86,6 @@ never rename it.
 | User notifications on publish | [Notification](../Notification/README.md) via `NotificationPublicApi::createBroadcastNotification()` | Central delivery pipeline shared across all domains |
 | Domain event bus | [Events](../Events/README.md) via `EventBus::emit()` | Cross-domain audit log and event routing |
 | Admin sidebar registration | [Administration](../Administration/README.md) via `AdminNavigationRegistry` | Shared admin layout owns navigation state |
-| Image storage, variants and display | [Media](../Media/README.md) via `MediaPublicApi` | Media owns image handling for every domain; News stores paths only |
+| Image storage, variants and display | [Media](../Media/README.md) via `MediaPublicApi` | Media owns image handling for every domain; News stores paths only. Advanced mode also offers sound blocks (MP3, 10 MB, `storePublicFile` in `news/`); `NewsMediaUsageProvider` claims their paths, and switching back to simple mode is refused while one exists |
 | Comment threads on articles | [Comment](../Comment/README.md) via `CommentPolicyRegistry`, `CommentMaintenancePublicApi` and `CommentPublicApi` | Comment owns storage, UI, moderation and lifecycle for every commentable entity; News supplies the policy for entity type `news` |
 | Block sanitization, rendering and text length | [Editor](../Editor/README.md) via `EditorPublicApi` (`sanitizeText`, `render`, `plainTextLength`) | Editor owns the block schema and the authoring components; News owns the `content_blocks` column and the derived `content` cache |

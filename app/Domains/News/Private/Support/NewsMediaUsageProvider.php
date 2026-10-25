@@ -24,7 +24,7 @@ final class NewsMediaUsageProvider implements MediaUsageProvider
 
         foreach (News::query()->whereNotNull('content_blocks')->get(['content_blocks']) as $news) {
             foreach ((array) $news->content_blocks as $block) {
-                if (($block['type'] ?? null) === 'image' && !empty($block['path'])) {
+                if ((($block['type'] ?? null) === 'image' ||($block['type'] ?? null) === 'audio') &&!empty($block['path'])) {
                     yield $block['path'];
                 }
             }

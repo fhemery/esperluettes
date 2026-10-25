@@ -252,3 +252,160 @@ describe('News advanced mode — HTTP request', function () {
         expect(News::count())->toBe($before);
     });
 });
+
+function soundPayload(array $block): array
+{
+    return newsData([
+        'mode' => 'advanced',
+        'blocks_order' => 'b0',
+        'blocks' => ['b0' => array_merge(['type' => 'audio'], $block)],
+    ]);
+}
+
+function mp3(int $kb = 100): UploadedFile
+{
+    return UploadedFile::fake()->create('song.mp3', $kb, 'audio/mpeg');
+}
+
+describe('News advanced mode — sound blocks', function () {
+    it('stores an uploaded sound on the public disk and renders a player', function () {
+        $this->actingAs(admin($this))
+            ->post(route('news.admin.store'), soundPayload(['sound' => mp3()]))
+            ->assertSessionHasNoErrors();
+
+        $news = News::query()->latest('id')->firstOrFail();
+        $block = $news->content_blocks[0];
+        expect($block['type'])->toBe('audio');
+        expect($block['path'])->toStartWith('news/')->toEndWith('.mp3');
+        Storage::disk('public')->assertExists($block['path']);
+        expect($news->content)->toContain('<audio');
+    });
+
+    it('keeps the sound caption', function () {
+        $this->actingAs(admin($this))
+            ->post(route('news.admin.store'), soundPayload(['sound' => mp3(), 'caption' => '  Theme  ']))
+            ->assertSessionHasNoErrors();
+
+        $news = News::query()->latest('id')->firstOrFail();
+        expect($news->content_blocks[0]['caption'])->toBe('Theme');
+        expect($news->content)->toContain('Theme');
+    });
+
+    it('lets a moderator add a sound block', function () {
+        $this->actingAs(moderator($this))
+            ->post(route('news.admin.store'), soundPayload(['sound' => mp3()]))
+            ->assertSessionHasNoErrors();
+
+        expect(News::query()->count())->toBe(1);
+    });
+
+    it('rejects a plain user', function () {
+        $this->actingAs(alice($this, [], true, [\App\Domains\Auth\Public\Api\Roles::USER]))
+            ->post(route('news.admin.store'), soundPayload(['sound' => mp3()]))
+            ->assertRedirect(route('dashboard'));
+
+        expect(News::query()->count())->toBe(0);
+    });
+
+    it('rejects a non-mp3 sound', function () {
+        app()->setLocale('fr');
+        $this->actingAs(admin($this))
+            ->post(route('news.admin.store'), soundPayload(['sound' => UploadedFile::fake()->create('a.wav', 10, 'audio/wav')]))
+            ->assertSessionHasErrors(['blocks.b0.sound' => __('news::admin.validation.audio_type')]);
+
+        expect(News::query()->count())->toBe(0);
+    });
+
+    it('rejects a sound over 10 MB', function () {
+        app()->setLocale('fr');
+        $this->actingAs(admin($this))
+            ->post(route('news.admin.store'), soundPayload(['sound' => mp3(11000)]))
+            ->assertSessionHasErrors(['blocks.b0.sound' => __('news::admin.validation.audio_max')]);
+
+        expect(News::query()->count())->toBe(0);
+    });
+
+    it('rejects a sound block without a file', function () {
+        app()->setLocale('fr');
+        $this->actingAs(admin($this))
+            ->post(route('news.admin.store'), soundPayload(['caption' => 'x']))
+            ->assertSessionHasErrors(['blocks' => __('news::admin.validation.audio_required')]);
+
+        expect(News::query()->count())->toBe(0);
+    });
+
+    it('keeps the stored sound on a round trip without re-upload', function () {
+        $news = newsSvc()->create(soundPayload(['sound' => mp3()]));
+        $path = $news->content_blocks[0]['path'];
+
+        $this->actingAs(admin($this))
+            ->put(route('news.admin.update', $news), soundPayload(['path' => $path, 'caption' => 'c']) + ['slug' => $news->slug])
+            ->assertSessionHasNoErrors();
+
+        expect($news->refresh()->content_blocks[0]['path'])->toBe($path);
+    });
+
+    it('rejects a sound removed without a replacement', function () {
+        $news = newsSvc()->create(soundPayload(['sound' => mp3()]));
+        $path = $news->content_blocks[0]['path'];
+
+        $this->actingAs(admin($this))
+            ->put(route('news.admin.update', $news), soundPayload(['path' => $path, 'sound_remove' => 'true']) + ['slug' => $news->slug])
+            ->assertSessionHasErrors('blocks');
+
+        expect($news->refresh()->content_blocks[0]['path'])->toBe($path);
+    });
+
+    it('replaces the sound with a new upload', function () {
+        $news = newsSvc()->create(soundPayload(['sound' => mp3()]));
+        $old = $news->content_blocks[0]['path'];
+
+        $this->actingAs(admin($this))
+            ->put(route('news.admin.update', $news), soundPayload(['path' => $old, 'sound_remove' => 'true', 'sound' => mp3()]) + ['slug' => $news->slug])
+            ->assertSessionHasNoErrors();
+
+        $new = $news->refresh()->content_blocks[0]['path'];
+        expect($new)->not->toBe($old);
+        Storage::disk('public')->assertExists($new);
+    });
+
+    it('rejects a sound path outside the news folder', function () {
+        foreach (['fanart/1/x.mp3', 'news/x.jpg', 'news/../fanart/x.mp3'] as $path) {
+            $this->actingAs(admin($this))
+                ->post(route('news.admin.store'), soundPayload(['path' => $path]))
+                ->assertSessionHasErrors('blocks');
+        }
+
+        expect(News::query()->count())->toBe(0);
+    });
+
+    it('refuses switching to simple mode while a sound block exists', function () {
+        $news = newsSvc()->create(soundPayload(['sound' => mp3()]));
+
+        $this->actingAs(admin($this))
+            ->put(route('news.admin.update', $news), newsData(['slug' => $news->slug, 'mode' => 'simple', 'content' => '<p>x</p>']))
+            ->assertSessionHasErrors('mode');
+
+        expect($news->refresh()->content_blocks[0]['type'])->toBe('audio');
+    });
+
+    it('shows the sound player to a guest on a published news', function () {
+        $news = newsSvc()->create(soundPayload(['sound' => mp3()]) + ['published_at' => now()->subMinute()]);
+        $news->update(['status' => 'published']);
+
+        auth()->logout();
+        $this->get(route('news.show', ['slug' => $news->slug]))
+            ->assertOk()
+            ->assertSee('<audio controls', false);
+    });
+});
+
+describe('NewsMediaUsageProvider — sounds', function () {
+    it('claims sound block paths', function () {
+        newsSvc()->create(soundPayload(['path' => 'news/abc.mp3']));
+
+        $paths = iterator_to_array((new NewsMediaUsageProvider())->usedPaths(), false);
+
+        expect($paths)->toContain('news/abc.mp3');
+    });
+});

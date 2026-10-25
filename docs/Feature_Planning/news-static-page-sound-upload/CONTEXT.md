@@ -41,6 +41,11 @@
 - Trap for tests: `$this->blade()` renders have no `$errors`; `<x-media::sound-field>` reads `$errors->get($name)`, so a test rendering an audio block must `view()->share('errors', new ViewErrorBag())` (real pages share it).
 - Chapter/News/StaticPage forms offer no `audio` yet (`blockTypes` default unchanged).
 
+### BUILD phase 3 → next (2026-10-25)
+
+- Shipped as planned; StaticPage should mirror `NewsService::resolveContent()` audio branch. Additions beyond the plan: path check also rejects `..`; mode-switch refusal lives in `NewsService::update()` (ValidationException on `mode`, key `audio_mode_switch`) since the plan named no place.
+- The form prop is `:block-types` (kebab) on `<x-editor::multi>`. A plain `user` hitting the admin store route is redirected to the dashboard (route middleware), not 403 — tests assert the redirect. Tests helpers: `alice($this, [], true, [Roles::USER])` for a non-confirmed user; there is no `user()` helper.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -211,7 +216,7 @@ No new edge. `EditorPrivate → MediaPublic` exists (image block); `NewsPrivate/
 | 1 | Media — public file storage, GC of public `.mp3`, sound-field `removeName` — **risky** | M | — | DONE |
 | 1v | Checkpoint — Secret Gift and Fanart sound fields, image picker | S | 1 | DONE |
 | 2 | Editor — built-in opt-in `audio` block type (+ Story guard test) | M | 1 | DONE |
-| 3 | News — enable sound blocks | M | 2 | TODO |
+| 3 | News — enable sound blocks | M | 2 | DONE |
 | 4 | StaticPage — enable sound blocks | S | 3 | TODO |
 
 5 rows, 4 BUILD phases + 1 checkpoint. Working agreement: one phase = one commit; failing test first; no phase N+1 before N's acceptance holds; re-ordering is surfaced, not taken silently.
