@@ -17,9 +17,9 @@ REFINE → DESIGN → PLAN → BUILD → VERIFY → WRAP
 
 | Step | Produces | Talks to you? |
 |------|----------|---------------|
-| REFINE | `01-functional.md` | yes — it interviews you |
-| DESIGN | `02-architecture.md` | yes — you arbitrate tradeoffs |
-| PLAN | `03-plan.md` | no |
+| REFINE | `01-functional.md` | only on blocking points |
+| DESIGN | `02-architecture.md` | only on tradeoffs that are costly to reverse |
+| PLAN | `03-plan.md` | almost never |
 | BUILD | code + tests, one subagent per phase | no |
 | VERIFY | `shots/`, filled QA checklist | no |
 | WRAP | `README.md`, backlog update | no |
@@ -37,15 +37,16 @@ at those folders is
 | `/next-task` | start the first `TODO` row — single-session only, see below |
 | `/continue-task` | resume the `WIP` task at whatever step its files say it reached |
 
-**One step per chat.** After each step, `/clear` and run `/continue-task`. The
-next step reads the artifact on disk, not the conversation that produced it —
-that is the whole reason the artifacts exist. A REFINE interview transcript is
-usually the largest thing in the window and carries nothing `01-functional.md`
-does not.
+REFINE, DESIGN and PLAN each run in their own subagent and chain on their own:
+they ask you only when a point is blocking, otherwise they record their
+judgement calls as assumptions in `DECISIONS.md` and the loop moves on. Each
+step reads the artifact on disk, not the conversation that produced it — that is
+the whole reason the artifacts exist.
 
 The `Mode` column in the backlog controls how often the loop stops:
-`interactive` stops at every step for approval, `auto` runs to the end and
-reports once. Use `auto` for bugfixes and chores.
+`interactive` stops once after PLAN so you can review the assumptions before
+BUILD, `auto` runs to the end and reports once (and never interviews). Use
+`auto` for bugfixes and chores.
 
 ## Definition of done
 

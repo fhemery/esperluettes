@@ -8,8 +8,17 @@ description: Turn a functional specification into a technical design, letting th
 Turn `01-functional.md` into `02-architecture.md`: how the feature is built, with
 every real fork in the road arbitrated by the user rather than by you.
 
-**Run this in the main thread** — the user picks the tradeoffs. Delegate
-research to read-only agents.
+**Run this in the `architecture-designer` subagent.** It has a fresh context and
+can ask the user directly (Claude Code: `AskUserQuestion`), but only about a
+**blocking** tradeoff. Delegate research to read-only agents.
+
+A tradeoff is **blocking** when both sides are reasonable *and* the choice is
+expensive to reverse (see Step 2). If every tradeoff has a clearly better option,
+or is cheap to reverse, do not ask: pick the recommended option, record it as an
+assumption in `DECISIONS.md` (with the rejected options and what would flip it),
+and hand back so the loop continues without waiting for the user. If the host
+gives you no way to ask, stop at the first blocking tradeoff and report it with
+your recommendation; the orchestrator asks and re-dispatches you.
 
 Output:
 [`templates/02-architecture.md`](../../loop/templates/02-architecture.md), plus
@@ -58,9 +67,10 @@ the choice is expensive to reverse. Typically:
 Anything that is not one of these, decide yourself and state it. Do not make the
 user arbitrate naming or folder layout.
 
-## Step 3 — Present each tradeoff
+## Step 3 — Present each blocking tradeoff
 
-One at a time, in this shape:
+Only the blocking ones; the others are decided and recorded, not presented. One
+at a time, in this shape:
 
 > **<the question>**
 > - **A (recommended)** — <option>. <one-line consequence>
@@ -113,11 +123,11 @@ Run `pnpm run gate` and commit `02-architecture.md` and `DECISIONS.md` (follow
 the `commit` skill) before handing back.
 
 Hand back a five-line summary: placement, data model in one line, the tradeoffs
-locked, and any new deptrac edge.
+locked (say which were asked and which assumed), and any new deptrac edge.
 
 ## In `auto` mode
 
 Pick the recommended option everywhere, record each as an assumption in
 `DECISIONS.md`, and keep the design as small as the fix allows. If a tradeoff
-turns out to be genuinely expensive to reverse, stop and ask anyway — `auto` is
-about speed on small things, not about taking large decisions alone.
+turns out to be genuinely expensive to reverse, ask anyway — `auto` is about
+speed on small things, not about taking large decisions alone.

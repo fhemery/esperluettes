@@ -71,17 +71,19 @@ most expensive rule to break.
 
 | Step | How to run it |
 |------|---------------|
-| REFINE | invoke the `refine-feature` skill **in this thread** (it interviews the user) |
-| DESIGN | invoke the `design-architecture` skill **in this thread** |
+| REFINE | spawn the `feature-refiner` agent (asks the user only if a point is blocking) |
+| DESIGN | spawn the `architecture-designer` agent (asks the user only if a tradeoff is blocking) |
 | PLAN | spawn the `feature-planner` agent |
 | BUILD | spawn one `phase-implementer` agent **per phase** of `03-plan.md`; a checkpoint row (`2v`) goes to `visual-verifier` instead — see below |
 | VERIFY | spawn the `visual-verifier` agent |
 | WRAP | spawn the `task-wrapper` agent |
 
-Never run REFINE or DESIGN in a subagent: a subagent cannot talk to the user, so
-the interview would be lost. Conversely, never run PLAN / BUILD / VERIFY / WRAP
-in this thread — they need no user input, so there is nothing to gain and a
-whole context to lose. Only if the host genuinely cannot spawn agents (the
+Never run any step in this thread: REFINE, DESIGN and PLAN subagents ask the
+user themselves when a point is blocking, and the others need no user input, so
+there is nothing to gain and a whole context to lose. If a subagent reports a
+blocking point instead of asking (its host cannot ask), you ask the user — one
+question at a time, with the subagent's recommended default first — append the
+answer to `DECISIONS.md`, and re-dispatch the same step. Only if the host genuinely cannot spawn agents (the
 spawn/Task capability is missing) do you run them here via their skills, and
 then you say so explicitly. A model refusal, rate limit, or premium-credit
 exhaustion is not that case — pick another available model and keep spawning.
@@ -102,10 +104,13 @@ will then carry for the rest of the session.
 Dispatch each step in order. After each one, update the backlog status — your
 own entry only, never another session's — then:
 
-- `interactive` — stop, summarise the step's output in a few lines, and tell the
-  user to `/clear` and run `/continue-task`. **One step per chat.** The next step
-  reads the artifact, not this conversation.
-  **BUILD is the exception: chain its phases in one chat.** Each phase runs in
+- `interactive` — **REFINE → DESIGN → PLAN chain without stopping**: after each,
+  give a two-line progress report (artifact written, assumptions made) and
+  dispatch the next. The step's own subagent already asked the user whatever was
+  blocking. Stop after PLAN, summarise the assumptions (the ones the user is
+  likeliest to reverse first) and the phase index, and wait for the go before
+  BUILD; if the user wants a fresh chat, `/clear` then `/continue-task`.
+  **BUILD chains its phases in one chat.** Each phase runs in
   its own `phase-implementer`, so the orchestrator only ever carries a two-line
   report per phase — clearing between them buys nothing and costs a re-read of
   the backlog, the plan and `DECISIONS.md` every time. Stop between phases only
@@ -131,7 +136,8 @@ plan. Never paste a subagent's full output into your thread.
 
 Stop and ask the user when:
 
-- a step produces a **blocking** open question;
+- a step reports a **blocking** point it could not ask itself (a point it did
+  ask, and got answered, is not a stop);
 - the gate (`pnpm run gate`) fails twice on the same phase for the same reason;
 - reality contradicts the plan (a needed API does not exist, a decision turns
   out to be unimplementable);

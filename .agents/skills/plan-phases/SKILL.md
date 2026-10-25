@@ -11,6 +11,14 @@ independently shippable, testable, and revertable.
 Output:
 [`templates/03-plan.md`](../../loop/templates/03-plan.md).
 
+## Asking the user
+
+Rarely needed. Ask (Claude Code: `AskUserQuestion`) only when a point blocks the
+cut itself — e.g. the architecture admits two incompatible phasings and neither
+is clearly better. Everything else goes in "Open items" and in your report, and
+the loop keeps going. If you cannot ask, report the blocking point instead of
+guessing.
+
 ## Read first
 
 `01-functional.md`, `02-architecture.md`, `DECISIONS.md`. Do not re-open

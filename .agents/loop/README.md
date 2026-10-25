@@ -22,17 +22,26 @@ backlog and the task folders.
 
 | Step | Skill | Runs | Produces |
 |------|-------|------|----------|
-| REFINE | `refine-feature` | **main thread** — it interviews the user | `01-functional.md` |
-| DESIGN | `design-architecture` | **main thread** — the user picks tradeoffs | `02-architecture.md` |
-| PLAN | `plan-phases` | subagent, user approves the result | `03-plan.md` |
+| REFINE | `refine-feature` | subagent `feature-refiner` — asks the user only about blocking points | `01-functional.md` |
+| DESIGN | `design-architecture` | subagent `architecture-designer` — asks only about blocking tradeoffs | `02-architecture.md` |
+| PLAN | `plan-phases` | subagent `feature-planner` — asks only if the cut itself is blocked | `03-plan.md` |
 | BUILD | `implement-phase` | one subagent **per phase**; a checkpoint row (`2v`) runs `verify-visually` instead | code + tests, green gate |
 | VERIFY | `verify-visually` | subagent (uses `run-app`) | `shots/`, filled QA checklist |
 | WRAP | `wrap-task` | subagent — opens with a retro | `README.md`, backlog updates, `loop-improvements/` findings |
 
-A subagent has no channel to the user: it can only report back. That is why
-REFINE and DESIGN are *not* subagents. They may still spawn read-only research
-agents to answer "how does X already work?" before asking the user a question
-the codebase already answers.
+REFINE, DESIGN and PLAN subagents can ask the user a question themselves
+(Claude Code: `AskUserQuestion`), but **only about a blocking point** — one that
+is the user's call, could reasonably go either way, and is costly to undo. With
+no blocking point they write their artifact, record every judgement call as an
+assumption in `DECISIONS.md`, and the orchestrator dispatches the next step
+immediately, without waiting for the user. They may spawn read-only research
+agents to answer "how does X already work?" before asking anything the
+codebase already answers.
+
+Where the host cannot let a subagent ask (a tool without that capability), the
+subagent stops at its first blocking point and reports it with a recommended
+default; the orchestrator asks the user and re-dispatches. Nothing is guessed
+silently.
 
 ## Status vocabulary
 
@@ -55,13 +64,16 @@ an interrupted session resumes cheaply.
 
 The `Mode` column controls how often the loop stops for the user:
 
-- `interactive` (default) — stop at every step boundary for approval (typically
-  one step — or one BUILD phase — per chat, then `/continue-task`)
+- `interactive` (default) — REFINE, DESIGN and PLAN chain without stopping as
+  long as none hits a blocking point (when one does, that subagent asks the
+  user, then the chain resumes). The loop then stops once, after PLAN, so the
+  user can review the accumulated assumptions before BUILD; BUILD phases chain
+  as before and stop before VERIFY.
 - `auto` — run all remaining steps without stopping for approval; report at the
-  end only. For bugfixes and small chores. REFINE and DESIGN degrade to "write
-  down the assumptions and continue" rather than interviewing. Only pause if a
-  blocking question or other stop condition fires. Do not auto-start the next
-  backlog `TODO`.
+  end only. For bugfixes and small chores. REFINE and DESIGN never interview:
+  they write down the assumptions and continue. Only pause if a blocking
+  question or other stop condition fires. Do not auto-start the next backlog
+  `TODO`.
 
 `auto` removes the **approval** stops, not the **context** boundaries. It still
 dispatches one subagent per step and per BUILD phase, exactly as `interactive`
@@ -97,11 +109,12 @@ costs**. Three rules follow:
    PLAN, BUILD, VERIFY, WRAP — happens in a subagent with a fresh context. If
    you catch yourself opening an Edit in the orchestrator thread, that is the
    bug.
-2. **One step per thread, one phase per subagent.** REFINE and DESIGN each end
-   with `/clear`, then `/continue-task`. DESIGN needs `01-functional.md` and
-   `DECISIONS.md` — about 8k tokens — not the REFINE interview transcript that
-   produced them. That transcript is usually the largest object in the window
-   and it carries no information the artifact does not.
+2. **One step per subagent, one phase per subagent.** REFINE, DESIGN and PLAN
+   each run in their own subagent, so DESIGN starts from `01-functional.md` and
+   `DECISIONS.md` — about 8k tokens — not from the REFINE interview transcript
+   that produced them. That transcript is usually the largest object in the
+   window and it carries no information the artifact does not; keeping it in a
+   subagent keeps it out of the orchestrator.
 3. **Command output is not a document.** Never let a full test run or gate run
    land in the transcript; it stays there and is re-read for the rest of the
    session. Redirect and read only what failed:

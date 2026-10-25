@@ -9,8 +9,21 @@ Turn `00-request.md` into `01-functional.md`: a specification where every
 statement is either something the user confirmed or an assumption written down
 as one.
 
-**Run this in the main thread.** You need to talk to the user. Delegate
-*research* to read-only agents; never delegate the interview.
+**Run this in the `feature-refiner` subagent.** It has a fresh context and can
+ask the user directly (Claude Code: `AskUserQuestion`), but only when a point is
+**blocking**. Delegate *research* to read-only agents.
+
+A point is **blocking** when it is the user's call, a reasonable answer could go
+either way, and a wrong guess would change the spec's shape or be costly to undo
+(who sees what, what happens on delete, a notification that may leak). Labels,
+ordering and wording are never blocking: pick the precedent and record it.
+
+**No blocking point → do not interview.** Write the spec from the request plus
+codebase precedent, put every judgement call in the assumptions table of
+`DECISIONS.md`, commit, and hand back so the loop continues without waiting for
+the user. If the host gives you no way to ask, stop at the first blocking point
+and report it with your recommended default; the orchestrator asks and
+re-dispatches you.
 
 Output: `docs/Feature_Planning/<slug>/01-functional.md` from
 [`templates/01-functional.md`](../../loop/templates/01-functional.md), plus rows
@@ -33,7 +46,11 @@ feature has already shipped, its compact record is in
 **Never ask the user something the code answers.** Every wasted question spends
 the attention you need for the questions only they can answer.
 
-## Step 2 — Interview
+## Step 2 — Interview (blocking points only)
+
+Triage first: list what you cannot settle from the request, the code or a
+prior feature, and keep only the blocking ones. Interview on those; the rest
+become assumptions. If the list is empty, skip to Step 3.
 
 The discipline, in order of importance:
 
@@ -68,9 +85,11 @@ For each item, decide in this order:
 1. Not applicable → note "N/A — <reason>", say nothing to the user.
 2. The code or an existing feature settles it → note the answer, mention it in
    passing, do not ask.
-3. Genuinely the user's call → ask.
+3. Genuinely the user's call **and blocking** → ask. Genuinely the user's call
+   but non-blocking → record your recommended default as an assumption.
 
-The most commonly forgotten items in this app, ask them explicitly every time:
+The most commonly forgotten items in this app — settle each explicitly every
+time (ask if blocking, otherwise assume and record):
 
 - **non-confirmed `user` vs `user-confirmed`** — the distinction is invisible in
   most requests and load-bearing in most features;
@@ -81,11 +100,14 @@ The most commonly forgotten items in this app, ask them explicitly every time:
 
 ## Step 4 — Replay
 
-Before writing the document, read the whole flow back to the user as a short
-narrative — "a confirmed reader highlights a passage, …" — including the edge
-paths. Reading it back catches contradictions that a question list never does.
+Before writing the document, read the whole flow back as a short narrative —
+"a confirmed reader highlights a passage, …" — including the edge paths.
+Reading it back catches contradictions that a question list never does. If you
+interviewed, say it to the user; if not, put it in your head and fix what
+doesn't hold.
 
-Then list what you are **assuming without having asked**, so the user can veto.
+Then list what you are **assuming without having asked**. It goes in the
+assumptions table and in your summary, so the user can veto it later.
 
 ## Step 5 — Write
 
@@ -106,10 +128,11 @@ sibling task), and an uncaught broken link here is exactly what sits invisible
 until an unrelated change stumbles on it later.
 
 Then hand back to the orchestrator with a five-line summary: what the feature
-is, the two or three decisions that shaped it, and anything still open.
+is, the two or three decisions that shaped it, the assumptions the user is most
+likely to want to reverse, and anything still open (non-blocking only — a
+blocking one is asked, never left open).
 
 ## In `auto` mode
 
-Do not interview. Write the spec from the request plus codebase precedent, put
-every judgement call in the assumptions table of `DECISIONS.md`, and flag in
-your summary the ones the user is most likely to want to reverse.
+Never interview, even for a blocking point you would otherwise ask: record your
+recommended default as an assumption and flag it in your summary.
