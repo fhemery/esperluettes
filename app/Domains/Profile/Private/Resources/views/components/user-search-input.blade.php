@@ -23,8 +23,7 @@
         async doSearch() {
             this.loading = true;
             try {
-                const r = await fetch(@js($searchUrl) + '?q=' + encodeURIComponent(this.query));
-                const html = await r.text();
+                const html = (await window.fetchFragment(@js($searchUrl) + '?q=' + encodeURIComponent(this.query))) ?? '';
                 this.$refs.results.innerHTML = html;
                 this.open = this.$refs.results.innerHTML.trim() !== '';
             } finally {

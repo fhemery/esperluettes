@@ -71,7 +71,7 @@
 - A class component whose name differs from its tag (`<x-a::foo-bar>`) needs an explicit `Blade::component` alias.
 - `x-show` changes land a frame late: measure layout from a `ResizeObserver` on the toggled element.
 - In a fragment injected by `x-html`, defer state-touching `x-init` work with `$nextTick`.
-- Load an HTML fragment with `window.fetchFragment` (or import `fragment-fetch.js`), not raw `fetch`: it navigates on a redirect and reloads on 401 / 419 instead of injecting a whole page; inject nothing on `null`. Many older call sites in other domains still use raw `fetch`.
+- Load an HTML fragment with `window.fetchFragment` (or import `fragment-fetch.js`), not raw `fetch`: it navigates on a redirect and reloads on 401 / 419 instead of injecting a whole page; inject nothing on `null`. The remaining raw `fetch` HTML loaders are deliberate: public routes (comment list, header search), the report form (guest-visible, redirects to `/login` itself), and load-more calls that read response headers (Notification).
 - `x-data` arguments are frozen at init: re-key a nested component whose arguments change (`x-for … :key`), never wrap it in `x-if`.
 
 **Confirm-modal always moves focus on open.** It forwards `focusable` to `modal.blade.php` (no opt-out). Covered by `Tests/Feature/View/Components/ConfirmModalA11yTest.php`.

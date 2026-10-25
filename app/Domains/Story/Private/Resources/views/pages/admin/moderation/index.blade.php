@@ -98,9 +98,8 @@
                                             open = false;
                                         } else {
                                             loading = true;
-                                            fetch('{{ route('story.admin.moderation.chapters', $story->id) }}')
-                                                .then(r => r.text())
-                                                .then(h => { html = h; open = true; loading = false; })
+                                            window.fetchFragment('{{ route('story.admin.moderation.chapters', $story->id) }}')
+                                                .then(h => { if (h !== null) { html = h; open = true; } loading = false; })
                                                 .catch(() => { loading = false; });
                                         }
                                     "

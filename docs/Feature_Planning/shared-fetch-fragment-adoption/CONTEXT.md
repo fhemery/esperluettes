@@ -20,6 +20,10 @@
 - Likeliest to be reversed: Comment list and Search dropdown excluded (A1, A2); Settings keeps the already-switched tab on `null` (A4).
 - No PHP, no route, no i18n; only inline Alpine in 4 Blade files plus a doc line in Shared.
 
+### BUILD phase 1 → WRAP (2026-10-25)
+
+- Shipped as planned, no deviation. No automated test covers the inline Alpine; browser check (§3.2) not done.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -155,7 +159,7 @@ An inline script on a page without the Shared layout would lack
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Adopt `fetchFragment` in the four loaders | S | — | TODO |
+| 1 | Adopt `fetchFragment` in the four loaders | S | — | DONE |
 
 ### Phase 1 — Adopt `fetchFragment` in the four loaders
 
@@ -207,4 +211,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE: four loaders adopt `window.fetchFragment`; Shared AGENTS.md line reworded; gate green.
