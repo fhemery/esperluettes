@@ -43,7 +43,6 @@ scoped to the task that actually changed.
 - **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Sound upload for news and static pages** · `news-static-page-sound-upload/` · interactive · TODO
-- **Extend fanart Discord endpoint payload** · `fanart-discord-endpoint-fields/` · auto · WIP:VERIFY
 
 ## Done
 
@@ -52,6 +51,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`fanart-discord-endpoint-fields`](_done/fanart-discord-endpoint-fields.md) · Discord fanart feed items gain `artist`, `authors`, `chapterSlug` and plain-text `description` (bot must be updated to use them)
 - [`promotion-requested-user-slug`](_done/promotion-requested-user-slug.md) · `auth.promotion.requested` payload gains the requester's `user_slug` (new rows only), exposed as-is by the Discord endpoint
 - [`prevent-chapter-copy`](_done/prevent-chapter-copy.md) · chapter body blocks copy / cut / drag-out for everyone but authors and co-authors; selection, quotes and annotations unaffected (deterrent only)
 - [`calendar-activity-time-picker`](_done/calendar-activity-time-picker.md) · date fields split into date + time inputs over a hidden UTC value (Calendar, Story chapters)
