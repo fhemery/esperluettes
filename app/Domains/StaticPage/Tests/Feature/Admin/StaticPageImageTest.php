@@ -208,3 +208,16 @@ describe('Static page admin image endpoints authorization', function () {
         expect($page->header_image_path)->toBeNull();
     });
 });
+
+describe('StaticPageMediaUsageProvider — sounds', function () {
+    it('claims sound block paths', function () {
+        StaticPage::factory()->create([
+            'slug' => 'avec-son',
+            'content_blocks' => [['type' => 'audio', 'path' => 'static-pages/abc.mp3']],
+        ]);
+
+        $paths = iterator_to_array((new StaticPageMediaUsageProvider())->usedPaths(), false);
+
+        expect($paths)->toContain('static-pages/abc.mp3');
+    });
+});

@@ -14,7 +14,8 @@ use Symfony\Component\HttpFoundation\Response;
  * Sole entry point other domains use for managed images and private files.
  * Media is addressed by storage path — no ids, no reference table.
  *
- * Two halves: public images have variants and URLs; private images
+ * Two halves: public images have variants and URLs (raw public files from
+ * storePublicFile have a URL but no variants); private images
  * (storePrivate, optionally with variants) and raw private files
  * (storePrivateFile) have no URL and are only ever streamed back by the domain
  * that owns their visibility rules.
@@ -61,6 +62,21 @@ class MediaPublicApi
     public function storePrivateFile(string $scope, UploadedFile $file): string
     {
         return $this->media->storePrivateFile($scope, $file);
+    }
+
+    /**
+     * Store an uploaded file's raw bytes on the public disk under a public
+     * scope; returns its stored path (extension guessed from the MIME type, not
+     * the client name). Throws for a private scope.
+     *
+     * No processing, no variants and **no content validation** — the caller
+     * validates the upload. URL via originalUrl(). GC sweeps only `.mp3` among
+     * non-image public files, so a consumer storing one must claim it in its
+     * MediaUsageProvider; any other extension would never be collected.
+     */
+    public function storePublicFile(string $scope, UploadedFile $file): string
+    {
+        return $this->media->storePublicFile($scope, $file);
     }
 
     /**

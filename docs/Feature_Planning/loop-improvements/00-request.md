@@ -67,6 +67,20 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
    the test and fell back to a mocked test. Fix: one line in
    `app/Domains/Notification/AGENTS.md` invariants.
 
+9. **Subagents edited files with `sed` despite the no-sed rule.**
+   *(news-static-page-sound-upload, phase 4 / VERIFY)* Three times, subagents
+   modified file content with `sed`, against CLAUDE.md's Edit/Write-only rule.
+   The rule is in CLAUDE.md, which spawned subagents do not reliably weigh.
+   Fix: the build/verify skills (or the subagent launch template in
+   `.agents/loop/`) restate "never edit with sed/awk/Python/heredocs — use
+   Edit/Write" in the prompt they hand to subagents.
+10. **Interactive mode ran BUILD to VERIFY inconsistently.**
+    *(news-static-page-sound-upload)* The loop was changed mid-task (commit
+    `24361386`) so interactive mode chains VERIFY after BUILD and stops before
+    WRAP. Already applied; check that `.agents/loop/README.md`, the
+    `continue-task` / `next-task` skills and the backlog status wording all say
+    the same thing.
+
 ## Why
 
 So that what one task learns the hard way is fixed for the next, instead of

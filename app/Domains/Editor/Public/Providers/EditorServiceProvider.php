@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Editor\Public\Providers;
 
+use App\Domains\Editor\Private\Blocks\AudioBlockType;
 use App\Domains\Editor\Private\Blocks\ImageBlockType;
 use App\Domains\Editor\Private\Blocks\TextBlockType;
 use App\Domains\Editor\Public\Blocks\EditorBlockRegistry;
@@ -16,10 +17,11 @@ class EditorServiceProvider extends ServiceProvider
     {
         // Built-ins are registered in the factory, not in boot(), so they come
         // first in all() whatever the boot order of plugin providers.
-        $this->app->singleton(EditorBlockRegistry::class, function (): EditorBlockRegistry {
+        $this->app->singleton(EditorBlockRegistry::class, function ($app): EditorBlockRegistry {
             $registry = new EditorBlockRegistry();
             $registry->register(new TextBlockType());
             $registry->register(new ImageBlockType());
+            $registry->register($app->make(AudioBlockType::class));
             return $registry;
         });
     }

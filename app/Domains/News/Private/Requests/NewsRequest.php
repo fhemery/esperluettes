@@ -44,13 +44,16 @@ class NewsRequest extends FormRequest
             $rules['content'] = ['nullable', 'string'];
             $rules['blocks_order'] = ['nullable', 'string'];
             $rules['blocks'] = ['required', 'array', 'min:1'];
-            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image'])];
+            $rules['blocks.*.type'] = ['required', Rule::in(['text', 'image', 'audio'])];
             $rules['blocks.*.html'] = ['nullable', 'string'];
             $rules['blocks.*.path'] = ['nullable', 'string', 'max:1024'];
             $rules['blocks.*.alt'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.caption'] = ['nullable', 'string', 'max:255'];
             $rules['blocks.*.keep_original'] = ['nullable'];
             $rules['blocks.*.file'] = ['nullable', 'image', 'max:2048'];
+            // Sound blocks use their own key so they never collide with the image rule above.
+            $rules['blocks.*.sound'] = ['nullable', 'file', 'mimes:mp3', 'max:10240'];
+            $rules['blocks.*.sound_remove'] = ['nullable'];
         } else {
             $rules['content'] = ['required', 'string'];
         }
@@ -78,6 +81,8 @@ class NewsRequest extends FormRequest
             'content.required' => __('news::admin.validation.content_required'),
             'header_image.file.image' => __('news::admin.validation.header_image_type'),
             'header_image.file.max' => __('news::admin.validation.header_image_max'),
+            'blocks.*.sound.mimes' => __('news::admin.validation.audio_type'),
+            'blocks.*.sound.max' => __('news::admin.validation.audio_max'),
             'status.required' => __('news::admin.validation.status_required'),
             'status.in' => __('news::admin.validation.status_invalid'),
             'meta_description.max' => __('news::admin.validation.meta_description_max'),

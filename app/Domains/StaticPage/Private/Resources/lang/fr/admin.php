@@ -83,5 +83,10 @@ return [
         'slug_unique' => 'Ce slug est déjà utilisé.',
         'content_required' => 'Le contenu est obligatoire.',
         'blocks_required' => 'Le contenu doit comporter au moins un bloc.',
+        'audio_required' => 'Un bloc son doit contenir un fichier.',
+        'audio_type' => 'Le son doit être un fichier MP3.',
+        'audio_max' => 'Le son ne doit pas dépasser 10 Mo.',
+        'audio_path_invalid' => 'Le fichier son de ce bloc est invalide.',
+        'audio_mode_switch' => 'Retirez les blocs son avant de repasser en mode simple.',
     ],
 ];

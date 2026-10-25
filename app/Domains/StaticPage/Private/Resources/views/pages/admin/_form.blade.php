@@ -112,6 +112,7 @@
                 :blocks="$meBlocks"
                 :mode="$meMode"
                 scope="static-pages"
+                :block-types="['text', 'image', 'audio']"
                 toolbar="editorial"
                 :nbLines="15"
             />

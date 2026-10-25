@@ -25,6 +25,14 @@ describe('News admin form renders the multi-editor', function () {
             ->assertDontSee('story::chapters.choice.block_label');
     });
 
+    it('offers the sound block in advanced mode', function () {
+        $this->actingAs(admin($this))
+            ->get(route('news.admin.create'))
+            ->assertOk()
+            ->assertSee("appendBlock('audio')", false)
+            ->assertSee('data-block-template="audio"', false);
+    });
+
     it('opens an advanced article in advanced mode', function () {
         $news = News::create([
             'title' => 'Advanced', 'slug' => 'advanced-' . uniqid(), 'summary' => 's',

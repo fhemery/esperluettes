@@ -28,7 +28,16 @@ a new block type is one `EditorBlockType` registration and no DTO (see
  'alt'   => '…',
  'caption'       => '…',    // optional
  'keep_original' => bool]   // optional; true = no responsive variants
+
+['type' => 'audio', 'path' => 'news/x.mp3', 'caption' => '…']  // caption optional
 ```
+
+`audio` is built in but **opt-in**: it is only offered by editors whose
+`blockTypes` lists it. The renderer renders every registered type, so keeping it
+out of a consumer (chapters) is that consumer's write-side whitelist. The type
+emits its own escaped `<audio controls>` (no Purifier profile allows it); its
+editor partial posts `{name}[{uid}][path|sound|sound_remove|caption]` and the
+consumer stores the upload through Media.
 
 Rules:
 
@@ -70,8 +79,8 @@ document is converted into a single text block.
 ### Block-type registry
 
 `Public/Blocks/EditorBlockRegistry` (container singleton) holds every block type,
-in registration order. `EditorServiceProvider` registers the built-ins `text`
-then `image` inside the singleton factory, so they always come first; another
+in registration order. `EditorServiceProvider` registers the built-ins `text`,
+`image` then `audio` inside the singleton factory, so they always come first; another
 domain registers its own type from its service provider with
 `app(EditorBlockRegistry::class)->register(new MyType())`. Registering a key
 twice throws `InvalidArgumentException`.

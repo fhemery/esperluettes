@@ -114,6 +114,7 @@
             :blocks="$meBlocks"
             :mode="$meMode"
             scope="news"
+            :block-types="['text', 'image', 'audio']"
             toolbar="editorial"
             class="mt-1"
         />

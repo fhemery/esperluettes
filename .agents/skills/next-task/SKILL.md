@@ -143,8 +143,10 @@ own entry only, never another session's — then:
   report per phase — clearing between them buys nothing and costs a re-read of
   the backlog, the plan and `CONTEXT.md` every time. Stop between phases only
   when a §5 condition fires, or when a phase contradicted the plan in a way the
-  user should arbitrate before the next one builds on it. Stop again once all
-  phases are `DONE`, before VERIFY.
+  user should arbitrate before the next one builds on it. Once all phases are
+  `DONE`, dispatch VERIFY without stopping. Stop again after VERIFY, before
+  WRAP: summarise what was built, the VERIFY result and anything the user
+  should check themselves, and wait for the go — WRAP archives the task.
 - `auto` — **keep dispatching the remaining steps without stopping for
   approval.** Do not ask the user to open a new chat unless a stop condition in
   §5 fires. Every judgement call lands in the "Assumptions" table of

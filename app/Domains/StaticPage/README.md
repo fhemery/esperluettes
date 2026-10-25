@@ -59,7 +59,7 @@ The `created_by` column records which admin created the page. It is intentionall
 | Concern | Delegated to | Why |
 |---|---|---|
 | HTML sanitization | `Shared::HtmlLinkUtils`, `Mews\Purifier` | Central sanitization config lives in Shared |
-| Header image storage, rendering and GC | `Media::MediaPublicApi` | Media is the sole entry point for managed images |
+| Header image storage, rendering and GC | `Media::MediaPublicApi` | Media is the sole entry point for managed images. Advanced mode also offers sound blocks (MP3, 10 MB, `storePublicFile` in `static-pages/`); `StaticPageMediaUsageProvider` claims their paths, and switching back to simple mode is refused while one exists |
 | Admin sidebar navigation | `Administration::AdminNavigationRegistry` | Shared admin nav managed centrally |
 | Domain event bus | `Events::EventBus` | Cross-domain event backbone |
 | User role checks (admin preview) | `Auth::AuthPublicApi`, `Auth::Roles` | Auth domain owns role resolution |
