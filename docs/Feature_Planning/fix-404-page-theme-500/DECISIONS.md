@@ -11,3 +11,4 @@
 | 1 | 419 and 500 pages are fixed by the same change (same root cause) | REFINE | yes |
 | 2 | Fix by a fallback view composer in SharedServiceProvider rather than reordering middleware | DESIGN | yes |
 | 3 | Branch: stay on `fix/misc-small-fixes` (user instruction) | REFINE | yes |
+| 4 | Composer sets `theme` per view (`$view->with`), not `View::share`, so a guest-resolved theme never leaks into later renders (plan said share) | BUILD | yes |
