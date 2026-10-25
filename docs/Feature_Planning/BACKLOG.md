@@ -42,7 +42,6 @@ scoped to the task that actually changed.
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
 - **Story — untranslated « Unknown » for a deactivated co-author** · `story-deactivated-coauthor-label/` · auto · TODO
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
-- **Prevent copying chapter text** · `prevent-chapter-copy/` · auto · WIP:PLAN
 - **Sound upload for news and static pages** · `news-static-page-sound-upload/` · interactive · TODO
 - **Add requester slug to auth.promotion.requested notification** · `promotion-requested-user-slug/` · auto · TODO
 - **Extend fanart Discord endpoint payload** · `fanart-discord-endpoint-fields/` · auto · TODO
@@ -54,6 +53,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`prevent-chapter-copy`](_done/prevent-chapter-copy.md) · chapter body blocks copy / cut / drag-out for everyone but authors and co-authors; selection, quotes and annotations unaffected (deterrent only)
 - [`calendar-activity-time-picker`](_done/calendar-activity-time-picker.md) · date fields split into date + time inputs over a hidden UTC value (Calendar, Story chapters)
 - [`admin-statistics-quotes`](_done/admin-statistics-quotes.md) · « Citations » tile and tab on /admin/statistics: net `global.total_quotes` from new Quote deletion/removal/restoration events, rebuilt from the quotes table (run `statistics:compute global.total_quotes` once after deploy)
 - [`quote-hard-delete`](_done/quote-hard-delete.md) · a reader's own quote deletion is now a hard delete, so reactivation no longer resurrects it; one-off migration purges legacy soft-deleted quotes (deploy only while no user is deactivated)

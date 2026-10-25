@@ -41,6 +41,16 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
    `localhost:8081/**` to `:8080`) would reroute the app's own requests. Fix:
    document the worktree port pair in `e2e/README.md`, and derive both the
    rewrite's source and target from `BASE_URL` / `APP_URL` instead of literals.
+5. **File-local Pest helpers slip through despite the rule and the plan.**
+   *(prevent-chapter-copy, phase 1)* The plan said "no file-local helpers" and
+   AGENTS.md forbids them, yet `ChapterCopyGuardTest.php` declares four global
+   functions. Nothing caught it, because no names collide yet. Fix: a gate check
+   that fails on a top-level `function` in `app/Domains/*/Tests/**/*Test.php`.
+6. **The BACKLOG status was not advanced past `WIP:PLAN`.**
+   *(prevent-chapter-copy)* BUILD and VERIFY both committed, but the row still
+   said `WIP:PLAN` at WRAP, so `/continue-task` would have resumed the wrong
+   step. Fix: the build and verify skills update the backlog status in the
+   same commit as their artifact.
 
 ## Why
 
