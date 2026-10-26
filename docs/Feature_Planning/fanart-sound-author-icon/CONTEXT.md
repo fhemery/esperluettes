@@ -21,6 +21,10 @@
 
 - As planned. Story-player entries carry `artistLabel` (already « Par Nom ») and `artistUrl`; icon markers: `data-artist-link`. Alpine follow-playback behaviour untested by automation (VERIFY).
 
+### VERIFY → WRAP (2026-10-26)
+
+- All 3 QA rows pass in a real browser: `e2e/tests/features/fanart-sound-author-icon.spec.ts` (3 tests; temporary, delete at WRAP, nothing worth promoting to `core/`). Screenshot at 375px opened: icon sits on the player row, no overflow. No defect, no flaky or manual rows.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -159,9 +163,9 @@ Working agreement: one phase = one commit; failing test first.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter page | Icon beside player and report button, links to profile | |
-| Story page | Icon hidden until play; changes artist when queue advances | |
-| Mobile 375px | Row does not overflow | |
+| Chapter page | Icon beside player and report button, links to profile | ✅ |
+| Story page | Icon hidden until play; changes artist when queue advances | ✅ |
+| Mobile 375px | Row does not overflow | ✅ |
 
 ### 3.3 Open items
 
@@ -186,3 +190,4 @@ None.
 ## 5. Build & verify log
 
 - BUILD phase 1 (2026-10-26): artist icon on chapter and story players; `audioPlaylist` enriched (batched profile lookup), store `current()`; gate green.
+- VERIFY (2026-10-26): PASS, 3/3 browser checks via the feature spec above (chapter link + « Par » tooltip, story icon hidden then follows queue, 375px no overflow).

@@ -61,6 +61,11 @@ export class FanartStoryPage {
     return this.page.locator('[data-fanart-player]');
   }
 
+  /** The artist icon link beside the story-page player. */
+  get artistLink(): Locator {
+    return this.player.locator('[data-artist-link]');
+  }
+
   group(key: string | number): Locator {
     return this.page.locator(`[data-group-key="${key}"]`);
   }
