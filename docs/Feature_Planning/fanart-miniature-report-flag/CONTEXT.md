@@ -9,6 +9,10 @@
 
 ## 0. Handoff
 
+### VERIFY → WRAP (2026-10-26)
+
+PASS. Delete `e2e/tests/features/fanart-miniature-report-flag.spec.ts` at WRAP (no core promotion). Open a11y defect: compact report-button accessible name is « flag » instead of « Signaler » (see §5); fix with `aria-label` or defer. Mobile tap target 50x38 px.
+
 ### BUILD phase 1 → VERIFY (2026-10-26)
 
 No deviation from the plan. Still unchecked in a browser: modal clipping in profile-tab groups, flag tap size on mobile, flag click not opening the viewer.
@@ -161,11 +165,11 @@ Working agreement: one phase = one commit; failing test first.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Story Fanarts tab | Flag bottom-right on others' fanart; click opens report modal, not viewer | |
-| Chapter images | Same | |
-| Profile Fanarts tab (other's profile / own) | Flag on others'; none on own; modal not clipped in collapsed/expanded groups | |
-| Mobile width | Flag visible and tappable | |
-| Keyboard | Tab reaches flag, Enter opens form | |
+| Story Fanarts tab | Flag bottom-right on others' fanart; click opens report modal, not viewer | ✅ |
+| Chapter images | Same | ✅ n/a: no separate surface, they are the story-tab chapter groups (same thumbnail) |
+| Profile Fanarts tab (other's profile / own) | Flag on others'; none on own; modal not clipped in collapsed/expanded groups | ✅ |
+| Mobile width | Flag visible and tappable | ✅ 50x38 px tap target |
+| Keyboard | Tab reaches flag, Enter opens form | ✅ |
 
 ### 3.3 Open items
 
@@ -189,3 +193,4 @@ None.
 ## 5. Build & verify log
 
 - **BUILD phase 1 (2026-10-26) — DONE.** `components/thumbnail.blade.php` now a `relative w-40 h-40` wrapper; button fills it; `@auth` + `user_id !== auth()->id()` gate a sibling `absolute bottom-1 right-1` `<x-moderation::report-button>`. Two tests added to `FanartFragmentsTest` (failed first). `pnpm run gate` green. Fanart README/AGENTS needed no change. Visual QA (§3.2: modal clipping, click not opening viewer) still for VERIFY.
+- **VERIFY (2026-10-26) — PASS with one a11y defect.** Spec `e2e/tests/features/fanart-miniature-report-flag.spec.ts` (4 tests, green; shots in `shots/`). Flag sits in the lower-right corner, absent on own fanart (story tab and own profile), click opens the report modal and not the viewer, modal unclipped inside the nested profile groups, Tab+Enter works, mobile 375 px tap works (50x38 px). **Defect (req. 1.4.4):** the flag's accessible name is « flag » (the Material icon text beats `title`), not « Signaler ». Lives in `moderation::report-button` compact mode (needs an `aria-label`); pre-existing for other consumers. The spec locates the flag by `button[title="Signaler"]` for that reason. Chapter-images row: no separate surface (same thumbnail in story-tab chapter groups).
