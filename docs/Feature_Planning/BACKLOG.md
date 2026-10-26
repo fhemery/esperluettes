@@ -42,7 +42,7 @@ scoped to the task that actually changed.
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
 - **Story — label the chapter form publish_at field** · `story-chapter-publish-at-label/` · auto · complexity:1 · TODO
-- **Collapse Toute l'oeuvre fanart area by default** · `fanart-toute-loeuvre-collapsed/` · auto · WIP:VERIFY
+- **Collapse Toute l'oeuvre fanart area by default** · `fanart-toute-loeuvre-collapsed/` · auto · WIP:WRAP
 - **Moderation — give the compact report button an accessible name** · `moderation-report-button-accessible-name/` · auto · complexity:1 · TODO
 
 ## Done

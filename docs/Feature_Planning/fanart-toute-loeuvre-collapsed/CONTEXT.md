@@ -10,6 +10,11 @@
 
 - Shipped as planned; nothing left out. The profile tab was not touched.
 
+### VERIFY → WRAP (2026-10-26)
+
+- PASS. New temporary spec `e2e/tests/features/fanart-toute-loeuvre-collapsed.spec.ts` (delete at WRAP; do not promote). Stale expectations in `fanart-artwork-module.spec.ts` (work group assumed open) updated to click « Montrer tout » first; that older spec is also still in `features/` and is due for deletion at its own WRAP.
+- Nothing flaky or manual.
+
 ### (earlier) DESIGN+PLAN notes
 
 - 0 blocking questions asked (auto mode).
@@ -85,7 +90,8 @@ Tests: update the existing assertion; add one for the notice absence. Visual: VE
 ### 3.2 Visual QA checklist
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Story Fanarts tab | « Toute l'œuvre » closed on load; click loads and shows thumbnails | |
+| Story Fanarts tab | « Toute l'œuvre » closed on load; click loads and shows thumbnails | ✅ (confirmed + author, no spoiler notice, collapses again) |
+| Other groups / profile tab | unchanged | ✅ chapter group spec still green; profile tab covered by `FanartProfileTabTest` (untouched code) |
 
 ### 3.3 Open items
 None.
@@ -106,3 +112,4 @@ None.
 ## 5. Build & verify log
 
 - BUILD phase 1 (2026-10-26): `tabSummary` work group `collapsed => true`; spoiler notice skipped for key `work`. Tests in `FanartFragmentsTest` (updated assertion + new author/reader test). Gate green. No deviation.
+- VERIFY (2026-10-26): browser spec green for confirmed reader and author; PASS.
