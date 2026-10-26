@@ -198,6 +198,26 @@ it('renders a group with thumbnails only, without a spoiler for the group endpoi
         ->assertDontSee(route('fanart.file', $audio->id), false);
 });
 
+it('shows a report flag on a miniature of another user\'s fanart', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    $fanart = createFanart(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => $chapter->id]);
+
+    $this->actingAs(bob($this))->get(groupUrl($story, $chapter->id))->assertOk()
+        ->assertSee("reportButton('fanart', {$fanart->id})", false);
+});
+
+it('hides the report flag on the viewer\'s own fanart miniature', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    createFanart(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => $chapter->id]);
+
+    $this->actingAs($author)->get(groupUrl($story, $chapter->id))->assertOk()
+        ->assertDontSee('reportButton', false);
+});
+
 it('renders the viewer with title, linked artist, sanitised description, report and delete for the submitter', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);

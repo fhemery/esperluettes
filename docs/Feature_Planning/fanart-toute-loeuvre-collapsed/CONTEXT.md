@@ -61,7 +61,7 @@ when the user is deactivated, reactivated or deleted; what the UI shows.
 ### 1.6 Cross-cutting concerns
 
 One line per item of
-[`../references/cross-cutting-checklist.md`](../references/cross-cutting-checklist.md);
+[`cross-cutting-checklist.md`](../../../.agents/loop/references/cross-cutting-checklist.md);
 inapplicable ones as "N/A — <reason>".
 
 | Concern | Decision |

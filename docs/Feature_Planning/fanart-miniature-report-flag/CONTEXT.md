@@ -9,6 +9,10 @@
 
 ## 0. Handoff
 
+### BUILD phase 1 → VERIFY (2026-10-26)
+
+No deviation from the plan. Still unchecked in a browser: modal clipping in profile-tab groups, flag tap size on mobile, flag click not opening the viewer.
+
 ### REFINE (+ fast-path DESIGN+PLAN) → BUILD (2026-10-26)
 
 No blocking question (auto mode, none needed). Riskiest point: the report modal is
@@ -132,7 +136,7 @@ Pest feature tests on the rendered fragments (existing `FanartFragmentsTest` sty
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Flag on thumbnail | S | — | TODO |
+| 1 | Flag on thumbnail | S | — | DONE |
 
 Working agreement: one phase = one commit; failing test first.
 
@@ -184,4 +188,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- **BUILD phase 1 (2026-10-26) — DONE.** `components/thumbnail.blade.php` now a `relative w-40 h-40` wrapper; button fills it; `@auth` + `user_id !== auth()->id()` gate a sibling `absolute bottom-1 right-1` `<x-moderation::report-button>`. Two tests added to `FanartFragmentsTest` (failed first). `pnpm run gate` green. Fanart README/AGENTS needed no change. Visual QA (§3.2: modal clipping, click not opening viewer) still for VERIFY.
