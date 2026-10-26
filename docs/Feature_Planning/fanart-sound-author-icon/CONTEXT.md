@@ -17,6 +17,10 @@
 - Trap: `audioPlaylist()` is memoised per request; enrich it there (one batched profile lookup), never call the profile API per row.
 - The report button of `chapter-audio` is the nearest sibling pattern (icon next to the player, `flex items-center gap-2`).
 
+### BUILD phase 1 → VERIFY (2026-10-26)
+
+- As planned. Story-player entries carry `artistLabel` (already « Par Nom ») and `artistUrl`; icon markers: `data-artist-link`. Alpine follow-playback behaviour untested by automation (VERIFY).
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -128,7 +132,7 @@ Playlist shape change: only `ChapterAudio`, `StoryPlayer`, `ChapterAudioIcon` co
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Artist icon on chapter and story players | S | — | TODO |
+| 1 | Artist icon on chapter and story players | S | — | DONE |
 
 Working agreement: one phase = one commit; failing test first.
 
@@ -181,4 +185,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- BUILD phase 1 (2026-10-26): artist icon on chapter and story players; `audioPlaylist` enriched (batched profile lookup), store `current()`; gate green.

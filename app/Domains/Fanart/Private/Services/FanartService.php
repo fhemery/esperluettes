@@ -325,7 +325,7 @@ class FanartService
      * Story-page playlist: the published audio the viewer may hear, in chapter order
      * (readers: published chapters only). Computed once per request and story.
      *
-     * @return array<int, array{chapterId: int, chapterSlug: string, fanartId: int}>
+     * @return array<int, array{chapterId: int, chapterSlug: string, fanartId: int, artistName: ?string, artistUrl: ?string}>
      */
     public function audioPlaylist(int $storyId, int $userId): array
     {
@@ -345,10 +345,20 @@ class FanartService
             ->get()
             ->keyBy('chapter_id');
 
+        $userIds = $audios->pluck('user_id')->unique()->values()->all();
+        $profiles = $userIds === [] ? [] : $this->profiles->getPublicProfiles($userIds);
+
         $playlist = [];
         foreach ($chapters as $chapter) {
             if ($audio = $audios->get($chapter->id)) {
-                $playlist[] = ['chapterId' => $chapter->id, 'chapterSlug' => $chapter->slug, 'fanartId' => $audio->id];
+                $artist = $profiles[$audio->user_id] ?? null;
+                $playlist[] = [
+                    'chapterId' => $chapter->id,
+                    'chapterSlug' => $chapter->slug,
+                    'fanartId' => $audio->id,
+                    'artistName' => $artist?->display_name,
+                    'artistUrl' => $artist ? route('profile.show', ['profile' => $artist->slug]) : null,
+                ];
             }
         }
         $attributes->set($key, $playlist);

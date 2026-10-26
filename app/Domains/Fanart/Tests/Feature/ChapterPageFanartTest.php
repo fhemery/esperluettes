@@ -91,3 +91,29 @@ it('keeps a single [data-quote-article] root in the chapter page', function () {
 
     expect(substr_count($html, 'data-quote-article'))->toBe(1);
 });
+
+it('shows the artist icon next to the chapter audio player', function () {
+    [$story, $chapter, $audio] = chapterWithFanarts($this);
+    $profile = app(\App\Domains\Shared\Contracts\ProfilePublicApi::class)->getPublicProfile($audio->user_id);
+
+    $this->actingAs(bob($this));
+    $html = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+        ->assertOk()->getContent();
+
+    expect($html)->toContain('data-artist-link')
+        ->toContain('href="' . route('profile.show', ['profile' => $profile->slug]) . '"')
+        ->toContain('title="Par ' . e($profile->display_name) . '"')
+        ->toContain('aria-label="Par ' . e($profile->display_name) . '"');
+});
+
+it('omits the artist icon when the artist profile is gone', function () {
+    [$story, $chapter, $audio] = chapterWithFanarts($this);
+    \App\Domains\Profile\Private\Models\Profile::query()->where('user_id', $audio->user_id)->delete();
+    \Illuminate\Support\Facades\Cache::flush();
+
+    $this->actingAs(bob($this));
+    $html = $this->get(route('chapters.show', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]))
+        ->assertOk()->getContent();
+
+    expect($html)->toContain('data-chapter-audio')->not->toContain('data-artist-link');
+});
