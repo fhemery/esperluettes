@@ -11,7 +11,7 @@ use Illuminate\View\Component;
 /** The story page's single audio element and the queue feeding the `fanartPlayer` Alpine store. */
 class StoryPlayer extends Component
 {
-    /** @var array<int, array{chapterId: int, src: string, markReadUrl: string}> */
+    /** @var array<int, array{chapterId: int, artistLabel: ?string, artistUrl: ?string, src: string, markReadUrl: string}> */
     public array $entries = [];
 
     public function __construct(public int $storyId, public string $storySlug)
@@ -24,6 +24,8 @@ class StoryPlayer extends Component
         foreach (app(FanartService::class)->audioPlaylist($storyId, $userId) as $item) {
             $this->entries[] = [
                 'chapterId' => $item['chapterId'],
+                'artistLabel' => $item['artistName'] !== null ? __('fanart::ui.player.artist', ['name' => $item['artistName']]) : null,
+                'artistUrl' => $item['artistUrl'],
                 'src' => route('fanart.file', $item['fanartId']),
                 'markReadUrl' => route('chapters.read.mark', [
                     'storySlug' => $storySlug,

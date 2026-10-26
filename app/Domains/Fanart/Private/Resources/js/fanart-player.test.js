@@ -69,3 +69,12 @@ describe('fanartPlayer store', () => {
         expect(player.currentId).toBe(3);
     });
 });
+
+describe('fanartPlayer current', () => {
+    it('current returns the playing entry', () => {
+        const { player } = make();
+        expect(player.current()).toBeNull();
+        player.play(3);
+        expect(player.current()).toEqual(entries[1]);
+    });
+});

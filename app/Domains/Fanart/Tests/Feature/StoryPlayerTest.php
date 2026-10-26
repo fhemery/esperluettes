@@ -66,3 +66,19 @@ it('renders no icon and no player for a guest', function () {
     $html = $this->get(route('stories.show', ['slug' => $story->slug]))->assertOk()->getContent();
     expect($html)->not->toContain('data-chapter-audio-icon')->not->toContain('data-fanart-player');
 });
+
+it('gives each story player entry its artist label and url', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author, ['title' => 'Avec audio']);
+    createFanart(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => $chapter->id, 'kind' => FanartKind::Audio, 'file_path' => 'fanart/1/a.mp3']);
+    $profile = app(\App\Domains\Shared\Contracts\ProfilePublicApi::class)->getPublicProfile($author->id);
+
+    $this->actingAs(bob($this));
+    $html = $this->get(route('stories.show', ['slug' => $story->slug]))->assertOk()->getContent();
+
+    preg_match('/data-entries="([^"]*)"/', $html, $m);
+    $entries = json_decode(html_entity_decode($m[1]), true);
+    expect($entries[0]['artistLabel'])->toBe('Par ' . $profile->display_name)
+        ->and($entries[0]['artistUrl'])->toBe(route('profile.show', ['profile' => $profile->slug]));
+});

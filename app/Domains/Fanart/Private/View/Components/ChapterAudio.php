@@ -15,6 +15,10 @@ class ChapterAudio extends Component
 
     public bool $canReport = false;
 
+    public ?string $artistName = null;
+
+    public ?string $artistUrl = null;
+
     public function __construct(public int $storyId, public int $chapterId)
     {
         $userId = Auth::id();
@@ -26,6 +30,8 @@ class ChapterAudio extends Component
         foreach ($service->audioPlaylist($storyId, $userId) as $item) {
             if ($item['chapterId'] === $chapterId) {
                 $this->fanartId = $item['fanartId'];
+                $this->artistName = $item['artistName'];
+                $this->artistUrl = $item['artistUrl'];
                 $fanart = $service->find($this->fanartId);
                 $this->canReport = $fanart !== null && $fanart->user_id !== $userId;
             }

@@ -19,6 +19,11 @@ export function createFanartPlayer(deps = {}) {
             this.currentId = null;
         },
 
+        // The queue entry being played, or null.
+        current() {
+            return this.queue.find((e) => e.chapterId === this.currentId) ?? null;
+        },
+
         play(chapterId) {
             const entry = this.queue.find((e) => e.chapterId === chapterId);
             if (!entry || !this.audio) return;

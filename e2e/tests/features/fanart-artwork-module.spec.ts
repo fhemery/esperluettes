@@ -22,7 +22,8 @@ test.describe('fanarts tab', () => {
     await storyPage.goto();
     await storyPage.openFanartsTab();
     await expect(storyPage.groups.first()).toBeVisible();
-    // Let Alpine initialise the injected fragment.
+    // « Toute l'œuvre » starts collapsed: open it, which also lets Alpine initialise the fragment.
+    await storyPage.group('work').getByRole('button', { name: 'Montrer tout' }).click();
     await expect(storyPage.group('work').locator('[data-fanart-id]').first()).toBeVisible();
 
     // A chapter the reader has not read is collapsed behind a spoiler notice.
@@ -46,6 +47,7 @@ test.describe('viewer', () => {
     const storyPage = new FanartStoryPage(confirmed, story());
     await storyPage.goto();
     await storyPage.openFanartsTab();
+    await storyPage.group('work').getByRole('button', { name: 'Montrer tout' }).click();
 
     await storyPage.thumbnail(ids.work).click();
     const viewer = storyPage.viewer;

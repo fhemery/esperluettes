@@ -66,8 +66,22 @@ it('marks unread chapter groups collapsed with a spoiler notice for a reader, re
     expect($html)
         ->toContain('data-group-key="' . $read->id . '" data-collapsed="false"')
         ->toContain('data-group-key="' . $unread->id . '" data-collapsed="true"')
-        ->toContain('data-group-key="work" data-collapsed="false"')
+        ->toContain('data-group-key="work" data-collapsed="true"')
         ->and(substr_count($html, e(__('fanart::ui.tab.spoiler'))))->toBe(1);
+});
+
+it('collapses Toute l\'œuvre by default for every viewer without a spoiler notice', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    createFanart(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => null]);
+
+    foreach ([bob($this), $author] as $viewer) {
+        $html = $this->actingAs($viewer)->get(tabUrl($story))->assertOk()->getContent();
+
+        expect($html)
+            ->toContain('data-group-key="work" data-collapsed="true"')
+            ->not->toContain(e(__('fanart::ui.tab.spoiler')));
+    }
 });
 
 it('expands every group for an author and shows the pending block', function () {
@@ -196,6 +210,26 @@ it('renders a group with thumbnails only, without a spoiler for the group endpoi
         ->assertSee('loading="lazy"', false)
         ->assertSee('alt="Portrait"', false)
         ->assertDontSee(route('fanart.file', $audio->id), false);
+});
+
+it('shows a report flag on a miniature of another user\'s fanart', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    $fanart = createFanart(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => $chapter->id]);
+
+    $this->actingAs(bob($this))->get(groupUrl($story, $chapter->id))->assertOk()
+        ->assertSee("reportButton('fanart', {$fanart->id})", false);
+});
+
+it('hides the report flag on the viewer\'s own fanart miniature', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    createFanart(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => $chapter->id]);
+
+    $this->actingAs($author)->get(groupUrl($story, $chapter->id))->assertOk()
+        ->assertDontSee('reportButton', false);
 });
 
 it('renders the viewer with title, linked artist, sanitised description, report and delete for the submitter', function () {

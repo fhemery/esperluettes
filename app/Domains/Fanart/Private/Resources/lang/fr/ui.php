@@ -74,6 +74,7 @@ return [
     'player' => [
         'listen' => 'Écouter la lecture audio de ce chapitre',
         'label' => 'Lecture audio du chapitre',
+        'artist' => 'Par :name',
     ],
     'actions' => [
         'submit_image' => 'Proposer une image',
