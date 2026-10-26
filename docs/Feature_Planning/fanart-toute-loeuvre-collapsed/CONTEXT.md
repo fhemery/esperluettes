@@ -1,209 +1,102 @@
-# <Task title> — context
+# Collapse Toute l'oeuvre fanart area by default — context
 
-> The task's single working file. Every agent reads **§0 Handoff first**, then
-> only the sections it needs, and writes its own section plus one Handoff entry
-> before it finishes. WRAP compacts the whole thing into `README.md` and the
-> folder is archived (see `.agents/loop/README.md`).
->
-> A section still reading `_Not written yet._` has not been done — that is how
-> `/continue-task` knows where the task stands.
-
-**Complexity:** _unrated_ /5 · **Mode:** interactive|auto
+**Complexity:** 1 /5 · **Mode:** auto
 
 ## 0. Handoff
 
-What the next agent needs that the sections below do not say: a trap found, the
-assumption most likely to be reversed, something deliberately left out, what to
-double-check. Newest entry first; 3–8 lines each; never a summary of the
-section you just wrote.
+### DESIGN+PLAN (written by the refiner, fast path) → BUILD (2026-10-26)
 
-### <STEP> → <next step> (<date>)
-
-_Not written yet._
+- 0 blocking questions asked (auto mode).
+- Likeliest to be reversed: A2 (profile tab left untouched) and A3 (no spoiler notice on the « Toute l'œuvre » group).
+- Existing tests assert `data-group-key="work" data-collapsed="false"` in `FanartFragmentsTest` (~l.69) and `FanartProfileTabTest` (~l.154, profile tab: stays `false`). Only the first changes. The reader spoiler-notice count (`toBe(1)`) in `FanartFragmentsTest` stays 1 because of A3.
 
 ## 1. Functional spec
 
-> REFINE. **What** the feature does, never **how**. Everything here is either
-> confirmed by the user or a recorded assumption (§4).
-
 ### 1.1 Overview
-
-Two or three sentences: what, for whom, the value.
+On the story's Fanarts tab, the « Toute l'œuvre » group (fanart not tied to a chapter) starts collapsed, like unread chapter groups. The viewer expands it with the existing « Tout afficher » button.
 
 ### 1.2 Vocabulary
-
 | Term | Meaning |
 |------|---------|
-| | |
-
-New nouns, in French if user-facing (the app is French-only).
+| Toute l'œuvre | The `work` group of the story Fanarts tab: fanart with no chapter |
 
 ### 1.3 Roles & visibility
-
-| Role | Can see | Can do |
-|------|---------|--------|
-| Guest | | |
-| `user` (non-confirmed) | | |
-| `user-confirmed` | | |
-| Author / co-author of the target | | |
-| Moderator | | |
-| Admin | | |
+Unchanged. Applies to every viewer who sees the tab, authors included (the group is not read-state dependent). Collapsed content is still lazily fetched on first expansion.
 
 ### 1.4 Functional requirements
-
-One sub-heading per flow, numbered steps, error and edge paths included.
+1. Loading the Fanarts tab: the « Toute l'œuvre » group is closed, button reads « Tout afficher », nothing fetched yet.
+2. Click: expands and loads the group as chapter groups already do; click again collapses.
+3. Chapter groups behave as before.
 
 ### 1.5 Lifecycle
-
-What happens to this data when the parent is deleted, unpublished or edited;
-when the user is deactivated, reactivated or deleted; what the UI shows.
+N/A — presentation only.
 
 ### 1.6 Cross-cutting concerns
-
-One line per item of
-[`cross-cutting-checklist.md`](../../../.agents/loop/references/cross-cutting-checklist.md);
-inapplicable ones as "N/A — <reason>".
-
 | Concern | Decision |
 |---------|----------|
-| Roles | |
-| Visibility / privacy | |
-| Settings | |
-| Notifications | |
-| Domain events | |
-| Statistics | |
-| Moderation | |
-| Lifecycle / cascade | |
-| Media | |
-| Search | |
-| i18n | |
-| Mobile | |
-| Accessibility | |
+| Roles | N/A — same for all viewers |
+| Visibility / privacy | Unchanged |
+| Settings | None (no per-user toggle) |
+| Notifications / events / statistics / moderation / lifecycle / media / search | N/A |
+| i18n | No new string |
+| Mobile | Same collapse control |
+| Accessibility | Existing `aria-expanded` button |
 
 ### 1.7 Out of scope
-
-Explicit non-goals, so nobody builds them by accident.
+Profile-tab fanart groups; a user setting; changing chapter-group collapse rules; remembering open state.
 
 ### 1.8 Open questions
-
-Each marked **blocking** or **non-blocking**. A blocking one is asked, never
-left here.
-
-_Not written yet._
+None blocking.
 
 ## 2. Architecture
 
-> DESIGN. **How** it is built: **shape and contracts, not a change list** —
-> signatures, data shapes, enforcement points, deptrac edges. The file-by-file
-> edits belong to §3 only, so the two cannot drift.
+Fanart domain only, no new edge. `FanartService::tabSummary()` returns the `work` group with `'collapsed' => true` (was `false`); `tab.blade.php` already derives `data-collapsed`, initial `open` and lazy load from `collapsed`. The spoiler notice in `tab.blade.php` is shown only when `collapsed` and the group key is not `work` (A3). Profile tab (`profileTab`/`profile-group.blade.php`) untouched.
 
-### 2.1 Domain placement
-
-Which domain owns it and why; new domain justified against extending one.
-One line per touched domain: minimum change, extension point or direct call.
-
-### 2.2 Data model
-
-Tables (columns, types, nullability, indexes; foreign keys only inside the
-owning domain), model (attribute syntax), lifecycle rules mapped from §1.5.
-
-### 2.3 PHP architecture
-
-Public API · services · policy (enforcing §1.3) · events and listeners ·
-routes/controllers/form requests (no `PATCH` — use `PUT`).
-
-### 2.4 Frontend
-
-Blade components, Alpine, JS/CSS layout; shared components reused.
-
-### 2.5 Deptrac
-
-New edges, each justified — or "no new edge".
-
-### 2.6 Testing strategy
-
-Integration (default), unit, vitest, and what only VERIFY can see.
-
-### 2.7 Tradeoffs locked
-
-| # | Question | Options considered | Chosen | Why / what would flip it |
-|---|----------|--------------------|--------|--------------------------|
-| 1 | | | | |
-
-### 2.8 Risks acknowledged
-
-Known weak points, with the trigger that would make us revisit them.
-
-_Not written yet._
+Tests: update the existing assertion; add one for the notice absence. Visual: VERIFY can skip (covered by feature tests; Alpine path unchanged).
 
 ## 3. Plan
 
-> PLAN. BUILD reads **one phase at a time** plus §0 and the architecture
-> sections that phase names — so each phase must stand alone: name the §2
-> sections it needs, and state what earlier phases left behind.
-
 ### 3.1 Phase index
-
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | | S/M | — | TODO |
+| 1 | Collapse the work group on the story tab | S | — | TODO |
 
-S ≈ half a day, M ≈ 1–2 days, anything larger is split. Status: `TODO` ·
-`WIP` · `DONE`; BUILD updates it (it is what lets `WIP:BUILD (3/7)` resume).
-Checkpoint rows (`2v` — see `plan-phases`) are run by `visual-verifier` and
-change no code: `| 2v | Checkpoint — <existing consumers> | S | 2 | TODO |`.
+### Phase 1 — Collapse the work group
 
-Working agreement: one phase = one commit; failing test first; no phase N+1
-before N's acceptance holds; re-ordering is surfaced, not taken silently.
+**Goal.** « Toute l'œuvre » starts collapsed on the story Fanarts tab. **Reads.** §2.
 
-### Phase 1 — <name>
+**Deliverables.**
+- `app/Domains/Fanart/Private/Services/FanartService.php` (`tabSummary`, `'work'` entry: `collapsed => true`; adjust docblock if needed).
+- `app/Domains/Fanart/Private/Resources/views/fragments/tab.blade.php` (`@if ($group['collapsed'] && $group['key'] !== 'work')` around the spoiler notice).
 
-**Goal.** One sentence. **Reads.** §2.x, §2.y.
-
-**Deliverables.** Files created or modified, by path.
-
-**Tests.** Named integration tests, as they will exist.
+**Tests.** In `app/Domains/Fanart/Tests/Feature/FanartFragmentsTest.php`: change `work` expectation to `data-collapsed="true"` in the reader test; add `it('collapses Toute l\'œuvre by default for every viewer without a spoiler notice')` covering a reader and the story author (work group `true`, spoiler notice count stays at chapter groups only). `FanartProfileTabTest` unchanged.
 
 **Acceptance.**
-- ✅ Checkable statements, not intentions.
+- ✅ Tab HTML has `data-group-key="work" data-collapsed="true"` for reader and author.
+- ✅ No spoiler notice for the work group.
 - ✅ `pnpm run gate` green.
 
 ### 3.2 Visual QA checklist
-
-Filled by VERIFY; written now, while the flows are fresh.
-
 | Surface | Check | OK? |
 |---------|-------|-----|
-| | | |
+| Story Fanarts tab | « Toute l'œuvre » closed on load; click loads and shows thumbnails | |
 
 ### 3.3 Open items
-
-What the plan assumes but has not confirmed; each names the phase that needs it.
-
-_Not written yet._
+None.
 
 ## 4. Decisions
 
-Append-only. Every question the user arbitrated, as given. BUILD reads this
-before asking anything already settled. Never edit a row — add one that
-supersedes it.
-
 | # | Date | Step | Question | Decision | Supersedes |
 |---|------|------|----------|----------|------------|
-| | | | | | |
+| 1 | 2026-10-26 | REFINE | Collapse the work group on the story tab | Yes, as requested | |
 
 ### Assumptions made without asking
-
-Each is a decision the user may want to reverse — WRAP surfaces them.
-
 | # | Assumption | Made at | Reversible? |
 |---|------------|---------|-------------|
-| | | | |
+| A1 | Applies to everyone, authors included | REFINE | Yes |
+| A2 | "Fanart tab" means the story tab only; profile tab groups unchanged | REFINE | Yes |
+| A3 | No spoiler notice on the work group (it is not read-gated) | REFINE | Yes |
 
 ## 5. Build & verify log
-
-One line per phase or checkpoint as it lands (commit sha, gate result,
-anything that contradicted the plan), then VERIFY's result block. Checkpoint
-results go here too, under their id.
 
 _Not written yet._
