@@ -53,7 +53,7 @@
                     <span x-show="open" x-cloak>{{ __('fanart::ui.tab.hide_all') }}</span>
                 </button>
             </div>
-            @if ($group['collapsed'])
+            @if ($group['collapsed'] && $group['key'] !== 'work')
                 <p class="text-sm italic" x-show="!open">{{ __('fanart::ui.tab.spoiler') }}</p>
             @endif
             <div x-show="open" x-cloak x-html="html">

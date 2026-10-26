@@ -407,7 +407,7 @@ class FanartService
 
         $groups = [];
         if (($counts[''] ?? 0) > 0) {
-            $groups[] = ['key' => 'work', 'title' => null, 'count' => (int) $counts[''], 'collapsed' => false];
+            $groups[] = ['key' => 'work', 'title' => null, 'count' => (int) $counts[''], 'collapsed' => true];
         }
         foreach ($chapters as $chapter) {
             $count = (int) ($counts[$chapter->id] ?? 0);

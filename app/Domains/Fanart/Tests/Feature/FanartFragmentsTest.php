@@ -66,8 +66,22 @@ it('marks unread chapter groups collapsed with a spoiler notice for a reader, re
     expect($html)
         ->toContain('data-group-key="' . $read->id . '" data-collapsed="false"')
         ->toContain('data-group-key="' . $unread->id . '" data-collapsed="true"')
-        ->toContain('data-group-key="work" data-collapsed="false"')
+        ->toContain('data-group-key="work" data-collapsed="true"')
         ->and(substr_count($html, e(__('fanart::ui.tab.spoiler'))))->toBe(1);
+});
+
+it('collapses Toute l\'œuvre by default for every viewer without a spoiler notice', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    createFanart(['story_id' => $story->id, 'user_id' => $author->id, 'chapter_id' => null]);
+
+    foreach ([bob($this), $author] as $viewer) {
+        $html = $this->actingAs($viewer)->get(tabUrl($story))->assertOk()->getContent();
+
+        expect($html)
+            ->toContain('data-group-key="work" data-collapsed="true"')
+            ->not->toContain(e(__('fanart::ui.tab.spoiler')));
+    }
 });
 
 it('expands every group for an author and shows the pending block', function () {

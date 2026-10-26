@@ -6,6 +6,12 @@
 
 ### DESIGN+PLAN (written by the refiner, fast path) → BUILD (2026-10-26)
 
+### BUILD phase 1 → VERIFY (2026-10-26)
+
+- Shipped as planned; nothing left out. The profile tab was not touched.
+
+### (earlier) DESIGN+PLAN notes
+
 - 0 blocking questions asked (auto mode).
 - Likeliest to be reversed: A2 (profile tab left untouched) and A3 (no spoiler notice on the « Toute l'œuvre » group).
 - Existing tests assert `data-group-key="work" data-collapsed="false"` in `FanartFragmentsTest` (~l.69) and `FanartProfileTabTest` (~l.154, profile tab: stays `false`). Only the first changes. The reader spoiler-notice count (`toBe(1)`) in `FanartFragmentsTest` stays 1 because of A3.
@@ -59,7 +65,7 @@ Tests: update the existing assertion; add one for the notice absence. Visual: VE
 ### 3.1 Phase index
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Collapse the work group on the story tab | S | — | TODO |
+| 1 | Collapse the work group on the story tab | S | — | DONE |
 
 ### Phase 1 — Collapse the work group
 
@@ -99,4 +105,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- BUILD phase 1 (2026-10-26): `tabSummary` work group `collapsed => true`; spoiler notice skipped for key `work`. Tests in `FanartFragmentsTest` (updated assertion + new author/reader test). Gate green. No deviation.
