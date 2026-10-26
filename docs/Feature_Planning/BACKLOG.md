@@ -42,7 +42,6 @@ scoped to the task that actually changed.
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
 - **Story — label the chapter form publish_at field** · `story-chapter-publish-at-label/` · auto · complexity:1 · TODO
-- **Show fanart sound author icon next to sound component** · `fanart-sound-author-icon/` · auto · WIP:VERIFY
 - **Collapse Toute l'oeuvre fanart area by default** · `fanart-toute-loeuvre-collapsed/` · auto · TODO
 - **Moderation — give the compact report button an accessible name** · `moderation-report-button-accessible-name/` · auto · complexity:1 · TODO
 
@@ -53,6 +52,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`fanart-sound-author-icon`](_done/fanart-sound-author-icon.md) · chapter and story sound players show an artist icon linking to the artist's profile (« Par <nom> »), following the playing chapter on the story page
 - [`fanart-miniature-report-flag`](_done/fanart-miniature-report-flag.md) · every fanart miniature shows a report flag (lower right, hidden on own fanart) that opens the existing report modal without opening the viewer
 - [`fanart-sound-download-protection`](_done/fanart-sound-download-protection.md) · fanart sound players hide download/context menu/drag via `<x-fanart::protected-audio>`, and navigating to a sound URL answers 403 (`Sec-Fetch-Dest`, no-store); friction only
 - [`shared-datetime-input-polish`](_done/shared-datetime-input-polish.md) · datetime-local-input group and time input are named after the caller label (input-label now stamps `{for}_label`); min widths wrap the pair earlier on phones
