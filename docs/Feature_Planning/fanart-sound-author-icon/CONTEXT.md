@@ -1,192 +1,169 @@
-# <Task title> — context
+# Fanart sound author icon — context
 
 > The task's single working file. Every agent reads **§0 Handoff first**, then
 > only the sections it needs, and writes its own section plus one Handoff entry
 > before it finishes. WRAP compacts the whole thing into `README.md` and the
 > folder is archived (see `.agents/loop/README.md`).
->
-> A section still reading `_Not written yet._` has not been done — that is how
-> `/continue-task` knows where the task stands.
 
-**Complexity:** _unrated_ /5 · **Mode:** interactive|auto
+**Complexity:** 2 /5 · **Mode:** auto
 
 ## 0. Handoff
 
-What the next agent needs that the sections below do not say: a trap found, the
-assumption most likely to be reversed, something deliberately left out, what to
-double-check. Newest entry first; 3–8 lines each; never a summary of the
-section you just wrote.
+### REFINE → BUILD (2026-10-26)
 
-### <STEP> → <next step> (<date>)
-
-_Not written yet._
+- Zero questions asked (auto mode, nothing blocking). Spec, design and plan written in one pass (fast path).
+- "The sound component" is read as the two **listening players** of the story flow: the chapter page player (`chapter-audio`) and the story page's single player (`story-player`). Most likely to be reversed: also adding the icon to the profile tab audio rows (excluded: they sit on the artist's own profile) or to the viewer (already shows « Par <artiste> »).
+- Trap: on the story page one `<audio>` serves all chapters, so the icon must follow the *currently playing* chapter (store state), not be static.
+- Trap: `audioPlaylist()` is memoised per request; enrich it there (one batched profile lookup), never call the profile API per row.
+- The report button of `chapter-audio` is the nearest sibling pattern (icon next to the player, `flex items-center gap-2`).
 
 ## 1. Functional spec
 
-> REFINE. **What** the feature does, never **how**. Everything here is either
-> confirmed by the user or a recorded assumption (§4).
-
 ### 1.1 Overview
 
-Two or three sentences: what, for whom, the value.
+Next to each fanart sound player a small person icon lets a listener find out who made the sound: it links to the artist's profile and shows « Par <nom> » as tooltip. For confirmed users who can already hear the sound.
 
 ### 1.2 Vocabulary
 
 | Term | Meaning |
 |------|---------|
-| | |
-
-New nouns, in French if user-facing (the app is French-only).
+| Icône d'artiste | Small `account_circle` link beside a sound player, to the artist's profile |
+| Artiste | The fanart's submitter (`fanarts.user_id`), as shown in the viewer (« Par ») |
 
 ### 1.3 Roles & visibility
 
 | Role | Can see | Can do |
 |------|---------|--------|
-| Guest | | |
-| `user` (non-confirmed) | | |
-| `user-confirmed` | | |
-| Author / co-author of the target | | |
-| Moderator | | |
-| Admin | | |
+| Guest / `user` | Nothing (players are not rendered for them today) | — |
+| `user-confirmed` | Icon wherever the player renders for them | Follow the link to the public profile |
+| Author / co-author, moderator, admin | Same as confirmed | Same |
+
+The icon is visible exactly when the player is: no new visibility rule.
 
 ### 1.4 Functional requirements
 
-One sub-heading per flow, numbered steps, error and edge paths included.
+**Chapter page.** Next to the audio player (before the report button), an icon link to the artist's profile, title/aria-label « Par <nom> ». Shown on the artist's own sound too.
+
+**Story page.** The single player has the same icon beside it. It reflects the chapter being played: the link and label change when the queue moves to the next chapter. Hidden while the player itself is hidden (nothing playing).
+
+**Edge.** If the artist's public profile cannot be resolved (account deleted/deactivated), the icon is not rendered; the player is unaffected.
 
 ### 1.5 Lifecycle
 
-What happens to this data when the parent is deleted, unpublished or edited;
-when the user is deactivated, reactivated or deleted; what the UI shows.
+Pure display, no data. Fanart deletion/unpublish already removes the player. Artist deleted/deactivated: no icon (see above).
 
 ### 1.6 Cross-cutting concerns
 
-One line per item of
-[`cross-cutting-checklist.md`](../../../.agents/loop/references/cross-cutting-checklist.md);
-inapplicable ones as "N/A — <reason>".
-
 | Concern | Decision |
 |---------|----------|
-| Roles | |
-| Visibility / privacy | |
-| Settings | |
-| Notifications | |
-| Domain events | |
-| Statistics | |
-| Moderation | |
-| Lifecycle / cascade | |
-| Media | |
-| Search | |
-| i18n | |
-| Mobile | |
-| Accessibility | |
+| Roles | See 1.3; `user` vs `user-confirmed` unchanged (players already confirmed-only) |
+| Visibility / privacy | Only the public display name and profile link, same data the viewer already shows |
+| Settings | N/A |
+| Notifications | N/A |
+| Domain events | N/A |
+| Statistics | N/A |
+| Moderation | N/A — report button untouched |
+| Lifecycle / cascade | See 1.5 |
+| Media | N/A |
+| Search | N/A |
+| i18n | New French string `player.artist` « Par :name » |
+| Mobile | Icon at least 24px, tappable, sits on the same row as the player |
+| Accessibility | `<a>` with `aria-label` and `title` « Par <nom> », decorative icon `aria-hidden` |
 
 ### 1.7 Out of scope
 
-Explicit non-goals, so nobody builds them by accident.
+- Icon on profile-tab audio rows, the viewer modal, the moderation snapshot, the audio miniature thumbnails.
+- Showing the artist's avatar or name as text; popover/card.
+- Co-artists (a fanart has one submitter).
 
 ### 1.8 Open questions
 
-Each marked **blocking** or **non-blocking**. A blocking one is asked, never
-left here.
-
-_Not written yet._
+None blocking. Non-blocking: icon glyph (`account_circle` chosen).
 
 ## 2. Architecture
 
-> DESIGN. **How** it is built: **shape and contracts, not a change list** —
-> signatures, data shapes, enforcement points, deptrac edges. The file-by-file
-> edits belong to §3 only, so the two cannot drift.
-
 ### 2.1 Domain placement
 
-Which domain owns it and why; new domain justified against extending one.
-One line per touched domain: minimum change, extension point or direct call.
+`Fanart` only. Uses `ProfilePublicApi` (already injected as `$this->profiles` in `FanartService`).
 
 ### 2.2 Data model
 
-Tables (columns, types, nullability, indexes; foreign keys only inside the
-owning domain), model (attribute syntax), lifecycle rules mapped from §1.5.
+None.
 
 ### 2.3 PHP architecture
 
-Public API · services · policy (enforcing §1.3) · events and listeners ·
-routes/controllers/form requests (no `PATCH` — use `PUT`).
+`FanartService::audioPlaylist()` items gain `artistName: ?string` and `artistUrl: ?string`: collect `user_id` of the audios, one `getPublicProfiles($ids)` call, `artistUrl = route('profile.show', ['profile' => $dto->slug])` (same as the viewer), both `null` when the profile is missing. The per-request memoisation is kept.
+
+`ChapterAudio` exposes `?string $artistName, $artistUrl` from the matching item. `StoryPlayer` adds both keys to each entry of `$entries`.
 
 ### 2.4 Frontend
 
-Blade components, Alpine, JS/CSS layout; shared components reused.
+- `chapter-audio.blade.php`: when `$artistUrl`, an `<a>` icon (`material-symbols-outlined account_circle`) between player and report button.
+- `fanart-player.js` store: `current()` returns the queue entry for `currentId` or `null`.
+- `story-player.blade.php`: wrap the audio and an `<a>` in a flex row; `<a x-show="$store.fanartPlayer.current()?.artistUrl" :href=... :title/:aria-label=...>`. Label built client-side from a translated template passed in the entry (`artistLabel`, already « Par Nom ») to avoid JS i18n.
+- Lang: `fanart::ui.player.artist` => `Par :name`.
 
 ### 2.5 Deptrac
 
-New edges, each justified — or "no new edge".
+No new edge.
 
 ### 2.6 Testing strategy
 
-Integration (default), unit, vitest, and what only VERIFY can see.
+Pest feature tests on both components (icon + link + label present; absent when artist profile missing; story-player entries carry `artistLabel`/`artistUrl`). Vitest for `current()`. Alpine reactivity (label follows playback) only VERIFY can see.
 
 ### 2.7 Tradeoffs locked
 
-| # | Question | Options considered | Chosen | Why / what would flip it |
-|---|----------|--------------------|--------|--------------------------|
-| 1 | | | | |
+| # | Question | Options | Chosen | Why |
+|---|----------|---------|--------|-----|
+| 1 | Where does the artist data come from | extra query in each component / enrich playlist | enrich `audioPlaylist` | One batched lookup, shared by both components, memoised |
+| 2 | Story page icon | static per row / follows playback | follows playback | One shared `<audio>`; rows have no player |
 
 ### 2.8 Risks acknowledged
 
-Known weak points, with the trigger that would make us revisit them.
-
-_Not written yet._
+Playlist shape change: only `ChapterAudio`, `StoryPlayer`, `ChapterAudioIcon` consume it (revisit if more consumers appear).
 
 ## 3. Plan
-
-> PLAN. BUILD reads **one phase at a time** plus §0 and the architecture
-> sections that phase names — so each phase must stand alone: name the §2
-> sections it needs, and state what earlier phases left behind.
 
 ### 3.1 Phase index
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | | S/M | — | TODO |
+| 1 | Artist icon on chapter and story players | S | — | TODO |
 
-S ≈ half a day, M ≈ 1–2 days, anything larger is split. Status: `TODO` ·
-`WIP` · `DONE`; BUILD updates it (it is what lets `WIP:BUILD (3/7)` resume).
-Checkpoint rows (`2v` — see `plan-phases`) are run by `visual-verifier` and
-change no code: `| 2v | Checkpoint — <existing consumers> | S | 2 | TODO |`.
+Working agreement: one phase = one commit; failing test first.
 
-Working agreement: one phase = one commit; failing test first; no phase N+1
-before N's acceptance holds; re-ordering is surfaced, not taken silently.
+### Phase 1 — Artist icon on chapter and story players
 
-### Phase 1 — <name>
+**Goal.** Show the artist icon beside both players. **Reads.** §2.3, §2.4.
 
-**Goal.** One sentence. **Reads.** §2.x, §2.y.
+**Deliverables.**
+- `app/Domains/Fanart/Private/Services/FanartService.php` (playlist enrichment)
+- `app/Domains/Fanart/Private/View/Components/ChapterAudio.php`, `StoryPlayer.php`
+- `app/Domains/Fanart/Private/Resources/views/components/chapter-audio.blade.php`, `story-player.blade.php`
+- `app/Domains/Fanart/Private/Resources/js/fanart-player.js` (+ `.test.js`)
+- `app/Domains/Fanart/Private/Resources/lang/fr/ui.php`
+- Tests in `app/Domains/Fanart/Tests/Feature/ChapterPageFanartTest.php` and `StoryPlayerTest.php`
 
-**Deliverables.** Files created or modified, by path.
-
-**Tests.** Named integration tests, as they will exist.
+**Tests.** `it shows the artist icon next to the chapter audio player`, `it omits the artist icon when the artist profile is gone`, `it gives each story player entry its artist label and url`, vitest `current returns the playing entry`.
 
 **Acceptance.**
-- ✅ Checkable statements, not intentions.
+- ✅ Chapter page: link to `profile.show` of the artist with « Par <nom> ».
+- ✅ Story page: icon appears when playing and updates on next chapter.
 - ✅ `pnpm run gate` green.
 
 ### 3.2 Visual QA checklist
 
-Filled by VERIFY; written now, while the flows are fresh.
-
 | Surface | Check | OK? |
 |---------|-------|-----|
-| | | |
+| Chapter page | Icon beside player and report button, links to profile | |
+| Story page | Icon hidden until play; changes artist when queue advances | |
+| Mobile 375px | Row does not overflow | |
 
 ### 3.3 Open items
 
-What the plan assumes but has not confirmed; each names the phase that needs it.
-
-_Not written yet._
+None.
 
 ## 4. Decisions
-
-Append-only. Every question the user arbitrated, as given. BUILD reads this
-before asking anything already settled. Never edit a row — add one that
-supersedes it.
 
 | # | Date | Step | Question | Decision | Supersedes |
 |---|------|------|----------|----------|------------|
@@ -194,16 +171,14 @@ supersedes it.
 
 ### Assumptions made without asking
 
-Each is a decision the user may want to reverse — WRAP surfaces them.
-
 | # | Assumption | Made at | Reversible? |
 |---|------------|---------|-------------|
-| | | | |
+| 1 | "Sound component" = chapter-page player and story-page player only | REFINE | Yes |
+| 2 | Icon links to the artist's profile, tooltip « Par <nom> » | REFINE | Yes |
+| 3 | Shown on the user's own sound too | REFINE | Yes |
+| 4 | No icon when the artist profile cannot be resolved | REFINE | Yes |
+| 5 | Glyph `account_circle` | REFINE | Yes |
 
 ## 5. Build & verify log
-
-One line per phase or checkpoint as it lands (commit sha, gate result,
-anything that contradicted the plan), then VERIFY's result block. Checkpoint
-results go here too, under their id.
 
 _Not written yet._
