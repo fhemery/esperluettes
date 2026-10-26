@@ -1,192 +1,173 @@
-# <Task title> — context
+# Report flag on fanart miniature — context
 
 > The task's single working file. Every agent reads **§0 Handoff first**, then
 > only the sections it needs, and writes its own section plus one Handoff entry
 > before it finishes. WRAP compacts the whole thing into `README.md` and the
 > folder is archived (see `.agents/loop/README.md`).
->
-> A section still reading `_Not written yet._` has not been done — that is how
-> `/continue-task` knows where the task stands.
 
-**Complexity:** _unrated_ /5 · **Mode:** interactive|auto
+**Complexity:** 2 /5 · **Mode:** auto
 
 ## 0. Handoff
 
-What the next agent needs that the sections below do not say: a trap found, the
-assumption most likely to be reversed, something deliberately left out, what to
-double-check. Newest entry first; 3–8 lines each; never a summary of the
-section you just wrote.
+### REFINE (+ fast-path DESIGN+PLAN) → BUILD (2026-10-26)
 
-### <STEP> → <next step> (<date>)
-
-_Not written yet._
+No blocking question (auto mode, none needed). Riskiest point: the report modal is
+loaded into a container inside the thumbnail wrapper; check in VERIFY it is not
+clipped by `overflow-hidden`/`x-show` ancestors (profile tab groups) and that a
+click on the flag never opens the viewer. Assumption likeliest to be reversed: no flag
+on the reporter's own fanart and none on audio rows of the profile tab (see §4).
+Verified in code: viewer fragment uses `canReport = $fanart->user_id !== $userId`
+and `<x-moderation::report-button topic-key="fanart" :entity-id :compact size="sm">`;
+`x-fanart::thumbnail` is used by `fragments/group`, `fragments/tab`, `fragments/profile-group`.
 
 ## 1. Functional spec
 
-> REFINE. **What** the feature does, never **how**. Everything here is either
-> confirmed by the user or a recorded assumption (§4).
-
 ### 1.1 Overview
 
-Two or three sentences: what, for whom, the value.
+A small flag button sits in the lower right corner of every fanart miniature
+(story Fanarts tab, chapter images, profile Fanarts tab). Clicking it opens the
+existing report form directly, without opening the fanart full screen. Value:
+reporting straight from the grid.
 
 ### 1.2 Vocabulary
 
 | Term | Meaning |
 |------|---------|
-| | |
-
-New nouns, in French if user-facing (the app is French-only).
+| Miniature | The 160x160 clickable thumbnail of a fanart (`x-fanart::thumbnail`) |
+| Drapeau | The flag icon button that opens the report form |
 
 ### 1.3 Roles & visibility
 
 | Role | Can see | Can do |
 |------|---------|--------|
-| Guest | | |
-| `user` (non-confirmed) | | |
-| `user-confirmed` | | |
-| Author / co-author of the target | | |
-| Moderator | | |
-| Admin | | |
+| Guest | Nothing (fanarts are confirmed-only) | — |
+| `user` (non-confirmed) | Nothing (fanart feature hidden) | — |
+| `user-confirmed` | Flag on every miniature except their own fanart | Report, same form/rules as in the viewer |
+| Author / co-author of the story | Same as confirmed | Same (reporting a pending fanart declines it, existing rule) |
+| Moderator / Admin | Same as confirmed | Same |
 
 ### 1.4 Functional requirements
 
-One sub-heading per flow, numbered steps, error and edge paths included.
+1. A confirmed viewer sees a flag icon over the lower right corner of each
+   miniature of a fanart they did not submit.
+2. Clicking the flag opens the existing report modal for topic `fanart` and that
+   fanart's id. It does not open the viewer.
+3. Submitting follows the unchanged existing report flow (reason, snapshot, moderation).
+4. The flag is reachable by keyboard and has an accessible label « Signaler ».
 
 ### 1.5 Lifecycle
 
-What happens to this data when the parent is deleted, unpublished or edited;
-when the user is deactivated, reactivated or deleted; what the UI shows.
+No data of its own. Follows the miniature: if the fanart is removed or no longer
+listed, the flag goes with it. Deactivated/deleted users: nothing new.
 
 ### 1.6 Cross-cutting concerns
 
-One line per item of
-[`../references/cross-cutting-checklist.md`](../references/cross-cutting-checklist.md);
-inapplicable ones as "N/A — <reason>".
-
 | Concern | Decision |
 |---------|----------|
-| Roles | |
-| Visibility / privacy | |
-| Settings | |
-| Notifications | |
-| Domain events | |
-| Statistics | |
-| Moderation | |
-| Lifecycle / cascade | |
-| Media | |
-| Search | |
-| i18n | |
-| Mobile | |
-| Accessibility | |
+| Roles | Miniatures are only rendered for confirmed viewers; flag hidden on own fanart (same rule as the viewer's `canReport`) |
+| Visibility / privacy | Unchanged |
+| Settings | N/A |
+| Notifications | N/A — unchanged (existing report flow) |
+| Domain events | N/A — unchanged `Moderation.ReportSubmitted` |
+| Statistics | N/A |
+| Moderation | Reuses topic `fanart` and its reasons |
+| Lifecycle / cascade | N/A — no data |
+| Media | N/A |
+| Search | N/A |
+| i18n | Reuses `moderation::report.button` label (French) |
+| Mobile | Flag always visible (no hover reveal), touch-sized, does not shrink the miniature's tap target below usability |
+| Accessibility | Real button, `title`/label, focus ring |
 
 ### 1.7 Out of scope
 
-Explicit non-goals, so nobody builds them by accident.
+- Audio rows (title + player) on the profile tab, and the chapter audio player (it already has its own report button).
+- Moderator delete / review actions on the miniature.
+- Any change to the report form, reasons or moderation flow.
+- Flag on the fanart creation/edit pages.
 
 ### 1.8 Open questions
 
-Each marked **blocking** or **non-blocking**. A blocking one is asked, never
-left here.
-
-_Not written yet._
+None blocking.
 
 ## 2. Architecture
 
-> DESIGN. **How** it is built: **shape and contracts, not a change list** —
-> signatures, data shapes, enforcement points, deptrac edges. The file-by-file
-> edits belong to §3 only, so the two cannot drift.
-
 ### 2.1 Domain placement
 
-Which domain owns it and why; new domain justified against extending one.
-One line per touched domain: minimum change, extension point or direct call.
+Fanart only; one Blade component change. Moderation's `<x-moderation::report-button>` is reused as-is (already consumed by Fanart's viewer, so no new coupling).
 
 ### 2.2 Data model
 
-Tables (columns, types, nullability, indexes; foreign keys only inside the
-owning domain), model (attribute syntax), lifecycle rules mapped from §1.5.
+None.
 
 ### 2.3 PHP architecture
 
-Public API · services · policy (enforcing §1.3) · events and listeners ·
-routes/controllers/form requests (no `PATCH` — use `PUT`).
+None. Existing `POST /moderation/report` is unchanged.
 
 ### 2.4 Frontend
 
-Blade components, Alpine, JS/CSS layout; shared components reused.
+`components/thumbnail.blade.php` becomes a `relative` wrapper `div` (keeps `w-40 h-40`) containing the existing thumbnail button (still `overflow-hidden`, now filling the wrapper) and, when the viewer is authenticated and `$fanart->user_id !== auth()->id()`, an `absolute bottom-1 right-1` `<x-moderation::report-button topic-key="fanart" :entity-id="$fanart->id" :compact="true" size="sm" />` placed as a sibling of (not inside) the button, so no nested interactive elements and the modal is not clipped by the button's `overflow-hidden`. The wrapper must not be inside any `@click` ancestor (checked: group/tab/profile-group have none around thumbnails).
 
 ### 2.5 Deptrac
 
-New edges, each justified — or "no new edge".
+No new edge (Fanart already uses Moderation views in the viewer).
 
 ### 2.6 Testing strategy
 
-Integration (default), unit, vitest, and what only VERIFY can see.
+Pest feature tests on the rendered fragments (existing `FanartFragmentsTest` style): flag markup `reportButton` present for another user's fanart, absent for own fanart. Modal clipping and click-not-opening-viewer are VERIFY-only.
 
 ### 2.7 Tradeoffs locked
 
 | # | Question | Options considered | Chosen | Why / what would flip it |
 |---|----------|--------------------|--------|--------------------------|
-| 1 | | | | |
+| 1 | Where the flag lives | Inside the button / sibling in wrapper | Sibling in wrapper | Avoids nested buttons and clipping |
+| 2 | Own fanart | Show anyway / hide | Hide | Mirrors viewer `canReport` |
 
 ### 2.8 Risks acknowledged
 
-Known weak points, with the trigger that would make us revisit them.
-
-_Not written yet._
+`report-button` renders a modal container inside the wrapper; if it clips in some context (profile tab `x-show`), revisit by teleporting.
 
 ## 3. Plan
-
-> PLAN. BUILD reads **one phase at a time** plus §0 and the architecture
-> sections that phase names — so each phase must stand alone: name the §2
-> sections it needs, and state what earlier phases left behind.
 
 ### 3.1 Phase index
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | | S/M | — | TODO |
+| 1 | Flag on thumbnail | S | — | TODO |
 
-S ≈ half a day, M ≈ 1–2 days, anything larger is split. Status: `TODO` ·
-`WIP` · `DONE`; BUILD updates it (it is what lets `WIP:BUILD (3/7)` resume).
-Checkpoint rows (`2v` — see `plan-phases`) are run by `visual-verifier` and
-change no code: `| 2v | Checkpoint — <existing consumers> | S | 2 | TODO |`.
+Working agreement: one phase = one commit; failing test first.
 
-Working agreement: one phase = one commit; failing test first; no phase N+1
-before N's acceptance holds; re-ordering is surfaced, not taken silently.
+### Phase 1 — Flag on thumbnail
 
-### Phase 1 — <name>
+**Goal.** Show the report flag on miniatures of other users' fanarts. **Reads.** §2.4, §2.6.
 
-**Goal.** One sentence. **Reads.** §2.x, §2.y.
+**Deliverables.**
+- Modify `app/Domains/Fanart/Private/Resources/views/components/thumbnail.blade.php` as in §2.4.
+- Add a line to `app/Domains/Fanart/AGENTS.md` / `README.md` only if they describe the thumbnail (check).
 
-**Deliverables.** Files created or modified, by path.
-
-**Tests.** Named integration tests, as they will exist.
+**Tests.** In `app/Domains/Fanart/Tests/Feature/FanartFragmentsTest.php`:
+- `it shows a report flag on a miniature of another user's fanart`
+- `it hides the report flag on the viewer's own fanart miniature`
 
 **Acceptance.**
-- ✅ Checkable statements, not intentions.
-- ✅ `pnpm run gate` green.
+- Tests above pass (written first, failing).
+- Thumbnail click still dispatches `fanart-open`; flag is not nested in the thumbnail button.
+- `pnpm run gate` green.
 
 ### 3.2 Visual QA checklist
 
-Filled by VERIFY; written now, while the flows are fresh.
-
 | Surface | Check | OK? |
 |---------|-------|-----|
-| | | |
+| Story Fanarts tab | Flag bottom-right on others' fanart; click opens report modal, not viewer | |
+| Chapter images | Same | |
+| Profile Fanarts tab (other's profile / own) | Flag on others'; none on own; modal not clipped in collapsed/expanded groups | |
+| Mobile width | Flag visible and tappable | |
+| Keyboard | Tab reaches flag, Enter opens form | |
 
 ### 3.3 Open items
 
-What the plan assumes but has not confirmed; each names the phase that needs it.
-
-_Not written yet._
+None.
 
 ## 4. Decisions
-
-Append-only. Every question the user arbitrated, as given. BUILD reads this
-before asking anything already settled. Never edit a row — add one that
-supersedes it.
 
 | # | Date | Step | Question | Decision | Supersedes |
 |---|------|------|----------|----------|------------|
@@ -194,16 +175,13 @@ supersedes it.
 
 ### Assumptions made without asking
 
-Each is a decision the user may want to reverse — WRAP surfaces them.
-
 | # | Assumption | Made at | Reversible? |
 |---|------------|---------|-------------|
-| | | | |
+| 1 | Flag hidden on the viewer's own fanart (mirrors viewer `canReport`) | REFINE | Yes |
+| 2 | Audio rows on the profile tab (no miniature) and chapter audio get no new flag | REFINE | Yes |
+| 3 | Flag always visible, not hover-only (mobile) | REFINE | Yes |
+| 4 | Flag also shown on pending fanarts (same as viewer) | REFINE | Yes |
 
 ## 5. Build & verify log
-
-One line per phase or checkpoint as it lands (commit sha, gate result,
-anything that contradicted the plan), then VERIFY's result block. Checkpoint
-results go here too, under their id.
 
 _Not written yet._
