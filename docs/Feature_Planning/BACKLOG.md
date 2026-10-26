@@ -42,6 +42,9 @@ scoped to the task that actually changed.
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
 - **Story — label the chapter form publish_at field** · `story-chapter-publish-at-label/` · auto · complexity:1 · TODO
+- **Report flag on fanart miniature** · `fanart-miniature-report-flag/` · auto · TODO
+- **Show fanart sound author icon next to sound component** · `fanart-sound-author-icon/` · auto · TODO
+- **Collapse Toute l'oeuvre fanart area by default** · `fanart-toute-loeuvre-collapsed/` · auto · TODO
 
 ## Done
 
