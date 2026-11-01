@@ -4,6 +4,10 @@
 
 ## 0. Handoff
 
+### VERIFY → WRAP (2026-11-01)
+
+PASS. Both QA rows OK, no spec written (rows are plain rendering, covered by notification tests; checked by hand through the driver). Nothing flaky. Test sanity: see §5.
+
 ### BUILD phase 1 → WRAP (2026-11-01)
 
 No plan deviation. `docs/notification-types.md` regenerated via `notifications:export-types-doc`. Type counts bumped to "eleven" in Fanart README/AGENTS. Visual QA (§3.2) not run.
@@ -170,8 +174,8 @@ None notable.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Notification list of ex-fanartist | Text and story link render | |
-| Notification preferences | New type listed under Fanarts | |
+| Notification list of ex-fanartist | Text and story link render | ✅ « Votre rôle de fanartiste sur Histoire E2E vous a été retiré », story name is a link (e2e instance, confirmed@e2e.test) |
+| Notification preferences | New type listed under Fanarts | ✅ /settings/notification lists « Mon rôle de fanartiste sur une histoire m'a été retiré » beside the 3 other fanart types |
 
 ### 3.3 Open items
 
@@ -194,3 +198,4 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE (2026-11-01): `fanart.role_revoked` sent from `FanartistService::revoke` when a row was deleted. Tests in FanartistManagementTest + FanartNotificationsTest; gate green.
+- VERIFY PASS (2026-11-01): notification list and preferences screen checked in a browser (notification sent via `FanartNotifier` on the e2e DB; the Fanarts group on the dev DB is not shown to admin). Mutation check: with the notify call in `FanartistService::revoke` commented out, `notifies the fanartist when the role is revoked` FAILS (0 vs 1) as it should; `does not notify when nobody held the role` still passes, as expected, since it asserts an absence (it guards the `$deleted > 0` condition, not the call). Call restored, tree clean.
