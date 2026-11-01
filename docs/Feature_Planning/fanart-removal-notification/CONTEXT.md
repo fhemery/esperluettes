@@ -4,6 +4,10 @@
 
 ## 0. Handoff
 
+### BUILD phase 1 → WRAP (2026-11-01)
+
+No plan deviation. `docs/notification-types.md` regenerated via `notifications:export-types-doc`. Type counts bumped to "eleven" in Fanart README/AGENTS. Visual QA (§3.2) not run.
+
 ### DESIGN+PLAN → BUILD (2026-11-01)
 
 One phase, low risk. The request ("fanart removal") was already covered by
@@ -137,7 +141,7 @@ None notable.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | `fanart.role_revoked` notification on revocation | S | — | TODO |
+| 1 | `fanart.role_revoked` notification on revocation | S | — | DONE |
 
 ### Phase 1 — Notify on revocation
 
@@ -189,4 +193,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE (2026-11-01): `fanart.role_revoked` sent from `FanartistService::revoke` when a row was deleted. Tests in FanartistManagementTest + FanartNotificationsTest; gate green.

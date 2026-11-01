@@ -13,6 +13,7 @@ const FANART_NOTIFICATION_TYPES = [
     'fanart.submitted', 'fanart.accepted', 'fanart.declined', 'fanart.deleted',
     'fanart.deleted_by_moderation', 'fanart.audio_replaced', 'fanart.removed_with_content',
     'fanart.role_requested', 'fanart.role_given', 'fanart.role_declined',
+    'fanart.role_revoked',
 ];
 
 /** @return array{0: object, 1: object, 2: object, 3: object, 4: \App\Domains\Fanart\Private\Models\Fanart} */
@@ -80,6 +81,7 @@ it('renders every type with its denormalised payload', function (string $type, C
     'role_requested' => ['fanart.role_requested', fn ($n, $f, $a, $r, $s) => $n->fanartRoleRequested($s->id, $r->id), ['Les Ombres', 'fanartiste']],
     'role_given' => ['fanart.role_given', fn ($n, $f, $a, $r, $s) => $n->fanartRoleGiven($s->id, $r->id, $a->id), ['Les Ombres', 'fanartiste']],
     'role_declined' => ['fanart.role_declined', fn ($n, $f, $a, $r, $s) => $n->fanartRoleDeclined($s->id, $r->id, $a->id), ['Les Ombres', 'refusée']],
+    'role_revoked' => ['fanart.role_revoked', fn ($n, $f, $a, $r, $s) => $n->fanartRoleRevoked($s->id, $r->id, $a->id), ['Les Ombres', 'retiré']],
 ]);
 
 it('renders deleted_by_moderation with its denormalised payload', function () {

@@ -11,6 +11,7 @@ use App\Domains\Fanart\Public\Notifications\FanartDeletedNotification;
 use App\Domains\Fanart\Public\Notifications\FanartNotificationContent;
 use App\Domains\Fanart\Public\Notifications\FanartRemovedWithContentNotification;
 use App\Domains\Fanart\Public\Notifications\FanartRoleDeclinedNotification;
+use App\Domains\Fanart\Public\Notifications\FanartRoleRevokedNotification;
 use App\Domains\Fanart\Public\Notifications\FanartRoleGivenNotification;
 use App\Domains\Fanart\Public\Notifications\FanartRoleRequestedNotification;
 use App\Domains\Fanart\Public\Notifications\FanartSubmittedNotification;
@@ -143,6 +144,15 @@ class FanartNotifier
             [$requesterId],
             $actorId,
             fn () => $this->forStory(FanartRoleDeclinedNotification::class, $storyId, $actorId),
+        );
+    }
+
+    public function fanartRoleRevoked(int $storyId, int $revokedUserId, int $actorId): void
+    {
+        $this->send(
+            [$revokedUserId],
+            $actorId,
+            fn () => $this->forStory(FanartRoleRevokedNotification::class, $storyId, $actorId),
         );
     }
 

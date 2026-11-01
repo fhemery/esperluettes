@@ -15,6 +15,7 @@ return [
         'type_role_requested' => 'Quelqu\'un demande à devenir fanartiste sur l\'une de mes histoires',
         'type_role_given' => 'Le rôle de fanartiste m\'a été accordé sur une histoire',
         'type_role_declined' => 'Ma demande pour devenir fanartiste a été refusée',
+        'type_role_revoked' => 'Mon rôle de fanartiste sur une histoire m\'a été retiré',
     ],
     'kind' => [
         'image' => 'une image',
@@ -55,5 +56,8 @@ return [
     ],
     'role_declined' => [
         'display' => 'Votre demande pour devenir fanartiste sur <a href=":story_url">:story_title</a> a été refusée',
+    ],
+    'role_revoked' => [
+        'display' => 'Votre rôle de fanartiste sur <a href=":story_url">:story_title</a> vous a été retiré',
     ],
 ];

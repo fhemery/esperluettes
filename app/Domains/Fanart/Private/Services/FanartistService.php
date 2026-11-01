@@ -160,11 +160,15 @@ class FanartistService
     }
 
     /** The user's fanarts are left untouched. */
-    public function revoke(int $storyId, int $userId): void
+    public function revoke(int $storyId, int $userId, int $actorId): void
     {
-        Fanartist::query()
+        $deleted = Fanartist::query()
             ->where('story_id', $storyId)
             ->where('user_id', $userId)
             ->delete();
+
+        if ($deleted > 0) {
+            $this->notifier->fanartRoleRevoked($storyId, $userId, $actorId);
+        }
     }
 }

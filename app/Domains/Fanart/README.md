@@ -44,7 +44,7 @@ Fanart never deletes a file; it only clears rows. `FanartMediaUsageProvider` cla
 |---|---|
 | Storage, variants, streaming helpers, GC | Media (`MediaPublicApi`, usage registry) |
 | Story, chapter, author and read-state lookups | Story (`StoryPublicApi`) |
-| Notifications (ten `fanart.*` types) | Notification registry |
+| Notifications (eleven `fanart.*` types) | Notification registry |
 | Reporting and moderator deletion | Moderation topic `fanart` |
 | Preferences (modes, profile-tab privacy) | Settings registry |
 | Lifecycle (user deactivated / deleted, story / chapter deleted) | Listeners on Auth and Story events |
