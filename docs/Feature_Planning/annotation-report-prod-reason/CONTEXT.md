@@ -181,3 +181,4 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE: migration + 3 tests; Moderation and Comment suites pass; gate green.
+- VERIFY (2026-11-01): checklist row is data-only (the modal renders `moderation_reasons` rows, already covered by `core/chapter-annotation-report.spec.ts`, which selects a reason in `#reason_id`). Ran `migrate` on the dev DB: the `annotation` topic now has one active « Autre » (id 3, sort 0). Modal not driven in the browser (no annotated chapter in dev data; cost not justified). PASS.
