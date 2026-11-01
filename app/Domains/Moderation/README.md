@@ -57,6 +57,8 @@ Without a formatter, `reported_user_id` is `null` and no snapshot is stored — 
 
 The Blade component `<x-moderation::report-button :topic="'story'" :entity-id="$story->id" />` handles AJAX form loading and report submission. The form is fetched lazily via `GET moderation/report-form/{topicKey}/{entityId}` and submitted via `POST moderation/report`.
 
+Both routes accept `user`, `user-confirmed`, `moderator`, `admin` and `tech-admin` (staff-only accounts can report). The JS redirects to `/login` on 401 only; on a 403 it keeps the modal open and shows the response `message` (generic `moderation::report.error` if absent). Known limit: `ReportController::store()` returns that same generic message for every authorization failure, so a guard's specific refusal reason is not shown yet.
+
 ---
 
 ## Architecture decisions and rationale

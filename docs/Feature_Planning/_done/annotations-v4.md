@@ -97,7 +97,7 @@ No migration, no new route, no JS file changed, no new deptrac edge.
 - Pushed back to the backlog:
   - [`annotation-report-prod-reason/`](./annotation-report-prod-reason.md) —
     the « Autre » reason is only in the dev seeder; production has none.
-  - [`moderation-report-refusals/`](../moderation-report-refusals/00-request.md) —
+  - [`moderation-report-refusals/`](./moderation-report-refusals.md) —
     403 in the report modal redirects to `/login`; moderator-only accounts see
     the button but the `moderation/report` route gate (`user`/`user-confirmed`)
     refuses them.
