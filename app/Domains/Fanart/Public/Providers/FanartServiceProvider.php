@@ -32,6 +32,7 @@ use App\Domains\Fanart\Public\Notifications\FanartDeletedByModerationNotificatio
 use App\Domains\Fanart\Public\Notifications\FanartDeletedNotification;
 use App\Domains\Fanart\Public\Notifications\FanartRemovedWithContentNotification;
 use App\Domains\Fanart\Public\Notifications\FanartRoleDeclinedNotification;
+use App\Domains\Fanart\Public\Notifications\FanartRoleRevokedNotification;
 use App\Domains\Fanart\Public\Notifications\FanartRoleGivenNotification;
 use App\Domains\Fanart\Public\Notifications\FanartRoleRequestedNotification;
 use App\Domains\Fanart\Public\Notifications\FanartSubmittedNotification;
@@ -132,6 +133,7 @@ class FanartServiceProvider extends ServiceProvider
             FanartRoleRequestedNotification::class => 'role_requested',
             FanartRoleGivenNotification::class => 'role_given',
             FanartRoleDeclinedNotification::class => 'role_declined',
+            FanartRoleRevokedNotification::class => 'role_revoked',
         ] as $class => $name) {
             $factory->register(
                 type: $class::type(),

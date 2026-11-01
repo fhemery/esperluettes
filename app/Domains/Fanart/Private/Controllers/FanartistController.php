@@ -41,7 +41,7 @@ class FanartistController
     {
         $story = $this->stories->resolve($slug);
 
-        $this->service->revoke($story->id, $userId);
+        $this->service->revoke($story->id, $userId, Auth::id());
 
         return back()->with('success', __('fanart::ui.fanartists.revoked'));
     }

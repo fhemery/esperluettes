@@ -36,6 +36,7 @@ class DeleteFanartsOnStoryDeleted
                 $fanart,
                 $event->story->title,
                 $event->story->slug,
+                actorId: $event->deletedByUserId,
             ));
     }
 }

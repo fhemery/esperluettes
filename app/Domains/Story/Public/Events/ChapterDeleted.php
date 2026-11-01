@@ -10,6 +10,7 @@ class ChapterDeleted implements DomainEvent
     public function __construct(
         public readonly int $storyId,
         public readonly ChapterSnapshot $chapter,
+        public readonly ?int $deletedByUserId = null,
     ) {}
 
     public static function name(): string { return 'Chapter.Deleted'; }
@@ -21,6 +22,7 @@ class ChapterDeleted implements DomainEvent
         return [
             'storyId' => $this->storyId,
             'chapter' => $this->chapter->toPayload(),
+            'deletedByUserId' => $this->deletedByUserId,
         ];
     }
 
@@ -39,6 +41,7 @@ class ChapterDeleted implements DomainEvent
         return new static(
             storyId: (int) ($payload['storyId'] ?? 0),
             chapter: ChapterSnapshot::fromPayload($chapterPayload),
+            deletedByUserId: isset($payload['deletedByUserId']) ? (int) $payload['deletedByUserId'] : null,
         );
     }
 }

@@ -2,7 +2,7 @@
 
 > **Auto-generated** by `php artisan notifications:export-types-doc`. Do not edit by hand.
 
-Generated at: 2026-10-25T08:40:20+00:00 (`locale`: `fr`)
+Generated at: 2026-11-01T12:02:56+00:00 (`locale`: `fr`)
 
 ## Group: Commentaires (`comments`)
 
@@ -89,6 +89,7 @@ Generated at: 2026-10-25T08:40:20+00:00 (`locale`: `fr`)
 | `fanart.role_requested` | `App\Domains\Fanart\Public\Notifications\FanartRoleRequestedNotification` | Quelqu'un demande à devenir fanartiste sur l'une de mes histoires | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
 | `fanart.role_given` | `App\Domains\Fanart\Public\Notifications\FanartRoleGivenNotification` | Le rôle de fanartiste m'a été accordé sur une histoire | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
 | `fanart.role_declined` | `App\Domains\Fanart\Public\Notifications\FanartRoleDeclinedNotification` | Ma demande pour devenir fanartiste a été refusée | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
+| `fanart.role_revoked` | `App\Domains\Fanart\Public\Notifications\FanartRoleRevokedNotification` | Mon rôle de fanartiste sur une histoire m'a été retiré | `actor_id`, `actor_name`, `actor_slug`, `story_id`, `story_title`, `story_slug`, `chapter_title`, `chapter_slug`, `fanart_title`, `kind`, `comment` | no | no | all authenticated users |
 
 ## Group: Calendrier (`calendar`)
 

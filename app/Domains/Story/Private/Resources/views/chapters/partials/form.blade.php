@@ -114,6 +114,7 @@
             <!-- Inline date picker — appears when toggle is OFF -->
             <div x-show="!published" x-cloak class="flex items-center gap-2 sm:flex-1">
                 <span class="material-symbols-outlined text-secondary text-[18px] leading-none shrink-0">schedule</span>
+                <x-shared::input-label for="publish_at" class="sr-only" :value="__('story::chapters.form.publish_at.label')" />
                 <x-shared::datetime-local-input
                     id="publish_at"
                     name="publish_at"

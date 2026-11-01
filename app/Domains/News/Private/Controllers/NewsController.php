@@ -26,7 +26,7 @@ class NewsController extends BaseController
         $news = News::query()
             ->published()
             ->orderForListing()
-            ->paginate(12);
+            ->get();
 
         $pinned = $this->newsService->getPinnedForCarousel();
 

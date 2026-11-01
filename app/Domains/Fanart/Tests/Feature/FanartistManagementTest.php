@@ -98,6 +98,29 @@ it('revokes the role without touching the user\'s fanarts', function () {
         ->and(Fanart::query()->find($fanart->id))->not->toBeNull();
 });
 
+it('notifies the fanartist when the role is revoked', function () {
+    $author = alice($this);
+    $artist = bob($this);
+    $story = publicStory('Histoire', $author->id);
+    $this->actingAs($author)->post(grantUrl($story->slug), ['target_users' => [$artist->id]]);
+
+    $this->actingAs($author)->delete(revokeUrl($story->slug, $artist->id))->assertRedirect();
+
+    expect(countNotificationsByKey('fanart.role_revoked'))->toBe(1)
+        ->and(getNotificationTargetUserIds(getLatestNotificationByKey('fanart.role_revoked')->id))->toBe([$artist->id])
+        ->and((int) getLatestNotificationByKey('fanart.role_revoked')->source_user_id)->toBe($author->id);
+});
+
+it('does not notify when nobody held the role', function () {
+    $author = alice($this);
+    $artist = bob($this);
+    $story = publicStory('Histoire', $author->id);
+
+    $this->actingAs($author)->delete(revokeUrl($story->slug, $artist->id))->assertRedirect();
+
+    expect(countNotificationsByKey('fanart.role_revoked'))->toBe(0);
+});
+
 it('returns 403 to a co-collaborator who is not an author and to the fanartiste', function () {
     $author = alice($this);
     $beta = bob($this);

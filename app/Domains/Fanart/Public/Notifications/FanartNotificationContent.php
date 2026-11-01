@@ -5,7 +5,7 @@ namespace App\Domains\Fanart\Public\Notifications;
 use App\Domains\Notification\Public\Contracts\NotificationContent;
 
 /**
- * Shared payload of the ten `fanart.*` notifications. Everything shown is
+ * Shared payload of the eleven `fanart.*` notifications. Everything shown is
  * denormalised at creation time, so a notification whose story, chapter or
  * fanart was deleted afterwards still renders.
  */

@@ -12,6 +12,7 @@ class StoryDeleted implements DomainEvent
     public function __construct(
         public readonly StorySnapshot $story,
         public readonly array $chapters = [],
+        public readonly ?int $deletedByUserId = null,
     ) {}
 
     public static function name(): string { return 'Story.Deleted'; }
@@ -23,6 +24,7 @@ class StoryDeleted implements DomainEvent
         return [
             'story' => $this->story->toPayload(),
             'chapters' => array_map(fn(ChapterSnapshot $c) => $c->toPayload(), $this->chapters),
+            'deletedByUserId' => $this->deletedByUserId,
         ];
     }
 
@@ -39,6 +41,10 @@ class StoryDeleted implements DomainEvent
         $storyPayload = (array) ($payload['story'] ?? []);
         $chaptersPayload = (array) ($payload['chapters'] ?? []);
         $chapters = array_map(fn($p) => ChapterSnapshot::fromPayload((array) $p), $chaptersPayload);
-        return new static(StorySnapshot::fromPayload($storyPayload), $chapters);
+        return new static(
+            StorySnapshot::fromPayload($storyPayload),
+            $chapters,
+            isset($payload['deletedByUserId']) ? (int) $payload['deletedByUserId'] : null,
+        );
     }
 }

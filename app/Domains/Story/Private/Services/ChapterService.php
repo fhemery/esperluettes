@@ -418,6 +418,7 @@ class ChapterService
             $this->eventBus->emit(new \App\Domains\Story\Public\Events\ChapterDeleted(
                 storyId: (int) $story->id,
                 chapter: $snapshot,
+                deletedByUserId: $userId,
             ));
 
             // Notify co-authors about the chapter deletion

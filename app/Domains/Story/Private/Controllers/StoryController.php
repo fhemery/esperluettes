@@ -399,7 +399,7 @@ class StoryController
         }
 
         // Hard delete via service; pivot tables use ON DELETE CASCADE
-        $this->service->deleteStory($story);
+        $this->service->deleteStory($story, Auth::id());
 
         return redirect()->route('stories.index')
             ->with('status', __('story::show.deleted'));
