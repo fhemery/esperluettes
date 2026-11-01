@@ -17,6 +17,12 @@ keeps its `paginate(20)` and `<x-shared::pagination>`). Check the view's
 
 Done as planned, no deviation. Only visual QA of `/news` remains.
 
+### VERIFY -> WRAP (2026-11-01)
+
+PASS. Row is essentially covered by the PHP feature test; one browser look at
+`/news` (admin, dev DB) rendered grid, no pager. No spec written. Only known
+noise: pre-existing 404 on storage/news webp. Nothing flaky or manual.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -100,7 +106,7 @@ published items, assert every slug link is present on `news.index`. Written firs
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| `/news` | All published items shown, no pager | |
+| `/news` | All published items shown, no pager | ✅ (dev DB has only 2 items, so no-cap proof is the PHP test; browser confirms render + 0 pager elements) |
 
 ### 3.3 Open items
 
@@ -122,3 +128,4 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE: `paginate(12)` -> `get()`; test `lists all published news beyond twelve items` added (failed first, now passes).
+- VERIFY (2026-11-01): PASS. `/news` driven in browser: renders, 0 pager elements; screenshot viewed. No e2e spec (render-only, covered by feature test).
