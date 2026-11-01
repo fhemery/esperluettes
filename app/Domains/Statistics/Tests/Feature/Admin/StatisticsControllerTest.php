@@ -40,6 +40,21 @@ describe('Statistics Admin Controller', function () {
             ->toMatch('/<button[^>]*aria-checked="false"[^>]*data-value="weekly"/');
     });
 
+    it('renders the time range switch with both options, 12 months selected', function () {
+        $response = $this->actingAs(admin($this))
+            ->get(route('statistics.admin.index'))
+            ->assertOk()
+            ->assertSee('aria-label="'.__('statistics::admin.time_range_label').'"', false)
+            ->assertSee('data-name="statistics-time-range"', false)
+            ->assertSee(__('statistics::admin.time_range_recent'))
+            ->assertSee(__('statistics::admin.time_range_all'))
+            ->assertSee('statistics.admin.time-range', false);
+
+        expect($response->getContent())
+            ->toMatch('/<button[^>]*aria-checked="true"[^>]*data-value="recent"/')
+            ->toMatch('/<button[^>]*aria-checked="false"[^>]*data-value="all"/');
+    });
+
     it('keeps the summary tiles outside the graph mode switch', function () {
         $html = $this->actingAs(admin($this))
             ->get(route('statistics.admin.index'))

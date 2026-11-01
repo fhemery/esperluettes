@@ -22,6 +22,10 @@
 - Seeding uses the last row's `cumulative_value`, else the sum of all earlier deltas (the delta-only fallback would have under-seeded). Recent range spans 48 points over 12 months, starting at the seeded level.
 - Recent options are emitted even for the empty state's sibling case; empty state still tests the full series. `app/Domains/Statistics/AGENTS.md` invariant on weekly range updated.
 
+### BUILD phase 2 → VERIFY (2026-11-01)
+
+- `charts.js`: `rangedPayload()` swaps in the `recent*` sets and `recentRangeMin/Max` when range is `recent`; a payload without `recentPoints` falls back to the full set. Mode and range tracked separately (`renderedMode`, `renderedRange`). No seeder change made; VERIFY should check whether `E2eStatisticsSeeder` has a point older than 12 months.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -128,7 +132,7 @@ Page payload roughly doubles (about 1 to 2 hundred points per chart, 6 charts): 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Server: range-aware series + payloads | S | — | DONE |
-| 2 | Client: range switch, charts, i18n | S | 1 | TODO |
+| 2 | Client: range switch, charts, i18n | S | 1 | DONE |
 
 Working agreement: one phase = one commit; failing test first.
 
@@ -190,3 +194,4 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 (2026-11-01): DONE. Server seeding, weekly `$from`, recent payload variants; new Statistics feature tests green.
+- Phase 2 (2026-11-01): DONE. Second segmented control, range-aware `charts.js`, French strings; vitest and controller test added.

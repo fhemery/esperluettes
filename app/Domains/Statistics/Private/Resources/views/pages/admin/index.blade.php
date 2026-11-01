@@ -31,17 +31,30 @@
             />
         </div>
 
-        <x-shared::segmented-control
-            name="statistics-graph-mode"
-            :label="__('statistics::admin.graph_mode_label')"
-            :options="[
-                'cumulative' => __('statistics::admin.graph_mode_cumulative'),
-                'weekly' => __('statistics::admin.graph_mode_weekly'),
-            ]"
-            selected="cumulative"
-            storage-key="statistics.admin.graph-mode"
-            class="self-start"
-        />
+        <div class="flex flex-wrap gap-4">
+            <x-shared::segmented-control
+                name="statistics-graph-mode"
+                :label="__('statistics::admin.graph_mode_label')"
+                :options="[
+                    'cumulative' => __('statistics::admin.graph_mode_cumulative'),
+                    'weekly' => __('statistics::admin.graph_mode_weekly'),
+                ]"
+                selected="cumulative"
+                storage-key="statistics.admin.graph-mode"
+                class="self-start"
+            />
+            <x-shared::segmented-control
+                name="statistics-time-range"
+                :label="__('statistics::admin.time_range_label')"
+                :options="[
+                    'recent' => __('statistics::admin.time_range_recent'),
+                    'all' => __('statistics::admin.time_range_all'),
+                ]"
+                selected="recent"
+                storage-key="statistics.admin.time-range"
+                class="self-start"
+            />
+        </div>
 
         <x-shared::tabs
             :tabs="[
