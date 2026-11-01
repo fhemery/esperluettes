@@ -15,6 +15,10 @@ rather than visible, to keep the inline toggle + picker row unchanged.
 
 No plan deviation. `input-label` auto-gives the label `id="publish_at_label"`, which the datetime component's `aria-labelledby` already pointed at (so group and time input are named). Visual QA of the sr-only row not done (no browser).
 
+### VERIFY → WRAP (2026-11-01)
+
+PASS. Driven on the e2e instance as author@e2e.test (`histoire-e2e-1` chapter create), no spec written (markup-only, covered by the feature test). Nothing flaky or manual; nothing to fold beyond the record.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -124,7 +128,7 @@ it must not disturb the `gap-2` flex row (verify visually).
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Chapter create/edit form, « Publié » off | Row looks identical; field named « Publication planifiée » in the accessibility tree | |
+| Chapter create/edit form, « Publié » off | Row looks identical; field named « Publication planifiée » in the accessibility tree | ✅ row box 722x38.69 at same position before/after (HEAD~1 vs HEAD); group and both textboxes named « Publication planifiée » |
 
 ### 3.3 Open items
 
@@ -145,3 +149,4 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE (2026-11-01): sr-only label added in `chapters/partials/form.blade.php`; test `create form labels the scheduled publication field` in `CreateChapterTest.php`. Visual QA (§3.2) not run.
+- VERIFY PASS (2026-11-01): toggle off reveals the row; bounding box identical to pre-change; ariaSnapshot shows group « Publication planifiée » with its textboxes named; screenshot opened, row renders normally.
