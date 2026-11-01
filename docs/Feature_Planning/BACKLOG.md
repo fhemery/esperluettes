@@ -24,7 +24,7 @@ scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO: leftover from `role-gated-notification-settings/` REFINE — Quote Contest already broadcasts lifecycle to all active `user-confirmed`, ignoring each activity’s `role_restrictions`. Recipients must be the users authorized to *that* activity, not a type-level role list and not every confirmed user.
-- **Moderation — report refusals: 403 handling and moderator-only accounts** · `moderation-report-refusals/` · interactive · TODO
+- **Moderation — report refusals: 403 handling and moderator-only accounts** · `moderation-report-refusals/` · interactive · complexity:2 · WIP:PLAN
 - **Chapter annotations — e2e fixtures for reaction and co-author reply reports** · `annotation-report-e2e-fixtures/` · interactive · TODO
 - **Fanart — seed a report reason for the fanart moderation topic in production** · `fanart-report-prod-reason/` · interactive · complexity:2 · TODO
 - **Chapter annotations — image annotation** · `annotations-images/` · interactive · TODO: split from `annotations-v4/` REFINE; needs a stable block id persisted through Editor + Story first.
