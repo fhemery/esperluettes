@@ -144,6 +144,81 @@ describe('weekly chart payload', function () {
         ]);
     });
 
+    it('stat-widget ships recent (12 months) variants next to the full ones', function () {
+        seedPayloadDaily('global.total_users', '2024-06-03', 4); // older than 12 months
+        seedPayloadDaily('global.total_users', '2026-01-20', 3);
+
+        $html = (string) $this->blade(
+            '<x-statistics::stat-widget statistic-key="global.total_users" label="Users" />'
+        );
+
+        $full = payloadAttribute($html, 'data-points');
+        $recent = payloadAttribute($html, 'data-recent-points');
+        expect($full[0]['x'])->toBe('2024-06-03')
+            ->and($recent)->toHaveCount(48)
+            ->and($recent[0]['x'])->toBe('2025-01-28')
+            ->and((float) $recent[0]['cumulativeValue'])->toBe(4.0)
+            ->and((float) $recent[47]['cumulativeValue'])->toBe(7.0);
+
+        $weekly = weeklyValues(payloadAttribute($html, 'data-recent-weekly-points'));
+        expect($weekly[0][0])->toBe('2025-01-27')
+            ->and(end($weekly))->toBe(['2026-01-26', 0.0])
+            ->and(payloadAttribute($html, 'data-weekly-points')[0]['x'])->toBe('2024-06-03');
+
+        $options = payloadAttribute($html, 'data-options');
+        expect($options['recentRangeMin'])->toBe('2025-01-28')
+            ->and($options['recentRangeMax'])->toBe('2026-01-28')
+            ->and($options['rangeMin'])->toBe('2024-06-03');
+    });
+
+    it('a metric silent in the last 12 months keeps a flat recent line, not the empty state', function () {
+        seedPayloadDaily('global.total_users', '2024-03-04', 6);
+
+        $html = (string) $this->blade(
+            '<x-statistics::stat-widget statistic-key="global.total_users" label="Users" />'
+        );
+
+        $recent = payloadAttribute($html, 'data-recent-points');
+        expect($html)->not->toContain('stat-line-chart-empty')
+            ->and(collect($recent)->pluck('cumulativeValue')->map(fn ($v) => (float) $v)->unique()->all())->toBe([6.0]);
+        foreach (payloadAttribute($html, 'data-recent-weekly-points') as $week) {
+            expect((float) $week['value'])->toBe(0.0);
+        }
+    });
+
+    it('comment-breakdown ships recent series with roots aligned to the total by week', function () {
+        seedPayloadDaily('global.total_comments', '2024-06-03', 5);
+        seedPayloadDaily('global.total_root_comments', '2024-06-03', 2);
+        seedPayloadDaily('global.total_comments', '2026-01-20', 1);
+        seedPayloadDaily('global.total_root_comments', '2026-01-20', 1);
+
+        $html = (string) $this->blade(
+            '<x-statistics::comment-breakdown-chart root-label="Roots" reply-label="Replies" />'
+        );
+
+        [$roots, $replies] = payloadAttribute($html, 'data-series');
+        expect($roots['points'][0]['x'])->toBe('2024-06-03')
+            ->and($roots['recentPoints'])->toHaveCount(48)
+            ->and((float) $roots['recentPoints'][0]['cumulativeValue'])->toBe(2.0)
+            ->and((float) $replies['recentPoints'][0]['cumulativeValue'])->toBe(3.0)
+            ->and((float) $replies['recentPoints'][47]['cumulativeValue'])->toBe(3.0);
+
+        expect(weeklyValues($roots['recentWeeklyPoints'])[0][0])->toBe('2025-01-27')
+            ->and(array_slice(weeklyValues($roots['recentWeeklyPoints']), -2))->toBe([
+                ['2026-01-19', 1.0],
+                ['2026-01-26', 0.0],
+            ])
+            ->and(array_slice(weeklyValues($replies['recentWeeklyPoints']), -2))->toBe([
+                ['2026-01-19', 0.0],
+                ['2026-01-26', 0.0],
+            ]);
+        expect(count($roots['recentWeeklyPoints']))->toBe(count($replies['recentWeeklyPoints']));
+
+        $options = payloadAttribute($html, 'data-options');
+        expect($options['recentRangeMin'])->toBe('2025-01-28')
+            ->and($options['recentRangeMax'])->toBe('2026-01-28');
+    });
+
     it('renders the empty state when the metric has no data', function () {
         $widget = (string) $this->blade(
             '<x-statistics::stat-widget statistic-key="global.total_users" label="Users" />'

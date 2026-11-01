@@ -60,7 +60,9 @@ The listener resolves affected statistics through `StatisticRegistry::getListene
 
 **Time-series is daily only.** `StatisticComputeService::incrementTimeSeries()` always writes `granularity = 'daily'`. Monthly compression described in the feature plan is not implemented; do not assume monthly rows exist.
 
-**Weekly aggregation ignores the chart's date range.** `StatisticQueryService::getWeeklyTimeSeries()` fetches *all* daily rows for the key/scope (no `from`/`to`), then `WeeklyAggregator::aggregate()` builds one point per calendar week from the first-ever data point through the current week. Do not add a range parameter without checking `charts.js`'s expectation that weekly bars can show more history than the cumulative view for the same chart.
+**Weekly aggregation always runs over all history.** `StatisticQueryService::getWeeklyTimeSeries()` fetches *all* daily rows, `WeeklyAggregator::aggregate()` builds one point per calendar week through the current week, and the optional `$from` only drops weeks before the one containing it (gaps stay zero-filled). The admin components embed two variants per chart: full (`points`, `weeklyPoints`) and the last 12 months (`recentPoints`, `recentWeeklyPoints`).
+
+**`getChartTimeSeries()` with `$from` seeds its starting level** from the last daily row strictly before `$from` (its `cumulative_value`, or the sum of earlier deltas when null); otherwise a metric silent in the range would draw a flat 0.
 
 **Cumulative values are recomputed after every delta.** After incrementing daily buckets, `recomputeCumulativeValues()` walks all rows in `period_start` order and rewrites `cumulative_value`. Chart display for cumulative mode relies on these stored values.
 

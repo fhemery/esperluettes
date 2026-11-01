@@ -16,6 +16,12 @@
 - Likeliest to be reversed: the 12-month default (A1) and remembering the choice in `localStorage` (A2).
 - Both ranges are embedded in the page (no reload, no endpoint), as the graph-toggle design did; the "server-driven" revisit the request mentions is not needed.
 
+### BUILD phase 1 → phase 2 (2026-11-01)
+
+- Payload keys as planned: line chart `data-recent-points` / `data-recent-weekly-points`, series `recentPoints` / `recentWeeklyPoints`, options `recentRangeMin` / `recentRangeMax`. `line-chart` takes new props `recent` / `recentWeekly`; `multi-line-chart` series items take `recentData` / `recentWeeklyData`.
+- Seeding uses the last row's `cumulative_value`, else the sum of all earlier deltas (the delta-only fallback would have under-seeded). Recent range spans 48 points over 12 months, starting at the seeded level.
+- Recent options are emitted even for the empty state's sibling case; empty state still tests the full series. `app/Domains/Statistics/AGENTS.md` invariant on weekly range updated.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -121,7 +127,7 @@ Page payload roughly doubles (about 1 to 2 hundred points per chart, 6 charts): 
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Server: range-aware series + payloads | S | — | TODO |
+| 1 | Server: range-aware series + payloads | S | — | DONE |
 | 2 | Client: range switch, charts, i18n | S | 1 | TODO |
 
 Working agreement: one phase = one commit; failing test first.
@@ -183,4 +189,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 (2026-11-01): DONE. Server seeding, weekly `$from`, recent payload variants; new Statistics feature tests green.

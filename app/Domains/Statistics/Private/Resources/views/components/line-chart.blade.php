@@ -1,6 +1,8 @@
 @props([
     'data',
     'weekly' => [],
+    'recent' => [],
+    'recentWeekly' => [],
     'label' => '',
     'cumulative' => false,
     'height' => '300px',
@@ -20,6 +22,17 @@
         'value' => (float) $point->value,
     ])->values()->all();
 
+    $recentPoints = collect($recent)->map(fn ($point) => [
+        'x' => $point->periodStart->format('Y-m-d'),
+        'value' => $point->value,
+        'cumulativeValue' => $point->cumulativeValue,
+    ])->values()->all();
+
+    $recentWeeklyPoints = collect($recentWeekly)->map(fn ($point) => [
+        'x' => $point->periodStart->format('Y-m-d'),
+        'value' => (float) $point->value,
+    ])->values()->all();
+
     $rangeMin = count($chartPoints) > 0 ? $chartPoints[0]['x'] : null;
     $rangeMax = count($chartPoints) > 0 ? $chartPoints[array_key_last($chartPoints)]['x'] : null;
 
@@ -30,6 +43,8 @@
         'backgroundColor' => $backgroundColor,
         'rangeMin' => $rangeMin,
         'rangeMax' => $rangeMax,
+        'recentRangeMin' => count($recentPoints) > 0 ? $recentPoints[0]['x'] : null,
+        'recentRangeMax' => count($recentPoints) > 0 ? $recentPoints[array_key_last($recentPoints)]['x'] : null,
         'locale' => app()->getLocale(),
         'weekTooltip' => __('statistics::admin.week_tooltip'),
         'currentWeekLabel' => __('statistics::admin.current_week'),
@@ -41,6 +56,8 @@
         data-statistics-line-chart
         data-points='@json($chartPoints)'
         data-weekly-points='@json($weeklyPoints)'
+        data-recent-points='@json($recentPoints)'
+        data-recent-weekly-points='@json($recentWeeklyPoints)'
         data-label="{{ $label }}"
         data-options='@json($options)'
         {{ $attributes->class(['stat-line-chart w-full']) }}

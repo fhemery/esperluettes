@@ -96,6 +96,22 @@ describe('StatisticQueryService::getWeeklyTimeSeries', function () {
         ]);
     });
 
+    it('honours from: keeps the week containing from, drops earlier weeks', function () {
+        seedWeeklyDaily('2026-01-05', 4);
+        seedWeeklyDaily('2026-01-13', 1);
+        seedWeeklyDaily('2026-01-20', 2);
+
+        // Thursday 2026-01-15 sits in the week starting Monday 2026-01-12.
+        $points = app(StatisticQueryService::class)
+            ->getWeeklyTimeSeries('global.total_users', from: Carbon::parse('2026-01-15'));
+        $result = [];
+        foreach ($points as $point) {
+            $result[$point->periodStart->format('Y-m-d')] = $point->value;
+        }
+
+        expect($result)->toEqual(['2026-01-12' => 1, '2026-01-19' => 2]);
+    });
+
     it('sums to the metric cumulative total', function () {
         $daily = ['2025-11-03' => 5, '2025-12-24' => 3, '2026-01-02' => -2, '2026-01-20' => 4];
         foreach ($daily as $date => $value) {
