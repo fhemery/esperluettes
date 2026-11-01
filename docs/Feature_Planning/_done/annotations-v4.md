@@ -95,7 +95,7 @@ No migration, no new route, no JS file changed, no new deptrac edge.
   reasons beyond « Autre ».
 - Cut mid-build: nothing.
 - Pushed back to the backlog:
-  - [`annotation-report-prod-reason/`](../annotation-report-prod-reason/00-request.md) —
+  - [`annotation-report-prod-reason/`](./annotation-report-prod-reason.md) —
     the « Autre » reason is only in the dev seeder; production has none.
   - [`moderation-report-refusals/`](../moderation-report-refusals/00-request.md) —
     403 in the report modal redirects to `/login`; moderator-only accounts see

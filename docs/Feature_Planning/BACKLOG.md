@@ -24,9 +24,9 @@ scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO: leftover from `role-gated-notification-settings/` REFINE — Quote Contest already broadcasts lifecycle to all active `user-confirmed`, ignoring each activity’s `role_restrictions`. Recipients must be the users authorized to *that* activity, not a type-level role list and not every confirmed user.
-- **Chapter annotations — seed the « Autre » reason for the annotation report topic in production** · `annotation-report-prod-reason/` · interactive · WIP:BUILD (0/1)
 - **Moderation — report refusals: 403 handling and moderator-only accounts** · `moderation-report-refusals/` · interactive · TODO
 - **Chapter annotations — e2e fixtures for reaction and co-author reply reports** · `annotation-report-e2e-fixtures/` · interactive · TODO
+- **Fanart — seed a report reason for the fanart moderation topic in production** · `fanart-report-prod-reason/` · interactive · complexity:2 · TODO
 - **Chapter annotations — image annotation** · `annotations-images/` · interactive · TODO: split from `annotations-v4/` REFINE; needs a stable block id persisted through Editor + Story first.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
 - **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · TODO: leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
@@ -50,6 +50,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`annotation-report-prod-reason`](_done/annotation-report-prod-reason.md) · data migration gives the `annotation` moderation topic an active « Autre » reason in production when it has none (dev seeder only before)
 - [`story-chapter-publish-at-label`](_done/story-chapter-publish-at-label.md) · the chapter form's scheduled-publication field is now named « Publication planifiée » for screen readers (sr-only label, no visual change)
 - [`fanart-removal-notification`](_done/fanart-removal-notification.md) · revoking a user's fanartist role notifies them (`fanart.role_revoked`, sender = revoking author, Discord via the generic channel); other removal paths already notified
 - [`removed-with-content-notification-remover-id`](_done/removed-with-content-notification-remover-id.md) · `fanart.removed_with_content` now has the user who deleted the chapter/story as sender and `actor_*` (events carry `deletedByUserId`; none on account-removal deletion)
