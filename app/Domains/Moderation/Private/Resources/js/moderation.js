@@ -24,7 +24,7 @@
               window.Alpine.initTree(this.$refs.modalContainer);
             }
           } else {
-            if (response.status === 401 || response.status === 403) {
+            if (response.status === 401) {
               window.location.href = '/login';
               return;
             }
@@ -81,7 +81,7 @@
             window.location.href = response.url;
             return;
           }
-          if (response.status === 401 || response.status === 403) {
+          if (response.status === 401) {
             window.location.href = '/login';
             return;
           }

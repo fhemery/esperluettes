@@ -8,6 +8,10 @@
 
 ## 0. Handoff
 
+### BUILD phase 1 → WRAP (2026-11-01)
+
+- A role-middleware refusal on these routes is a 302 redirect (not 403), so the Pest "no role" case asserts a redirect and no stored report.
+
 ### DESIGN+PLAN → BUILD (2026-11-01)
 
 - Written inline by the refiner (fast path). One phase, JS fix + route gate + tests.
@@ -97,7 +101,7 @@ None blocking.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Report refusals: 403 in modal, staff-only accounts allowed | S | — | TODO |
+| 1 | Report refusals: 403 in modal, staff-only accounts allowed | S | — | DONE |
 
 ### Phase 1 — Report refusals
 
@@ -143,4 +147,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE (2026-11-01): route gate widened to staff roles, JS shows 403 message / 401-only redirect. Tests: `ReportRoleGateTest.php`, `moderation.test.js`.
