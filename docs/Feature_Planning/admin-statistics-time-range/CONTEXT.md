@@ -26,6 +26,11 @@
 
 - `charts.js`: `rangedPayload()` swaps in the `recent*` sets and `recentRangeMin/Max` when range is `recent`; a payload without `recentPoints` falls back to the full set. Mode and range tracked separately (`renderedMode`, `renderedRange`). No seeder change made; VERIFY should check whether `E2eStatisticsSeeder` has a point older than 12 months.
 
+### VERIFY → WRAP (2026-11-01)
+
+- PASS, all six checklist rows (§5). No spec added, no code changed; nothing to promote or delete in `e2e/tests/features/`.
+- Fold in: the e2e seeder has no data older than 12 months, so the two ranges are only distinguishable with hand-added old rows. Manual eyeball: mobile layout puts the two switches on separate rows (`shots/mobile.png`).
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -195,3 +200,18 @@ None.
 
 - Phase 1 (2026-11-01): DONE. Server seeding, weekly `$from`, recent payload variants; new Statistics feature tests green.
 - Phase 2 (2026-11-01): DONE. Second segmented control, range-aware `charts.js`, French strings; vitest and controller test added.
+
+### VERIFY (2026-11-01) — PASS
+
+Driven on the e2e instance (admin@e2e.test) with a throwaway flow; every screenshot opened (`shots/`). `E2eStatisticsSeeder` has only 6 weeks of data (nothing older than 12 months), so for the check I temporarily wrote old rows into `database/e2e.sqlite` (words +5000 twenty months ago; quotes all shifted 15 months back). Seeder left untouched, no spec added (checklist says no durable e2e spec); the existing `core/admin-statistics` spec still passes.
+
+| Surface | Check | OK? |
+|---------|-------|-----|
+| `/admin/statistics` | Two switches on one row, wrap on mobile; default *12 derniers mois* | ✅ default recent + cumulative; at 375px the switches stack on two rows (`mobile.png`), no horizontal overflow |
+| Cumulé, 12 mois | Line starts at real level, not 0 | ✅ words starts at 5000 (`words-cum-12m.png`); quotes silent for 15 months draws a flat line at 6, not 0 (`quotes-cum-12m.png`) |
+| Par semaine, 12 mois | About 53 bars max; current week lighter | ✅ payload 53 weeks vs 88 / 71 for all history; early 5000 bar gone (`words-week-12m.png`), last bar lighter; silent quotes shows empty bars, not empty state |
+| Depuis le début | Identical to previous behaviour | ✅ old 5000 bar back from Feb 2025 (`words-week-all.png`) |
+| Hidden tabs | Switch applies after changing tab | ✅ content/quotes tabs opened after the switch show the chosen range |
+| Reload | Choice remembered; bad stored value falls back to 12 mois | ✅ weekly+all survives reload; `garbage` falls back to recent |
+
+Note: the e2e seeder cannot tell the ranges apart (no point older than 12 months); adding one would shift the tile and weekly fixtures the core spec asserts, so deliberately not done.
