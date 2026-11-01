@@ -1,192 +1,161 @@
-# <Task title> — context
+# Fanart moderation notification as system notification — context
 
 > The task's single working file. Every agent reads **§0 Handoff first**, then
 > only the sections it needs, and writes its own section plus one Handoff entry
 > before it finishes. WRAP compacts the whole thing into `README.md` and the
 > folder is archived (see `.agents/loop/README.md`).
->
-> A section still reading `_Not written yet._` has not been done — that is how
-> `/continue-task` knows where the task stands.
 
-**Complexity:** _unrated_ /5 · **Mode:** interactive|auto
+**Complexity:** 2 /5 · **Mode:** auto
 
 ## 0. Handoff
 
-What the next agent needs that the sections below do not say: a trap found, the
-assumption most likely to be reversed, something deliberately left out, what to
-double-check. Newest entry first; 3–8 lines each; never a summary of the
-section you just wrote.
+### REFINE (+ DESIGN+PLAN fast path) → BUILD (2026-11-01)
 
-### <STEP> → <next step> (<date>)
-
-_Not written yet._
+- 0 blocking questions (auto mode). Single-file-ish change in `FanartNotifier`.
+- Trap: the moderator must still be excluded from the recipients (a moderator
+  can also be a story author or the fanartist); with `sourceUserId = null` the
+  existing "recipient != actor" filter must keep using the moderator id.
+- The payload (`actor_id/name/slug`) is stored in `content_data` and would leak
+  the moderator even if the sender column is null: blank it too.
+- Assumption likeliest to be reversed: the audit event `Fanart.DeletedByModeration`
+  keeps `moderatorId` (admin-only log, not shown to the fanartist).
+- Verified: `deleted_by_moderation` display string never shows the actor name.
 
 ## 1. Functional spec
 
-> REFINE. **What** the feature does, never **how**. Everything here is either
-> confirmed by the user or a recorded assumption (§4).
-
 ### 1.1 Overview
 
-Two or three sentences: what, for whom, the value.
+When a moderator deletes a fanart, the notification sent to the story authors
+and to the fanartist is a system notification: it no longer shows or stores the
+moderator as sender, so nobody can tell which moderator acted.
 
 ### 1.2 Vocabulary
 
 | Term | Meaning |
 |------|---------|
-| | |
-
-New nouns, in French if user-facing (the app is French-only).
+| Notification système | Notification with no source user (`source_user_id` null); no sender is displayed. |
 
 ### 1.3 Roles & visibility
 
 | Role | Can see | Can do |
 |------|---------|--------|
-| Guest | | |
-| `user` (non-confirmed) | | |
-| `user-confirmed` | | |
-| Author / co-author of the target | | |
-| Moderator | | |
-| Admin | | |
+| Guest / `user` | nothing | nothing |
+| `user-confirmed` (fanartist, story author) | the notification, without any sender | — |
+| Moderator / Admin | unchanged | delete a fanart via the moderation route (unchanged) |
 
 ### 1.4 Functional requirements
 
-One sub-heading per flow, numbered steps, error and edge paths included.
+1. A moderator deletes a fanart (`fanart.moderation.destroy`).
+2. The story authors and the fanartist each receive `fanart.deleted_by_moderation`
+   with no sender (no avatar / name in the notification list) and a payload
+   that carries no moderator identity.
+3. Text stays « Le fanart « … » a été supprimé par la modération sur <histoire> ».
+4. The moderator is never a recipient, even if also an author or the fanartist.
 
 ### 1.5 Lifecycle
 
-What happens to this data when the parent is deleted, unpublished or edited;
-when the user is deactivated, reactivated or deleted; what the UI shows.
+Notifications already sent keep their old sender: no data migration (assumption).
+A deactivated/deleted moderator is irrelevant now that nothing references them.
 
 ### 1.6 Cross-cutting concerns
 
-One line per item of
-[`../references/cross-cutting-checklist.md`](../../../.agents/loop/references/cross-cutting-checklist.md);
-inapplicable ones as "N/A — <reason>".
-
 | Concern | Decision |
 |---------|----------|
-| Roles | |
-| Visibility / privacy | |
-| Settings | |
-| Notifications | |
-| Domain events | |
-| Statistics | |
-| Moderation | |
-| Lifecycle / cascade | |
-| Media | |
-| Search | |
-| i18n | |
-| Mobile | |
-| Accessibility | |
+| Roles | Unchanged. |
+| Visibility / privacy | Moderator identity must not leak via sender column nor payload. |
+| Settings | Unchanged (same type, same preference). |
+| Notifications | Only `fanart.deleted_by_moderation` becomes system. |
+| Domain events | `Fanart.DeletedByModeration` unchanged (keeps `moderatorId`, admin audit log only). |
+| Statistics / Moderation / Media / Search | N/A. |
+| Lifecycle / cascade | See 1.5. |
+| i18n | No new strings. |
+| Mobile / Accessibility | N/A — no UI change beyond missing sender. |
 
 ### 1.7 Out of scope
 
-Explicit non-goals, so nobody builds them by accident.
+- Other fanart notifications (author-side accept/decline/delete keep their actor).
+- Rewriting already-sent notifications.
+- Other domains' moderation notifications.
+- Hiding the moderator from the audit log.
 
 ### 1.8 Open questions
 
-Each marked **blocking** or **non-blocking**. A blocking one is asked, never
-left here.
-
-_Not written yet._
+None blocking. Non-blocking: should the same hold for other moderator-triggered
+notifications elsewhere (Story, Comment)? Not requested; left out.
 
 ## 2. Architecture
 
-> DESIGN. **How** it is built: **shape and contracts, not a change list** —
-> signatures, data shapes, enforcement points, deptrac edges. The file-by-file
-> edits belong to §3 only, so the two cannot drift.
-
 ### 2.1 Domain placement
 
-Which domain owns it and why; new domain justified against extending one.
-One line per touched domain: minimum change, extension point or direct call.
-
-### 2.2 Data model
-
-Tables (columns, types, nullability, indexes; foreign keys only inside the
-owning domain), model (attribute syntax), lifecycle rules mapped from §1.5.
+Fanart only. `FanartNotifier` (private service) is the sole sender; no other
+domain changes. Notification's `createNotification(..., ?int $sourceUserId)`
+already accepts null.
 
 ### 2.3 PHP architecture
 
-Public API · services · policy (enforcing §1.3) · events and listeners ·
-routes/controllers/form requests (no `PATCH` — use `PUT`).
-
-### 2.4 Frontend
-
-Blade components, Alpine, JS/CSS layout; shared components reused.
+- `FanartNotifier::send()` gains a separate sender: keep the `$actorId`
+  parameter for recipient exclusion, add `bool $system = false`; when true,
+  `createNotification(..., null)`.
+- `fanartDeletedByModeration()` calls `send(..., $moderatorId, ..., system: true)`
+  and builds the content without actor (`forFanart()` takes `?int $actorId`;
+  null yields `actorId: 0`, empty name/slug, no profile lookup).
+- Payload class and lang strings unchanged (display ignores actor).
 
 ### 2.5 Deptrac
 
-New edges, each justified — or "no new edge".
+No new edge.
 
 ### 2.6 Testing strategy
 
-Integration (default), unit, vitest, and what only VERIFY can see.
+Integration in `DeleteFanartTest` / `FanartNotificationsTest` (existing helpers):
+source user null, payload without moderator, moderator-as-author excluded.
 
 ### 2.7 Tradeoffs locked
 
-| # | Question | Options considered | Chosen | Why / what would flip it |
-|---|----------|--------------------|--------|--------------------------|
-| 1 | | | | |
+| # | Question | Chosen | Why |
+|---|----------|--------|-----|
+| 1 | Anonymise via null source + blank payload vs. new notification type | Null source + blank payload | Same type keeps settings/translations; minimal. |
 
 ### 2.8 Risks acknowledged
 
-Known weak points, with the trigger that would make us revisit them.
-
-_Not written yet._
+Old notifications keep their moderator sender; revisit if the user wants a backfill.
 
 ## 3. Plan
-
-> PLAN. BUILD reads **one phase at a time** plus §0 and the architecture
-> sections that phase names — so each phase must stand alone: name the §2
-> sections it needs, and state what earlier phases left behind.
 
 ### 3.1 Phase index
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | | S/M | — | TODO |
+| 1 | Anonymous moderation notification | S | — | TODO |
 
-S ≈ half a day, M ≈ 1–2 days, anything larger is split. Status: `TODO` ·
-`WIP` · `DONE`; BUILD updates it (it is what lets `WIP:BUILD (3/7)` resume).
-Checkpoint rows (`2v` — see `plan-phases`) are run by `visual-verifier` and
-change no code: `| 2v | Checkpoint — <existing consumers> | S | 2 | TODO |`.
+### Phase 1 — Anonymous moderation notification
 
-Working agreement: one phase = one commit; failing test first; no phase N+1
-before N's acceptance holds; re-ordering is surfaced, not taken silently.
+**Goal.** `fanart.deleted_by_moderation` is created with null source user and no
+moderator in the payload. **Reads.** §2.3.
 
-### Phase 1 — <name>
+**Deliverables.**
+- `app/Domains/Fanart/Private/Services/FanartNotifier.php` (`send`, `forFanart`, `fanartDeletedByModeration`).
+- Tests in `app/Domains/Fanart/Tests/Feature/DeleteFanartTest.php` (extend the moderator test: `source_user_id` null, `content_data` has no moderator id/name/slug) and `FanartNotificationsTest.php` (moderator who is also an author is not notified).
 
-**Goal.** One sentence. **Reads.** §2.x, §2.y.
-
-**Deliverables.** Files created or modified, by path.
-
-**Tests.** Named integration tests, as they will exist.
+**Tests.** Failing first: `it('sends the moderation deletion as a system notification')`,
+`it('does not notify a moderator who is also a story author')`.
 
 **Acceptance.**
-- ✅ Checkable statements, not intentions.
+- ✅ Latest `fanart.deleted_by_moderation` row has `source_user_id` null and no actor data.
+- ✅ Recipients unchanged (authors + fanartist, minus moderator).
 - ✅ `pnpm run gate` green.
 
 ### 3.2 Visual QA checklist
 
-Filled by VERIFY; written now, while the flows are fresh.
-
 | Surface | Check | OK? |
 |---------|-------|-----|
-| | | |
+| Notification list (fanartist) | Moderation notification shows no sender | |
 
 ### 3.3 Open items
 
-What the plan assumes but has not confirmed; each names the phase that needs it.
-
-_Not written yet._
+None.
 
 ## 4. Decisions
-
-Append-only. Every question the user arbitrated, as given. BUILD reads this
-before asking anything already settled. Never edit a row — add one that
-supersedes it.
 
 | # | Date | Step | Question | Decision | Supersedes |
 |---|------|------|----------|----------|------------|
@@ -194,16 +163,13 @@ supersedes it.
 
 ### Assumptions made without asking
 
-Each is a decision the user may want to reverse — WRAP surfaces them.
-
 | # | Assumption | Made at | Reversible? |
 |---|------------|---------|-------------|
-| | | | |
+| 1 | "System notification" = `source_user_id` null and no moderator in the payload | REFINE | Yes |
+| 2 | Only `fanart.deleted_by_moderation` changes (it is the only moderator-driven fanart notification) | REFINE | Yes |
+| 3 | Already-sent notifications are not rewritten | REFINE | Yes |
+| 4 | Audit event keeps `moderatorId` | REFINE | Yes |
 
 ## 5. Build & verify log
-
-One line per phase or checkpoint as it lands (commit sha, gate result,
-anything that contradicted the plan), then VERIFY's result block. Checkpoint
-results go here too, under their id.
 
 _Not written yet._
