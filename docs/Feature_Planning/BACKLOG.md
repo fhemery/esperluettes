@@ -43,7 +43,6 @@ scoped to the task that actually changed.
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
 - **Story — label the chapter form publish_at field** · `story-chapter-publish-at-label/` · auto · complexity:1 · TODO
 - **Moderation — give the compact report button an accessible name** · `moderation-report-button-accessible-name/` · auto · complexity:1 · TODO
-- **removed_with_content notification missing remover ID** · `removed-with-content-notification-remover-id/` · auto · TODO
 - **Notify fanartist when fanart is removed, also on Discord** · `fanart-removal-notification/` · interactive · TODO
 
 ## Done
@@ -53,6 +52,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`removed-with-content-notification-remover-id`](_done/removed-with-content-notification-remover-id.md) · `fanart.removed_with_content` now has the user who deleted the chapter/story as sender and `actor_*` (events carry `deletedByUserId`; none on account-removal deletion)
 - [`fanart-moderation-system-notification`](_done/fanart-moderation-system-notification.md) · moderator deletion of a fanart notifies authors and fanartist as a system notification (no source user, no moderator in the payload)
 - [`news-list-no-pagination`](_done/news-list-no-pagination.md) · the public news list shows every published news item on one page (no 12-item cap, which hid older news since no pager was ever rendered)
 - [`fanart-toute-loeuvre-collapsed`](_done/fanart-toute-loeuvre-collapsed.md) · the « Toute l'œuvre » group on the story Fanarts tab starts collapsed for everyone (no spoiler notice), lazy-loaded on expand
