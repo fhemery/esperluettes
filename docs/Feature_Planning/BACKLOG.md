@@ -41,7 +41,6 @@ scoped to the task that actually changed.
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
-- **Story — label the chapter form publish_at field** · `story-chapter-publish-at-label/` · auto · complexity:1 · TODO
 - **Moderation — give the compact report button an accessible name** · `moderation-report-button-accessible-name/` · auto · complexity:1 · TODO
 
 ## Done
@@ -51,6 +50,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`story-chapter-publish-at-label`](_done/story-chapter-publish-at-label.md) · the chapter form's scheduled-publication field is now named « Publication planifiée » for screen readers (sr-only label, no visual change)
 - [`fanart-removal-notification`](_done/fanart-removal-notification.md) · revoking a user's fanartist role notifies them (`fanart.role_revoked`, sender = revoking author, Discord via the generic channel); other removal paths already notified
 - [`removed-with-content-notification-remover-id`](_done/removed-with-content-notification-remover-id.md) · `fanart.removed_with_content` now has the user who deleted the chapter/story as sender and `actor_*` (events carry `deletedByUserId`; none on account-removal deletion)
 - [`fanart-moderation-system-notification`](_done/fanart-moderation-system-notification.md) · moderator deletion of a fanart notifies authors and fanartist as a system notification (no source user, no moderator in the payload)
