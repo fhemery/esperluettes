@@ -1,192 +1,151 @@
-# <Task title> — context
+# `fanart.removed_with_content` records who removed the content — context
 
-> The task's single working file. Every agent reads **§0 Handoff first**, then
-> only the sections it needs, and writes its own section plus one Handoff entry
-> before it finishes. WRAP compacts the whole thing into `README.md` and the
-> folder is archived (see `.agents/loop/README.md`).
->
-> A section still reading `_Not written yet._` has not been done — that is how
-> `/continue-task` knows where the task stands.
-
-**Complexity:** _unrated_ /5 · **Mode:** interactive|auto
+**Complexity:** 2 /5 · **Mode:** auto
 
 ## 0. Handoff
 
-What the next agent needs that the sections below do not say: a trap found, the
-assumption most likely to be reversed, something deliberately left out, what to
-double-check. Newest entry first; 3–8 lines each; never a summary of the
-section you just wrote.
+### REFINE → BUILD (2026-11-01)
 
-### <STEP> → <next step> (<date>)
-
-_Not written yet._
+- 0 questions asked (auto mode). Request read as: the notification has no sender
+  (`source_user_id` null) and no `actor_*` in its payload; wanted = the remover.
+- Likeliest reversal: A1 (story deleted via account deletion stays sender-less).
+- Trap: `NotificationPublicApi::createNotification` throws `ValidationException` if the
+  source user has no public profile, and `FanartNotifier::send` swallows it, which would
+  silently drop the notification. Hence A1: never pass a remover who may be gone.
+- Event contract change is additive (nullable, default null, `fromPayload` tolerant) so
+  stored/audit events and other listeners/tests keep working.
+- Display text unchanged (it never mentions the remover).
 
 ## 1. Functional spec
 
-> REFINE. **What** the feature does, never **how**. Everything here is either
-> confirmed by the user or a recorded assumption (§4).
-
 ### 1.1 Overview
 
-Two or three sentences: what, for whom, the value.
+When a chapter or a story is deleted, fanartists whose fanart disappears get
+`fanart.removed_with_content`. That notification currently has no sender and an
+empty actor in its payload. It must carry the id (and name/slug snapshot) of the user
+who removed the content.
 
 ### 1.2 Vocabulary
 
 | Term | Meaning |
 |------|---------|
-| | |
-
-New nouns, in French if user-facing (the app is French-only).
+| remover | The user who deleted the chapter / story that took the fanart with it |
 
 ### 1.3 Roles & visibility
 
-| Role | Can see | Can do |
-|------|---------|--------|
-| Guest | | |
-| `user` (non-confirmed) | | |
-| `user-confirmed` | | |
-| Author / co-author of the target | | |
-| Moderator | | |
-| Admin | | |
+Unchanged. Only authors can delete a chapter/story; recipients are the fanartists
+(non-author submitters), as today. The remover is never a recipient.
 
 ### 1.4 Functional requirements
 
-One sub-heading per flow, numbered steps, error and edge paths included.
+1. Chapter deleted by user U: each notified fanartist's notification has sender U and
+   payload `actor_id` / `actor_name` / `actor_slug` = U.
+2. Story deleted by author U from the story page: same.
+3. Story deleted as a side effect of an author's account removal: no remover is
+   recorded (A1); behaviour as today.
+4. Recipient set, text and links unchanged. Already-sent notifications untouched.
 
 ### 1.5 Lifecycle
 
-What happens to this data when the parent is deleted, unpublished or edited;
-when the user is deactivated, reactivated or deleted; what the UI shows.
+Payload is a snapshot (name/slug copied at send time). If the remover is later
+deactivated/deleted, the notification keeps its snapshot, like other fanart notifications.
 
 ### 1.6 Cross-cutting concerns
 
-One line per item of
-[`../references/cross-cutting-checklist.md`](../../../.agents/loop/references/cross-cutting-checklist.md);
-inapplicable ones as "N/A — <reason>".
-
 | Concern | Decision |
 |---------|----------|
-| Roles | |
-| Visibility / privacy | |
-| Settings | |
-| Notifications | |
-| Domain events | |
-| Statistics | |
-| Moderation | |
-| Lifecycle / cascade | |
-| Media | |
-| Search | |
-| i18n | |
-| Mobile | |
-| Accessibility | |
+| Roles | No change |
+| Visibility / privacy | Remover is a public profile; text does not display them |
+| Settings | N/A — notification type and preference unchanged |
+| Notifications | Only this type's sender/payload change |
+| Domain events | `Story.Deleted` and `Chapter.Deleted` gain an optional `deletedByUserId` (additive) |
+| Statistics | N/A |
+| Moderation | N/A |
+| Lifecycle / cascade | See 1.5, A1 |
+| Media / Search | N/A |
+| i18n | N/A — no new wording |
+| Mobile / Accessibility | N/A |
 
 ### 1.7 Out of scope
 
-Explicit non-goals, so nobody builds them by accident.
+- Showing the remover in the displayed text.
+- Rewriting existing notifications.
+- Other Story/ReadList notifications' sender handling.
+- Moderator-triggered story/chapter deletion (none exists).
 
 ### 1.8 Open questions
 
-Each marked **blocking** or **non-blocking**. A blocking one is asked, never
-left here.
-
-_Not written yet._
+None blocking. Non-blocking: if the request meant only `source_user_id` and not the
+payload actor fields, the extra payload fields are harmless.
 
 ## 2. Architecture
 
-> DESIGN. **How** it is built: **shape and contracts, not a change list** —
-> signatures, data shapes, enforcement points, deptrac edges. The file-by-file
-> edits belong to §3 only, so the two cannot drift.
-
 ### 2.1 Domain placement
 
-Which domain owns it and why; new domain justified against extending one.
-One line per touched domain: minimum change, extension point or direct call.
+- **Story**: `StoryDeleted` and `ChapterDeleted` get `public readonly ?int $deletedByUserId = null`
+  (last constructor arg; in `toPayload` / `fromPayload`, tolerant of absence; version stays 1).
+  `StoryService::deleteStory(Story $story, ?int $deletedByUserId = null)`; the controller
+  passes `Auth::id()`, `deleteStoriesByAuthor` passes nothing. `deleteChapter` already has `$userId`.
+- **Fanart**: both listeners forward `$event->deletedByUserId` as `$actorId` to
+  `FanartNotifier::fanartRemovedWithContent` (parameter already exists but is unused).
+  The notifier builds the content with actor id/name/slug (profile lookup, like `forStory`)
+  and sends with the actor as sender when set; null keeps today's behaviour.
 
-### 2.2 Data model
-
-Tables (columns, types, nullability, indexes; foreign keys only inside the
-owning domain), model (attribute syntax), lifecycle rules mapped from §1.5.
-
-### 2.3 PHP architecture
-
-Public API · services · policy (enforcing §1.3) · events and listeners ·
-routes/controllers/form requests (no `PATCH` — use `PUT`).
-
-### 2.4 Frontend
-
-Blade components, Alpine, JS/CSS layout; shared components reused.
-
-### 2.5 Deptrac
-
-New edges, each justified — or "no new edge".
+No table, no deptrac edge (Fanart already uses `StoryPublicApi`, `ProfilePublicApi`, Story events).
 
 ### 2.6 Testing strategy
 
-Integration (default), unit, vitest, and what only VERIFY can see.
+Integration in `FanartLifecycleTest` / `FanartNotificationsTest`; a Story event round-trip
+(payload with and without the field).
 
 ### 2.7 Tradeoffs locked
 
-| # | Question | Options considered | Chosen | Why / what would flip it |
-|---|----------|--------------------|--------|--------------------------|
-| 1 | | | | |
-
-### 2.8 Risks acknowledged
-
-Known weak points, with the trigger that would make us revisit them.
-
-_Not written yet._
+| # | Question | Options | Chosen | Why |
+|---|----------|---------|--------|-----|
+| 1 | Where to get the remover | read `Auth` in listener / add to events | events | listeners must not rely on request state; events are the contract |
+| 2 | Account-removal path | pass the author / nothing | nothing | sender may be gone, send would silently drop the notification |
 
 ## 3. Plan
-
-> PLAN. BUILD reads **one phase at a time** plus §0 and the architecture
-> sections that phase names — so each phase must stand alone: name the §2
-> sections it needs, and state what earlier phases left behind.
 
 ### 3.1 Phase index
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | | S/M | — | TODO |
+| 1 | Carry the remover through events into the notification | S | — | TODO |
 
-S ≈ half a day, M ≈ 1–2 days, anything larger is split. Status: `TODO` ·
-`WIP` · `DONE`; BUILD updates it (it is what lets `WIP:BUILD (3/7)` resume).
-Checkpoint rows (`2v` — see `plan-phases`) are run by `visual-verifier` and
-change no code: `| 2v | Checkpoint — <existing consumers> | S | 2 | TODO |`.
+### Phase 1 — Carry the remover
 
-Working agreement: one phase = one commit; failing test first; no phase N+1
-before N's acceptance holds; re-ordering is surfaced, not taken silently.
+**Goal.** `fanart.removed_with_content` has the remover as sender and in the payload.
+**Reads.** §2.1.
 
-### Phase 1 — <name>
+**Deliverables.**
+- `app/Domains/Story/Public/Events/StoryDeleted.php`, `ChapterDeleted.php`: optional `deletedByUserId` (payload round-trip).
+- `app/Domains/Story/Private/Services/StoryService.php` (`deleteStory`), `ChapterService.php` (`deleteChapter` passes `$userId`), `Story/Private/Controllers/StoryController.php` (passes `Auth::id()`).
+- `app/Domains/Fanart/Private/Listeners/DeleteFanartsOnChapterDeleted.php`, `DeleteFanartsOnStoryDeleted.php`: forward actor.
+- `app/Domains/Fanart/Private/Services/FanartNotifier.php` (`fanartRemovedWithContent`): actor fields in payload + sender.
+- `docs/notification-types.md`: annotate the row; Fanart `AGENTS.md` line 16 if wording needs it.
 
-**Goal.** One sentence. **Reads.** §2.x, §2.y.
-
-**Deliverables.** Files created or modified, by path.
-
-**Tests.** Named integration tests, as they will exist.
+**Tests.**
+- Chapter deletion by an author: notification `source_user_id` = author, payload `actor_id` = author.
+- Story deletion by an author via controller: same.
+- Account-removal story deletion: still notifies, `source_user_id` null.
+- Event payload round-trip with and without `deletedByUserId`.
 
 **Acceptance.**
-- ✅ Checkable statements, not intentions.
-- ✅ `pnpm run gate` green.
+- Checks above pass; existing Fanart/Story/ReadList/Statistics tests green.
+- `pnpm run gate` green.
 
 ### 3.2 Visual QA checklist
 
-Filled by VERIFY; written now, while the flows are fresh.
-
 | Surface | Check | OK? |
 |---------|-------|-----|
-| | | |
+| Notification list | A removed-with-content notification still renders, text unchanged | |
 
 ### 3.3 Open items
 
-What the plan assumes but has not confirmed; each names the phase that needs it.
-
-_Not written yet._
+None.
 
 ## 4. Decisions
-
-Append-only. Every question the user arbitrated, as given. BUILD reads this
-before asking anything already settled. Never edit a row — add one that
-supersedes it.
 
 | # | Date | Step | Question | Decision | Supersedes |
 |---|------|------|----------|----------|------------|
@@ -194,16 +153,12 @@ supersedes it.
 
 ### Assumptions made without asking
 
-Each is a decision the user may want to reverse — WRAP surfaces them.
-
 | # | Assumption | Made at | Reversible? |
 |---|------------|---------|-------------|
-| | | | |
+| A1 | Story deleted through author account removal records no remover (author's profile may be gone; send would swallow the failure) | REFINE | yes |
+| A2 | "Remover ID" means both notification sender and payload `actor_id`, with name/slug snapshot | REFINE | yes |
+| A3 | Co-author deleting a story/chapter is the remover (not the story creator) | REFINE | yes |
 
 ## 5. Build & verify log
-
-One line per phase or checkpoint as it lands (commit sha, gate result,
-anything that contradicted the plan), then VERIFY's result block. Checkpoint
-results go here too, under their id.
 
 _Not written yet._
