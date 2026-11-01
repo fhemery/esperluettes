@@ -26,6 +26,10 @@
 - No plan deviation. The moderator-excluded test passes on old code too (existing "never notifies the actor" already covered it); kept as requested.
 - Visual QA (notification list shows no sender) not run.
 
+### VERIFY → WRAP (2026-11-01)
+
+- Visual row PASS, checked manually via the run-app driver on the e2e instance (no spec written: the DB-level assertions already live in PHP tests). Nothing to promote; no feature spec to delete.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -154,7 +158,7 @@ moderator in the payload. **Reads.** §2.3.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Notification list (fanartist) | Moderation notification shows no sender | |
+| Notification list (fanartist) | Moderation notification shows no sender | ✅ |
 
 ### 3.3 Open items
 
@@ -178,3 +182,4 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE: `FanartNotifier::send(..., system: true)` passes null source user; `forFanart` takes `?int $actorId` (null = blank actor payload). Tests in `DeleteFanartTest` and `FanartNotificationsTest`. Visual QA (§3.2) not run.
+- VERIFY (2026-11-01) PASS: created the notification through the real `FanartNotifier::fanartDeletedByModeration` (moderator 4, fanartist `confirmed@e2e.test`); row has `source_user_id` null and blank actor payload. `/notifications` as the fanartist shows the text « Le fanart « QA Dessin » a été supprimé par la modération sur Histoire E2E » with the default site-logo avatar and no moderator name. Screenshot opened and checked.
