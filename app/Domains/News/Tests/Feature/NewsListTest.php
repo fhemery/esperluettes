@@ -24,6 +24,22 @@ describe('News List', function () {
         $response->assertSee('/news/' . $a->slug, escape: false);
     });
 
+    it('lists all published news beyond twelve items', function () {
+        $admin = admin($this);
+        $items = collect(range(1, 15))->map(fn ($i) => News::factory()->published()->create([
+            'title' => "Bulk News $i",
+            'slug' => "bulk-news-$i",
+            'created_by' => $admin->id,
+        ]));
+
+        $response = $this->get(route('news.index'));
+        $response->assertOk();
+
+        foreach ($items as $item) {
+            $response->assertSee('/news/' . $item->slug, escape: false);
+        }
+    });
+
     it('does not show non-published news in index', function () {
         $admin = admin($this);
         News::factory()->create([

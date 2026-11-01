@@ -13,6 +13,10 @@ Assumption likeliest to be reversed: scope is the public list only (admin list
 keeps its `paginate(20)` and `<x-shared::pagination>`). Check the view's
 `@forelse($news as $news)` shadowing still works with a Collection (it does).
 
+### BUILD phase 1 -> VERIFY (2026-11-01)
+
+Done as planned, no deviation. Only visual QA of `/news` remains.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -74,7 +78,7 @@ hundreds.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Remove pagination from public news list | S | — | TODO |
+| 1 | Remove pagination from public news list | S | — | DONE |
 
 ### Phase 1 — Remove pagination from public news list
 
@@ -117,4 +121,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE: `paginate(12)` -> `get()`; test `lists all published news beyond twelve items` added (failed first, now passes).
