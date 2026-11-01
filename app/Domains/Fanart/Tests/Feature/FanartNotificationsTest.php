@@ -127,6 +127,17 @@ it('never notifies the actor', function () {
     expect($targets)->toContain($coAuthor->id)->toContain($artist->id)->not->toContain($author->id);
 });
 
+it('does not notify a moderator who is also a story author', function () {
+    [$author, $artist, $story, , $fanart] = fanartScene($this);
+    $moderator = moderator($this);
+    addCollaborator($story->id, $moderator->id);
+
+    app(FanartNotifier::class)->fanartDeletedByModeration($fanart, $moderator->id);
+
+    $targets = getNotificationTargetUserIds(getLatestNotificationByKey('fanart.deleted_by_moderation')->id);
+    expect($targets)->toContain($author->id)->toContain($artist->id)->not->toContain($moderator->id);
+});
+
 it('sends nothing and throws nothing when the only recipient is the actor', function () {
     [$author, $artist, $story, , $fanart] = fanartScene($this);
 

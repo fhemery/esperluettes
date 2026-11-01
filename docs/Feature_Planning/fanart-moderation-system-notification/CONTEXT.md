@@ -21,6 +21,11 @@
   keeps `moderatorId` (admin-only log, not shown to the fanartist).
 - Verified: `deleted_by_moderation` display string never shows the actor name.
 
+### BUILD phase 1 → VERIFY (2026-11-01)
+
+- No plan deviation. The moderator-excluded test passes on old code too (existing "never notifies the actor" already covered it); kept as requested.
+- Visual QA (notification list shows no sender) not run.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -126,7 +131,7 @@ Old notifications keep their moderator sender; revisit if the user wants a backf
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Anonymous moderation notification | S | — | TODO |
+| 1 | Anonymous moderation notification | S | — | DONE |
 
 ### Phase 1 — Anonymous moderation notification
 
@@ -172,4 +177,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE: `FanartNotifier::send(..., system: true)` passes null source user; `forFanart` takes `?int $actorId` (null = blank actor payload). Tests in `DeleteFanartTest` and `FanartNotificationsTest`. Visual QA (§3.2) not run.

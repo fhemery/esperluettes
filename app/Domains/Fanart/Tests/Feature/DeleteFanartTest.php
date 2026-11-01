@@ -79,6 +79,22 @@ it('lets a moderator delete any fanart, notifies authors and fanartist, emits Fa
         ->and(app(EventPublicApi::class)->latest('Fanart.DeletedByModeration'))->not->toBeNull();
 });
 
+it('sends the moderation deletion as a system notification', function () {
+    $author = alice($this);
+    $artist = bob($this);
+    $moderator = moderator($this);
+    $story = publicStory('Histoire', $author->id);
+    $fanart = createFanart(['story_id' => $story->id, 'user_id' => $artist->id]);
+
+    $this->actingAs($moderator)->delete(route('fanart.moderation.destroy', $fanart->id));
+
+    $notification = getLatestNotificationByKey('fanart.deleted_by_moderation');
+    expect($notification->source_user_id)->toBeNull()
+        ->and($notification->content_data['actor_id'] ?? 0)->toBe(0)
+        ->and($notification->content_data['actor_name'] ?? '')->toBe('')
+        ->and($notification->content_data['actor_slug'] ?? '')->toBe('');
+});
+
 it('returns 403 on the moderation route to an author', function () {
     $author = alice($this);
     $artist = bob($this);

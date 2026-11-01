@@ -73,7 +73,8 @@ class FanartNotifier
         $this->send(
             array_merge($this->storyApi->getAuthorIds($fanart->story_id), [$fanart->user_id]),
             $moderatorId,
-            fn () => $this->forFanart(FanartDeletedByModerationNotification::class, $fanart, $moderatorId),
+            fn () => $this->forFanart(FanartDeletedByModerationNotification::class, $fanart, null),
+            system: true,
         );
     }
 
@@ -141,8 +142,9 @@ class FanartNotifier
     /**
      * @param int[] $recipientIds
      * @param callable(): FanartNotificationContent $content built only when someone will receive it
+     * @param bool $system no sender is recorded; $actorId is then only excluded from the recipients
      */
-    private function send(array $recipientIds, ?int $actorId, callable $content): void
+    private function send(array $recipientIds, ?int $actorId, callable $content, bool $system = false): void
     {
         $recipientIds = array_values(array_unique(array_filter(
             array_map('intval', $recipientIds),
@@ -154,23 +156,23 @@ class FanartNotifier
         }
 
         try {
-            $this->notificationApi->createNotification($recipientIds, $content(), $actorId);
+            $this->notificationApi->createNotification($recipientIds, $content(), $system ? null : $actorId);
         } catch (ValidationException) {
             // recipients no longer exist: nothing to tell
         }
     }
 
     /** @param class-string<FanartNotificationContent> $class */
-    private function forFanart(string $class, Fanart $fanart, int $actorId, ?string $comment = null): FanartNotificationContent
+    private function forFanart(string $class, Fanart $fanart, ?int $actorId, ?string $comment = null): FanartNotificationContent
     {
         $story = $this->storyApi->getStoriesByIds([$fanart->story_id])[$fanart->story_id] ?? null;
         $chapter = $fanart->chapter_id !== null
             ? ($this->storyApi->getChaptersByIds([$fanart->chapter_id])[$fanart->chapter_id] ?? null)
             : null;
-        $actor = $this->profileApi->getPublicProfiles([$actorId])[$actorId] ?? null;
+        $actor = $actorId !== null ? ($this->profileApi->getPublicProfiles([$actorId])[$actorId] ?? null) : null;
 
         return new $class(
-            actorId: $actorId,
+            actorId: $actorId ?? 0,
             actorName: (string) ($actor?->display_name ?? ''),
             actorSlug: (string) ($actor?->slug ?? ''),
             storyId: $fanart->story_id,
