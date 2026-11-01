@@ -103,6 +103,7 @@ Use for **both** sections:
 | `faq` | `[FAQ]` |
 | `staticpage` | `[Pages statiques]` |
 | `statistics`, `stats` | `[Statistiques]` |
+| `fanart` | `[Fanart]` |
 | `shared` (user-visible UI only) | `[Divers]` |
 | `dev` or unknown tooling | skip for retest unless files touch a domain |
 
