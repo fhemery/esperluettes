@@ -26,6 +26,10 @@ run `pnpm run e2e` on the three annotation specs by hand.
 
 Deviation: `tech_admin`'s email is `tech-admin@e2e.test` (hyphen), not the underscore the plan wrote. No other surprises; overlay spec needed only the tint-list edits.
 
+### VERIFY → WRAP (2026-11-01)
+
+PASS, full e2e 41/41 and gate green. Nothing flaky or manual. The new test lives in `core/chapter-annotation-report.spec.ts` (already core; no feature spec to delete).
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -167,8 +171,8 @@ before N's acceptance holds; re-ordering is surfaced, not taken silently.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Pop-up root 102, author | Reaction row and co-author reply each show « Signaler » | |
-| Pop-up root 101, `confirmed` popover | Still exactly one « Signaler » | |
+| Pop-up root 102, author | Reaction row and co-author reply each show « Signaler » | ✅ |
+| Pop-up root 101, `confirmed` popover | Still exactly one « Signaler » | ✅ |
 
 ### 3.3 Open items
 
@@ -191,3 +195,4 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE: seed (reaction + tech_admin reply on root 102), fixtures, new report test (red before seed, green after), overlay tint lists. Annotation e2e specs 15/15 green; gate green.
+- VERIFY (2026-11-01) PASS: re-seeded full `pnpm run e2e` 41/41 green (annotation set incl. new test, admin-menus, comments, editor, fanart feature spec) — no regression from the new rows. New test asserts reaction row and co-author reply each have `annotation-report` named « Signaler », and reports one end to end. QA rows: root 102 author pop-up ✅; root 101 `confirmed` popover still exactly one « Signaler » ✅ (existing report spec green). No rows moved to PHP tests; nothing manual. `pnpm run gate` green.
