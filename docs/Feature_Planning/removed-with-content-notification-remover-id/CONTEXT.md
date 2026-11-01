@@ -143,7 +143,7 @@ Integration in `FanartLifecycleTest` / `FanartNotificationsTest`; a Story event 
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Notification list | A removed-with-content notification still renders, text unchanged | |
+| Notification list | A removed-with-content notification still renders, text unchanged | n/a in browser: Blade render of a payload, covered by PHP tests (FanartNotificationsTest/FanartLifecycleTest, 27 pass); no client-side behaviour |
 
 ### 3.3 Open items
 
@@ -166,3 +166,4 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE (2026-11-01): events carry `deletedByUserId`; notifier sets sender + `actor_*`. Tests: 3 in FanartLifecycleTest, Story `DeletedEventsPayloadTest`.
+- VERIFY (2026-11-01): PASS. The single QA row is server-rendered text with no Alpine/JS/asset change, so it was moved to PHP feature tests (Fanart notification tests re-run: 27 pass). No browser spec written. Handoff VERIFY -> WRAP: no flaky or manual rows; no feature spec to delete.
