@@ -8,6 +8,12 @@
 
 ## 0. Handoff
 
+### VERIFY → WRAP (2026-11-01)
+
+- PASS. Temp e2e spec already deleted (nothing to promote). Screenshots in `shots/` — drop at wrap.
+- Guard 403 message in the modal is the generic report error text (by design of `store()`), not a specific reason.
+- Role-middleware 302 goes to `/dashboard` (loops for a role-less account); unrealistic, left as is.
+
 ### BUILD phase 1 → WRAP (2026-11-01)
 
 - A role-middleware refusal on these routes is a 302 redirect (not 403), so the Pest "no role" case asserts a redirect and no stored report.
@@ -125,8 +131,8 @@ None blocking.
 
 | Surface | Check | OK? |
 |---------|-------|-----|
-| Report modal | A refused submit (guard 403) shows the message in the modal, no redirect | |
-| Comment list as a moderator-only account | « Signaler » submits successfully | |
+| Report modal | A refused submit (guard 403) shows the message in the modal, no redirect | ✅ |
+| Comment list as a moderator-only account | « Signaler » submits successfully | ✅ (page-level « Signaler »; comments are members-only, see §5) |
 
 ### 3.3 Open items
 
@@ -148,3 +154,19 @@ None.
 ## 5. Build & verify log
 
 - Phase 1 DONE (2026-11-01): route gate widened to staff roles, JS shows 403 message / 401-only redirect. Tests: `ReportRoleGateTest.php`, `moderation.test.js`.
+
+### VERIFY (2026-11-01) — PASS
+
+Driven with a throw-away Playwright spec on the e2e instance (deleted; not promoted). Shots in `shots/`.
+
+| Check | Result |
+|-------|--------|
+| Moderator-only account (`user-confirmed` stripped) opens the page-level « Signaler » modal and submits: success state shown (`shots/moderator-only-success.png`) | ✅ |
+| Guard 403 (annotation deleted after the modal opened): modal stays open, error shown in its error region, URL unchanged, no success (`shots/guard-403.png`). The text is the controller's generic `moderation::report.error` ("Une erreur est survenue lors de l'envoi…") — the guard JSON carries that, not a specific refusal reason | ✅ |
+| 401 (session cookies cleared after the modal loaded, then submit) goes to `/login` | ✅ |
+| Existing `chapter-annotation-report` core spec | ✅ 3/3 |
+| `pnpm run gate` | ✅ |
+
+Findings to know about:
+- **Role-middleware 302 in a browser.** `fetch` follows the redirect, `response.redirected` is true, so the JS does `location.href = response.url`. The redirect target is `/dashboard`. For a role-less account (the only way to hit it today) `/dashboard` itself redirects to `/dashboard` in a loop: the modal stays on a spinner for several seconds, then falls back to the generic error. No realistic user hits this (every account has `user`, `user-confirmed` or a staff role), so not a defect of this change; the redirect branch pre-dates it.
+- **Comments are members-only**: a staff-only account sees « Seuls les membres peuvent accéder aux commentaires », so the comment-list « Signaler » (QA row 2) is not reachable by them. Verified on the page-level « Signaler » (same route) instead. The Handoff claim that the comment list exposes the button to moderator-only accounts does not hold.
