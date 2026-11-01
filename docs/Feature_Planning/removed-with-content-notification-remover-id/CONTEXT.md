@@ -16,6 +16,10 @@
   stored/audit events and other listeners/tests keep working.
 - Display text unchanged (it never mentions the remover).
 
+### BUILD phase 1 -> WRAP (2026-11-01)
+
+- No plan deviation. Visual QA (§3.2 notification list render) not run; text and payload keys unchanged.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -111,7 +115,7 @@ Integration in `FanartLifecycleTest` / `FanartNotificationsTest`; a Story event 
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Carry the remover through events into the notification | S | — | TODO |
+| 1 | Carry the remover through events into the notification | S | — | DONE |
 
 ### Phase 1 — Carry the remover
 
@@ -161,4 +165,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE (2026-11-01): events carry `deletedByUserId`; notifier sets sender + `actor_*`. Tests: 3 in FanartLifecycleTest, Story `DeletedEventsPayloadTest`.

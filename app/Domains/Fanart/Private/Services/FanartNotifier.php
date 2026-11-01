@@ -101,14 +101,21 @@ class FanartNotifier
         $this->send(
             [$fanart->user_id],
             $actorId,
-            fn () => new FanartRemovedWithContentNotification(
-                storyId: $fanart->story_id,
-                storyTitle: $storyTitle,
-                storySlug: $storySlug,
-                chapterTitle: (string) $chapterTitle,
-                fanartTitle: $fanart->title,
-                kind: $fanart->kind->value,
-            ),
+            function () use ($fanart, $storyTitle, $storySlug, $chapterTitle, $actorId) {
+                $actor = $actorId !== null ? ($this->profileApi->getPublicProfiles([$actorId])[$actorId] ?? null) : null;
+
+                return new FanartRemovedWithContentNotification(
+                    actorId: $actorId ?? 0,
+                    actorName: (string) ($actor?->display_name ?? ''),
+                    actorSlug: (string) ($actor?->slug ?? ''),
+                    storyId: $fanart->story_id,
+                    storyTitle: $storyTitle,
+                    storySlug: $storySlug,
+                    chapterTitle: (string) $chapterTitle,
+                    fanartTitle: $fanart->title,
+                    kind: $fanart->kind->value,
+                );
+            },
         );
     }
 

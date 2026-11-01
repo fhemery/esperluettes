@@ -185,3 +185,46 @@ it('hides fanarts of an unpublished chapter from readers and shows them again on
     $chapter->update(['status' => Chapter::STATUS_PUBLISHED]);
     expect($policy->view($reader->id, $fanart))->toBeTrue();
 });
+
+it('records the author who deleted a chapter as sender and actor of the removed-with-content notification', function () {
+    $author = alice($this);
+    $artist = bob($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    createFanart(['story_id' => $story->id, 'chapter_id' => $chapter->id, 'user_id' => $artist->id]);
+
+    $this->actingAs($author)->delete(route('chapters.destroy', [$story->slug, $chapter->slug]));
+
+    $notification = getLatestNotificationByKey('fanart.removed_with_content');
+    expect((int) $notification->source_user_id)->toBe($author->id)
+        ->and($notification->content_data['actor_id'])->toBe($author->id)
+        ->and($notification->content_data['actor_name'])->not->toBe('')
+        ->and($notification->content_data['actor_slug'])->not->toBe('');
+});
+
+it('records the author who deleted a story as sender and actor of the removed-with-content notification', function () {
+    $author = alice($this);
+    $artist = bob($this);
+    $story = publicStory('Histoire', $author->id);
+    createFanart(['story_id' => $story->id, 'user_id' => $artist->id]);
+
+    $this->actingAs($author)->delete(route('stories.destroy', $story->slug));
+
+    $notification = getLatestNotificationByKey('fanart.removed_with_content');
+    expect((int) $notification->source_user_id)->toBe($author->id)
+        ->and($notification->content_data['actor_id'])->toBe($author->id)
+        ->and($notification->content_data['actor_slug'])->not->toBe('');
+});
+
+it('records no remover when the story goes with its author\'s account', function () {
+    $author = alice($this);
+    $artist = bob($this);
+    $story = publicStory('Histoire', $author->id);
+    createFanart(['story_id' => $story->id, 'user_id' => $artist->id]);
+
+    deleteUser($this, $author);
+
+    $notification = getLatestNotificationByKey('fanart.removed_with_content');
+    expect($notification)->not->toBeNull()
+        ->and($notification->source_user_id)->toBeNull();
+});

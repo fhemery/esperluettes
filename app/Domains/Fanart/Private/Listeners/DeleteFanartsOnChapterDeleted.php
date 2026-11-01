@@ -37,6 +37,7 @@ class DeleteFanartsOnChapterDeleted
                 (string) ($story?->title ?? ''),
                 (string) ($story?->slug ?? ''),
                 $event->chapter->title,
+                $event->deletedByUserId,
             ));
     }
 }

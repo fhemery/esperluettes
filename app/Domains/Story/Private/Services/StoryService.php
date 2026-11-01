@@ -447,9 +447,9 @@ class StoryService
     /**
      * Hard delete a story and let DB cascades clean related records.
      */
-    public function deleteStory(Story $story): void
+    public function deleteStory(Story $story, ?int $deletedByUserId = null): void
     {
-        DB::transaction(function () use ($story) {
+        DB::transaction(function () use ($story, $deletedByUserId) {
             // Build snapshots before deletion
             $before = StorySnapshot::fromModel($story, (int) $story->created_by_user_id);
             $chapters = $story->chapters()->orderBy('sort_order')->get();
@@ -465,7 +465,7 @@ class StoryService
             $story->forceDelete();
 
             // Emit deletion event
-            $this->eventBus->emit(new StoryDeleted($before, $chapterSnaps));
+            $this->eventBus->emit(new StoryDeleted($before, $chapterSnaps, $deletedByUserId));
         });
     }
 

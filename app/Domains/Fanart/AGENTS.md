@@ -13,7 +13,7 @@ No `FanartPublicApi`. Other domains consume the Blade components listed in the R
 ## Listens to
 
 - `Auth.UserDeleted` (hard-delete the user's fanarts, fanartist rows, role requests), `Auth.UserDeactivated` / `Auth.UserReactivated` (soft-delete / restore their fanarts).
-- `Story.Deleted` (wipe the story's fanarts, fanartists, requests; notify each non-author fanartist) and `Chapter.Deleted` (delete the chapter's fanarts; notify their submitters except the authors). Both notify `fanart.removed_with_content`.
+- `Story.Deleted` (wipe the story's fanarts, fanartists, requests; notify each non-author fanartist) and `Chapter.Deleted` (delete the chapter's fanarts; notify their submitters except the authors). Both notify `fanart.removed_with_content`, with the deleting user as sender and `actor_*` (events carry `deletedByUserId`; none when the story goes with its author's account).
 
 - `Moderation.ReportSubmitted` (topic `fanart` only): a pending fanart reported by one of its story's authors is declined (hard-deleted, `fanart.declined` without comment). Any other reporter or a published fanart: nothing.
 
