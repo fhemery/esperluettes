@@ -17,6 +17,10 @@ Fast path: §1–§3 written by the refiner. Zero blocking questions asked.
 - Not in scope: the `fanart` topic has the same dev-seeder-only situation; flag
   it in the final summary, do not fix here.
 
+### BUILD phase 1 → WRAP (2026-11-01)
+
+No deviation. `fanart` topic still has the dev-seeder-only gap (not fixed, out of scope).
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -131,7 +135,7 @@ reasons for that topic.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Data migration + test | S | — | TODO |
+| 1 | Data migration + test | S | — | DONE |
 
 Working agreement: one phase = one commit; failing test first.
 
@@ -176,4 +180,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE: migration + 3 tests; Moderation and Comment suites pass; gate green.
