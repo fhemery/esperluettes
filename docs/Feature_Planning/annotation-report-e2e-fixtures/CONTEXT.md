@@ -22,6 +22,10 @@ assumption: reaction on root 102 rather than on a new chapter. E2E needs the app
 running (see `e2e/README.md`); the gate does not run Playwright, so BUILD must
 run `pnpm run e2e` on the three annotation specs by hand.
 
+### BUILD phase 1 → WRAP (2026-11-01)
+
+Deviation: `tech_admin`'s email is `tech-admin@e2e.test` (hyphen), not the underscore the plan wrote. No other surprises; overlay spec needed only the tint-list edits.
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -138,7 +142,7 @@ fails after the seed change.
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Seed, fixtures, specs | S | — | TODO |
+| 1 | Seed, fixtures, specs | S | — | DONE |
 
 Working agreement: one phase = one commit; failing test first; no phase N+1
 before N's acceptance holds; re-ordering is surfaced, not taken silently.
@@ -186,4 +190,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE: seed (reaction + tech_admin reply on root 102), fixtures, new report test (red before seed, green after), overlay tint lists. Annotation e2e specs 15/15 green; gate green.

@@ -130,7 +130,8 @@ export const ANNOTATED = {
     /** Under `confirmed`'s own quote `Le ruisseau chante`. */
     underQuote: 'ruisseau chante sous le pont',
   },
-  user: { clearing: 'traverse la clairière', mill: 'le moulin tourne encore' },
+  /** `owl`: a reaction (emoji-only annotation) on a free passage. */
+  user: { clearing: 'traverse la clairière', mill: 'le moulin tourne encore', owl: 'Une chouette observe' },
   anonymised: 'Plus loin',
   deactivated: 'Thêta un',
   quote: 'Le ruisseau chante',
@@ -140,6 +141,9 @@ export const ANNOTATED = {
     clearing: 'La clairière est bien décrite.',
     authorReply: 'Merci pour le renard.',
     deactivatedReply: "Réponse d'un compte désactivé.",
+    reaction: '❤️',
+    /** Reply of `tech_admin`, co-author of story 6, to `user`'s clearing annotation. */
+    coauthorReply: 'Précision de la coautrice.',
   },
   /** Chapter 13, `user`'s root. */
   reviewed: {
