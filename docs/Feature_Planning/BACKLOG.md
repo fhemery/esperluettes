@@ -24,7 +24,6 @@ scoped to the task that actually changed.
 
 - **Statistics — per-user statistics on the profile** · `statistics-profile/` · interactive · TODO
 - **Calendar — activity state-change notifications** · `calendar-notifications/` · interactive · TODO: leftover from `role-gated-notification-settings/` REFINE — Quote Contest already broadcasts lifecycle to all active `user-confirmed`, ignoring each activity’s `role_restrictions`. Recipients must be the users authorized to *that* activity, not a type-level role list and not every confirmed user.
-- **Chapter annotations — e2e fixtures for reaction and co-author reply reports** · `annotation-report-e2e-fixtures/` · interactive · complexity:2 · WIP:BUILD (0/1)
 - **Fanart — seed a report reason for the fanart moderation topic in production** · `fanart-report-prod-reason/` · interactive · complexity:2 · TODO
 - **Moderation — return the guard's refusal message to the report modal** · `moderation-report-guard-message/` · interactive · complexity:2 · TODO
 - **Chapter annotations — image annotation** · `annotations-images/` · interactive · TODO: split from `annotations-v4/` REFINE; needs a stable block id persisted through Editor + Story first.
@@ -50,6 +49,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`annotation-report-e2e-fixtures`](_done/annotation-report-e2e-fixtures.md) · e2e seed of a reaction and a co-author reply on chapter 11 root 102, with a Playwright test reporting both from the author pop-up
 - [`moderation-report-refusals`](_done/moderation-report-refusals.md) · report modal shows a 403 message instead of redirecting to `/login`; moderator/admin/tech-admin-only accounts pass the report route gate
 - [`annotation-report-prod-reason`](_done/annotation-report-prod-reason.md) · data migration gives the `annotation` moderation topic an active « Autre » reason in production when it has none (dev seeder only before)
 - [`story-chapter-publish-at-label`](_done/story-chapter-publish-at-label.md) · the chapter form's scheduled-publication field is now named « Publication planifiée » for screen readers (sr-only label, no visual change)
