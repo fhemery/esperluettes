@@ -11,6 +11,10 @@ Fast path (rated 1): §1–§3 written by the refiner. No question asked. The ke
 and is unused: reuse it. Likeliest reversal: label is visually hidden (`sr-only`)
 rather than visible, to keep the inline toggle + picker row unchanged.
 
+### BUILD phase 1 → WRAP (2026-11-01)
+
+No plan deviation. `input-label` auto-gives the label `id="publish_at_label"`, which the datetime component's `aria-labelledby` already pointed at (so group and time input are named). Visual QA of the sr-only row not done (no browser).
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -101,7 +105,7 @@ it must not disturb the `gap-2` flex row (verify visually).
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Add sr-only label + test | S | — | TODO |
+| 1 | Add sr-only label + test | S | — | DONE |
 
 ### Phase 1 — Add the label
 
@@ -140,4 +144,4 @@ None.
 
 ## 5. Build & verify log
 
-_Not written yet._
+- Phase 1 DONE (2026-11-01): sr-only label added in `chapters/partials/form.blade.php`; test `create form labels the scheduled publication field` in `CreateChapterTest.php`. Visual QA (§3.2) not run.

@@ -56,6 +56,18 @@ describe('Creating a chapter', function () {
             ->not->toContain('type="datetime-local"');
     });
 
+    it('create form labels the scheduled publication field', function () {
+        $user = alice($this);
+        $this->actingAs($user);
+        $story = createStoryForAuthor($user->id, ['title' => 'Labelled Sched']);
+
+        $html = $this->get('/stories/' . $story->slug . '/chapters/create')->getContent();
+
+        expect($html)
+            ->toMatch('/<label[^>]*id="publish_at_label"[^>]*for="publish_at"[^>]*>\s*' . preg_quote(trans('story::chapters.form.publish_at.label'), '/') . '/u')
+            ->toContain('aria-labelledby="publish_at_label"');
+    });
+
     it('creates a published chapter and redirects to its show page', function () {
         $user = alice($this);
         $this->actingAs($user);
