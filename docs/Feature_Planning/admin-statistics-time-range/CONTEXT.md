@@ -215,3 +215,7 @@ Driven on the e2e instance (admin@e2e.test) with a throwaway flow; every screens
 | Reload | Choice remembered; bad stored value falls back to 12 mois | ✅ weekly+all survives reload; `garbage` falls back to recent |
 
 Note: the e2e seeder cannot tell the ranges apart (no point older than 12 months); adding one would shift the tile and weekly fixtures the core spec asserts, so deliberately not done.
+
+### Fix after VERIFY (2026-11-02)
+
+`E2eStatisticsSeeder` now writes a +5000 `global.total_words` point twenty months ago (`OLD`, mirrored as `STATISTICS.oldWords`); only that metric, so the core spec's users/quotes tile and week assertions are untouched (no core change needed). New `features/admin-statistics-time-range.spec.ts` (default 12 months, switch to Depuis le début adds the old weekly bar, choice survives reload); `AdminStatisticsPage` gained `rangeSwitch` / `selectRange`. The earlier note that the seeder was deliberately left alone is superseded. `database/e2e.sqlite` is gitignored and was rebuilt by the e2e global reset. Delete the feature spec at WRAP.

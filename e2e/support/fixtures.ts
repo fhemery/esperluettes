@@ -304,7 +304,9 @@ export const GIFT = {
  * `app/Domains/Statistics/Database/Seeders/E2eStatisticsSeeder.php` as net daily
  * deltas relative to the current week. Weekly nets, oldest first; the last one
  * is the current week. Index 2 is a week with no row (a zero bar), and
- * `words` / `stories` each drop below zero once.
+ * `words` / `stories` each drop below zero once. `words` also has a single
+ * +`oldWords` point twenty months ago (outside « 12 derniers mois »), on top of
+ * the weekly nets.
  */
 export const STATISTICS = {
   weeks: 6,
@@ -313,6 +315,7 @@ export const STATISTICS = {
   stories: [2, 1, 0, -1, 1, 1],
   chapters: [3, 2, 0, 1, 4, 1],
   words: [1200, 800, 0, -300, 500, 150],
+  oldWords: 5000,
   comments: [4, 3, 0, 5, 2, 1],
   rootComments: [2, 1, 0, 3, 1, 1],
   quotes: [2, 1, 0, -1, 3, 1],

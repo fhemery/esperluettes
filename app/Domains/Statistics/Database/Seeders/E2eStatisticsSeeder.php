@@ -32,6 +32,14 @@ class E2eStatisticsSeeder extends Seeder
         'global.total_quotes' => [2, 1, 0, -1, 3, 1],
     ];
 
+    /**
+     * Net deltas older than the « 12 derniers mois » range, so the two admin
+     * ranges draw different data. Only a metric the core spec leaves alone.
+     */
+    public const OLD_MONTHS_AGO = 20;
+
+    public const OLD = ['global.total_words' => 5000];
+
     public function run(): void
     {
         $now = CarbonImmutable::now();
@@ -40,6 +48,19 @@ class E2eStatisticsSeeder extends Seeder
 
         foreach (self::WEEKLY as $key => $deltas) {
             $cumulative = 0;
+
+            if (isset(self::OLD[$key])) {
+                $cumulative = self::OLD[$key];
+                StatisticTimeSeries::create([
+                    'statistic_key' => $key,
+                    'scope_type' => 'global',
+                    'scope_id' => null,
+                    'granularity' => 'daily',
+                    'period_start' => $now->subMonths(self::OLD_MONTHS_AGO)->startOfDay(),
+                    'value' => $cumulative,
+                    'cumulative_value' => $cumulative,
+                ]);
+            }
 
             foreach ($deltas as $index => $delta) {
                 if ($delta === 0) {
