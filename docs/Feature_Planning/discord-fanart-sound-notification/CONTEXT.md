@@ -9,6 +9,10 @@
 
 ## 0. Handoff
 
+### VERIFY → WRAP (2026-11-02)
+
+- Visual QA §3.2 all PASS; spec `e2e/tests/features/discord-fanart-sound-notification.spec.ts` (delete at WRAP, nothing worth promoting). `FanartCreatePage` gained a `kind` argument and `shareOnDiscord`. Full e2e suite 47/47. Manual: none, apart from the environment note in §5.
+
 ### BUILD phase 1 → VERIFY (2026-11-02)
 
 - Deviation: the user asked for ids too, so image and audio items also expose `storyId`, `storySlug`, `chapterId`, `artist.name` (documented in `Discord_Api_Usage.md`). A5 respected: no hint text under the checkbox. Browser QA (§3.2) not done.
@@ -195,3 +199,4 @@ Bot-side support is outside this repo (phase 1 docs only).
 ## 5. Build & verify log
 
 - **BUILD phase 1 — DONE (2026-11-02).** Checkbox shown for every kind; `share_on_discord` stored for audio; `discordEligible()` takes a kinds list (image+audio for the feed, image only for `isDiscordEligible()`); items gain `kind` and, on user request, `storyId`, `storySlug`, `chapterId`, `artist.name` (image and audio alike, additive). Audio items have no `imageUrl`. Tests in `SubmitFanartTest` / `DiscordFeedTest`; gate green. Visual QA §3.2 left for VERIFY.
+- **VERIFY — PASS (2026-11-02).** Spec `e2e/tests/features/discord-fanart-sound-notification.spec.ts` (6 tests), full suite 47/47. Rows: 1 ✅ (confirmed, sound form: shown, unchecked); 2 ✅ (invalid submit ticked, 302 back, still ticked); 3 ✅ (author, sound artwork form: shown, unchecked); 4 ✅ (author and confirmed, image forms: shown, unchecked); 5 ✅ (Pixel 7 at 375 px: row inside viewport; wrapping judged by bounds only, not by eye). Env note: this worktree's container maps host `E2E_PORT` (8081) to container 8080 while `playwright.config.ts` serves on `E2E_PORT` inside, and host 8080 was taken by another project; ran with a manual `artisan serve --port=8080` in the container and `E2E_BASE_URL=http://localhost:8081`.

@@ -84,10 +84,15 @@ export class FanartCreatePage {
   constructor(
     private readonly page: Page,
     private readonly storySlug: string,
+    private readonly kind: 'image' | 'audio' = 'image',
   ) {}
 
   async goto(): Promise<void> {
-    await this.page.goto(`/stories/${this.storySlug}/fanarts/create/image`);
+    await this.page.goto(`/stories/${this.storySlug}/fanarts/create/${this.kind}`);
+  }
+
+  get shareOnDiscord(): Locator {
+    return this.page.locator('input[name="share_on_discord"]');
   }
 
   get title(): Locator {
