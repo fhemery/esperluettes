@@ -530,7 +530,7 @@ curl -X DELETE "https://esperluettes.com/api/discord/users/123456789012345678" \
 
 ## Fanarts feed
 
-Images **and sounds** that their uploader chose to share on Discord (« Partager sur Discord »), published, on **public** stories (and published chapters), not yet reported as sent. Pending, community and private-story items never appear; a deleted fanart simply drops out. Author artworks are included when they ticked the box. A sound item is a notification only: it has no `imageUrl` and no link to the file (sounds stay private). Deploy bot support for items without `imageUrl` before the first sound is ticked.
+Images that their uploader chose to share on Discord (« Partager sur Discord »), published, on **public** stories (and published chapters), not yet reported as sent. Audio, pending, community and private-story items never appear; a deleted fanart simply drops out. Author artworks are included when they ticked the box.
 
 ### GET /api/discord/fanarts/pending
 
@@ -542,19 +542,15 @@ Images **and sounds** that their uploader chose to share on Discord (« Partager
   "data": [
     {
       "id": 12,
-      "kind": "image",
       "title": "Portrait de Mara",
       "artistName": "Alice",
-      "artist": {"id": 4, "slug": "alice", "name": "Alice", "avatarUrl": "https://esperluettes.com/storage/profile_pictures/4.webp"},
+      "artist": {"id": 4, "slug": "alice", "avatarUrl": "https://esperluettes.com/storage/profile_pictures/4.webp"},
       "authors": [
         {"id": 7, "name": "Bob", "slug": "bob"},
         {"id": 9, "name": "Carole", "slug": "carole"}
       ],
-      "storyId": 3,
-      "storySlug": "la-riviere-3",
       "storyTitle": "La Rivière",
       "storyUrl": "https://esperluettes.com/stories/la-riviere-3",
-      "chapterId": 15,
       "chapterTitle": "Chapitre 2",
       "chapterSlug": "chapitre-2-15",
       "description": "Mara au bord de l'eau.\nMerci de votre lecture !",
@@ -566,7 +562,7 @@ Images **and sounds** that their uploader chose to share on Discord (« Partager
 }
 ```
 
-`kind` is `"image"` or `"audio"`; audio items carry the same fields minus `imageUrl` (and always have a chapter). `storyId`/`storySlug` identify the story, `chapterId` the chapter (omitted with `chapterTitle`/`chapterSlug` when none); `artist.name` equals `artistName`. `approvedAt` is the ISO 8601 UTC time the fanart was approved by an author, or uploaded for an author artwork (published without review). `artist.id` is the user id of the fanartist; `artist` is `null` when the profile is unavailable. `authors` lists all authors and co-authors of the story. `chapterTitle` and `chapterSlug` are omitted when the fanart is not attached to a chapter. `description` is plain text (paragraphs separated by newlines) and omitted when empty. `imageUrl` is a signed URL (valid 24 hours, no API key or session needed) to the 800px-wide WebP variant; it answers 403 when altered or expired and 404 when the fanart is no longer eligible.
+`approvedAt` is the ISO 8601 UTC time the fanart was approved by an author, or uploaded for an author artwork (published without review). `artist.id` is the user id of the fanartist; `artist` is `null` when the profile is unavailable. `authors` lists all authors and co-authors of the story. `chapterTitle` and `chapterSlug` are omitted when the fanart is not attached to a chapter. `description` is plain text (paragraphs separated by newlines) and omitted when empty. `imageUrl` is a signed URL (valid 24 hours, no API key or session needed) to the 800px-wide WebP variant; it answers 403 when altered or expired and 404 when the fanart is no longer eligible.
 
 ### POST /api/discord/fanarts/mark-sent
 

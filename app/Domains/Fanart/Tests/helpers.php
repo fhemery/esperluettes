@@ -71,16 +71,6 @@ function botGetPending(Tests\TestCase $t, array $query = [])
     return $t->getJson('/api/discord/fanarts/pending?' . http_build_query($query), ['Authorization' => 'Bearer __test_api_key__']);
 }
 
-/** A published audio fanart ticked "share on Discord". */
-function sharedAudio(array $overrides = []): Fanart
-{
-    return createPendingAudio(array_merge([
-        'status' => FanartStatus::Published,
-        'published_at' => now(),
-        'share_on_discord' => true,
-    ], $overrides));
-}
-
 /** A published image fanart ticked "share on Discord". */
 function sharedImage(array $overrides = []): Fanart
 {

@@ -53,19 +53,8 @@ class ChapterContentResolver
         // request: a client may not name someone else's folder.
         $scope = 'chapters/' . $actingUserId;
 
-        $order = array_values(array_filter(
-            explode(',', (string) ($data['blocks_order'] ?? '')),
-            fn ($uid) => $uid !== ''
-        ));
-        $raw = is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
-
         $blocks = [];
-        foreach ($order as $uid) {
-            $b = $raw[$uid] ?? null;
-            if (!is_array($b)) {
-                continue;
-            }
-
+        foreach ($this->orderedBlocks($data) as $b) {
             $type = $b['type'] ?? null;
 
             if ($type === 'text') {
@@ -121,6 +110,54 @@ class ChapterContentResolver
             'content' => $this->editor->render($blocks, 'multiedit-narrative', ['chapters' => $targets]),
             'content_blocks' => $blocks,
         ];
+    }
+
+    /**
+     * Number of image files `resolve()` would store for this payload: image
+     * blocks listed in `blocks_order` that carry an uploaded file. Reused paths
+     * (library or already saved) arrive as `path` and are not counted.
+     *
+     * @param array<string,mixed> $data
+     */
+    public function countNewUploads(array $data): int
+    {
+        if (($data['mode'] ?? 'simple') !== 'advanced') {
+            return 0;
+        }
+
+        $count = 0;
+        foreach ($this->orderedBlocks($data) as $b) {
+            if (($b['type'] ?? null) === 'image' && ($b['file'] ?? null) instanceof UploadedFile) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    /**
+     * The submitted blocks, in `blocks_order` order, skipping ids with no block.
+     *
+     * @param array<string,mixed> $data
+     * @return list<array<string,mixed>>
+     */
+    private function orderedBlocks(array $data): array
+    {
+        $order = array_values(array_filter(
+            explode(',', (string) ($data['blocks_order'] ?? '')),
+            fn ($uid) => $uid !== ''
+        ));
+        $raw = is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
+
+        $blocks = [];
+        foreach ($order as $uid) {
+            $b = $raw[$uid] ?? null;
+            if (is_array($b)) {
+                $blocks[] = $b;
+            }
+        }
+
+        return $blocks;
     }
 
     /**

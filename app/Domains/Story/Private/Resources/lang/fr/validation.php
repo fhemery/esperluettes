@@ -90,5 +90,8 @@ return [
         'publish_at' => [
             'after' => 'La date de publication planifiée doit être dans le futur.',
         ],
+        'credits' => [
+            'insufficient' => 'Cet enregistrement coûte :cost crédit(s) de chapitre, il vous en reste :balance.',
+        ],
     ],
 ];

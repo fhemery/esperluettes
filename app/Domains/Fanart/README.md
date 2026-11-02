@@ -12,7 +12,7 @@ Confirmed readers (« fanartistes ») submit images (jpg/png/webp, 2 Mo) and sou
 - **Fanartiste role**: lives here (`fanart_fanartists`), not in Story's collaborators; it grants no access to private stories. Readers may request it; an author accepts or declines (30-day cooldown after a decline).
 - **Visibility**: readers see published fanarts of published chapters on readable stories; authors and staff also see pending ones and unpublished chapters' fanarts. Chapters not yet read are collapsed behind a spoiler notice.
 - **Message to the authors**: a submitter may add an optional plain-text message (500 chars, not offered on author artworks). It is not stored on `fanarts`; it lives only in the authors' `fanart.submitted` notification, so deleting that notification loses it.
-- **Discord relay**: published images and sounds of public stories, opt-in at submission, exposed to the bot as feed items; images through signed, expiring image URLs, sounds as link-only notifications (no file URL).
+- **Discord relay**: published images of public stories, opt-in at submission, exposed to the bot through signed, expiring image URLs.
 
 ## Where it shows up
 
@@ -52,7 +52,7 @@ Fanart never deletes a file; it only clears rows. `FanartMediaUsageProvider` cla
 
 ## Deliberately not built
 
-No statistics, no submission cap, no editing of a published fanart by its artist (delete and resubmit), no follower notification on publication, no global search, no GIF or non-mp3 audio, no sound file on Discord (announcement only), no player that survives page navigation, no comments or likes on fanarts, nothing shown to guests or non-confirmed users (no teaser).
+No statistics, no submission cap, no editing of a published fanart by its artist (delete and resubmit), no follower notification on publication, no global search, no GIF or non-mp3 audio, no audio on Discord, no player that survives page navigation, no comments or likes on fanarts, nothing shown to guests or non-confirmed users (no teaser).
 
 Sound download protection is friction only: players hide the native download entry and context menu, and opening a sound URL by navigation answers 403. It does not stop a determined user (devtools, curl with a session cookie, screen capture); there is no DRM, watermark or signed URL.
 

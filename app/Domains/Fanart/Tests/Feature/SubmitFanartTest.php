@@ -298,7 +298,7 @@ it('turns away a non-confirmed user and redirects a guest', function () {
     expect(Fanart::count())->toBe(0);
 });
 
-it('honours share_on_discord for audio', function () {
+it('ignores share_on_discord for audio', function () {
     $author = alice($this);
     $story = publicStory('Histoire', $author->id);
     $chapter = createPublishedChapter($this, $story, $author);
@@ -308,36 +308,10 @@ it('honours share_on_discord for audio', function () {
 
     $this->post(route('fanart.store', $story->slug), audioPayload($chapter->id, ['share_on_discord' => '1']))
         ->assertRedirect();
-    expect(Fanart::where('kind', FanartKind::Audio)->first()->share_on_discord)->toBeTrue();
-
-    Fanart::query()->delete();
-    $this->post(route('fanart.store', $story->slug), audioPayload($chapter->id))->assertRedirect();
-    expect(Fanart::where('kind', FanartKind::Audio)->first()->share_on_discord)->toBeFalse();
+    expect(Fanart::first()->share_on_discord)->toBeFalse();
 
     $this->post(route('fanart.store', $story->slug), imagePayload(['share_on_discord' => '1']))->assertRedirect();
     expect(Fanart::where('kind', FanartKind::Image)->first()->share_on_discord)->toBeTrue();
-});
-
-it('shows the discord checkbox on the audio submission form', function () {
-    $author = alice($this);
-    $story = publicStory('Histoire', $author->id);
-    $reader = bob($this);
-    grantAudioRole($story->id, $reader->id);
-
-    $this->actingAs($reader)
-        ->get(route('fanart.create', [$story->slug, 'audio']))
-        ->assertOk()
-        ->assertSee('name="share_on_discord"', false);
-});
-
-it('shows the discord checkbox on the audio artwork form', function () {
-    $author = alice($this);
-    $story = publicStory('Histoire', $author->id);
-
-    $this->actingAs($author)
-        ->get(route('fanart.create', [$story->slug, 'audio']))
-        ->assertOk()
-        ->assertSee('name="share_on_discord"', false);
 });
 
 function renderSubmitted(): string
