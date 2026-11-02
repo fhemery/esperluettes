@@ -7,9 +7,10 @@ description: Write and make a git commit that matches this project's conventions
 
 ## Before you commit
 
-- **Only commit when asked**, or at the end of a loop step — BUILD commits at
-  the end of each phase; REFINE, DESIGN, PLAN and WRAP each commit their own
-  artifact before handing back (see `.agents/loop/README.md`'s "Gate" section).
+- **Only commit when asked**, or at the end of a BUILD phase (see
+  `.agents/loop/README.md`'s "Gate" section). `CONTEXT.md` is git-ignored, so
+  REFINE, DESIGN and PLAN usually have nothing to commit; WRAP leaves its
+  paperwork uncommitted for `squash-branch` to fold into the last build commit.
   Never commit speculatively mid-work.
 - Never commit on `main`. Branch first: `git checkout -b <type>/<short-slug>`.
 - `git status` and `git diff` first — know exactly what is going in. Do not
@@ -67,7 +68,9 @@ Always end with the `Co-Authored-By` trailer above.
 
 In the loop, **one BUILD phase = one commit**: it ships independently, keeps the
 gate green, and is revertable on its own. If you are reaching for "and" in the
-subject, it is two commits.
+subject, it is two commits. At WRAP, `squash-branch` keeps these commits as
+they are and only folds the non-build ones (VERIFY specs, paperwork) into the
+first or last — so a long feature stays a series of small commits.
 
 ## Writing the message
 

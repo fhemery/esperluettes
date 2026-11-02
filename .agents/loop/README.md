@@ -280,15 +280,21 @@ Honours `LOCAL_RUNNER` (`php` or `sail`) like the husky hooks. A phase is not
 finished until the gate is green — this is rule #4 of `AGENTS.md` made
 mechanical.
 
-**Every step ends on a green gate and a commit, not just BUILD.** REFINE,
-DESIGN, PLAN and WRAP all write or delete files under `docs/Feature_Planning/`
-— a renamed task folder, an absorbed sibling task, a deleted pre-loop doc — and
-each of those can break a relative link or leave a stale reference sitting
-uncommitted, invisible until some unrelated later change stumbles on it. Run
-`pnpm run gate` (it skips the PHP/JS suites when nothing code-related changed,
-so this is cheap) and commit the step's own artifact before handing back —
-see the `commit` skill. Skip the commit only for a genuine mid-interview
-scratch state, and say so.
+**Commits: one per BUILD phase, nothing else.** `CONTEXT.md` and `shots/` are
+git-ignored (`git add -f` one only to carry a task to another machine), so
+REFINE, DESIGN and PLAN leave nothing to commit by themselves — the branch
+history is code, not paperwork. If such a step does change tracked files (a
+renamed task folder, an absorbed sibling task, backlog rows from a split), run
+`pnpm run gate` (cheap when nothing code-related changed) and commit them, as a
+broken relative link would otherwise sit invisible until an unrelated change
+stumbles on it.
+
+VERIFY's e2e specs may be committed as they come; WRAP does **not** commit its
+paperwork. It runs the gate on the working tree, then `pnpm run squash-branch`
+rebuilds the branch with one commit per build commit: non-build commits fold
+into the first or last build commit, the paperwork lands in the last one, and
+the middle phases stay untouched. A 26-phase feature stays 26 commits; a
+one-phase task becomes one. See `wrap-task` §7.
 
 ## Non-negotiables inherited from AGENTS.md
 

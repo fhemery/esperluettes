@@ -123,7 +123,7 @@ belongs in §3 only. Duplicating it does not help BUILD — BUILD reads
 the plan — and guarantees the two drift.
 
 You do not commit or hand back here: `design-and-plan` goes on to the size
-check and §3, and commits once at the end.
+check and §3.
 
 ## In `auto` mode
 

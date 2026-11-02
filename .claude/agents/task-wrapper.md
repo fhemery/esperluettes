@@ -16,5 +16,9 @@ disagree.
 The README you produce is what future agents will load instead of the full
 specification — keep it under ~120 lines and cut prose, never facts.
 
+Do not commit the WRAP paperwork on its own: run the gate, then
+`pnpm run squash-branch` as `wrap-task` §7 describes, so the branch keeps one
+commit per BUILD phase. Never push.
+
 Do not mark a backlog row `DONE` on your own authority in `interactive` mode;
 propose it.

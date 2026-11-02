@@ -131,6 +131,6 @@ rather than leaving it to BUILD.
 
 ## Output
 
-`design-and-plan` runs the gate and commits `CONTEXT.md`, then returns the phase
+`design-and-plan` returns the phase
 index table and the total phase count (checkpoints included). Flag any phase
 you were unsure how to cut.

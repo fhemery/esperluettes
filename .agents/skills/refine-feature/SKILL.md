@@ -149,10 +149,10 @@ Fill §1 of `CONTEXT.md`. Rules:
 - End with the §0 Handoff entry (`REFINE → DESIGN+PLAN`): how many blocking
   questions you asked, the assumptions the user is likeliest to reverse, parked technical constraints, the seams (at 5).
 
-Run `pnpm run gate` and commit `CONTEXT.md` (follow the
-`commit` skill) — this step wrote or deleted planning docs (e.g. absorbing a
-sibling task), and an uncaught broken link here is exactly what sits invisible
-until an unrelated change stumbles on it later.
+`CONTEXT.md` is git-ignored: do not commit it. Run `pnpm run gate` only if this
+step changed tracked docs (e.g. absorbing a sibling task, a renamed folder), and
+commit those (follow the `commit` skill) — an uncaught broken link here is
+exactly what sits invisible until an unrelated change stumbles on it later.
 
 Then hand back to the orchestrator with a five-line summary: what the feature
 is, the complexity rating, the two or three decisions that shaped it, the assumptions the user is most

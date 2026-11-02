@@ -10,6 +10,7 @@
         "gate": "node scripts/gate.js",
         "worktree": "node scripts/worktree.js",
         "add-task": "node scripts/add-task.js",
+        "squash-branch": "node scripts/squash-branch.js",
         "package": "node scripts/package.js",
         "prepare": "husky",
         "dep:check": "./vendor/bin/sail composer deptrac",

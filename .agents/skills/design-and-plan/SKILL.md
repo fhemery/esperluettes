@@ -26,7 +26,9 @@ Read `CONTEXT.md` §0 (Handoff), §1 and §4, then follow in order:
    contracts, §3 holds paths, signatures and named tests, and neither repeats
    the other.
 
-Commit once (`CONTEXT.md`) after §3, with the gate green. The §0 Handoff entry
+`CONTEXT.md` is git-ignored: there is nothing to commit after §3 unless you also
+changed tracked files (backlog rows from a split — commit those with the gate
+green). The §0 Handoff entry
 (`DESIGN+PLAN → BUILD`) holds what BUILD cannot read off the plan: the riskiest
 phase, the assumption most likely to be reversed, anything verified in the code
 that a later reader would otherwise re-check.
