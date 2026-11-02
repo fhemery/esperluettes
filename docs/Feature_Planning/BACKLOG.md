@@ -43,6 +43,8 @@ scoped to the task that actually changed.
 
 ## Done
 
+- [`discord-fanart-sound-notification`](_done/discord-fanart-sound-notification.md) · sound fanarts get the opt-in « Partager sur Discord » checkbox and ticked published sounds join the Discord pending feed as link-only items (`kind`, no `imageUrl`)
+
 WRAP trims a finished task's folder to just its `README.md`, moves it to
 `_done/<slug>.md`, and adds one line here. `_done/` is a flat archive, browsable
 like closed PRs — not loaded by default, read when working in a related area or

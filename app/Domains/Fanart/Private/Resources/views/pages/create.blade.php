@@ -107,12 +107,10 @@
                 <x-shared::input-error :messages="$errors->get('attestation')" />
             </div>
 
-            @if ($kind === 'image')
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="share_on_discord" value="1" @checked(old('share_on_discord'))>
-                    <span>{{ __('fanart::ui.create.share_on_discord') }}</span>
-                </label>
-            @endif
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="share_on_discord" value="1" @checked(old('share_on_discord'))>
+                <span>{{ __('fanart::ui.create.share_on_discord') }}</span>
+            </label>
 
             @unless ($isArtwork)
                 <div class="text-sm flex items-center gap-2">
