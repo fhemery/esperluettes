@@ -40,9 +40,10 @@ scoped to the task that actually changed.
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
 - **Moderation — give the compact report button an accessible name** · `moderation-report-button-accessible-name/` · auto · complexity:1 · TODO
-- **Notify Discord when audio fanart is published** · `discord-fanart-sound-notification/` · interactive · complexity:2 · WIP:BUILD
 
 ## Done
+
+- [`discord-fanart-sound-notification`](_done/discord-fanart-sound-notification.md) · sound fanarts get the opt-in « Partager sur Discord » checkbox and ticked published sounds join the Discord pending feed as link-only items (`kind`, no `imageUrl`)
 
 WRAP trims a finished task's folder to just its `README.md`, moves it to
 `_done/<slug>.md`, and adds one line here. `_done/` is a flat archive, browsable
