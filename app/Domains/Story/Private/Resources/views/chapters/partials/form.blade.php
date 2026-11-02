@@ -64,7 +64,8 @@
             toolbar="links"
             class="mt-1 block w-full"
             :nbLines="15" :indentParagraphs="true"
-            :needs-property-confirm="true" />
+            :needs-property-confirm="true"
+            :imageNotice="__('story::chapters.form.content.image_credit_notice', ['balance' => $availableCredits])" />
         <x-input-error :messages="$errors->get('content')" class="mt-2" />
         <x-input-error :messages="collect($errors->get('blocks'))->merge(\Illuminate\Support\Arr::flatten($errors->get('blocks.*')))->unique()->values()->all()" class="mt-2" />
         <x-input-error :messages="$errors->get('credits')" class="mt-2" />

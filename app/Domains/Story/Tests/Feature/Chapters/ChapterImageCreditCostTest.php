@@ -184,6 +184,21 @@ describe('Chapter image credit cost', function () {
         expect($chapter->fresh()->content_blocks[1]['path'])->toStartWith('chapters/' . $coAuthor->id . '/');
     });
 
+    it('shows the image credit notice with the current balance on the create and edit forms', function () {
+        setAvailableCredits($this->author->id, 4);
+        $chapter = createPublishedChapter($this, $this->story, $this->author);
+        setAvailableCredits($this->author->id, 4);
+        $notice = 'story::chapters.form.content.image_credit_notice';
+
+        $create = $this->get(route('chapters.create', ['storySlug' => $this->story->slug]))->assertOk()->getContent();
+        $edit = $this->get(route('chapters.edit', ['storySlug' => $this->story->slug, 'chapterSlug' => $chapter->slug]))->assertOk()->getContent();
+
+        foreach ([$create, $edit] as $html) {
+            expect($html)->toContain($notice);
+            expect(\Illuminate\Support\Str::between($html, '<template data-block-template="image">', '</template>'))->toContain($notice);
+        }
+    });
+
     it('rolls back the chapter when the spend fails inside the transaction', function () {
         setAvailableCredits($this->author->id, 5);
         app()->instance(ChapterCreditService::class, new class (app(\App\Domains\Events\Public\Api\EventBus::class)) extends ChapterCreditService {
