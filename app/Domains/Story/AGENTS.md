@@ -70,7 +70,7 @@
 
 **TW IDs when disclosure is not `listed`.** When `tw_disclosure` is `no_tw` or `unspoiled`, the `story_trigger_warnings` rows must be cleared on save. The model does not enforce this — the service layer does. Skipping this leaves orphaned TW rows that appear in API responses.
 
-**Chapter credits: check before, spend after.** The check `availableForUser <= 0` throws an `AuthorizationException` before the DB transaction starts. Credits are spent via `spendOne()` *after* a successful save. Do not reorder this sequence.
+**Chapter credits: check before storing, spend first in the transaction.** A chapter save costs 1 on creation plus 1 per freshly uploaded image (`ChapterContentResolver::countNewUploads`; library/saved paths are free). `ChapterService` checks the balance *before* `resolve()` stores any file (0 credits on create stays a 403 `AuthorizationException`; any other shortfall is a `credits` `ValidationException`), then calls the guarded `ChapterCreditService::trySpend($userId, $cost)` as the *first* statement of the save transaction, before any write or event. Do not reorder: storing before the check keeps files of a rejected save, and spending late leaves listener side effects behind on rollback. No refund on delete/replace.
 
 **Soft delete vs. hard delete.** `SoftDeleteStoriesOnUserDeactivated` calls `softDeleteStoriesByAuthor`; `RemoveStoriesOnUserDeleted` hard-deletes. A co-authored story is soft-deleted only once every author is deactivated (one `AuthPublicApi::getUsersById` call); reactivating any author restores it; account deletion still hard-deletes every co-authored story. These are separate listeners for separate events — do not merge them.
 

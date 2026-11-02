@@ -35,7 +35,9 @@ When `tw_disclosure` is not `listed`, the service layer clears `story_trigger_wa
 Credits gate chapter creation to encourage community engagement:
 
 - Each user starts with **5 credits** on registration (`UserRegistered` listener).
-- Creating a chapter costs **1 credit** (checked before the DB transaction; spent after a successful save).
+- Creating a chapter costs **1 credit**; each **freshly uploaded** chapter image costs **1 more**, on create and on edit (editing alone is free). Library reuse, already-saved images and unchanged re-saves are free; no refund on replace/remove/delete; no staff exemption; cost not configurable. The cost is `1 + ChapterContentResolver::countNewUploads()`.
+- All-or-nothing: the balance is checked **before** `ChapterContentResolver::resolve()` stores any file, and spent by the guarded `ChapterCreditService::trySpend($userId, $n)` as the first statement of the save transaction. A shortfall caused by images is a `credits` validation error (cost and balance in French); a 0 balance on create stays a 403. No audit event for credit movements.
+- The chapter form shows a notice under each image field (Editor `imageNotice` prop) and a live pending-uploads counter (`chapter-image-credits.js`, Vite entry; informational, never blocks submit).
 - Leaving a root comment on a published chapter authored by someone else earns **1 credit** (once per user/chapter pair, via `CommentPosted` listener).
 - A moderation-deleted comment causes 1 credit to be revoked (`CommentDeletedByModeration` listener).
 

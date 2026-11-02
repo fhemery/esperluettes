@@ -45,6 +45,25 @@ export class ChapterEditPage {
     return new DateTimeField(this.page, 'publish_at');
   }
 
+  /** The live "pending uploads vs balance" counter. */
+  get creditsCounter(): Locator {
+    return this.page.getByTestId('chapter-image-credits');
+  }
+
+  get creditsError(): Locator {
+    return this.page.getByText(/Cet enregistrement coûte/).first();
+  }
+
+  /** The hidden file input of the nth block (an image block). */
+  imageFileInput(blockIndex: number): Locator {
+    return this.blocks.block(blockIndex).locator('input[type="file"][name$="[file]"]');
+  }
+
+  /** Ticks the property box that a freshly picked image requires. */
+  async confirmPropertyOf(blockIndex: number): Promise<void> {
+    await this.blocks.block(blockIndex).locator('input[type="checkbox"][required]').check();
+  }
+
   get saveButton(): Locator {
     return this.page.getByTestId('chapter-save');
   }

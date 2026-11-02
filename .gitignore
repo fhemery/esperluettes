@@ -31,6 +31,11 @@ TODO.md
 /tmp/
 .obsidian
 
+# In-flight task working files (see .agents/loop/README.md "Task folder").
+# `git add -f` one only to move a task between machines.
+/docs/Feature_Planning/*/CONTEXT.md
+/docs/Feature_Planning/*/shots/
+
 # Browser driver screenshots (see .agents/skills/run-app)
 /.agents/skills/run-app/shots/
 

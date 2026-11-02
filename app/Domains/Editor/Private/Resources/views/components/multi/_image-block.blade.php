@@ -2,7 +2,7 @@
     One image block of the multi-editor. Composes the Media image-field.
 
     Vars: $name (base), $uid, $scope, $path, $alt, $caption, $keepOriginal,
-          $needsPropertyConfirm
+          $needsPropertyConfirm, $imageNotice (optional help text)
 --}}
 <div class="ce-block ce-block--image border border-border rounded-lg p-3 mb-3 relative" data-block data-type="image" data-uid="{{ $uid }}">
     <div class="flex items-center justify-end gap-1 mb-2 text-fg/60">
@@ -23,7 +23,8 @@
         :show-usage="false"
         :allow-keep-original="true"
         :keep-original="$keepOriginal ?? false"
-        :needs-property-confirm="$needsPropertyConfirm ?? false" />
+        :needs-property-confirm="$needsPropertyConfirm ?? false"
+        :help-text="$imageNotice ?? null" />
 
     @include('editor::components.multi._insert-affordance')
 </div>

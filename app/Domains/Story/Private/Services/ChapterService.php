@@ -26,6 +26,7 @@ use App\Domains\Story\Private\Services\ChapterCreditService;
 use App\Domains\Story\Private\Support\ChapterContentResolver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ChapterService
 {
@@ -42,18 +43,30 @@ class ChapterService
     {
         $title = (string) $request->input('title');
         $authorNoteHtml = $request->input('author_note');
+
+        // Enforce chapter credits: must have at least 1 available to create
+        $available = $this->credits->availableForUser($userId);
+        if ($available <= 0) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('No chapter credits left. Comment other chapters to earn more.');
+        }
+
+        // Creation costs 1, plus 1 per freshly uploaded image. Checked before
+        // resolve() stores anything, so a rejected save stores no file.
+        $cost = 1 + $this->contentResolver->countNewUploads($request->all());
+        $this->assertCanAfford($cost, $available);
+
         $content = $this->contentResolver->resolve($request->all(), $userId, $story, null);
         $published = (bool)($request->boolean('published', false));
         $publishAt = (!$published && $request->input('publish_at'))
             ? now()->parse($request->input('publish_at'))
             : null;
 
-        // Enforce chapter credits: must have at least 1 available to create
-        if ($this->credits->availableForUser($userId) <= 0) {
-            throw new \Illuminate\Auth\Access\AuthorizationException('No chapter credits left. Comment other chapters to earn more.');
-        }
+        return DB::transaction(function () use ($story, $title, $authorNoteHtml, $content, $published, $publishAt, $userId, $cost) {
+            // Spend first: a lost race throws and rolls back before any write or event.
+            if (!$this->credits->trySpend($userId, $cost)) {
+                $this->throwInsufficientCredits($cost, $this->credits->availableForUser($userId));
+            }
 
-        return DB::transaction(function () use ($story, $title, $authorNoteHtml, $content, $published, $publishAt, $userId) {
             // compute sparse sort order
             $maxOrder = (int) (Chapter::where('story_id', $story->id)->max('sort_order') ?? 0);
             $sortOrder = $maxOrder + 100;
@@ -100,9 +113,6 @@ class ChapterService
                 storyId: (int) $story->id,
                 chapter: ChapterSnapshot::fromModel($chapter),
             ));
-
-            // Record spend after successful creation
-            $this->credits->spendOne((int)$userId);
 
             // Notify co-authors about the new chapter
             $this->notifyCoAuthorsOfChapterChange($story, $userId, 'created', $title, $chapter->slug);
@@ -230,13 +240,26 @@ class ChapterService
     {
         $title = (string) $request->input('title');
         $authorNoteHtml = $request->input('author_note'); // purified or null
+
+        // Editing is free; each freshly uploaded image costs 1 credit, checked
+        // before resolve() stores anything.
+        $cost = $this->contentResolver->countNewUploads($request->all());
+        if ($cost > 0) {
+            $this->assertCanAfford($cost, $this->credits->availableForUser($userId));
+        }
+
         $content = $this->contentResolver->resolve($request->all(), $userId, $story, $chapter);
         $published = (bool)($request->boolean('published', false));
         $publishAt = (!$published && $request->input('publish_at'))
             ? now()->parse($request->input('publish_at'))
             : null;
 
-        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $content, $published, $publishAt, $userId) {
+        return DB::transaction(function () use ($story, $chapter, $title, $authorNoteHtml, $content, $published, $publishAt, $userId, $cost) {
+            // Spend first: a lost race throws and rolls back before any write or event.
+            if (!$this->credits->trySpend($userId, $cost)) {
+                $this->throwInsufficientCredits($cost, $this->credits->availableForUser($userId));
+            }
+
             // Snapshot BEFORE changes
             $before = ChapterSnapshot::fromModel($chapter);
             $wasPublished = $chapter->status === Chapter::STATUS_PUBLISHED;
@@ -304,6 +327,23 @@ class ChapterService
 
             return $chapter;
         });
+    }
+
+    private function assertCanAfford(int $cost, int $available): void
+    {
+        if ($available < $cost) {
+            $this->throwInsufficientCredits($cost, $available);
+        }
+    }
+
+    private function throwInsufficientCredits(int $cost, int $available): never
+    {
+        throw ValidationException::withMessages([
+            'credits' => __('story::validation.chapter.credits.insufficient', [
+                'cost' => $cost,
+                'balance' => max(0, $available),
+            ]),
+        ]);
     }
 
     // sanitizeAndValidate no longer needed; inputs are prepared in the FormRequest

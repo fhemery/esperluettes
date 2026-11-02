@@ -331,4 +331,25 @@ describe('<x-editor::multi>', function () {
             ->and(Str::between($with, '<template data-block-template="image">', '</template>'))->toContain($confirm)
             ->and($without)->not->toContain($confirm);
     });
+
+    it('forwards imageNotice to image blocks and the image template', function () {
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="chapters/1" :blocks="$blocks" image-notice="Notice crédit XYZ" />',
+            ['blocks' => [['type' => 'image', 'path' => 'chapters/1/a.jpg', 'alt' => '']]]
+        );
+
+        expect(substr_count($html, 'Notice crédit XYZ'))->toBe(2)
+            ->and(Str::between($html, '<template data-block-template="image">', '</template>'))->toContain('Notice crédit XYZ');
+    });
+
+    it('renders no image notice by default', function () {
+        $html = (string) $this->blade(
+            '<x-editor::multi name="blocks" scope="news" :blocks="$blocks" />',
+            ['blocks' => [['type' => 'image', 'path' => 'news/a.jpg', 'alt' => '']]]
+        );
+
+        // The image field renders its help text as <p class="text-xs text-fg/60">.
+        expect($html)->not->toContain('Notice crédit XYZ')
+            ->and($html)->not->toContain('<p class="text-xs text-fg/60">');
+    });
 });

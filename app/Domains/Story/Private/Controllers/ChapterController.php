@@ -89,6 +89,7 @@ class ChapterController
         return view('story::chapters.create', [
             'story' => $story,
             'choiceTargets' => $this->choiceTargets->forStory($story),
+            'availableCredits' => max(0, $this->chapterCreditService->availableForUser((int) $request->user()->id)),
         ]);
     }
 
@@ -240,6 +241,7 @@ class ChapterController
             'chapter' => $chapter,
             'page' => $page,
             'choiceTargets' => $this->choiceTargets->forStory($story),
+            'availableCredits' => max(0, $this->chapterCreditService->availableForUser((int) $request->user()->id)),
         ]);
     }
 

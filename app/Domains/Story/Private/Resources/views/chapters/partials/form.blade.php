@@ -27,7 +27,11 @@
     </div>
 
     <!-- Content -->
-    <div>
+    <div x-data="chapterImageCredits({
+        balance: {{ (int) $availableCredits }},
+        creationCost: {{ isset($chapter) ? 0 : 1 }},
+        labels: @js(__('story::chapters.form.content.credit_counter')),
+    })">
         <x-input-label for="content" required="true" size="md" color="secondary" :value="__('story::chapters.form.content.label')" />
         @php
             // Non-empty blocks reopen the component in advanced mode, so the mode is
@@ -64,9 +68,12 @@
             toolbar="links"
             class="mt-1 block w-full"
             :nbLines="15" :indentParagraphs="true"
-            :needs-property-confirm="true" />
+            :needs-property-confirm="true"
+            :imageNotice="__('story::chapters.form.content.image_credit_notice', ['balance' => $availableCredits])" />
         <x-input-error :messages="$errors->get('content')" class="mt-2" />
         <x-input-error :messages="collect($errors->get('blocks'))->merge(\Illuminate\Support\Arr::flatten($errors->get('blocks.*')))->unique()->values()->all()" class="mt-2" />
+        <p class="mt-2 text-sm text-fg/80" aria-live="polite" data-testid="chapter-image-credits" x-text="label"></p>
+        <x-input-error :messages="$errors->get('credits')" class="mt-2" />
     </div>
 
     <!-- Published toggle + scheduled publication -->

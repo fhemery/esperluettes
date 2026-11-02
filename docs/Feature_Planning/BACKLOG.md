@@ -36,13 +36,12 @@ scoped to the task that actually changed.
 - **Media — sound field polish (missing icon, saved sound name/size)** · `media-sound-field-polish/` · interactive · TODO: leftover from `media-sound-upload/` — pre-existing glitches carried into `<x-media::sound-field>`
 - **Loop improvements** · `loop-improvements/` · interactive · TODO
 - **Shared — dim accent headings in dark mode** · `shared-dark-heading-contrast/` · interactive · TODO
-- **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
-- **Moderation — give the compact report button an accessible name** · `moderation-report-button-accessible-name/` · auto · complexity:1 · TODO
 
 ## Done
 
+- [`choice-buttons-font-size`](_done/choice-buttons-font-size.md) · chapter-choice block buttons drop `text-sm` and inherit the chapter body font size (stored chapters pick it up when re-saved)
 - [`discord-fanart-sound-notification`](_done/discord-fanart-sound-notification.md) · sound fanarts get the opt-in « Partager sur Discord » checkbox and ticked published sounds join the Discord pending feed as link-only items (`kind`, no `imageUrl`)
 
 WRAP trims a finished task's folder to just its `README.md`, moves it to
@@ -50,6 +49,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`moderation-report-button-accessible-name`](_done/moderation-report-button-accessible-name.md) · the compact report button now has an `aria-label` « Signaler » and a hidden icon span, so screen readers no longer announce « flag »
 - [`admin-statistics-time-range`](_done/admin-statistics-time-range.md) · admin statistics page gets a *12 derniers mois* (default) / *Depuis le début* switch applying to all charts in both modes, with a permanent e2e core spec
 - [`annotation-report-e2e-fixtures`](_done/annotation-report-e2e-fixtures.md) · e2e seed of a reaction and a co-author reply on chapter 11 root 102, with a Playwright test reporting both from the author pop-up
 - [`moderation-report-refusals`](_done/moderation-report-refusals.md) · report modal shows a 403 message instead of redirecting to `/login`; moderator/admin/tech-admin-only accounts pass the report route gate
@@ -61,6 +61,7 @@ tracking down why something is the way it is.
 - [`news-list-no-pagination`](_done/news-list-no-pagination.md) · the public news list shows every published news item on one page (no 12-item cap, which hid older news since no pager was ever rendered)
 - [`fanart-toute-loeuvre-collapsed`](_done/fanart-toute-loeuvre-collapsed.md) · the « Toute l'œuvre » group on the story Fanarts tab starts collapsed for everyone (no spoiler notice), lazy-loaded on expand
 - [`fanart-sound-author-icon`](_done/fanart-sound-author-icon.md) · chapter and story sound players show an artist icon linking to the artist's profile (« Par <nom> »), following the playing chapter on the story page
+- [`chapter-image-upload-credit-cost`](_done/chapter-image-upload-credit-cost.md) · each freshly uploaded chapter image costs 1 chapter credit (create and edit), all-or-nothing, with a per-field notice and a live pending-uploads counter in the chapter form
 - [`fanart-miniature-report-flag`](_done/fanart-miniature-report-flag.md) · every fanart miniature shows a report flag (lower right, hidden on own fanart) that opens the existing report modal without opening the viewer
 - [`fanart-sound-download-protection`](_done/fanart-sound-download-protection.md) · fanart sound players hide download/context menu/drag via `<x-fanart::protected-audio>`, and navigating to a sound URL answers 403 (`Sec-Fetch-Dest`, no-store); friction only
 - [`shared-datetime-input-polish`](_done/shared-datetime-input-polish.md) · datetime-local-input group and time input are named after the caller label (input-label now stamps `{for}_label`); min widths wrap the pair earlier on phones

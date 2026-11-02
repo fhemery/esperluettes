@@ -26,6 +26,7 @@
       nbLines      height in lines of every writing surface (simple + each block)
       indentParagraphs  adds `ql-indent` to every writing surface
       needsPropertyConfirm  forward to each image block's media field (default false)
+      imageNotice  optional plain-text notice shown under each image field (default null = none)
 --}}
 @props([
     'name' => 'blocks',
@@ -43,6 +44,7 @@
     'nbLines' => 5,
     'indentParagraphs' => false,
     'needsPropertyConfirm' => false,
+    'imageNotice' => null,
 ])
 
 @use(App\Domains\Editor\Private\Support\ToolbarPresets)
@@ -128,6 +130,7 @@
                         'path' => $block['path'] ?? null, 'alt' => $block['alt'] ?? '', 'caption' => $block['caption'] ?? '',
                         'keepOriginal' => $block['keep_original'] ?? false,
                         'needsPropertyConfirm' => $needsPropertyConfirm,
+                        'imageNotice' => $imageNotice,
                     ])
                 @elseif ($blockKey === 'text')
                     @include('editor::components.multi._text-block', [
@@ -168,6 +171,7 @@
                     'name' => $name, 'uid' => '__UID__', 'scope' => $scope, 'path' => null, 'alt' => '', 'caption' => '',
                     'keepOriginal' => false,
                     'needsPropertyConfirm' => $needsPropertyConfirm,
+                    'imageNotice' => $imageNotice,
                 ])
             @else
                 @include($t->editorView(), [

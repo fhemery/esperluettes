@@ -234,6 +234,18 @@ describe('Chapter choice block — rendering', function () {
         expect(chapterHref($this->story, $a))->toStartWith('/');
     });
 
+    it('renders choice buttons without a fixed font size so they inherit the body size', function () {
+        $a = createPublishedChapter($this, $this->story, $this->author, ['title' => 'Porte A']);
+
+        storeChoiceChapter($this, $this->story, [
+            ['chapter_id' => (string) $a->id, 'label' => 'Gauche'],
+        ])->assertRedirect();
+
+        $block = Str::after(latestChapter()->content, 'ce-block--chapter-choice');
+        expect($block)->toContain('<a href=');
+        expect($block)->not->toMatch('/\btext-(xs|sm|base|lg|xl)\b/');
+    });
+
     it('uses the label as link text and falls back to the target title when empty', function () {
         $a = createPublishedChapter($this, $this->story, $this->author, ['title' => 'Porte A']);
         $b = createPublishedChapter($this, $this->story, $this->author, ['title' => 'Porte B']);

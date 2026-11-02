@@ -159,13 +159,35 @@ irreversible loss is nothing a revert cannot restore.
 - Mention the archive in the report (path of `_done/<slug>.md`) rather than
   asking beforehand.
 
-## 7. Commit the paperwork
+## 7. Gate, then squash — no paperwork commit
 
 Run `pnpm run gate` — step 6 just deleted and moved files, so this is the check
 that a link elsewhere in the repo did not silently break. Fix anything it
-reports before committing, not after. The README, the backlog change and any
-regenerated domain docs go in one `docs(<domain>)` commit. Follow the `commit`
-skill.
+reports before squashing, not after.
+
+Do **not** commit the paperwork (README, backlog change, regenerated domain
+docs, retro, deleted task folder) on its own. Leave it in the working tree and
+let `squash-branch` fold it into the last build commit, so the branch keeps one
+commit per BUILD phase:
+
+1. List the build commits, oldest first: the `phase-implementer` commits, one
+   per phase of the plan (`git log --oneline origin/main..HEAD`, cross-checked
+   with the phase index). Anything else on the branch — VERIFY's e2e specs, a
+   stray fix-up — is not a build commit and gets folded into its neighbour.
+   Checkpoint rows (`2v`) make no commit.
+2. `pnpm run squash-branch -- --builds=<sha>,<sha>,...` (add
+   `--base=origin/<branch>` if the task was not cut from `origin/main`). It
+   keeps each build commit's message, takes the working tree as the last
+   commit's content, and prints the old tip with the command that restores it.
+   It uses `git commit-tree`, not `git rebase`, and skips the git hooks — hence
+   the gate above.
+3. Check `git status` is clean and `git log --oneline origin/main..HEAD` shows
+   one line per phase. A one-phase task ends as a single commit.
+4. If the squashed subject no longer describes the last commit (it now also
+   carries VERIFY and the docs), amend only the *body* with a line per extra;
+   do not re-split.
+
+Never push; the orchestrator or the user does.
 
 ## 8. Report
 
