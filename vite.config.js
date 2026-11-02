@@ -55,6 +55,7 @@ export default defineConfig(({ mode }) => {
                     'app/Domains/Fanart/Private/Resources/js/fanart-viewer.js',
                     'app/Domains/Fanart/Private/Resources/js/fanart-player.js',
                     'app/Domains/Statistics/Private/Resources/js/charts.js',
+                    'app/Domains/Story/Private/Resources/js/chapter-image-credits.js',
                 ],
                 refresh: true,
             }),
