@@ -58,5 +58,5 @@ Moderation topic `fanart` (already registered); no new registration.
   unclipped modal in nested groups, keyboard, mobile 375 px). No page-object
   member was left orphaned.
 - Backlog row pushed back:
-  [`moderation-report-button-accessible-name`](../moderation-report-button-accessible-name/00-request.md)
+  [`moderation-report-button-accessible-name`](./moderation-report-button-accessible-name.md)
   — give the compact report button an `aria-label`.

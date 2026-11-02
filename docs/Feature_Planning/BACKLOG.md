@@ -39,7 +39,6 @@ scoped to the task that actually changed.
 - **Credit cost for uploading an image into a chapter** · `chapter-image-upload-credit-cost/` · interactive · TODO
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
-- **Moderation — give the compact report button an accessible name** · `moderation-report-button-accessible-name/` · auto · complexity:1 · TODO
 
 ## Done
 
@@ -50,6 +49,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`moderation-report-button-accessible-name`](_done/moderation-report-button-accessible-name.md) · the compact report button now has an `aria-label` « Signaler » and a hidden icon span, so screen readers no longer announce « flag »
 - [`admin-statistics-time-range`](_done/admin-statistics-time-range.md) · admin statistics page gets a *12 derniers mois* (default) / *Depuis le début* switch applying to all charts in both modes, with a permanent e2e core spec
 - [`annotation-report-e2e-fixtures`](_done/annotation-report-e2e-fixtures.md) · e2e seed of a reaction and a co-author reply on chapter 11 root 102, with a Playwright test reporting both from the author pop-up
 - [`moderation-report-refusals`](_done/moderation-report-refusals.md) · report modal shows a 403 message instead of redirecting to `/login`; moderator/admin/tech-admin-only accounts pass the report route gate
