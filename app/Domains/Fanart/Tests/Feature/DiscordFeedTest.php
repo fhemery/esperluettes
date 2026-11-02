@@ -49,7 +49,7 @@ it('lists published images with share_on_discord on public stories only', functi
     $response->assertJsonPath('pagination.total', 1);
 });
 
-it('excludes audio, pending, community and private stories, and already-sent ones', function () {
+it('excludes pending, community and private stories, and already-sent ones', function () {
     $author = alice($this);
     $public = publicStory('Publique', $author->id);
     $community = communityStory('Communaute', $author->id);
@@ -58,7 +58,6 @@ it('excludes audio, pending, community and private stories, and already-sent one
     $kept = sharedImage(['story_id' => $public->id, 'user_id' => $author->id]);
     sharedImage(['story_id' => $public->id, 'user_id' => $author->id, 'status' => FanartStatus::Pending, 'published_at' => null]);
     sharedImage(['story_id' => $public->id, 'user_id' => $author->id, 'discord_sent_at' => now()]);
-    createFanart(['story_id' => $public->id, 'user_id' => $author->id, 'kind' => FanartKind::Audio, 'share_on_discord' => true, 'chapter_id' => 1]);
     sharedImage(['story_id' => $community->id, 'user_id' => $author->id]);
     sharedImage(['story_id' => $private->id, 'user_id' => $author->id]);
 
@@ -237,4 +236,101 @@ it('uses the submission date as approval date for an author artwork', function (
     $item = botGetPending($this)->assertOk()->json('data.0');
 
     expect(\Illuminate\Support\Carbon::parse($item['approvedAt'])->equalTo($submittedAt))->toBeTrue();
+});
+
+it('lists ticked published audio on public stories without an image url', function () {
+    $author = alice($this);
+    $bob = bob($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    $audio = sharedAudio(['story_id' => $story->id, 'chapter_id' => $chapter->id, 'user_id' => $bob->id, 'title' => 'Ma lecture']);
+
+    $item = botGetPending($this)->assertOk()->json('data.0');
+
+    expect($item['id'])->toBe($audio->id)
+        ->and($item['kind'])->toBe('audio')
+        ->and($item['title'])->toBe('Ma lecture')
+        ->and($item['storyId'])->toBe($story->id)
+        ->and($item['storySlug'])->toBe($story->slug)
+        ->and($item['storyUrl'])->toBe(route('stories.show', $story->slug))
+        ->and($item['chapterId'])->toBe($chapter->id)
+        ->and($item['chapterSlug'])->toBe($chapter->slug)
+        ->and($item['chapterTitle'])->toBe($chapter->title)
+        ->and($item['artist']['id'])->toBe($bob->id)
+        ->and($item['artist']['name'])->toBe($item['artistName'])
+        ->and($item)->not->toHaveKey('imageUrl')
+        ->and(json_encode($item))->not->toContain($audio->file_path);
+});
+
+it('excludes unticked, pending, sent, community and unpublished-chapter audio', function () {
+    $author = alice($this);
+    $public = publicStory('Publique', $author->id);
+    $community = communityStory('Communaute', $author->id);
+    $chapter = createPublishedChapter($this, $public, $author);
+    $communityChapter = createPublishedChapter($this, $community, $author);
+    $kept = sharedAudio(['story_id' => $public->id, 'chapter_id' => $chapter->id]);
+    sharedAudio(['story_id' => $public->id, 'chapter_id' => $chapter->id, 'share_on_discord' => false]);
+    sharedAudio(['story_id' => $public->id, 'chapter_id' => $chapter->id, 'status' => FanartStatus::Pending, 'published_at' => null]);
+    sharedAudio(['story_id' => $public->id, 'chapter_id' => $chapter->id, 'discord_sent_at' => now()]);
+    sharedAudio(['story_id' => $community->id, 'chapter_id' => $communityChapter->id]);
+    sharedAudio(['story_id' => $public->id, 'chapter_id' => 999999]);
+
+    expect(collect(botGetPending($this)->assertOk()->json('data'))->pluck('id')->all())->toBe([$kept->id]);
+});
+
+it('refuses the signed image route for audio', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    $audio = sharedAudio(['story_id' => $story->id, 'chapter_id' => $chapter->id]);
+
+    $this->get(URL::temporarySignedRoute('fanart.discord-image', now()->addDay(), ['fanartId' => $audio->id]))
+        ->assertNotFound();
+});
+
+it('marks audio as sent', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    $audio = sharedAudio(['story_id' => $story->id, 'chapter_id' => $chapter->id]);
+
+    $this->postJson('/api/discord/fanarts/mark-sent', ['ids' => [$audio->id]], ['Authorization' => 'Bearer __test_api_key__'])
+        ->assertOk()->assertJson(['markedCount' => 1]);
+
+    botGetPending($this)->assertOk()->assertJsonCount(0, 'data');
+});
+
+it('includes ticked audio artworks', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+
+    $this->actingAs($author)
+        ->post(route('fanart.store', $story->slug), [
+            'kind' => 'audio',
+            'title' => 'Ma lecture',
+            'chapter_id' => $chapter->id,
+            'attestation' => '1',
+            'share_on_discord' => '1',
+            'sound' => \Illuminate\Http\UploadedFile::fake()->create('lecture.mp3', 100, 'audio/mpeg'),
+        ])->assertSessionHasNoErrors();
+
+    $item = botGetPending($this)->assertOk()->json('data.0');
+    expect($item['kind'])->toBe('audio')->and($item['artist']['id'])->toBe($author->id);
+});
+
+it('gives images a kind and the ids and slugs the bot needs', function () {
+    $author = alice($this);
+    $story = publicStory('Histoire', $author->id);
+    $chapter = createPublishedChapter($this, $story, $author);
+    sharedImage(['story_id' => $story->id, 'chapter_id' => $chapter->id, 'user_id' => bob($this)->id]);
+
+    $item = botGetPending($this)->assertOk()->json('data.0');
+
+    expect($item['kind'])->toBe('image')
+        ->and($item['storyId'])->toBe($story->id)
+        ->and($item['storySlug'])->toBe($story->slug)
+        ->and($item['chapterId'])->toBe($chapter->id)
+        ->and($item['artist'])->toHaveKeys(['id', 'slug', 'name', 'avatarUrl'])
+        ->and($item['imageUrl'])->toBeString();
 });

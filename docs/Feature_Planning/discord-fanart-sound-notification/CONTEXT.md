@@ -9,6 +9,10 @@
 
 ## 0. Handoff
 
+### BUILD phase 1 → VERIFY (2026-11-02)
+
+- Deviation: the user asked for ids too, so image and audio items also expose `storyId`, `storySlug`, `chapterId`, `artist.name` (documented in `Discord_Api_Usage.md`). A5 respected: no hint text under the checkbox. Browser QA (§3.2) not done.
+
 ### DESIGN+PLAN revision → BUILD (2026-11-02)
 
 - The user reversed A1 (see §4 D1): audio uses the **same opt-in checkbox** as images, on the reader submission form and the author artwork upload. §1–§3 rewritten accordingly; still one phase, still rated 2 (a small UI change is now in scope, hence a visual QA checklist).
@@ -133,7 +137,7 @@ The bot (other repo) may crash on an item with no `imageUrl` before it is update
 
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
-| 1 | Opt-in audio in the Discord fanart feed | S | — | TODO |
+| 1 | Opt-in audio in the Discord fanart feed | S | — | DONE |
 
 Working agreement: one phase = one commit; failing test first. One phase: the checkbox without the feed would store a choice nobody reads, and the feed without the checkbox would list nothing.
 
@@ -190,4 +194,4 @@ Bot-side support is outside this repo (phase 1 docs only).
 
 ## 5. Build & verify log
 
-_Not written yet._
+- **BUILD phase 1 — DONE (2026-11-02).** Checkbox shown for every kind; `share_on_discord` stored for audio; `discordEligible()` takes a kinds list (image+audio for the feed, image only for `isDiscordEligible()`); items gain `kind` and, on user request, `storyId`, `storySlug`, `chapterId`, `artist.name` (image and audio alike, additive). Audio items have no `imageUrl`. Tests in `SubmitFanartTest` / `DiscordFeedTest`; gate green. Visual QA §3.2 left for VERIFY.

@@ -58,7 +58,7 @@ class FanartService
             'title' => $data->title,
             'description' => $this->cleanDescription($data->description),
             'file_path' => $path,
-            'share_on_discord' => $isImage && $data->shareOnDiscord,
+            'share_on_discord' => $data->shareOnDiscord,
         ]);
 
         $this->notifier->fanartSubmitted($fanart, $userId, $data->message);
@@ -87,7 +87,7 @@ class FanartService
                 'title' => $data->title,
                 'description' => $this->cleanDescription($data->description),
                 'file_path' => $this->storeFile($storyId, $data->kind, $data->file),
-                'share_on_discord' => $data->kind === FanartKind::Image && $data->shareOnDiscord,
+                'share_on_discord' => $data->shareOnDiscord,
                 'published_at' => now(),
             ]);
 
@@ -141,11 +141,11 @@ class FanartService
      * Published, opted-in images of public stories (and published chapters) that the Discord bot
      * may relay. Readability is the guest's, so community and private stories never qualify.
      */
-    private function discordEligible(?int $onlyFanartId = null): Builder
+    private function discordEligible(?int $onlyFanartId = null, array $kinds = [FanartKind::Image, FanartKind::Audio]): Builder
     {
         $query = Fanart::query()
             ->published()
-            ->where('kind', FanartKind::Image)
+            ->whereIn('kind', $kinds)
             ->where('share_on_discord', true);
         if ($onlyFanartId !== null) {
             $query->whereKey($onlyFanartId);
@@ -169,7 +169,7 @@ class FanartService
 
     public function isDiscordEligible(int $fanartId): bool
     {
-        return $this->discordEligible($fanartId)->exists();
+        return $this->discordEligible($fanartId, [FanartKind::Image])->exists();
     }
 
     /**
@@ -205,18 +205,29 @@ class FanartService
             }
             $item = [
                 'id' => $fanart->id,
+                'kind' => $fanart->kind->value,
                 'title' => $fanart->title,
                 'artistName' => ($profiles[$fanart->user_id] ?? null)?->display_name ?? '',
                 'artist' => isset($profiles[$fanart->user_id])
-                    ? ['id' => $profiles[$fanart->user_id]->user_id, 'slug' => $profiles[$fanart->user_id]->slug, 'avatarUrl' => $profiles[$fanart->user_id]->avatar_url]
+                    ? [
+                        'id' => $profiles[$fanart->user_id]->user_id,
+                        'slug' => $profiles[$fanart->user_id]->slug,
+                        'name' => $profiles[$fanart->user_id]->display_name,
+                        'avatarUrl' => $profiles[$fanart->user_id]->avatar_url,
+                    ]
                     : null,
                 'authors' => $this->discordAuthors($authorIds[$fanart->story_id] ?? [], $profiles),
+                'storyId' => $fanart->story_id,
+                'storySlug' => $story->slug,
                 'storyTitle' => $story->title,
                 'storyUrl' => route('stories.show', $story->slug),
-                'imageUrl' => URL::temporarySignedRoute('fanart.discord-image', now()->addDay(), ['fanartId' => $fanart->id]),
                 'approvedAt' => $fanart->published_at->toISOString(),
             ];
+            if ($fanart->kind === FanartKind::Image) {
+                $item['imageUrl'] = URL::temporarySignedRoute('fanart.discord-image', now()->addDay(), ['fanartId' => $fanart->id]);
+            }
             if ($fanart->chapter_id !== null && isset($chapters[$fanart->chapter_id])) {
+                $item['chapterId'] = $fanart->chapter_id;
                 $item['chapterTitle'] = $chapters[$fanart->chapter_id]->title;
                 $item['chapterSlug'] = $chapters[$fanart->chapter_id]->slug;
             }
