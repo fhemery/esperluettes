@@ -36,6 +36,11 @@
 - `Storage::fake('public')` is not empty after registration (avatar files); scope disk assertions to `allFiles('chapters')`.
 - New helper `setAvailableCredits($userId, $n)` in `Story/Tests/helpers.php` (sets gained = n, spent = 0); `setUserCredits` only sets `credits_gained`.
 
+### BUILD phase 2 → next (2026-11-02)
+
+- No deviation. `availableCredits` is clamped with `max(0, …)` in the controller (legacy rows can be negative, as in A15). The notice sentence ends with a full stop; tests assert the raw key (`APP_LOCALE=zz`).
+- `image-field` renders the help text as `<p class="text-xs text-fg/60">`; the "absent by default" Blade test relies on that exact markup. Phase 3 adds the counter near the same form section, and the form now requires `$availableCredits` (both views supply it).
+
 ## 1. Functional spec
 
 ### 1.1 Overview
@@ -251,7 +256,7 @@ No new edge. Story → Editor (the component) and Story → Media already exist.
 | # | Phase | Size | Depends on | Status |
 |---|-------|------|------------|--------|
 | 1 | Server-side charge: count, pre-check, atomic spend — **risky** | M | — | DONE |
-| 2 | Per-field notice: Editor `imageNotice` prop + Story form wiring | S | 1 | TODO |
+| 2 | Per-field notice: Editor `imageNotice` prop + Story form wiring | S | 1 | DONE |
 | 3 | Live counter: Story Alpine module, vitest, e2e | M | 2 | TODO |
 
 There is no checkpoint row. Phase 2 adds an optional prop that defaults to `null`, and its Blade test asserts that News-style usage renders unchanged. Phase 3 runs the `multi-editor` core e2e spec against the reshaped form.
@@ -406,3 +411,4 @@ Filled by VERIFY; written now, while the flows are fresh.
 ## 5. Build & verify log
 
 - **Phase 1 — DONE (2026-11-02).** `trySpend`, `countNewUploads` (shared `orderedBlocks()` iterator), pre-check before `resolve()` and spend-first in both transactions, `credits` error slot in the form. Tests: `Tests/Feature/Chapters/ChapterImageCreditCostTest.php` (10), `Tests/Feature/ChapterCreditTrySpendTest.php` (4). `pnpm run gate` green (first run hit a transient Blade-cache `tempnam` race in Fanart `ArtworkTest` under parallel; passes alone and on rerun).
+- **Phase 2 — DONE (2026-11-02).** Editor `imageNotice` prop (multi + `_image-block` to `helpText`), controller `availableCredits`, Story form wiring and lang key. Tests: 2 in `Editor/Tests/Feature/MultiEditorComponentTest.php`, 1 in `ChapterImageCreditCostTest.php`. `pnpm run gate` green.

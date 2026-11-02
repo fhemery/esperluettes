@@ -46,6 +46,7 @@ return [
         ],
         'content' => [
             'label' => 'Contenu',
+            'image_credit_notice' => 'Importer une image coûte 1 crédit de chapitre, il vous en reste :balance.',
         ],
         'published' => [
             'label' => 'Publié',
