@@ -191,6 +191,7 @@ and the `MediaUsageProvider` that keeps the file alive.
 | `placeholder` | `''` | Placeholder text |
 | `nbLines` | `5` | Height in lines of every writing surface — the simple pane and each text block |
 | `indentParagraphs` | `false` | Adds `ql-indent` to every writing surface |
+| `imageNotice` | `null` | Plain-text notice rendered under each image field (forwarded to the media field's `helpText`, also in the hidden template); `null` renders nothing. Story's chapter form uses it for the credit cost |
 
 Switching back to *simple* is refused while any non-text block exists.
 

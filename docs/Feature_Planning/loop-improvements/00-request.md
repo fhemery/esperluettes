@@ -108,17 +108,15 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     feature's states need (e.g. data older than a cut-off) and makes it a phase
     deliverable; VERIFY adds seeder data rather than editing the sqlite file.
 
-14. **Squash-at-WRAP via `commit-tree` has no gate and a fragile fold rule.**
-    *(choice-buttons-font-size)* Trial strategy: the whole branch (REFINE,
-    BUILD, VERIFY, WRAP) collapsed into one commit with `git commit-tree` +
-    `reset --hard`. Awkward: hooks do not run, so the gate must be run by hand
-    first on the final tree; the WRAP commit must be made only to be squashed
-    away (needed just to get a clean tree); the old tip sha must be recorded
-    for undo; and a REFINE commit that already holds the source fix (here the
-    one-class change) is folded into the BUILD commit, hiding that BUILD only
-    added a test. Fix: if adopted, have the skill script it (`pnpm run
-    squash-branch`: runs the gate, builds the message, prints the old tip), and
-    let WRAP stage the paperwork without a separate commit.
+14. **VERIFY marked a feature e2e spec "temporary, delete at WRAP" without
+    asking whether it was the only coverage.** *(chapter-image-upload-credit-cost)*
+    The spec was the sole browser test of the edit-form counter and the
+    insufficient-credit state; the note was wrong and WRAP had to keep it.
+    VERIFY also edited e2e files with a heredoc/`sed` (see 9, 12, 13). Fix:
+    the verify skill states the keep/delete/promote decision for any spec it
+    grows, with the reason, instead of defaulting to "delete"; wrap-task §4
+    lets WRAP keep a feature spec that is the only coverage of a state, recorded
+    in "Not done".
 
 ## Why
 

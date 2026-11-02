@@ -1,5 +1,9 @@
 @section('title', __('story::chapters.edit.title', ['title' => $chapter->title]) . ' – ' . $story->title)
 
+@push('head-scripts')
+    @vite('app/Domains/Story/Private/Resources/js/chapter-image-credits.js')
+@endpush
+
 <x-app-layout :page="$page" size="md">
     <div class="w-full text-fg flex flex-col gap-4 surface-read text-on-surface p-2 sm:p-4">
         <x-shared::title>{{ __('story::chapters.edit.heading', ['story' => $story->title]) }}</x-shared::title>

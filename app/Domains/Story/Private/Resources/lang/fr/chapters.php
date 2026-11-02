@@ -47,6 +47,17 @@ return [
         'content' => [
             'label' => 'Contenu',
             'image_credit_notice' => 'Importer une image coûte 1 crédit de chapitre, il vous en reste :balance.',
+            'credit_counter' => [
+                'create' => [
+                    'one' => 'Coût de l\'enregistrement : :total crédit (:count image à importer) · :balance disponible(s)',
+                    'other' => 'Coût de l\'enregistrement : :total crédits (1 pour le chapitre + :count image(s) à importer) · :balance disponible(s)',
+                ],
+                'edit' => [
+                    'one' => ':count image à importer · :balance crédit(s) disponible(s)',
+                    'other' => ':count images à importer · :balance crédit(s) disponible(s)',
+                ],
+                'insufficient' => ' — solde insuffisant',
+            ],
         ],
         'published' => [
             'label' => 'Publié',
