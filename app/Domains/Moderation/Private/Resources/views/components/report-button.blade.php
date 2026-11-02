@@ -13,9 +13,10 @@
         color="error"
         x-bind:disabled="loading"
         :title="$compact ? __('moderation::report.button'): ''"
+        :aria-label="$compact ? __('moderation::report.button') : null"
         :size="$size"
     >
-        <span class="material-symbols-outlined">flag</span>
+        <span class="material-symbols-outlined" aria-hidden="true">flag</span>
         @if(!$compact)
             {{ __('moderation::report.button') }}
         @endif
