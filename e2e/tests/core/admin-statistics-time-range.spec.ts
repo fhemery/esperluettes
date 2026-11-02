@@ -4,7 +4,10 @@ import { expect, test } from '../../support/test';
 
 /**
  * admin-statistics-time-range — the « 12 derniers mois » / « Depuis le début »
- * switch. The words series has a +STATISTICS.oldWords point twenty months ago
+ * switch. Promoted to core at WRAP: the range logic lives in browser-only
+ * charts.js plus server-embedded payloads, so no PHP test can catch a
+ * regression in the in-place redraw or the stored choice.
+ * The words series has a +STATISTICS.oldWords point twenty months ago
  * (E2eStatisticsSeeder), so the two ranges draw different data: in weekly mode
  * the old week is a bar only in « Depuis le début ».
  */

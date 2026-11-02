@@ -28,7 +28,6 @@ scoped to the task that actually changed.
 - **Moderation — return the guard's refusal message to the report modal** · `moderation-report-guard-message/` · interactive · complexity:2 · TODO
 - **Chapter annotations — image annotation** · `annotations-images/` · interactive · TODO: split from `annotations-v4/` REFINE; needs a stable block id persisted through Editor + Story first.
 - **Calendar — collaborative story-writing activity type** · `collaborative-stories-activities/` · interactive · TODO: a group co-writes one story on a shared account, chapters assigned to individual authors with per-chapter scheduling/permissions. `00-request.md` already has the user's raw notes (French) from a discussion with Joanne; needs a proper REFINE pass. Was dropped from the backlog without being wrapped — restored 2026-08-05.
-- **Admin statistics — time-range selector** · `admin-statistics-time-range/` · interactive · WIP:BUILD (2/2): leftover from [`admin-statistics-graph-toggle`](_done/admin-statistics-graph-toggle.md) (spec §8) — *12 derniers mois* / *Depuis le début*; also bounds the weekly bars, which currently span all history
 - **Release mechanism with release note and rollout plan** · `release-notes/` · interactive · TODO
 - **`shared/dark_theme` — honour `role_based`** · `dark-theme-role-based/` · interactive · TODO: leftover from `feature-toggle-registration` (spec §9). Checked once at boot with no user, so `role_based` acts as `off`.
 - **Shared — button contrast in light themes** · `shared-button-contrast/` · interactive · TODO: leftover from `multiedit-chapter-switch-block/` WRAP — primary buttons 3.1–3.6 and accent 3.02 (spring) in light mode, below AA.
@@ -49,6 +48,7 @@ WRAP trims a finished task's folder to just its `README.md`, moves it to
 like closed PRs — not loaded by default, read when working in a related area or
 tracking down why something is the way it is.
 
+- [`admin-statistics-time-range`](_done/admin-statistics-time-range.md) · admin statistics page gets a *12 derniers mois* (default) / *Depuis le début* switch applying to all charts in both modes, with a permanent e2e core spec
 - [`annotation-report-e2e-fixtures`](_done/annotation-report-e2e-fixtures.md) · e2e seed of a reaction and a co-author reply on chapter 11 root 102, with a Playwright test reporting both from the author pop-up
 - [`moderation-report-refusals`](_done/moderation-report-refusals.md) · report modal shows a 403 message instead of redirecting to `/login`; moderator/admin/tech-admin-only accounts pass the report route gate
 - [`annotation-report-prod-reason`](_done/annotation-report-prod-reason.md) · data migration gives the `annotation` moderation topic an active « Autre » reason in production when it has none (dev seeder only before)
