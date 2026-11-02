@@ -95,13 +95,13 @@ No migration, no new route, no JS file changed, no new deptrac edge.
   reasons beyond « Autre ».
 - Cut mid-build: nothing.
 - Pushed back to the backlog:
-  - [`annotation-report-prod-reason/`](../annotation-report-prod-reason/00-request.md) —
+  - [`annotation-report-prod-reason/`](./annotation-report-prod-reason.md) —
     the « Autre » reason is only in the dev seeder; production has none.
-  - [`moderation-report-refusals/`](../moderation-report-refusals/00-request.md) —
+  - [`moderation-report-refusals/`](./moderation-report-refusals.md) —
     403 in the report modal redirects to `/login`; moderator-only accounts see
     the button but the `moderation/report` route gate (`user`/`user-confirmed`)
     refuses them.
-  - [`annotation-report-e2e-fixtures/`](../annotation-report-e2e-fixtures/00-request.md) —
+  - [`annotation-report-e2e-fixtures`](./annotation-report-e2e-fixtures.md) —
     reaction and co-author-reply rows not covered in the browser (PHP covers the rules).
 - Unverified: duplicate modal name `report-modal-annotation-<id>` if the same
   annotation's form is opened from both surfaces on one page.

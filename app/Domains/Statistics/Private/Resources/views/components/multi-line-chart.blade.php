@@ -18,10 +18,23 @@
             'value' => (float) $point->value,
         ])->values()->all();
 
+        $recentPoints = collect($item['recentData'] ?? [])->map(fn ($point) => [
+            'x' => $point->periodStart->format('Y-m-d'),
+            'value' => $point->value,
+            'cumulativeValue' => $point->cumulativeValue,
+        ])->values()->all();
+
+        $recentWeeklyPoints = collect($item['recentWeeklyData'] ?? [])->map(fn ($point) => [
+            'x' => $point->periodStart->format('Y-m-d'),
+            'value' => (float) $point->value,
+        ])->values()->all();
+
         return [
             'label' => $item['label'],
             'points' => $points,
             'weeklyPoints' => $weeklyPoints,
+            'recentPoints' => $recentPoints,
+            'recentWeeklyPoints' => $recentWeeklyPoints,
             'color' => $item['color'] ?? 'rgb(99, 102, 241)',
             'backgroundColor' => $item['backgroundColor'] ?? 'rgba(99, 102, 241, 0.1)',
         ];
@@ -31,7 +44,11 @@
     $rangeMin = $allPoints->isNotEmpty() ? $allPoints->first()['x'] : null;
     $rangeMax = $allPoints->isNotEmpty() ? $allPoints->last()['x'] : null;
 
+    $allRecent = collect($chartSeries)->flatMap(fn ($item) => $item['recentPoints'])->values();
+
     $options = [
+        'recentRangeMin' => $allRecent->isNotEmpty() ? $allRecent->first()['x'] : null,
+        'recentRangeMax' => $allRecent->isNotEmpty() ? $allRecent->last()['x'] : null,
         'cumulative' => $cumulative,
         'stepped' => $cumulative,
         'showLegend' => $showLegend,

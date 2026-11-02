@@ -21,6 +21,18 @@
         cumulative: true,
     );
     $weeklySeries = $queryService->getWeeklyTimeSeries($statisticKey, $scopeType, $scopeId);
+
+    $recentFrom = now()->subMonths(12)->startOfDay();
+    $recentSeries = $queryService->getChartTimeSeries(
+        $statisticKey,
+        $scopeType,
+        $scopeId,
+        $recentFrom,
+        $to,
+        $maxPoints,
+        cumulative: true,
+    );
+    $recentWeeklySeries = $queryService->getWeeklyTimeSeries($statisticKey, $scopeType, $scopeId, $recentFrom);
 @endphp
 
 <div {{ $attributes->class(['stat-widget surface-bg text-on-surface rounded-lg p-6']) }}>
@@ -31,6 +43,8 @@
     <x-statistics::line-chart
         :data="$timeSeries"
         :weekly="$weeklySeries"
+        :recent="$recentSeries"
+        :recent-weekly="$recentWeeklySeries"
         :label="$label"
         :height="$chartHeight"
         cumulative

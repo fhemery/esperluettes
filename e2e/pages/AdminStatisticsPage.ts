@@ -23,7 +23,10 @@ export type Drawing = { bars: Bar[]; texts: string[]; kinds: ('bar' | 'line')[] 
 export type GraphMode = 'cumulative' | 'weekly';
 export type StatisticsTab = 'users' | 'content' | 'comments' | 'quotes';
 
+export type TimeRange = 'recent' | 'all';
+
 const MODE_LABELS: Record<GraphMode, string> = { cumulative: 'Cumulé', weekly: 'Par semaine' };
+const RANGE_LABELS: Record<TimeRange, string> = { recent: '12 derniers mois', all: 'Depuis le début' };
 
 /** Runs in the page, before any script. Must be self-contained. */
 function installCanvasRecorder(): void {
@@ -128,6 +131,18 @@ export class AdminStatisticsPage {
 
   async selectMode(mode: GraphMode): Promise<void> {
     await this.modeOption(mode).click();
+  }
+
+  get rangeSwitch(): Locator {
+    return this.page.locator('[data-segmented-control][data-name="statistics-time-range"]');
+  }
+
+  rangeOption(range: TimeRange): Locator {
+    return this.rangeSwitch.getByRole('radio', { name: RANGE_LABELS[range] });
+  }
+
+  async selectRange(range: TimeRange): Promise<void> {
+    await this.rangeOption(range).click();
   }
 
   get tabList(): Locator {

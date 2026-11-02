@@ -86,4 +86,48 @@ describe('StatisticQueryService::getChartTimeSeries', function () {
         expect($result)->toHaveCount(5);
         expect($result[0]->granularity)->toBe('bucket');
     });
+
+    it('seeds the starting level from the last row before from (cumulative rows)', function () {
+        seedDailyPoint('2025-06-01', 5, 5);
+        seedDailyPoint('2025-07-01', 5, 10);
+
+        $result = app(StatisticQueryService::class)->getChartTimeSeries(
+            'global.total_users',
+            from: Carbon::parse('2026-01-10'),
+            maxPoints: 5,
+        );
+
+        expect($result)->toHaveCount(5);
+        foreach ($result as $point) {
+            expect($point->cumulativeValue)->toBe(10.0);
+        }
+    });
+
+    it('seeds the starting level by summing deltas when rows carry no cumulative value', function () {
+        seedDailyPoint('2025-06-01', 5);
+        seedDailyPoint('2025-07-01', 3);
+        seedDailyPoint('2026-01-20', 2);
+
+        $result = app(StatisticQueryService::class)->getChartTimeSeries(
+            'global.total_users',
+            from: Carbon::parse('2026-01-10'),
+            maxPoints: 21,
+        );
+
+        expect($result[0]->cumulativeValue)->toBe(8.0)
+            ->and($result[array_key_last($result)]->cumulativeValue)->toBe(10.0);
+    });
+
+    it('starts at 0 when nothing precedes from', function () {
+        seedDailyPoint('2026-01-20', 2, 2);
+
+        $result = app(StatisticQueryService::class)->getChartTimeSeries(
+            'global.total_users',
+            from: Carbon::parse('2026-01-10'),
+            maxPoints: 21,
+        );
+
+        expect($result[0]->cumulativeValue)->toBe(0.0)
+            ->and($result[array_key_last($result)]->cumulativeValue)->toBe(2.0);
+    });
 });

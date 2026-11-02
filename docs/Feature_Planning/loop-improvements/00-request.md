@@ -91,6 +91,23 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     (`../../../.agents/loop/references/cross-cutting-checklist.md`) or drop the
     link and name the file in backticks.
 
+12. **Plans cite seeded accounts from memory; a builder used a heredoc.**
+    *(annotation-report-e2e-fixtures)* The plan wrote `tech_admin@e2e.test`;
+    the seeded email is `tech-admin@e2e.test` (`E2eAccountsSeeder`), found by
+    the builder the hard way. A builder also used a heredoc to edit a file,
+    against the CLAUDE.md rule (see 9). Fix: PLAN greps `E2eAccountsSeeder`
+    for any account it names and quotes the exact email; the builder prompt
+    template restates the no-heredoc rule.
+
+13. **A builder used `sed` for a backlog edit; the verifier hand-edited the
+    e2e database.** *(admin-statistics-time-range)* BUILD edited
+    `BACKLOG.md` with `sed` (see 9). VERIFY wrote old rows straight into
+    `database/e2e.sqlite` to tell the two ranges apart because
+    `E2eStatisticsSeeder` had no old data, then had to fix the seeder
+    afterwards. Fix: PLAN checks that the e2e seeder carries the data a
+    feature's states need (e.g. data older than a cut-off) and makes it a phase
+    deliverable; VERIFY adds seeder data rather than editing the sqlite file.
+
 ## Why
 
 So that what one task learns the hard way is fixed for the next, instead of

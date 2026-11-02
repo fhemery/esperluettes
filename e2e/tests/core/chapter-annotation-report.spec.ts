@@ -107,3 +107,23 @@ test('reader sees no « Signaler » on their own annotation', async ({ confirmed
   await expect(mine).toHaveCount(1);
   await expect(mine.getByTestId('annotation-report')).toHaveCount(0);
 });
+
+test('author reports a reaction and a co-author reply from the pop-up', async ({ author }) => {
+  const { thread, annotations } = await visit(author);
+  await thread.scrollToBottom();
+  await annotations.openPublished(thread.item(ANNOTATED.roots.user));
+
+  const reaction = rowWith(annotations, ANNOTATED.bodies.reaction);
+  await expect(reaction).toHaveCount(1);
+  await expect(reaction.getByTestId('annotation-report')).toHaveAccessibleName('Signaler');
+
+  const clearing = rowWith(annotations, ANNOTATED.bodies.clearing);
+  const reply = annotations.replies(clearing).filter({ hasText: ANNOTATED.bodies.coauthorReply });
+  await expect(reply).toHaveCount(1);
+  await expect(reply.getByTestId('annotation-report')).toHaveAccessibleName('Signaler');
+
+  await reply.getByTestId('annotation-report').click();
+  await submitReport(author);
+  await closeReport(author);
+  await expect(annotations.serverDialog).toBeVisible();
+});

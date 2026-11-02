@@ -13,72 +13,90 @@
 
 @php
     $queryService = app(\App\Domains\Statistics\Private\Services\StatisticQueryService::class);
-    $totalSeries = $queryService->getChartTimeSeries(
-        $totalKey,
-        $scopeType,
-        $scopeId,
-        $from,
-        $to,
-        $maxPoints,
-        cumulative: true,
-    );
-    $rootSeries = $queryService->getChartTimeSeries(
-        $rootKey,
-        $scopeType,
-        $scopeId,
-        $from,
-        $to,
-        $maxPoints,
-        cumulative: true,
-    );
 
-    $replySeries = collect($totalSeries)->map(function ($totalPoint, $index) use ($rootSeries) {
-        $rootPoint = $rootSeries[$index] ?? null;
-        $totalCumulative = $totalPoint->cumulativeValue ?? $totalPoint->value;
-        $rootCumulative = $rootPoint?->cumulativeValue ?? $rootPoint?->value ?? 0;
-
-        return new \App\Domains\Statistics\Public\DTOs\TimeSeriesPoint(
-            periodStart: $totalPoint->periodStart,
-            granularity: $totalPoint->granularity,
-            value: 0,
-            cumulativeValue: max(0, $totalCumulative - $rootCumulative),
-        );
-    })->all();
-
-    // Weekly nets, aligned on the week (not the index): roots may start later
+    // Roots/replies cumulative series and weekly nets over one range ($rangeFrom).
+    // Weekly nets are aligned on the week (not the index): roots may start later
     // than the total. Replies are not clamped — a net may be negative.
-    $weeklyTotal = $queryService->getWeeklyTimeSeries($totalKey, $scopeType, $scopeId);
-    $weeklyRootByWeek = collect($queryService->getWeeklyTimeSeries($rootKey, $scopeType, $scopeId))
-        ->keyBy(fn ($point) => $point->periodStart->format('Y-m-d'));
+    $breakdown = function ($rangeFrom) use ($queryService, $totalKey, $rootKey, $scopeType, $scopeId, $to, $maxPoints) {
+        $totalSeries = $queryService->getChartTimeSeries(
+            $totalKey,
+            $scopeType,
+            $scopeId,
+            $rangeFrom,
+            $to,
+            $maxPoints,
+            cumulative: true,
+        );
+        $rootSeries = $queryService->getChartTimeSeries(
+            $rootKey,
+            $scopeType,
+            $scopeId,
+            $rangeFrom,
+            $to,
+            $maxPoints,
+            cumulative: true,
+        );
 
-    $weeklyRoot = [];
-    $weeklyReply = [];
-    foreach ($weeklyTotal as $totalPoint) {
-        $rootValue = $weeklyRootByWeek->get($totalPoint->periodStart->format('Y-m-d'))?->value ?? 0;
-        $weeklyRoot[] = new \App\Domains\Statistics\Public\DTOs\TimeSeriesPoint(
-            periodStart: $totalPoint->periodStart,
-            granularity: $totalPoint->granularity,
-            value: $rootValue,
-        );
-        $weeklyReply[] = new \App\Domains\Statistics\Public\DTOs\TimeSeriesPoint(
-            periodStart: $totalPoint->periodStart,
-            granularity: $totalPoint->granularity,
-            value: $totalPoint->value - $rootValue,
-        );
-    }
+        $replySeries = collect($totalSeries)->map(function ($totalPoint, $index) use ($rootSeries) {
+            $rootPoint = $rootSeries[$index] ?? null;
+            $totalCumulative = $totalPoint->cumulativeValue ?? $totalPoint->value;
+            $rootCumulative = $rootPoint?->cumulativeValue ?? $rootPoint?->value ?? 0;
+
+            return new \App\Domains\Statistics\Public\DTOs\TimeSeriesPoint(
+                periodStart: $totalPoint->periodStart,
+                granularity: $totalPoint->granularity,
+                value: 0,
+                cumulativeValue: max(0, $totalCumulative - $rootCumulative),
+            );
+        })->all();
+
+        $weeklyTotal = $queryService->getWeeklyTimeSeries($totalKey, $scopeType, $scopeId, $rangeFrom);
+        $weeklyRootByWeek = collect($queryService->getWeeklyTimeSeries($rootKey, $scopeType, $scopeId, $rangeFrom))
+            ->keyBy(fn ($point) => $point->periodStart->format('Y-m-d'));
+
+        $weeklyRoot = [];
+        $weeklyReply = [];
+        foreach ($weeklyTotal as $totalPoint) {
+            $rootValue = $weeklyRootByWeek->get($totalPoint->periodStart->format('Y-m-d'))?->value ?? 0;
+            $weeklyRoot[] = new \App\Domains\Statistics\Public\DTOs\TimeSeriesPoint(
+                periodStart: $totalPoint->periodStart,
+                granularity: $totalPoint->granularity,
+                value: $rootValue,
+            );
+            $weeklyReply[] = new \App\Domains\Statistics\Public\DTOs\TimeSeriesPoint(
+                periodStart: $totalPoint->periodStart,
+                granularity: $totalPoint->granularity,
+                value: $totalPoint->value - $rootValue,
+            );
+        }
+
+        return [
+            'root' => $rootSeries,
+            'reply' => $replySeries,
+            'weeklyRoot' => $weeklyRoot,
+            'weeklyReply' => $weeklyReply,
+        ];
+    };
+
+    $full = $breakdown($from);
+    $recent = $breakdown(now()->subMonths(12)->startOfDay());
 
     $series = [
         [
             'label' => $rootLabel,
-            'data' => $rootSeries,
-            'weeklyData' => $weeklyRoot,
+            'data' => $full['root'],
+            'weeklyData' => $full['weeklyRoot'],
+            'recentData' => $recent['root'],
+            'recentWeeklyData' => $recent['weeklyRoot'],
             'color' => 'rgb(99, 102, 241)',
             'backgroundColor' => 'rgba(99, 102, 241, 0.1)',
         ],
         [
             'label' => $replyLabel,
-            'data' => $replySeries,
-            'weeklyData' => $weeklyReply,
+            'data' => $full['reply'],
+            'weeklyData' => $full['weeklyReply'],
+            'recentData' => $recent['reply'],
+            'recentWeeklyData' => $recent['weeklyReply'],
             'color' => 'rgb(16, 185, 129)',
             'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
         ],

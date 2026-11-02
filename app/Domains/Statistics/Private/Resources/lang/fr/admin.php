@@ -22,6 +22,9 @@ return [
     'graph_mode_label' => 'Mode d’affichage des graphiques',
     'graph_mode_cumulative' => 'Cumulé',
     'graph_mode_weekly' => 'Par semaine',
+    'time_range_label' => 'Période des graphiques',
+    'time_range_recent' => '12 derniers mois',
+    'time_range_all' => 'Depuis le début',
     'current_week' => 'semaine en cours',
     'week_tooltip' => 'Semaine du :date : :value',
 ];

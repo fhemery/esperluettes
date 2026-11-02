@@ -108,7 +108,8 @@ class E2eCommentsSeeder extends Seeder
      * - `confirmed` (101): a three-annotation line with `user`, a processed one,
      *   a missing one, a moved one, an emptied one, one under their own quote;
      *   the first carries an author reply and a deactivated writer's reply.
-     * - `user` (102): one in the shared line, one beside the anonymised one.
+     * - `user` (102): one in the shared line, one beside the anonymised one, a
+ *   reaction (`<p>❤️</p>`), and a reply by `tech_admin` (co-author) to the first.
      * - anonymised (103, `author_id` null, as `RemoveAuthorOnUserDeleted` leaves it).
      * - deactivated (104): soft-deleted, as `SoftDeleteCommentsOnUserDeactivated` leaves it.
      * - chapter 13, `user` (105): three annotations, the first answered by the author.
@@ -116,11 +117,11 @@ class E2eCommentsSeeder extends Seeder
     private function seedInChapterAnnotations(): void
     {
         $ids = DB::table('users')
-            ->whereIn('email', ['author@e2e.test', 'confirmed@e2e.test', 'user@e2e.test', 'deactivated@e2e.test'])
+            ->whereIn('email', ['author@e2e.test', 'confirmed@e2e.test', 'user@e2e.test', 'deactivated@e2e.test', 'tech-admin@e2e.test'])
             ->pluck('id', 'email')
             ->map(fn ($id) => (int) $id);
 
-        if ($ids->count() < 4) {
+        if ($ids->count() < 5) {
             $this->command?->warn('E2e accounts missing; skipping the in-chapter annotations.');
             return;
         }
@@ -158,6 +159,7 @@ class E2eCommentsSeeder extends Seeder
         $user = $ids['user@e2e.test'];
         $author = $ids['author@e2e.test'];
         $deactivated = $ids['deactivated@e2e.test'];
+        $coAuthor = $ids['tech-admin@e2e.test'];
 
         $root(self::ANNOTATED_CONFIRMED_ROOT_ID, self::ANNOTATED_CHAPTER_ID, $confirmed);
         $root(self::ANNOTATED_USER_ROOT_ID, self::ANNOTATED_CHAPTER_ID, $user);
@@ -182,8 +184,10 @@ class E2eCommentsSeeder extends Seeder
         ]);
         $annotation(self::ANNOTATED_CONFIRMED_ROOT_ID, $confirmed, '<p>Le ruisseau, sous ma citation.</p>', 'ruisseau chante sous le pont');
 
-        $annotation(self::ANNOTATED_USER_ROOT_ID, $user, '<p>La clairière est bien décrite.</p>', 'traverse la clairière');
+        $clearing = $annotation(self::ANNOTATED_USER_ROOT_ID, $user, '<p>La clairière est bien décrite.</p>', 'traverse la clairière');
         $annotation(self::ANNOTATED_USER_ROOT_ID, $user, '<p>Un moulin qui tourne à vide.</p>', 'le moulin tourne encore');
+        $annotation(self::ANNOTATED_USER_ROOT_ID, $user, '<p>❤️</p>', 'Une chouette observe');
+        $annotation(self::ANNOTATED_USER_ROOT_ID, $coAuthor, '<p>Précision de la coautrice.</p>', null, ['parent_annotation_id' => $clearing]);
 
         $annotation(self::ANNOTATED_ANONYMISED_ROOT_ID, null, '<p>Remarque d\'un compte supprimé.</p>', 'Plus loin');
 

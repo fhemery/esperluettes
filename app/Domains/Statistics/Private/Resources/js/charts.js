@@ -123,6 +123,7 @@ function formatChartData(points, label, options = {}) {
 }
 
 const GRAPH_MODE_CONTROL = 'statistics-graph-mode';
+const TIME_RANGE_CONTROL = 'statistics-time-range';
 const WEEK_ALPHA = 0.8;
 const CURRENT_WEEK_ALPHA = 0.35;
 
@@ -254,11 +255,46 @@ function currentMode() {
     return control?.dataset.value === 'weekly' ? 'weekly' : 'cumulative';
 }
 
-/** Mounted containers → { kind: 'line'|'multi', chart, payload }, so a mode change can re-create them. */
+/** Range selected on the page's time-range switch; 'recent' unless it says exactly 'all'. */
+function currentRange() {
+    const control = document.querySelector(`[data-segmented-control][data-name="${TIME_RANGE_CONTROL}"]`);
+
+    return control?.dataset.value === 'all' ? 'all' : 'recent';
+}
+
+/** Mounted containers → { kind: 'line'|'multi', chart, payload }, so a mode/range change can re-create them. */
 const registry = new Map();
 let renderedMode = null;
+let renderedRange = null;
 
-function createChart(canvas, kind, payload, mode) {
+/** Payload as seen through a range: the recent variants replace the full ones, axis bounds included. */
+function rangedPayload(payload, range) {
+    if (range !== 'recent') {
+        return payload;
+    }
+
+    const { options } = payload;
+    const ranged = {
+        ...payload,
+        options: { ...options, rangeMin: options.recentRangeMin ?? options.rangeMin, rangeMax: options.recentRangeMax ?? options.rangeMax },
+    };
+
+    if (payload.recentPoints) {
+        ranged.points = payload.recentPoints;
+        ranged.weeklyPoints = payload.recentWeeklyPoints ?? [];
+    }
+
+    if (payload.series) {
+        ranged.series = payload.series.map((item) => (item.recentPoints
+            ? { ...item, points: item.recentPoints, weeklyPoints: item.recentWeeklyPoints ?? [] }
+            : item));
+    }
+
+    return ranged;
+}
+
+function createChart(canvas, kind, fullPayload, mode, range) {
+    const payload = rangedPayload(fullPayload, range);
     const { options } = payload;
 
     if (kind === 'line') {
@@ -278,18 +314,20 @@ function createChart(canvas, kind, payload, mode) {
 
 function registerChart(container, canvas, kind, payload) {
     renderedMode ??= currentMode();
-    const chart = createChart(canvas, kind, payload, renderedMode);
+    renderedRange ??= currentRange();
+    const chart = createChart(canvas, kind, payload, renderedMode, renderedRange);
 
     registry.set(container, { kind, canvas, chart, payload });
     container.dataset.statisticsChartMounted = 'true';
 }
 
-function renderAll(mode) {
+function renderAll(mode, range) {
     renderedMode = mode;
+    renderedRange = range;
 
     registry.forEach((entry) => {
         entry.chart?.destroy();
-        entry.chart = createChart(entry.canvas, entry.kind, entry.payload, mode);
+        entry.chart = createChart(entry.canvas, entry.kind, entry.payload, mode, range);
     });
 }
 
@@ -327,6 +365,8 @@ function mountLineChartContainer(container) {
     registerChart(container, canvas, 'line', {
         points,
         weeklyPoints: parseJsonDataset(container, 'weeklyPoints', []),
+        recentPoints: parseJsonDataset(container, 'recentPoints', null),
+        recentWeeklyPoints: parseJsonDataset(container, 'recentWeeklyPoints', []),
         label: container.dataset.label ?? '',
         options: parseJsonDataset(container, 'options', {}),
     });
@@ -409,19 +449,26 @@ window.StatisticsCharts = {
 // The switch has already dispatched its initial value before this module runs
 // (mounting reads it from data-value); this handles later changes. Idempotent.
 window.addEventListener('segmented-control-change', (event) => {
-    if (event.detail?.name !== GRAPH_MODE_CONTROL) {
+    const { name, value } = event.detail ?? {};
+    let mode = renderedMode;
+    let range = renderedRange;
+
+    if (name === GRAPH_MODE_CONTROL) {
+        mode = value === 'weekly' ? 'weekly' : 'cumulative';
+    } else if (name === TIME_RANGE_CONTROL) {
+        range = value === 'all' ? 'all' : 'recent';
+    } else {
         return;
     }
 
-    const mode = event.detail.value === 'weekly' ? 'weekly' : 'cumulative';
-
-    if (mode !== renderedMode) {
-        renderAll(mode);
+    if (mode !== renderedMode || range !== renderedRange) {
+        renderAll(mode, range);
     }
 });
 
 export {
     currentMode,
+    currentRange,
     formatChartData,
     formatMultiChartData,
     formatWeeklyChartData,

@@ -19,7 +19,7 @@ const C = ANNOTATED.confirmed;
 const U = ANNOTATED.user;
 
 /** What the author sees tinted on chapter 11 by default (processed, missing and deactivated left out). */
-const AUTHOR_TINT = [C.fox, C.morning, C.movedTo, C.emptied, C.underQuote, U.clearing, U.mill, ANNOTATED.anonymised];
+const AUTHOR_TINT = [C.fox, C.morning, C.movedTo, C.emptied, C.underQuote, U.clearing, U.mill, U.owl, ANNOTATED.anonymised];
 
 /** What `confirmed` sees: their own, the processed one included. */
 const CONFIRMED_TINT = [C.fox, C.morning, C.processed, C.movedTo, C.emptied, C.underQuote];
@@ -38,7 +38,7 @@ test('heat map: on hides tint, avatars, filter menu and popover; off restores th
   await overlay.expectHighlighted(AUTHOR_TINT);
   await overlay.toggleCommenter(ACCOUNTS.user.displayName);
   await overlay.filterButton.click();
-  const filtered = AUTHOR_TINT.filter((t) => t !== U.clearing && t !== U.mill);
+  const filtered = AUTHOR_TINT.filter((t) => t !== U.clearing && t !== U.mill && t !== U.owl);
   await overlay.expectHighlighted(filtered);
   await overlay.open(C.fox);
 

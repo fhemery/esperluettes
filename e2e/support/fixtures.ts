@@ -130,7 +130,8 @@ export const ANNOTATED = {
     /** Under `confirmed`'s own quote `Le ruisseau chante`. */
     underQuote: 'ruisseau chante sous le pont',
   },
-  user: { clearing: 'traverse la clairière', mill: 'le moulin tourne encore' },
+  /** `owl`: a reaction (emoji-only annotation) on a free passage. */
+  user: { clearing: 'traverse la clairière', mill: 'le moulin tourne encore', owl: 'Une chouette observe' },
   anonymised: 'Plus loin',
   deactivated: 'Thêta un',
   quote: 'Le ruisseau chante',
@@ -140,6 +141,9 @@ export const ANNOTATED = {
     clearing: 'La clairière est bien décrite.',
     authorReply: 'Merci pour le renard.',
     deactivatedReply: "Réponse d'un compte désactivé.",
+    reaction: '❤️',
+    /** Reply of `tech_admin`, co-author of story 6, to `user`'s clearing annotation. */
+    coauthorReply: 'Précision de la coautrice.',
   },
   /** Chapter 13, `user`'s root. */
   reviewed: {
@@ -300,7 +304,9 @@ export const GIFT = {
  * `app/Domains/Statistics/Database/Seeders/E2eStatisticsSeeder.php` as net daily
  * deltas relative to the current week. Weekly nets, oldest first; the last one
  * is the current week. Index 2 is a week with no row (a zero bar), and
- * `words` / `stories` each drop below zero once.
+ * `words` / `stories` each drop below zero once. `words` also has a single
+ * +`oldWords` point twenty months ago (outside « 12 derniers mois »), on top of
+ * the weekly nets.
  */
 export const STATISTICS = {
   weeks: 6,
@@ -309,6 +315,7 @@ export const STATISTICS = {
   stories: [2, 1, 0, -1, 1, 1],
   chapters: [3, 2, 0, 1, 4, 1],
   words: [1200, 800, 0, -300, 500, 150],
+  oldWords: 5000,
   comments: [4, 3, 0, 5, 2, 1],
   rootComments: [2, 1, 0, 3, 1, 1],
   quotes: [2, 1, 0, -1, 3, 1],

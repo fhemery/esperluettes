@@ -151,6 +151,11 @@ class StatisticQueryService
             $to,
         );
 
+        $seed = $this->startingLevelBefore($statisticKey, $scopeType, $scopeId, $from);
+        if ($seed !== null) {
+            array_unshift($dailyPoints, $seed);
+        }
+
         return app(TimeSeriesResampler::class)->resample(
             $dailyPoints,
             $from,
@@ -161,7 +166,43 @@ class StatisticQueryService
     }
 
     /**
+     * Cumulative level reached by the last daily row strictly before $from,
+     * as a point the resampler can start its running total from.
+     */
+    private function startingLevelBefore(
+        string $statisticKey,
+        string $scopeType,
+        mixed $scopeId,
+        Carbon $from,
+    ): ?TimeSeriesPoint {
+        $before = StatisticTimeSeries::query()
+            ->where('statistic_key', $statisticKey)
+            ->where('scope_type', $scopeType)
+            ->where('scope_id', $scopeId)
+            ->where('granularity', 'daily')
+            ->where('period_start', '<', $from);
+
+        $last = (clone $before)->orderByDesc('period_start')->first();
+
+        if ($last === null) {
+            return null;
+        }
+
+        $level = $last->cumulative_value !== null
+            ? (float) $last->cumulative_value
+            : (float) $before->sum('value');
+
+        return new TimeSeriesPoint(
+            periodStart: $last->period_start,
+            granularity: $last->granularity,
+            value: 0,
+            cumulativeValue: $level,
+        );
+    }
+
+    /**
      * Get net deltas per calendar week (Monday → Sunday) up to the current week.
+     * With $from, weeks before the one containing $from are dropped.
      *
      * @return TimeSeriesPoint[] one point per calendar week, oldest first
      */
@@ -169,9 +210,20 @@ class StatisticQueryService
         string $statisticKey,
         string $scopeType = 'global',
         mixed $scopeId = null,
+        ?DateTimeInterface $from = null,
     ): array {
         $points = $this->getTimeSeries($statisticKey, $scopeType, $scopeId, 'daily');
+        $weeks = app(WeeklyAggregator::class)->aggregate($points, now());
 
-        return app(WeeklyAggregator::class)->aggregate($points, now());
+        if ($from === null) {
+            return $weeks;
+        }
+
+        $firstWeek = Carbon::parse($from)->startOfWeek(Carbon::MONDAY)->startOfDay();
+
+        return array_values(array_filter(
+            $weeks,
+            fn (TimeSeriesPoint $week) => Carbon::parse($week->periodStart)->gte($firstWeek),
+        ));
     }
 }

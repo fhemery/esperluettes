@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth', 'compliant'])->group(function () {
     // Moderation routes - require authentication and verified email
-    Route::middleware(['role:' . Roles::USER . ',' . Roles::USER_CONFIRMED])->prefix('moderation')->name('moderation.')->group(function () {
+    Route::middleware(['role:' . Roles::USER . ',' . Roles::USER_CONFIRMED . ',' . Roles::MODERATOR . ',' . Roles::ADMIN . ',' . Roles::TECH_ADMIN])->prefix('moderation')->name('moderation.')->group(function () {
         // Get report form with reasons for a specific topic (AJAX, returns HTML)
         Route::get('report-form/{topicKey}/{entityId}', [ModerationReportController::class, 'form'])
             ->name('report.form');

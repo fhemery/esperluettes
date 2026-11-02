@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Chart } from 'chart.js';
 import {
     currentMode,
+    currentRange,
     formatChartData,
     formatMultiChartData,
     formatWeeklyChartData,
@@ -149,5 +150,62 @@ describe('statistics charts — weekly mode', () => {
         switchTo('cumulative');
         expect([typeOf('with-weekly'), typeOf('breakdown'), typeOf('no-weekly')]).toEqual(['line', 'line', 'line']);
         expect(Object.keys(Chart.instances)).toHaveLength(3);
+    });
+
+    it('reads the range from the control data-value, defaulting to recent', () => {
+        document.body.innerHTML = '';
+        expect(currentRange()).toBe('recent');
+
+        document.body.innerHTML = '<div data-segmented-control data-name="statistics-time-range" data-value="all"></div>';
+        expect(currentRange()).toBe('all');
+
+        document.body.innerHTML = '<div data-segmented-control data-name="statistics-time-range" data-value="garbage"></div>';
+        expect(currentRange()).toBe('recent');
+    });
+
+    it('switches range and mode independently, picking the matching point sets and axis bounds', () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        const full = [{ x: '2025-01-01', value: 1, cumulativeValue: 1 }, { x: '2026-09-07', value: 1, cumulativeValue: 2 }];
+        const recent = [{ x: '2026-01-01', value: 0, cumulativeValue: 2 }];
+        const fullWeeks = weeks.concat([{ x: '2026-09-28', value: 1 }]);
+        const options = JSON.stringify({
+            cumulative: true, rangeMin: '2025-01-01', rangeMax: '2026-09-07',
+            recentRangeMin: '2026-01-01', recentRangeMax: '2026-09-07',
+        });
+        document.body.innerHTML = `
+            <div data-statistics-line-chart data-label="Z" data-points='${JSON.stringify(full)}'
+                 data-weekly-points='${JSON.stringify(fullWeeks)}' data-recent-points='${JSON.stringify(recent)}'
+                 data-recent-weekly-points='${JSON.stringify(weeks)}' data-options='${options}'><canvas></canvas></div>
+            <div data-statistics-multi-line-chart data-options='${options}'
+                 data-series='${JSON.stringify([{ label: 'M', points: full, weeklyPoints: fullWeeks, recentPoints: recent, recentWeeklyPoints: weeks }])}'><canvas></canvas></div>`;
+        const chartOf = (label) => Object.values(Chart.instances)
+            .find((chart) => chart.config.data.datasets[0]?.label === label);
+        const emit = (name, value) => window.dispatchEvent(
+            new CustomEvent('segmented-control-change', { detail: { name, value } }),
+        );
+
+        window.StatisticsCharts.mountAll();
+        // default range is recent
+        expect(chartOf('Z').config.data.datasets[0].data).toHaveLength(1);
+        expect(chartOf('Z').config.options.scales.x.min).toBe('2026-01-01');
+        expect(chartOf('M').config.data.datasets[0].data).toHaveLength(1);
+
+        emit('statistics-time-range', 'all');
+        expect(chartOf('Z').config.data.datasets[0].data).toHaveLength(2);
+        expect(chartOf('Z').config.options.scales.x.min).toBe('2025-01-01');
+        expect(chartOf('M').config.data.datasets[0].data).toHaveLength(2);
+
+        emit('statistics-graph-mode', 'weekly');
+        expect(chartOf('Z').config.type).toBe('bar');
+        expect(chartOf('Z').config.data.labels).toHaveLength(4);
+
+        emit('statistics-time-range', 'recent');
+        expect(chartOf('Z').config.type).toBe('bar');
+        expect(chartOf('Z').config.data.labels).toHaveLength(3);
+        expect(chartOf('M').config.data.labels).toHaveLength(3);
+
+        emit('statistics-graph-mode', 'cumulative');
+        expect(chartOf('Z').config.type).toBe('line');
+        expect(chartOf('Z').config.data.datasets[0].data).toHaveLength(1);
     });
 });
