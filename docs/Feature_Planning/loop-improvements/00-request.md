@@ -108,6 +108,18 @@ agent shims, the docs and the dev scripts, surfaced by finished tasks.
     feature's states need (e.g. data older than a cut-off) and makes it a phase
     deliverable; VERIFY adds seeder data rather than editing the sqlite file.
 
+14. **Squash-at-WRAP via `commit-tree` has no gate and a fragile fold rule.**
+    *(choice-buttons-font-size)* Trial strategy: the whole branch (REFINE,
+    BUILD, VERIFY, WRAP) collapsed into one commit with `git commit-tree` +
+    `reset --hard`. Awkward: hooks do not run, so the gate must be run by hand
+    first on the final tree; the WRAP commit must be made only to be squashed
+    away (needed just to get a clean tree); the old tip sha must be recorded
+    for undo; and a REFINE commit that already holds the source fix (here the
+    one-class change) is folded into the BUILD commit, hiding that BUILD only
+    added a test. Fix: if adopted, have the skill script it (`pnpm run
+    squash-branch`: runs the gate, builds the message, prints the old tip), and
+    let WRAP stage the paperwork without a separate commit.
+
 ## Why
 
 So that what one task learns the hard way is fixed for the next, instead of
