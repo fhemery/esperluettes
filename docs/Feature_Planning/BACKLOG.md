@@ -40,6 +40,7 @@ scoped to the task that actually changed.
 - **Notification — load-more through fetchFragment** · `notification-load-more-fetch-fragment/` · interactive · TODO
 - **News/static pages sounds — verify Range seeking and upload limits in production** · `news-sound-production-check/` · interactive · TODO
 - **Moderation — give the compact report button an accessible name** · `moderation-report-button-accessible-name/` · auto · complexity:1 · TODO
+- **Notify Discord when audio fanart is published** · `discord-fanart-sound-notification/` · interactive · complexity:2 · WIP:REFINE
 
 ## Done
 
