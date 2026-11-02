@@ -207,6 +207,20 @@ function setUserCredits(int $userId, int $credits): void
         ]);
 }
 
+/**
+ * Set the user's available chapter credits to exactly $available, whatever was spent before.
+ */
+function setAvailableCredits(int $userId, int $available): void
+{
+    DB::table('story_chapter_credits')
+        ->where('user_id', $userId)
+        ->update([
+            'credits_gained' => $available,
+            'credits_spent' => 0,
+            'updated_at' => now(),
+        ]);
+}
+
 function addCollaborator(int $storyId, int $userId, string $role = 'author'): void
 {
     DB::table('story_collaborators')->insert([
